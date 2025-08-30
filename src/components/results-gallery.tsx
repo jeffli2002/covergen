@@ -37,14 +37,33 @@ export default function ResultsGallery() {
     console.log('Edit image:', imageUrl, index)
   }
 
-  const handleShare = (imageUrl: string, index: number) => {
-    // TODO: Open sharing modal
-    if (navigator.share) {
-      navigator.share({
-        title: currentTask.title,
-        text: 'Check out my AI-generated cover!',
-        url: imageUrl
-      })
+  const handleShare = async (imageUrl: string, index: number) => {
+    try {
+      // Check if Web Share API is available
+      if (navigator.share) {
+        await navigator.share({
+          title: currentTask.title,
+          text: `Check out my AI-generated cover for "${currentTask.title}"!`,
+          url: window.location.href // Share current page URL instead of image URL for better compatibility
+        })
+      } else {
+        // Fallback: Copy link to clipboard
+        const shareUrl = window.location.href
+        await navigator.clipboard.writeText(shareUrl)
+        
+        // Show feedback (in a real app, use a toast notification)
+        const button = document.querySelector(`[data-share-index="${index}"]`) as HTMLElement
+        if (button) {
+          const originalText = button.textContent
+          button.textContent = 'Copied!'
+          setTimeout(() => {
+            button.textContent = originalText
+          }, 2000)
+        }
+      }
+    } catch (error) {
+      // User cancelled share or error occurred
+      console.log('Share cancelled or failed:', error)
     }
   }
 
@@ -137,6 +156,7 @@ export default function ResultsGallery() {
                       size="sm"
                       variant="outline"
                       onClick={() => handleShare(imageUrl, index)}
+                      data-share-index={index}
                     >
                       <Share2 className="w-3 h-3" />
                     </Button>

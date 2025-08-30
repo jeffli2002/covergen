@@ -1,9 +1,12 @@
-import { Youtube, Twitter, Music, Image, Video, Layout } from 'lucide-react'
+import { Youtube, Twitter, Music, Image, Video, Layout, Instagram, Facebook, Linkedin } from 'lucide-react'
 
 export const platformIcons = {
   none: Layout,
   youtube: Youtube,
   twitter: Twitter,
+  instagram: Instagram,
+  facebook: Facebook,
+  linkedin: Linkedin,
   tiktok: Music,
   spotify: Music,
   xiaohongshu: Image,
@@ -29,6 +32,24 @@ export const platformGuidelines = {
     "Keep text centered for best visibility",
     "Consider both light and dark mode Twitter themes",
     "Avoid text near edges due to cropping"
+  ],
+  instagram: [
+    "Square format works best for feed posts",
+    "Consider carousel posts for multiple images",
+    "Bold, aesthetic visuals for Instagram aesthetic",
+    "Ensure text is readable on mobile devices"
+  ],
+  facebook: [
+    "Optimized for news feed display",
+    "Text should be minimal and impactful",
+    "Consider mobile and desktop viewing",
+    "High contrast for better engagement"
+  ],
+  linkedin: [
+    "Professional appearance is key",
+    "Clean, business-appropriate design",
+    "Text should be clear and professional",
+    "Consider corporate branding guidelines"
   ],
   tiktok: [
     "Account for UI elements at top and bottom",
@@ -102,6 +123,45 @@ export const platformPrompts = {
     layoutInstructions: "Image will appear in timeline with rounded corners. Keep text centered for best visibility. Consider both light and dark mode Twitter themes. Avoid text near edges due to cropping.",
     backgroundInstructions: "Use a neutral background or a subtle pattern. Avoid busy backgrounds that might distract from the text.",
     designInstructions: "Consider a clean, minimalist design with a strong focal point. Bold, eye-catching visuals perform best."
+  },
+  instagram: {
+    base: "Instagram post, aesthetic social media content, visually appealing",
+    modifiers: [
+      "Instagram-worthy aesthetic",
+      "bold and vibrant colors",
+      "lifestyle photography style",
+      "mobile-optimized readability"
+    ],
+    sizeInstructions: "Width: 1080px, Height: 1080px",
+    layoutInstructions: "Square format works best for feed posts. Consider carousel posts for multiple images. Bold, aesthetic visuals for Instagram aesthetic. Ensure text is readable on mobile devices.",
+    backgroundInstructions: "Use trending colors or aesthetic backgrounds. Consider Instagram's visual culture and current design trends.",
+    designInstructions: "Focus on visual storytelling. Use filters and effects that align with Instagram aesthetics. Keep it visually striking."
+  },
+  facebook: {
+    base: "Facebook post image, social engagement optimized, shareable content",
+    modifiers: [
+      "Facebook-friendly design",
+      "emotionally engaging visuals",
+      "clear call-to-action",
+      "shareable content style"
+    ],
+    sizeInstructions: "Width: 1200px, Height: 630px",
+    layoutInstructions: "Optimized for news feed display. Text should be minimal and impactful. Consider mobile and desktop viewing. High contrast for better engagement.",
+    backgroundInstructions: "Use colors that stand out in the Facebook feed. Consider emotional appeal and shareability.",
+    designInstructions: "Create content that encourages engagement. Use visuals that tell a story or evoke emotion."
+  },
+  linkedin: {
+    base: "LinkedIn post, professional business content, corporate style",
+    modifiers: [
+      "professional appearance",
+      "business-appropriate design",
+      "corporate branding style",
+      "thought leadership aesthetic"
+    ],
+    sizeInstructions: "Width: 1200px, Height: 627px",
+    layoutInstructions: "Professional appearance is key. Clean, business-appropriate design. Text should be clear and professional. Consider corporate branding guidelines.",
+    backgroundInstructions: "Use professional colors like blues, grays, or corporate brand colors. Keep it clean and sophisticated.",
+    designInstructions: "Maintain a professional tone. Use clean typography and structured layouts. Focus on credibility and expertise."
   },
   tiktok: {
     base: "Vertical format, mobile-first design, Gen-Z aesthetic, TikTok style",
@@ -195,6 +255,21 @@ export const platformEnhancements = {
     "Dark mode support",
     "Engagement boost"
   ],
+  instagram: [
+    "Aesthetic appeal",
+    "Story-ready format",
+    "Influencer style"
+  ],
+  facebook: [
+    "Shareability",
+    "Engagement focus",
+    "Mobile optimization"
+  ],
+  linkedin: [
+    "Professional tone",
+    "B2B messaging",
+    "Thought leadership"
+  ],
   tiktok: [
     "Vertical format", 
     "Gen-Z styling",
@@ -255,6 +330,12 @@ export function generatePlatformPrompt(platform: string, style: string, userTitl
     finalPrompt += `TikTok: 1080 x 1920\n`
   } else if (platform === 'twitter') {
     finalPrompt += `Twitter: 1600 x 900\n`
+  } else if (platform === 'instagram') {
+    finalPrompt += `Instagram: 1080 x 1080\n`
+  } else if (platform === 'facebook') {
+    finalPrompt += `Facebook: 1200 x 630\n`
+  } else if (platform === 'linkedin') {
+    finalPrompt += `LinkedIn: 1200 x 627\n`
   } else if (platform === 'spotify') {
     finalPrompt += `Spotify: 3000 x 3000\n`
   } else if (platform === 'xiaohongshu') {
@@ -294,18 +375,6 @@ export function generatePlatformPrompt(platform: string, style: string, userTitl
   return finalPrompt
 }
 
-export const platformSizes = {
-  none: { width: 1200, height: 630, label: 'Custom Size' },
-  youtube: { width: 1280, height: 720, label: 'YouTube Thumbnail' },
-  twitter: { width: 1600, height: 900, label: 'Twitter Post' },
-  tiktok: { width: 1080, height: 1920, label: 'TikTok Video' },
-  spotify: { width: 3000, height: 3000, label: 'Spotify Cover' },
-  xiaohongshu: { width: 1080, height: 1440, label: 'Xiaohongshu' },
-  wechat: { width: 1080, height: 1260, label: 'WeChat Channels' },
-  bilibili: { width: 1280, height: 720, label: 'Bilibili Cover' },
-  twitch: { width: 1280, height: 720, label: 'Twitch Thumbnail' }
-} as const
-
 export const styleTemplates = {
   none: [],
   youtube: [
@@ -321,6 +390,27 @@ export const styleTemplates = {
     "Quote",
     "News",
     "Personal"
+  ],
+  instagram: [
+    "Lifestyle",
+    "Fashion",
+    "Food",
+    "Travel",
+    "Fitness"
+  ],
+  facebook: [
+    "Event",
+    "Promotion",
+    "Community",
+    "Inspirational",
+    "Product"
+  ],
+  linkedin: [
+    "Industry News",
+    "Career Tips",
+    "Company Update",
+    "Thought Leadership",
+    "Case Study"
   ],
   tiktok: [
     "Dance",
@@ -365,6 +455,3 @@ export const styleTemplates = {
     "IRL"
   ]
 } as const
-
-export type Platform = keyof typeof platformSizes
-export type Style = keyof typeof styleTemplates

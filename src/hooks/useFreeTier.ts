@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 
-const FREE_TIER_LIMIT = 3
+const FREE_TIER_LIMIT = 10
 
 export function useFreeTier() {
   const { user, getUserUsageToday, incrementUsage } = useAuth()

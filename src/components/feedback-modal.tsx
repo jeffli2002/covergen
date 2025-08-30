@@ -30,24 +30,48 @@ export default function FeedbackModal({ isOpen, onClose, context = 'general' }: 
     e.preventDefault()
     setIsSubmitting(true)
     
-    // Mock feedback submission
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    console.log('Feedback submitted:', {
-      context,
-      rating,
-      feedback,
-      email,
-      timestamp: new Date().toISOString()
-    })
-    
-    setIsSubmitting(false)
-    onClose()
-    
-    // Reset form
-    setRating(0)
-    setFeedback('')
-    setEmail('')
+    try {
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          context,
+          rating,
+          feedback,
+          email,
+          timestamp: new Date().toISOString()
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to submit feedback')
+      }
+      
+      console.log('Feedback submitted successfully:', data)
+      
+      // Reset form
+      setRating(0)
+      setFeedback('')
+      setEmail('')
+      
+      onClose()
+      
+      // Show success message (could use a toast notification here)
+      if (typeof window !== 'undefined') {
+        alert('Thank you for your feedback!')
+      }
+    } catch (error) {
+      console.error('Error submitting feedback:', error)
+      if (typeof window !== 'undefined') {
+        alert('Failed to submit feedback. Please try again.')
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (

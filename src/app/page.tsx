@@ -19,16 +19,22 @@ import {
   Twitch,
   Music,
   MessageSquare,
+  Instagram,
+  Facebook,
+  Linkedin,
   // Add more platform icons as needed
 } from 'lucide-react'
 
 const platformIcons = [
   { name: 'YouTube', icon: Youtube, color: 'text-red-500' },
+  { name: 'Instagram', icon: Instagram, color: 'text-pink-500' },
+  { name: 'Facebook', icon: Facebook, color: 'text-blue-600' },
+  { name: 'LinkedIn', icon: Linkedin, color: 'text-blue-700' },
   { name: 'Twitch', icon: Twitch, color: 'text-purple-500' },
+  { name: 'TikTok', icon: MessageSquare, color: 'text-black' },
   { name: 'Spotify', icon: Music, color: 'text-green-500' },
-  { name: 'TikTok', icon: Sparkles, color: 'text-pink-500' },
-  { name: 'Bilibili', icon: Globe, color: 'text-blue-500' },
-  { name: 'Xiaohongshu', icon: Globe, color: 'text-orange-500' },
+  { name: 'Bilibili', icon: Globe, color: 'text-sky-500' },
+  { name: 'Xiaohongshu', icon: Sparkles, color: 'text-rose-500' },
 ]
 
 const features = [
@@ -40,7 +46,7 @@ const features = [
   {
     icon: Globe,
     title: 'Multi-Platform Support',
-    description: 'Optimized for YouTube, Twitch, Spotify, Bilibili, TikTok, Xiaohongshu and more'
+    description: 'Optimized for YouTube, Instagram, Facebook, LinkedIn, TikTok, Spotify, and 10+ platforms'
   },
   {
     icon: Zap,
@@ -78,11 +84,11 @@ export default function HomePage() {
   // A/B test for CTA button text
   const ctaVariant = getVariant('homepage_cta', user?.id)
   const ctaTexts = {
-    'Get Started Free': 'Get Started Free',
-    'Create Your First Cover': 'Create Your First Cover',
-    'Start Generating': 'Start Generating'
+    'Get Started Free': 'Start Free - No Login Required',
+    'Create Your First Cover': 'Create Free Cover Now',
+    'Start Generating': 'Generate Free - No Sign Up'
   }
-  const ctaText = ctaTexts[ctaVariant as keyof typeof ctaTexts] || 'Get Started Free'
+  const ctaText = ctaTexts[ctaVariant as keyof typeof ctaTexts] || 'Start Free - No Login Required'
 
   return (
     <div className="min-h-screen bg-background">
@@ -99,10 +105,29 @@ export default function HomePage() {
                 <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">AI Magic</span>
               </h1>
               
-              <p className="text-lg md:text-xl lg:text-2xl text-gray-600 mb-8 md:mb-12 max-w-4xl mx-auto px-4 font-medium leading-relaxed">
+              <p className="text-lg md:text-xl lg:text-2xl text-gray-600 mb-4 max-w-4xl mx-auto px-4 font-medium leading-relaxed">
                 Generate professional covers and posters for your content across all platforms. 
                 <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent font-semibold">Save 70% of your time</span> while maintaining perfect brand consistency.
               </p>
+              
+              {/* Free generation highlight */}
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl px-6 py-4 mb-8 max-w-3xl mx-auto border border-green-200">
+                <p className="text-lg md:text-xl font-semibold text-green-800">
+                  🎉 <span className="underline decoration-2 decoration-green-400">100% FREE Generation</span> • No Sign-in Required • Unlimited Creativity
+                </p>
+              </div>
+              
+              {/* Use cases */}
+              <div className="text-base md:text-lg text-gray-600 mb-8 max-w-4xl mx-auto px-4">
+                <p className="font-medium mb-2">Perfect for creating:</p>
+                <div className="flex flex-wrap justify-center gap-2 md:gap-3">
+                  <span className="px-4 py-2 bg-blue-100 text-blue-700 rounded-full font-medium">📱 Social Media Covers</span>
+                  <span className="px-4 py-2 bg-purple-100 text-purple-700 rounded-full font-medium">🎨 Marketing Posters</span>
+                  <span className="px-4 py-2 bg-pink-100 text-pink-700 rounded-full font-medium">📢 Ad Campaigns</span>
+                  <span className="px-4 py-2 bg-orange-100 text-orange-700 rounded-full font-medium">✨ Lifestyle Content</span>
+                  <span className="px-4 py-2 bg-teal-100 text-teal-700 rounded-full font-medium">🎯 Product Launches</span>
+                </div>
+              </div>
               
               {/* Platform Icons */}
               <div className="flex justify-center gap-6 md:gap-8 lg:gap-12 mb-12 md:mb-16 flex-wrap px-4">
