@@ -211,12 +211,12 @@ export default function GenerationForm() {
                     </span>
                   </span>
                 </SelectItem>
-                <SelectItem value="xiaohongshu">
+                <SelectItem value="rednote">
                   <span className="flex items-center gap-2 w-full">
-                    {React.createElement(platformIcons.xiaohongshu, { className: "w-4 h-4" })}
-                    <span className="flex-1">{platformSizes.xiaohongshu.label}</span>
+                    {React.createElement(platformIcons.rednote, { className: "w-4 h-4" })}
+                    <span className="flex-1">{platformSizes.rednote.label}</span>
                     <span className="text-xs text-muted-foreground">
-                      {platformSizes.xiaohongshu.width}×{platformSizes.xiaohongshu.height}
+                      {platformSizes.rednote.width}×{platformSizes.rednote.height}
                     </span>
                   </span>
                 </SelectItem>

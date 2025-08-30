@@ -30,11 +30,11 @@ const platformIcons = [
   { name: 'Instagram', icon: Instagram, color: 'text-pink-500' },
   { name: 'Facebook', icon: Facebook, color: 'text-blue-600' },
   { name: 'LinkedIn', icon: Linkedin, color: 'text-blue-700' },
-  { name: 'Twitch', icon: Twitch, color: 'text-purple-500' },
+  { name: 'Twitter(X)', icon: MessageSquare, color: 'text-blue-400' },
   { name: 'TikTok', icon: MessageSquare, color: 'text-black' },
   { name: 'Spotify', icon: Music, color: 'text-green-500' },
-  { name: 'Bilibili', icon: Globe, color: 'text-sky-500' },
-  { name: 'Xiaohongshu', icon: Sparkles, color: 'text-rose-500' },
+  { name: 'Wechat', icon: MessageSquare, color: 'text-green-500' },
+  { name: 'Rednote', icon: Sparkles, color: 'text-rose-500' },
 ]
 
 const features = [
@@ -56,7 +56,7 @@ const features = [
   {
     icon: Shield,
     title: 'Compliant & Safe',
-    description: 'All AI-generated content includes watermarks for transparency and regulation compliance'
+    description: 'All AI-generated content is watermark-free for professional use'
   }
 ]
 
@@ -265,7 +265,7 @@ export default function HomePage() {
                   What's the difference between free and Pro plans?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Free users get 3 generations per day with standard quality. Pro users get unlimited generations, 
+                  Free users get 10 generations per day with standard quality. Pro users get unlimited generations, 
                   higher resolution outputs, priority processing, and commercial usage rights.
                 </p>
               </div>

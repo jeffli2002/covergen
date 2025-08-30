@@ -55,7 +55,7 @@ export function generatePlatformDescription(platform: string): string {
     spotify: 'Generate professional Spotify album covers and playlist artwork. AI-powered square format designs that look great at any size.',
     twitch: 'Create engaging Twitch thumbnails and stream overlays. AI-powered designs optimized for gaming content and streaming culture.',
     bilibili: 'Design stunning Bilibili video covers with AI. Optimized for Chinese video platform with anime and gaming aesthetics.',
-    xiaohongshu: 'Create aesthetic Xiaohongshu covers that drive engagement. AI-powered designs for lifestyle and beauty content.',
+    rednote: 'Create aesthetic Rednote covers that drive engagement. AI-powered designs for lifestyle and beauty content.',
     wechat: 'Generate professional WeChat Channels covers. AI-powered vertical format optimized for Chinese social media.'
   }
   

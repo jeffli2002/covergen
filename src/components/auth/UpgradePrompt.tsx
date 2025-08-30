@@ -36,7 +36,7 @@ export default function UpgradePrompt({ onClose, onSignIn }: UpgradePromptProps)
             )}
           </div>
           <p className="text-gray-600 text-sm mt-2">
-            You've used all 3 free images for today. Sign in or upgrade to continue creating!
+            You've used all 10 free images for today. Sign in or upgrade to continue creating!
           </p>
         </CardHeader>
         <CardContent className="space-y-6">

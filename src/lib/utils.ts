@@ -14,7 +14,7 @@ export const platformSizes = {
   linkedin: { width: 1200, height: 627, label: 'LinkedIn' },
   tiktok: { width: 1080, height: 1920, label: 'TikTok' },
   spotify: { width: 1400, height: 1400, label: 'Spotify' },
-  xiaohongshu: { width: 1080, height: 1350, label: 'Xiaohongshu' },
+  rednote: { width: 1080, height: 1350, label: 'Rednote (小红书)' },
   wechat: { width: 1080, height: 1260, label: 'WeChat 视频号' },
   bilibili: { width: 1920, height: 1080, label: 'Bilibili' },
   twitch: { width: 1200, height: 600, label: 'Twitch' }

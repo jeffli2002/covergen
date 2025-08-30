@@ -93,7 +93,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'spotify',
     'tiktok',
     'bilibili',
-    'xiaohongshu',
+    'rednote',
     'wechat'
   ]
   

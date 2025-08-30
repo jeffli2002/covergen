@@ -346,7 +346,7 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
               <div className="mt-4 p-3 bg-purple-50 rounded-md">
                 <p className="text-xs text-purple-800">
                   By creating an account, you agree to our Terms of Service and Privacy Policy. 
-                  Free users can create up to 3 images per day.
+                  Free users can create up to 10 images per day.
                 </p>
               </div>
             )}
@@ -366,7 +366,7 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
             </div>
             <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3">
               <div className="font-medium text-blue-300">Free Tier</div>
-              <div className="text-gray-200">3 images daily</div>
+              <div className="text-gray-200">10 images daily</div>
             </div>
           </div>
         </div>

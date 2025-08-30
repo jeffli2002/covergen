@@ -9,7 +9,7 @@ export const platformIcons = {
   linkedin: Linkedin,
   tiktok: Music,
   spotify: Music,
-  xiaohongshu: Image,
+  rednote: Image,
   wechat: Video,
   bilibili: Video,
   twitch: Video
@@ -63,7 +63,7 @@ export const platformGuidelines = {
     "Ensure good visibility at 64x64px",
     "Simple, iconic designs work best"
   ],
-  xiaohongshu: [
+  rednote: [
     "First image is most important for discovery",
     "Text overlay should be clear and aesthetic",
     "Trending styles favor minimalist design",
@@ -189,8 +189,8 @@ export const platformPrompts = {
     backgroundInstructions: "Use a neutral background or a subtle pattern. Avoid busy backgrounds that might distract from the text.",
     designInstructions: "Consider a clean, minimalist design with a strong focal point. Bold, eye-catching visuals perform best."
   },
-  xiaohongshu: {
-    base: "小红书 (Xiaohongshu) style, aesthetic lifestyle content, trendy Chinese social media",
+  rednote: {
+    base: "Rednote (小红书) style, aesthetic lifestyle content, trendy Chinese social media",
     modifiers: [
       "minimalist and clean",
       "lifestyle photography style",
@@ -280,7 +280,7 @@ export const platformEnhancements = {
     "Genre matching",
     "Icon clarity"
   ],
-  xiaohongshu: [
+  rednote: [
     "Aesthetic focus",
     "Lifestyle branding",
     "Trend alignment"
@@ -338,8 +338,8 @@ export function generatePlatformPrompt(platform: string, style: string, userTitl
     finalPrompt += `LinkedIn: 1200 x 627\n`
   } else if (platform === 'spotify') {
     finalPrompt += `Spotify: 3000 x 3000\n`
-  } else if (platform === 'xiaohongshu') {
-    finalPrompt += `Xiaohongshu: 1080 x 1440\n`
+  } else if (platform === 'rednote') {
+    finalPrompt += `Rednote: 1080 x 1440\n`
   } else if (platform === 'wechat') {
     finalPrompt += `WeChat: 1080 x 1260\n`
   } else if (platform === 'bilibili') {
@@ -426,7 +426,7 @@ export const styleTemplates = {
     "Electronic",
     "Classical"
   ],
-  xiaohongshu: [
+  rednote: [
     "Lifestyle",
     "Fashion",
     "Beauty",
