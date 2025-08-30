@@ -118,7 +118,7 @@ export default function ShowcasePage() {
               <div className="relative overflow-hidden">
                 <div className="aspect-video bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
                   <div className="text-center p-4">
-                    <Image className="w-16 h-16 text-gray-400 mx-auto mb-2" alt="" />
+                    <Image className="w-16 h-16 text-gray-400 mx-auto mb-2" />
                     <p className="text-sm text-gray-500">{item.title}</p>
                   </div>
                 </div>
