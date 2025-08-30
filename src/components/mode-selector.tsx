@@ -103,6 +103,7 @@ export default function ModeSelector({
       setIsPreprocessing(false)
       console.log('🏁 Preprocessing completed')
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [platform, referenceImages])
 
   // 当平台或参考图像变化时，自动预处理图像
