@@ -40,7 +40,7 @@ export default function PricingPage() {
         name: 'Free Plan',
         price: '0',
         priceCurrency: 'USD',
-        description: '3 generations per day, standard quality, personal use only'
+        description: '10 generations per day, standard quality, personal use only'
       },
       {
         '@type': 'Offer',
@@ -128,7 +128,7 @@ export default function PricingPage() {
                   </h3>
                   <p className="text-gray-600">
                     While we don't offer a traditional free trial, our Free plan lets you test 
-                    the platform with 3 generations per day. This gives you a chance to experience 
+                    the platform with 10 generations per day. This gives you a chance to experience 
                     the quality before upgrading.
                   </p>
                 </div>

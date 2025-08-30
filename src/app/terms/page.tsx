@@ -132,7 +132,7 @@ export default function TermsPage() {
             <CardContent className="space-y-4">
               <h3 className="text-lg font-semibold mb-3">Free Tier</h3>
               <ul className="space-y-2 list-disc list-inside text-muted-foreground">
-                <li>3 cover generations per day</li>
+                <li>10 cover generations per day</li>
                 <li>Standard resolution output</li>
                 <li>Basic platform support</li>
                 <li>Community support</li>
@@ -174,7 +174,7 @@ export default function TermsPage() {
               <h3 className="text-lg font-semibold mb-3 mt-6">Generated Content</h3>
               <p>
                 AI-generated images are subject to our licensing terms. Free users receive limited usage rights, while Pro+ 
-                users receive commercial usage rights. All generated content includes AI watermark for transparency.
+                users receive commercial usage rights. All generated content is watermark-free for professional use.
               </p>
 
               <h3 className="text-lg font-semibold mb-3 mt-6">Our Technology</h3>

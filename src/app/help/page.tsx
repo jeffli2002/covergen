@@ -23,7 +23,7 @@ const faqCategories = [
       },
       {
         question: 'How many images can I generate?',
-        answer: 'Free users get 3 generations per day. Pro users get 50 per month, and Pro+ users get 200 per month.'
+        answer: 'Free users get 10 generations per day. Pro users get 50 per month, and Pro+ users get 200 per month.'
       }
     ]
   },

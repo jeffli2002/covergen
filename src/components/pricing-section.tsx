@@ -14,9 +14,9 @@ const tiers = [
     description: 'Perfect for trying out AI cover generation',
     icon: Sparkles,
     features: [
-      '3 covers per day',
+      '10 covers per day',
       'Standard resolution',
-      'AI watermark included',
+      'No watermark',
       'Basic platform sizes',
       'Email support'
     ],
@@ -37,7 +37,7 @@ const tiers = [
     features: [
       '50 covers per month',
       'High-definition export',
-      'AI watermark included',
+      'No watermark',
       'All platform sizes',
       'Priority support',
       'Batch generation'
@@ -58,7 +58,7 @@ const tiers = [
     features: [
       '200 covers per month',
       'Ultra-high resolution',
-      'AI watermark included',
+      'No watermark',
       'Commercial license',
       'Custom brand templates',
       'API access',
@@ -81,7 +81,7 @@ export default function PricingSection() {
         email: 'demo@example.com',
         tier: 'free',
         quotaUsed: 1,
-        quotaLimit: 3
+        quotaLimit: 10
       })
     }
 
@@ -111,7 +111,7 @@ export default function PricingSection() {
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4 text-gray-900">Choose Your Plan</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Start free and upgrade as you grow. All plans include AI watermark for compliance.
+            Start free and upgrade as you grow. All generated images are watermark-free.
           </p>
         </div>
 
@@ -208,7 +208,7 @@ export default function PricingSection() {
         {/* Additional info */}
         <div className="text-center mt-12 space-y-4">
           <p className="text-sm text-gray-600">
-            All plans include AI watermark in compliance with global AI transparency regulations.
+            All plans include watermark-free images for professional use.
           </p>
           <div className="flex justify-center gap-8 text-sm text-gray-600">
             <span>✓ Cancel anytime</span>
