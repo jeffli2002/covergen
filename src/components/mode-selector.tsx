@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { 
@@ -38,33 +38,7 @@ export default function ModeSelector({
   const [preprocessedImages, setPreprocessedImages] = useState<string[]>([])
   const [isPreprocessing, setIsPreprocessing] = useState(false)
 
-  // 当平台或参考图像变化时，自动预处理图像
-  useEffect(() => {
-    // 只在开发模式下显示详细日志
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔍 ModeSelector useEffect triggered:', {
-        mode,
-        referenceImagesLength: referenceImages.length,
-        platform,
-        isPreprocessing,
-        hasPlatform: !!platform,
-        platformNotNone: platform !== 'none',
-        shouldPreprocess: mode === 'image' && referenceImages.length > 0 && platform && platform !== 'none'
-      })
-    }
-    
-    if (mode === 'image' && referenceImages.length > 0 && platform && platform !== 'none') {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🚀 Starting auto-preprocessing for platform:', platform)
-      }
-      preprocessImages()
-    } else {
-      // 移除不必要的日志
-      setPreprocessedImages([])
-    }
-  }, [mode, referenceImages, platform])
-
-  const preprocessImages = async () => {
+  const preprocessImages = useCallback(async () => {
     if (!platform || platform === 'none' || referenceImages.length === 0) {
       console.log('❌ Preprocessing skipped - invalid conditions')
       return
@@ -129,7 +103,33 @@ export default function ModeSelector({
       setIsPreprocessing(false)
       console.log('🏁 Preprocessing completed')
     }
-  }
+  }, [platform, referenceImages])
+
+  // 当平台或参考图像变化时，自动预处理图像
+  useEffect(() => {
+    // 只在开发模式下显示详细日志
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 ModeSelector useEffect triggered:', {
+        mode,
+        referenceImagesLength: referenceImages.length,
+        platform,
+        isPreprocessing,
+        hasPlatform: !!platform,
+        platformNotNone: platform !== 'none',
+        shouldPreprocess: mode === 'image' && referenceImages.length > 0 && platform && platform !== 'none'
+      })
+    }
+    
+    if (mode === 'image' && referenceImages.length > 0 && platform && platform !== 'none') {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🚀 Starting auto-preprocessing for platform:', platform)
+      }
+      preprocessImages()
+    } else {
+      // 移除不必要的日志
+      setPreprocessedImages([])
+    }
+  }, [mode, referenceImages, platform, isPreprocessing, preprocessImages])
 
   const fileToDataUrl = (file: File): Promise<string> => {
     return new Promise((resolve) => {
