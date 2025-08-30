@@ -1,0 +1,40 @@
+{
+  "name": "cover-generation-backend",
+  "version": "1.0.0",
+  "description": "Backend microservices for cover generation tool",
+  "private": true,
+  "workspaces": [
+    "services/*",
+    "shared",
+    "gateway"
+  ],
+  "scripts": {
+    "dev": "npm run dev:all",
+    "dev:all": "concurrently \"npm run dev:auth-service\" \"npm run dev:user-management-service\" \"npm run dev:cover-generation-service\" \"npm run dev:task-management-service\"",
+    "dev:auth-service": "cd services/auth-service && npm run dev",
+    "dev:user-management-service": "cd services/user-management-service && npm run dev",
+    "dev:cover-generation-service": "cd services/cover-generation-service && npm run dev",
+    "dev:task-management-service": "cd services/task-management-service && npm run dev",
+    "dev:image-edit-service": "cd services/image-edit-service && npm run dev",
+    "dev:payment-service": "cd services/payment-service && npm run dev",
+    "test": "jest",
+    "test:auth-service": "cd services/auth-service && npm test",
+    "test:integration": "jest --testPathPattern=tests/integration",
+    "build": "npm run build:all",
+    "build:all": "npm run build --workspaces",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.11.5",
+    "concurrently": "^8.2.2",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1"
+  }
+}

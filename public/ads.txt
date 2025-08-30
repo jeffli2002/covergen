@@ -1,0 +1,13 @@
+# ads.txt file for CoverGen AI
+# This file helps prevent unauthorized ad inventory sales
+
+# Google AdSense (example - replace with your actual publisher ID)
+google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+
+# Google Ad Manager (if applicable)
+# google.com, pub-0000000000000000, RESELLER, f08c47fec0942fa0
+
+# Other ad networks can be added here as needed
+# Format: <domain>, <publisher_id>, <relationship>, <certification_id>
+
+# Contact: advertising@covergen.ai

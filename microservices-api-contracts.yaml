@@ -1,0 +1,810 @@
+# Microservices API Contracts
+# Version: 1.0.0
+# Description: Detailed API specifications for each microservice in the Cover Generation Tool
+
+# Common definitions used across services
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - message
+        - timestamp
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+        timestamp:
+          type: string
+          format: date-time
+        request_id:
+          type: string
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          default: 1
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+        total:
+          type: integer
+        hasMore:
+          type: boolean
+
+---
+# Auth Service API
+auth-service:
+  base_path: /auth/v1
+  endpoints:
+    - method: POST
+      path: /register
+      description: Register new user
+      request:
+        body:
+          email:
+            type: string
+            format: email
+          password:
+            type: string
+            minLength: 8
+          username:
+            type: string
+            minLength: 3
+      response:
+        201:
+          user_id: string
+          email: string
+          access_token: string
+          refresh_token: string
+          expires_in: integer
+
+    - method: POST
+      path: /login
+      description: User login
+      request:
+        body:
+          email: string
+          password: string
+      response:
+        200:
+          user_id: string
+          access_token: string
+          refresh_token: string
+          expires_in: integer
+
+    - method: POST
+      path: /refresh
+      description: Refresh access token
+      request:
+        body:
+          refresh_token: string
+      response:
+        200:
+          access_token: string
+          expires_in: integer
+
+    - method: GET
+      path: /oauth/{provider}
+      description: OAuth login initiation
+      parameters:
+        - name: provider
+          in: path
+          enum: [google, github]
+      response:
+        302:
+          headers:
+            Location: string
+
+---
+# User Management Service API
+user-management-service:
+  base_path: /users/v1
+  security: bearerAuth
+  endpoints:
+    - method: GET
+      path: /{userId}
+      description: Get user profile
+      parameters:
+        - name: userId
+          in: path
+          type: string
+          format: uuid
+      response:
+        200:
+          id: string
+          email: string
+          username: string
+          fullName: string
+          avatarUrl: string
+          subscriptionTier: 
+            enum: [free, pro, pro_plus]
+          quotaUsed: integer
+          quotaLimit: integer
+          createdAt: string
+          preferences:
+            language: string
+            emailNotifications: boolean
+
+    - method: PUT
+      path: /{userId}
+      description: Update user profile
+      parameters:
+        - name: userId
+          in: path
+      request:
+        body:
+          username: string
+          fullName: string
+          avatarUrl: string
+          preferences: object
+      response:
+        200:
+          message: string
+
+    - method: GET
+      path: /{userId}/quota
+      description: Get user quota status
+      response:
+        200:
+          used: integer
+          limit: integer
+          resetAt: string
+          tier: string
+
+    - method: POST
+      path: /{userId}/quota/consume
+      description: Consume user quota
+      request:
+        body:
+          amount: 
+            type: integer
+            default: 1
+          operation:
+            enum: [generate, edit, export]
+      response:
+        200:
+          remaining: integer
+          consumed: integer
+
+---
+# Cover Generation Service API
+cover-generation-service:
+  base_path: /covers/v1
+  security: bearerAuth
+  endpoints:
+    - method: POST
+      path: /generate
+      description: Generate cover images
+      request:
+        body:
+          title:
+            type: string
+            maxLength: 200
+          templateId:
+            type: string
+          avatarUrl:
+            type: string
+            format: uri
+          style:
+            type: object
+            properties:
+              colorScheme: string
+              mood: string
+              elements: array
+          options:
+            type: object
+            properties:
+              count:
+                type: integer
+                minimum: 1
+                maximum: 6
+                default: 3
+              quality:
+                enum: [standard, high]
+                default: standard
+      response:
+        202:
+          taskId: string
+          status: string
+          estimatedTime: integer
+
+    - method: GET
+      path: /tasks/{taskId}
+      description: Get generation task status
+      parameters:
+        - name: taskId
+          in: path
+      response:
+        200:
+          taskId: string
+          status:
+            enum: [pending, processing, completed, failed]
+          progress: integer
+          results:
+            type: array
+            items:
+              imageId: string
+              url: string
+              thumbnailUrl: string
+              metadata: object
+          error:
+            code: string
+            message: string
+          createdAt: string
+          completedAt: string
+
+    - method: POST
+      path: /tasks/{taskId}/cancel
+      description: Cancel generation task
+      response:
+        200:
+          message: string
+
+---
+# Image Edit Service API
+image-edit-service:
+  base_path: /edits/v1
+  security: bearerAuth
+  endpoints:
+    - method: POST
+      path: /sessions
+      description: Create edit session
+      request:
+        body:
+          imageId:
+            type: string
+          imageUrl:
+            type: string
+            format: uri
+      response:
+        201:
+          sessionId: string
+          imageUrl: string
+          expiresAt: string
+
+    - method: POST
+      path: /sessions/{sessionId}/apply
+      description: Apply edit to image
+      parameters:
+        - name: sessionId
+          in: path
+      request:
+        body:
+          mask:
+            type: object
+            properties:
+              type:
+                enum: [rectangle, circle, polygon, lasso]
+              coordinates: array
+          instruction:
+            type: string
+            maxLength: 500
+          options:
+            type: object
+            properties:
+              preserveStyle: boolean
+              blendMode: string
+      response:
+        200:
+          editId: string
+          resultUrl: string
+          thumbnailUrl: string
+
+    - method: GET
+      path: /sessions/{sessionId}/history
+      description: Get edit history
+      response:
+        200:
+          edits:
+            type: array
+            items:
+              editId: string
+              instruction: string
+              resultUrl: string
+              timestamp: string
+
+    - method: POST
+      path: /sessions/{sessionId}/undo
+      description: Undo last edit
+      response:
+        200:
+          currentVersion: string
+          imageUrl: string
+
+---
+# Template Service API
+template-service:
+  base_path: /templates/v1
+  endpoints:
+    - method: GET
+      path: /
+      description: List templates
+      parameters:
+        - name: category
+          in: query
+          type: string
+        - name: tier
+          in: query
+          enum: [free, premium]
+        - name: sort
+          in: query
+          enum: [popular, newest, alphabetical]
+        - $ref: '#/components/schemas/Pagination'
+      response:
+        200:
+          templates:
+            type: array
+            items:
+              id: string
+              name: string
+              category: string
+              thumbnailUrl: string
+              isPremium: boolean
+              usageCount: integer
+              tags: array
+          pagination: object
+
+    - method: GET
+      path: /{templateId}
+      description: Get template details
+      response:
+        200:
+          id: string
+          name: string
+          description: string
+          category: string
+          thumbnailUrl: string
+          previewUrls: array
+          promptTemplate: string
+          styleParams: object
+          isPremium: boolean
+          requiredTier: string
+
+    - method: POST
+      path: /custom
+      description: Create custom template (Pro+ only)
+      security: bearerAuth
+      request:
+        body:
+          name: string
+          baseTemplateId: string
+          customizations: object
+      response:
+        201:
+          templateId: string
+          message: string
+
+---
+# Content Safety Service API (gRPC)
+content-safety-service:
+  protocol: gRPC
+  base_path: content.safety.v1.ContentSafetyService
+  
+  proto: |
+    syntax = "proto3";
+    package content.safety.v1;
+    
+    service ContentSafetyService {
+      rpc CheckText (TextCheckRequest) returns (SafetyCheckResponse);
+      rpc CheckImage (ImageCheckRequest) returns (SafetyCheckResponse);
+      rpc CheckComposite (CompositeCheckRequest) returns (SafetyCheckResponse);
+    }
+    
+    message TextCheckRequest {
+      string text = 1;
+      repeated string languages = 2;
+      SafetyLevel threshold = 3;
+    }
+    
+    message ImageCheckRequest {
+      string image_url = 1;
+      repeated string categories = 2;
+      SafetyLevel threshold = 3;
+    }
+    
+    message CompositeCheckRequest {
+      string text = 1;
+      string image_url = 2;
+      SafetyLevel threshold = 3;
+    }
+    
+    message SafetyCheckResponse {
+      bool is_safe = 1;
+      repeated Violation violations = 2;
+      map<string, float> scores = 3;
+    }
+    
+    message Violation {
+      string category = 1;
+      float severity = 2;
+      string description = 3;
+    }
+    
+    enum SafetyLevel {
+      SAFETY_LEVEL_UNSPECIFIED = 0;
+      SAFETY_LEVEL_LOW = 1;
+      SAFETY_LEVEL_MEDIUM = 2;
+      SAFETY_LEVEL_HIGH = 3;
+    }
+
+---
+# Payment Service API
+payment-service:
+  base_path: /payments/v1
+  security: bearerAuth
+  endpoints:
+    - method: POST
+      path: /methods
+      description: Add payment method
+      request:
+        body:
+          type:
+            enum: [card, paypal, alipay, wechat]
+          provider:
+            enum: [stripe, paypal, alipay, wechat]
+          token: string
+          isDefault: boolean
+      response:
+        201:
+          methodId: string
+          last4: string
+          brand: string
+
+    - method: POST
+      path: /subscribe
+      description: Create subscription
+      request:
+        body:
+          planId: string
+          paymentMethodId: string
+          billingCycle:
+            enum: [monthly, yearly]
+          promoCode: string
+      response:
+        201:
+          subscriptionId: string
+          status: string
+          nextBillingDate: string
+          amount: number
+          currency: string
+
+    - method: POST
+      path: /charge
+      description: One-time charge
+      request:
+        body:
+          amount: number
+          currency: string
+          description: string
+          paymentMethodId: string
+      response:
+        201:
+          chargeId: string
+          status: string
+          receiptUrl: string
+
+    - method: POST
+      path: /webhooks/{provider}
+      description: Payment webhook handler
+      parameters:
+        - name: provider
+          in: path
+          enum: [stripe, paypal, alipay, wechat]
+      request:
+        headers:
+          - name: X-Webhook-Signature
+            required: true
+        body: object
+      response:
+        200:
+          received: boolean
+
+---
+# Task Management Service API
+task-management-service:
+  base_path: /tasks/v1
+  security: bearerAuth
+  endpoints:
+    - method: POST
+      path: /
+      description: Create task
+      request:
+        body:
+          type:
+            enum: [cover_generation, image_edit, batch_export]
+          priority:
+            enum: [low, normal, high, urgent]
+            default: normal
+          payload: object
+          scheduledFor: string
+      response:
+        201:
+          taskId: string
+          status: string
+          position: integer
+
+    - method: GET
+      path: /{taskId}
+      description: Get task details
+      response:
+        200:
+          taskId: string
+          type: string
+          status:
+            enum: [queued, processing, completed, failed, cancelled]
+          progress: integer
+          result: object
+          error: object
+          createdAt: string
+          startedAt: string
+          completedAt: string
+          attempts: integer
+
+    - method: GET
+      path: /queue/stats
+      description: Get queue statistics
+      response:
+        200:
+          queues:
+            type: object
+            additionalProperties:
+              pending: integer
+              processing: integer
+              completed24h: integer
+              failed24h: integer
+              avgProcessingTime: integer
+
+---
+# Export Service API
+export-service:
+  base_path: /export/v1
+  security: bearerAuth
+  endpoints:
+    - method: POST
+      path: /prepare
+      description: Prepare export
+      request:
+        body:
+          imageId: string
+          format:
+            enum: [png, jpg, webp]
+          platform:
+            enum: [youtube, instagram, tiktok, twitter, custom]
+          dimensions:
+            width: integer
+            height: integer
+          quality: integer
+          watermark:
+            enabled: boolean
+            type:
+              enum: [synthid, visible]
+      response:
+        202:
+          exportId: string
+          status: string
+          estimatedSize: integer
+
+    - method: GET
+      path: /{exportId}/download
+      description: Download exported file
+      response:
+        200:
+          headers:
+            Content-Type: string
+            Content-Disposition: string
+          body: binary
+
+---
+# Notification Service API
+notification-service:
+  base_path: /notifications/v1
+  security: bearerAuth
+  endpoints:
+    - method: POST
+      path: /send
+      description: Send notification
+      request:
+        body:
+          userId: string
+          type:
+            enum: [email, push, in_app, webhook]
+          template: string
+          data: object
+          priority:
+            enum: [low, normal, high]
+          scheduleFor: string
+      response:
+        201:
+          notificationId: string
+          status: string
+
+    - method: GET
+      path: /user/{userId}
+      description: Get user notifications
+      parameters:
+        - name: userId
+          in: path
+        - name: status
+          in: query
+          enum: [unread, read, all]
+        - $ref: '#/components/schemas/Pagination'
+      response:
+        200:
+          notifications:
+            type: array
+            items:
+              id: string
+              type: string
+              title: string
+              message: string
+              data: object
+              isRead: boolean
+              createdAt: string
+          pagination: object
+
+    - method: PUT
+      path: /preferences/{userId}
+      description: Update notification preferences
+      request:
+        body:
+          email:
+            marketing: boolean
+            transactional: boolean
+            digest: string
+          push:
+            enabled: boolean
+            categories: array
+          inApp:
+            enabled: boolean
+      response:
+        200:
+          message: string
+
+---
+# Analytics Service API
+analytics-service:
+  base_path: /analytics/v1
+  security: bearerAuth
+  endpoints:
+    - method: POST
+      path: /events
+      description: Track event
+      request:
+        body:
+          eventType: string
+          userId: string
+          sessionId: string
+          properties: object
+          timestamp: string
+      response:
+        201:
+          eventId: string
+          accepted: boolean
+
+    - method: GET
+      path: /metrics/realtime
+      description: Get realtime metrics
+      parameters:
+        - name: metrics
+          in: query
+          type: array
+          items:
+            enum: [active_users, generation_rate, error_rate]
+        - name: interval
+          in: query
+          enum: [1m, 5m, 15m, 1h]
+          default: 5m
+      response:
+        200:
+          metrics: object
+          timestamp: string
+
+    - method: GET
+      path: /reports/{reportType}
+      description: Get analytics report
+      parameters:
+        - name: reportType
+          in: path
+          enum: [usage, revenue, performance, user_behavior]
+        - name: startDate
+          in: query
+          format: date
+        - name: endDate
+          in: query
+          format: date
+        - name: groupBy
+          in: query
+          enum: [hour, day, week, month]
+      response:
+        200:
+          report:
+            type: string
+            period: object
+            data: array
+            summary: object
+            generatedAt: string
+
+---
+# Metrics Service API
+metrics-service:
+  base_path: /metrics/v1
+  endpoints:
+    - method: POST
+      path: /collect
+      description: Collect metrics
+      request:
+        body:
+          metrics:
+            type: array
+            items:
+              name: string
+              value: number
+              type:
+                enum: [counter, gauge, histogram]
+              tags: object
+              timestamp: string
+      response:
+        201:
+          accepted: integer
+          rejected: integer
+
+    - method: GET
+      path: /service/{serviceName}
+      description: Get service metrics
+      parameters:
+        - name: serviceName
+          in: path
+        - name: metrics
+          in: query
+          type: array
+        - name: period
+          in: query
+          default: 1h
+      response:
+        200:
+          service: string
+          metrics:
+            cpu: object
+            memory: object
+            requests: object
+            errors: object
+            custom: object
+          health:
+            status: string
+            uptime: integer
+            lastCheck: string
+
+    - method: GET
+      path: /alerts/active
+      description: Get active alerts
+      response:
+        200:
+          alerts:
+            type: array
+            items:
+              id: string
+              severity:
+                enum: [info, warning, error, critical]
+              service: string
+              metric: string
+              condition: string
+              value: number
+              threshold: number
+              startedAt: string
+              acknowledged: boolean

@@ -1,0 +1,2352 @@
+openapi: 3.0.3
+info:
+  title: Cover Generation Tool API
+  description: |
+    RESTful API specification for the global cover & poster generation tool. 
+    This API provides endpoints for authentication, user management, cover generation,
+    image editing, payment processing, and analytics.
+  version: 1.0.0
+  contact:
+    name: Manus AI API Support
+    email: api-support@covergen.ai
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: https://api.covergen.ai/v1
+    description: Production API server
+  - url: https://api-staging.covergen.ai/v1
+    description: Staging API server
+  - url: https://api-cn.covergen.ai/v1
+    description: China region API server
+
+tags:
+  - name: Authentication
+    description: User authentication and registration endpoints
+  - name: Users
+    description: User profile and subscription management
+  - name: Templates
+    description: Cover style templates management
+  - name: Generation
+    description: Cover generation operations
+  - name: Editing
+    description: Image editing operations
+  - name: Export
+    description: Download and export operations
+  - name: Payments
+    description: Subscription and payment processing
+  - name: Safety
+    description: Content safety and validation
+  - name: Analytics
+    description: Usage metrics and analytics
+
+# Security schemes
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT token obtained from login endpoints. 
+        Token expires in 24 hours, refresh token expires in 30 days.
+    
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for server-to-server authentication
+
+  # Common response schemas
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - message
+        - timestamp
+      properties:
+        code:
+          type: string
+          example: "VALIDATION_ERROR"
+          enum:
+            - VALIDATION_ERROR
+            - AUTHENTICATION_ERROR
+            - AUTHORIZATION_ERROR
+            - NOT_FOUND
+            - RATE_LIMIT_EXCEEDED
+            - QUOTA_EXCEEDED
+            - PAYMENT_REQUIRED
+            - CONTENT_SAFETY_VIOLATION
+            - SERVICE_UNAVAILABLE
+            - INTERNAL_ERROR
+        message:
+          type: string
+          example: "Invalid request parameters"
+        details:
+          type: object
+          additionalProperties: true
+          example:
+            field: "title"
+            reason: "Title must be between 1 and 200 characters"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-08-28T10:30:00Z"
+        request_id:
+          type: string
+          example: "req_1234567890abcdef"
+    
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          default: 1
+          example: 1
+        per_page:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+          example: 20
+        total_pages:
+          type: integer
+          example: 5
+        total_items:
+          type: integer
+          example: 95
+        has_next:
+          type: boolean
+          example: true
+        has_prev:
+          type: boolean
+          example: false
+
+# Security requirement applied globally
+security:
+  - bearerAuth: []
+
+paths:
+  # ==================== Authentication APIs ====================
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register new user
+      description: Create a new user account with email or third-party provider
+      security: []  # No auth required for registration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/EmailRegistration'
+                - $ref: '#/components/schemas/SocialRegistration'
+      responses:
+        '201':
+          description: User successfully registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Invalid registration data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user with email/password or social provider
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/EmailLogin'
+                - $ref: '#/components/schemas/SocialLogin'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Too many login attempts
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+              description: Request limit per minute
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+              description: Remaining requests in window
+            X-RateLimit-Reset:
+              schema:
+                type: integer
+              description: Unix timestamp when limit resets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: Exchange refresh token for new access token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refresh_token
+              properties:
+                refresh_token:
+                  type: string
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout user
+      description: Invalidate current session and tokens
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Successfully logged out"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /auth/verify-email:
+    post:
+      tags:
+        - Authentication
+      summary: Verify email address
+      description: Verify user email with verification code
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - code
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+                code:
+                  type: string
+                  pattern: '^[0-9]{6}$'
+                  example: "123456"
+      responses:
+        '200':
+          description: Email verified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Email verified successfully"
+                  verified:
+                    type: boolean
+                    example: true
+        '400':
+          description: Invalid verification code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/forgot-password:
+    post:
+      tags:
+        - Authentication
+      summary: Request password reset
+      description: Send password reset link to user email
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+      responses:
+        '200':
+          description: Password reset email sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Password reset email sent"
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ==================== User Management APIs ====================
+  /users/me:
+    get:
+      tags:
+        - Users
+      summary: Get current user profile
+      description: Retrieve authenticated user's profile information
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    patch:
+      tags:
+        - Users
+      summary: Update user profile
+      description: Update current user's profile information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfileUpdate'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400':
+          description: Invalid update data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    delete:
+      tags:
+        - Users
+      summary: Delete user account
+      description: Permanently delete user account and all associated data
+      responses:
+        '204':
+          description: Account deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /users/me/subscription:
+    get:
+      tags:
+        - Users
+      summary: Get subscription status
+      description: Retrieve current subscription plan and quota usage
+      responses:
+        '200':
+          description: Subscription information retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /users/me/quota:
+    get:
+      tags:
+        - Users
+      summary: Get quota usage
+      description: Get detailed quota usage for current billing period
+      responses:
+        '200':
+          description: Quota usage retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuotaUsage'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /users/me/history:
+    get:
+      tags:
+        - Users
+      summary: Get generation history
+      description: Retrieve user's cover generation history with pagination
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Items per page
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [pending, processing, completed, failed]
+          description: Filter by task status
+        - in: query
+          name: start_date
+          schema:
+            type: string
+            format: date
+          description: Filter by start date
+        - in: query
+          name: end_date
+          schema:
+            type: string
+            format: date
+          description: Filter by end date
+      responses:
+        '200':
+          description: Generation history retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GenerationTask'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # ==================== Template APIs ====================
+  /templates:
+    get:
+      tags:
+        - Templates
+      summary: List available templates
+      description: Get list of available style templates with filtering
+      parameters:
+        - in: query
+          name: category
+          schema:
+            type: string
+            enum: [tech, lifestyle, minimal, cartoon, cyberpunk, chinese_style]
+          description: Filter by template category
+        - in: query
+          name: tag
+          schema:
+            type: string
+          description: Filter by template tag
+        - in: query
+          name: popular
+          schema:
+            type: boolean
+          description: Show only popular templates
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        '200':
+          description: Template list retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Template'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /templates/{template_id}:
+    get:
+      tags:
+        - Templates
+      summary: Get template details
+      description: Get detailed information about a specific template
+      parameters:
+        - in: path
+          name: template_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Template unique identifier
+      responses:
+        '200':
+          description: Template details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateDetail'
+        '404':
+          description: Template not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # ==================== Cover Generation APIs ====================
+  /generation/upload-avatar:
+    post:
+      tags:
+        - Generation
+      summary: Upload avatar image
+      description: |
+        Upload user avatar or logo for cover generation.
+        Supports JPG, PNG formats up to 10MB.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Avatar image file (JPG/PNG, max 10MB)
+                purpose:
+                  type: string
+                  enum: [avatar, logo]
+                  default: avatar
+                  description: Purpose of the uploaded image
+      responses:
+        '201':
+          description: Avatar uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  upload_id:
+                    type: string
+                    format: uuid
+                    example: "550e8400-e29b-41d4-a716-446655440000"
+                  url:
+                    type: string
+                    format: uri
+                    example: "https://storage.covergen.ai/avatars/550e8400-e29b-41d4-a716-446655440000.jpg"
+                  thumbnail_url:
+                    type: string
+                    format: uri
+                    example: "https://storage.covergen.ai/avatars/550e8400-e29b-41d4-a716-446655440000_thumb.jpg"
+                  metadata:
+                    type: object
+                    properties:
+                      width:
+                        type: integer
+                        example: 1024
+                      height:
+                        type: integer
+                        example: 1024
+                      size:
+                        type: integer
+                        example: 204800
+                      format:
+                        type: string
+                        example: "jpeg"
+        '400':
+          description: Invalid file or format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: File too large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /generation/create:
+    post:
+      tags:
+        - Generation
+      summary: Create cover generation task
+      description: |
+        Create a new cover generation task. This endpoint will return immediately
+        with a task ID. Use the task status endpoint to check progress.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerationRequest'
+      responses:
+        '202':
+          description: Generation task created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task_id:
+                    type: string
+                    format: uuid
+                    example: "123e4567-e89b-12d3-a456-426614174000"
+                  status:
+                    type: string
+                    enum: [pending, queued]
+                    example: "queued"
+                  estimated_time:
+                    type: integer
+                    description: Estimated completion time in seconds
+                    example: 10
+                  queue_position:
+                    type: integer
+                    description: Position in processing queue
+                    example: 3
+        '400':
+          description: Invalid generation parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '402':
+          description: Quota exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /generation/tasks/{task_id}:
+    get:
+      tags:
+        - Generation
+      summary: Get generation task status
+      description: Check the status and results of a generation task
+      parameters:
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Generation task ID
+      responses:
+        '200':
+          description: Task status retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerationTask'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /generation/tasks/{task_id}/retry:
+    post:
+      tags:
+        - Generation
+      summary: Retry failed generation task
+      description: Retry a failed generation task
+      parameters:
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Failed task ID to retry
+      responses:
+        '202':
+          description: Retry initiated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum: [queued]
+                  message:
+                    type: string
+                    example: "Task queued for retry"
+        '400':
+          description: Task cannot be retried
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # ==================== Edit APIs ====================
+  /edit/sessions:
+    post:
+      tags:
+        - Editing
+      summary: Create edit session
+      description: Create a new editing session for an existing image
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - image_url
+              properties:
+                image_url:
+                  type: string
+                  format: uri
+                  description: URL of the image to edit
+                  example: "https://storage.covergen.ai/generated/123e4567-e89b-12d3-a456-426614174000.jpg"
+                source_task_id:
+                  type: string
+                  format: uuid
+                  description: Original generation task ID (if applicable)
+      responses:
+        '201':
+          description: Edit session created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session_id:
+                    type: string
+                    format: uuid
+                    example: "987e6543-e21b-12d3-a456-426614174999"
+                  expires_at:
+                    type: string
+                    format: date-time
+                    description: Session expiration time (1 hour)
+                    example: "2025-08-28T11:30:00Z"
+                  edit_url:
+                    type: string
+                    format: uri
+                    description: URL for editing operations
+                    example: "https://api.covergen.ai/v1/edit/sessions/987e6543-e21b-12d3-a456-426614174999"
+        '400':
+          description: Invalid image URL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /edit/sessions/{session_id}/apply:
+    post:
+      tags:
+        - Editing
+      summary: Apply mask-based edit
+      description: Apply a mask-based edit to the image in the session
+      parameters:
+        - in: path
+          name: session_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Edit session ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditRequest'
+      responses:
+        '202':
+          description: Edit task created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  edit_id:
+                    type: string
+                    format: uuid
+                    example: "456e7890-e12b-34d5-a678-901234567890"
+                  status:
+                    type: string
+                    enum: [processing]
+                    example: "processing"
+                  estimated_time:
+                    type: integer
+                    description: Estimated completion time in seconds
+                    example: 5
+        '400':
+          description: Invalid edit parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Session not found or expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '402':
+          description: Quota exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /edit/sessions/{session_id}/edits/{edit_id}:
+    get:
+      tags:
+        - Editing
+      summary: Get edit result
+      description: Retrieve the result of a mask-based edit
+      parameters:
+        - in: path
+          name: session_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Edit session ID
+        - in: path
+          name: edit_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Edit operation ID
+      responses:
+        '200':
+          description: Edit result retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditResult'
+        '404':
+          description: Edit not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # ==================== Download/Export APIs ====================
+  /export/prepare:
+    post:
+      tags:
+        - Export
+      summary: Prepare image for download
+      description: |
+        Prepare an image for download with specified format and size.
+        This includes format conversion, resizing, and watermark embedding.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportRequest'
+      responses:
+        '200':
+          description: Export prepared successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  download_url:
+                    type: string
+                    format: uri
+                    description: Temporary download URL (expires in 1 hour)
+                    example: "https://download.covergen.ai/temp/abc123def456.jpg"
+                  expires_at:
+                    type: string
+                    format: date-time
+                    example: "2025-08-28T11:30:00Z"
+                  file_size:
+                    type: integer
+                    description: File size in bytes
+                    example: 1048576
+                  dimensions:
+                    type: object
+                    properties:
+                      width:
+                        type: integer
+                        example: 1280
+                      height:
+                        type: integer
+                        example: 720
+        '400':
+          description: Invalid export parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /export/batch:
+    post:
+      tags:
+        - Export
+      summary: Batch export multiple sizes
+      description: Export an image in multiple platform sizes in one request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - image_url
+                - platforms
+              properties:
+                image_url:
+                  type: string
+                  format: uri
+                  description: Source image URL
+                platforms:
+                  type: array
+                  items:
+                    type: string
+                    enum: [youtube, bilibili, tiktok, instagram_post, instagram_story, twitter, facebook]
+                  minItems: 1
+                  maxItems: 10
+                  example: ["youtube", "bilibili", "tiktok"]
+                format:
+                  type: string
+                  enum: [jpg, png, webp]
+                  default: jpg
+                quality:
+                  type: integer
+                  minimum: 1
+                  maximum: 100
+                  default: 85
+                  description: JPEG/WebP quality (1-100)
+      responses:
+        '200':
+          description: Batch export completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exports:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        platform:
+                          type: string
+                          example: "youtube"
+                        download_url:
+                          type: string
+                          format: uri
+                          example: "https://download.covergen.ai/temp/youtube_abc123.jpg"
+                        dimensions:
+                          type: object
+                          properties:
+                            width:
+                              type: integer
+                              example: 1280
+                            height:
+                              type: integer
+                              example: 720
+                        file_size:
+                          type: integer
+                          example: 512000
+                  expires_at:
+                    type: string
+                    format: date-time
+                    example: "2025-08-28T11:30:00Z"
+        '400':
+          description: Invalid batch export parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # ==================== Payment APIs ====================
+  /payments/subscriptions:
+    get:
+      tags:
+        - Payments
+      summary: Get subscription plans
+      description: List available subscription plans with pricing
+      parameters:
+        - in: query
+          name: currency
+          schema:
+            type: string
+            enum: [USD, EUR, CNY]
+            default: USD
+          description: Currency for pricing display
+      responses:
+        '200':
+          description: Subscription plans retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  plans:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SubscriptionPlan'
+                  current_plan:
+                    type: string
+                    enum: [free, pro, pro_plus]
+                    example: "free"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /payments/subscribe:
+    post:
+      tags:
+        - Payments
+      summary: Create subscription
+      description: |
+        Create a new subscription or upgrade existing subscription.
+        Returns payment URL for payment processing.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - plan_id
+                - payment_method
+              properties:
+                plan_id:
+                  type: string
+                  enum: [pro_monthly, pro_yearly, pro_plus_monthly, pro_plus_yearly]
+                  example: "pro_monthly"
+                payment_method:
+                  type: string
+                  enum: [stripe, paypal, wechat, alipay]
+                  example: "stripe"
+                coupon_code:
+                  type: string
+                  description: Optional promotional code
+                  example: "SAVE20"
+                return_url:
+                  type: string
+                  format: uri
+                  description: URL to redirect after payment
+                  example: "https://app.covergen.ai/payment/success"
+      responses:
+        '200':
+          description: Payment session created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payment_id:
+                    type: string
+                    format: uuid
+                    example: "pay_123e4567-e89b-12d3-a456-426614174000"
+                  payment_url:
+                    type: string
+                    format: uri
+                    description: Redirect user to this URL for payment
+                    example: "https://checkout.stripe.com/pay/cs_test_a1b2c3d4"
+                  expires_at:
+                    type: string
+                    format: date-time
+                    description: Payment session expiration
+                    example: "2025-08-28T11:00:00Z"
+        '400':
+          description: Invalid subscription parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /payments/cancel-subscription:
+    post:
+      tags:
+        - Payments
+      summary: Cancel subscription
+      description: Cancel current subscription at end of billing period
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: Optional cancellation reason
+                  example: "Too expensive"
+                feedback:
+                  type: string
+                  description: Optional feedback
+                  example: "The service was good but I don't need it anymore"
+      responses:
+        '200':
+          description: Subscription cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Subscription will be cancelled on 2025-09-28"
+                  cancellation_date:
+                    type: string
+                    format: date
+                    example: "2025-09-28"
+                  access_until:
+                    type: string
+                    format: date
+                    example: "2025-09-28"
+        '400':
+          description: No active subscription
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /payments/history:
+    get:
+      tags:
+        - Payments
+      summary: Get payment history
+      description: Retrieve user's payment and invoice history
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        '200':
+          description: Payment history retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PaymentRecord'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # ==================== Content Safety APIs ====================
+  /safety/validate-text:
+    post:
+      tags:
+        - Safety
+      summary: Validate text content
+      description: Check text for sensitive words and inappropriate content
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+                - language
+              properties:
+                text:
+                  type: string
+                  description: Text to validate
+                  example: "Amazing tech tutorial thumbnail"
+                language:
+                  type: string
+                  enum: [en, zh, es, fr, de, ja, ko]
+                  description: Language code
+                  example: "en"
+                context:
+                  type: string
+                  enum: [title, description, overlay_text]
+                  description: Context of the text
+                  example: "title"
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  safe:
+                    type: boolean
+                    example: true
+                  issues:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          enum: [profanity, hate_speech, violence, adult_content, spam]
+                          example: "profanity"
+                        severity:
+                          type: string
+                          enum: [low, medium, high]
+                          example: "low"
+                        matched_text:
+                          type: string
+                          example: "damn"
+                        suggestion:
+                          type: string
+                          example: "Consider using alternative wording"
+                  score:
+                    type: number
+                    minimum: 0
+                    maximum: 1
+                    description: Safety score (0-1, higher is safer)
+                    example: 0.95
+        '400':
+          description: Invalid validation request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /safety/validate-image:
+    post:
+      tags:
+        - Safety
+      summary: Validate generated image
+      description: Check generated image for policy violations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - image_url
+              properties:
+                image_url:
+                  type: string
+                  format: uri
+                  description: URL of image to validate
+                  example: "https://storage.covergen.ai/generated/123e4567-e89b-12d3-a456-426614174000.jpg"
+                check_faces:
+                  type: boolean
+                  default: true
+                  description: Check for face swapping or deepfakes
+                check_text:
+                  type: boolean
+                  default: true
+                  description: Extract and check text in image
+      responses:
+        '200':
+          description: Image validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  safe:
+                    type: boolean
+                    example: true
+                  violations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          enum: [adult_content, violence, hate_symbols, face_swap, copyright]
+                          example: "adult_content"
+                        confidence:
+                          type: number
+                          minimum: 0
+                          maximum: 1
+                          example: 0.85
+                        description:
+                          type: string
+                          example: "Potentially inappropriate content detected"
+                  detected_text:
+                    type: array
+                    items:
+                      type: string
+                    example: ["AMAZING", "TECH TIPS"]
+                  face_analysis:
+                    type: object
+                    properties:
+                      faces_detected:
+                        type: integer
+                        example: 1
+                      synthetic_probability:
+                        type: number
+                        minimum: 0
+                        maximum: 1
+                        example: 0.15
+        '400':
+          description: Invalid image URL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /safety/report:
+    post:
+      tags:
+        - Safety
+      summary: Report content violation
+      description: Report inappropriate content or policy violation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content_type
+                - content_id
+                - reason
+              properties:
+                content_type:
+                  type: string
+                  enum: [image, text, user]
+                  example: "image"
+                content_id:
+                  type: string
+                  description: ID of the reported content
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+                reason:
+                  type: string
+                  enum: [inappropriate, copyright, spam, other]
+                  example: "inappropriate"
+                details:
+                  type: string
+                  description: Additional details about the violation
+                  example: "This image contains offensive content"
+      responses:
+        '201':
+          description: Report submitted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  report_id:
+                    type: string
+                    format: uuid
+                    example: "rep_987e6543-e21b-12d3-a456-426614174999"
+                  status:
+                    type: string
+                    enum: [submitted, under_review]
+                    example: "submitted"
+                  message:
+                    type: string
+                    example: "Thank you for your report. We'll review it within 24 hours."
+        '400':
+          description: Invalid report data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # ==================== Analytics APIs ====================
+  /analytics/usage:
+    get:
+      tags:
+        - Analytics
+      summary: Get usage analytics
+      description: Retrieve usage metrics for the authenticated user
+      parameters:
+        - in: query
+          name: period
+          schema:
+            type: string
+            enum: [day, week, month, year]
+            default: month
+          description: Time period for analytics
+        - in: query
+          name: start_date
+          schema:
+            type: string
+            format: date
+          description: Start date for custom period
+        - in: query
+          name: end_date
+          schema:
+            type: string
+            format: date
+          description: End date for custom period
+      responses:
+        '200':
+          description: Usage analytics retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageAnalytics'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /analytics/popular-templates:
+    get:
+      tags:
+        - Analytics
+      summary: Get popular templates
+      description: Get analytics on most used templates
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+          description: Number of templates to return
+      responses:
+        '200':
+          description: Popular templates retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  templates:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        template_id:
+                          type: string
+                          format: uuid
+                        name:
+                          type: string
+                        category:
+                          type: string
+                        usage_count:
+                          type: integer
+                        satisfaction_rate:
+                          type: number
+                          minimum: 0
+                          maximum: 1
+                        last_used:
+                          type: string
+                          format: date-time
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+# Component schemas
+components:
+  # Common responses
+  responses:
+    UnauthorizedError:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  # Authentication schemas
+  schemas:
+    EmailRegistration:
+      type: object
+      required:
+        - email
+        - password
+        - agree_terms
+      properties:
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        password:
+          type: string
+          format: password
+          minLength: 8
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$'
+          description: At least 8 characters with uppercase, lowercase, and number
+        display_name:
+          type: string
+          minLength: 2
+          maxLength: 50
+          example: "John Doe"
+        agree_terms:
+          type: boolean
+          description: Must be true
+        marketing_consent:
+          type: boolean
+          default: false
+        referral_code:
+          type: string
+          example: "FRIEND2025"
+
+    SocialRegistration:
+      type: object
+      required:
+        - provider
+        - token
+        - agree_terms
+      properties:
+        provider:
+          type: string
+          enum: [google, facebook, twitter]
+          example: "google"
+        token:
+          type: string
+          description: OAuth token from provider
+        agree_terms:
+          type: boolean
+        marketing_consent:
+          type: boolean
+          default: false
+
+    EmailLogin:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        password:
+          type: string
+          format: password
+        remember_me:
+          type: boolean
+          default: false
+
+    SocialLogin:
+      type: object
+      required:
+        - provider
+        - token
+      properties:
+        provider:
+          type: string
+          enum: [google, facebook, twitter]
+          example: "google"
+        token:
+          type: string
+          description: OAuth token from provider
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/UserProfile'
+        tokens:
+          type: object
+          properties:
+            access_token:
+              type: string
+              description: JWT access token
+              example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+            refresh_token:
+              type: string
+              description: Refresh token for getting new access token
+              example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+            token_type:
+              type: string
+              example: "Bearer"
+            expires_in:
+              type: integer
+              description: Token expiration time in seconds
+              example: 86400
+
+    # User schemas
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        display_name:
+          type: string
+          example: "John Doe"
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://storage.covergen.ai/avatars/user-avatar.jpg"
+        language:
+          type: string
+          enum: [en, zh, es, fr, de, ja, ko]
+          default: en
+        timezone:
+          type: string
+          example: "America/New_York"
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-01-15T10:30:00Z"
+        email_verified:
+          type: boolean
+          example: true
+        subscription_tier:
+          type: string
+          enum: [free, pro, pro_plus]
+          example: "free"
+        auth_providers:
+          type: array
+          items:
+            type: string
+            enum: [email, google, facebook, twitter]
+          example: ["email", "google"]
+
+    UserProfileUpdate:
+      type: object
+      properties:
+        display_name:
+          type: string
+          minLength: 2
+          maxLength: 50
+        avatar_url:
+          type: string
+          format: uri
+        language:
+          type: string
+          enum: [en, zh, es, fr, de, ja, ko]
+        timezone:
+          type: string
+
+    Subscription:
+      type: object
+      properties:
+        tier:
+          type: string
+          enum: [free, pro, pro_plus]
+          example: "pro"
+        status:
+          type: string
+          enum: [active, cancelled, expired, past_due]
+          example: "active"
+        started_at:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2025-02-01T00:00:00Z"
+        auto_renew:
+          type: boolean
+          example: true
+        payment_method:
+          type: string
+          enum: [stripe, paypal, wechat, alipay]
+          example: "stripe"
+        next_billing_date:
+          type: string
+          format: date
+          nullable: true
+          example: "2025-02-01"
+        cancellation_date:
+          type: string
+          format: date
+          nullable: true
+
+    QuotaUsage:
+      type: object
+      properties:
+        period_start:
+          type: string
+          format: date-time
+          example: "2025-08-01T00:00:00Z"
+        period_end:
+          type: string
+          format: date-time
+          example: "2025-08-31T23:59:59Z"
+        usage:
+          type: object
+          properties:
+            generations:
+              type: object
+              properties:
+                used:
+                  type: integer
+                  example: 15
+                limit:
+                  type: integer
+                  example: 50
+                remaining:
+                  type: integer
+                  example: 35
+            edits:
+              type: object
+              properties:
+                used:
+                  type: integer
+                  example: 5
+                limit:
+                  type: integer
+                  example: 100
+                remaining:
+                  type: integer
+                  example: 95
+            storage_mb:
+              type: object
+              properties:
+                used:
+                  type: number
+                  example: 245.5
+                limit:
+                  type: number
+                  example: 1024
+                remaining:
+                  type: number
+                  example: 778.5
+        overage_charges:
+          type: number
+          example: 0
+          description: Additional charges for usage over limits
+
+    # Template schemas
+    Template:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "tpl_123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          example: "Tech Tutorial"
+        description:
+          type: string
+          example: "Modern tech-focused design with neon accents"
+        category:
+          type: string
+          enum: [tech, lifestyle, minimal, cartoon, cyberpunk, chinese_style]
+          example: "tech"
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["modern", "neon", "gradient"]
+        preview_url:
+          type: string
+          format: uri
+          example: "https://storage.covergen.ai/templates/tech-tutorial-preview.jpg"
+        usage_count:
+          type: integer
+          example: 1250
+        is_premium:
+          type: boolean
+          example: false
+        created_at:
+          type: string
+          format: date-time
+
+    TemplateDetail:
+      allOf:
+        - $ref: '#/components/schemas/Template'
+        - type: object
+          properties:
+            prompt_template:
+              type: string
+              description: AI prompt template (for internal use)
+              example: "Generate a {style} thumbnail with {elements}"
+            parameters:
+              type: object
+              description: Customizable parameters for the template
+              additionalProperties: true
+              example:
+                background_style: ["gradient", "solid", "pattern"]
+                color_schemes: ["neon", "pastel", "monochrome"]
+            examples:
+              type: array
+              items:
+                type: string
+                format: uri
+              description: Example images created with this template
+
+    # Generation schemas
+    GenerationRequest:
+      type: object
+      required:
+        - title
+        - template_id
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Video or podcast title
+          example: "10 Amazing Python Tips You Need to Know!"
+        template_id:
+          type: string
+          format: uuid
+          description: Style template ID
+          example: "tpl_123e4567-e89b-12d3-a456-426614174000"
+        avatar_upload_id:
+          type: string
+          format: uuid
+          description: Previously uploaded avatar ID
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        custom_parameters:
+          type: object
+          description: Template-specific customizations
+          additionalProperties: true
+          example:
+            background_color: "#FF6B6B"
+            text_position: "bottom"
+        language:
+          type: string
+          enum: [en, zh, es, fr, de, ja, ko]
+          default: en
+          description: Language for text rendering
+        output_count:
+          type: integer
+          minimum: 1
+          maximum: 6
+          default: 3
+          description: Number of variations to generate
+
+    GenerationTask:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        user_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          example: "10 Amazing Python Tips You Need to Know!"
+        template_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, queued, processing, completed, failed]
+          example: "completed"
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Processing progress percentage
+          example: 100
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              url:
+                type: string
+                format: uri
+                example: "https://storage.covergen.ai/generated/result1.jpg"
+              thumbnail_url:
+                type: string
+                format: uri
+                example: "https://storage.covergen.ai/generated/result1_thumb.jpg"
+              metadata:
+                type: object
+                properties:
+                  width:
+                    type: integer
+                    example: 1920
+                  height:
+                    type: integer
+                    example: 1080
+                  size:
+                    type: integer
+                    example: 2048000
+                  ai_watermark:
+                    type: boolean
+                    example: true
+        error:
+          type: object
+          nullable: true
+          properties:
+            code:
+              type: string
+              example: "AI_SERVICE_ERROR"
+            message:
+              type: string
+              example: "AI service temporarily unavailable"
+        created_at:
+          type: string
+          format: date-time
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        processing_time_ms:
+          type: integer
+          description: Total processing time in milliseconds
+          example: 8500
+
+    # Edit schemas
+    EditRequest:
+      type: object
+      required:
+        - mask
+        - instruction
+      properties:
+        mask:
+          type: object
+          description: Mask defining the edit area
+          required:
+            - type
+            - coordinates
+          properties:
+            type:
+              type: string
+              enum: [rectangle, circle, polygon, freeform]
+              example: "rectangle"
+            coordinates:
+              oneOf:
+                - type: object
+                  description: Rectangle coordinates
+                  properties:
+                    x:
+                      type: integer
+                    y:
+                      type: integer
+                    width:
+                      type: integer
+                    height:
+                      type: integer
+                - type: object
+                  description: Circle coordinates
+                  properties:
+                    cx:
+                      type: integer
+                    cy:
+                      type: integer
+                    radius:
+                      type: integer
+                - type: array
+                  description: Polygon/freeform points
+                  items:
+                    type: object
+                    properties:
+                      x:
+                        type: integer
+                      y:
+                        type: integer
+        instruction:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Edit instruction in natural language
+          example: "Change the background to a coffee shop with warm lighting"
+        preserve_style:
+          type: boolean
+          default: true
+          description: Maintain overall image style
+        strength:
+          type: number
+          minimum: 0
+          maximum: 1
+          default: 0.7
+          description: Edit strength (0=subtle, 1=strong)
+
+    EditResult:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        session_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [processing, completed, failed]
+          example: "completed"
+        original_url:
+          type: string
+          format: uri
+        edited_url:
+          type: string
+          format: uri
+          nullable: true
+        mask_preview_url:
+          type: string
+          format: uri
+          description: Preview showing the mask area
+        instruction:
+          type: string
+        processing_time_ms:
+          type: integer
+          example: 3500
+        error:
+          type: object
+          nullable: true
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+
+    # Export schemas
+    ExportRequest:
+      type: object
+      required:
+        - image_url
+        - platform
+      properties:
+        image_url:
+          type: string
+          format: uri
+          description: Source image URL
+        platform:
+          type: string
+          enum: [youtube, bilibili, tiktok, instagram_post, instagram_story, twitter, facebook, custom]
+          example: "youtube"
+        custom_dimensions:
+          type: object
+          description: Required when platform is "custom"
+          properties:
+            width:
+              type: integer
+              minimum: 100
+              maximum: 4096
+              example: 1280
+            height:
+              type: integer
+              minimum: 100
+              maximum: 4096
+              example: 720
+        format:
+          type: string
+          enum: [jpg, png, webp]
+          default: jpg
+        quality:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 85
+          description: JPEG/WebP quality
+        add_watermark:
+          type: boolean
+          default: true
+          description: Add AI-generated watermark
+
+    # Payment schemas
+    SubscriptionPlan:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "pro_monthly"
+        name:
+          type: string
+          example: "Pro Monthly"
+        description:
+          type: string
+          example: "50 covers per month with HD export"
+        tier:
+          type: string
+          enum: [free, pro, pro_plus]
+        billing_period:
+          type: string
+          enum: [monthly, yearly]
+        price:
+          type: object
+          properties:
+            amount:
+              type: number
+              example: 9.00
+            currency:
+              type: string
+              example: "USD"
+            display:
+              type: string
+              example: "$9.00"
+        original_price:
+          type: object
+          description: Original price if discounted
+          nullable: true
+          properties:
+            amount:
+              type: number
+            currency:
+              type: string
+            display:
+              type: string
+        features:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "Cover generations per month"
+              value:
+                type: string
+                example: "50"
+              highlighted:
+                type: boolean
+                example: true
+        limits:
+          type: object
+          properties:
+            generations_per_month:
+              type: integer
+              example: 50
+            edits_per_month:
+              type: integer
+              example: 100
+            storage_mb:
+              type: integer
+              example: 1024
+            export_quality:
+              type: string
+              enum: [standard, hd, ultra_hd]
+              example: "hd"
+            commercial_use:
+              type: boolean
+              example: false
+
+    PaymentRecord:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [subscription, one_time, refund]
+        amount:
+          type: number
+          example: 9.00
+        currency:
+          type: string
+          example: "USD"
+        status:
+          type: string
+          enum: [pending, completed, failed, refunded]
+        description:
+          type: string
+          example: "Pro Monthly Subscription - August 2025"
+        payment_method:
+          type: string
+          example: "Visa ending in 4242"
+        invoice_url:
+          type: string
+          format: uri
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    # Analytics schemas
+    UsageAnalytics:
+      type: object
+      properties:
+        period:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date-time
+            end:
+              type: string
+              format: date-time
+        summary:
+          type: object
+          properties:
+            total_generations:
+              type: integer
+              example: 125
+            total_edits:
+              type: integer
+              example: 45
+            total_downloads:
+              type: integer
+              example: 98
+            average_generation_time:
+              type: number
+              description: Average time in seconds
+              example: 8.5
+            satisfaction_rate:
+              type: number
+              description: Percentage of generated covers downloaded
+              example: 0.784
+        daily_breakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              generations:
+                type: integer
+              edits:
+                type: integer
+              downloads:
+                type: integer
+        template_usage:
+          type: array
+          items:
+            type: object
+            properties:
+              template_id:
+                type: string
+                format: uuid
+              template_name:
+                type: string
+              usage_count:
+                type: integer
+              download_rate:
+                type: number
+        platform_breakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              platform:
+                type: string
+                enum: [youtube, bilibili, tiktok, instagram, twitter, facebook, other]
+              export_count:
+                type: integer
+              percentage:
+                type: number

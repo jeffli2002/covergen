@@ -1,0 +1,72 @@
+# robots.txt for CoverGen AI
+# Last updated: 2025-08-30
+
+# Default - Allow all crawlers
+User-agent: *
+Allow: /
+
+# Block access to API routes
+Disallow: /api/
+
+# Block access to user dashboard and editor pages (require login)
+Disallow: /dashboard/
+Disallow: /editor/
+Disallow: /account/
+Disallow: /settings/
+
+# Block access to temporary and system files
+Disallow: /_next/
+Disallow: /node_modules/
+Disallow: /*.json$
+Disallow: /*.map$
+
+# Allow specific important resources
+Allow: /images/
+Allow: /favicon.ico
+Allow: /og-image.jpg
+
+# Crawl delay to prevent server overload
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://covergen.ai/sitemap.xml
+
+# Specific bot rules
+# Google
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Bing
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Block bad bots
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+# AI/ML crawlers - block to protect our content
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /

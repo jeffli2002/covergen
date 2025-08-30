@@ -1,0 +1,657 @@
+# Kubernetes Deployment Configurations for Cover Generation Tool
+# This file contains example configurations for deploying microservices
+
+---
+# Namespace Configuration
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: covergen-production
+  labels:
+    env: production
+    istio-injection: enabled
+
+---
+# ConfigMap for Service Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-config
+  namespace: covergen-production
+data:
+  NODE_ENV: "production"
+  LOG_LEVEL: "info"
+  ENABLE_METRICS: "true"
+  ENABLE_TRACING: "true"
+
+---
+# Auth Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  namespace: covergen-production
+  labels:
+    app: auth-service
+    version: v1.0.0
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+        version: v1.0.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+    spec:
+      serviceAccountName: auth-service-sa
+      containers:
+      - name: auth-service
+        image: covergen/auth-service:1.0.0
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 9090
+          name: metrics
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: auth-db-secret
+              key: url
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: auth-jwt-secret
+              key: secret
+        - name: OAUTH_GOOGLE_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: oauth-secrets
+              key: google-client-id
+        - name: OAUTH_GOOGLE_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: oauth-secrets
+              key: google-client-secret
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+          readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          name: service-config
+
+---
+# Auth Service HorizontalPodAutoscaler
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: auth-service-hpa
+  namespace: covergen-production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: auth-service
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+# Cover Generation Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cover-generation-service
+  namespace: covergen-production
+  labels:
+    app: cover-generation-service
+    version: v2.1.0
+spec:
+  replicas: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: cover-generation-service
+  template:
+    metadata:
+      labels:
+        app: cover-generation-service
+        version: v2.1.0
+    spec:
+      serviceAccountName: cover-generation-sa
+      containers:
+      - name: cover-generation
+        image: covergen/cover-generation-service:2.1.0
+        ports:
+        - containerPort: 8080
+        - containerPort: 9090
+        env:
+        - name: VERTEX_AI_PROJECT_ID
+          value: "covergen-global"
+        - name: VERTEX_AI_LOCATION
+          value: "us-central1"
+        - name: VERTEX_AI_CREDENTIALS
+          valueFrom:
+            secretKeyRef:
+              name: gcp-credentials
+              key: service-account-key
+        - name: RABBITMQ_URL
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-secret
+              key: url
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: url
+        - name: CONTENT_SAFETY_SERVICE_URL
+          value: "content-safety-service:50051"
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 2000m
+            memory: 4Gi
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8080
+          initialDelaySeconds: 45
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8080
+          initialDelaySeconds: 20
+          periodSeconds: 10
+
+---
+# Cover Generation Service HPA with Custom Metrics
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: cover-generation-hpa
+  namespace: covergen-production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: cover-generation-service
+  minReplicas: 5
+  maxReplicas: 50
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  - type: Pods
+    pods:
+      metric:
+        name: rabbitmq_queue_depth
+      target:
+        type: AverageValue
+        averageValue: "30"
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+      - type: Pods
+        value: 5
+        periodSeconds: 15
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+
+---
+# Content Safety Service Deployment (Python)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: content-safety-service
+  namespace: covergen-production
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: content-safety-service
+  template:
+    metadata:
+      labels:
+        app: content-safety-service
+        version: v1.0.0
+    spec:
+      containers:
+      - name: content-safety
+        image: covergen/content-safety-service:1.0.0
+        ports:
+        - containerPort: 50051
+          name: grpc
+        - containerPort: 9090
+          name: metrics
+        env:
+        - name: ML_MODEL_PATH
+          value: "/models"
+        - name: PERSPECTIVE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: perspective-api
+              key: api-key
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 2Gi
+        volumeMounts:
+        - name: ml-models
+          mountPath: /models
+          readOnly: true
+      volumes:
+      - name: ml-models
+        persistentVolumeClaim:
+          claimName: ml-models-pvc
+
+---
+# Task Management Service with Redis Sidecar
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task-management-service
+  namespace: covergen-production
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: task-management-service
+  template:
+    metadata:
+      labels:
+        app: task-management-service
+        version: v1.0.0
+    spec:
+      containers:
+      - name: task-management
+        image: covergen/task-management-service:1.0.0
+        ports:
+        - containerPort: 8080
+        env:
+        - name: REDIS_URL
+          value: "localhost:6379"  # Sidecar Redis
+        - name: MONGODB_URL
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-secret
+              key: url
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+      - name: redis-sidecar
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+
+---
+# Service Definitions
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+  namespace: covergen-production
+  labels:
+    app: auth-service
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8080
+    name: http
+  - port: 9090
+    targetPort: 9090
+    name: metrics
+  selector:
+    app: auth-service
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cover-generation-service
+  namespace: covergen-production
+  labels:
+    app: cover-generation-service
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8080
+    name: http
+  selector:
+    app: cover-generation-service
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: content-safety-service
+  namespace: covergen-production
+  labels:
+    app: content-safety-service
+spec:
+  type: ClusterIP
+  ports:
+  - port: 50051
+    targetPort: 50051
+    name: grpc
+  selector:
+    app: content-safety-service
+
+---
+# Istio VirtualService for Canary Deployment
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: cover-generation-vs
+  namespace: covergen-production
+spec:
+  hosts:
+  - cover-generation-service
+  http:
+  - match:
+    - headers:
+        x-user-type:
+          exact: beta
+    route:
+    - destination:
+        host: cover-generation-service
+        subset: v2-1-0
+      weight: 100
+  - route:
+    - destination:
+        host: cover-generation-service
+        subset: v2-0-0
+      weight: 90
+    - destination:
+        host: cover-generation-service
+        subset: v2-1-0
+      weight: 10
+
+---
+# Istio DestinationRule
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: cover-generation-dr
+  namespace: covergen-production
+spec:
+  host: cover-generation-service
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 50
+        http2MaxRequests: 100
+    loadBalancer:
+      simple: LEAST_REQUEST
+    outlierDetection:
+      consecutiveErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      minHealthPercent: 50
+  subsets:
+  - name: v2-0-0
+    labels:
+      version: v2.0.0
+  - name: v2-1-0
+    labels:
+      version: v2.1.0
+
+---
+# PodDisruptionBudget for High Availability
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: auth-service-pdb
+  namespace: covergen-production
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: auth-service
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cover-generation-pdb
+  namespace: covergen-production
+spec:
+  minAvailable: 3
+  selector:
+    matchLabels:
+      app: cover-generation-service
+
+---
+# NetworkPolicy for Service Isolation
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: content-safety-isolation
+  namespace: covergen-production
+spec:
+  podSelector:
+    matchLabels:
+      app: content-safety-service
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: cover-generation-service
+    - podSelector:
+        matchLabels:
+          app: image-edit-service
+    ports:
+    - protocol: TCP
+      port: 50051
+
+---
+# ServiceMonitor for Prometheus
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: covergen-services
+  namespace: covergen-production
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      metrics: "true"
+  endpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics
+
+---
+# Example Secret Configuration (Base64 encoded in real deployment)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: auth-db-secret
+  namespace: covergen-production
+type: Opaque
+data:
+  url: cG9zdGdyZXNxbDovL3VzZXI6cGFzc0Bwb3N0Z3Jlcy1hdXRoOjU0MzIvYXV0aGRi
+
+---
+# PersistentVolumeClaim for ML Models
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ml-models-pvc
+  namespace: covergen-production
+spec:
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: fast-ssd
+
+---
+# Ingress Configuration with SSL
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: covergen-ingress
+  namespace: covergen-production
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+spec:
+  tls:
+  - hosts:
+    - api.covergen.ai
+    secretName: covergen-tls
+  rules:
+  - host: api.covergen.ai
+    http:
+      paths:
+      - path: /auth
+        pathType: Prefix
+        backend:
+          service:
+            name: auth-service
+            port:
+              number: 80
+      - path: /covers
+        pathType: Prefix
+        backend:
+          service:
+            name: cover-generation-service
+            port:
+              number: 80
+
+---
+# Job for Database Migration
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migration-v1-0-0
+  namespace: covergen-production
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      initContainers:
+      - name: wait-for-db
+        image: busybox
+        command: ['sh', '-c', 'until nc -z postgres-auth 5432; do sleep 1; done']
+      containers:
+      - name: migrate
+        image: covergen/db-migrations:1.0.0
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: auth-db-secret
+              key: url
+        command: ["npm", "run", "migrate:up"]
+
+---
+# CronJob for Cleanup
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: temp-files-cleanup
+  namespace: covergen-production
+spec:
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: cleanup
+            image: covergen/cleanup-job:1.0.0
+            env:
+            - name: STORAGE_BUCKET
+              value: "covergen-temp-files"
+            - name: MAX_AGE_HOURS
+              value: "24"
