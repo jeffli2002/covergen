@@ -1,0 +1,227 @@
+'use client'
+
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Music, Sparkles, Smartphone, Zap, TrendingUp } from 'lucide-react'
+
+const features = [
+  {
+    icon: Smartphone,
+    title: 'Mobile-First Design',
+    description: 'Perfect 1080x1920 vertical format for TikTok feeds'
+  },
+  {
+    icon: TrendingUp,
+    title: 'Viral Potential',
+    description: 'Trending aesthetics that boost discoverability'
+  },
+  {
+    icon: Zap,
+    title: 'Gen-Z Optimized',
+    description: 'Bold, dynamic designs that resonate with TikTok users'
+  },
+  {
+    icon: Music,
+    title: 'Content Aware',
+    description: 'Styles for dance, comedy, education, and more'
+  }
+]
+
+export default function TikTokCoverMakerClient({ locale, translations }: { locale: string, translations: any }) {
+  const howToSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: 'How to Create Viral TikTok Covers',
+    description: 'Step-by-step guide to creating engaging TikTok video covers with AI',
+    step: [
+      {
+        '@type': 'HowToStep',
+        name: 'Choose your content type',
+        text: 'Select from dance, comedy, educational, or other TikTok content categories'
+      },
+      {
+        '@type': 'HowToStep',
+        name: 'Upload reference image',
+        text: 'Add your brand logo or reference image for consistent styling'
+      },
+      {
+        '@type': 'HowToStep',
+        name: 'Enter video title',
+        text: 'Add your catchy TikTok video title or hook'
+      },
+      {
+        '@type': 'HowToStep',
+        name: 'Generate and download',
+        text: 'AI creates multiple cover options in vertical TikTok format'
+      }
+    ]
+  }
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+      />
+      
+      <div className="min-h-screen bg-background">
+        {/* Hero Section */}
+        <section className="py-20 bg-gradient-to-br from-pink-50 to-purple-100">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto text-center">
+              <div className="flex justify-center mb-6">
+                <div className="p-4 bg-gradient-to-r from-pink-600 to-purple-600 rounded-3xl">
+                  <Music className="w-12 h-12 text-white" />
+                </div>
+              </div>
+              
+              <h1 className="text-5xl md:text-6xl font-bold mb-6 text-gray-900">
+                TikTok Cover Maker
+              </h1>
+              
+              <p className="text-xl md:text-2xl text-gray-700 mb-8 leading-relaxed">
+                Create covers that make viewers <span className="bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent font-semibold">stop scrolling</span> and 
+                start watching. AI-powered vertical covers for viral TikTok content.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+                <Link href={`/${locale}#generator`}>
+                  <Button size="lg" className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white px-8 py-6 text-lg">
+                    <Sparkles className="w-5 h-5 mr-2" />
+                    Create TikTok Covers
+                  </Button>
+                </Link>
+                <Link href={`/${locale}#pricing`}>
+                  <Button size="lg" variant="outline" className="px-8 py-6 text-lg">
+                    View Pricing
+                  </Button>
+                </Link>
+              </div>
+              
+              <p className="text-gray-600">
+                Perfect for creators • Optimized for FYP • Mobile-first design
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Features Grid */}
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+              Built for TikTok Success
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+              {features.map((feature) => (
+                <Card key={feature.title} className="hover:scale-105 transition-transform">
+                  <CardContent className="p-6 text-center">
+                    <div className="flex justify-center mb-4">
+                      <div className="p-3 bg-gradient-to-r from-pink-100 to-purple-100 rounded-2xl">
+                        <feature.icon className="w-8 h-8 text-purple-600" />
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                    <p className="text-gray-600">{feature.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Content Types */}
+        <section className="py-16 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+                Covers for Every TikTok Niche
+              </h2>
+              
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                {[
+                  '💃 Dance Videos',
+                  '😂 Comedy Skits', 
+                  '🎓 Educational',
+                  '🍳 Food & Cooking',
+                  '💄 Beauty & Fashion',
+                  '🎮 Gaming Content',
+                  '🏋️ Fitness Tips',
+                  '🎨 Art & DIY',
+                  '🐾 Pet Videos'
+                ].map((type) => (
+                  <div key={type} className="bg-white rounded-2xl p-6 text-center hover:shadow-lg transition-shadow">
+                    <span className="text-lg font-medium">{type}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* TikTok Tips */}
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+                TikTok Cover Best Practices
+              </h2>
+              
+              <div className="grid md:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl p-6">
+                    <h3 className="text-xl font-semibold mb-3">🎯 Clear Focal Point</h3>
+                    <p className="text-gray-600">
+                      Mobile screens are small. Make your main subject obvious and centered for maximum impact.
+                    </p>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl p-6">
+                    <h3 className="text-xl font-semibold mb-3">🌈 Bold Colors</h3>
+                    <p className="text-gray-600">
+                      Bright, contrasting colors help your content stand out in the fast-scrolling FYP feed.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="space-y-6">
+                  <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl p-6">
+                    <h3 className="text-xl font-semibold mb-3">📱 Account for UI</h3>
+                    <p className="text-gray-600">
+                      TikTok's interface covers parts of your video. Our AI keeps important elements in safe zones.
+                    </p>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl p-6">
+                    <h3 className="text-xl font-semibold mb-3">✨ Trending Styles</h3>
+                    <p className="text-gray-600">
+                      Stay current with TikTok aesthetics. Our AI adapts to the latest visual trends automatically.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="py-20 bg-gradient-to-br from-pink-600 to-purple-600 text-white">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              Ready to Go Viral on TikTok?
+            </h2>
+            <p className="text-xl md:text-2xl mb-8 opacity-90">
+              Create scroll-stopping covers that boost your views and engagement
+            </p>
+            <Link href={`/${locale}#generator`}>
+              <Button size="lg" className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-6 text-lg font-semibold">
+                Start Creating TikTok Covers
+              </Button>
+            </Link>
+          </div>
+        </section>
+      </div>
+    </>
+  )
+}

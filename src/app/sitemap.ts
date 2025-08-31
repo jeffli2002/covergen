@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 import { i18n } from '@/lib/i18n/config'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://covergen.ai'
+  const baseUrl = 'https://covergen.pro'
   const currentDate = new Date().toISOString()
   
   // Define all static routes with multi-language support
@@ -160,7 +160,7 @@ function generateLanguageAlternates(path: string): Record<string, string> {
   
   // Since we only support English now, we just return the English URL
   i18n.locales.forEach((locale) => {
-    alternates[locale.code] = `https://covergen.ai/${locale.code}${path}`
+    alternates[locale.code] = `https://covergen.pro/${locale.code}${path}`
   })
   
   return alternates

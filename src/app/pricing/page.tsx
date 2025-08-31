@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     images: ['/pricing-og.jpg'],
   },
   alternates: {
-    canonical: 'https://covergen.ai/pricing',
+    canonical: 'https://covergen.pro/pricing',
   },
 }
 

@@ -2,7 +2,7 @@
 
 export const SEO_CONSTANTS = {
   siteName: 'CoverGen AI',
-  siteUrl: 'https://covergen.ai',
+  siteUrl: 'https://covergen.pro',
   twitterHandle: '@covergenai',
   defaultOgImage: '/og-image.jpg',
   

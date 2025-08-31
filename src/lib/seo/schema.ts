@@ -4,13 +4,13 @@ import { Organization, WebSite, SoftwareApplication, FAQPage, BreadcrumbList, Pr
 export const organizationSchema: WithContext<Organization> = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
-  '@id': 'https://covergen.ai/#organization',
+  '@id': 'https://covergen.pro/#organization',
   name: 'CoverGen AI',
   alternateName: 'Cover Generator AI',
-  url: 'https://covergen.ai',
+  url: 'https://covergen.pro',
   logo: {
     '@type': 'ImageObject',
-    url: 'https://covergen.ai/logo.png',
+    url: 'https://covergen.pro/logo.png',
     width: '600',
     height: '600',
   },
@@ -24,7 +24,7 @@ export const organizationSchema: WithContext<Organization> = {
     '@type': 'ContactPoint',
     telephone: '+1-555-123-4567',
     contactType: 'customer support',
-    email: 'support@covergen.ai',
+    email: 'support@covergen.pro',
     availableLanguage: ['en', 'es', 'pt', 'zh', 'ar'],
   },
 }
@@ -33,16 +33,16 @@ export const organizationSchema: WithContext<Organization> = {
 export const websiteSchema: WithContext<WebSite> = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  '@id': 'https://covergen.ai/#website',
-  url: 'https://covergen.ai',
+  '@id': 'https://covergen.pro/#website',
+  url: 'https://covergen.pro',
   name: 'CoverGen AI',
   description: 'Create stunning covers and thumbnails with AI for YouTube, TikTok, Spotify, and more. Nano banana powered technology.',
   publisher: {
-    '@id': 'https://covergen.ai/#organization',
+    '@id': 'https://covergen.pro/#organization',
   },
   potentialAction: {
     '@type': 'SearchAction',
-    target: 'https://covergen.ai/search?q={search_term_string}',
+    target: 'https://covergen.pro/search?q={search_term_string}',
     query: 'required name=search_term_string',
   },
   inLanguage: ['en', 'es', 'pt', 'zh', 'ar'],
@@ -89,9 +89,9 @@ export const softwareApplicationSchema: WithContext<SoftwareApplication> = {
     bestRating: '5',
   },
   screenshot: [
-    'https://covergen.ai/screenshots/dashboard.png',
-    'https://covergen.ai/screenshots/editor.png',
-    'https://covergen.ai/screenshots/gallery.png',
+    'https://covergen.pro/screenshots/dashboard.png',
+    'https://covergen.pro/screenshots/editor.png',
+    'https://covergen.pro/screenshots/gallery.png',
   ],
   featureList: [
     'AI-powered cover generation',
@@ -207,7 +207,7 @@ export function generatePlatformSchema(platform: string, features: string[]): Wi
     description: `AI-powered ${platform} cover generator with nano banana technology. Create stunning covers optimized for ${platform}'s algorithm.`,
     featureList: features,
     provider: {
-      '@id': 'https://covergen.ai/#organization',
+      '@id': 'https://covergen.pro/#organization',
     },
     aggregateRating: {
       '@type': 'AggregateRating',

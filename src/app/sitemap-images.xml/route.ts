@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
 export async function GET() {
-  const baseUrl = 'https://covergen.ai'
+  const baseUrl = 'https://covergen.pro'
   
   // Define all important images on the site
   const images = [

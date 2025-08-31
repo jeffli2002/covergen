@@ -20,5 +20,5 @@ amazon-adsystem.com, pub-0000000000000000, DIRECT
 # Note: Replace placeholder IDs (pub-0000000000000000) with actual publisher IDs when setting up ad networks
 # This is primarily a subscription-based service, ads are supplementary
 
-# Contact: support@covergen.ai
-# Website: https://covergen.ai
+# Contact: support@covergen.pro
+# Website: https://covergen.pro

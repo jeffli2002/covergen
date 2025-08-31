@@ -1,6 +1,6 @@
 import { headers } from 'next/headers'
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://covergen.ai'
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://covergen.pro'
 
 export function getCanonicalUrl(path: string = ''): string {
   // Remove trailing slash from path
@@ -17,7 +17,7 @@ export function getCanonicalUrl(path: string = ''): string {
 
 export function getCurrentUrl(): string {
   const headersList = headers()
-  const host = headersList.get('host') || 'covergen.ai'
+  const host = headersList.get('host') || 'covergen.pro'
   const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
   const pathname = headersList.get('x-pathname') || '/'
   

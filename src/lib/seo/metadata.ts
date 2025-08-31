@@ -39,11 +39,11 @@ export function generateMetadata({
   noindex = false,
   schema,
 }: GenerateMetadataParams): Metadata {
-  const baseUrl = 'https://covergen.ai'
+  const baseUrl = 'https://covergen.pro'
   const url = `${baseUrl}${locale !== 'en' ? `/${locale}` : ''}${path}`
   
   const defaultImage = {
-    url: 'https://covergen.ai/og-image.png',
+    url: 'https://covergen.pro/og-image.png',
     width: 1200,
     height: 630,
     alt: 'CoverGen AI - AI-Powered Cover Generator',
@@ -174,7 +174,7 @@ export function generatePlatformMetadata(platform: string, locale: string = 'en'
     path: `/platforms/${platform}`,
     locale,
     images: [{
-      url: `https://covergen.ai/${platform}-cover-generator-og.jpg`,
+      url: `https://covergen.pro/${platform}-cover-generator-og.jpg`,
       width: 1200,
       height: 630,
       alt: `${platform.charAt(0).toUpperCase() + platform.slice(1)} Cover Generator - CoverGen AI`,
@@ -200,7 +200,7 @@ export function generateBlogMetadata(
       path: `/blog/${slug}`,
       locale,
       images: [{
-        url: `https://covergen.ai/blog/${slug}/og-image.jpg`,
+        url: `https://covergen.pro/blog/${slug}/og-image.jpg`,
         width: 1200,
         height: 630,
         alt: title,

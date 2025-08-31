@@ -59,13 +59,13 @@ export async function generateMetadata({
     openGraph: {
       type: 'website',
       locale: locale,
-      url: `https://covergen.ai/${locale}`,
+      url: `https://covergen.pro/${locale}`,
       title: `${dict.common.appName} - ${dict.common.tagline}`,
       description: dict.common.description,
       siteName: dict.common.appName,
       images: [
         {
-          url: 'https://covergen.ai/og-image.png',
+          url: 'https://covergen.pro/og-image.png',
           width: 1200,
           height: 630,
           alt: dict.common.appName,
@@ -76,7 +76,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title: `${dict.common.appName} - ${dict.common.tagline}`,
       description: dict.common.description,
-      images: ['https://covergen.ai/twitter-image.png'],
+      images: ['https://covergen.pro/twitter-image.png'],
       creator: '@covergenai',
     },
     robots: {
@@ -91,11 +91,11 @@ export async function generateMetadata({
       },
     },
     alternates: {
-      canonical: `https://covergen.ai/${locale}`,
+      canonical: `https://covergen.pro/${locale}`,
       languages: Object.fromEntries(
         i18n.locales.map((l) => [
           l.code,
-          `https://covergen.ai/${l.code}`,
+          `https://covergen.pro/${l.code}`,
         ])
       ),
     },

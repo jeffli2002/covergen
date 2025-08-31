@@ -41,8 +41,8 @@ Allow: /*.js$
 Crawl-delay: 1
 
 # Sitemap location
-Sitemap: https://covergen.ai/sitemap.xml
-Sitemap: https://covergen.ai/sitemap-images.xml
+Sitemap: https://covergen.pro/sitemap.xml
+Sitemap: https://covergen.pro/sitemap-images.xml
 
 # Specific bot rules
 # Google

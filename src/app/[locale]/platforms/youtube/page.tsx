@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     images: ['/youtube-thumbnail-maker-og.jpg'],
   },
   alternates: {
-    canonical: 'https://covergen.ai/platforms/youtube',
+    canonical: 'https://covergen.pro/platforms/youtube',
   },
 }
 
