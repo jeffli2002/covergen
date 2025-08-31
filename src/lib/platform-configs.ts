@@ -1,14 +1,15 @@
 import { Youtube, Twitter, Music, Image, Video, Layout, Instagram, Facebook, Linkedin } from 'lucide-react'
+import { TikTokIcon, SpotifyIcon, TwitterXIcon } from '@/components/icons/brand-icons'
 
 export const platformIcons = {
   none: Layout,
   youtube: Youtube,
-  twitter: Twitter,
+  twitter: TwitterXIcon,
   instagram: Instagram,
   facebook: Facebook,
   linkedin: Linkedin,
-  tiktok: Music,
-  spotify: Music,
+  tiktok: TikTokIcon,
+  spotify: SpotifyIcon,
   rednote: Image,
   wechat: Video,
   bilibili: Video,

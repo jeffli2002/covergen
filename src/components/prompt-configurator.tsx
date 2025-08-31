@@ -105,7 +105,7 @@ export default function PromptConfigurator({
               <SelectContent className="bg-white border-gray-200 max-h-[300px]">
                 <SelectGroup>
                   <SelectLabel className="text-gray-600 text-xs">Social Media</SelectLabel>
-                  {['youtube', 'twitter', 'tiktok', 'rednote', 'wechat'].map((p) => (
+                  {['youtube', 'instagram', 'twitter', 'facebook', 'linkedin', 'tiktok', 'rednote', 'wechat'].map((p) => (
                     <SelectItem key={p} value={p} className="text-gray-900 hover:bg-gray-50 text-sm">
                       <span className="flex items-center gap-2 w-full">
                         {React.createElement(platformIcons[p as Platform], { className: "w-4 h-4" })}

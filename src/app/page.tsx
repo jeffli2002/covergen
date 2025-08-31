@@ -22,14 +22,15 @@ import {
   Facebook,
   Linkedin,
 } from 'lucide-react'
+import { TikTokIcon, SpotifyIcon, TwitterXIcon } from '@/components/icons/brand-icons'
 
 const platformIcons = [
   { name: 'YouTube', icon: Youtube, color: 'text-red-500' },
   { name: 'Instagram', icon: Instagram, color: 'text-pink-500' },
-  { name: 'TikTok', icon: Music, color: 'text-black' },
-  { name: 'Spotify', icon: Music, color: 'text-green-500' },
+  { name: 'TikTok', icon: TikTokIcon, color: 'text-black' },
+  { name: 'Spotify', icon: SpotifyIcon, color: 'text-green-500' },
   { name: 'LinkedIn', icon: Linkedin, color: 'text-blue-700' },
-  { name: 'X (Twitter)', icon: MessageSquare, color: 'text-blue-400' },
+  { name: 'X', icon: TwitterXIcon, color: 'text-black' },
 ]
 
 const features = [
@@ -122,22 +123,6 @@ export default function HomePage() {
                     <span className="text-sm md:text-base lg:text-lg font-medium text-gray-700">{platform.name}</span>
                   </div>
                 ))}
-              </div>
-              
-              {/* Three key benefits with styling */}
-              <div className="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-6 mb-12 text-sm md:text-base">
-                <span className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full font-medium">
-                  <Zap className="w-4 h-4" />
-                  10-second generation
-                </span>
-                <span className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-full font-medium">
-                  <Globe className="w-4 h-4" />
-                  All major platforms
-                </span>
-                <span className="flex items-center gap-2 px-4 py-2 bg-pink-100 text-pink-700 rounded-full font-medium">
-                  <Sparkles className="w-4 h-4" />
-                  No login required
-                </span>
               </div>
 
               <Button 
@@ -509,7 +494,7 @@ export default function HomePage() {
               <Button 
                 size="lg" 
                 variant="outline"
-                className="text-xl px-10 py-8 border-2 border-white text-white hover:bg-white/10 rounded-3xl font-semibold transition-all duration-300"
+                className="text-xl px-10 py-8 border-2 border-white bg-white/20 backdrop-blur-sm text-white hover:bg-white hover:text-gray-900 rounded-3xl font-semibold transition-all duration-300"
                 onClick={() => {
                   setFeedbackModal({ isOpen: true, context: 'general' })
                   trackInteraction('feedback_button', 'click', user?.id)
