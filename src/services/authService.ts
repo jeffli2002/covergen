@@ -107,7 +107,8 @@ class AuthService {
             this.startSessionRefreshTimer()
           } else if (event === 'SIGNED_OUT') {
             this.stopSessionRefreshTimer()
-            this.onSignOut()
+            // Don't call onSignOut here as we already handle it in signOut method
+            // to avoid duplicate state updates
           } else if (event === 'TOKEN_REFRESHED') {
             this.lastSessionCheck = Date.now()
             if (session) {
@@ -268,16 +269,35 @@ class AuthService {
 
   async signOut() {
     try {
+      console.log('[Auth] Starting sign out process')
+      
+      // Stop session refresh timer first
+      this.stopSessionRefreshTimer()
+      
+      // Clear local state immediately
+      this.user = null
+      this.session = null
+      this.clearStoredSession()
+      
+      // Notify listeners immediately for instant UI update
+      if (this.onAuthChange) {
+        this.onAuthChange(null)
+      }
+      
+      // Then call Supabase signOut
       const { error } = await supabase.auth.signOut()
 
       if (error) {
+        console.error('[Auth] Sign out error:', error)
         throw error
       }
 
+      console.log('[Auth] Sign out successful')
       return {
         success: true
       }
     } catch (error: any) {
+      console.error('[Auth] Sign out failed:', error)
       return {
         success: false,
         error: error.message

@@ -12,8 +12,14 @@ export default function MobileHeader() {
   const { user, signOut } = useAuth()
 
   const handleLogout = async () => {
-    await signOut()
-    setIsMenuOpen(false)
+    console.log('[MobileHeader] Signing out...')
+    const result = await signOut()
+    if (!result.success) {
+      console.error('[MobileHeader] Sign out failed:', result.error)
+    } else {
+      console.log('[MobileHeader] Sign out successful')
+      setIsMenuOpen(false)
+    }
   }
 
   const handleAuthSuccess = () => {

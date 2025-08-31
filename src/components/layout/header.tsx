@@ -19,7 +19,13 @@ export default function Header({ locale, translations: t }: HeaderProps) {
   const [showAuthModal, setShowAuthModal] = useState(false)
 
   const handleLogout = async () => {
-    await signOut()
+    console.log('[Header] Signing out...')
+    const result = await signOut()
+    if (!result.success) {
+      console.error('[Header] Sign out failed:', result.error)
+    } else {
+      console.log('[Header] Sign out successful')
+    }
   }
 
   const handleAuthSuccess = () => {
