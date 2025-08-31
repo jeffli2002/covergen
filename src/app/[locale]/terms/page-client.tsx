@@ -147,26 +147,44 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                 <div className="grid md:grid-cols-3 gap-4">
                   <div className="border border-gray-200 rounded-lg p-4">
                     <h4 className="font-semibold text-gray-900 mb-2">Free Plan</h4>
+                    <p className="text-sm font-medium text-gray-900 mb-2">$0/forever</p>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ 3 generations daily</li>
-                      <li>✓ Basic features</li>
-                      <li>✓ Community support</li>
+                      <li>✓ 10 covers per day</li>
+                      <li>✓ Standard resolution</li>
+                      <li>✓ No watermark</li>
+                      <li>✓ Basic platform sizes</li>
+                      <li>✓ Email support</li>
                     </ul>
                   </div>
-                  <div className="border border-blue-200 bg-blue-50 rounded-lg p-4">
+                  <div className="border border-blue-200 bg-blue-50 rounded-lg p-4 relative">
                     <h4 className="font-semibold text-gray-900 mb-2">Pro Plan</h4>
+                    <p className="text-sm font-medium text-gray-900 mb-2">$9/month</p>
+                    <div className="absolute top-2 right-2">
+                      <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">Coming Soon</span>
+                    </div>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ 100 generations monthly</li>
-                      <li>✓ Advanced features</li>
+                      <li>✓ 50 covers per month</li>
+                      <li>✓ High-definition export</li>
+                      <li>✓ No watermark</li>
+                      <li>✓ All platform sizes</li>
                       <li>✓ Priority support</li>
+                      <li>✓ Batch generation</li>
                     </ul>
                   </div>
-                  <div className="border border-purple-200 bg-purple-50 rounded-lg p-4">
+                  <div className="border border-purple-200 bg-purple-50 rounded-lg p-4 relative">
                     <h4 className="font-semibold text-gray-900 mb-2">Pro+ Plan</h4>
+                    <p className="text-sm font-medium text-gray-900 mb-2">$19/month</p>
+                    <div className="absolute top-2 right-2">
+                      <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">Coming Soon</span>
+                    </div>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ Unlimited generations</li>
-                      <li>✓ All features</li>
+                      <li>✓ 200 covers per month</li>
+                      <li>✓ Ultra-high resolution</li>
+                      <li>✓ No watermark</li>
+                      <li>✓ Commercial license</li>
+                      <li>✓ Custom brand templates</li>
                       <li>✓ API access</li>
+                      <li>✓ Dedicated support</li>
                     </ul>
                   </div>
                 </div>

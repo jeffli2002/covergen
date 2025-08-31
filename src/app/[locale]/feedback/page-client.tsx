@@ -169,8 +169,8 @@ export default function FeedbackPageClient({ locale, translations: t }: Feedback
         <div className="mt-8 text-center text-gray-600">
           <p>
             You can also reach us directly at{' '}
-            <a href="mailto:feedback@covergen.pro" className="text-blue-600 hover:underline">
-              feedback@covergen.pro
+            <a href="mailto:support@covergen.pro" className="text-blue-600 hover:underline">
+              support@covergen.pro
             </a>
           </p>
         </div>

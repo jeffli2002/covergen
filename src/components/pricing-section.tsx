@@ -187,18 +187,28 @@ export default function PricingSection() {
                   )}
 
                   {/* CTA Button */}
-                  <Button 
-                    className={`w-full transition-all duration-300 ${
-                      tier.popular 
-                        ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white hover:shadow-lg' 
-                        : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'
-                    }`}
-                    variant={tier.popular ? "default" : "outline"}
-                    disabled={isCurrentTier}
-                    onClick={() => handleSubscribe(tier.id)}
-                  >
-                    {isCurrentTier ? 'Current Plan' : tier.cta}
-                  </Button>
+                  {tier.id === 'free' ? (
+                    <Button 
+                      className="w-full transition-all duration-300 bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300"
+                      variant="outline"
+                      disabled={isCurrentTier}
+                      onClick={() => handleSubscribe(tier.id)}
+                    >
+                      {isCurrentTier ? 'Current Plan' : tier.cta}
+                    </Button>
+                  ) : (
+                    <Button 
+                      className={`w-full transition-all duration-300 ${
+                        tier.popular 
+                          ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white hover:shadow-lg' 
+                          : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'
+                      }`}
+                      variant={tier.popular ? "default" : "outline"}
+                      disabled={true}
+                    >
+                      Coming Soon
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             )
