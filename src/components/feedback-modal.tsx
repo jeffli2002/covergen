@@ -48,26 +48,36 @@ export default function FeedbackModal({ isOpen, onClose, context = 'general' }: 
       const data = await response.json()
       
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to submit feedback')
+        console.error('API error response:', data)
+        const errorMessage = data.details 
+          ? `${data.error}\n\nDetails: ${data.details}`
+          : data.error || 'Failed to submit feedback'
+        throw new Error(errorMessage)
       }
       
       console.log('Feedback submitted successfully:', data)
       
-      // Reset form
-      setRating(0)
-      setFeedback('')
-      setEmail('')
-      
-      onClose()
-      
-      // Show success message (could use a toast notification here)
-      if (typeof window !== 'undefined') {
-        alert('Thank you for your feedback!')
+      // Only reset form and show success if we actually have a success response
+      if (data.success) {
+        // Reset form
+        setRating(0)
+        setFeedback('')
+        setEmail('')
+        
+        onClose()
+        
+        // Show success message (could use a toast notification here)
+        if (typeof window !== 'undefined') {
+          alert('Thank you for your feedback!')
+        }
+      } else {
+        throw new Error('Unexpected response format')
       }
     } catch (error) {
       console.error('Error submitting feedback:', error)
       if (typeof window !== 'undefined') {
-        alert('Failed to submit feedback. Please try again.')
+        const message = error instanceof Error ? error.message : 'Failed to submit feedback. Please try again.'
+        alert(message)
       }
     } finally {
       setIsSubmitting(false)
