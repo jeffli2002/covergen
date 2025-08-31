@@ -38,6 +38,29 @@ const platformIcons = [
   { name: 'X', icon: TwitterXIcon, color: 'text-black' },
 ]
 
+const features = [
+  {
+    icon: Sparkles,
+    title: 'AI-Powered',
+    description: 'Advanced AI creates stunning, professional covers in seconds'
+  },
+  {
+    icon: Zap,
+    title: 'Lightning Fast',
+    description: 'Generate multiple variations instantly with one click'
+  },
+  {
+    icon: Globe,
+    title: 'Multi-Platform',
+    description: 'Perfectly sized for YouTube, TikTok, Spotify, and more'
+  },
+  {
+    icon: Shield,
+    title: 'Brand Consistent',
+    description: 'Maintain your unique style across all platforms'
+  }
+]
+
 export default function HomePageClient({ locale, translations: t }: HomePageClientProps) {
   const { currentTask, user } = useAppStore()
   const { trackPageView, trackInteraction, getVariant } = useAnalytics()
