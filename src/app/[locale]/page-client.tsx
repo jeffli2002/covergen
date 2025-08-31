@@ -392,8 +392,8 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
           </div>
         </section>
 
-        {/* Testimonials Section */}
-        <section className="py-24 bg-gradient-to-br from-purple-50 via-white to-pink-50">
+        {/* Testimonials Section - Hidden */}
+        {/* <section className="py-24 bg-gradient-to-br from-purple-50 via-white to-pink-50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-900">
@@ -406,7 +406,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
               {/* Testimonial 1 */}
-              <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group relative overflow-hidden">
+              {/* <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group relative overflow-hidden">
                 <div className="flex items-center mb-6">
                   <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4">
                     S
@@ -427,10 +427,10 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                     </svg>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
               {/* Testimonial 2 */}
-              <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group relative overflow-hidden">
+              {/* <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group relative overflow-hidden">
                 <div className="flex items-center mb-6">
                   <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4">
                     M
@@ -451,10 +451,10 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                     </svg>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
               {/* Testimonial 3 */}
-              <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group relative overflow-hidden">
+              {/* <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group relative overflow-hidden">
                 <div className="flex items-center mb-6">
                   <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4">
                     E
@@ -475,10 +475,10 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                     </svg>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
               {/* Testimonial 4 */}
-              <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group relative overflow-hidden">
+              {/* <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group relative overflow-hidden">
                 <div className="flex items-center mb-6">
                   <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4">
                     D
@@ -499,10 +499,10 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                     </svg>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
               {/* Testimonial 5 */}
-              <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group relative overflow-hidden">
+              {/* <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group relative overflow-hidden">
                 <div className="flex items-center mb-6">
                   <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4">
                     L
@@ -523,10 +523,10 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                     </svg>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
               {/* Testimonial 6 */}
-              <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group relative overflow-hidden">
+              {/* <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group relative overflow-hidden">
                 <div className="flex items-center mb-6">
                   <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4">
                     A
@@ -548,10 +548,10 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                   ))}
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* CTA for Testimonials */}
-            <div className="text-center mt-16">
+            {/* <div className="text-center mt-16">
               <Button 
                 size="lg" 
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-semibold rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300"
@@ -567,7 +567,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
               </p>
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* Pricing Section */}
         <section id="pricing">
