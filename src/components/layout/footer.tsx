@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Sparkles, Heart } from 'lucide-react'
+import { Sparkles, Heart, Twitter, Mail } from 'lucide-react'
 import { Locale } from '@/lib/i18n/config'
 
 interface FooterProps {
@@ -27,9 +27,27 @@ export default function Footer({ locale, translations: t }: FooterProps) {
             <p className="text-sm text-gray-600 leading-relaxed">
               {t.footer.madeWith} <Heart className="inline w-4 h-4 text-red-500 mx-1" /> {t.footer.by}
             </p>
+            <div className="flex gap-4 mt-4">
+              <a
+                href="https://twitter.com/jeffli2002"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-600 hover:text-blue-600 transition-colors"
+                aria-label="Twitter"
+              >
+                <Twitter className="w-5 h-5" />
+              </a>
+              <a
+                href="mailto:jefflee2002@gmail.com"
+                className="text-gray-600 hover:text-blue-600 transition-colors"
+                aria-label="Email"
+              >
+                <Mail className="w-5 h-5" />
+              </a>
+            </div>
           </div>
 
-          {/* Product */}
+          {/* Product/Resources */}
           <div>
             <h3 className="text-lg font-semibold mb-4">{t.footer.product}</h3>
             <ul className="space-y-3 text-base text-gray-600">
@@ -44,8 +62,13 @@ export default function Footer({ locale, translations: t }: FooterProps) {
                 </Link>
               </li>
               <li>
-                <Link href={`/${locale}/tutorials`} className="hover:text-blue-600 transition-colors">
-                  {t.footer.documentation}
+                <Link href={`/${locale}#platforms`} className="hover:text-blue-600 transition-colors">
+                  Platforms
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${locale}#showcase`} className="hover:text-blue-600 transition-colors">
+                  Showcase
                 </Link>
               </li>
             </ul>
@@ -56,18 +79,18 @@ export default function Footer({ locale, translations: t }: FooterProps) {
             <h3 className="text-lg font-semibold mb-4">{t.footer.company}</h3>
             <ul className="space-y-3 text-base text-gray-600">
               <li>
-                <Link href={`/${locale}/about`} className="hover:text-blue-600 transition-colors">
-                  {t.footer.about}
+                <Link href={`/${locale}/support`} className="hover:text-blue-600 transition-colors">
+                  Support
                 </Link>
               </li>
               <li>
-                <Link href={`/${locale}/blog`} className="hover:text-blue-600 transition-colors">
-                  {t.navigation.blog}
+                <Link href={`/${locale}/feedback`} className="hover:text-blue-600 transition-colors">
+                  Feedback
                 </Link>
               </li>
               <li>
-                <Link href={`/${locale}/contact`} className="hover:text-blue-600 transition-colors">
-                  {t.footer.contact}
+                <Link href={`/${locale}#faq`} className="hover:text-blue-600 transition-colors">
+                  FAQ
                 </Link>
               </li>
             </ul>
