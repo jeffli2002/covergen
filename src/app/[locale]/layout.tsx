@@ -6,6 +6,7 @@ import { getDictionary } from '@/lib/i18n/get-dictionary'
 import Header from '@/components/layout/header'
 import Footer from '@/components/layout/footer'
 import { Analytics } from '@vercel/analytics/react'
+import { Providers } from '@/components/providers'
 import '@/app/globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -105,14 +106,16 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} dir={dir}>
       <body className={inter.className}>
-        <div className="min-h-screen flex flex-col">
-          <Header locale={locale} translations={dict} />
-          <main className="flex-grow">
-            {children}
-          </main>
-          <Footer locale={locale} translations={dict} />
-        </div>
-        <Analytics />
+        <Providers>
+          <div className="min-h-screen flex flex-col">
+            <Header locale={locale} translations={dict} />
+            <main className="flex-grow">
+              {children}
+            </main>
+            <Footer locale={locale} translations={dict} />
+          </div>
+          <Analytics />
+        </Providers>
       </body>
     </html>
   )
