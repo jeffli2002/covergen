@@ -5,7 +5,7 @@
   <!-- Homepage - Most important -->
   <url>
     <loc>https://covergen.ai/</loc>
-    <lastmod>2025-08-30</lastmod>
+    <lastmod>2025-08-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -13,49 +13,14 @@
   <!-- Platform-specific landing pages - High priority for SEO -->
   <url>
     <loc>https://covergen.ai/platforms/youtube</loc>
-    <lastmod>2025-08-30</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  
-  <url>
-    <loc>https://covergen.ai/platforms/twitch</loc>
-    <lastmod>2025-08-30</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  
-  <url>
-    <loc>https://covergen.ai/platforms/spotify</loc>
-    <lastmod>2025-08-30</lastmod>
+    <lastmod>2025-08-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   
   <url>
     <loc>https://covergen.ai/platforms/tiktok</loc>
-    <lastmod>2025-08-30</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  
-  <url>
-    <loc>https://covergen.ai/platforms/bilibili</loc>
-    <lastmod>2025-08-30</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  
-  <url>
-    <loc>https://covergen.ai/platforms/rednote</loc>
-    <lastmod>2025-08-30</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  
-  <url>
-    <loc>https://covergen.ai/platforms/wechat</loc>
-    <lastmod>2025-08-30</lastmod>
+    <lastmod>2025-08-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -63,7 +28,7 @@
   <!-- Pricing page - High priority -->
   <url>
     <loc>https://covergen.ai/pricing</loc>
-    <lastmod>2025-08-30</lastmod>
+    <lastmod>2025-08-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -71,28 +36,28 @@
   <!-- Resource pages -->
   <url>
     <loc>https://covergen.ai/tutorials</loc>
-    <lastmod>2025-08-30</lastmod>
+    <lastmod>2025-08-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <url>
     <loc>https://covergen.ai/blog</loc>
-    <lastmod>2025-08-30</lastmod>
+    <lastmod>2025-08-31</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   
   <url>
     <loc>https://covergen.ai/showcase</loc>
-    <lastmod>2025-08-30</lastmod>
+    <lastmod>2025-08-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>https://covergen.ai/help</loc>
-    <lastmod>2025-08-30</lastmod>
+    <lastmod>2025-08-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -100,21 +65,21 @@
   <!-- Support pages -->
   <url>
     <loc>https://covergen.ai/support</loc>
-    <lastmod>2025-08-30</lastmod>
+    <lastmod>2025-08-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://covergen.ai/feedback</loc>
-    <lastmod>2025-08-30</lastmod>
+    <lastmod>2025-08-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://covergen.ai/status</loc>
-    <lastmod>2025-08-30</lastmod>
+    <lastmod>2025-08-31</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
@@ -122,28 +87,28 @@
   <!-- Legal pages - Low priority but necessary -->
   <url>
     <loc>https://covergen.ai/terms</loc>
-    <lastmod>2025-08-30</lastmod>
+    <lastmod>2025-08-31</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   
   <url>
     <loc>https://covergen.ai/privacy</loc>
-    <lastmod>2025-08-30</lastmod>
+    <lastmod>2025-08-31</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   
   <url>
     <loc>https://covergen.ai/cookies</loc>
-    <lastmod>2025-08-30</lastmod>
+    <lastmod>2025-08-31</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   
   <url>
     <loc>https://covergen.ai/accessibility</loc>
-    <lastmod>2025-08-30</lastmod>
+    <lastmod>2025-08-31</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>

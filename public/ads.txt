@@ -1,13 +1,24 @@
 # ads.txt file for CoverGen AI
 # This file helps prevent unauthorized ad inventory sales
+# Last updated: 2025-08-31
 
-# Google AdSense (example - replace with your actual publisher ID)
+# Google AdSense
 google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
 
-# Google Ad Manager (if applicable)
-# google.com, pub-0000000000000000, RESELLER, f08c47fec0942fa0
+# Google Ad Manager
+google.com, pub-0000000000000000, RESELLER, f08c47fec0942fa0
 
-# Other ad networks can be added here as needed
-# Format: <domain>, <publisher_id>, <relationship>, <certification_id>
+# Carbon Ads (Developer-focused advertising)
+carbonads.com, pub-0000000000000000, DIRECT
 
-# Contact: advertising@covergen.ai
+# Media.net
+media.net, pub-0000000000000000, DIRECT, 8CUB46Z7R
+
+# Amazon Associates
+amazon-adsystem.com, pub-0000000000000000, DIRECT
+
+# Note: Replace placeholder IDs (pub-0000000000000000) with actual publisher IDs when setting up ad networks
+# This is primarily a subscription-based service, ads are supplementary
+
+# Contact: support@covergen.ai
+# Website: https://covergen.ai

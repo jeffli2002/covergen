@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@formatjs/intl-localematcher": "^0.6.1",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-progress": "^1.0.3",
     "@radix-ui/react-select": "^2.0.0",
@@ -23,14 +24,17 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "lucide-react": "^0.344.0",
+    "negotiator": "^1.0.0",
     "next": "^14.2.0",
     "openai": "^5.16.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
+    "server-only": "^0.0.1",
     "tailwind-merge": "^2.2.0",
     "zustand": "^4.5.0"
   },
   "devDependencies": {
+    "@types/negotiator": "^0.6.4",
     "@types/node": "^20.11.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",

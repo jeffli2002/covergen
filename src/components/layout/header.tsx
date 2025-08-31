@@ -6,8 +6,15 @@ import { Crown, LogOut, Sparkles, User } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import AuthForm from '@/components/auth/AuthForm'
 import UserMenu from '@/components/auth/UserMenu'
+import LanguageSwitcher from '@/components/language-switcher'
+import { Locale } from '@/lib/i18n/config'
 
-export default function Header() {
+interface HeaderProps {
+  locale: Locale
+  translations: any
+}
+
+export default function Header({ locale, translations: t }: HeaderProps) {
   const { user, signOut } = useAuth()
   const [showAuthModal, setShowAuthModal] = useState(false)
 
@@ -29,22 +36,23 @@ export default function Header() {
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              CoverGen AI
+              {t.common.appName}
             </h1>
           </div>
 
           {/* Navigation */}
           <nav className="flex items-center space-x-8">
             <a href="#features" className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">
-              Features
+              {t.navigation.features}
             </a>
             <a href="#pricing" className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">
-              Pricing
+              {t.navigation.pricing}
             </a>
           </nav>
 
           {/* User section */}
           <div className="flex items-center gap-3">
+            <LanguageSwitcher currentLocale={locale} />
             {user ? (
               <>
                 <UserMenu />
