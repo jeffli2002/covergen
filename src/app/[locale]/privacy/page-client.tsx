@@ -375,6 +375,7 @@ export default function PrivacyPageClient({ locale, translations: t }: PrivacyPa
                       <p className="text-sm text-gray-600">Address</p>
                       <p className="text-gray-900">
                         CoverGen Pro, Privacy Department<br />
+                        Datun Road, Chaoyang District<br />
                         Beijing, China
                       </p>
                     </div>
@@ -403,7 +404,7 @@ export default function PrivacyPageClient({ locale, translations: t }: PrivacyPa
                       <p className="text-sm text-gray-600">地址</p>
                       <p className="text-gray-900">
                         CoverGen Pro 隐私部门<br />
-                        中国 北京
+                        中国北京市朝阳区大屯路
                       </p>
                     </div>
                   </div>

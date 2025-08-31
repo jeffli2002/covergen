@@ -106,6 +106,11 @@ export default function Footer({ locale, translations: t }: FooterProps) {
                 </Link>
               </li>
               <li>
+                <Link href={`/${locale}/refund`} className="hover:text-blue-600 transition-colors">
+                  {t.footer.refund || 'Refund Policy'}
+                </Link>
+              </li>
+              <li>
                 <Link href={`/${locale}/cookies`} className="hover:text-blue-600 transition-colors">
                   {t.footer.cookies}
                 </Link>

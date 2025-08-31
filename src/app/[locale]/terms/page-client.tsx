@@ -173,12 +173,98 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">4.2 Payment Terms</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">4.2 Billing & Payment Terms</h3>
                 <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                  <p className="text-gray-700">• Subscriptions are billed monthly or annually in advance</p>
-                  <p className="text-gray-700">• Prices are subject to change with 30 days notice</p>
-                  <p className="text-gray-700">• All fees are non-refundable except as required by law</p>
-                  <p className="text-gray-700">• Failed payments may result in service suspension</p>
+                  <p className="text-gray-700">• <strong>Billing Cycles:</strong> Subscriptions are billed monthly or annually in advance</p>
+                  <p className="text-gray-700">• <strong>Payment Methods:</strong> We accept credit cards, debit cards, PayPal, and region-specific payment methods</p>
+                  <p className="text-gray-700">• <strong>Currency:</strong> Prices are displayed in USD, EUR, or CNY based on your location</p>
+                  <p className="text-gray-700">• <strong>Taxes:</strong> Prices exclude applicable taxes, which will be calculated at checkout</p>
+                  <p className="text-gray-700">• <strong>Failed Payments:</strong> We'll retry failed payments 3 times over 7 days before suspending service</p>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">4.3 Auto-Renewal</h3>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-gray-700 mb-2">
+                    <strong>Important:</strong> All paid subscriptions automatically renew until cancelled:
+                  </p>
+                  <ul className="space-y-1 text-gray-700 text-sm">
+                    <li>• Monthly plans renew on the same day each month</li>
+                    <li>• Annual plans renew on the anniversary of your subscription date</li>
+                    <li>• You'll receive an email reminder 3 days before renewal</li>
+                    <li>• Cancel anytime through your account settings to prevent renewal</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">4.4 Cancellation Policy</h3>
+                <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                  <p className="text-gray-700">• <strong>Cancel Anytime:</strong> You can cancel your subscription at any time</p>
+                  <p className="text-gray-700">• <strong>Access Until End of Period:</strong> You'll retain access until the end of your current billing period</p>
+                  <p className="text-gray-700">• <strong>No Partial Refunds:</strong> We don't offer refunds for partial billing periods</p>
+                  <p className="text-gray-700">• <strong>Reactivation:</strong> You can reactivate your subscription anytime without losing your data</p>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">4.5 Refund Policy</h3>
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <p className="text-gray-700 mb-3"><strong>We offer refunds in the following situations:</strong></p>
+                  <ul className="space-y-2 text-gray-700">
+                    <li>• <strong>7-Day Money Back Guarantee:</strong> Full refund within 7 days of initial subscription (first-time subscribers only)</li>
+                    <li>• <strong>Service Issues:</strong> Pro-rated refunds for extended service outages (&gt;24 hours)</li>
+                    <li>• <strong>Billing Errors:</strong> Full refund for accidental duplicate charges or billing errors</li>
+                    <li>• <strong>Legal Requirements:</strong> Refunds required by local consumer protection laws</li>
+                  </ul>
+                  <p className="text-gray-700 mt-3 text-sm">
+                    To request a refund, contact support@covergen.pro with your account email and reason for refund.
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">4.6 Free Trials</h3>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <p className="text-gray-700 mb-2">When offered, free trials are subject to these terms:</p>
+                  <ul className="space-y-1 text-gray-700 text-sm">
+                    <li>• Limited to one trial per user/payment method</li>
+                    <li>• Automatically converts to paid subscription unless cancelled</li>
+                    <li>• Cancellation must occur before trial ends to avoid charges</li>
+                    <li>• Trial features may differ from full subscription</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">4.7 Plan Changes</h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="font-semibold text-gray-800 mb-2">Upgrades</h4>
+                    <ul className="space-y-1 text-sm text-gray-600">
+                      <li>• Take effect immediately</li>
+                      <li>• Prorated charge for current period</li>
+                      <li>• New plan rate applies at next renewal</li>
+                    </ul>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="font-semibold text-gray-800 mb-2">Downgrades</h4>
+                    <ul className="space-y-1 text-sm text-gray-600">
+                      <li>• Take effect at next billing cycle</li>
+                      <li>• No refund for current period</li>
+                      <li>• Feature access adjusts accordingly</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">4.8 Price Changes</h3>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <p className="text-gray-700">
+                    We may adjust prices with <strong>30 days advance notice</strong> via email. You can accept the new price or cancel before it takes effect. Promotional pricing is time-limited and may not be renewed.
+                  </p>
                 </div>
               </div>
             </div>
@@ -212,6 +298,25 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
               <p className="text-sm text-amber-800">
                 <strong>Note:</strong> AI-generated content may include watermarks as required by law. You must have rights to any input content used in generation.
               </p>
+            </div>
+
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">5.3 AI Generation Disclaimer</h3>
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 space-y-3">
+                <p className="text-gray-700">
+                  <strong>Important:</strong> CoverGen Pro uses advanced AI models to generate images based on your inputs. Please understand:
+                </p>
+                <ul className="space-y-2 text-gray-700 text-sm">
+                  <li>• <strong>Quality Variance:</strong> Generation results depend on prompt quality, complexity, and AI model capabilities</li>
+                  <li>• <strong>No Guarantee:</strong> We cannot guarantee that every generation will meet your expectations or requirements</li>
+                  <li>• <strong>Network Dependencies:</strong> Service quality may be affected by internet connectivity and server availability</li>
+                  <li>• <strong>AI Limitations:</strong> AI models may occasionally produce unexpected, incorrect, or unsuitable results</li>
+                  <li>• <strong>Iteration Expected:</strong> Multiple attempts may be needed to achieve desired results</li>
+                </ul>
+                <p className="text-gray-700 text-sm mt-3">
+                  <strong>By using our Service, you acknowledge these inherent limitations of AI technology and accept that results may vary.</strong>
+                </p>
+              </div>
             </div>
           </section>
 
@@ -276,17 +381,53 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
             
             <div className="space-y-6">
               <div className="bg-gray-50 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">9.1 Service Availability</h3>
-                <p className="text-gray-700">
-                  The Service is provided "AS IS" and "AS AVAILABLE". We do not guarantee uninterrupted or error-free operation.
-                </p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">9.1 Service Availability & Performance</h3>
+                <div className="space-y-3">
+                  <p className="text-gray-700">
+                    The Service is provided "AS IS" and "AS AVAILABLE". We do not guarantee:
+                  </p>
+                  <ul className="space-y-2 text-gray-700 text-sm">
+                    <li>• Uninterrupted or error-free operation of the Service</li>
+                    <li>• Consistent AI generation quality or success rates</li>
+                    <li>• Specific generation times or performance levels</li>
+                    <li>• Availability during high traffic periods or maintenance</li>
+                    <li>• Compatibility with all network conditions or devices</li>
+                  </ul>
+                  <div className="mt-3 p-3 bg-amber-100 rounded-lg">
+                    <p className="text-sm text-amber-800">
+                      <strong>Network Notice:</strong> Service performance depends on your internet connection quality, regional server availability, and third-party AI service providers.
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <div className="bg-gray-50 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">9.2 Limitation of Liability</h3>
-                <p className="text-gray-700">
-                  To the fullest extent permitted by law, CoverGen Pro shall not be liable for any indirect, incidental, or consequential damages arising from your use of the Service.
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">9.2 AI-Specific Disclaimers</h3>
+                <div className="space-y-3">
+                  <p className="text-gray-700 font-semibold">We specifically disclaim liability for:</p>
+                  <ul className="space-y-2 text-gray-700 text-sm">
+                    <li>• AI-generated content that doesn't meet your expectations</li>
+                    <li>• Failed generations due to prompt complexity or AI limitations</li>
+                    <li>• Variations in output quality between generations</li>
+                    <li>• Time delays in generation due to server load or network issues</li>
+                    <li>• Inability to generate specific styles or concepts</li>
+                    <li>• Content that may require multiple iterations to achieve desired results</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">9.3 Limitation of Liability</h3>
+                <p className="text-gray-700 mb-3">
+                  To the fullest extent permitted by law, CoverGen Pro shall not be liable for:
                 </p>
+                <ul className="space-y-2 text-gray-700 text-sm">
+                  <li>• Any indirect, incidental, special, or consequential damages</li>
+                  <li>• Lost profits, revenue, or business opportunities</li>
+                  <li>• Costs of procuring substitute services</li>
+                  <li>• Damages resulting from AI generation failures or quality issues</li>
+                  <li>• Any damages exceeding the fees paid by you in the past 12 months</li>
+                </ul>
               </div>
             </div>
           </section>
@@ -373,6 +514,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                       <p className="text-sm text-gray-600">Address</p>
                       <p className="text-gray-900">
                         CoverGen Pro, Legal Department<br />
+                        Datun Road, Chaoyang District<br />
                         Beijing, China
                       </p>
                     </div>
@@ -401,7 +543,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                       <p className="text-sm text-gray-600">地址</p>
                       <p className="text-gray-900">
                         CoverGen Pro 法务部门<br />
-                        中国 北京
+                        中国北京市朝阳区大屯路
                       </p>
                     </div>
                   </div>
