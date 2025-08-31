@@ -100,7 +100,7 @@ export default async function LocaleLayout({
 
   const dict = await getDictionary(locale)
   const localeInfo = i18n.locales.find(l => l.code === locale)
-  const dir = localeInfo?.dir || 'ltr'
+  const dir = locale === 'ar' ? 'rtl' : 'ltr'
 
   return (
     <html lang={locale} dir={dir}>
