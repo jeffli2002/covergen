@@ -1,4 +1,4 @@
-# CoverGen AI - AI-Powered Cover & Poster Generator
+# CoverGen Pro - AI-Powered Cover & Poster Generator
 
 An advanced AI-powered platform for generating professional covers and posters for content creators across multiple social media platforms.
 

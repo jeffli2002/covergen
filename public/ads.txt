@@ -1,4 +1,4 @@
-# ads.txt file for CoverGen AI
+# ads.txt file for CoverGen Pro
 # This file helps prevent unauthorized ad inventory sales
 # Last updated: 2025-08-31
 

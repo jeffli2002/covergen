@@ -1,4 +1,4 @@
-# robots.txt for CoverGen AI
+# robots.txt for CoverGen Pro
 # Last updated: 2025-08-31
 
 # Default - Allow all crawlers

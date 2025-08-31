@@ -1,5 +1,5 @@
 export const seoConfig = {
-  siteName: 'CoverGen AI',
+  siteName: 'CoverGen Pro',
   siteUrl: 'https://covergen.pro',
   siteDescription: 'AI-powered cover and thumbnail generator with nano banana technology for content creators across YouTube, TikTok, Spotify, and more platforms.',
   siteKeywords: [
@@ -39,7 +39,7 @@ export const seoConfig = {
     'best AI cover generator 2025',
     
     // Brand variations
-    'CoverGen AI',
+    'CoverGen Pro',
     'Cover Generator AI',
     'covergen.pro',
   ],
@@ -57,13 +57,13 @@ export const seoConfig = {
     url: 'https://covergen.pro/og-image.png',
     width: 1200,
     height: 630,
-    alt: 'CoverGen AI - AI-Powered Cover Generator',
+    alt: 'CoverGen Pro - AI-Powered Cover Generator',
   },
   
   // Twitter card image
   twitterImage: {
     url: 'https://covergen.pro/twitter-image.png',
-    alt: 'CoverGen AI - Create stunning covers with AI',
+    alt: 'CoverGen Pro - Create stunning covers with AI',
   },
   
   // Verification codes (replace with actual codes)

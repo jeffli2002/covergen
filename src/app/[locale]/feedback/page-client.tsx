@@ -47,7 +47,7 @@ export default function FeedbackPageClient({ locale, translations: t }: Feedback
             We Value Your Feedback
           </h1>
           <p className="text-xl text-gray-600">
-            Help us improve CoverImage AI by sharing your thoughts and suggestions.
+            Help us improve CoverGen Pro by sharing your thoughts and suggestions.
           </p>
         </div>
 
@@ -146,7 +146,7 @@ export default function FeedbackPageClient({ locale, translations: t }: Feedback
                     : feedbackType === 'feature'
                     ? "Tell us about the feature you'd like to see..."
                     : feedbackType === 'appreciation'
-                    ? "What do you love about CoverImage AI?"
+                    ? "What do you love about CoverGen Pro?"
                     : "Share your thoughts with us..."
                 }
                 className="w-full resize-none"
@@ -169,8 +169,8 @@ export default function FeedbackPageClient({ locale, translations: t }: Feedback
         <div className="mt-8 text-center text-gray-600">
           <p>
             You can also reach us directly at{' '}
-            <a href="mailto:feedback@coverimage.ai" className="text-blue-600 hover:underline">
-              feedback@coverimage.ai
+            <a href="mailto:feedback@covergen.pro" className="text-blue-600 hover:underline">
+              feedback@covergen.pro
             </a>
           </p>
         </div>

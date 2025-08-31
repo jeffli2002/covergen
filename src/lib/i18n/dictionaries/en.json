@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "CoverGen AI",
+    "appName": "CoverGen Pro",
     "tagline": "Create Stunning Covers with AI Magic",
     "description": "Generate professional covers and posters for your content across all platforms. Save 70% of your time while maintaining perfect brand consistency.",
     "freeGeneration": "100% FREE Generation • No Sign-in Required • Unlimited Creativity",
@@ -46,7 +46,7 @@
     "startGenerating": "Start Generating - It's Free!"
   },
   "features": {
-    "title": "Why Choose CoverGen AI?",
+    "title": "Why Choose CoverGen Pro?",
     "subtitle": "Everything you need to create professional covers that stand out and drive engagement.",
     "aiGeneration": {
       "title": "AI-Powered Generation",
@@ -135,7 +135,7 @@
     "documentation": "Documentation",
     "apiDocs": "API Docs",
     "status": "Status",
-    "copyright": "© 2025 CoverGen AI. All rights reserved.",
+    "copyright": "© 2025 CoverGen Pro. All rights reserved.",
     "madeWith": "Made with",
     "by": "by creators, for creators"
   },

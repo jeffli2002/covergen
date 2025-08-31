@@ -66,10 +66,10 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: 'CoverGen AI',
+    name: 'CoverGen Pro',
     applicationCategory: 'DesignApplication',
     operatingSystem: 'Web',
-    description: 'AI-powered cover and thumbnail generator using Google Gemini 2.5 Flash (Nano Banana) - the latest and most powerful AI image generation model',
+    description: 'AI-powered cover and thumbnail generator using Google Gemini 2.5 Flash (Nano Banana) - the latest and powerful AI image generation model',
     offers: {
       '@type': 'Offer',
       price: '0',
@@ -215,14 +215,14 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                 <div className="text-6xl">🍌</div>
               </div>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-gray-900">
-                Powered by Google's Most Advanced AI
+                Powered by Google's Advanced AI
               </h2>
               <div className="bg-white rounded-3xl p-8 shadow-lg border border-yellow-200">
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">
                   Google Gemini 2.5 Flash <span className="text-yellow-600">("Nano Banana")</span>
                 </h3>
                 <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                  We use Google's latest and most powerful image generation model - Gemini 2.5 Flash, 
+                  We use Google's latest and powerful image generation model - Gemini 2.5 Flash, 
                   affectionately known as "Nano Banana" in the AI community. This cutting-edge technology delivers:
                 </p>
                 <div className="grid md:grid-cols-3 gap-6 text-left">
@@ -248,7 +248,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         <section id="features" className="py-20 bg-white">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-900">Why Choose CoverGen AI?</h2>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-900">Why Choose CoverGen Pro?</h2>
               <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto font-medium leading-relaxed">
                 Built for content creators who want <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold">professional results</span> without the complexity
               </p>
@@ -322,8 +322,8 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                 Frequently Asked Questions
               </h2>
               <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto font-medium">
-                Everything you need to know about CoverGen AI. Can't find the answer you're looking for? 
-                <a href="mailto:jefflee2002@gmail.com" className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:from-blue-700 hover:to-purple-700 hover:underline ml-1 font-bold">Contact us</a>.
+                Everything you need to know about CoverGen Pro. Can't find the answer you're looking for? 
+                <a href="mailto:contact@covergen.pro" className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:from-blue-700 hover:to-purple-700 hover:underline ml-1 font-bold">Contact us</a>.
               </p>
             </div>
 

@@ -36,7 +36,7 @@ export default function SupportPageClient({ locale, translations: t }: SupportPa
               Get help via email. We typically respond within 24 hours.
             </p>
             <a
-              href="mailto:support@coverimage.ai"
+              href="mailto:support@covergen.pro"
               className="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-2"
             >
               Send us an email
@@ -112,7 +112,7 @@ export default function SupportPageClient({ locale, translations: t }: SupportPa
             Still need help? We're just an email away.
           </p>
           <Button asChild size="lg">
-            <a href="mailto:support@coverimage.ai">
+            <a href="mailto:support@covergen.pro">
               Contact Support
             </a>
           </Button>

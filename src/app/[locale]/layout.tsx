@@ -28,7 +28,7 @@ export async function generateMetadata({
       default: `${dict.common.appName} - ${dict.common.tagline}`,
       template: `%s | ${dict.common.appName}`,
     },
-    description: `${dict.common.description} Powered by Google Gemini 2.5 Flash (Nano Banana) - the latest and most powerful AI image generation model.`,
+    description: `${dict.common.description} Powered by Google Gemini 2.5 Flash (Nano Banana) - the latest and powerful AI image generation model.`,
     keywords: [
       'AI cover generator',
       'YouTube thumbnail maker',

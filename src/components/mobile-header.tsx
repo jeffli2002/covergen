@@ -32,7 +32,7 @@ export default function MobileHeader() {
       {/* Mobile Header */}
       <header className="lg:hidden border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex h-20 items-center justify-between px-4">
-          <h1 className="text-2xl md:text-3xl font-bold text-primary">CoverGen AI</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-primary">CoverGen Pro</h1>
           
           <Button
             variant="ghost"
@@ -48,7 +48,7 @@ export default function MobileHeader() {
       {isMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-50 bg-background">
           <div className="flex h-20 items-center justify-between px-4 border-b">
-            <h1 className="text-2xl md:text-3xl font-bold text-primary">CoverGen AI</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-primary">CoverGen Pro</h1>
             <Button
               variant="ghost"
               size="sm"
