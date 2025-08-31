@@ -5,7 +5,6 @@ import { i18n, type Locale } from '@/lib/i18n/config'
 import { getDictionary } from '@/lib/i18n/get-dictionary'
 import Header from '@/components/layout/header'
 import Footer from '@/components/layout/footer'
-import { Toaster } from '@/components/ui/toaster'
 import { Analytics } from '@vercel/analytics/react'
 import '@/app/globals.css'
 
@@ -113,7 +112,6 @@ export default async function LocaleLayout({
           </main>
           <Footer locale={locale} translations={dict} />
         </div>
-        <Toaster />
         <Analytics />
       </body>
     </html>
