@@ -1,4 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+import { cookies } from 'next/headers'
+import rateLimit from '@/lib/rate-limit'
+
+// Initialize Supabase client with service role key for server-side operations
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error('Supabase credentials not configured. Feedback feature will be disabled.')
+  // In production, we should fail gracefully
+}
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+  }
+})
+
+// Rate limiter: 5 feedback submissions per IP per minute
+const limiter = rateLimit({
+  interval: 60 * 1000, // 60 seconds
+  uniqueTokenPerInterval: 500, // Max number of users during interval
+})
 
 interface FeedbackData {
   context: 'generation' | 'result' | 'general'
@@ -10,6 +35,27 @@ interface FeedbackData {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Supabase is configured
+    if (!supabaseUrl || !supabaseServiceKey) {
+      return NextResponse.json(
+        { error: 'Feedback service is not configured' },
+        { status: 503 }
+      )
+    }
+
+    // Rate limiting in production
+    if (process.env.NODE_ENV === 'production') {
+      const ip = request.headers.get('x-forwarded-for') || 'anonymous'
+      try {
+        await limiter.check(5, ip) // 5 requests per minute per IP
+      } catch {
+        return NextResponse.json(
+          { error: 'Too many requests. Please try again later.' },
+          { status: 429 }
+        )
+      }
+    }
+
     const data: FeedbackData = await request.json()
 
     // Validate required fields
@@ -20,25 +66,49 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // In a real application, you would:
-    // 1. Save to database
-    // 2. Send to analytics service
-    // 3. Trigger notifications if needed
+    // Get user session if available
+    const cookieStore = cookies()
+    const token = cookieStore.get('sb-access-token')?.value
     
-    // For now, we'll log it and return success
-    console.log('Feedback received:', {
-      ...data,
-      userAgent: request.headers.get('user-agent'),
-      ip: request.headers.get('x-forwarded-for') || 'unknown'
-    })
+    let userId = null
+    if (token) {
+      const { data: { user }, error } = await supabase.auth.getUser(token)
+      if (!error && user) {
+        userId = user.id
+      }
+    }
 
-    // Simulate async processing
-    await new Promise(resolve => setTimeout(resolve, 500))
+    // Map context to feedback type
+    const typeMap = {
+      'generation': 'feature',
+      'result': 'improvement',
+      'general': 'other'
+    }
+
+    // Insert feedback into Supabase
+    const { data: feedbackResult, error } = await supabase
+      .from('feedback')
+      .insert([{
+        user_id: userId,
+        email: data.email?.trim() || null,
+        message: data.feedback?.trim() || `Rating: ${data.rating}/5 for ${data.context}`,
+        type: typeMap[data.context] || 'other',
+        rating: data.rating,
+        page_url: request.headers.get('referer') || '',
+        user_agent: request.headers.get('user-agent') || '',
+      }])
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Supabase error:', error)
+      throw new Error('Failed to save feedback')
+    }
 
     return NextResponse.json({
       success: true,
       message: 'Thank you for your feedback!',
-      feedbackId: `fb_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      feedbackId: feedbackResult.id
     })
   } catch (error) {
     console.error('Feedback submission error:', error)
