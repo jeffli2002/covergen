@@ -374,7 +374,10 @@ class AuthService {
   }
 
   async getUserUsageToday() {
-    if (!this.user) return 0
+    if (!this.user) {
+      // No user, return 0 without logging error
+      return 0
+    }
 
     try {
       const today = new Date()

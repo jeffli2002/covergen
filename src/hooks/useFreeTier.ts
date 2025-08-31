@@ -30,7 +30,8 @@ export function useFreeTier() {
     }
 
     checkUsage()
-  }, [user, getUserUsageToday])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]) // Remove getUserUsageToday from dependencies to prevent unnecessary calls
 
   const canGenerate = () => {
     // Bypass limit in development mode
