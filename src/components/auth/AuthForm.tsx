@@ -25,7 +25,14 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
     confirmPassword: ''
   })
 
-  const { signIn, signUp, signInWithGoogle, resetPassword } = useAuth()
+  const { signIn, signUp, signInWithGoogle, resetPassword, user } = useAuth()
+
+  // Monitor auth state changes and close modal when user is authenticated
+  useEffect(() => {
+    if (user && onAuthSuccess) {
+      onAuthSuccess(user)
+    }
+  }, [user, onAuthSuccess])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -128,6 +135,8 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
       
       if (result.success) {
         setMessage({ type: 'success', text: 'Redirecting to Google...' })
+        // The page will redirect to Google OAuth, so we don't close the modal here
+        // The modal will be closed when the user returns from Google OAuth
       } else {
         setMessage({ type: 'error', text: result.error })
       }

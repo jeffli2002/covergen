@@ -69,6 +69,22 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
     context: 'general'
   })
 
+  // Handle OAuth callback
+  useEffect(() => {
+    const handleOAuthCallback = async () => {
+      const urlParams = new URLSearchParams(window.location.search)
+      const code = urlParams.get('code')
+      
+      if (code) {
+        // Clean up the URL to remove the code parameter
+        const newUrl = window.location.pathname
+        window.history.replaceState({}, document.title, newUrl)
+      }
+    }
+    
+    handleOAuthCallback()
+  }, [])
+
   // Track page view and A/B test variants
   useEffect(() => {
     trackPageView('homepage', user?.id)

@@ -231,7 +231,9 @@ class AuthService {
         throw new Error('Supabase not configured')
       }
 
-      const redirectUrl = `${window.location.origin}/`
+      // Get the current pathname to preserve locale
+      const currentPath = window.location.pathname || '/en'
+      const redirectUrl = `${window.location.origin}${currentPath}`
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
