@@ -155,15 +155,14 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
               </h1>
               
               <p className="text-lg md:text-xl lg:text-2xl text-gray-600 mb-4 max-w-4xl mx-auto px-4 font-medium leading-relaxed">
-                Generate professional covers and posters for your content across all platforms. 
-                <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent font-semibold"> Save 70% of your time</span> while maintaining perfect brand consistency.
+                Generate professional covers and posters for your content across all platforms.
               </p>
 
               {/* Powered by Nano Banana Badge */}
               <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-full px-4 py-2 mb-4 border border-yellow-200">
                 <span className="text-2xl">🍌</span>
                 <span className="text-sm md:text-base font-semibold text-gray-800">
-                  Powered by Google Gemini 2.5 Flash <span className="text-yellow-600">("Nano Banana")</span> - The Latest AI Model
+                  Powered by Google Gemini 2.5 Flash <span className="text-yellow-600">("Nano Banana")</span>
                 </span>
               </div>
               
