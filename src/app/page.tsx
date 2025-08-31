@@ -186,24 +186,32 @@ export default function HomePage() {
         </section>
 
         {/* Stats Section */}
-        <section className="py-20 bg-white">
+        <section className="py-20 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
           <div className="container mx-auto px-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto text-center">
-              <div>
-                <div className="text-3xl md:text-4xl font-semibold mb-2 text-gray-900">10s</div>
-                <div className="text-sm text-gray-600">Generation Time</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto text-center">
+              <div className="group">
+                <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl p-6 transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-blue-200">
+                  <div className="text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">10s</div>
+                  <div className="text-base font-medium text-blue-700">Generation Time</div>
+                </div>
               </div>
-              <div>
-                <div className="text-3xl md:text-4xl font-semibold mb-2 text-gray-900">6+</div>
-                <div className="text-sm text-gray-600">Platforms</div>
+              <div className="group">
+                <div className="bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl p-6 transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-purple-200">
+                  <div className="text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">6+</div>
+                  <div className="text-base font-medium text-purple-700">Platforms</div>
+                </div>
               </div>
-              <div>
-                <div className="text-3xl md:text-4xl font-semibold mb-2 text-gray-900">99.9%</div>
-                <div className="text-sm text-gray-600">Uptime</div>
+              <div className="group">
+                <div className="bg-gradient-to-br from-pink-100 to-pink-200 rounded-2xl p-6 transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-pink-200">
+                  <div className="text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-pink-600 to-pink-800 bg-clip-text text-transparent">99.9%</div>
+                  <div className="text-base font-medium text-pink-700">Uptime</div>
+                </div>
               </div>
-              <div>
-                <div className="text-3xl md:text-4xl font-semibold mb-2 text-gray-900">70%</div>
-                <div className="text-sm text-gray-600">Time Saved</div>
+              <div className="group">
+                <div className="bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl p-6 transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-orange-200">
+                  <div className="text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-orange-600 to-orange-800 bg-clip-text text-transparent">70%</div>
+                  <div className="text-base font-medium text-orange-700">Time Saved</div>
+                </div>
               </div>
             </div>
           </div>
