@@ -102,6 +102,8 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
       const urlParams = new URLSearchParams(window.location.search)
       const code = urlParams.get('code')
       
+      console.log('[OAuth] Checking for OAuth callback:', { code, url: window.location.href })
+      
       if (code) {
         // Clean up the URL to remove the code parameter
         const newUrl = window.location.pathname
@@ -610,102 +612,6 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
           </div>
         </section>
       </main>
-
-      {/* Footer */}
-      <footer className="py-16 border-t bg-background">
-        <div className="container mx-auto px-4">
-          {/* Main Footer Content */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-            {/* Brand Section */}
-            <div>
-                          <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">CoverGen AI</h3>
-            </div>
-            <p className="text-gray-600 mb-4 text-sm">
-              AI-powered cover generation for creators. Transform your content with intelligent design.
-            </p>
-              <div className="flex gap-4">
-                <a href="https://twitter.com/jeffli2002" target="_blank" rel="noopener noreferrer" className="p-2 bg-blue-100 hover:bg-blue-200 rounded-2xl transition-all duration-300 hover:scale-110">
-                  <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                  </svg>
-                </a>
-                <a href="mailto:jefflee2002@gmail.com" className="p-2 bg-green-100 hover:bg-green-200 rounded-2xl transition-all duration-300 hover:scale-110">
-                  <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-                  </svg>
-                </a>
-              </div>
-              
-
-            </div>
-
-
-          </div>
-
-          {/* Product, Resources, Legal */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Product</h3>
-              <ul className="space-y-3 text-base text-gray-600">
-                <li><a href="#features" className="hover:text-blue-600 transition-colors">Features</a></li>
-                <li><a href="#pricing" className="hover:text-blue-600 transition-colors">Pricing</a></li>
-                <li><a href="/tutorials" className="hover:text-blue-600 transition-colors">Tutorials</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Resources</h3>
-              <ul className="space-y-3 text-base text-gray-600">
-                <li><a href="/help" className="hover:text-blue-600 transition-colors">Help Center</a></li>
-                <li><a href="/blog" className="hover:text-blue-600 transition-colors">Blog</a></li>
-                <li><a href="/community" className="hover:text-blue-600 transition-colors">Community</a></li>
-                <li><a href="/feedback" className="hover:text-blue-600 transition-colors">Feature Requests</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Legal</h3>
-              <ul className="space-y-3 text-base text-gray-600">
-                <li><a href="/privacy" className="hover:text-blue-600 transition-colors">Privacy Policy</a></li>
-                <li><a href="/terms" className="hover:text-blue-600 transition-colors">Terms of Service</a></li>
-                <li><a href="/cookies" className="hover:text-blue-600 transition-colors">Cookie Policy</a></li>
-                <li><a href="/accessibility" className="hover:text-blue-600 transition-colors">Accessibility</a></li>
-              </ul>
-            </div>
-          </div>
-
-
-
-          {/* Bottom Footer */}
-          <div className="border-t pt-8">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span>&copy; 2025 CoverGen AI. All rights reserved.</span>
-                <span className="hidden sm:inline">•</span>
-                <span className="hidden sm:inline">Made with ❤️ for creators worldwide</span>
-              </div>
-              <div className="flex items-center gap-6 text-sm text-gray-600">
-                <a href="/sitemap.xml" className="hover:text-blue-600 transition-colors">Sitemap</a>
-                <a href="/accessibility" className="hover:text-blue-600 transition-colors">Accessibility</a>
-                <a href="/security" className="hover:text-blue-600 transition-colors">Security</a>
-                <div className="flex items-center gap-2">
-                  <span>🌍</span>
-                  <select className="bg-transparent border-none text-sm focus:outline-none">
-                    <option value="en">English</option>
-                    <option value="zh">中文</option>
-                    <option value="ja">日本語</option>
-                    <option value="ko">한국어</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
 
       {/* Feedback Modal */}
       <FeedbackModal 

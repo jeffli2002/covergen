@@ -31,6 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(user)
         })
         const currentUser = authService.getCurrentUser()
+        console.log('[AuthContext] Current user:', currentUser?.email)
         setUser(currentUser)
       } catch (error) {
         console.error('Auth initialization error:', error)

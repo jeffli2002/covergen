@@ -66,6 +66,8 @@ class AuthService {
 
       try {
         const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any
+        
+        console.log('[Auth] Session check result:', { session, error, user: session?.user?.email })
 
         if (error) {
           console.error('Error getting session:', error)
@@ -98,6 +100,8 @@ class AuthService {
             this.onAuthChange(this.user)
           }
 
+          console.log('[Auth] Auth state change:', { event, user: session?.user?.email })
+          
           if (event === 'SIGNED_IN' && session) {
             await this.onSignIn(session.user)
             this.startSessionRefreshTimer()
@@ -459,6 +463,10 @@ class AuthService {
     this.user = null
     this.session = null
     this.clearStoredSession()
+    
+    if (this.onAuthChange) {
+      this.onAuthChange(null)
+    }
   }
 
   private async syncUserData() {

@@ -31,6 +31,7 @@
     "openai": "^5.16.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
+    "schema-dts": "^1.1.5",
     "server-only": "^0.0.1",
     "tailwind-merge": "^2.2.0",
     "zustand": "^4.5.0"

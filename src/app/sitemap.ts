@@ -158,9 +158,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
 function generateLanguageAlternates(path: string): Record<string, string> {
   const alternates: Record<string, string> = {}
   
+  // Since we only support English now, we just return the English URL
   i18n.locales.forEach((locale) => {
-    const langCode = locale.code === 'zh' ? 'zh-CN' : locale.code === 'pt' ? 'pt-BR' : locale.code
-    alternates[langCode] = `https://covergen.ai/${locale.code}${path}`
+    alternates[locale.code] = `https://covergen.ai/${locale.code}${path}`
   })
   
   return alternates

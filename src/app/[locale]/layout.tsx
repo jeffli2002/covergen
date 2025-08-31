@@ -58,7 +58,7 @@ export async function generateMetadata({
     publisher: 'CoverGen AI',
     openGraph: {
       type: 'website',
-      locale: locale === 'zh' ? 'zh_CN' : locale === 'pt' ? 'pt_BR' : locale,
+      locale: locale,
       url: `https://covergen.ai/${locale}`,
       title: `${dict.common.appName} - ${dict.common.tagline}`,
       description: dict.common.description,
@@ -94,7 +94,7 @@ export async function generateMetadata({
       canonical: `https://covergen.ai/${locale}`,
       languages: Object.fromEntries(
         i18n.locales.map((l) => [
-          l.code === 'zh' ? 'zh-CN' : l.code === 'pt' ? 'pt-BR' : l.code,
+          l.code,
           `https://covergen.ai/${l.code}`,
         ])
       ),
@@ -115,7 +115,7 @@ export default async function LocaleLayout({
 
   const dict = await getDictionary(locale)
   const localeInfo = i18n.locales.find(l => l.code === locale)
-  const dir = locale === 'ar' ? 'rtl' : 'ltr'
+  const dir = 'ltr'
 
   return (
     <html lang={locale} dir={dir}>
