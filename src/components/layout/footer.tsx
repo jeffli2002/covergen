@@ -66,11 +66,6 @@ export default function Footer({ locale, translations: t }: FooterProps) {
                   Platforms
                 </Link>
               </li>
-              <li>
-                <Link href={`/${locale}#showcase`} className="hover:text-blue-600 transition-colors">
-                  Showcase
-                </Link>
-              </li>
             </ul>
           </div>
 
