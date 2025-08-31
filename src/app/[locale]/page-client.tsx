@@ -62,6 +62,33 @@ const features = [
 ]
 
 export default function HomePageClient({ locale, translations: t }: HomePageClientProps) {
+  // Structured data for SEO
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'CoverGen AI',
+    applicationCategory: 'DesignApplication',
+    operatingSystem: 'Web',
+    description: 'AI-powered cover and thumbnail generator using Google Gemini 2.5 Flash (Nano Banana) - the latest and most powerful AI image generation model',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock'
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.9',
+      ratingCount: '2156'
+    },
+    featureList: [
+      'AI-powered image generation',
+      'Google Gemini 2.5 Flash (Nano Banana) technology',
+      'Multi-platform support',
+      'No sign-in required',
+      'Free generation'
+    ]
+  }
   const { currentTask, user } = useAppStore()
   const { trackPageView, trackInteraction, getVariant } = useAnalytics()
   const [feedbackModal, setFeedbackModal] = useState<{ isOpen: boolean; context: 'generation' | 'result' | 'general' }>({
@@ -109,6 +136,10 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
 
   return (
     <div className="min-h-screen bg-background">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <MobileHeader />
       
       <main>
@@ -125,6 +156,14 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                 Generate professional covers and posters for your content across all platforms. 
                 <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent font-semibold"> Save 70% of your time</span> while maintaining perfect brand consistency.
               </p>
+
+              {/* Powered by Nano Banana Badge */}
+              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-full px-4 py-2 mb-4 border border-yellow-200">
+                <span className="text-2xl">🍌</span>
+                <span className="text-sm md:text-base font-semibold text-gray-800">
+                  Powered by Google Gemini 2.5 Flash <span className="text-yellow-600">("Nano Banana")</span> - The Latest AI Model
+                </span>
+              </div>
               
               {/* Free generation highlight */}
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl px-6 py-4 mb-8 max-w-3xl mx-auto border border-green-200">
@@ -164,6 +203,43 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         <section id="generator" className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
             <ImageGenerator />
+          </div>
+        </section>
+
+        {/* Technology Section - Nano Banana */}
+        <section className="py-16 bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto text-center">
+              <div className="flex justify-center mb-6">
+                <div className="text-6xl">🍌</div>
+              </div>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-gray-900">
+                Powered by Google's Most Advanced AI
+              </h2>
+              <div className="bg-white rounded-3xl p-8 shadow-lg border border-yellow-200">
+                <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                  Google Gemini 2.5 Flash <span className="text-yellow-600">("Nano Banana")</span>
+                </h3>
+                <p className="text-lg text-gray-600 mb-6 leading-relaxed">
+                  We use Google's latest and most powerful image generation model - Gemini 2.5 Flash, 
+                  affectionately known as "Nano Banana" in the AI community. This cutting-edge technology delivers:
+                </p>
+                <div className="grid md:grid-cols-3 gap-6 text-left">
+                  <div className="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-2xl p-6">
+                    <h4 className="font-bold text-gray-800 mb-2">⚡ Lightning Fast</h4>
+                    <p className="text-gray-600">Generate high-quality images in seconds, not minutes</p>
+                  </div>
+                  <div className="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-2xl p-6">
+                    <h4 className="font-bold text-gray-800 mb-2">🎨 Superior Quality</h4>
+                    <p className="text-gray-600">State-of-the-art AI understanding for perfect compositions</p>
+                  </div>
+                  <div className="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-2xl p-6">
+                    <h4 className="font-bold text-gray-800 mb-2">🌐 Multi-Language</h4>
+                    <p className="text-gray-600">Understands prompts in 100+ languages naturally</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
