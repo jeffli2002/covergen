@@ -3,7 +3,7 @@
 # Last updated: 2025-08-31
 
 # Google AdSense
-google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+google.com, pub-9378191378774896, DIRECT, f08c47fec0942fa0
 
 # Google Ad Manager
 google.com, pub-0000000000000000, RESELLER, f08c47fec0942fa0
