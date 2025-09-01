@@ -155,7 +155,25 @@ export default function ImageGenerator() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to generate images')
+        let errorMessage = 'Failed to generate images'
+        
+        try {
+          const error = await response.json()
+          errorMessage = error.error || errorMessage
+        } catch (e) {
+          // If we can't parse the error, use status-based messages
+        }
+        
+        // Handle specific error cases
+        if (response.status === 413) {
+          throw new Error('Images are too large. Our compression reduced them but they\'re still too big. Please use smaller source images (under 2MB each).')
+        } else if (response.status === 429) {
+          throw new Error('Rate limit exceeded. Please wait a few minutes before trying again.')
+        } else if (response.status === 401) {
+          throw new Error('API authentication failed. Please contact support.')
+        }
+        
+        throw new Error(errorMessage)
       }
 
       const data = await response.json()

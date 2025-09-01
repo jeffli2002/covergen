@@ -4,6 +4,15 @@ import { generateImage, GEMINI_MODEL } from '@/lib/openrouter'
 // Image generation endpoint
 export async function POST(request: NextRequest) {
   try {
+    // Check request size before parsing
+    const contentLength = request.headers.get('content-length')
+    if (contentLength && parseInt(contentLength) > 4 * 1024 * 1024) { // 4MB limit
+      return NextResponse.json(
+        { error: 'Request too large. Please use smaller images or reduce the number of reference images.' },
+        { status: 413 }
+      )
+    }
+    
     const body = await request.json()
     const { prompt, referenceImages, mode, style, platform, dimensions } = body
 
@@ -29,6 +38,21 @@ export async function POST(request: NextRequest) {
         { error: 'Reference images are required for image-to-image mode' },
         { status: 400 }
       )
+    }
+    
+    // Validate image sizes
+    if (referenceImages && referenceImages.length > 0) {
+      for (let i = 0; i < referenceImages.length; i++) {
+        const imageSize = referenceImages[i].length
+        console.log(`Reference image ${i + 1} size: ${(imageSize / 1024 / 1024).toFixed(2)}MB`)
+        
+        if (imageSize > 2 * 1024 * 1024) { // 2MB per image
+          return NextResponse.json(
+            { error: `Reference image ${i + 1} is too large (${(imageSize / 1024 / 1024).toFixed(2)}MB). Maximum size is 2MB per image.` },
+            { status: 413 }
+          )
+        }
+      }
     }
 
     // Generate image using OpenRouter with Gemini 2.5 Flash

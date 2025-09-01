@@ -47,8 +47,15 @@ export async function resizeImage(
       // Draw the image to cover the entire canvas
       ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight)
       
-      // Convert to data URL
-      const resizedDataUrl = canvas.toDataURL('image/png', 0.95)
+      // Convert to data URL with compression
+      // Use JPEG for better compression, fallback to PNG if needed
+      let resizedDataUrl = canvas.toDataURL('image/jpeg', 0.8)
+      
+      // If still too large, reduce quality further
+      if (resizedDataUrl.length > 1000000) { // 1MB
+        resizedDataUrl = canvas.toDataURL('image/jpeg', 0.6)
+      }
+      
       resolve(resizedDataUrl)
     }
     
@@ -209,9 +216,36 @@ export async function preprocessImageForPlatform(
           
           console.log('Image drawn to canvas successfully')
           
-          const result = canvas.toDataURL('image/png', 0.95)
-          console.log('Canvas converted to data URL, length:', result.length)
+          // Apply compression to reduce payload size
+          let result = canvas.toDataURL('image/jpeg', 0.85)
+          console.log('Initial conversion to JPEG, length:', result.length)
           
+          // If the image is still too large, reduce quality
+          if (result.length > 800000) { // 800KB
+            result = canvas.toDataURL('image/jpeg', 0.7)
+            console.log('Reduced quality to 0.7, new length:', result.length)
+          }
+          
+          if (result.length > 800000) { // Still too large
+            result = canvas.toDataURL('image/jpeg', 0.5)
+            console.log('Further reduced quality to 0.5, new length:', result.length)
+          }
+          
+          // If still too large, resize the canvas
+          if (result.length > 800000) {
+            const scale = 0.8
+            canvas.width = targetWidth * scale
+            canvas.height = targetHeight * scale
+            ctx.drawImage(
+              img,
+              cropParams.cropX, cropParams.cropY, cropParams.cropWidth, cropParams.cropHeight,
+              0, 0, canvas.width, canvas.height
+            )
+            result = canvas.toDataURL('image/jpeg', 0.6)
+            console.log('Scaled down image to 80%, new length:', result.length)
+          }
+          
+          console.log('Final compressed data URL length:', result.length)
           resolve(result)
         } catch (error) {
           console.error('Error in image processing:', error)
