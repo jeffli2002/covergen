@@ -122,21 +122,13 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         // OAuth callback detected, force a refresh of auth state
         console.log('[HomePage] OAuth code detected, refreshing auth state...')
         
-        // Import auth service and refresh
-        const { default: authService } = await import('@/services/authService')
-        
-        // Wait a moment for Supabase to process
+        // Wait a moment for Supabase to process, then refresh auth state
         setTimeout(async () => {
           try {
-            // Check if refreshAuth method exists
-            if (authService && typeof authService.refreshAuth === 'function') {
-              await authService.refreshAuth()
-              console.log('[HomePage] Auth refresh completed')
-            } else {
-              // Fallback: reinitialize auth
-              await authService.initialize()
-              console.log('[HomePage] Auth reinitialized')
-            }
+            // Force a re-check of the session by reinitializing
+            const { default: authService } = await import('@/services/authService')
+            await authService.initialize()
+            console.log('[HomePage] Auth state refreshed')
           } catch (err) {
             console.error('[HomePage] Auth refresh error:', err)
           }
