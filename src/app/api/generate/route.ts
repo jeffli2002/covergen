@@ -130,8 +130,36 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Generation error:', error)
+    
+    // Provide more detailed error information
+    let errorMessage = 'Failed to generate images'
+    let errorDetails = ''
+    
+    if (error instanceof Error) {
+      errorMessage = error.message
+      // Check for rate limit errors
+      if (error.message.includes('rate limit') || error.message.includes('429')) {
+        errorMessage = 'Rate limit exceeded. Please try again in a few minutes.'
+      } else if (error.message.includes('API key') || error.message.includes('401')) {
+        errorMessage = 'API authentication failed. Please check your API key.'
+      } else if (error.message.includes('timeout')) {
+        errorMessage = 'Image generation timed out. Please try again.'
+      }
+      
+      // Log full error details
+      console.error('Full error details:', {
+        message: error.message,
+        stack: error.stack,
+        cause: (error as any).cause,
+        response: (error as any).response,
+      })
+    }
+    
     return NextResponse.json(
-      { error: 'Failed to generate images' },
+      { 
+        error: errorMessage,
+        details: process.env.NODE_ENV === 'development' ? errorDetails : undefined
+      },
       { status: 500 }
     )
   }

@@ -104,6 +104,28 @@ export async function generateImage(params: ImageGenerationParams) {
     return response
   } catch (error) {
     console.error('Error generating image:', error)
+    
+    // Log more details about the error
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        cause: (error as any).cause,
+        response: (error as any).response?.data,
+        status: (error as any).response?.status,
+        headers: (error as any).response?.headers,
+      })
+      
+      // Check if it's an OpenAI API error
+      if ((error as any).response?.status === 429) {
+        throw new Error('Rate limit exceeded. The free tier of Gemini 2.5 Flash has usage limits. Please try again later.')
+      } else if ((error as any).response?.status === 401) {
+        throw new Error('API authentication failed. Please check your OpenRouter API key.')
+      } else if ((error as any).response?.status === 400) {
+        throw new Error('Invalid request. Please check your prompt and try again.')
+      }
+    }
+    
     throw error
   }
 }
