@@ -124,6 +124,10 @@ export default function Footer({ locale, translations: t }: FooterProps) {
           <p className="text-center text-sm text-gray-600">
             {t.footer.copyright}
           </p>
+          <p className="text-center text-xs text-gray-500 mt-2 italic">
+            * This platform is an independent product and is not affiliated with, endorsed by, or sponsored by Google. 
+            We provide access to the Gemini 2.5 Flash model through our custom interface.
+          </p>
         </div>
       </div>
     </footer>

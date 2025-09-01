@@ -57,9 +57,9 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
               <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
                 <Mail className="w-6 h-6 text-purple-600" />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Easy Process</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">Fast Response</h3>
               <p className="text-gray-600 text-sm">
-                Simple email request to support@covergen.pro
+                We respond to all refund requests within 3 business days
               </p>
             </div>
           </div>
@@ -253,9 +253,9 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
                       3
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">Receive confirmation</p>
+                      <p className="font-semibold text-gray-900">Receive response</p>
                       <p className="text-gray-600 text-sm mt-1">
-                        We'll confirm receipt within 24 hours
+                        We'll respond to your request within 3 business days
                       </p>
                     </div>
                   </li>

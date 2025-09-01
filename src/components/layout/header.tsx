@@ -45,7 +45,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
               {t.common.appName}
             </h1>
             <span className="text-sm text-gray-600 font-medium">
-              Powered by Nano Banana
+              Powered by Nano Banana*
             </span>
           </a>
 

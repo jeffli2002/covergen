@@ -24,6 +24,7 @@ const DEFAULT_KEYWORDS = [
   'AI design tool',
   'nano banana',
   'Google Gemini 2.5 Flash',
+  'independent platform',
   'content creator tools',
   'social media covers',
   'instant generation',

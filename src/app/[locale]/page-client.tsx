@@ -69,7 +69,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
     name: 'CoverGen Pro',
     applicationCategory: 'DesignApplication',
     operatingSystem: 'Web',
-    description: 'AI-powered cover and thumbnail generator using Google Gemini 2.5 Flash (Nano Banana) - the latest and powerful AI image generation model',
+    description: 'AI-powered cover and thumbnail generator using Google Gemini 2.5 Flash (Nano Banana) - the latest and powerful AI image generation model. This platform is independent and not affiliated with Google.',
     offers: {
       '@type': 'Offer',
       price: '0',
@@ -101,18 +101,63 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
     const handleOAuthCallback = async () => {
       const urlParams = new URLSearchParams(window.location.search)
       const code = urlParams.get('code')
+      const error = urlParams.get('error')
+      const errorDescription = urlParams.get('error_description')
       
-      console.log('[OAuth] Checking for OAuth callback:', { code, url: window.location.href })
+      console.log('[HomePage] OAuth check:', { 
+        code: !!code, 
+        error, 
+        hasUser: !!user,
+        url: window.location.href
+      })
       
-      if (code) {
-        // Clean up the URL to remove the code parameter
-        const newUrl = window.location.pathname
-        window.history.replaceState({}, document.title, newUrl)
+      if (error) {
+        console.error('[HomePage] OAuth error:', errorDescription || error)
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname)
+        return
+      }
+      
+      if (code && !user) {
+        // OAuth callback detected, force a refresh of auth state
+        console.log('[HomePage] OAuth code detected, refreshing auth state...')
+        
+        // Import auth service and refresh
+        const authService = (await import('@/services/authService')).default
+        
+        // Wait a moment for Supabase to process
+        setTimeout(async () => {
+          try {
+            await authService.refreshAuth()
+            console.log('[HomePage] Auth refresh completed')
+          } catch (err) {
+            console.error('[HomePage] Auth refresh error:', err)
+          }
+          
+          // Clean up URL
+          window.history.replaceState({}, document.title, window.location.pathname)
+        }, 1500)
+      } else if (code && user) {
+        // User is already authenticated, just clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname)
       }
     }
     
     handleOAuthCallback()
-  }, [])
+  }, [user])
+  
+  // Handle post-OAuth redirect
+  useEffect(() => {
+    if (user) {
+      // Check for stored redirect
+      const storedRedirect = sessionStorage.getItem('oauth_redirect')
+      if (storedRedirect) {
+        console.log('[HomePage] User authenticated, redirecting to:', storedRedirect)
+        sessionStorage.removeItem('oauth_redirect')
+        window.location.href = storedRedirect
+      }
+    }
+  }, [user])
 
   // Track page view and A/B test variants
   useEffect(() => {
@@ -231,6 +276,12 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                     <h4 className="font-bold text-gray-800 mb-2">🌐 Multi-Language</h4>
                     <p className="text-gray-600">Understands prompts in 100+ languages naturally</p>
                   </div>
+                </div>
+                <div className="mt-6 p-4 bg-gray-100 rounded-xl">
+                  <p className="text-sm text-gray-600 text-center italic">
+                    This platform is an independent product and is not affiliated with, endorsed by, or sponsored by Google. 
+                    We provide access to the Gemini 2.5 Flash model through our custom interface.
+                  </p>
                 </div>
               </div>
             </div>
