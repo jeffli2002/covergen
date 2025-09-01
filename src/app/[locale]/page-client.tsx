@@ -123,13 +123,20 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         console.log('[HomePage] OAuth code detected, refreshing auth state...')
         
         // Import auth service and refresh
-        const authService = (await import('@/services/authService')).default
+        const { default: authService } = await import('@/services/authService')
         
         // Wait a moment for Supabase to process
         setTimeout(async () => {
           try {
-            await authService.refreshAuth()
-            console.log('[HomePage] Auth refresh completed')
+            // Check if refreshAuth method exists
+            if (authService && typeof authService.refreshAuth === 'function') {
+              await authService.refreshAuth()
+              console.log('[HomePage] Auth refresh completed')
+            } else {
+              // Fallback: reinitialize auth
+              await authService.initialize()
+              console.log('[HomePage] Auth reinitialized')
+            }
           } catch (err) {
             console.error('[HomePage] Auth refresh error:', err)
           }
