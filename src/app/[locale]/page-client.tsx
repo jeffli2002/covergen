@@ -158,23 +158,9 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                 Generate professional covers and posters for your content across all platforms.
               </p>
 
-              {/* Powered by Nano Banana Badge */}
-              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-full px-4 py-2 mb-4 border border-yellow-200">
-                <span className="text-2xl">🍌</span>
-                <span className="text-sm md:text-base font-semibold text-gray-800">
-                  Powered by Google Gemini 2.5 Flash <span className="text-yellow-600">("Nano Banana")</span>
-                </span>
-              </div>
-              
-              {/* Free generation highlight */}
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl px-6 py-4 mb-8 max-w-3xl mx-auto border border-green-200">
-                <p className="text-lg md:text-xl font-semibold text-green-800">
-                  🎉 <span className="underline decoration-2 decoration-green-400">100% FREE Generation</span> • No Sign-in Required • Unlimited Creativity
-                </p>
-              </div>
               
               {/* Platform Icons with animations */}
-              <div className="flex justify-center gap-6 md:gap-8 lg:gap-12 mb-12 md:mb-16 flex-wrap px-4">
+              <div className="flex justify-center gap-6 md:gap-8 lg:gap-12 mb-8 flex-wrap px-4">
                 {platformIcons.map((platform) => (
                   <div key={platform.name} className="flex flex-col items-center gap-2 md:gap-3 group">
                     <div className="p-3 md:p-4 lg:p-5 rounded-3xl bg-gray-50 shadow-sm hover:shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-2 border border-gray-100">
@@ -183,6 +169,13 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                     <span className="text-sm md:text-base lg:text-lg font-medium text-gray-700">{platform.name}</span>
                   </div>
                 ))}
+              </div>
+
+              {/* Free generation highlight */}
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl px-6 py-4 mb-8 max-w-3xl mx-auto border border-green-200">
+                <p className="text-lg md:text-xl font-semibold text-green-800">
+                  🎉 <span className="underline decoration-2 decoration-green-400">100% FREE Generation</span> • No Sign-in Required • Unlimited Creativity
+                </p>
               </div>
 
               <Button 
@@ -354,8 +347,9 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                   What's the difference between free and Pro plans?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Free users get 10 generations per day with standard quality. Pro users get unlimited generations, 
-                  higher resolution outputs, priority processing, and commercial usage rights.
+                  Free users get 10 covers per month for personal use only. Pro users get 120 covers per month with 
+                  commercial usage rights and 24-hour download history. Pro+ users get 300 covers per month with full 
+                  commercial license and 7-day cloud gallery.
                 </p>
               </div>
 
@@ -364,8 +358,8 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                   Can I use the generated images commercially?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Free users have limited usage rights. Pro+ subscribers get full commercial usage rights for 
-                  all generated images, perfect for business and marketing purposes.
+                  Free plan is for personal use only. Pro plan includes commercial usage rights for small businesses 
+                  and content creators. Pro+ plan offers full commercial license with team and enterprise usage rights.
                 </p>
               </div>
 
