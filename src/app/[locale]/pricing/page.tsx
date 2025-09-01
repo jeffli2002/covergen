@@ -3,7 +3,7 @@ import PricingSection from '@/components/pricing-section'
 
 export const metadata: Metadata = {
   title: 'Pricing - Affordable AI Cover Generation Plans',
-  description: 'Choose the perfect plan for your content creation needs. Free tier available, Pro plans starting at $9.99/month. Create unlimited covers for all platforms.',
+  description: 'Choose the perfect plan for your content creation needs. Free tier available, Pro plans starting at $9/month. Create professional covers for all platforms.',
   keywords: [
     'CoverGen AI pricing',
     'cover generator pricing',
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'CoverGen AI Pricing - Plans for Every Creator',
-    description: 'From free to pro - find the perfect plan for your content creation needs. Unlimited AI cover generation starting at $9.99/month.',
+    description: 'From free to pro - find the perfect plan for your content creation needs. AI cover generation starting at $9/month.',
     images: ['/pricing-og.jpg'],
   },
   alternates: {
@@ -40,35 +40,35 @@ export default function PricingPage() {
         name: 'Free Plan',
         price: '0',
         priceCurrency: 'USD',
-        description: '10 generations per day, standard quality, personal use only'
+        description: '10 covers per month, personal use only, email support'
       },
       {
         '@type': 'Offer',
         name: 'Pro Plan',
-        price: '9.99',
+        price: '9',
         priceCurrency: 'USD',
         priceSpecification: {
           '@type': 'UnitPriceSpecification',
-          price: '9.99',
+          price: '9',
           priceCurrency: 'USD',
           billingIncrement: 1,
           billingDuration: 'P1M'
         },
-        description: 'Unlimited generations, high resolution, priority processing'
+        description: '120 covers per month, commercial use, 24-hour download history'
       },
       {
         '@type': 'Offer',
         name: 'Pro+ Plan',
-        price: '29.99',
+        price: '19',
         priceCurrency: 'USD',
         priceSpecification: {
           '@type': 'UnitPriceSpecification',
-          price: '29.99',
+          price: '19',
           priceCurrency: 'USD',
           billingIncrement: 1,
           billingDuration: 'P1M'
         },
-        description: 'Everything in Pro plus API access, team features, commercial rights'
+        description: '300 covers per month, full commercial license, 7-day cloud gallery, API access'
       }
     ]
   }
@@ -128,7 +128,7 @@ export default function PricingPage() {
                   </h3>
                   <p className="text-gray-600">
                     While we don't offer a traditional free trial, our Free plan lets you test 
-                    the platform with 10 generations per day. This gives you a chance to experience 
+                    the platform with 10 covers per month. This gives you a chance to experience 
                     the quality before upgrading.
                   </p>
                 </div>

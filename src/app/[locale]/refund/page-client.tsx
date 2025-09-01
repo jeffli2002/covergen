@@ -282,6 +282,50 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
             </div>
           </section>
 
+          {/* Subscription Plans Overview */}
+          <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Subscription Plans & Usage Rights</h2>
+            
+            <div className="grid md:grid-cols-3 gap-4 mb-6">
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h3 className="font-semibold text-gray-900 mb-2">Free Plan</h3>
+                <p className="text-sm text-gray-600 mb-2">$0/forever</p>
+                <ul className="text-sm text-gray-600 space-y-1">
+                  <li>• 10 covers per month</li>
+                  <li>• Personal use only</li>
+                  <li>• No commercial rights</li>
+                </ul>
+              </div>
+              
+              <div className="bg-blue-50 rounded-lg p-4">
+                <h3 className="font-semibold text-gray-900 mb-2">Pro Plan</h3>
+                <p className="text-sm text-gray-600 mb-2">$9/month</p>
+                <ul className="text-sm text-gray-600 space-y-1">
+                  <li>• 120 covers per month</li>
+                  <li>• Personal & commercial use</li>
+                  <li>• 24-hour download history</li>
+                </ul>
+              </div>
+              
+              <div className="bg-purple-50 rounded-lg p-4">
+                <h3 className="font-semibold text-gray-900 mb-2">Pro+ Plan</h3>
+                <p className="text-sm text-gray-600 mb-2">$19/month</p>
+                <ul className="text-sm text-gray-600 space-y-1">
+                  <li>• 300 covers per month</li>
+                  <li>• Full commercial license</li>
+                  <li>• 7-day cloud gallery</li>
+                  <li>• Team & enterprise use</li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <p className="text-amber-800 text-sm">
+                <strong>Important:</strong> Refunds do not affect the usage rights of content generated during your paid subscription period. Content created under Pro/Pro+ plans retains its commercial usage rights even after downgrading or refund.
+              </p>
+            </div>
+          </section>
+
           {/* Special Cases Section */}
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Special Cases</h2>
@@ -339,10 +383,10 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
             <div className="space-y-6">
               <div className="border-b border-gray-200 pb-6">
                 <h3 className="font-semibold text-gray-900 mb-2">
-                  What happens to my data after a refund?
+                  What happens to my usage rights after a refund?
                 </h3>
                 <p className="text-gray-600">
-                  Your account returns to the Free plan. All your data, images, and settings are preserved. You can upgrade again anytime.
+                  Your account returns to the Free plan (10 covers per month, personal use only). Previously generated content under Pro/Pro+ plans retains its commercial usage rights. All your data, images, and settings are preserved.
                 </p>
               </div>
               

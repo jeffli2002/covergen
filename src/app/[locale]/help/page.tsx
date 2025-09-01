@@ -23,7 +23,7 @@ const faqCategories = [
       },
       {
         question: 'How many images can I generate?',
-        answer: 'Free users get 10 generations per day. Pro users get 50 per month, and Pro+ users get 200 per month.'
+        answer: 'Free users get 10 covers per month. Pro users get 120 per month, and Pro+ users get 300 per month.'
       }
     ]
   },
@@ -74,12 +74,20 @@ const faqCategories = [
     description: 'Manage your account and subscription',
     faqs: [
       {
+        question: 'What are the usage rights for each plan?',
+        answer: 'Free plan: Personal use only. Pro plan: Personal and commercial use allowed. Pro+ plan: Full commercial license with extended rights for teams and enterprises.'
+      },
+      {
         question: 'How do I upgrade to Pro?',
         answer: 'Click the upgrade button in your dashboard or visit the pricing page to choose your plan. All plans include a 7-day free trial.'
       },
       {
         question: 'Can I cancel my subscription?',
         answer: 'Yes, you can cancel anytime from your account settings. Your access continues until the end of your billing period.'
+      },
+      {
+        question: 'What\'s included in download history and cloud gallery?',
+        answer: 'Pro users get 24-hour download history to re-download recent creations. Pro+ users get 7-day cloud gallery to store and manage all generated covers.'
       },
       {
         question: 'How do I reset my password?',

@@ -14,14 +14,13 @@ const tiers = [
     description: 'Perfect for trying out AI cover generation',
     icon: Sparkles,
     features: [
-      '10 covers per day',
-      'Standard resolution',
+      '10 covers per month',
       'No watermark',
       'Basic platform sizes',
       'Email support'
     ],
     limitations: [
-      'Daily limit resets at midnight',
+      'Monthly limit resets on the 1st',
       'No commercial usage',
     ],
     cta: 'Get Started',
@@ -35,12 +34,12 @@ const tiers = [
     description: 'Ideal for regular content creators',
     icon: Zap,
     features: [
-      '50 covers per month',
-      'High-definition export',
+      '120 covers per month',
       'No watermark',
       'All platform sizes',
       'Priority support',
-      'Batch generation'
+      'Batch generation',
+      '24-hour download history'
     ],
     limitations: [
       'Monthly quota',
@@ -56,13 +55,13 @@ const tiers = [
     description: 'For professional creators and teams',
     icon: Crown,
     features: [
-      '200 covers per month',
-      'Ultra-high resolution',
+      '300 covers per month',
       'No watermark',
       'Commercial license',
       'Custom brand templates',
       'API access',
-      'Dedicated support'
+      'Dedicated support',
+      '7-day cloud gallery'
     ],
     limitations: [],
     cta: 'Go Pro+',
@@ -87,7 +86,7 @@ export default function PricingSection() {
 
     // Mock subscription upgrade
     if (tierKey !== 'free' && user) {
-      const quotaLimits = { pro: 50, pro_plus: 200 }
+      const quotaLimits = { pro: 120, pro_plus: 300 }
       setUser({
         ...user,
         tier: tierKey as 'pro' | 'pro_plus',

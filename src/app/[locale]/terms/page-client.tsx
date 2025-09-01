@@ -149,11 +149,11 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                     <h4 className="font-semibold text-gray-900 mb-2">Free Plan</h4>
                     <p className="text-sm font-medium text-gray-900 mb-2">$0/forever</p>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ 10 covers per day</li>
-                      <li>✓ Standard resolution</li>
+                      <li>✓ 10 covers per month</li>
                       <li>✓ No watermark</li>
                       <li>✓ Basic platform sizes</li>
                       <li>✓ Email support</li>
+                      <li>✓ Personal use only</li>
                     </ul>
                   </div>
                   <div className="border border-blue-200 bg-blue-50 rounded-lg p-4 relative">
@@ -163,12 +163,13 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                       <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">Coming Soon</span>
                     </div>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ 50 covers per month</li>
-                      <li>✓ High-definition export</li>
+                      <li>✓ 120 covers per month</li>
                       <li>✓ No watermark</li>
                       <li>✓ All platform sizes</li>
                       <li>✓ Priority support</li>
                       <li>✓ Batch generation</li>
+                      <li>✓ 24-hour download history</li>
+                      <li>✓ Personal & commercial use</li>
                     </ul>
                   </div>
                   <div className="border border-purple-200 bg-purple-50 rounded-lg p-4 relative">
@@ -178,13 +179,14 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                       <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">Coming Soon</span>
                     </div>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ 200 covers per month</li>
-                      <li>✓ Ultra-high resolution</li>
+                      <li>✓ 300 covers per month</li>
                       <li>✓ No watermark</li>
-                      <li>✓ Commercial license</li>
+                      <li>✓ Full commercial license</li>
                       <li>✓ Custom brand templates</li>
                       <li>✓ API access</li>
                       <li>✓ Dedicated support</li>
+                      <li>✓ 7-day cloud gallery</li>
+                      <li>✓ Team & enterprise use</li>
                     </ul>
                   </div>
                 </div>
@@ -312,9 +314,57 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
               </div>
             </div>
 
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">5.3 Usage Rights by Plan</h3>
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-2">Free Plan</h4>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p><strong>Personal Use Only</strong></p>
+                    <ul className="space-y-1 text-gray-600">
+                      <li>✓ Personal social media</li>
+                      <li>✓ Non-commercial blogs</li>
+                      <li>✓ Personal projects</li>
+                      <li>✗ Commercial use</li>
+                      <li>✗ Client work</li>
+                      <li>✗ Monetized content</li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-2">Pro Plan</h4>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p><strong>Personal & Commercial Use</strong></p>
+                    <ul className="space-y-1 text-gray-600">
+                      <li>✓ All personal uses</li>
+                      <li>✓ Commercial projects</li>
+                      <li>✓ Monetized content</li>
+                      <li>✓ Client work</li>
+                      <li>✓ Small business use</li>
+                      <li>✗ Resale/redistribution</li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-2">Pro+ Plan</h4>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p><strong>Full Commercial License</strong></p>
+                    <ul className="space-y-1 text-gray-600">
+                      <li>✓ All Pro features</li>
+                      <li>✓ Enterprise use</li>
+                      <li>✓ Team collaboration</li>
+                      <li>✓ White-label rights</li>
+                      <li>✓ Extended license</li>
+                      <li>✓ Priority IP protection</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
               <p className="text-sm text-amber-800">
-                <strong>Note:</strong> AI-generated content may include watermarks as required by law. You must have rights to any input content used in generation.
+                <strong>Important:</strong> Usage rights are tied to your active subscription. Downgrading or cancelling may affect your rights to use previously generated content for commercial purposes. AI-generated content may include watermarks as required by law.
               </p>
             </div>
 
