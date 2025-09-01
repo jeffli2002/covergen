@@ -218,7 +218,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
               {/* Free generation highlight */}
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl px-6 py-4 mb-8 max-w-3xl mx-auto border border-green-200">
                 <p className="text-lg md:text-xl font-semibold text-green-800">
-                  🎉 <span className="underline decoration-2 decoration-green-400">100% FREE Generation</span> • No Sign-in Required • Unlimited Creativity
+                  🎉 <span className="underline decoration-2 decoration-green-400">TRY FREE TODAY</span> • No Sign-in Required • Unlimited Creativity
                 </p>
               </div>
 
