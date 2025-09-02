@@ -1,0 +1,4 @@
+# Force HTTPS
+http://covergen.pro/* https://covergen.pro/:splat 301!
+http://www.covergen.pro/* https://covergen.pro/:splat 301!
+https://www.covergen.pro/* https://covergen.pro/:splat 301!

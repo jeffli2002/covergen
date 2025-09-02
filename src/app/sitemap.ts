@@ -8,7 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Define all static routes with multi-language support
   const staticRoutes = [
     {
-      url: baseUrl,
+      url: `${baseUrl}/en`,
       lastModified: currentDate,
       changeFrequency: 'weekly' as const,
       priority: 1.0,
@@ -17,7 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       },
     },
     {
-      url: `${baseUrl}/pricing`,
+      url: `${baseUrl}/en/pricing`,
       lastModified: currentDate,
       changeFrequency: 'weekly' as const,
       priority: 0.8,
@@ -26,7 +26,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       },
     },
     {
-      url: `${baseUrl}/tutorials`,
+      url: `${baseUrl}/en/tutorials`,
       lastModified: currentDate,
       changeFrequency: 'weekly' as const,
       priority: 0.7,
@@ -35,7 +35,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       },
     },
     {
-      url: `${baseUrl}/blog`,
+      url: `${baseUrl}/en/blog`,
       lastModified: currentDate,
       changeFrequency: 'daily' as const,
       priority: 0.7,
@@ -44,7 +44,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       },
     },
     {
-      url: `${baseUrl}/showcase`,
+      url: `${baseUrl}/en/showcase`,
       lastModified: currentDate,
       changeFrequency: 'weekly' as const,
       priority: 0.6,
@@ -53,7 +53,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       },
     },
     {
-      url: `${baseUrl}/help`,
+      url: `${baseUrl}/en/help`,
       lastModified: currentDate,
       changeFrequency: 'monthly' as const,
       priority: 0.6,
@@ -62,7 +62,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       },
     },
     {
-      url: `${baseUrl}/support`,
+      url: `${baseUrl}/en/support`,
       lastModified: currentDate,
       changeFrequency: 'monthly' as const,
       priority: 0.5,
@@ -71,7 +71,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       },
     },
     {
-      url: `${baseUrl}/feedback`,
+      url: `${baseUrl}/en/feedback`,
       lastModified: currentDate,
       changeFrequency: 'monthly' as const,
       priority: 0.5,
@@ -80,7 +80,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       },
     },
     {
-      url: `${baseUrl}/status`,
+      url: `${baseUrl}/en/status`,
       lastModified: currentDate,
       changeFrequency: 'daily' as const,
       priority: 0.5,
@@ -89,7 +89,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       },
     },
     {
-      url: `${baseUrl}/terms`,
+      url: `${baseUrl}/en/terms`,
       lastModified: currentDate,
       changeFrequency: 'yearly' as const,
       priority: 0.3,
@@ -98,7 +98,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       },
     },
     {
-      url: `${baseUrl}/privacy`,
+      url: `${baseUrl}/en/privacy`,
       lastModified: currentDate,
       changeFrequency: 'yearly' as const,
       priority: 0.3,
@@ -107,7 +107,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       },
     },
     {
-      url: `${baseUrl}/cookies`,
+      url: `${baseUrl}/en/cookies`,
       lastModified: currentDate,
       changeFrequency: 'yearly' as const,
       priority: 0.3,
@@ -116,12 +116,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
       },
     },
     {
-      url: `${baseUrl}/accessibility`,
+      url: `${baseUrl}/en/accessibility`,
       lastModified: currentDate,
       changeFrequency: 'yearly' as const,
       priority: 0.3,
       alternates: {
         languages: generateLanguageAlternates('/accessibility'),
+      },
+    },
+    {
+      url: `${baseUrl}/en/refund`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly' as const,
+      priority: 0.4,
+      alternates: {
+        languages: generateLanguageAlternates('/refund'),
       },
     },
   ]
@@ -140,7 +149,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   
   const platformRoutes = platforms.flatMap((platform) => [
     {
-      url: `${baseUrl}/platforms/${platform.name}`,
+      url: `${baseUrl}/en/platforms/${platform.name}`,
       lastModified: currentDate,
       changeFrequency: 'weekly' as const,
       priority: platform.priority,
