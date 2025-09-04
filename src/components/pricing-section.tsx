@@ -12,27 +12,27 @@ import AuthForm from '@/components/auth/AuthForm'
 const tiers = [
   {
     id: 'free',
-    name: 'Free Trial',
+    name: 'Free',
     price: '$0',
-    period: '7 days',
-    description: 'Try our AI cover generation with full access',
+    period: 'forever',
+    description: 'Perfect for trying out our AI cover generator',
     icon: Sparkles,
     features: [
-      '7-day free trial',
-      '3 covers per day',
-      '10 covers per month max',
+      '10 covers per month',
+      '3 covers per day max',
       'No watermark',
       'All platform sizes',
-      'Email support'
+      'Email support',
+      'Personal use only'
     ],
     limitations: [
-      'Daily limit resets at midnight UTC',
-      'Monthly limit: 10 covers maximum',
-      'Trial expires after 7 days',
-      'No commercial usage during trial',
+      'Daily limit: 3 covers',
+      'Monthly limit: 10 covers',
+      'No commercial usage'
     ],
-    cta: 'Start Free Trial',
-    popular: false
+    cta: 'Get Started',
+    popular: false,
+    badge: null
   },
   {
     id: 'pro',
@@ -50,8 +50,9 @@ const tiers = [
       '24-hour download history'
     ],
     limitations: [],
-    cta: 'Upgrade to Pro',
-    popular: true
+    cta: 'Start 7-Day Trial',
+    popular: true,
+    badge: '7-Day Free Trial'
   },
   {
     id: 'pro_plus',
@@ -70,8 +71,9 @@ const tiers = [
       '7-day cloud gallery'
     ],
     limitations: [],
-    cta: 'Upgrade to Pro+',
-    popular: false
+    cta: 'Start 7-Day Trial',
+    popular: false,
+    badge: '7-Day Free Trial'
   }
 ]
 
@@ -150,7 +152,7 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4 text-gray-900">Choose Your Plan</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Start with a 7-day free trial and upgrade for more daily generations. All images are watermark-free.
+            Start free or try Pro plans with a 7-day trial. All images are watermark-free.
           </p>
         </div>
 
@@ -174,6 +176,14 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
                   </div>
                 )}
                 
+                {tier.badge && !tier.popular && (
+                  <div className="absolute -top-3 right-4">
+                    <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg">
+                      {tier.badge}
+                    </span>
+                  </div>
+                )}
+                
                 <CardHeader className="text-center pb-2">
                   <div className="flex justify-center mb-4">
                     <div className={`p-3 rounded-2xl transition-all duration-300 group-hover:scale-110 ${
@@ -191,6 +201,7 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
                       /{tier.period}
                     </span>
                   </div>
+                  
                   
                   <CardDescription className="text-base text-gray-600">
                     {tier.description}
@@ -262,7 +273,7 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
           </p>
           <div className="flex justify-center gap-8 text-sm text-gray-600">
             <span>✓ Cancel anytime</span>
-            <span>✓ 7-day free trial</span>
+            <span>✓ No setup fees</span>
             <span>✓ 24/7 support</span>
           </div>
         </div>

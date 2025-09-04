@@ -235,7 +235,6 @@ export default function BookCoverCreatorTool() {
                         <div className="flex items-center gap-2">
                           <span>{g.label}</span>
                           {g.popular && <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded">Popular</span>}
-                          {g.trending && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Trending</span>}
                         </div>
                       </SelectItem>
                     ))}

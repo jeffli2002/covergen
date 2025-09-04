@@ -101,20 +101,25 @@ export function AuthDebug() {
       // Import authService dynamically to avoid circular imports
       const authService = (await import('@/services/authService')).default
       
-      const success = await authService.refreshAuth()
-      console.log('[AuthDebug] Hybrid refresh result:', success)
+      // Initialize the authService which will handle session detection
+      const success = await authService.initialize()
+      console.log('[AuthDebug] Initialization result:', success)
       
       if (success) {
         // Get updated session
         if (supabase) {
-          const { data: { session } } = await supabase.auth.getSession()
-          setSessionData(session)
+          const { data: { session }, error } = await supabase.auth.refreshSession()
+          if (session && !error) {
+            setSessionData(session)
+            setError('')
+            // Optionally reload page for complete UI refresh
+            setTimeout(() => window.location.reload(), 1000)
+          } else {
+            setError('Session refresh failed - ' + (error?.message || 'unknown error'))
+          }
         }
-        setError('')
-        // Optionally reload page for complete UI refresh
-        setTimeout(() => window.location.reload(), 1000)
       } else {
-        setError('Hybrid refresh failed - no valid session found')
+        setError('Failed to initialize auth service')
       }
     } catch (err) {
       console.error('[AuthDebug] Hybrid refresh error:', err)

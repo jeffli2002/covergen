@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
 }
 
 async function handleCheckoutComplete(data: any) {
-  const { userId, customerId, subscriptionId, planId } = data
+  const { userId, customerId, subscriptionId, planId, trialEnd } = data
 
   if (!userId || !planId) {
     console.error('[Webhook] Missing required data for checkout complete')
@@ -93,17 +93,35 @@ async function handleCheckoutComplete(data: any) {
       pro_plus: 300
     }
 
+    // Check if this is a trial subscription
+    const isTrialSubscription = trialEnd && new Date(trialEnd) > new Date()
+    const trialEndsAt = isTrialSubscription ? new Date(trialEnd).toISOString() : null
+
+    // Update auth.users table with Creem trial info using raw SQL
+    // Note: Supabase doesn't allow direct updates to auth.users via API, so we use RPC
+    if (isTrialSubscription) {
+      const { error: rpcError } = await adminSupabase.rpc('update_user_trial_status', {
+        p_user_id: userId,
+        p_trial_ends_at: trialEndsAt,
+        p_subscription_tier: planId
+      })
+      
+      if (rpcError) {
+        console.error('[Webhook] Error updating user trial status:', rpcError)
+      }
+    }
+
     // Update or create subscription record
     const { error: subError } = await adminSupabase
       .from('subscriptions')
       .upsert({
         user_id: userId,
         tier: planId,
-        status: 'active',
+        status: isTrialSubscription ? 'trialing' : 'active',
         stripe_customer_id: customerId,
         stripe_subscription_id: subscriptionId,
         current_period_start: new Date().toISOString(),
-        current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        current_period_end: trialEndsAt || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         updated_at: new Date().toISOString()
       }, {
         onConflict: 'user_id'
@@ -129,7 +147,10 @@ async function handleCheckoutComplete(data: any) {
       throw profileError
     }
 
-    console.log(`[Webhook] Successfully activated ${planId} subscription for user ${userId}`)
+    console.log(`[Webhook] Successfully activated ${planId} ${isTrialSubscription ? 'TRIAL' : 'PAID'} subscription for user ${userId}`)
+    if (isTrialSubscription) {
+      console.log(`[Webhook] Trial ends at: ${trialEndsAt}`)
+    }
   } catch (error) {
     console.error('[Webhook] Error in handleCheckoutComplete:', error)
     throw error

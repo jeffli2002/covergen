@@ -2,67 +2,69 @@ import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 
 export interface GenerationLimitStatus {
-  daily_count: number
-  daily_limit: number
+  monthly_usage: number
+  monthly_limit: number | null
+  daily_usage: number
+  daily_limit: number | null
+  trial_usage: number
+  trial_limit: number | null
   can_generate: boolean
   is_trial: boolean
+  trial_ends_at: string | null
   subscription_tier: string
-  remaining?: number
+  remaining_monthly: number | null
+  remaining_trial: number | null
+  remaining_daily: number
 }
 
-export async function checkGenerationLimit(userId: string | null): Promise<GenerationLimitStatus> {
+export async function checkGenerationLimit(userId: string | null): Promise<GenerationLimitStatus | null> {
   const supabase = await createClient()
 
   // For unauthenticated users, always return free tier limits
   if (!userId) {
     return {
-      daily_count: 0,
+      monthly_usage: 0,
+      monthly_limit: 10,
+      daily_usage: 0,
       daily_limit: 3,
+      trial_usage: 0,
+      trial_limit: null,
       can_generate: true,
       is_trial: false,
+      trial_ends_at: null,
       subscription_tier: 'free',
-      remaining: 3
+      remaining_monthly: 10,
+      remaining_trial: null,
+      remaining_daily: 3
     }
   }
 
   try {
-    // Get current daily usage
+    // Get current generation limit status
     const { data, error } = await supabase
-      .rpc('get_daily_generation_count', { p_user_id: userId })
+      .rpc('check_generation_limit', { 
+        p_user_id: userId,
+        p_subscription_tier: 'free' // Will be overridden by actual tier in function
+      })
 
     if (error) {
-      console.error('Error getting generation count:', error)
-      // Return default free tier on error
-      return {
-        daily_count: 0,
-        daily_limit: 3,
-        can_generate: true,
-        is_trial: false,
-        subscription_tier: 'free',
-        remaining: 3
-      }
+      console.error('Error checking generation limit:', error)
+      return null
     }
 
     return data as GenerationLimitStatus
   } catch (error) {
     console.error('Error checking generation limit:', error)
-    return {
-      daily_count: 0,
-      daily_limit: 3,
-      can_generate: true,
-      is_trial: false,
-      subscription_tier: 'free',
-      remaining: 3
-    }
+    return null
   }
 }
 
-export async function incrementGenerationCount(userId: string, subscriptionTier: string = 'free'): Promise<GenerationLimitStatus> {
+export async function incrementGenerationCount(userId: string, subscriptionTier: string = 'free'): Promise<GenerationLimitStatus | null> {
   const supabase = await createClient()
 
   try {
     const { data, error } = await supabase
-      .rpc('increment_daily_generation', { 
+      .rpc('increment_generation_count', { 
         p_user_id: userId,
         p_subscription_tier: subscriptionTier
       })
@@ -79,28 +81,56 @@ export async function incrementGenerationCount(userId: string, subscriptionTier:
   }
 }
 
-export async function getUserSubscriptionTier(userId: string): Promise<string> {
+export async function getUserSubscriptionInfo(userId: string): Promise<{
+  subscription_tier: string,
+  is_trial: boolean,
+  trial_ends_at: string | null
+}> {
   const supabase = await createClient()
 
   try {
-    const { data, error } = await supabase
-      .from('auth.users')
-      .select('creem_subscription_tier, creem_trial_ends_at')
+    // First try to get from subscriptions table (most up-to-date)
+    const { data: subData, error: subError } = await supabase
+      .from('subscriptions')
+      .select('tier, status, current_period_end')
+      .eq('user_id', userId)
+      .single()
+
+    if (!subError && subData) {
+      const isTrialing = subData.status === 'trialing'
+      return {
+        subscription_tier: subData.tier || 'free',
+        is_trial: isTrialing,
+        trial_ends_at: isTrialing ? subData.current_period_end : null
+      }
+    }
+
+    // Fallback to profiles table
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('subscription_tier')
       .eq('id', userId)
       .single()
 
-    if (error || !data) {
-      return 'free'
+    if (!profileError && profileData) {
+      return {
+        subscription_tier: profileData.subscription_tier || 'free',
+        is_trial: false,
+        trial_ends_at: null
+      }
     }
 
-    // Check if user is on trial
-    if (data.creem_trial_ends_at && new Date(data.creem_trial_ends_at) > new Date()) {
-      return 'free' // Trial users have free tier limits
+    return {
+      subscription_tier: 'free',
+      is_trial: false,
+      trial_ends_at: null
     }
-
-    return data.creem_subscription_tier || 'free'
   } catch (error) {
-    console.error('Error getting subscription tier:', error)
-    return 'free'
+    console.error('Error getting subscription info:', error)
+    return {
+      subscription_tier: 'free',
+      is_trial: false,
+      trial_ends_at: null
+    }
   }
 }

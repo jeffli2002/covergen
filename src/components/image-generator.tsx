@@ -320,7 +320,7 @@ export default function ImageGenerator() {
       {showUpgradeModal && (
         <UpgradePrompt 
           onClose={() => setShowUpgradeModal(false)}
-          onSignIn={() => {
+          onUpgrade={() => {
             setShowUpgradeModal(false)
             setShowAuthModal(true)
           }}

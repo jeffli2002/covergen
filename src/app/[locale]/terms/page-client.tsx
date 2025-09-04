@@ -146,43 +146,42 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">4.1 Available Plans</h3>
                 <div className="grid md:grid-cols-3 gap-4">
                   <div className="border border-gray-200 rounded-lg p-4">
-                    <h4 className="font-semibold text-gray-900 mb-2">Free Trial</h4>
-                    <p className="text-sm font-medium text-gray-900 mb-2">$0/7 days</p>
+                    <h4 className="font-semibold text-gray-900 mb-2">Free Plan</h4>
+                    <p className="text-sm font-medium text-gray-900 mb-2">$0/forever</p>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ 7-day free trial</li>
-                      <li>✓ 3 covers per day</li>
-                      <li>✓ 10 covers per month max</li>
+                      <li>✓ 10 covers per month</li>
+                      <li>✓ 3 covers per day max</li>
                       <li>✓ No watermark</li>
                       <li>✓ All platform sizes</li>
                       <li>✓ Email support</li>
-                      <li>✓ Trial use only</li>
+                      <li>✓ Personal use only</li>
                     </ul>
                   </div>
                   <div className="border border-blue-200 bg-blue-50 rounded-lg p-4">
                     <h4 className="font-semibold text-gray-900 mb-2">Pro Plan</h4>
                     <p className="text-sm font-medium text-gray-900 mb-2">$9/month</p>
                     <ul className="space-y-1 text-sm text-gray-600">
+                      <li>✓ 7-day free trial</li>
                       <li>✓ 120 covers per month</li>
                       <li>✓ No watermark</li>
                       <li>✓ All platform sizes</li>
                       <li>✓ Priority support</li>
                       <li>✓ Commercial usage rights</li>
                       <li>✓ 24-hour download history</li>
-                      <li>✓ Personal & commercial use</li>
                     </ul>
                   </div>
                   <div className="border border-purple-200 bg-purple-50 rounded-lg p-4">
                     <h4 className="font-semibold text-gray-900 mb-2">Pro+ Plan</h4>
                     <p className="text-sm font-medium text-gray-900 mb-2">$19/month</p>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ Unlimited daily generations</li>
+                      <li>✓ 7-day free trial</li>
+                      <li>✓ 300 covers per month</li>
                       <li>✓ No watermark</li>
                       <li>✓ Full commercial license</li>
                       <li>✓ Custom brand templates</li>
                       <li>✓ API access</li>
                       <li>✓ Dedicated support</li>
                       <li>✓ 7-day cloud gallery</li>
-                      <li>✓ Team & enterprise use</li>
                     </ul>
                   </div>
                 </div>
@@ -225,33 +224,27 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">4.5 Refund Policy</h3>
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                  <p className="text-gray-700 mb-3"><strong>We offer refunds in the following situations:</strong></p>
-                  <ul className="space-y-2 text-gray-700">
-                    <li>• <strong>7-Day Money Back Guarantee:</strong> Full refund within 7 days of initial subscription (first-time subscribers only)</li>
-                    <li>• <strong>Service Issues:</strong> Pro-rated refunds for extended service outages (&gt;24 hours)</li>
-                    <li>• <strong>Billing Errors:</strong> Full refund for accidental duplicate charges or billing errors</li>
-                    <li>• <strong>Legal Requirements:</strong> Refunds required by local consumer protection laws</li>
-                  </ul>
-                  <p className="text-gray-700 mt-3 text-sm">
-                    To request a refund, contact support@covergen.pro with your account email and reason for refund.
-                  </p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">4.5 No Refund Policy</h3>
+                <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                  <p className="text-gray-700">• <strong>All Sales Final:</strong> Due to the digital nature of our service, all sales are final</p>
+                  <p className="text-gray-700">• <strong>Try Before You Buy:</strong> Pro/Pro+ plans include a 7-day trial period to evaluate the service</p>
+                  <p className="text-gray-700">• <strong>Billing Errors:</strong> We will correct any verified billing errors or duplicate charges</p>
+                  <p className="text-gray-700">• <strong>Service Credits:</strong> Extended outages may be compensated with service credits at our discretion</p>
                 </div>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">4.6 7-Day Free Trial</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">4.6 Pro/Pro+ Trial Terms</h3>
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <p className="text-gray-700 mb-2">All new users receive a 7-day free trial with the following terms:</p>
+                  <p className="text-gray-700 mb-2">Pro and Pro+ plans include a 7-day trial with these terms:</p>
                   <ul className="space-y-1 text-gray-700 text-sm">
-                    <li>• <strong>Duration:</strong> 7 consecutive days from account creation</li>
-                    <li>• <strong>Daily Limit:</strong> 3 cover generations per day (resets at midnight UTC)</li>
-                    <li>• <strong>Availability:</strong> One trial per user/email address/payment method</li>
-                    <li>• <strong>Features:</strong> Full access to all platform sizes and generation features</li>
-                    <li>• <strong>Usage Rights:</strong> Trial use only - no commercial usage during trial period</li>
-                    <li>• <strong>No Auto-Billing:</strong> Trial does not automatically convert to paid subscription</li>
-                    <li>• <strong>After Trial:</strong> Upgrade required to continue generating covers</li>
+                    <li>• <strong>Pro Trial:</strong> 28 covers total (4 per day average) during 7-day trial</li>
+                    <li>• <strong>Pro+ Trial:</strong> 70 covers total (10 per day average) during 7-day trial</li>
+                    <li>• <strong>Automatic Billing:</strong> Subscription begins after trial unless cancelled</li>
+                    <li>• <strong>Fresh Start:</strong> Trial usage doesn't count against your first paid month</li>
+                    <li>• <strong>Full Features:</strong> Access to all plan features during trial</li>
+                    <li>• <strong>Cancel Anytime:</strong> Cancel before trial ends to avoid charges</li>
+                    <li>• <strong>One Trial Per Account:</strong> Limited to one trial per payment method</li>
                   </ul>
                 </div>
               </div>
@@ -317,17 +310,17 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
               <h3 className="text-lg font-semibold text-gray-900 mb-3">5.3 Usage Rights by Plan</h3>
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-gray-900 mb-2">Free Trial</h4>
+                  <h4 className="font-semibold text-gray-900 mb-2">Free Plan</h4>
                   <div className="space-y-2 text-sm text-gray-700">
-                    <p><strong>Trial Use Only</strong></p>
+                    <p><strong>Personal Use Only</strong></p>
                     <ul className="space-y-1 text-gray-600">
-                      <li>✓ Personal evaluation</li>
-                      <li>✓ Testing platform features</li>
+                      <li>✓ Personal projects</li>
                       <li>✓ Learning/educational use</li>
+                      <li>✓ Non-commercial content</li>
+                      <li>✓ Social media (personal)</li>
                       <li>✗ Commercial use</li>
                       <li>✗ Client work</li>
                       <li>✗ Monetized content</li>
-                      <li>✗ Business applications</li>
                     </ul>
                   </div>
                 </div>
@@ -364,7 +357,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
 
             <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
               <p className="text-sm text-amber-800">
-                <strong>Important:</strong> Usage rights are tied to your subscription status. Trial users have limited usage rights. After trial expiration, you must upgrade to Pro or Pro+ for commercial usage rights. AI-generated content may include watermarks as required by law.
+                <strong>Important:</strong> Usage rights are tied to your subscription status. Free plan users are limited to personal use only. Upgrade to Pro or Pro+ for commercial usage rights. AI-generated content may include watermarks as required by law.
               </p>
             </div>
 

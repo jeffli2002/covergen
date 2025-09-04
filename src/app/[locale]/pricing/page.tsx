@@ -3,8 +3,8 @@ import PricingSection from '@/components/pricing-section'
 import { Locale } from '@/lib/i18n/config'
 
 export const metadata: Metadata = {
-  title: 'Pricing - 7-Day Free Trial + Affordable AI Cover Plans',
-  description: '7-day free trial with 3 covers daily, then Pro plans starting at $9/month for unlimited generations. Create professional covers for all platforms.',
+  title: 'Pricing - AI Cover Generation Plans with Free Trial',
+  description: 'Start free with 10 covers/month or try Pro plans with 7-day trial. Pro at $9/month (120 covers), Pro+ at $19/month (300 covers).',
   keywords: [
     'CoverGen AI pricing',
     'cover generator pricing',
@@ -14,11 +14,11 @@ export const metadata: Metadata = {
     'affordable cover generator',
     '7-day free trial',
     'pro cover generation',
-    'daily generation limits'
+    'monthly cover quotas'
   ],
   openGraph: {
-    title: 'CoverGen AI Pricing - 7-Day Free Trial + Pro Plans',
-    description: '7-day free trial with 3 covers daily. Upgrade for unlimited generations starting at $9/month.',
+    title: 'CoverGen AI Pricing - Free Plan + Pro with 7-Day Trial',
+    description: 'Free plan: 10 covers/month. Pro plans include 7-day trial. Upgrade for more monthly covers.',
     images: ['/pricing-og.jpg'],
   },
   alternates: {
@@ -43,10 +43,10 @@ export default function PricingPage({
     offers: [
       {
         '@type': 'Offer',
-        name: 'Free Trial',
+        name: 'Free Plan',
         price: '0',
         priceCurrency: 'USD',
-        description: '7-day free trial, 3 covers per day, 10 covers per month max, all platform sizes'
+        description: '10 covers per month, 3 per day max, personal use only'
       },
       {
         '@type': 'Offer',
@@ -58,9 +58,10 @@ export default function PricingPage({
           price: '9',
           priceCurrency: 'USD',
           billingIncrement: 1,
-          billingDuration: 'P1M'
+          billingDuration: 'P1M',
+          trialDuration: 'P7D'
         },
-        description: '120 covers per month, commercial use, all features'
+        description: '7-day free trial, 120 covers per month, commercial use, all features'
       },
       {
         '@type': 'Offer',
@@ -72,9 +73,10 @@ export default function PricingPage({
           price: '19',
           priceCurrency: 'USD',
           billingIncrement: 1,
-          billingDuration: 'P1M'
+          billingDuration: 'P1M',
+          trialDuration: 'P7D'
         },
-        description: '300 covers per month, full commercial license, API access, dedicated support'
+        description: '7-day free trial, 300 covers per month, full commercial license, API access'
       }
     ]
   }
@@ -94,8 +96,7 @@ export default function PricingPage({
                 Simple, Transparent Pricing
               </h1>
               <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto">
-                Start with a 7-day free trial with 3 daily generations. 
-                Upgrade for unlimited cover creation.
+                Start free with 10 covers/month or try Pro plans with a 7-day trial.
               </p>
             </div>
             
@@ -130,35 +131,36 @@ export default function PricingPage({
                 
                 <div className="bg-white rounded-2xl p-6 shadow-sm">
                   <h3 className="text-xl font-semibold mb-3">
-                    How does the 7-day free trial work?
+                    How does the Pro/Pro+ trial work?
                   </h3>
                   <p className="text-gray-600">
-                    All new users get a 7-day free trial with 3 cover generations per day and 10 covers 
-                    maximum per month. You have full access to all platform sizes and features. 
-                    After the trial, you'll need to upgrade to continue generating covers.
+                    Pro and Pro+ plans include a 7-day free trial. During the trial, Pro users get 28 covers 
+                    (4/day) and Pro+ users get 70 covers (10/day). Trial usage doesn't count against your 
+                    first paid month - you'll get the full monthly quota when your subscription begins.
                   </p>
                 </div>
                 
                 <div className="bg-white rounded-2xl p-6 shadow-sm">
                   <h3 className="text-xl font-semibold mb-3">
-                    What happens when I reach my daily limit?
+                    What happens when I reach my limit?
                   </h3>
                   <p className="text-gray-600">
-                    During the trial, you can generate up to 3 covers per day with a 10 cover monthly maximum. 
-                    When you reach either limit, you'll see an upgrade prompt. Your daily limit resets at 
-                    midnight UTC, or you can upgrade to Pro for higher monthly quotas.
+                    Free users can generate 3 covers per day (10/month max). Pro/Pro+ users have monthly quotas 
+                    with no fixed daily limit - you can use your remaining monthly balance anytime. When you reach 
+                    your limit, you'll see an upgrade prompt or need to wait for the next billing cycle.
                   </p>
                 </div>
                 
                 <div className="bg-white rounded-2xl p-6 shadow-sm">
-                  <h3 className="text-xl font-semibold mb-3">
-                    Do you offer refunds?
-                  </h3>
-                  <p className="text-gray-600">
-                    We offer a 7-day money-back guarantee for first-time Pro and Pro+ subscribers. 
-                    If you're not satisfied, contact support for a full refund.
-                  </p>
-                </div>
+                    <h3 className="text-xl font-semibold mb-3">
+                      What happens after my trial ends?
+                    </h3>
+                    <p className="text-gray-600">
+                      After your 7-day trial, your Pro or Pro+ subscription will automatically begin unless you 
+                      cancel. You'll receive the full monthly quota (120 for Pro, 300 for Pro+) starting fresh - 
+                      trial usage doesn't deduct from your paid month.
+                    </p>
+                  </div>
               </div>
             </div>
           </div>

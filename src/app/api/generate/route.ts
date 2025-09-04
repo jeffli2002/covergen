@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateImage, GEMINI_MODEL } from '@/lib/openrouter'
 import { createClient } from '@/lib/supabase/server'
-import { checkGenerationLimit, incrementGenerationCount, getUserSubscriptionTier } from '@/lib/generation-limits'
+import { checkGenerationLimit, incrementGenerationCount, getUserSubscriptionInfo } from '@/lib/generation-limits'
 
 // Image generation endpoint
 export async function POST(request: NextRequest) {
@@ -43,16 +43,34 @@ export async function POST(request: NextRequest) {
       // Check current generation limit
       const limitStatus = await checkGenerationLimit(user.id)
       
+      if (!limitStatus) {
+        console.error('Failed to check generation limit')
+        return NextResponse.json(
+          { error: 'Failed to verify generation limits' },
+          { status: 500 }
+        )
+      }
+      
       // If user has reached their limit, return error
       if (!limitStatus.can_generate) {
+        const errorMessage = limitStatus.is_trial 
+          ? `Trial limit reached (${limitStatus.trial_usage}/${limitStatus.trial_limit} covers used)`
+          : `Daily generation limit reached (${limitStatus.daily_usage}/${limitStatus.daily_limit} today)`
+          
         return NextResponse.json(
           { 
-            error: 'Daily generation limit reached',
+            error: errorMessage,
             limit_reached: true,
-            daily_count: limitStatus.daily_count,
+            daily_usage: limitStatus.daily_usage,
             daily_limit: limitStatus.daily_limit,
+            monthly_usage: limitStatus.monthly_usage,
+            monthly_limit: limitStatus.monthly_limit,
+            trial_usage: limitStatus.trial_usage,
+            trial_limit: limitStatus.trial_limit,
             subscription_tier: limitStatus.subscription_tier,
-            is_trial: limitStatus.is_trial
+            is_trial: limitStatus.is_trial,
+            trial_ends_at: limitStatus.trial_ends_at,
+            remaining_daily: limitStatus.remaining_daily
           },
           { status: 429 }
         )
@@ -171,8 +189,8 @@ export async function POST(request: NextRequest) {
     // Increment generation count for authenticated users after successful generation
     if (user) {
       try {
-        const subscriptionTier = await getUserSubscriptionTier(user.id)
-        await incrementGenerationCount(user.id, subscriptionTier)
+        const subInfo = await getUserSubscriptionInfo(user.id)
+        await incrementGenerationCount(user.id, subInfo.subscription_tier)
       } catch (error) {
         console.error('Failed to increment generation count:', error)
         // Continue with successful response even if counting fails

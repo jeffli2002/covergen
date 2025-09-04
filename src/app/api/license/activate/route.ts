@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { creemService } from '@/services/payment/creem'
 import { createClient } from '@supabase/supabase-js'
-import { Creem } from 'creem'
 
 // Create service role Supabase client
 const supabaseAdmin = createClient(
@@ -14,11 +12,6 @@ const supabaseAdmin = createClient(
     }
   }
 )
-
-// Initialize Creem SDK
-const creemClient = new Creem({
-  serverIdx: process.env.NODE_ENV !== 'production' ? 1 : 0,
-})
 
 export async function POST(req: NextRequest) {
   try {
@@ -75,49 +68,12 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // Activate a new license with Creem
-    const result = await creemClient.activateLicense({
-      xApiKey: process.env.CREEM_SECRET_KEY!,
-      activateLicenseRequestEntity: {
-        customerId: subscription.stripe_customer_id,
-        productId: process.env.CREEM_PROPLUS_PRODUCT_ID || 'prod_proplus',
-        metadata: {
-          userId: user.id,
-          email: user.email,
-          subscriptionId: subscription.stripe_subscription_id
-        }
-      }
-    })
-
-    // Store license in database
-    const { error: insertError } = await supabaseAdmin
-      .from('api_licenses')
-      .insert({
-        user_id: user.id,
-        license_key: result.data.licenseKey,
-        status: 'active',
-        activated_at: new Date().toISOString(),
-        metadata: {
-          creemLicenseId: result.data.id,
-          subscriptionId: subscription.stripe_subscription_id
-        }
-      })
-
-    if (insertError) {
-      console.error('Failed to store license:', insertError)
-      // Try to deactivate the license
-      await creemClient.deactivateLicense({
-        licenseKey: result.data.licenseKey,
-        xApiKey: process.env.CREEM_SECRET_KEY!,
-      })
-      throw new Error('Failed to store license key')
-    }
-
-    return NextResponse.json({
-      success: true,
-      licenseKey: result.data.licenseKey,
-      message: 'License activated successfully'
-    })
+    // For now, return an error indicating that license creation is not available
+    // The actual license key should be created during the subscription process
+    return NextResponse.json(
+      { error: 'No active license found. Please contact support to activate your API access.' },
+      { status: 404 }
+    )
   } catch (error: any) {
     console.error('License activation error:', error)
     return NextResponse.json(

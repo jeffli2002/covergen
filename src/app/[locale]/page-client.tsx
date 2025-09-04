@@ -396,9 +396,9 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                   What's the difference between free and Pro plans?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Free users get 10 covers per month for personal use only. Pro users get 120 covers per month with 
-                  commercial usage rights and 24-hour download history. Pro+ users get 300 covers per month with full 
-                  commercial license and 7-day cloud gallery.
+                  Free users get 10 covers per month (3/day max) for personal use only. Pro ($9/month) includes a 7-day trial and 
+                  120 covers per month with commercial rights. Pro+ ($19/month) also includes a 7-day trial and 300 covers per 
+                  month with full commercial license and 7-day cloud gallery.
                 </p>
               </div>
 
@@ -429,6 +429,17 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                 <p className="text-gray-600 leading-relaxed">
                   Yes! We take privacy seriously. Your reference images are processed securely and deleted 
                   after generation. We never store or share your content with third parties.
+                </p>
+              </div>
+              
+              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+                <h3 className="text-xl font-semibold mb-4 text-gray-900">
+                  How does the Pro/Pro+ trial work?
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Pro and Pro+ plans come with a 7-day free trial. During the trial, Pro users get 28 covers total 
+                  and Pro+ users get 70 covers total. Trial usage doesn't count against your first paid month - you'll 
+                  get the full monthly quota when your subscription begins.
                 </p>
               </div>
             </div>

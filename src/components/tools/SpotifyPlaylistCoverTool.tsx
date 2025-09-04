@@ -179,9 +179,11 @@ export default function SpotifyPlaylistCoverTool() {
         <Card className="p-6">
           <h3 className="text-xl font-semibold mb-4">Generated Covers</h3>
           <OutputGallery
-            outputs={outputs}
+            generatedImages={outputs}
+            downloadingId={null}
+            onDownload={() => {}}
+            onGenerateNew={() => {}}
             platform="spotify"
-            title={playlistName}
           />
         </Card>
       )}

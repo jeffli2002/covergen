@@ -86,15 +86,15 @@ export default function SupportPageClient({ locale, translations: t }: SupportPa
           <h2 className="text-2xl font-semibold mb-6">Frequently Asked Questions</h2>
           <div className="space-y-6">
             <div className="border-l-4 border-blue-500 pl-4">
-              <h4 className="font-semibold text-gray-900">How does the 7-day free trial work?</h4>
+              <h4 className="font-semibold text-gray-900">How does the Pro/Pro+ trial work?</h4>
               <p className="text-gray-600 mt-1">
-                All new users get a 7-day free trial with 3 cover generations per day. You have full access to all platform sizes and features. After the trial expires, you'll need to upgrade to continue generating covers.
+                Pro and Pro+ plans include a 7-day free trial. During the trial, Pro users get 28 covers total (4/day average) and Pro+ users get 70 covers total (10/day average). Trial usage doesn't count against your first paid month.
               </p>
             </div>
             <div className="border-l-4 border-blue-500 pl-4">
-              <h4 className="font-semibold text-gray-900">What happens when I reach my daily limit?</h4>
+              <h4 className="font-semibold text-gray-900">What happens when I reach my limit?</h4>
               <p className="text-gray-600 mt-1">
-                During the trial, you can generate up to 3 covers per day. When you reach this limit, you'll see an upgrade prompt. Your daily limit resets at midnight UTC, or you can upgrade to Pro for unlimited generations.
+                Free users have 3 covers per day (10/month max). Pro/Pro+ users can use their monthly quota anytime without fixed daily limits. When you reach your limit, you'll see an upgrade prompt or need to wait for the next billing cycle.
               </p>
             </div>
             <div className="border-l-4 border-blue-500 pl-4">
@@ -106,7 +106,7 @@ export default function SupportPageClient({ locale, translations: t }: SupportPa
             <div className="border-l-4 border-blue-500 pl-4">
               <h4 className="font-semibold text-gray-900">Do Pro users have daily limits?</h4>
               <p className="text-gray-600 mt-1">
-                No, Pro ($9/month) and Pro+ ($19/month) subscribers get unlimited daily generations with no daily limits.
+                Pro ($9/month, 120 covers) and Pro+ ($19/month, 300 covers) have no fixed daily limits. You can use your remaining monthly balance anytime during the billing cycle.
               </p>
             </div>
             <div className="border-l-4 border-blue-500 pl-4">
@@ -116,9 +116,9 @@ export default function SupportPageClient({ locale, translations: t }: SupportPa
               </p>
             </div>
             <div className="border-l-4 border-blue-500 pl-4">
-              <h4 className="font-semibold text-gray-900">Can I get a refund?</h4>
+              <h4 className="font-semibold text-gray-900">What's your refund policy?</h4>
               <p className="text-gray-600 mt-1">
-                Yes, we offer a 7-day money-back guarantee for all subscription plans.
+                All sales are final due to the digital nature of our service. Pro/Pro+ plans include a 7-day trial so you can evaluate the service before committing.
               </p>
             </div>
           </div>

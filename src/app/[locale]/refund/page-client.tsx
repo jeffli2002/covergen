@@ -20,11 +20,11 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
           </div>
           <h1 className="text-5xl font-bold text-gray-900 mb-4">Refund Policy</h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Your satisfaction is our priority. We offer a fair and transparent refund policy.
+            All sales are final. Pro/Pro+ plans include a 7-day free trial to evaluate our service before committing.
           </p>
           <div className="flex items-center justify-center gap-2 text-gray-600 mt-4">
             <CheckCircle2 className="w-5 h-5 text-green-500" />
-            <p className="text-lg">Last Updated: August 31, 2025</p>
+            <p className="text-lg">Last Updated: January 2025</p>
           </div>
         </div>
 
@@ -32,34 +32,34 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
         <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-8 mb-12 border border-green-100">
           <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
             <Shield className="w-6 h-6 text-green-600" />
-            Our Refund Commitment
+            Our Sales Policy
           </h2>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="bg-white rounded-lg p-6 shadow-sm">
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
                 <Clock className="w-6 h-6 text-green-600" />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">7-Day Guarantee</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">7-Day Trial</h3>
               <p className="text-gray-600 text-sm">
-                Full refund within 7 days of your first subscription
+                Pro/Pro+ plans include a 7-day trial period to test features
               </p>
             </div>
             <div className="bg-white rounded-lg p-6 shadow-sm">
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
                 <CheckCircle2 className="w-6 h-6 text-blue-600" />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">No Questions Asked</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">Try Before You Buy</h3>
               <p className="text-gray-600 text-sm">
-                First-time subscribers can get a full refund, no questions
+                Cancel your trial anytime before it converts to a paid subscription
               </p>
             </div>
             <div className="bg-white rounded-lg p-6 shadow-sm">
               <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
                 <Mail className="w-6 h-6 text-purple-600" />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Fast Response</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">Billing Support</h3>
               <p className="text-gray-600 text-sm">
-                We respond to all refund requests within 3 business days
+                We quickly resolve billing errors and technical issues
               </p>
             </div>
           </div>
@@ -69,35 +69,36 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
         <div className="space-y-8">
           {/* Eligibility Section */}
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Refund Eligibility</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Sales Policy</h2>
             
             <div className="space-y-6">
-              {/* 7-Day Money Back Guarantee */}
-              <div className="border-l-4 border-green-500 pl-6">
+              {/* No Refunds Policy */}
+              <div className="border-l-4 border-red-500 pl-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-green-500" />
-                  7-Day Money Back Guarantee
+                  <XCircle className="w-5 h-5 text-red-500" />
+                  All Sales Are Final
                 </h3>
-                <div className="bg-green-50 rounded-lg p-4 mb-4">
+                <div className="bg-red-50 rounded-lg p-4 mb-4">
                   <p className="text-gray-700 mb-3">
-                    <strong>First-time subscribers</strong> are eligible for a full refund within 7 days of purchase if:
+                    <strong>Due to the digital nature of our service</strong>, we do not offer refunds. However:
                   </p>
                   <ul className="space-y-2 text-gray-600">
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span>This is your first paid subscription with CoverGen Pro</span>
+                      <span>Pro and Pro+ plans include a 7-day free trial</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span>You request the refund within 7 days of the initial purchase</span>
+                      <span>You can cancel your trial anytime before it converts to paid</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span>You haven't previously received a refund from us</span>
+                      <span>Free plan available with 10 covers per month</span>
                     </li>
                   </ul>
                 </div>
               </div>
+
 
               {/* Service Issues */}
               <div className="border-l-4 border-blue-500 pl-6">
@@ -107,31 +108,31 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
                 </h3>
                 <div className="bg-blue-50 rounded-lg p-4">
                   <p className="text-gray-700 mb-3">
-                    We provide <strong>pro-rated refunds</strong> for:
+                    We may provide <strong>service credits</strong> (not refunds) for:
                   </p>
                   <ul className="space-y-2 text-gray-600">
-                    <li>• Service outages lasting more than 24 consecutive hours</li>
-                    <li>• Inability to access paid features for extended periods</li>
-                    <li>• Major functionality issues preventing normal use</li>
+                    <li>• Extended service outages at our discretion</li>
+                    <li>• Major functionality issues caused by our platform</li>
+                    <li>• Credits applied to future billing cycles only</li>
                   </ul>
                 </div>
               </div>
 
-              {/* Billing Errors */}
-              <div className="border-l-4 border-purple-500 pl-6">
+              {/* Billing Errors - Only Exception */}
+              <div className="border-l-4 border-green-500 pl-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-purple-500" />
-                  Billing Errors
+                  <CreditCard className="w-5 h-5 text-green-500" />
+                  Billing Error Corrections
                 </h3>
-                <div className="bg-purple-50 rounded-lg p-4">
+                <div className="bg-green-50 rounded-lg p-4">
                   <p className="text-gray-700 mb-3">
-                    <strong>Full refunds</strong> are provided for:
+                    <strong>We will correct</strong> verified billing errors:
                   </p>
                   <ul className="space-y-2 text-gray-600">
-                    <li>• Accidental duplicate charges</li>
-                    <li>• Unauthorized charges after cancellation</li>
+                    <li>• Duplicate charges due to technical errors</li>
+                    <li>• Charges after confirmed cancellation</li>
                     <li>• Incorrect billing amounts</li>
-                    <li>• Technical errors in our payment system</li>
+                    <li>• System errors causing overcharges</li>
                   </ul>
                 </div>
               </div>
@@ -147,55 +148,55 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
             
             <div className="bg-red-50 border border-red-200 rounded-lg p-6">
               <p className="text-gray-700 mb-4">
-                We <strong>cannot</strong> provide refunds for:
+                Refunds will <strong>NOT</strong> be granted for:
               </p>
               <ul className="space-y-3 text-gray-700">
                 <li className="flex items-start gap-3">
                   <XCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                   <div>
-                    <strong>Change of mind</strong> after the 7-day guarantee period
+                    <strong>Requests made after 60 days</strong> from the purchase date
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
                   <XCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                   <div>
-                    <strong>Partial month/year</strong> when cancelling mid-billing cycle
+                    <strong>Dissatisfaction with generated content quality</strong> (subjective preferences)
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
                   <XCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                   <div>
-                    <strong>Feature requests</strong> or functionality you expected but isn't available
+                    <strong>Unused generation quotas</strong> (these do not roll over)
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
                   <XCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                   <div>
-                    <strong>Account suspension</strong> due to Terms of Service violations
+                    <strong>Violation of our Terms of Service</strong>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
                   <XCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                   <div>
-                    <strong>Consumed credits</strong> or generations already used
+                    <strong>Accounts that have used</strong> more than 50% of monthly quota
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
                   <XCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                   <div>
-                    <strong>AI generation quality</strong> that doesn't meet personal preferences
+                    <strong>Mid-billing cycle cancellations</strong> (no partial refunds)
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
                   <XCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                   <div>
-                    <strong>Network-related issues</strong> outside our control
+                    <strong>Technical issues</strong> on your device or network
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
                   <XCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                   <div>
-                    <strong>AI limitations</strong> in understanding complex or ambiguous prompts
+                    <strong>Failure to cancel</strong> during the 7-day trial period
                   </div>
                 </li>
               </ul>
@@ -214,11 +215,11 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
 
           {/* How to Request Section */}
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">How to Request a Refund</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">How to Report Billing Errors</h2>
             
             <div className="space-y-6">
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Step-by-Step Process</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Billing Error Resolution Process</h3>
                 
                 <ol className="space-y-4">
                   <li className="flex gap-4">
@@ -241,9 +242,9 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
                       <p className="font-semibold text-gray-900">Include required information</p>
                       <ul className="text-gray-600 text-sm mt-1 space-y-1">
                         <li>• Account email address</li>
-                        <li>• Transaction ID (if available)</li>
-                        <li>• Reason for refund request</li>
-                        <li>• Date of purchase</li>
+                        <li>• Transaction ID and screenshot</li>
+                        <li>• Description of the billing error</li>
+                        <li>• Date and amount of incorrect charge</li>
                       </ul>
                     </div>
                   </li>
@@ -265,9 +266,9 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
                       4
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">Refund processing</p>
+                      <p className="font-semibold text-gray-900">Error correction</p>
                       <p className="text-gray-600 text-sm mt-1">
-                        Approved refunds are processed within 5-10 business days
+                        Verified billing errors are corrected within 5-10 business days
                       </p>
                     </div>
                   </li>
@@ -276,7 +277,7 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
 
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                 <p className="text-amber-800 text-sm">
-                  <strong>Note:</strong> Refund timing depends on your payment method and bank. Credit card refunds typically appear within 5-10 business days, while PayPal refunds are usually instant.
+                  <strong>Note:</strong> Billing error corrections depend on your payment method. Credit card corrections typically appear within 5-10 business days, while PayPal corrections are usually faster.
                 </p>
               </div>
             </div>
@@ -292,8 +293,8 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
                 <p className="text-sm text-gray-600 mb-2">$0/forever</p>
                 <ul className="text-sm text-gray-600 space-y-1">
                   <li>• 10 covers per month</li>
+                  <li>• 3 covers per day max</li>
                   <li>• Personal use only</li>
-                  <li>• No commercial rights</li>
                 </ul>
               </div>
               
@@ -301,9 +302,9 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
                 <h3 className="font-semibold text-gray-900 mb-2">Pro Plan</h3>
                 <p className="text-sm text-gray-600 mb-2">$9/month</p>
                 <ul className="text-sm text-gray-600 space-y-1">
+                  <li>• 7-day free trial</li>
                   <li>• 120 covers per month</li>
-                  <li>• Personal & commercial use</li>
-                  <li>• 24-hour download history</li>
+                  <li>• Commercial usage rights</li>
                 </ul>
               </div>
               
@@ -311,17 +312,17 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
                 <h3 className="font-semibold text-gray-900 mb-2">Pro+ Plan</h3>
                 <p className="text-sm text-gray-600 mb-2">$19/month</p>
                 <ul className="text-sm text-gray-600 space-y-1">
+                  <li>• 7-day free trial</li>
                   <li>• 300 covers per month</li>
                   <li>• Full commercial license</li>
                   <li>• 7-day cloud gallery</li>
-                  <li>• Team & enterprise use</li>
                 </ul>
               </div>
             </div>
             
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
               <p className="text-amber-800 text-sm">
-                <strong>Important:</strong> Refunds do not affect the usage rights of content generated during your paid subscription period. Content created under Pro/Pro+ plans retains its commercial usage rights even after downgrading or refund.
+                <strong>Important:</strong> All sales are final. Pro/Pro+ plans include a 7-day trial period where you can evaluate the service with prorated limits (28 covers for Pro trial, 70 covers for Pro+ trial) before your paid subscription begins.
               </p>
             </div>
           </section>
@@ -337,17 +338,17 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
                   Annual Subscriptions
                 </h3>
                 <p className="text-gray-600 text-sm">
-                  Annual plans follow the same 7-day guarantee. After 7 days, we may offer pro-rated refunds for unused months in exceptional circumstances.
+                  Annual plans also include a 7-day trial period. After the trial, all payments are final. Consider monthly plans if you're unsure about long-term commitment.
                 </p>
               </div>
               
               <div className="bg-gray-50 rounded-lg p-6">
                 <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                   <CreditCard className="w-5 h-5 text-blue-500" />
-                  Payment Disputes
+                  Chargebacks
                 </h3>
                 <p className="text-gray-600 text-sm">
-                  Please contact us before initiating a chargeback. We're committed to resolving issues fairly and quickly.
+                  Please contact our support team before filing a chargeback. We actively dispute fraudulent chargebacks and excessive disputes may result in account termination.
                 </p>
               </div>
               
@@ -383,19 +384,19 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
             <div className="space-y-6">
               <div className="border-b border-gray-200 pb-6">
                 <h3 className="font-semibold text-gray-900 mb-2">
-                  What happens to my usage rights after a refund?
+                  Can I cancel during my Pro/Pro+ trial?
                 </h3>
                 <p className="text-gray-600">
-                  Your account returns to the Free plan (10 covers per month, personal use only). Previously generated content under Pro/Pro+ plans retains its commercial usage rights. All your data, images, and settings are preserved.
+                  Yes! You can cancel your trial anytime before it converts to a paid subscription. Simply go to your account settings and cancel. You'll continue to have access to trial features until the 7-day period ends.
                 </p>
               </div>
               
               <div className="border-b border-gray-200 pb-6">
                 <h3 className="font-semibold text-gray-900 mb-2">
-                  Can I get a refund if I forgot to cancel?
+                  What if I forget to cancel my trial?
                 </h3>
                 <p className="text-gray-600">
-                  If you contact us within 48 hours of an unwanted renewal, we'll typically issue a full refund as a one-time courtesy.
+                  All sales are final once your trial converts to a paid subscription. We send reminder emails before your trial ends. Set a calendar reminder if needed to avoid unwanted charges.
                 </p>
               </div>
               
@@ -410,10 +411,10 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
               
               <div>
                 <h3 className="font-semibold text-gray-900 mb-2">
-                  What if my refund request is denied?
+                  Why don't you offer refunds?
                 </h3>
                 <p className="text-gray-600">
-                  We'll always explain why a refund cannot be issued. You can appeal the decision by providing additional information or context.
+                  As a digital service, our resources are consumed immediately upon use. Pro/Pro+ trials let you fully evaluate the service risk-free. The free plan is always available for basic needs.
                 </p>
               </div>
             </div>
