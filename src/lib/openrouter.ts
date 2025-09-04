@@ -10,12 +10,18 @@ export const openai = new OpenAI({
   },
 })
 
-// Model configuration for Gemini 2.5 Flash Image Preview (nano banana)
-export const GEMINI_MODEL = 'google/gemini-2.5-flash-image-preview:free' // Free version of Gemini 2.5 Flash Image
+// Model configuration for image generation
+// Using the Gemini 2.5 Flash Image Preview model (without :free suffix)
+export const GEMINI_MODEL = 'google/gemini-2.5-flash-image-preview' // Gemini image generation model
 
-// NOTE: Gemini Flash via OpenRouter may not respect dimension parameters since it's a chat model
-// that generates images, not a dedicated image generation API. Consider implementing server-side
-// image resizing as a fallback to ensure platform-specific dimensions are applied.
+// Note: OpenRouter has removed the free tier (:free) for this model
+// Make sure your API key has credits to use this model
+
+// Alternative image generation models available on OpenRouter:
+// - 'stabilityai/stable-diffusion-xl-base-1.0' - Stable Diffusion XL
+// - 'prompthero/openjourney' - Free Midjourney-style model
+// - 'kakaobrain/karlo-v1-alpha' - Free image generation model
+// - 'lambdalabs/sd-image-variations-diffusers' - Image variations model
 
 export interface ImageGenerationParams {
   prompt: string
@@ -30,6 +36,10 @@ export async function generateImage(params: ImageGenerationParams) {
   const { prompt, referenceImages, mode, dimensions } = params
 
   try {
+    // For Gemini 2.5 Flash Image Preview, we need to format the request correctly
+    // This model expects image generation prompts in a specific format
+    console.log('Generating with model:', GEMINI_MODEL)
+    
     // Prepare messages based on mode
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = []
 
@@ -58,7 +68,8 @@ export async function generateImage(params: ImageGenerationParams) {
       })
     } else {
       // Text-to-image mode - generate new images
-      let finalPrompt = `Generate a high-quality image: ${prompt}`
+      // For Gemini image model, be more direct with the prompt
+      let finalPrompt = `${prompt}`
       
       // Add dimensions if provided (skip for "none" platform to allow natural AI generation)
       if (dimensions && dimensions.width && dimensions.height) {
@@ -85,19 +96,35 @@ export async function generateImage(params: ImageGenerationParams) {
       })
     }
 
-    // Call OpenRouter API
-    // Try to pass dimensions as additional parameters (may not be supported by chat models)
+    // Call OpenRouter API for image generation
     const requestParams: any = {
       model: GEMINI_MODEL,
       messages,
+      // Remove unsupported parameters that might cause issues
+      // The Gemini model handles image generation internally
     }
     
-    // Add dimension parameters if available (experimental - may not work with chat models)
+    // Add dimension parameters if available
     if (dimensions && dimensions.width && dimensions.height) {
       requestParams.size = `${dimensions.width}x${dimensions.height}`
       requestParams.width = dimensions.width
       requestParams.height = dimensions.height
+      // Also try OpenAI-style size parameter
+      if (dimensions.width === 1024 && dimensions.height === 1024) {
+        requestParams.size = "1024x1024"
+      } else if (dimensions.width === 1792 && dimensions.height === 1024) {
+        requestParams.size = "1792x1024"
+      } else if (dimensions.width === 1024 && dimensions.height === 1792) {
+        requestParams.size = "1024x1792"
+      }
     }
+    
+    console.log('Sending request to OpenRouter with params:', {
+      model: requestParams.model,
+      hasMessages: !!requestParams.messages,
+      size: requestParams.size,
+      n: requestParams.n
+    })
     
     const response = await openai.chat.completions.create(requestParams)
 
@@ -117,12 +144,16 @@ export async function generateImage(params: ImageGenerationParams) {
       })
       
       // Check if it's an OpenAI API error
-      if ((error as any).response?.status === 429) {
-        throw new Error('Rate limit exceeded. The free tier of Gemini 2.5 Flash has usage limits. Please try again later.')
+      if ((error as any).response?.status === 404) {
+        throw new Error(`Model '${GEMINI_MODEL}' not found. This might be an incorrect model ID. Please check OpenRouter documentation for available models.`)
+      } else if ((error as any).response?.status === 422) {
+        throw new Error('Invalid request format. The Gemini image model might require different parameters.')
+      } else if ((error as any).response?.status === 429) {
+        throw new Error('Rate limit exceeded. The free tier has usage limits. Please try again later.')
       } else if ((error as any).response?.status === 401) {
         throw new Error('API authentication failed. Please check your OpenRouter API key.')
       } else if ((error as any).response?.status === 400) {
-        throw new Error('Invalid request. Please check your prompt and try again.')
+        throw new Error('Invalid request. The model might not support image generation with this format.')
       }
     }
     

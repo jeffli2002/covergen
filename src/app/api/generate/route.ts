@@ -112,6 +112,14 @@ export async function POST(request: NextRequest) {
     // Extract image data from Gemini's response
     const message = result.choices[0]?.message as any
     console.log('Full Gemini response:', JSON.stringify(result, null, 2))
+    console.log('Message content type:', typeof message?.content)
+    console.log('Message content:', message?.content)
+    
+    // Check if this is an image generation model response
+    // The Gemini 2.5 Flash Image model might return images differently
+    if (result.choices?.[0]?.finish_reason === 'stop' && !message?.content) {
+      console.log('Empty response from model - this might be a chat model, not an image model')
+    }
     
     // Parse the response to extract generated images
     let generatedImages: string[] = []
@@ -152,8 +160,21 @@ export async function POST(request: NextRequest) {
     }
     
     
-    // If no images were extracted, generate placeholder data URLs for testing
+    // If no images were extracted, the AI model is not returning images
     if (generatedImages.length === 0) {
+      console.warn('WARNING: No images were returned from the AI model. This might indicate:')
+      console.warn('1. The Gemini 2.5 Flash Image Preview model requires different API parameters')
+      console.warn('2. The model might need specific formatting for image generation requests')
+      console.warn('3. OpenRouter might handle this model differently than expected')
+      console.warn('Current model:', GEMINI_MODEL)
+      
+      // For now, return an error instead of placeholders in production
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('Image generation is temporarily unavailable. The AI model configuration needs to be updated to use an image generation model instead of a chat model.')
+      }
+      
+      console.warn('Development mode: Generating placeholder images as fallback...')
+      
       // Use platform dimensions or default to 1920x1080 for placeholders
       // For "none" platform, use a reasonable default placeholder size
       const width = dimensions?.width || 1920
