@@ -1,7 +1,7 @@
 'use client'
 
 import { lazy, Suspense } from 'react'
-import { Music, Music, Square, Headphones, Sparkles, Sparkles } from 'lucide-react'
+import { Music, Square, Headphones, Sparkles } from 'lucide-react'
 import { getLightweightKeywords } from '@/lib/seo/lightweight-keywords'
 import { platformShowcases } from '@/lib/platform-showcases'
 
