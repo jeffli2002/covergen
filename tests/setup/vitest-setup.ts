@@ -1,5 +1,5 @@
-import { vi } from 'vitest';
-import dotenv from 'dotenv';
+import { vi, afterAll } from 'vitest';
+import * as dotenv from 'dotenv';
 
 // Load test environment variables
 dotenv.config({ path: '.env.test' });
