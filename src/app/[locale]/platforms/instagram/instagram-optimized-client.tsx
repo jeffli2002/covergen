@@ -169,7 +169,7 @@ function DynamicShowcaseLoader() {
 }
 
 function DynamicShowcaseWrapper() {
-  const [showcases, setShowcases] = useState([])
+  const [showcases, setShowcases] = useState<any[]>([])
   
   useEffect(() => {
     getShowcaseData().then(data => {
