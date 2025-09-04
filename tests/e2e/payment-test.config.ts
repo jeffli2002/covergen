@@ -24,6 +24,12 @@ export default defineConfig({
     // Payment-specific settings
     actionTimeout: 15000, // 15 seconds for actions
     navigationTimeout: 30000, // 30 seconds for navigation
+    
+    // Environment variables for payment testing
+    extraHTTPHeaders: {
+      // Add any required headers for payment testing
+      'X-Test-Mode': 'true',
+    },
   },
 
   projects: [
@@ -56,12 +62,4 @@ export default defineConfig({
   // Payment test specific setup
   globalSetup: './payment-test-setup.ts',
   globalTeardown: './payment-test-teardown.ts',
-
-  // Environment variables for payment testing
-  use: {
-    extraHTTPHeaders: {
-      // Add any required headers for payment testing
-      'X-Test-Mode': 'true',
-    },
-  },
 });
