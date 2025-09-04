@@ -226,7 +226,7 @@ class CreemPaymentService {
 
       // Handle different response structures
       const checkoutId = checkout.id
-      const checkoutUrl = checkout.checkoutUrl || checkout.url || `https://app.creem.io/checkout/${checkoutId}`
+      const checkoutUrl = checkout.checkoutUrl || `https://app.creem.io/checkout/${checkoutId}`
       
       console.log('[Creem] Checkout created:', {
         id: checkoutId,
