@@ -110,18 +110,7 @@ export default function InstagramOptimizedClient({ locale, translations }: { loc
         </div>
       </section>
 
-      {/* Lazy load remaining content */}
-      <Suspense fallback={<div className="h-64 bg-gray-50 animate-pulse" />}>
-        <InstagramFormatsSection />
-      </Suspense>
-
-      <Suspense fallback={<div className="h-64 bg-gray-50 animate-pulse" />}>
-        <InstagramAlgorithmSection />
-      </Suspense>
-
-      <Suspense fallback={<div className="h-64 bg-gray-50 animate-pulse" />}>
-        <InstagramBestPracticesSection />
-      </Suspense>
+      {/* Additional sections can be added here */}
 
       {/* CTA Section - Critical */}
       <section className="py-20 bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 text-white">
@@ -192,7 +181,3 @@ function DynamicShowcaseWrapper() {
   )
 }
 
-// Lazy-loaded sections
-const InstagramFormatsSection = lazy(() => import('./sections/FormatsSection'))
-const InstagramAlgorithmSection = lazy(() => import('./sections/AlgorithmSection'))
-const InstagramBestPracticesSection = lazy(() => import('./sections/BestPracticesSection'))
