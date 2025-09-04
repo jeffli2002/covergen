@@ -200,11 +200,16 @@ class AuthService {
         throw new Error('Supabase not configured')
       }
 
+      // Get redirect URL from browser or environment
+      const redirectUrl = typeof window !== 'undefined' 
+        ? `${window.location.origin}/en` 
+        : `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001'}/en`
+      
       // Simple OAuth like production - let Supabase handle everything
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${siteUrl}${redirectUrl || `/${locale || 'en'}`}`,
+          redirectTo: redirectUrl,
           queryParams: {
             // Force account selection to allow switching accounts
             prompt: 'select_account',
