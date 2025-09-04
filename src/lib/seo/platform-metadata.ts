@@ -145,7 +145,7 @@ export const PLATFORM_IMAGE_CONFIGS = {
 
 // Image optimization preload hints
 export function generateImagePreloadLinks(platform: string): string[] {
-  const config = PLATFORM_IMAGE_CONFIGS[platform.toLowerCase()]
+  const config = PLATFORM_IMAGE_CONFIGS[platform.toLowerCase() as keyof typeof PLATFORM_IMAGE_CONFIGS]
   if (!config) return []
 
   return [

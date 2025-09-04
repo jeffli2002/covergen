@@ -128,9 +128,10 @@ export const BUNDLE_OPTIMIZATION = {
   
   // Third-party libraries to load on demand
   lazyLibraries: {
-    'framer-motion': () => import('framer-motion'),
-    'react-intersection-observer': () => import('react-intersection-observer'),
-    'react-lazy-load-image-component': () => import('react-lazy-load-image-component')
+    // Commented out until these libraries are installed
+    // 'framer-motion': () => import('framer-motion'),
+    // 'react-intersection-observer': () => import('react-intersection-observer'),
+    // 'react-lazy-load-image-component': () => import('react-lazy-load-image-component')
   }
 }
 
