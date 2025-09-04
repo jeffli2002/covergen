@@ -159,13 +159,6 @@ export default function InstagramOptimizedClient({ locale, translations }: { loc
   )
 }
 
-// Helper function to get showcase data
-async function getShowcaseData() {
-  // This would typically fetch from an API or import from a data file
-  // For now, return empty array to prevent errors
-  return []
-}
-
 // Lazy-loaded components
 function DynamicShowcaseLoader() {
   return (
@@ -179,7 +172,11 @@ function DynamicShowcaseWrapper() {
   const [showcases, setShowcases] = useState([])
   
   useEffect(() => {
-    getShowcaseData().then(setShowcases)
+    getShowcaseData().then(data => {
+      if (data && Array.isArray(data)) {
+        setShowcases(data)
+      }
+    })
   }, [])
   
   if (!showcases.length) {
