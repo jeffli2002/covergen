@@ -1,0 +1,48 @@
+import { Metadata } from 'next'
+import dynamic from 'next/dynamic'
+import Link from 'next/link'
+import { Star, Zap, Palette, Sparkles, Download, Share2 } from 'lucide-react'
+
+// Lazy load the tool component
+const AnimePosterTool = dynamic(() => import('@/components/tools/AnimePosterTool'), {
+  loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded-lg" />,
+  ssr: false
+})
+
+export const metadata: Metadata = {
+  title: 'Anime Poster Maker - Create Stunning Anime Posters with AI | CoverGen Pro',
+  description: 'Design professional anime posters in seconds with our AI-powered anime poster maker. Choose from 100+ anime styles, add Japanese text, and create eye-catching designs for your anime content.',
+  keywords: [
+    'anime poster maker',
+    'anime poster generator',
+    'anime poster creator',
+    'anime poster design',
+    'manga poster maker',
+    'anime art generator',
+    'anime cover maker',
+    'japanese poster design',
+    'anime poster templates',
+    'free anime poster maker',
+    'AI anime poster',
+    'anime poster maker online',
+    'custom anime posters',
+    'anime movie poster maker',
+    'anime event poster'
+  ],
+  openGraph: {
+    title: 'Anime Poster Maker - Create Stunning Anime Posters with AI',
+    description: 'Design professional anime posters in seconds. 100+ anime styles, Japanese typography, and AI-powered generation.',
+    images: ['/og/anime-poster-maker.jpg'],
+    type: 'website',
+  },
+  alternates: {
+    canonical: 'https://covergen.pro/tools/anime-poster-maker',
+  },
+}
+
+// Schema markup for SEO
+const schemaData = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Anime Poster Maker",
+  "applicationCategory": "DesignApplication",

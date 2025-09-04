@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useAppStore } from '@/lib/store'
 import { useAnalytics } from '@/lib/analytics'
+import { useAuth } from '@/contexts/AuthContext'
+import { supabase } from '@/lib/supabase'
 import { 
   Sparkles, 
   Zap, 
@@ -23,6 +25,7 @@ import {
 } from 'lucide-react'
 import { TikTokIcon, SpotifyIcon, TwitterXIcon } from '@/components/icons/brand-icons'
 import { Locale } from '@/lib/i18n/config'
+import { AuthDebugSimple } from '@/components/auth/AuthDebugSimple'
 
 interface HomePageClientProps {
   locale: Locale
@@ -95,21 +98,30 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
     isOpen: false,
     context: 'general'
   })
+  const { user: authUser } = useAuth()
 
-  // Handle OAuth callback
+  // Debug session state
+  useEffect(() => {
+    const debugSession = async () => {
+      if (!supabase) return
+      const { data: { session }, error } = await supabase.auth.getSession()
+      console.log('[PageClient Debug]', {
+        authUser: authUser?.email,
+        session: session?.user?.email,
+        cookies: document.cookie,
+        hasAuthCookies: document.cookie.includes('sb-'),
+        error
+      })
+    }
+    debugSession()
+  }, [authUser])
+
+  // Handle OAuth callback - detect when we have a code and no user yet
   useEffect(() => {
     const handleOAuthCallback = async () => {
       const urlParams = new URLSearchParams(window.location.search)
-      const code = urlParams.get('code')
       const error = urlParams.get('error')
       const errorDescription = urlParams.get('error_description')
-      
-      console.log('[HomePage] OAuth check:', { 
-        code: !!code, 
-        error, 
-        hasUser: !!user,
-        url: window.location.href
-      })
       
       if (error) {
         console.error('[HomePage] OAuth error:', errorDescription || error)
@@ -117,33 +129,10 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         window.history.replaceState({}, document.title, window.location.pathname)
         return
       }
-      
-      if (code && !user) {
-        // OAuth callback detected, force a refresh of auth state
-        console.log('[HomePage] OAuth code detected, refreshing auth state...')
-        
-        // Wait a moment for Supabase to process, then refresh auth state
-        setTimeout(async () => {
-          try {
-            // Force a re-check of the session by reinitializing
-            const { default: authService } = await import('@/services/authService')
-            await authService.initialize()
-            console.log('[HomePage] Auth state refreshed')
-          } catch (err) {
-            console.error('[HomePage] Auth refresh error:', err)
-          }
-          
-          // Clean up URL
-          window.history.replaceState({}, document.title, window.location.pathname)
-        }, 1500)
-      } else if (code && user) {
-        // User is already authenticated, just clean up URL
-        window.history.replaceState({}, document.title, window.location.pathname)
-      }
     }
     
     handleOAuthCallback()
-  }, [user])
+  }, [])
   
   // Handle post-OAuth redirect
   useEffect(() => {
@@ -182,6 +171,16 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Debug panel */}
+      <AuthDebugSimple />
+      
+      {/* Temporary debug text */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="fixed top-4 right-4 bg-yellow-400 text-black p-2 rounded text-sm z-50">
+          DEBUG: User = {authUser?.email || 'Not signed in'}
+        </div>
+      )}
+      
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
@@ -615,7 +614,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
 
         {/* Pricing Section */}
         <section id="pricing">
-          <PricingSection />
+          <PricingSection locale={locale} />
         </section>
 
         {/* CTA Section */}

@@ -74,8 +74,8 @@ export default function PerformanceMonitor({
         cls: Math.round(cls * 1000) / 1000,
         fid: Math.round(fid),
         ttfb: Math.round(navigation.responseStart - navigation.requestStart),
-        loadTime: Math.round(navigation.loadEventEnd - navigation.navigationStart),
-        domContentLoaded: Math.round(navigation.domContentLoadedEventEnd - navigation.navigationStart),
+        loadTime: Math.round(navigation.loadEventEnd - navigation.fetchStart),
+        domContentLoaded: Math.round(navigation.domContentLoadedEventEnd - navigation.fetchStart),
         jsHeapUsed,
         jsHeapTotal,
       }

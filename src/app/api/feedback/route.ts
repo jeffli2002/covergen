@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
-import rateLimit from '@/lib/rate-limit'
+// import rateLimit from '@/lib/rate-limit' // TODO: Fix rate limiting implementation
 import type { Database } from '@/types/supabase'
 
 // Initialize Supabase client with service role key for server-side operations
@@ -22,10 +22,11 @@ if (!supabaseUrl || !supabaseServiceKey) {
 }
 
 // Rate limiter: 5 feedback submissions per IP per minute
-const limiter = rateLimit({
-  interval: 60 * 1000, // 60 seconds
-  uniqueTokenPerInterval: 500, // Max number of users during interval
-})
+// TODO: Implement proper rate limiting
+// const limiter = rateLimit({
+//   interval: 60 * 1000, // 60 seconds
+//   uniqueTokenPerInterval: 500, // Max number of users during interval
+// })
 
 interface FeedbackData {
   context: 'generation' | 'result' | 'general'

@@ -1,0 +1,86 @@
+
+> coverimage-generator@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.32
+  - Local:        http://localhost:3001
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 12.5s
+ ○ Compiling /src/middleware ...
+ ✓ Compiled /src/middleware in 1041ms (161 modules)
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 10.8s (515 modules)
+ GET /api/payment/test-creem 404 in 12133ms
+ ✓ Compiled in 2.6s (260 modules)
+ GET /api/payment/test-creem 404 in 185ms
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (108kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ ○ Compiling /api/payment/create-checkout ...
+ ✓ Compiled /api/payment/create-checkout in 1258ms (228 modules)
+[Creem Init] Configuration: {
+  testMode: true,
+  hasApiKey: true,
+  apiKeyPrefix: 'creem_test...',
+  nodeEnv: 'development'
+}
+Create checkout API called
+Request body: {
+  planId: 'pro',
+  successUrl: 'http://localhost:3001/en/payment/success?session_id={CHECKOUT_SESSION_ID}',
+  cancelUrl: 'http://localhost:3001/en/payment/cancel'
+}
+Auth header present: true
+Token extracted: eyJhbGciOiJIUzI1NiIs...
+Creating Creem checkout session: {
+  userId: '4d1c8dec-3f72-4ac9-8c24-95ae375dbf1a',
+  planId: 'pro',
+  env: { hasApiKey: true, hasProPlanId: true, hasProPlusPlanId: true }
+}
+[Creem] Creating checkout with: {
+  productId: 'prod_7aQWgvmz1JHGafTEGZtz9g',
+  planId: 'pro',
+  userEmail: 'jefflee2002@gmail.com',
+  apiKey: 'Present',
+  apiKeyLength: 33,
+  testMode: true
+}
+[Creem] Checkout response: {
+  id: 'ch_5hAs2nwKyNpv4LtCFENeiC',
+  mode: 'test',
+  object: 'checkout',
+  status: 'pending',
+  product: 'prod_7aQWgvmz1JHGafTEGZtz9g',
+  units: 1,
+  checkoutUrl: 'https://creem.io/test/checkout/prod_7aQWgvmz1JHGafTEGZtz9g/ch_5hAs2nwKyNpv4LtCFENeiC',
+  successUrl: 'http://localhost:3001/en/payment/success?session_id={CHECKOUT_SESSION_ID}',
+  metadata: {
+    planId: 'pro',
+    userId: '4d1c8dec-3f72-4ac9-8c24-95ae375dbf1a',
+    userEmail: 'jefflee2002@gmail.com',
+    currentPlan: 'free'
+  }
+}
+[Creem] Checkout created: {
+  id: 'ch_5hAs2nwKyNpv4LtCFENeiC',
+  url: 'https://creem.io/test/checkout/prod_7aQWgvmz1JHGafTEGZtz9g/ch_5hAs2nwKyNpv4LtCFENeiC',
+  hasUrl: true
+}
+Creem checkout result: {
+  success: true,
+  hasUrl: true,
+  url: 'https://creem.io/test/checkout/prod_7aQWgvmz1JHGaf...',
+  error: undefined
+}
+Created Creem checkout session: {
+  sessionId: 'ch_5hAs2nwKyNpv4LtCFENeiC',
+  planId: 'pro',
+  userId: '4d1c8dec-3f72-4ac9-8c24-95ae375dbf1a',
+  email: 'jefflee2002@gmail.com'
+}
+ POST /api/payment/create-checkout 200 in 7088ms
+ ○ Compiling /[locale]/payment/success ...
+ ✓ Compiled /[locale]/payment/success in 4.5s (985 modules)
+ GET /en/payment/success?session_id=%7BCHECKOUT_SESSION_ID%7D&request_id=checkout_4d1c8dec-3f72-4ac9-8c24-95ae375dbf1a_1756973635466&checkout_id=ch_5hAs2nwKyNpv4LtCFENeiC&order_id=ord_2ZUZX7gPYOSUVcoMie1gGg&customer_id=cust_5VBGLoHBQfH1VVrCJ3gQ1b&subscription_id=sub_5dTb681WiYRdsnIxn2Ngze&product_id=prod_7aQWgvmz1JHGafTEGZtz9g&signature=d1f340be1a4e16a7f7ecd0e421f27d06526b61097ec534bd07c7ad09f4e0cdae 200 in 8373ms
+ ✓ Compiled /_not-found in 303ms (506 modules)
+ GET /en/.well-known/appspecific/com.chrome.devtools.json 404 in 559ms

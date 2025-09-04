@@ -1,4 +1,8 @@
 // SEO utility functions and constants
+import { PLATFORM_KEYWORDS, getPlatformKeywords, getAllKeywords } from './seo/platform-keywords';
+
+// Re-export for external use
+export { getPlatformKeywords };
 
 export const SEO_CONSTANTS = {
   siteName: 'CoverGen AI',
@@ -10,40 +14,50 @@ export const SEO_CONSTANTS = {
   titleTemplate: '%s | CoverGen AI',
   homepageTitle: 'CoverGen AI - AI-Powered Cover & Poster Generator for Content Creators',
   
-  // Common keywords by category
+  // Common keywords by category - now using the comprehensive platform keywords
   keywords: {
     general: [
       'AI cover generator',
       'social media cover design',
       'content creator tools',
       'automatic cover generation',
-      'AI design tools'
+      'AI design tools',
+      'cover',
+      'cover image',
+      'cover maker',
+      'cover image generator',
+      'thumbnail',
+      'thumbnail maker',
+      'poster',
+      'poster maker',
+      'poster image maker',
+      'poster image generator',
     ],
-    youtube: [
-      'YouTube thumbnail maker',
-      'YouTube thumbnail generator',
-      'AI thumbnail creator',
-      'YouTube cover maker',
-      'thumbnail design tool'
-    ],
-    tiktok: [
-      'TikTok cover maker',
-      'TikTok thumbnail generator',
-      'vertical video thumbnail',
-      'TikTok content tools'
-    ],
-    spotify: [
-      'Spotify album art maker',
-      'Spotify cover generator',
-      'music cover design',
-      'album artwork creator'
-    ],
-    twitch: [
-      'Twitch thumbnail maker',
-      'Twitch overlay creator',
-      'stream thumbnail generator',
-      'gaming cover maker'
-    ]
+    youtube: getPlatformKeywords('youtube'),
+    tiktok: getPlatformKeywords('tiktok'),
+    spotify: getPlatformKeywords('spotify'),
+    twitch: getPlatformKeywords('twitch'),
+    instagram: getPlatformKeywords('instagram'),
+    linkedin: getPlatformKeywords('linkedin'),
+    twitter: getPlatformKeywords('twitter'),
+    facebook: getPlatformKeywords('facebook'),
+    pinterest: getPlatformKeywords('pinterest'),
+    snapchat: getPlatformKeywords('snapchat'),
+    discord: getPlatformKeywords('discord'),
+    reddit: getPlatformKeywords('reddit'),
+    telegram: getPlatformKeywords('telegram'),
+    whatsapp: getPlatformKeywords('whatsapp'),
+    xiaohongshu: getPlatformKeywords('xiaohongshu'),
+    wechat: getPlatformKeywords('wechat'),
+    weibo: getPlatformKeywords('weibo'),
+    bilibili: getPlatformKeywords('bilibili'),
+    douyin: getPlatformKeywords('douyin'),
+    amazon: getPlatformKeywords('amazon'),
+    etsy: getPlatformKeywords('etsy'),
+    shopify: getPlatformKeywords('shopify'),
+    behance: getPlatformKeywords('behance'),
+    dribbble: getPlatformKeywords('dribbble'),
+    figma: getPlatformKeywords('figma'),
   }
 }
 

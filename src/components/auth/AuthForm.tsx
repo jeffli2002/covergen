@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Alert } from '@/components/ui/alert'
@@ -25,14 +25,7 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
     confirmPassword: ''
   })
 
-  const { signIn, signUp, signInWithGoogle, resetPassword, user } = useAuth()
-
-  // Monitor auth state changes and close modal when user is authenticated
-  useEffect(() => {
-    if (user && onAuthSuccess) {
-      onAuthSuccess(user)
-    }
-  }, [user, onAuthSuccess])
+  const { signIn, signUp, signInWithGoogle, resetPassword } = useAuth()
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -135,8 +128,6 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
       
       if (result.success) {
         setMessage({ type: 'success', text: 'Redirecting to Google...' })
-        // The page will redirect to Google OAuth, so we don't close the modal here
-        // The modal will be closed when the user returns from Google OAuth
       } else {
         setMessage({ type: 'error', text: result.error })
       }
@@ -177,7 +168,7 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <Wand2 className="h-12 w-12 text-purple-600" />
-            <span className="text-3xl font-bold text-white ml-2">CoverGen Pro</span>
+            <span className="text-3xl font-bold text-white ml-2">CoverImage AI</span>
           </div>
           <p className="text-gray-200">Create stunning covers with AI</p>
         </div>
@@ -186,7 +177,7 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle className="text-center">
-                {isLogin ? 'Welcome Back!' : 'Join CoverGen Pro'}
+                {isLogin ? 'Welcome Back!' : 'Join CoverImage AI'}
               </CardTitle>
               {onClose && (
                 <Button
@@ -355,7 +346,7 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
               <div className="mt-4 p-3 bg-purple-50 rounded-md">
                 <p className="text-xs text-purple-800">
                   By creating an account, you agree to our Terms of Service and Privacy Policy. 
-                  Free users can create up to 10 images per day.
+                  Free users can create up to 3 images per day.
                 </p>
               </div>
             )}
@@ -363,7 +354,7 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
         </Card>
 
         <div className="mt-8 text-center">
-          <h3 className="text-lg font-semibold text-white mb-4">Why Choose CoverGen Pro?</h3>
+          <h3 className="text-lg font-semibold text-white mb-4">Why Choose CoverImage AI?</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3">
               <div className="font-medium text-purple-300">AI-Powered</div>
@@ -375,7 +366,7 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
             </div>
             <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3">
               <div className="font-medium text-blue-300">Free Tier</div>
-              <div className="text-gray-200">10 images daily</div>
+              <div className="text-gray-200">3 images daily</div>
             </div>
           </div>
         </div>

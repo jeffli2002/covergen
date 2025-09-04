@@ -87,13 +87,13 @@ export default function WeChatCoverMakerClient({ locale, translations }: { local
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
                 <Link href={`/${locale}#generator`}>
-                  <Button size="lg" className="bg-white text-green-700 hover:bg-green-50 px-8 py-6 text-lg">
-                    <Sparkles className="w-5 h-5 mr-2" />
+                  <Button size="lg" variant="ghost" className="bg-white hover:bg-gray-100 px-8 py-6 text-lg shadow-lg font-semibold" style={{color: '#15803d'}}>
+                    <Sparkles className="w-5 h-5 mr-2 text-green-700" />
                     Create WeChat Covers
                   </Button>
                 </Link>
                 <Link href={`/${locale}#pricing`}>
-                  <Button size="lg" variant="outline" className="text-white border-white hover:bg-green-700 px-8 py-6 text-lg">
+                  <Button size="lg" variant="ghost" className="text-white border-2 border-white hover:bg-white hover:text-green-700 px-8 py-6 text-lg font-semibold transition-colors">
                     View Pricing
                   </Button>
                 </Link>
@@ -290,7 +290,7 @@ export default function WeChatCoverMakerClient({ locale, translations }: { local
               Create covers that connect with 1.3 billion users
             </p>
             <Link href={`/${locale}#generator`}>
-              <Button size="lg" className="bg-white text-green-700 hover:bg-green-50 px-8 py-6 text-lg font-semibold">
+              <Button size="lg" variant="ghost" className="bg-white hover:bg-gray-100 px-8 py-6 text-lg font-semibold shadow-lg" style={{color: '#15803d'}}>
                 Start Creating WeChat Covers
               </Button>
             </Link>

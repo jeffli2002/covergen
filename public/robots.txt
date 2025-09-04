@@ -1,16 +1,50 @@
 # robots.txt for CoverGen Pro
-# Last updated: 2025-08-31
+# Last updated: 2025-09-02
+# AI-powered cover and thumbnail generator for content creators
 
-# Default - Allow all crawlers
+# Default - Allow all crawlers with content prioritization
 User-agent: *
 Allow: /
-Allow: /platforms/*
-Allow: /blog/*
-Allow: /tutorials/*
-Allow: /showcase/*
-Allow: /pricing
-Allow: /help
-Allow: /support
+
+# High-value content pages - prioritize for indexing
+Allow: /en/platforms/*
+Allow: /en/tools/*
+Allow: /en/blog/*
+Allow: /en/tutorials/*
+Allow: /en/showcase/*
+Allow: /en/pricing
+Allow: /en/help
+Allow: /en/support
+Allow: /en/feedback
+Allow: /en/status
+
+# Explicitly allow popular platform pages (high-priority SEO targets)
+Allow: /en/platforms/youtube
+Allow: /en/platforms/tiktok
+Allow: /en/platforms/instagram
+Allow: /en/platforms/spotify
+Allow: /en/platforms/twitch
+Allow: /en/platforms/linkedin
+Allow: /en/platforms/wechat
+Allow: /en/platforms/rednote
+
+# Explicitly allow tool pages (low-KD keyword targets)
+Allow: /en/tools/anime-poster-maker
+Allow: /en/tools/bilibili-video-cover
+Allow: /en/tools/spotify-playlist-cover
+Allow: /en/tools/facebook-event-cover
+Allow: /en/tools/social-media-poster
+Allow: /en/tools/book-cover-creator
+Allow: /en/tools/game-cover-art
+Allow: /en/tools/webinar-poster-maker
+Allow: /en/tools/event-poster-designer
+Allow: /en/tools/music-album-cover
+
+# Allow localized versions
+Allow: /es/*
+Allow: /pt/*
+Allow: /zh/*
+Allow: /ar/*
 
 # Block access to API routes
 Disallow: /api/
@@ -28,19 +62,30 @@ Disallow: /node_modules/
 Disallow: /*.json$
 Disallow: /*.map$
 Disallow: /.env*
+Disallow: /*.log$
+Disallow: /tmp/
+Disallow: /temp/
+
+# Block duplicate content paths
+Disallow: /*?*
+Disallow: /*#*
+Disallow: /print/
+Disallow: /mobile/
 
 # Allow specific important resources
 Allow: /images/
 Allow: /favicon.ico
-Allow: /og-image.jpg
+Allow: /og-image.png
 Allow: /twitter-image.png
+Allow: /manifest.json
 Allow: /*.css$
 Allow: /*.js$
+Allow: /fonts/
 
 # Crawl delay to prevent server overload
 Crawl-delay: 1
 
-# Sitemap location
+# Sitemap location - Single comprehensive sitemap
 Sitemap: https://covergen.pro/sitemap.xml
 
 # Specific bot rules

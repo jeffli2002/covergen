@@ -1,0 +1,52 @@
+Pls provide all needed cover pictures in all created landing pages rather than just having a placeholder.  You can search and download related cover images with suggested title and  your smart prompt, resize it  based on targeted platform requirement then feed all inputs to AI  to generate fascinating coverage image and upload them to corresponding landing pages. Ultrathink.
+
+
+All downloaded images should fit the platform style.
+You need to add appropriate  title and prompt （e.g.  background change, clothes change, hair style change, etc.)   to feed AI to generate cool cover image for this flatform.
+In the end, the original downloaded image and AI generated image , both are supposed to be added on landing page for comparison.
+
+
+Update Todos
+  ⎿  ☒ Kill any running Node/npm processes
+     ☒ Clean npm cache and remove node_modules
+     ☐ Reinstall dependencies
+     ☐ Start development server
+
+● Bash(npm install)
+  ⎿  Error: Command timed out after 2m 0.0s npm WARN EBADENGINE Unsupported engine {
+     npm WARN EBADENGINE   package: 'lru-cache@11.1.0',
+     npm WARN EBADENGINE   required: { node: '20 || >=22' },
+     npm WARN EBADENGINE   current: { node: 'v18.19.1', npm: '9.2.0' }
+     npm WARN EBADENGINE }
+     npm WARN deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out
+     lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more
+     comprehensive and powerful.
+     npm WARN deprecated @humanwhocodes/config-array@0.13.0: Use @eslint/config-array instead
+     npm WARN deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+     npm WARN deprecated @humanwhocodes/object-schema@2.0.3: Use @eslint/object-schema instead
+     npm WARN deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+     … +1 line (ctrl+r to see all)
+
+
+
+
+> ● Update Todos
+    ⎿  ☒ Find all tool pages and components
+       ☒ Check each tool for cards under Output Gallery
+       ☒ EventPosterTool - Move card to separate section
+       ☒ GameCoverArtTool - Move card to separate section
+       ☒ WebinarPosterTool - Move card to separate section
+       ☐ MusicAlbumCoverTool - Move card to separate section
+       ☐ SpotifyPlaylistCoverTool - Move card to separate section
+    ⎿  API Error (503 upstream connect error or disconnect/reset before headers. reset reason: overflow) · Retrying
+   in 1 seconds… (attempt 1/10)
+    ⎿  API Error (503 upstream connect error or disconnect/reset before headers. reset reason: overflow) · Retrying
+   in 1 seconds… (attempt 2/10)
+    ⎿  API Error (503 upstream connect error or disconnect/reset before headers. reset reason: overflow) · Retrying
+   in 2 seconds… (attempt 3/10)
+    ⎿  API Error (503 upstream connect error or disconnect/reset before headers. reset reason: overflow) · Retrying
+   in 5 seconds… (attempt 4/10)
+    ⎿  API Error (503 upstream connect error or disconnect/reset before headers. reset reason: overflow) · Retrying
+   in 9 seconds… (attempt 5/10)
+
+  ● Read(src/components/tools/MusicAlbumCoverTool.tsx)

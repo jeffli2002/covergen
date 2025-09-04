@@ -10,7 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: `${baseUrl}/en`,
       lastModified: currentDate,
-      changeFrequency: 'weekly' as const,
+      changeFrequency: 'daily' as const,
       priority: 1.0,
       alternates: {
         languages: generateLanguageAlternates(''),
@@ -138,13 +138,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Platform-specific pages with proper priorities and keywords focus
   const platforms = [
     { name: 'youtube', priority: 0.95 }, // Higher priority for popular platforms
-    { name: 'twitch', priority: 0.9 },
-    { name: 'spotify', priority: 0.9 },
     { name: 'tiktok', priority: 0.95 }, // High demand platform
-    { name: 'linkedin', priority: 0.85 },
     { name: 'instagram', priority: 0.9 },
-    { name: 'xiaohongshu', priority: 0.85 },
+    { name: 'spotify', priority: 0.9 },
+    { name: 'twitch', priority: 0.9 },
+    { name: 'linkedin', priority: 0.85 },
     { name: 'wechat', priority: 0.85 },
+    { name: 'rednote', priority: 0.85 },
   ]
   
   const platformRoutes = platforms.flatMap((platform) => [
@@ -159,8 +159,34 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ])
   
+  // Tool-specific pages with SEO focus on low-KD keywords
+  const tools = [
+    { name: 'anime-poster-maker', priority: 0.8 },
+    { name: 'bilibili-video-cover', priority: 0.8 },
+    { name: 'spotify-playlist-cover', priority: 0.85 },
+    { name: 'facebook-event-cover', priority: 0.8 },
+    { name: 'social-media-poster', priority: 0.85 },
+    { name: 'book-cover-creator', priority: 0.85 },
+    { name: 'game-cover-art', priority: 0.8 },
+    { name: 'webinar-poster-maker', priority: 0.75 },
+    { name: 'event-poster-designer', priority: 0.75 },
+    { name: 'music-album-cover', priority: 0.85 },
+  ]
+  
+  const toolRoutes = tools.flatMap((tool) => [
+    {
+      url: `${baseUrl}/en/tools/${tool.name}`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly' as const,
+      priority: tool.priority,
+      alternates: {
+        languages: generateLanguageAlternates(`/tools/${tool.name}`),
+      },
+    },
+  ])
+  
   // Combine all routes
-  return [...staticRoutes, ...platformRoutes]
+  return [...staticRoutes, ...platformRoutes, ...toolRoutes]
 }
 
 // Helper function to generate language alternates

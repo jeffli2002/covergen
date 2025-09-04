@@ -8,7 +8,14 @@ export const metadata: Metadata = {
   description: 'Create viral TikTok covers that boost engagement. AI-powered vertical cover generation optimized for TikTok\'s algorithm and Gen-Z aesthetics.',
   keywords: [
     'TikTok cover maker',
+    'TikTok thumbnail maker',
     'TikTok thumbnail generator',
+    'TikTok cover creator',
+    'TikTok poster maker',
+    'TikTok cover image generator',
+    'TikTok thumbnail designer',
+    'TikTok poster image maker',
+    'tiktok thumbnail maker',
     'TikTok video cover',
     'vertical video thumbnail',
     'TikTok cover design',
@@ -16,7 +23,10 @@ export const metadata: Metadata = {
     'viral TikTok covers',
     'TikTok cover templates',
     'mobile video covers',
-    'TikTok content creator tools'
+    'TikTok content creator tools',
+    'TikTok story cover maker',
+    'TikTok banner maker',
+    'TikTok profile cover'
   ],
   openGraph: {
     title: 'TikTok Cover Maker - CoverGen AI',

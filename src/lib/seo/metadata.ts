@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import { organizationSchema, websiteSchema, softwareApplicationSchema } from './schema'
+import { getAllKeywords, getPlatformKeywords } from './platform-keywords'
 
 interface GenerateMetadataParams {
   title: string
@@ -17,18 +18,7 @@ interface GenerateMetadataParams {
   schema?: any
 }
 
-const DEFAULT_KEYWORDS = [
-  'AI cover generator',
-  'thumbnail maker', 
-  'cover creator',
-  'AI design tool',
-  'nano banana',
-  'Google Gemini 2.5 Flash',
-  'independent platform',
-  'content creator tools',
-  'social media covers',
-  'instant generation',
-]
+const DEFAULT_KEYWORDS = getAllKeywords()
 
 export function generateMetadata({
   title,

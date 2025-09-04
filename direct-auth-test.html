@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Direct Auth Test</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        button { margin: 5px; padding: 10px; }
+        #output { background: #f0f0f0; padding: 10px; margin-top: 20px; white-space: pre-wrap; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Direct Supabase Auth Test</h1>
+    <p>This page tests authentication directly without the Next.js framework.</p>
+    
+    <button onclick="checkAuth()">Check Auth Status</button>
+    <button onclick="signIn()">Sign In with Google</button>
+    <button onclick="refreshSession()">Refresh Session</button>
+    <button onclick="signOut()">Sign Out</button>
+    <button onclick="clearOutput()">Clear Output</button>
+    
+    <div id="output"></div>
+    
+    <script>
+    const SUPABASE_URL = 'https://exungkcoaihcemcmhqdr.supabase.co'
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4dW5na2NvYWloY2VtY21ocWRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzEzMzg3ODUsImV4cCI6MjA0NjkxNDc4NX0.HVMWCB3VcNyiMyVKY7M1QQMfh3tiMJSZqKxRXtJYlJg'
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    
+    function log(message, type = '') {
+        const output = document.getElementById('output')
+        const timestamp = new Date().toISOString()
+        const className = type ? ` class="${type}"` : ''
+        output.innerHTML += `<div${className}>[${timestamp}] ${message}</div>`
+    }
+    
+    function clearOutput() {
+        document.getElementById('output').innerHTML = ''
+    }
+    
+    async function checkAuth() {
+        log('=== Checking Auth Status ===')
+        
+        try {
+            // Check session
+            const { data: { session }, error } = await supabase.auth.getSession()
+            
+            if (error) {
+                log(`Error: ${error.message}`, 'error')
+                return
+            }
+            
+            if (session) {
+                log(`Authenticated as: ${session.user.email}`, 'success')
+                log(`Provider: ${session.user.app_metadata?.provider}`)
+                log(`Session expires at: ${new Date(session.expires_at * 1000).toLocaleString()}`)
+                log(`Access token: ${session.access_token.substring(0, 50)}...`)
+                
+                // Check if expired
+                const now = Date.now()
+                const expiresAt = session.expires_at * 1000
+                if (now >= expiresAt) {
+                    log('Session has expired!', 'error')
+                } else {
+                    const remainingTime = Math.floor((expiresAt - now) / 1000 / 60)
+                    log(`Session valid for ${remainingTime} more minutes`, 'success')
+                }
+            } else {
+                log('Not authenticated', 'error')
+            }
+            
+            // Check localStorage
+            log('\\n=== localStorage Auth Keys ===')
+            const keys = Object.keys(localStorage)
+            const authKeys = keys.filter(k => k.includes('auth') || k.includes('sb-') || k.includes('supabase'))
+            log(`Found ${authKeys.length} auth-related keys`)
+            authKeys.forEach(k => {
+                const val = localStorage.getItem(k)
+                log(`${k}: ${val?.substring(0, 100)}...`)
+            })
+            
+        } catch (err) {
+            log(`Exception: ${err.message}`, 'error')
+        }
+    }
+    
+    async function signIn() {
+        log('=== Signing in with Google ===')
+        
+        try {
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.href
+                }
+            })
+            
+            if (error) {
+                log(`Sign in error: ${error.message}`, 'error')
+            } else {
+                log('Redirecting to Google...', 'success')
+            }
+        } catch (err) {
+            log(`Exception: ${err.message}`, 'error')
+        }
+    }
+    
+    async function refreshSession() {
+        log('=== Refreshing Session ===')
+        
+        try {
+            const { data: { session }, error } = await supabase.auth.refreshSession()
+            
+            if (error) {
+                log(`Refresh error: ${error.message}`, 'error')
+            } else if (session) {
+                log('Session refreshed successfully!', 'success')
+                log(`New expiration: ${new Date(session.expires_at * 1000).toLocaleString()}`)
+            } else {
+                log('No session to refresh', 'error')
+            }
+        } catch (err) {
+            log(`Exception: ${err.message}`, 'error')
+        }
+    }
+    
+    async function signOut() {
+        log('=== Signing Out ===')
+        
+        try {
+            const { error } = await supabase.auth.signOut()
+            
+            if (error) {
+                log(`Sign out error: ${error.message}`, 'error')
+            } else {
+                log('Signed out successfully', 'success')
+            }
+        } catch (err) {
+            log(`Exception: ${err.message}`, 'error')
+        }
+    }
+    
+    // Check for OAuth callback on page load
+    window.addEventListener('load', () => {
+        const hashParams = new URLSearchParams(window.location.hash.substring(1))
+        if (hashParams.get('access_token')) {
+            log('OAuth callback detected with tokens!', 'success')
+            checkAuth()
+        }
+    })
+    
+    // Listen for auth state changes
+    supabase.auth.onAuthStateChange((event, session) => {
+        log(`\\nAuth state changed: ${event}`)
+        if (session) {
+            log(`User: ${session.user.email}`, 'success')
+        }
+    })
+    </script>
+</body>
+</html>

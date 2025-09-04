@@ -1,0 +1,146 @@
+// Platform showcase data with optimized image paths
+// Images should be pre-optimized using the optimize-images.js script
+
+export interface ShowcaseItem {
+  title: string
+  originalImage: string
+  optimizedImage?: string
+  webpImage?: string
+  placeholderImage?: string
+  targetDimensions: { width: number; height: number; label: string }
+}
+
+export const platformShowcasesOptimized = {
+  youtube: [
+    {
+      title: "10 MIND-BLOWING Tech Gadgets",
+      originalImage: "/platform-examples/youtube/original-1.jpg",
+      optimizedImage: "/platform-examples/youtube/original-1-optimized.jpg",
+      webpImage: "/platform-examples/youtube/original-1.webp",
+      placeholderImage: "/platform-examples/youtube/original-1-placeholder.jpg",
+      targetDimensions: { width: 1280, height: 720, label: "1280×720 (16:9)" }
+    },
+    {
+      title: "I Tried This For 30 Days...",
+      originalImage: "/platform-examples/youtube/original-2.jpg",
+      optimizedImage: "/platform-examples/youtube/original-2-optimized.jpg",
+      webpImage: "/platform-examples/youtube/original-2.webp",
+      placeholderImage: "/platform-examples/youtube/original-2-placeholder.jpg",
+      targetDimensions: { width: 1280, height: 720, label: "1280×720 (16:9)" }
+    },
+    {
+      title: "You Won't Believe What Happened!",
+      originalImage: "/platform-examples/youtube/original-3.jpg",
+      optimizedImage: "/platform-examples/youtube/original-3-optimized.jpg",
+      webpImage: "/platform-examples/youtube/original-3.webp",
+      placeholderImage: "/platform-examples/youtube/original-3-placeholder.jpg",
+      targetDimensions: { width: 1280, height: 720, label: "1280×720 (16:9)" }
+    }
+  ],
+  
+  tiktok: [
+    {
+      title: "Wait for it... 😱",
+      originalImage: "/platform-examples/tiktok/original-1.jpg",
+      optimizedImage: "/platform-examples/tiktok/original-1-optimized.jpg",
+      webpImage: "/platform-examples/tiktok/original-1.webp",
+      placeholderImage: "/platform-examples/tiktok/original-1-placeholder.jpg",
+      targetDimensions: { width: 1080, height: 1920, label: "1080×1920 (9:16)" }
+    },
+    {
+      title: "POV: You're Gen Z",
+      originalImage: "/platform-examples/tiktok/original-2.jpg",
+      optimizedImage: "/platform-examples/tiktok/original-2-optimized.jpg",
+      webpImage: "/platform-examples/tiktok/original-2.webp",
+      placeholderImage: "/platform-examples/tiktok/original-2-placeholder.jpg",
+      targetDimensions: { width: 1080, height: 1920, label: "1080×1920 (9:16)" }
+    }
+  ],
+
+  instagram: [
+    {
+      title: "Living My Best Life ✨",
+      originalImage: "/platform-examples/instagram/original-1.jpg",
+      optimizedImage: "/platform-examples/instagram/original-1-optimized.jpg",
+      webpImage: "/platform-examples/instagram/original-1.webp",
+      placeholderImage: "/platform-examples/instagram/original-1-placeholder.jpg",
+      targetDimensions: { width: 1080, height: 1080, label: "1080×1080 (1:1)" }
+    },
+    {
+      title: "Monday Motivation 💪",
+      originalImage: "/platform-examples/instagram/original-2.jpg",
+      optimizedImage: "/platform-examples/instagram/original-2-optimized.jpg",
+      webpImage: "/platform-examples/instagram/original-2.webp",
+      placeholderImage: "/platform-examples/instagram/original-2-placeholder.jpg",
+      targetDimensions: { width: 1080, height: 1080, label: "1080×1080 (1:1)" }
+    }
+  ],
+
+  spotify: [
+    {
+      title: "Chill Vibes Only",
+      originalImage: "/platform-examples/spotify/original-1.jpg",
+      optimizedImage: "/platform-examples/spotify/original-1-optimized.jpg",
+      webpImage: "/platform-examples/spotify/original-1.webp",
+      placeholderImage: "/platform-examples/spotify/original-1-placeholder.jpg",
+      targetDimensions: { width: 640, height: 640, label: "640×640 (1:1)" }
+    },
+    {
+      title: "Workout Beast Mode",
+      originalImage: "/platform-examples/spotify/original-2.jpg",
+      optimizedImage: "/platform-examples/spotify/original-2-optimized.jpg",
+      webpImage: "/platform-examples/spotify/original-2.webp",
+      placeholderImage: "/platform-examples/spotify/original-2-placeholder.jpg",
+      targetDimensions: { width: 640, height: 640, label: "640×640 (1:1)" }
+    }
+  ],
+
+  twitch: [
+    {
+      title: "EPIC GAMING STREAM",
+      originalImage: "/platform-examples/twitch/original-1.jpg",
+      optimizedImage: "/platform-examples/twitch/original-1-optimized.jpg",
+      webpImage: "/platform-examples/twitch/original-1.webp",
+      placeholderImage: "/platform-examples/twitch/original-1-placeholder.jpg",
+      targetDimensions: { width: 1200, height: 600, label: "1200×600 (2:1)" }
+    },
+    {
+      title: "Just Chatting",
+      originalImage: "/platform-examples/twitch/original-2.jpg",
+      optimizedImage: "/platform-examples/twitch/original-2-optimized.jpg",
+      webpImage: "/platform-examples/twitch/original-2.webp",
+      placeholderImage: "/platform-examples/twitch/original-2-placeholder.jpg",
+      targetDimensions: { width: 1200, height: 600, label: "1200×600 (2:1)" }
+    }
+  ],
+
+  linkedin: [
+    {
+      title: "Professional Excellence",
+      originalImage: "/platform-examples/linkedin/original-1.jpg",
+      optimizedImage: "/platform-examples/linkedin/original-1-optimized.jpg",
+      webpImage: "/platform-examples/linkedin/original-1.webp",
+      placeholderImage: "/platform-examples/linkedin/original-1-placeholder.jpg",
+      targetDimensions: { width: 1584, height: 396, label: "1584×396 (4:1)" }
+    },
+    {
+      title: "Innovation Leader",
+      originalImage: "/platform-examples/linkedin/original-2.jpg",
+      optimizedImage: "/platform-examples/linkedin/original-2-optimized.jpg",
+      webpImage: "/platform-examples/linkedin/original-2.webp",
+      placeholderImage: "/platform-examples/linkedin/original-2-placeholder.jpg",
+      targetDimensions: { width: 1584, height: 396, label: "1584×396 (4:1)" }
+    }
+  ]
+}
+
+// Helper function to get the best available image
+export function getBestImageSrc(item: ShowcaseItem): string {
+  return item.webpImage || item.optimizedImage || item.originalImage
+}
+
+// Helper function to get placeholder data URL
+export function getPlaceholderDataUrl(item: ShowcaseItem): string {
+  // Default blur placeholder if no custom placeholder is available
+  return item.placeholderImage || 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=='
+}

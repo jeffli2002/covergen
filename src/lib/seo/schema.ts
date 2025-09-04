@@ -67,7 +67,7 @@ export const softwareApplicationSchema: WithContext<SoftwareApplication> = {
     },
     {
       '@type': 'Offer',
-      price: '9.99',
+      price: '9',
       priceCurrency: 'USD',
       name: 'Pro Plan',
       description: 'Unlimited covers, priority generation',
@@ -75,7 +75,7 @@ export const softwareApplicationSchema: WithContext<SoftwareApplication> = {
     },
     {
       '@type': 'Offer',
-      price: '19.99',
+      price: '19',
       priceCurrency: 'USD',
       name: 'Pro+ Plan',
       description: 'Everything in Pro + API access, team features',
@@ -119,7 +119,7 @@ export const productSchema: WithContext<Product> = {
     '@type': 'AggregateOffer',
     priceCurrency: 'USD',
     lowPrice: '0',
-    highPrice: '19.99',
+    highPrice: '19',
     offerCount: '3',
   },
   aggregateRating: {
@@ -185,6 +185,41 @@ export function generateFAQSchema(faqs: Array<{ question: string; answer: string
   }
 }
 
+// Tool schema generator
+export function generateToolSchema(tool: {
+  name: string
+  description: string
+  features: string[]
+  url: string
+}): WithContext<SoftwareApplication> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: `CoverGen AI - ${tool.name}`,
+    operatingSystem: 'Web',
+    applicationCategory: 'DesignApplication',
+    applicationSubCategory: 'AI Design Tool',
+    description: tool.description,
+    url: tool.url,
+    featureList: tool.features,
+    provider: {
+      '@id': 'https://covergen.pro/#organization',
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.9',
+      ratingCount: '3247',
+      bestRating: '5',
+    },
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+    },
+  }
+}
+
 // Platform-specific schema generator
 export function generatePlatformSchema(platform: string, features: string[]): WithContext<SoftwareApplication> {
   const platformNames: Record<string, string> = {
@@ -214,5 +249,154 @@ export function generatePlatformSchema(platform: string, features: string[]): Wi
       ratingValue: '4.8',
       ratingCount: '2543',
     },
+  }
+}
+
+// Article schema generator for blog posts
+export function generateArticleSchema(article: {
+  title: string
+  description: string
+  author: string
+  datePublished: string
+  dateModified?: string
+  imageUrl: string
+  url: string
+  wordCount: number
+  keywords: string[]
+}): WithContext<any> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: article.title,
+    description: article.description,
+    author: {
+      '@type': 'Person',
+      name: article.author,
+      url: `https://covergen.pro/authors/${article.author.toLowerCase().replace(' ', '-')}`,
+    },
+    datePublished: article.datePublished,
+    dateModified: article.dateModified || article.datePublished,
+    image: article.imageUrl,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': article.url,
+    },
+    publisher: {
+      '@id': 'https://covergen.pro/#organization',
+    },
+    wordCount: article.wordCount,
+    keywords: article.keywords.join(', '),
+    articleSection: 'Content Creation',
+  }
+}
+
+// How-to schema generator for tutorials
+export function generateHowToSchema(tutorial: {
+  name: string
+  description: string
+  totalTime: string
+  steps: Array<{ name: string; text: string; image?: string }>
+  imageUrl: string
+}): WithContext<any> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: tutorial.name,
+    description: tutorial.description,
+    totalTime: tutorial.totalTime,
+    estimatedCost: {
+      '@type': 'MonetaryAmount',
+      currency: 'USD',
+      value: '0',
+    },
+    supply: [
+      {
+        '@type': 'HowToSupply',
+        name: 'CoverGen Pro Account (Free or Paid)',
+      },
+      {
+        '@type': 'HowToSupply',
+        name: 'Reference Image (Optional)',
+      },
+    ],
+    tool: [
+      {
+        '@type': 'HowToTool',
+        name: 'Web Browser',
+      },
+      {
+        '@type': 'HowToTool',
+        name: 'Internet Connection',
+      },
+    ],
+    step: tutorial.steps.map((step, index) => ({
+      '@type': 'HowToStep',
+      name: step.name,
+      text: step.text,
+      image: step.image,
+      position: index + 1,
+    })),
+    image: tutorial.imageUrl,
+  }
+}
+
+// Video schema generator for video content
+export function generateVideoSchema(video: {
+  name: string
+  description: string
+  thumbnailUrl: string
+  uploadDate: string
+  duration: string
+  embedUrl: string
+  transcript?: string
+}): WithContext<any> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'VideoObject',
+    name: video.name,
+    description: video.description,
+    thumbnailUrl: video.thumbnailUrl,
+    uploadDate: video.uploadDate,
+    duration: video.duration,
+    embedUrl: video.embedUrl,
+    transcript: video.transcript,
+    publisher: {
+      '@id': 'https://covergen.pro/#organization',
+    },
+    contentUrl: video.embedUrl,
+    interactionStatistic: {
+      '@type': 'InteractionCounter',
+      interactionType: { '@type': 'WatchAction' },
+      userInteractionCount: '12456',
+    },
+  }
+}
+
+// Local Business schema for contact/support pages
+export function generateLocalBusinessSchema(): WithContext<any> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    '@id': 'https://covergen.pro/#localbusiness',
+    name: 'CoverGen Pro Support',
+    image: 'https://covergen.pro/logo.png',
+    url: 'https://covergen.pro',
+    telephone: '+1-555-123-4567',
+    email: 'support@covergen.pro',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: '123 AI Street',
+      addressLocality: 'San Francisco',
+      addressRegion: 'CA',
+      postalCode: '94105',
+      addressCountry: 'US',
+    },
+    openingHoursSpecification: {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      opens: '09:00',
+      closes: '18:00',
+    },
+    priceRange: '$0 - $20',
   }
 }

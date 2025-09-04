@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { match as matchLocale } from '@formatjs/intl-localematcher'
 import Negotiator from 'negotiator'
+import { updateSession } from '@/lib/supabase/middleware'
 
 const locales = ['en']
 const defaultLocale = 'en'
@@ -32,7 +33,7 @@ function getLocale(request: NextRequest): string {
   }
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   
   // Check if the pathname is missing a locale
@@ -50,6 +51,9 @@ export function middleware(request: NextRequest) {
     '/ads.txt',
     '/images',
     '/fonts',
+    '/test',
+    '/auth/callback', // Skip middleware for auth callback
+    '.html',
     '.png',
     '.jpg',
     '.jpeg',
@@ -63,6 +67,14 @@ export function middleware(request: NextRequest) {
   if (shouldSkip) {
     return NextResponse.next()
   }
+
+  // Special handling for auth routes - update session but skip locale redirect
+  if (pathname.startsWith('/auth')) {
+    return await updateSession(request)
+  }
+
+  // Update Supabase session
+  const supabaseResponse = await updateSession(request)
 
   // Redirect if pathname is missing locale
   if (pathnameIsMissingLocale) {
@@ -86,22 +98,23 @@ export function middleware(request: NextRequest) {
   const locale = pathname.split('/')[1]
   
   // Set locale cookie if different
-  const response = NextResponse.next()
   const currentLocaleCookie = request.cookies.get('locale')?.value
   
   if (currentLocaleCookie !== locale) {
-    response.cookies.set('locale', locale, { 
+    supabaseResponse.cookies.set('locale', locale, { 
       maxAge: 60 * 60 * 24 * 365, // 1 year
       sameSite: 'lax'
     })
   }
 
-  return response
+  return supabaseResponse
 }
 
 export const config = {
   matcher: [
-    // Skip all internal paths (_next)
-    '/((?!_next|api|favicon.ico|robots.txt|sitemap.xml|ads.txt).*)',
+    // Match all routes except Next.js internals and static files
+    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|ads.txt).*)',
+    // Specifically include auth routes
+    '/auth/:path*',
   ],
 }

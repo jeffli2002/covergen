@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .log {
+            background: #f0f0f0;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>Direct Supabase OAuth Test</h1>
+    
+    <div>
+        <button onclick="checkConfig()">Check Config</button>
+        <button onclick="signInWithGoogle()">Sign in with Google</button>
+        <button onclick="clearLogs()">Clear Logs</button>
+    </div>
+
+    <div id="logs" class="log"></div>
+
+    <script>
+        // Initialize Supabase
+        const SUPABASE_URL = 'https://exungkcoaihcemcmhqdr.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4dW5na2NvYWloY2VtY21ocWRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1MzQzMzMsImV4cCI6MjA3MjExMDMzM30.pU6RCNu0ugnAac8kSgCNyZDHEfU_6B_NpVgR9MwS4_Y';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        function log(message, type = '') {
+            const logsDiv = document.getElementById('logs');
+            const entry = document.createElement('div');
+            entry.className = type;
+            entry.textContent = `[${new Date().toISOString()}] ${message}`;
+            logsDiv.appendChild(entry);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+            console.log(message);
+        }
+
+        async function checkConfig() {
+            log('Checking configuration...');
+            log(`Supabase URL: ${SUPABASE_URL}`);
+            log(`Current location: ${window.location.origin}`);
+            
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                if (error) {
+                    log(`Session check error: ${error.message}`, 'error');
+                } else {
+                    log(`Session exists: ${!!session}`, session ? 'success' : '');
+                    if (session) {
+                        log(`User: ${session.user.email}`, 'success');
+                    }
+                }
+            } catch (err) {
+                log(`Exception: ${err.message}`, 'error');
+            }
+        }
+
+        async function signInWithGoogle() {
+            log('Starting Google OAuth...');
+            
+            try {
+                const redirectTo = `${window.location.origin}/oauth-test.html`;
+                log(`Redirect URL: ${redirectTo}`);
+                
+                const { data, error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: redirectTo,
+                        queryParams: {
+                            access_type: 'offline',
+                            prompt: 'consent',
+                        }
+                    }
+                });
+
+                if (error) {
+                    log(`OAuth Error: ${error.message}`, 'error');
+                    log(`Error details: ${JSON.stringify(error)}`, 'error');
+                } else {
+                    log('OAuth initiated successfully', 'success');
+                    log(`Provider: ${data?.provider}`);
+                    log(`URL: ${data?.url}`);
+                    
+                    if (!data?.url) {
+                        log('ERROR: No OAuth URL returned!', 'error');
+                        log('This usually means Google provider is not configured in Supabase', 'error');
+                    }
+                }
+            } catch (err) {
+                log(`Exception: ${err.message}`, 'error');
+                log(`Stack: ${err.stack}`, 'error');
+            }
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+
+        // Check for OAuth callback
+        window.addEventListener('load', async () => {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+            
+            if (code) {
+                log('OAuth code detected!', 'success');
+                log('Attempting to exchange code for session...');
+                
+                try {
+                    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+                    if (error) {
+                        log(`Exchange error: ${error.message}`, 'error');
+                    } else {
+                        log('Code exchange successful!', 'success');
+                        checkConfig();
+                    }
+                } catch (err) {
+                    log(`Exchange exception: ${err.message}`, 'error');
+                }
+            } else {
+                log('No OAuth code in URL');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -8,9 +8,10 @@ import { Sparkles, Zap, Shield, Check } from 'lucide-react'
 interface UpgradePromptProps {
   onClose?: () => void
   onSignIn?: () => void
+  onUpgrade?: () => void
 }
 
-export default function UpgradePrompt({ onClose, onSignIn }: UpgradePromptProps) {
+export default function UpgradePrompt({ onClose, onSignIn, onUpgrade }: UpgradePromptProps) {
   const features = [
     { icon: Zap, text: 'Unlimited image generation' },
     { icon: Sparkles, text: 'Priority AI processing' },
@@ -48,7 +49,7 @@ export default function UpgradePrompt({ onClose, onSignIn }: UpgradePromptProps)
               <span className="text-3xl font-bold text-purple-600">$9.99</span>
               <span className="text-gray-600">/month</span>
             </div>
-            <Badge className="mt-2 bg-green-500">COMING SOON</Badge>
+            <Badge className="mt-2 bg-purple-500">SPECIAL OFFER</Badge>
           </div>
 
           <div className="space-y-3">
@@ -65,9 +66,9 @@ export default function UpgradePrompt({ onClose, onSignIn }: UpgradePromptProps)
           <div className="space-y-3">
             <Button 
               className="w-full bg-purple-600 hover:bg-purple-700"
-              disabled
+              onClick={onUpgrade || (() => window.location.href = '/#pricing')}
             >
-              Upgrade to Pro (Coming Soon)
+              Upgrade to Pro
             </Button>
             
             {onSignIn && (
