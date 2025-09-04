@@ -319,8 +319,8 @@ class AuthService {
         this.session = data.session
         this.user = data.user
         
-        if (this.authChangeHandler) {
-          await this.authChangeHandler(data.user)
+        if (this.onAuthChange) {
+          await this.onAuthChange(data.user)
         }
       }
 
