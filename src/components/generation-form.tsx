@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,6 +11,17 @@ import { Upload, Sparkles, Info, CheckCircle, ChevronDown, ChevronUp } from 'luc
 import { platformSizes, styleTemplates, type Platform, type StyleTemplate } from '@/lib/utils'
 import { useAppStore } from '@/lib/store'
 import { platformIcons, platformGuidelines, platformEnhancements, generatePlatformPrompt } from '@/lib/platform-configs'
+import UpgradePrompt from '@/components/auth/UpgradePrompt'
+import { createClient } from '@/lib/supabase/client'
+
+interface DailyLimitStatus {
+  daily_count: number
+  daily_limit: number
+  can_generate: boolean
+  is_trial: boolean
+  subscription_tier: string
+  remaining?: number
+}
 
 export default function GenerationForm() {
   const [title, setTitle] = useState('')
@@ -20,8 +31,34 @@ export default function GenerationForm() {
   const [avatar, setAvatar] = useState<File | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [showPromptDetails, setShowPromptDetails] = useState(false)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [dailyLimitStatus, setDailyLimitStatus] = useState<DailyLimitStatus | null>(null)
   
   const { user, addTask } = useAppStore()
+  const supabase = createClient()
+
+  // Fetch daily limit status when component mounts or user changes
+  useEffect(() => {
+    if (user) {
+      fetchDailyLimitStatus()
+    }
+  }, [user])
+
+  const fetchDailyLimitStatus = async () => {
+    if (!user) return
+
+    try {
+      const { data } = await supabase.rpc('get_daily_generation_count', {
+        p_user_id: user.id
+      })
+      
+      if (data) {
+        setDailyLimitStatus(data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch daily limit status:', error)
+    }
+  }
 
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
@@ -31,6 +68,12 @@ export default function GenerationForm() {
 
   const handleGenerate = async () => {
     if (!title.trim() || !prompt.trim() || !user) return
+    
+    // Check if user has reached daily limit
+    if (dailyLimitStatus && !dailyLimitStatus.can_generate) {
+      setShowUpgradeModal(true)
+      return
+    }
     
     setIsGenerating(true)
     
@@ -70,16 +113,35 @@ export default function GenerationForm() {
         }),
       })
 
-      if (!response.ok) {
-        throw new Error('Generation failed')
-      }
-
       const data = await response.json()
+
+      if (!response.ok) {
+        // Check if it's a rate limit error
+        if (response.status === 429 && data.limit_reached) {
+          setDailyLimitStatus({
+            daily_count: data.daily_count,
+            daily_limit: data.daily_limit,
+            can_generate: false,
+            is_trial: data.is_trial,
+            subscription_tier: data.subscription_tier
+          })
+          setShowUpgradeModal(true)
+          useAppStore.getState().updateTask(task.id, {
+            status: 'failed',
+            results: []
+          })
+          return
+        }
+        throw new Error(data.error || 'Generation failed')
+      }
       
       useAppStore.getState().updateTask(task.id, {
         status: 'completed',
         results: data.images || []
       })
+
+      // Refresh daily limit status after successful generation
+      await fetchDailyLimitStatus()
     } catch (error) {
       console.error('Generation error:', error)
       useAppStore.getState().updateTask(task.id, {
@@ -91,8 +153,7 @@ export default function GenerationForm() {
     }
   }
 
-  const canGenerate = user && title.trim() && prompt.trim() && 
-    (user.tier !== 'free' || user.quotaUsed < user.quotaLimit)
+  const canGenerate = user && title.trim() && prompt.trim()
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -356,18 +417,23 @@ export default function GenerationForm() {
           </div>
         )}
 
-        {/* Quota Info */}
-        {user && (
+        {/* Daily Quota Info */}
+        {user && dailyLimitStatus && (
           <div className="bg-muted rounded-lg p-3">
             <div className="text-sm">
-              <span className="font-medium">Quota:</span> {user.quotaUsed}/{user.quotaLimit} 
+              <span className="font-medium">Daily Generations:</span> {dailyLimitStatus.daily_count}/{dailyLimitStatus.daily_limit}
               <span className="text-muted-foreground ml-1">
-                ({user.tier === 'free' ? 'Daily' : 'Monthly'})
+                {dailyLimitStatus.is_trial ? '(7-day free trial)' : `(${dailyLimitStatus.subscription_tier} tier)`}
               </span>
             </div>
-            {user.tier === 'free' && user.quotaUsed >= user.quotaLimit && (
+            {!dailyLimitStatus.can_generate && (
               <p className="text-sm text-destructive mt-1">
-                Daily quota exceeded. Upgrade to Pro for more generations.
+                Daily limit reached. Upgrade to Pro for unlimited generations.
+              </p>
+            )}
+            {dailyLimitStatus.remaining !== undefined && dailyLimitStatus.remaining > 0 && (
+              <p className="text-sm text-green-600 mt-1">
+                {dailyLimitStatus.remaining} generations remaining today
               </p>
             )}
           </div>
@@ -393,6 +459,20 @@ export default function GenerationForm() {
           )}
         </Button>
       </CardContent>
+      
+      {/* Upgrade Modal */}
+      {showUpgradeModal && dailyLimitStatus && (
+        <UpgradePrompt
+          onClose={() => setShowUpgradeModal(false)}
+          onUpgrade={() => {
+            setShowUpgradeModal(false)
+            window.location.href = '/pricing'
+          }}
+          dailyCount={dailyLimitStatus.daily_count}
+          dailyLimit={dailyLimitStatus.daily_limit}
+          isTrial={dailyLimitStatus.is_trial}
+        />
+      )}
     </Card>
   )
 }

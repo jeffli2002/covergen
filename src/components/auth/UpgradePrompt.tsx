@@ -7,13 +7,21 @@ import { Sparkles, Zap, Shield, Check } from 'lucide-react'
 
 interface UpgradePromptProps {
   onClose?: () => void
-  onSignIn?: () => void
   onUpgrade?: () => void
+  dailyCount?: number
+  dailyLimit?: number
+  isTrial?: boolean
 }
 
-export default function UpgradePrompt({ onClose, onSignIn, onUpgrade }: UpgradePromptProps) {
+export default function UpgradePrompt({ 
+  onClose, 
+  onUpgrade, 
+  dailyCount = 3, 
+  dailyLimit = 3, 
+  isTrial = false 
+}: UpgradePromptProps) {
   const features = [
-    { icon: Zap, text: 'Unlimited image generation' },
+    { icon: Zap, text: 'Unlimited daily generations' },
     { icon: Sparkles, text: 'Priority AI processing' },
     { icon: Shield, text: 'Commercial usage rights' },
     { icon: Check, text: 'All platform sizes included' },
@@ -37,8 +45,16 @@ export default function UpgradePrompt({ onClose, onSignIn, onUpgrade }: UpgradeP
             )}
           </div>
           <p className="text-gray-600 text-sm mt-2">
-            You've used all 10 free images for today. Sign in or upgrade to continue creating!
+            {isTrial 
+              ? `You've used all ${dailyLimit} generations for today during your 7-day free trial.`
+              : `You've used all ${dailyLimit} free generations for today.`
+            }
           </p>
+          <div className="mt-2 text-center">
+            <Badge variant="outline" className="text-xs">
+              Used {dailyCount} / {dailyLimit} generations today
+            </Badge>
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="text-center py-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg">
@@ -66,24 +82,27 @@ export default function UpgradePrompt({ onClose, onSignIn, onUpgrade }: UpgradeP
           <div className="space-y-3">
             <Button 
               className="w-full bg-purple-600 hover:bg-purple-700"
-              onClick={onUpgrade || (() => window.location.href = '/#pricing')}
+              onClick={onUpgrade || (() => window.location.href = '/pricing')}
             >
               Upgrade to Pro
             </Button>
             
-            {onSignIn && (
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={onSignIn}
-              >
-                Sign In to Continue
-              </Button>
-            )}
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={onClose}
+            >
+              Try Again Tomorrow
+            </Button>
           </div>
 
-          <div className="text-center text-sm text-gray-500">
-            <p>Free tier resets daily at midnight</p>
+          <div className="text-center text-sm text-gray-500 space-y-1">
+            <p>Your daily limit resets at midnight UTC</p>
+            {isTrial && (
+              <p className="font-medium text-purple-600">
+                You have {7 - Math.ceil((Date.now() - Date.now()) / (1000 * 60 * 60 * 24))} days left in your free trial
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>
