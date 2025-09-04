@@ -219,13 +219,13 @@ class CreemPaymentService {
       console.log('[Creem] Checkout response:', checkout)
 
       // Check if we have a valid checkout response
-      if (!checkout || (!checkout.id && !checkout.checkoutId)) {
+      if (!checkout || !checkout.id) {
         console.error('Invalid checkout response:', checkout)
         throw new Error('Invalid checkout response from Creem')
       }
 
       // Handle different response structures
-      const checkoutId = checkout.id || checkout.checkoutId
+      const checkoutId = checkout.id
       const checkoutUrl = checkout.checkoutUrl || checkout.url || `https://app.creem.io/checkout/${checkoutId}`
       
       console.log('[Creem] Checkout created:', {

@@ -54,12 +54,12 @@ export default function SpotifyPlaylistCoverTool() {
     
     // Simulate API call
     setTimeout(() => {
-      // Mock generated covers
+      // Mock generated covers using placeholder service
       const mockCovers = [
-        '/api/placeholder/300/300',
-        '/api/placeholder/300/300',
-        '/api/placeholder/300/300',
-        '/api/placeholder/300/300'
+        'https://via.placeholder.com/300/1DB954/FFFFFF?text=Playlist+1',
+        'https://via.placeholder.com/300/191414/1DB954?text=Playlist+2',
+        'https://via.placeholder.com/300/7B1FA2/FFFFFF?text=Playlist+3',
+        'https://via.placeholder.com/300/FF5722/FFFFFF?text=Playlist+4'
       ]
       setOutputs(mockCovers)
       setLoading(false)

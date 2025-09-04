@@ -60,10 +60,10 @@ export default function FacebookEventCoverTool() {
     setTimeout(() => {
       // Mock generated covers with Facebook event dimensions (1200x628)
       const mockCovers = [
-        '/api/placeholder/1200/628',
-        '/api/placeholder/1200/628',
-        '/api/placeholder/1200/628',
-        '/api/placeholder/1200/628'
+        'https://via.placeholder.com/1200x628/1877F2/FFFFFF?text=Event+Cover+1',
+        'https://via.placeholder.com/1200x628/42B883/FFFFFF?text=Event+Cover+2',
+        'https://via.placeholder.com/1200x628/FF6B6B/FFFFFF?text=Event+Cover+3',
+        'https://via.placeholder.com/1200x628/7C3AED/FFFFFF?text=Event+Cover+4'
       ]
       setOutputs(mockCovers)
       setLoading(false)
