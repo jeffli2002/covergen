@@ -1,6 +1,6 @@
 'use client'
 
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -157,6 +157,13 @@ export default function InstagramOptimizedClient({ locale, translations }: { loc
       </Suspense>
     </div>
   )
+}
+
+// Helper function to get showcase data
+async function getShowcaseData() {
+  // This would typically fetch from an API or import from a data file
+  // For now, return empty array to prevent errors
+  return []
 }
 
 // Lazy-loaded components
