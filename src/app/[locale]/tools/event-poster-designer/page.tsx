@@ -245,21 +245,15 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
           <p className="text-xl text-white/90 mb-8">
             Create professional event posters that drive attendance
           </p>
-          <Button 
-            size="lg" 
-            className="bg-white text-purple-600 hover:bg-gray-100"
-            onClick={() => {
-              const generator = document.getElementById('generator')
-              if (generator) {
-                generator.scrollIntoView({ behavior: 'smooth' })
-              } else {
-                window.location.href = `/${locale}#generator`
-              }
-            }}
-          >
-            <Sparkles className="w-5 h-5 mr-2" />
-            Start Designing Now
-          </Button>
+          <Link href="#generator">
+            <Button 
+              size="lg" 
+              className="bg-white text-purple-600 hover:bg-gray-100"
+            >
+              <Sparkles className="w-5 h-5 mr-2" />
+              Start Designing Now
+            </Button>
+          </Link>
         </div>
       </section>
 

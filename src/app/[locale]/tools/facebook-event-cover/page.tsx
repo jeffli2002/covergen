@@ -245,21 +245,15 @@ export default function FacebookEventCoverPage({ params: { locale } }: { params:
           <p className="text-xl text-white/90 mb-8">
             Create Facebook event covers that get more attendees
           </p>
-          <Button 
-            size="lg" 
-            className="bg-white text-blue-600 hover:bg-gray-100"
-            onClick={() => {
-              const generator = document.getElementById('generator')
-              if (generator) {
-                generator.scrollIntoView({ behavior: 'smooth' })
-              } else {
-                window.location.href = `/${locale}#generator`
-              }
-            }}
-          >
-            <Sparkles className="w-5 h-5 mr-2" />
-            Create Your Event Cover
-          </Button>
+          <Link href="#generator">
+            <Button 
+              size="lg" 
+              className="bg-white text-blue-600 hover:bg-gray-100"
+            >
+              <Sparkles className="w-5 h-5 mr-2" />
+              Create Your Event Cover
+            </Button>
+          </Link>
         </div>
       </section>
 
