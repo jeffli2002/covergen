@@ -1,4 +1,3 @@
-import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
@@ -8,11 +7,12 @@ export async function GET(request: Request) {
   const next = requestUrl.searchParams.get('next') || '/en'
   const origin = requestUrl.origin
 
-  console.log('[Auth Callback] Processing OAuth callback:', { code: !!code, next })
+  console.log('[Auth Callback] Processing OAuth callback:', { code: !!code, next, origin })
 
   if (code) {
     try {
-      const cookieStore = cookies()
+      // Create response to handle cookies properly
+      const response = NextResponse.redirect(`${origin}${next}`)
       
       // Create a Supabase client with proper cookie handling for the response
       const supabase = createServerClient(
@@ -21,13 +21,33 @@ export async function GET(request: Request) {
         {
           cookies: {
             get(name: string) {
-              return cookieStore.get(name)?.value
+              return request.headers.get('cookie')
+                ?.split(';')
+                ?.find(c => c.trim().startsWith(`${name}=`))
+                ?.split('=')[1]
             },
             set(name: string, value: string, options: CookieOptions) {
-              cookieStore.set({ name, value, ...options })
+              response.cookies.set({
+                name,
+                value,
+                ...options,
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                path: '/',
+              })
             },
             remove(name: string, options: CookieOptions) {
-              cookieStore.delete({ name, ...options })
+              response.cookies.set({
+                name,
+                value: '',
+                ...options,
+                expires: new Date(0),
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                path: '/',
+              })
             },
           },
         }
@@ -40,18 +60,13 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${origin}/en?error=auth_failed&message=${encodeURIComponent(error.message)}`)
       }
 
-      // Check what session we got
-      const { data: { session } } = await supabase.auth.getSession()
-      console.log('[Auth Callback] Code exchange successful, session:', session?.user?.email)
-      console.log('[Auth Callback] Session cookies should be set, redirecting to:', next)
+      console.log('[Auth Callback] Code exchange successful, user:', data?.user?.email)
       
-      // Create redirect response that will include the set cookies
-      const redirectUrl = new URL(next, origin)
-      return NextResponse.redirect(redirectUrl)
+      return response
       
     } catch (error) {
       console.error('[Auth Callback] Unexpected error:', error)
-      return NextResponse.redirect(`${origin}/en?error=auth_failed`)
+      return NextResponse.redirect(`${origin}/en?error=auth_failed&details=${encodeURIComponent(String(error))}`)
     }
   }
 
