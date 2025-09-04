@@ -1,13 +1,19 @@
 import { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { notFound } from 'next/navigation'
+import Script from 'next/script'
 import { i18n, type Locale } from '@/lib/i18n/config'
 import { getDictionary } from '@/lib/i18n/get-dictionary'
 import Header from '@/components/layout/header'
 import Footer from '@/components/layout/Footer'
 import { Analytics } from '@vercel/analytics/react'
 import { Providers } from '@/components/providers'
+import { organizationSchema, websiteSchema, softwareApplicationSchema } from '@/lib/seo/schema'
+import { Suspense, lazy } from 'react'
 import '@/app/globals.css'
+
+// Lazy load performance monitor for development
+const PerformanceMonitor = lazy(() => import('@/components/seo/PerformanceMonitorV2'))
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -30,11 +36,27 @@ export async function generateMetadata({
     },
     description: `${dict.common.description} Powered by Google Gemini 2.5 Flash (Nano Banana) - the latest and powerful AI image generation model. This platform is independent and not affiliated with Google.`,
     keywords: [
+      // Core keywords
+      'cover',
+      'cover image',
+      'cover maker',
+      'cover image generator',
+      'thumbnail',
+      'thumbnail maker',
+      'thumbnail maker',
+      'youtube thumbnail maker',
+      'youtube thumbnail maker',
+      'youtube cover maker',
+      'poster',
+      'poster maker',
+      'poster image maker',
+      'poster image generator',
+      'tiktok thumbnail maker',
+      
+      // AI and Technology
       'AI cover generator',
-      'YouTube thumbnail maker',
-      'TikTok cover creator',
-      'Spotify cover art',
-      'poster design',
+      'AI thumbnail maker',
+      'AI poster generator',
       'AI design tool',
       'content creator tools',
       'social media covers',
@@ -99,6 +121,9 @@ export async function generateMetadata({
         ])
       ),
     },
+    other: {
+      'google-adsense-account': 'ca-pub-9378191378774896',
+    },
   }
 }
 
@@ -117,20 +142,53 @@ export default async function LocaleLayout({
   const localeInfo = i18n.locales.find(l => l.code === locale)
   const dir = 'ltr'
 
+  // Combine all global schemas
+  const globalSchema = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      organizationSchema,
+      websiteSchema,
+      softwareApplicationSchema,
+    ],
+  }
+
   return (
-    <html lang={locale} dir={dir}>
-      <body className={inter.className}>
-        <Providers>
-          <div className="min-h-screen flex flex-col">
-            <Header locale={locale} translations={dict} />
-            <main className="flex-grow">
-              {children}
-            </main>
-            <Footer locale={locale} translations={dict} />
-          </div>
-          <Analytics />
-        </Providers>
-      </body>
-    </html>
+    <>
+      <Script
+        id="set-html-attrs"
+        strategy="beforeInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `
+            document.documentElement.lang = '${locale}';
+            document.documentElement.dir = '${dir}';
+            document.documentElement.className = '${inter.className}';
+          `,
+        }}
+      />
+      <Script
+        id="structured-data"
+        type="application/ld+json"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(globalSchema) }}
+      />
+      <Providers>
+        <div className={`min-h-screen flex flex-col ${inter.className}`}>
+          <Header locale={locale} translations={dict} />
+          <main className="flex-grow">
+            {children}
+          </main>
+          <Footer locale={locale} translations={dict} />
+        </div>
+        <Analytics />
+        
+        {/* Performance Monitor - Development only */}
+        <Suspense fallback={null}>
+          <PerformanceMonitor 
+            enabled={process.env.NODE_ENV === 'development'} 
+            showDebug={false}
+          />
+        </Suspense>
+      </Providers>
+    </>
   )
 }

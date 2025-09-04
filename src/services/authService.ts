@@ -36,50 +36,17 @@ class AuthService {
   private async _doInitialize() {
     try {
       if (!supabase) {
-        console.warn('Supabase not configured, auth service will be disabled')
         this.initialized = true
         return false
       }
 
-      const storedSession = this.getStoredSession()
-      if (storedSession && this.isSessionValid(storedSession)) {
-        this.session = storedSession
-        this.user = storedSession.user
-
-        supabase.auth.setSession({
-          access_token: storedSession.access_token,
-          refresh_token: storedSession.refresh_token
-        }).then(({ error }) => {
-          if (error) {
-            console.warn('Stored session invalid, clearing...', error)
-            this.clearStoredSession()
-            this.session = null
-            this.user = null
-          }
-        })
-      }
-
-      const sessionPromise = supabase.auth.getSession()
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Session check timeout')), 3000)
-      )
-
-      try {
-        const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any
-        
-        console.log('[Auth] Session check result:', { session, error, user: session?.user?.email })
-
-        if (error) {
-          console.error('Error getting session:', error)
-        } else {
-          if (session) {
-            this.session = session
-            this.user = session.user
-            this.storeSession(session)
-          }
-        }
-      } catch (timeoutError) {
-        console.warn('Session check timed out, continuing with stored session if available')
+      // Let Supabase handle everything - it will detect OAuth tokens automatically
+      const { data: { session }, error } = await supabase.auth.getSession()
+      
+      if (session) {
+        this.session = session
+        this.user = session.user
+        this.storeSession(session)
       }
 
       this.initialized = true
@@ -100,15 +67,12 @@ class AuthService {
             this.onAuthChange(this.user)
           }
 
-          console.log('[Auth] Auth state change:', { event, user: session?.user?.email })
-          
           if (event === 'SIGNED_IN' && session) {
             await this.onSignIn(session.user)
             this.startSessionRefreshTimer()
           } else if (event === 'SIGNED_OUT') {
             this.stopSessionRefreshTimer()
-            // Don't call onSignOut here as we already handle it in signOut method
-            // to avoid duplicate state updates
+            this.onSignOut()
           } else if (event === 'TOKEN_REFRESHED') {
             this.lastSessionCheck = Date.now()
             if (session) {
@@ -236,17 +200,13 @@ class AuthService {
         throw new Error('Supabase not configured')
       }
 
-      // Get the current pathname to preserve locale
-      const currentPath = window.location.pathname || '/en'
-      const redirectUrl = `${window.location.origin}${currentPath}`
-
+      // Simple OAuth like production - let Supabase handle everything
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: redirectUrl,
           queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
+            // Force account selection to allow switching accounts
+            prompt: 'select_account'
           }
         }
       })
@@ -269,35 +229,16 @@ class AuthService {
 
   async signOut() {
     try {
-      console.log('[Auth] Starting sign out process')
-      
-      // Stop session refresh timer first
-      this.stopSessionRefreshTimer()
-      
-      // Clear local state immediately
-      this.user = null
-      this.session = null
-      this.clearStoredSession()
-      
-      // Notify listeners immediately for instant UI update
-      if (this.onAuthChange) {
-        this.onAuthChange(null)
-      }
-      
-      // Then call Supabase signOut
       const { error } = await supabase.auth.signOut()
 
       if (error) {
-        console.error('[Auth] Sign out error:', error)
         throw error
       }
 
-      console.log('[Auth] Sign out successful')
       return {
         success: true
       }
     } catch (error: any) {
-      console.error('[Auth] Sign out failed:', error)
       return {
         success: false,
         error: error.message
@@ -374,29 +315,39 @@ class AuthService {
   }
 
   async getUserUsageToday() {
-    if (!this.user) {
-      // No user, return 0 without logging error
-      return 0
-    }
+    if (!this.user) return 0
 
     try {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
 
+      // First check if table exists with a simple count
+      const { error: tableError } = await supabase
+        .from('user_usage')
+        .select('*', { count: 'exact', head: true })
+        .limit(1)
+
+      if (tableError) {
+        // Table doesn't exist or no access - return 0
+        return 0
+      }
+
       const { data, error } = await supabase
         .from('user_usage')
-        .select('generation_count')
+        .select('*')
         .eq('user_id', this.user.id)
         .gte('date', today.toISOString())
         .single()
 
-      if (error && error.code !== 'PGRST116') {
-        throw error
+      if (error) {
+        // No data for today - return 0
+        return 0
       }
 
-      return data?.generation_count || 0
+      // Try different possible column names
+      return data?.generation_count || data?.usage_count || data?.count || 0
     } catch (error) {
-      console.error('Error getting user usage:', error)
+      // Silently fail - usage tracking is optional
       return 0
     }
   }
@@ -486,10 +437,6 @@ class AuthService {
     this.user = null
     this.session = null
     this.clearStoredSession()
-    
-    if (this.onAuthChange) {
-      this.onAuthChange(null)
-    }
   }
 
   private async syncUserData() {

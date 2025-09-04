@@ -1,9 +1,13 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Check, Crown, Sparkles, Zap } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
+import { useAuth } from '@/contexts/AuthContext'
+import { useRouter } from 'next/navigation'
+import AuthForm from '@/components/auth/AuthForm'
 
 const tiers = [
   {
@@ -69,42 +73,76 @@ const tiers = [
   }
 ]
 
-export default function PricingSection() {
-  const { user, setUser } = useAppStore()
+interface PricingSectionProps {
+  locale?: string
+}
+
+const PENDING_PLAN_KEY = 'covergen_pending_plan'
+
+export default function PricingSection({ locale = 'en' }: PricingSectionProps = {}) {
+  const { user } = useAppStore()
+  const { user: authUser } = useAuth()
+  const router = useRouter()
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [pendingPlan, setPendingPlan] = useState<string | null>(null)
+  
+  // Check for pending plan on mount and after auth
+  useEffect(() => {
+    if (authUser) {
+      const storedPlan = localStorage.getItem(PENDING_PLAN_KEY)
+      if (storedPlan && storedPlan !== 'free') {
+        console.log('[PricingSection] Found pending plan after auth:', storedPlan)
+        localStorage.removeItem(PENDING_PLAN_KEY)
+        // Redirect to payment page with the plan
+        router.push(`/${locale}/payment?plan=${storedPlan}`)
+      }
+    }
+  }, [authUser, router, locale])
 
   const handleSubscribe = (tierKey: string) => {
-    if (!user) {
-      // Mock login first
-      setUser({
-        id: 'user_123',
-        email: 'demo@example.com',
-        tier: 'free',
-        quotaUsed: 1,
-        quotaLimit: 10
-      })
+    // For free tier, just navigate to generator
+    if (tierKey === 'free') {
+      const generatorSection = document.getElementById('generator')
+      if (generatorSection) {
+        generatorSection.scrollIntoView({ behavior: 'smooth' })
+      } else if (window.location.pathname !== '/') {
+        window.location.href = '/#generator'
+      }
+      return
     }
 
-    // Mock subscription upgrade
-    if (tierKey !== 'free' && user) {
-      const quotaLimits = { pro: 120, pro_plus: 300 }
-      setUser({
-        ...user,
-        tier: tierKey as 'pro' | 'pro_plus',
-        quotaLimit: quotaLimits[tierKey as keyof typeof quotaLimits],
-        quotaUsed: 0 // Reset on upgrade
-      })
+    // For paid tiers, check authentication
+    if (!authUser || !user) {
+      // Store the plan they want to subscribe to
+      setPendingPlan(tierKey)
+      // Also store in localStorage for OAuth flow
+      localStorage.setItem(PENDING_PLAN_KEY, tierKey)
+      // Show sign-in modal
+      setShowAuthModal(true)
+      return
     }
 
-    // Navigate to image generator
-    const generatorSection = document.getElementById('generator')
-    if (generatorSection) {
-      generatorSection.scrollIntoView({ behavior: 'smooth' })
-    } else if (window.location.pathname !== '/') {
-      window.location.href = '/#generator'
+    // If authenticated, navigate to payment page
+    router.push(`/${locale}/payment?plan=${tierKey}`)
+  }
+
+  const handleAuthSuccess = (authenticatedUser: any) => {
+    console.log('[PricingSection] Auth success, pending plan:', pendingPlan)
+    setShowAuthModal(false)
+    
+    // After successful sign-in, redirect to payment with the pending plan
+    if (pendingPlan && pendingPlan !== 'free') {
+      // Small delay to ensure auth state is fully updated
+      setTimeout(() => {
+        console.log('[PricingSection] Redirecting to payment page for plan:', pendingPlan)
+        router.push(`/${locale}/payment?plan=${pendingPlan}`)
+        setPendingPlan(null)
+      }, 100)
     }
   }
 
   return (
+    <>
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
@@ -203,9 +241,10 @@ export default function PricingSection() {
                           : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'
                       }`}
                       variant={tier.popular ? "default" : "outline"}
-                      disabled={true}
+                      disabled={isCurrentTier}
+                      onClick={() => handleSubscribe(tier.id)}
                     >
-                      Coming Soon
+                      {isCurrentTier ? 'Current Plan' : tier.cta}
                     </Button>
                   )}
                 </CardContent>
@@ -227,5 +266,19 @@ export default function PricingSection() {
         </div>
       </div>
     </section>
+
+    {/* Auth Modal */}
+    {showAuthModal && (
+      <AuthForm 
+        onClose={() => {
+          setShowAuthModal(false)
+          setPendingPlan(null)
+          // Clear pending plan from localStorage on close
+          localStorage.removeItem(PENDING_PLAN_KEY)
+        }}
+        onAuthSuccess={handleAuthSuccess}
+      />
+    )}
+    </>
   )
 }

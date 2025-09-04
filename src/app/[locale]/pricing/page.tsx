@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import PricingSection from '@/components/pricing-section'
+import { Locale } from '@/lib/i18n/config'
 
 export const metadata: Metadata = {
   title: 'Pricing - Affordable AI Cover Generation Plans',
@@ -24,7 +25,11 @@ export const metadata: Metadata = {
   },
 }
 
-export default function PricingPage() {
+export default function PricingPage({
+  params: { locale },
+}: {
+  params: { locale: Locale }
+}) {
   const pricingSchema = {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -93,7 +98,7 @@ export default function PricingPage() {
               </p>
             </div>
             
-            <PricingSection />
+            <PricingSection locale={locale} />
             
             {/* FAQ Section */}
             <div className="max-w-4xl mx-auto mt-20">
