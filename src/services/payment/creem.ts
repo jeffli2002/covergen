@@ -15,7 +15,6 @@ console.log('[Creem Init] Configuration:', {
 // Initialize Creem SDK with test mode support
 const creemClient = new Creem({
   serverIdx: CREEM_TEST_MODE ? 1 : 0, // 0: production, 1: test-mode
-  apiKey: CREEM_API_KEY, // Try passing API key during initialization
 })
 
 // Test card numbers for Creem
