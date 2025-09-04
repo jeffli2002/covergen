@@ -124,7 +124,7 @@ class CreemPaymentService {
     currentPlan = 'free'
   }: CreateCheckoutSessionParams) {
     const plan = SUBSCRIPTION_PLANS[planId]
-    if (!plan || planId === 'free') {
+    if (!plan) {
       throw new Error('Invalid plan selected')
     }
 
