@@ -19,15 +19,7 @@ export function createBrowserClient() {
           
           // Use default storage (localStorage) but with security considerations
           // In production, consider implementing encrypted storage
-          storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-          
-          // Cookie options for better security (when cookies are used)
-          cookieOptions: {
-            secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-            sameSite: 'lax', // CSRF protection
-            maxAge: 60 * 60 * 24 * 7, // 7 days
-            httpOnly: false // Must be false for browser client
-          }
+          storage: typeof window !== 'undefined' ? window.localStorage : undefined
         },
         
         // Additional security headers
