@@ -4,10 +4,12 @@ import { Badge } from '@/components/ui/badge'
 import { Sparkles } from 'lucide-react'
 import { useFreeTier } from '@/hooks/useFreeTier'
 import { useAuth } from '@/contexts/AuthContext'
+import { useSubscription } from '@/hooks/useSubscription'
 
 export default function UserMenu() {
   const { getRemainingGenerations, freeTierLimit } = useFreeTier()
-  const { subscription } = useAuth()
+  const { user } = useAuth()
+  const { subscription } = useSubscription()
   const remaining = getRemainingGenerations()
   const isDevMode = process.env.NEXT_PUBLIC_BYPASS_USAGE_LIMIT === 'true' && process.env.NODE_ENV === 'development'
   

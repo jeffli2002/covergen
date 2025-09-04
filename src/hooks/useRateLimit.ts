@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription } from '@/hooks/useSubscription';
 import {
   generateDeviceFingerprint,
   hashFingerprint,
@@ -23,7 +24,8 @@ export interface RateLimitState {
 }
 
 export function useRateLimit(): RateLimitState {
-  const { user, subscription } = useAuth();
+  const { user } = useAuth();
+  const { subscription } = useSubscription();
   const [isLoading, setIsLoading] = useState(true);
   const [anonymousId, setAnonymousId] = useState<string | null>(null);
   const [usage, setUsage] = useState(getAnonymousUsage());

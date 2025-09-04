@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useRateLimit } from '@/hooks/useRateLimit'
 import { useAuth } from '@/contexts/AuthContext'
+import { useSubscription } from '@/hooks/useSubscription'
 import { RateLimitModal, PlatformRestrictedModal } from '@/components/rate-limit-modal'
 import { UsageIndicator, CompactUsageIndicator } from '@/components/usage-indicator'
 import { FREE_TIER_LIMITS } from '@/lib/rate-limit'
@@ -21,7 +22,8 @@ export function PlatformRateLimitWrapper({
   onGenerate,
   showUsageIndicator = true,
 }: PlatformRateLimitWrapperProps) {
-  const { user, subscription } = useAuth()
+  const { user } = useAuth()
+  const { subscription } = useSubscription()
   const {
     remainingCovers,
     hasReachedLimit,
