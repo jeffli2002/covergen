@@ -200,3 +200,5 @@ export default function WebinarPosterTool() {
     </div>
   )
 }
+
+export default WebinarPosterTool

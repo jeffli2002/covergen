@@ -215,3 +215,5 @@ export default function SpotifyPlaylistCoverTool() {
     </div>
   )
 }
+
+export default SpotifyPlaylistCoverTool

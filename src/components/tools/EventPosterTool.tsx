@@ -216,3 +216,5 @@ export default function EventPosterTool() {
     </div>
   )
 }
+
+export default EventPosterTool

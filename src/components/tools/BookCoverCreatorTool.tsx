@@ -352,3 +352,5 @@ export default function BookCoverCreatorTool() {
     </div>
   )
 }
+
+export default BookCoverCreatorTool

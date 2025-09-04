@@ -385,3 +385,5 @@ export default function GameCoverArtTool() {
     </div>
   )
 }
+
+export default GameCoverArtTool

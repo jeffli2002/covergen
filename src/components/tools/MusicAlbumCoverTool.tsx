@@ -250,3 +250,5 @@ export default function MusicAlbumCoverTool() {
     </div>
   )
 }
+
+export default MusicAlbumCoverTool
