@@ -32,8 +32,14 @@ export async function POST(req: NextRequest) {
     // Handle the webhook event
     const result = await creemService.handleWebhookEvent(event)
 
+    // Check if result has a type property
+    if (!result || typeof result !== 'object' || !('type' in result)) {
+      console.log('[Webhook] Event processed successfully')
+      return NextResponse.json({ received: true })
+    }
+
     // Process the result based on event type
-    switch (result.type) {
+    switch ((result as any).type) {
       case 'checkout_complete':
         await handleCheckoutComplete(result)
         break
