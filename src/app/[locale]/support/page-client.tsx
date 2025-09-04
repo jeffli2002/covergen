@@ -83,12 +83,30 @@ export default function SupportPageClient({ locale, translations: t }: SupportPa
 
         {/* Common Issues */}
         <div className="bg-white rounded-xl shadow-sm p-8">
-          <h2 className="text-2xl font-semibold mb-6">Common Issues</h2>
-          <div className="space-y-4">
+          <h2 className="text-2xl font-semibold mb-6">Frequently Asked Questions</h2>
+          <div className="space-y-6">
+            <div className="border-l-4 border-blue-500 pl-4">
+              <h4 className="font-semibold text-gray-900">How does the 7-day free trial work?</h4>
+              <p className="text-gray-600 mt-1">
+                All new users get a 7-day free trial with 3 cover generations per day. You have full access to all platform sizes and features. After the trial expires, you'll need to upgrade to continue generating covers.
+              </p>
+            </div>
+            <div className="border-l-4 border-blue-500 pl-4">
+              <h4 className="font-semibold text-gray-900">What happens when I reach my daily limit?</h4>
+              <p className="text-gray-600 mt-1">
+                During the trial, you can generate up to 3 covers per day. When you reach this limit, you'll see an upgrade prompt. Your daily limit resets at midnight UTC, or you can upgrade to Pro for unlimited generations.
+              </p>
+            </div>
             <div className="border-l-4 border-blue-500 pl-4">
               <h4 className="font-semibold text-gray-900">How do I upgrade my subscription?</h4>
               <p className="text-gray-600 mt-1">
-                Go to your account settings and click on the "Upgrade" button in the subscription section.
+                Click "Upgrade to Pro" in the limit modal or go to the pricing page. You can upgrade directly from the generation form when you hit your daily limit.
+              </p>
+            </div>
+            <div className="border-l-4 border-blue-500 pl-4">
+              <h4 className="font-semibold text-gray-900">Do Pro users have daily limits?</h4>
+              <p className="text-gray-600 mt-1">
+                No, Pro ($9/month) and Pro+ ($19/month) subscribers get unlimited daily generations with no daily limits.
               </p>
             </div>
             <div className="border-l-4 border-blue-500 pl-4">

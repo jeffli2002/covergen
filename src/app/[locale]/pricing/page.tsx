@@ -3,8 +3,8 @@ import PricingSection from '@/components/pricing-section'
 import { Locale } from '@/lib/i18n/config'
 
 export const metadata: Metadata = {
-  title: 'Pricing - Affordable AI Cover Generation Plans',
-  description: 'Choose the perfect plan for your content creation needs. Free tier available, Pro plans starting at $9/month. Create professional covers for all platforms.',
+  title: 'Pricing - 7-Day Free Trial + Affordable AI Cover Plans',
+  description: '7-day free trial with 3 covers daily, then Pro plans starting at $9/month for unlimited generations. Create professional covers for all platforms.',
   keywords: [
     'CoverGen AI pricing',
     'cover generator pricing',
@@ -12,12 +12,13 @@ export const metadata: Metadata = {
     'thumbnail maker pricing',
     'content creator tools pricing',
     'affordable cover generator',
-    'free thumbnail maker',
-    'pro cover generation'
+    '7-day free trial',
+    'pro cover generation',
+    'daily generation limits'
   ],
   openGraph: {
-    title: 'CoverGen AI Pricing - Plans for Every Creator',
-    description: 'From free to pro - find the perfect plan for your content creation needs. AI cover generation starting at $9/month.',
+    title: 'CoverGen AI Pricing - 7-Day Free Trial + Pro Plans',
+    description: '7-day free trial with 3 covers daily. Upgrade for unlimited generations starting at $9/month.',
     images: ['/pricing-og.jpg'],
   },
   alternates: {
@@ -42,10 +43,10 @@ export default function PricingPage({
     offers: [
       {
         '@type': 'Offer',
-        name: 'Free Plan',
+        name: 'Free Trial',
         price: '0',
         priceCurrency: 'USD',
-        description: '10 covers per month, personal use only, email support'
+        description: '7-day free trial, 3 covers per day, all platform sizes'
       },
       {
         '@type': 'Offer',
@@ -59,7 +60,7 @@ export default function PricingPage({
           billingIncrement: 1,
           billingDuration: 'P1M'
         },
-        description: '120 covers per month, commercial use, 24-hour download history'
+        description: 'Unlimited daily generations, commercial use, all features'
       },
       {
         '@type': 'Offer',
@@ -73,7 +74,7 @@ export default function PricingPage({
           billingIncrement: 1,
           billingDuration: 'P1M'
         },
-        description: '300 covers per month, full commercial license, 7-day cloud gallery, API access'
+        description: 'Unlimited generations, full commercial license, API access, dedicated support'
       }
     ]
   }
@@ -93,8 +94,8 @@ export default function PricingPage({
                 Simple, Transparent Pricing
               </h1>
               <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto">
-                Choose the perfect plan for your content creation needs. 
-                Start free, upgrade when you're ready.
+                Start with a 7-day free trial with 3 daily generations. 
+                Upgrade for unlimited cover creation.
               </p>
             </div>
             
@@ -129,12 +130,23 @@ export default function PricingPage({
                 
                 <div className="bg-white rounded-2xl p-6 shadow-sm">
                   <h3 className="text-xl font-semibold mb-3">
-                    Is there a free trial for Pro plans?
+                    How does the 7-day free trial work?
                   </h3>
                   <p className="text-gray-600">
-                    While we don't offer a traditional free trial, our Free plan lets you test 
-                    the platform with 10 covers per month. This gives you a chance to experience 
-                    the quality before upgrading.
+                    All new users get a 7-day free trial with 3 cover generations per day. 
+                    You have full access to all platform sizes and features. After the trial, 
+                    you'll need to upgrade to continue generating covers.
+                  </p>
+                </div>
+                
+                <div className="bg-white rounded-2xl p-6 shadow-sm">
+                  <h3 className="text-xl font-semibold mb-3">
+                    What happens when I reach my daily limit?
+                  </h3>
+                  <p className="text-gray-600">
+                    During the trial, you can generate up to 3 covers per day. When you reach 
+                    this limit, you'll see an upgrade prompt. Your daily limit resets at midnight UTC, 
+                    or you can upgrade to Pro for unlimited generations.
                   </p>
                 </div>
                 

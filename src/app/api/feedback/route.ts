@@ -50,18 +50,7 @@ export async function POST(request: NextRequest) {
     console.log('Supabase URL:', supabaseUrl)
     console.log('Service key exists:', !!supabaseServiceKey)
 
-    // Rate limiting in production
-    if (process.env.NODE_ENV === 'production') {
-      const ip = request.headers.get('x-forwarded-for') || 'anonymous'
-      try {
-        await limiter.check(5, ip) // 5 requests per minute per IP
-      } catch {
-        return NextResponse.json(
-          { error: 'Too many requests. Please try again later.' },
-          { status: 429 }
-        )
-      }
-    }
+    // Rate limiting disabled - TODO: Implement proper rate limiting
 
     const data: FeedbackData = await request.json()
 

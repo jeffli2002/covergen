@@ -12,22 +12,24 @@ import AuthForm from '@/components/auth/AuthForm'
 const tiers = [
   {
     id: 'free',
-    name: 'Free',
+    name: 'Free Trial',
     price: '$0',
-    period: 'forever',
-    description: 'Perfect for trying out AI cover generation',
+    period: '7 days',
+    description: 'Try our AI cover generation with full access',
     icon: Sparkles,
     features: [
-      '10 covers per month',
+      '7-day free trial',
+      '3 covers per day',
       'No watermark',
-      'Basic platform sizes',
+      'All platform sizes',
       'Email support'
     ],
     limitations: [
-      'Monthly limit resets on the 1st',
-      'No commercial usage',
+      'Daily limit resets at midnight UTC',
+      'Trial expires after 7 days',
+      'No commercial usage during trial',
     ],
-    cta: 'Get Started',
+    cta: 'Start Free Trial',
     popular: false
   },
   {
@@ -38,17 +40,15 @@ const tiers = [
     description: 'Ideal for regular content creators',
     icon: Zap,
     features: [
-      '120 covers per month',
+      'Unlimited daily generations',
       'No watermark',
       'All platform sizes',
       'Priority support',
-      'Batch generation',
+      'Commercial usage rights',
       '24-hour download history'
     ],
-    limitations: [
-      'Monthly quota',
-    ],
-    cta: 'Start Pro Trial',
+    limitations: [],
+    cta: 'Upgrade to Pro',
     popular: true
   },
   {
@@ -59,16 +59,16 @@ const tiers = [
     description: 'For professional creators and teams',
     icon: Crown,
     features: [
-      '300 covers per month',
+      'Unlimited daily generations',
       'No watermark',
-      'Commercial license',
+      'Full commercial license',
       'Custom brand templates',
       'API access',
       'Dedicated support',
       '7-day cloud gallery'
     ],
     limitations: [],
-    cta: 'Go Pro+',
+    cta: 'Upgrade to Pro+',
     popular: false
   }
 ]
@@ -148,7 +148,7 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4 text-gray-900">Choose Your Plan</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Start free and upgrade as you grow. All generated images are watermark-free.
+            Start with a 7-day free trial and upgrade for unlimited generations. All images are watermark-free.
           </p>
         </div>
 

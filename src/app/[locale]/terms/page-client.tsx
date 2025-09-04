@@ -146,40 +146,35 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">4.1 Available Plans</h3>
                 <div className="grid md:grid-cols-3 gap-4">
                   <div className="border border-gray-200 rounded-lg p-4">
-                    <h4 className="font-semibold text-gray-900 mb-2">Free Plan</h4>
-                    <p className="text-sm font-medium text-gray-900 mb-2">$0/forever</p>
+                    <h4 className="font-semibold text-gray-900 mb-2">Free Trial</h4>
+                    <p className="text-sm font-medium text-gray-900 mb-2">$0/7 days</p>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ 10 covers per month</li>
+                      <li>✓ 7-day free trial</li>
+                      <li>✓ 3 covers per day</li>
                       <li>✓ No watermark</li>
-                      <li>✓ Basic platform sizes</li>
+                      <li>✓ All platform sizes</li>
                       <li>✓ Email support</li>
-                      <li>✓ Personal use only</li>
+                      <li>✓ Trial use only</li>
                     </ul>
                   </div>
-                  <div className="border border-blue-200 bg-blue-50 rounded-lg p-4 relative">
+                  <div className="border border-blue-200 bg-blue-50 rounded-lg p-4">
                     <h4 className="font-semibold text-gray-900 mb-2">Pro Plan</h4>
                     <p className="text-sm font-medium text-gray-900 mb-2">$9/month</p>
-                    <div className="absolute top-2 right-2">
-                      <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">Coming Soon</span>
-                    </div>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ 120 covers per month</li>
+                      <li>✓ Unlimited daily generations</li>
                       <li>✓ No watermark</li>
                       <li>✓ All platform sizes</li>
                       <li>✓ Priority support</li>
-                      <li>✓ Batch generation</li>
+                      <li>✓ Commercial usage rights</li>
                       <li>✓ 24-hour download history</li>
                       <li>✓ Personal & commercial use</li>
                     </ul>
                   </div>
-                  <div className="border border-purple-200 bg-purple-50 rounded-lg p-4 relative">
+                  <div className="border border-purple-200 bg-purple-50 rounded-lg p-4">
                     <h4 className="font-semibold text-gray-900 mb-2">Pro+ Plan</h4>
                     <p className="text-sm font-medium text-gray-900 mb-2">$19/month</p>
-                    <div className="absolute top-2 right-2">
-                      <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">Coming Soon</span>
-                    </div>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ 300 covers per month</li>
+                      <li>✓ Unlimited daily generations</li>
                       <li>✓ No watermark</li>
                       <li>✓ Full commercial license</li>
                       <li>✓ Custom brand templates</li>
@@ -245,14 +240,17 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">4.6 Free Trials</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">4.6 7-Day Free Trial</h3>
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <p className="text-gray-700 mb-2">When offered, free trials are subject to these terms:</p>
+                  <p className="text-gray-700 mb-2">All new users receive a 7-day free trial with the following terms:</p>
                   <ul className="space-y-1 text-gray-700 text-sm">
-                    <li>• Limited to one trial per user/payment method</li>
-                    <li>• Automatically converts to paid subscription unless cancelled</li>
-                    <li>• Cancellation must occur before trial ends to avoid charges</li>
-                    <li>• Trial features may differ from full subscription</li>
+                    <li>• <strong>Duration:</strong> 7 consecutive days from account creation</li>
+                    <li>• <strong>Daily Limit:</strong> 3 cover generations per day (resets at midnight UTC)</li>
+                    <li>• <strong>Availability:</strong> One trial per user/email address/payment method</li>
+                    <li>• <strong>Features:</strong> Full access to all platform sizes and generation features</li>
+                    <li>• <strong>Usage Rights:</strong> Trial use only - no commercial usage during trial period</li>
+                    <li>• <strong>No Auto-Billing:</strong> Trial does not automatically convert to paid subscription</li>
+                    <li>• <strong>After Trial:</strong> Upgrade required to continue generating covers</li>
                   </ul>
                 </div>
               </div>
