@@ -82,18 +82,7 @@ export default async function WebinarPosterPage({ params: { locale } }: Props) {
     name: 'Webinar Poster Maker',
     description: 'Create professional webinar posters, registration banners, and promotional graphics for Zoom, Teams, GoToWebinar and other platforms',
     url: `https://covergen.pro/${locale}/tools/webinar-poster-maker`,
-    applicationCategory: 'DesignApplication',
-    operatingSystem: 'Any',
-    offers: {
-      price: '0',
-      priceCurrency: 'USD',
-    },
-    aggregateRating: {
-      ratingValue: '4.9',
-      ratingCount: '1892',
-      bestRating: '5',
-      worstRating: '1',
-    },
+    features: ['Professional Templates', 'Multi-platform Support', 'Custom Branding', 'HD Export']
   })
 
   const faqSchema = generateFAQSchema([

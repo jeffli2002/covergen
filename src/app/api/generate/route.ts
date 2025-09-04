@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateImage, GEMINI_MODEL } from '@/lib/openrouter'
+import { createClient } from '@/lib/supabase/server'
+import { checkGenerationLimit, incrementGenerationCount, getUserSubscriptionTier } from '@/lib/generation-limits'
 
 // Image generation endpoint
 export async function POST(request: NextRequest) {
@@ -31,6 +33,30 @@ export async function POST(request: NextRequest) {
         { error: 'Prompt and mode are required' },
         { status: 400 }
       )
+    }
+
+    // Check generation limits for authenticated users
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (user) {
+      // Check current generation limit
+      const limitStatus = await checkGenerationLimit(user.id)
+      
+      // If user has reached their limit, return error
+      if (!limitStatus.can_generate) {
+        return NextResponse.json(
+          { 
+            error: 'Daily generation limit reached',
+            limit_reached: true,
+            daily_count: limitStatus.daily_count,
+            daily_limit: limitStatus.daily_limit,
+            subscription_tier: limitStatus.subscription_tier,
+            is_trial: limitStatus.is_trial
+          },
+          { status: 429 }
+        )
+      }
     }
 
     if (mode === 'image' && (!referenceImages || referenceImages.length === 0)) {
@@ -140,6 +166,17 @@ export async function POST(request: NextRequest) {
         const base64 = Buffer.from(canvas).toString('base64')
         return `data:image/svg+xml;base64,${base64}`
       })
+    }
+
+    // Increment generation count for authenticated users after successful generation
+    if (user) {
+      try {
+        const subscriptionTier = await getUserSubscriptionTier(user.id)
+        await incrementGenerationCount(user.id, subscriptionTier)
+      } catch (error) {
+        console.error('Failed to increment generation count:', error)
+        // Continue with successful response even if counting fails
+      }
     }
 
     return NextResponse.json({

@@ -82,18 +82,7 @@ export default async function SocialMediaPosterPage({ params: { locale } }: Prop
     name: 'Social Media Poster Maker',
     description: 'Create stunning social media posters, banners, and posts for Instagram, Facebook, LinkedIn, Twitter, Discord, and Pinterest',
     url: `https://covergen.pro/${locale}/tools/social-media-poster`,
-    applicationCategory: 'DesignApplication',
-    operatingSystem: 'Any',
-    offers: {
-      price: '0',
-      priceCurrency: 'USD',
-    },
-    aggregateRating: {
-      ratingValue: '4.9',
-      ratingCount: '2847',
-      bestRating: '5',
-      worstRating: '1',
-    },
+    features: ['AI Generation', 'Multiple Platforms', 'Custom Templates', 'Brand Consistency']
   })
 
   const faqSchema = generateFAQSchema([
