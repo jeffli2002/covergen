@@ -46,7 +46,7 @@ export default function PricingPage({
         name: 'Free Trial',
         price: '0',
         priceCurrency: 'USD',
-        description: '7-day free trial, 3 covers per day, all platform sizes'
+        description: '7-day free trial, 3 covers per day, 10 covers per month max, all platform sizes'
       },
       {
         '@type': 'Offer',
@@ -60,7 +60,7 @@ export default function PricingPage({
           billingIncrement: 1,
           billingDuration: 'P1M'
         },
-        description: 'Unlimited daily generations, commercial use, all features'
+        description: '120 covers per month, commercial use, all features'
       },
       {
         '@type': 'Offer',
@@ -74,7 +74,7 @@ export default function PricingPage({
           billingIncrement: 1,
           billingDuration: 'P1M'
         },
-        description: 'Unlimited generations, full commercial license, API access, dedicated support'
+        description: '300 covers per month, full commercial license, API access, dedicated support'
       }
     ]
   }
@@ -133,9 +133,9 @@ export default function PricingPage({
                     How does the 7-day free trial work?
                   </h3>
                   <p className="text-gray-600">
-                    All new users get a 7-day free trial with 3 cover generations per day. 
-                    You have full access to all platform sizes and features. After the trial, 
-                    you'll need to upgrade to continue generating covers.
+                    All new users get a 7-day free trial with 3 cover generations per day and 10 covers 
+                    maximum per month. You have full access to all platform sizes and features. 
+                    After the trial, you'll need to upgrade to continue generating covers.
                   </p>
                 </div>
                 
@@ -144,9 +144,9 @@ export default function PricingPage({
                     What happens when I reach my daily limit?
                   </h3>
                   <p className="text-gray-600">
-                    During the trial, you can generate up to 3 covers per day. When you reach 
-                    this limit, you'll see an upgrade prompt. Your daily limit resets at midnight UTC, 
-                    or you can upgrade to Pro for unlimited generations.
+                    During the trial, you can generate up to 3 covers per day with a 10 cover monthly maximum. 
+                    When you reach either limit, you'll see an upgrade prompt. Your daily limit resets at 
+                    midnight UTC, or you can upgrade to Pro for higher monthly quotas.
                   </p>
                 </div>
                 

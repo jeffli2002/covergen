@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     // Activate a new license with Creem
     const result = await creemClient.activateLicense({
       xApiKey: process.env.CREEM_SECRET_KEY!,
-      activateLicense: {
+      activateLicenseRequest: {
         customerId: subscription.stripe_customer_id,
         productId: process.env.CREEM_PROPLUS_PRODUCT_ID || 'prod_proplus',
         metadata: {

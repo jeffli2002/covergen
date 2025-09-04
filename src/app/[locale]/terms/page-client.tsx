@@ -151,6 +151,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                     <ul className="space-y-1 text-sm text-gray-600">
                       <li>✓ 7-day free trial</li>
                       <li>✓ 3 covers per day</li>
+                      <li>✓ 10 covers per month max</li>
                       <li>✓ No watermark</li>
                       <li>✓ All platform sizes</li>
                       <li>✓ Email support</li>
@@ -161,7 +162,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                     <h4 className="font-semibold text-gray-900 mb-2">Pro Plan</h4>
                     <p className="text-sm font-medium text-gray-900 mb-2">$9/month</p>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ Unlimited daily generations</li>
+                      <li>✓ 120 covers per month</li>
                       <li>✓ No watermark</li>
                       <li>✓ All platform sizes</li>
                       <li>✓ Priority support</li>
@@ -316,16 +317,17 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
               <h3 className="text-lg font-semibold text-gray-900 mb-3">5.3 Usage Rights by Plan</h3>
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-gray-900 mb-2">Free Plan</h4>
+                  <h4 className="font-semibold text-gray-900 mb-2">Free Trial</h4>
                   <div className="space-y-2 text-sm text-gray-700">
-                    <p><strong>Personal Use Only</strong></p>
+                    <p><strong>Trial Use Only</strong></p>
                     <ul className="space-y-1 text-gray-600">
-                      <li>✓ Personal social media</li>
-                      <li>✓ Non-commercial blogs</li>
-                      <li>✓ Personal projects</li>
+                      <li>✓ Personal evaluation</li>
+                      <li>✓ Testing platform features</li>
+                      <li>✓ Learning/educational use</li>
                       <li>✗ Commercial use</li>
                       <li>✗ Client work</li>
                       <li>✗ Monetized content</li>
+                      <li>✗ Business applications</li>
                     </ul>
                   </div>
                 </div>
@@ -362,7 +364,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
 
             <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
               <p className="text-sm text-amber-800">
-                <strong>Important:</strong> Usage rights are tied to your active subscription. Downgrading or cancelling may affect your rights to use previously generated content for commercial purposes. AI-generated content may include watermarks as required by law.
+                <strong>Important:</strong> Usage rights are tied to your subscription status. Trial users have limited usage rights. After trial expiration, you must upgrade to Pro or Pro+ for commercial usage rights. AI-generated content may include watermarks as required by law.
               </p>
             </div>
 

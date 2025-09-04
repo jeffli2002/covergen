@@ -20,12 +20,14 @@ const tiers = [
     features: [
       '7-day free trial',
       '3 covers per day',
+      '10 covers per month max',
       'No watermark',
       'All platform sizes',
       'Email support'
     ],
     limitations: [
       'Daily limit resets at midnight UTC',
+      'Monthly limit: 10 covers maximum',
       'Trial expires after 7 days',
       'No commercial usage during trial',
     ],
@@ -40,7 +42,7 @@ const tiers = [
     description: 'Ideal for regular content creators',
     icon: Zap,
     features: [
-      'Unlimited daily generations',
+      '120 covers per month',
       'No watermark',
       'All platform sizes',
       'Priority support',
@@ -59,7 +61,7 @@ const tiers = [
     description: 'For professional creators and teams',
     icon: Crown,
     features: [
-      'Unlimited daily generations',
+      '300 covers per month',
       'No watermark',
       'Full commercial license',
       'Custom brand templates',
@@ -148,7 +150,7 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4 text-gray-900">Choose Your Plan</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Start with a 7-day free trial and upgrade for unlimited generations. All images are watermark-free.
+            Start with a 7-day free trial and upgrade for more daily generations. All images are watermark-free.
           </p>
         </div>
 
