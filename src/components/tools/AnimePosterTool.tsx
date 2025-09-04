@@ -41,12 +41,14 @@ export default function AnimePosterTool() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedImages, setGeneratedImages] = useState<string[]>([])
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   const handleGenerate = async () => {
     if (!title.trim()) return
     
     setIsGenerating(true)
     setGeneratedImages([]) // Clear previous results
+    setError(null) // Clear any previous errors
     
     try {
       // Build the anime-specific prompt
@@ -66,7 +68,25 @@ export default function AnimePosterTool() {
       })
 
       if (!response.ok) {
-        throw new Error('Generation failed')
+        let errorMessage = 'Failed to generate anime poster'
+        
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.error || errorMessage
+          
+          // Handle specific error cases
+          if (response.status === 413) {
+            errorMessage = 'Images are too large. Please try again with smaller images.'
+          } else if (response.status === 429) {
+            errorMessage = 'Rate limit exceeded. Please wait a few minutes before trying again.'
+          } else if (response.status === 401) {
+            errorMessage = 'API authentication failed. Please contact support.'
+          }
+        } catch (e) {
+          // If we can't parse the error, use the default message
+        }
+        
+        throw new Error(errorMessage)
       }
 
       const data = await response.json()
@@ -74,10 +94,12 @@ export default function AnimePosterTool() {
       // Set only the first image from the response
       if (data.images && data.images.length > 0) {
         setGeneratedImages([data.images[0]])
+      } else {
+        throw new Error('No images were generated. Please try again.')
       }
     } catch (error) {
       console.error('Generation error:', error)
-      // Handle error appropriately
+      setError(error instanceof Error ? error.message : 'Failed to generate anime poster. Please try again.')
     } finally {
       setIsGenerating(false)
     }
@@ -220,6 +242,13 @@ export default function AnimePosterTool() {
                   </>
                 )}
               </Button>
+
+              {/* Error Message */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                  <p className="text-sm font-medium">{error}</p>
+                </div>
+              )}
             </div>
           </div>
 

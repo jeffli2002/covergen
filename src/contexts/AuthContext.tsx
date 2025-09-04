@@ -80,9 +80,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         })
         
         // Initialize auth service and wait for completion
+        console.log('[AuthContext] Starting auth initialization')
         await authService.initialize()
         
         const currentUser = authService.getCurrentUser()
+        console.log('[AuthContext] Current user after init:', {
+          hasUser: !!currentUser,
+          email: currentUser?.email
+        })
         setUser(currentUser)
         
         // Load subscription data on init
@@ -117,24 +122,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('[AuthContext] Auth initialization error:', error)
       } finally {
         setLoading(false)
-        
-        // Handle implicit flow tokens after initialization
-        const hash = window.location.hash
-        if (hash && hash.includes('access_token')) {
-          const params = new URLSearchParams(hash.substring(1))
-          const accessToken = params.get('access_token')
-          const refreshToken = params.get('refresh_token')
-          
-          if (accessToken && refreshToken) {
-            // Set session from URL tokens
-            authService.setSessionFromTokens(accessToken, refreshToken).then(() => {
-              // Clean URL
-              window.history.replaceState({}, document.title, window.location.pathname + window.location.search)
-            }).catch(error => {
-              console.error('[AuthContext] Failed to set session from tokens:', error)
-            })
-          }
-        }
       }
     }
 

@@ -175,14 +175,35 @@ export default function SpotifyPlaylistCoverTool() {
         </div>
       </Card>
 
+      {/* Debug info */}
+      <Card className="p-4 bg-yellow-50 border-yellow-200">
+        <p className="text-sm text-yellow-800">
+          Debug: outputs.length = {outputs.length}, loading = {loading.toString()}
+        </p>
+        {outputs.length > 0 && (
+          <p className="text-sm text-yellow-800">
+            First output URL: {outputs[0]}
+          </p>
+        )}
+      </Card>
+
       {outputs.length > 0 && (
         <Card className="p-6">
           <h3 className="text-xl font-semibold mb-4">Generated Covers</h3>
           <OutputGallery
             generatedImages={outputs}
             downloadingId={null}
-            onDownload={() => {}}
-            onGenerateNew={() => {}}
+            onDownload={(imageUrl: string, index: number) => {
+              console.log('Download clicked:', imageUrl, index)
+              // Create download link
+              const link = document.createElement('a')
+              link.href = imageUrl
+              link.download = `spotify-playlist-cover-${index + 1}.png`
+              document.body.appendChild(link)
+              link.click()
+              document.body.removeChild(link)
+            }}
+            onGenerateNew={handleGenerate}
             platform="spotify"
           />
         </Card>

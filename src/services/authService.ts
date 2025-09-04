@@ -40,8 +40,63 @@ class AuthService {
         return false
       }
 
-      // Let Supabase handle everything - it will detect OAuth tokens automatically
+      // Check for OAuth tokens in URL hash before getting session
+      const hash = typeof window !== 'undefined' ? window.location.hash : ''
+      console.log('[AuthService] Checking for OAuth tokens in URL hash:', !!hash)
+      
+      if (hash && hash.includes('access_token')) {
+        console.log('[AuthService] Found access_token in URL hash')
+        const params = new URLSearchParams(hash.substring(1))
+        const accessToken = params.get('access_token')
+        const refreshToken = params.get('refresh_token')
+        
+        console.log('[AuthService] Tokens found:', { 
+          hasAccessToken: !!accessToken, 
+          hasRefreshToken: !!refreshToken 
+        })
+        
+        if (accessToken && refreshToken) {
+          // Set session from URL tokens first
+          console.log('[AuthService] Setting session from URL tokens')
+          const { data: tokenData, error: tokenError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          })
+          
+          if (tokenError) {
+            console.error('[AuthService] Error setting session from tokens:', tokenError)
+          } else if (tokenData.session) {
+            console.log('[AuthService] Successfully set session from tokens:', {
+              userId: tokenData.user?.id,
+              email: tokenData.user?.email
+            })
+            this.session = tokenData.session
+            this.user = tokenData.user
+            this.storeSession(tokenData.session)
+            
+            // Notify auth change handler immediately
+            if (this.onAuthChange) {
+              console.log('[AuthService] Notifying auth change handler after token set')
+              this.onAuthChange(this.user)
+            }
+            
+            // Clean URL after successful token handling
+            if (typeof window !== 'undefined') {
+              window.history.replaceState({}, document.title, window.location.pathname + window.location.search)
+            }
+          }
+        }
+      }
+
+      // Now get the session (either from tokens above or existing session)
       const { data: { session }, error } = await supabase.auth.getSession()
+      
+      console.log('[AuthService] GetSession result:', {
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        email: session?.user?.email,
+        error: error?.message
+      })
       
       if (session) {
         this.session = session
@@ -53,6 +108,13 @@ class AuthService {
 
       if (!this.authSubscription) {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+          console.log('[AuthService] Auth state change:', {
+            event,
+            hasSession: !!session,
+            hasUser: !!session?.user,
+            email: session?.user?.email
+          })
+          
           this.session = session
           this.user = session?.user || null
           this.lastSessionCheck = Date.now()
@@ -64,6 +126,7 @@ class AuthService {
           }
 
           if (this.onAuthChange) {
+            console.log('[AuthService] Calling onAuthChange handler')
             this.onAuthChange(this.user)
           }
 
