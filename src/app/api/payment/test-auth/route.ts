@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-export async function GET(req: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
     // Log all headers
     const headers: any = {}
@@ -72,4 +72,8 @@ export async function GET(req: NextRequest) {
       stack: error.stack
     }, { status: 500 })
   }
+}
+
+export async function GET(req: NextRequest) {
+  return POST(req)
 }

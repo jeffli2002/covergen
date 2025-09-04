@@ -11,6 +11,7 @@ import { useAppStore } from '@/lib/store'
 import authService from '@/services/authService'
 import { creemService, SUBSCRIPTION_PLANS, CREEM_TEST_CARDS } from '@/services/payment/creem'
 import { toast } from 'sonner'
+import PaymentDebug from '@/components/debug/PaymentDebug'
 
 interface PaymentPageClientProps {
   locale: string
@@ -37,8 +38,15 @@ export default function PaymentPageClient({
     // Check if we're in test mode
     setIsTestMode(creemService.isTestMode())
 
+    console.log('[PaymentPage] Initial load:', {
+      isAuthenticated: authService.isAuthenticated(),
+      user: user,
+      session: authService.getCurrentSession() ? 'Present' : 'Missing'
+    })
+
     // Check authentication
     if (!authService.isAuthenticated()) {
+      console.log('[PaymentPage] Not authenticated, redirecting...')
       // Redirect to auth with return URL
       const returnUrl = `/${locale}/payment?plan=${selectedPlan}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
       router.push(`/${locale}?auth=signin&redirect=${encodeURIComponent(returnUrl)}`)
@@ -88,6 +96,8 @@ export default function PaymentPageClient({
   const handleSelectPlan = async (planId: 'pro' | 'pro_plus') => {
     console.log('[PaymentPage] handleSelectPlan called with planId:', planId)
     console.log('[PaymentPage] Current user:', user)
+    console.log('[PaymentPage] Authentication status:', authService.isAuthenticated())
+    console.log('[PaymentPage] Current session:', authService.getCurrentSession() ? 'Present' : 'Missing')
     
     if (!user) {
       console.log('[PaymentPage] No user found, showing error')
@@ -97,6 +107,14 @@ export default function PaymentPageClient({
 
     setLoading(true)
     console.log('[PaymentPage] Creating checkout session...')
+    
+    // Debug session details
+    const session = authService.getCurrentSession()
+    console.log('[PaymentPage] Session details:', {
+      hasAccessToken: !!session?.access_token,
+      tokenLength: session?.access_token?.length,
+      tokenPrefix: session?.access_token?.substring(0, 20)
+    })
     
     try {
       // Create checkout session
@@ -155,7 +173,7 @@ export default function PaymentPageClient({
       ...SUBSCRIPTION_PLANS.pro_plus,
       icon: Crown,
       popular: false,
-      savings: 'Save $69/year'
+      savings: null
     }
   ]
 
@@ -179,6 +197,12 @@ export default function PaymentPageClient({
                 No real charges will be made.
               </AlertDescription>
             </Alert>
+          )}
+          
+          {isTestMode && (
+            <div className="mt-6">
+              <PaymentDebug />
+            </div>
           )}
         </div>
 

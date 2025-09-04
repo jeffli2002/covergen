@@ -53,8 +53,7 @@ export const SUBSCRIPTION_PLANS = {
       'No watermark',
       'All platform sizes',
       'Priority support',
-      'Batch generation',
-      '24-hour download history'
+      'Basic tool usage'
     ]
   },
   pro_plus: {
@@ -62,13 +61,12 @@ export const SUBSCRIPTION_PLANS = {
     name: 'Pro+', 
     price: 1900, // $19.00 in cents
     priceId: CREEM_TEST_MODE ? 'price_test_proplus_1900' : 'price_proplus_1900',
-    credits: 500,
+    credits: 300,
     features: [
       '300 covers per month',
       'No watermark',
       'Commercial license',
-      'Custom brand templates',
-      'API access',
+      'All tools usage',
       'Dedicated support',
       '7-day cloud gallery'
     ]
