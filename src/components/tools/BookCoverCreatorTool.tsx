@@ -353,4 +353,3 @@ export default function BookCoverCreatorTool() {
   )
 }
 
-export default BookCoverCreatorTool

@@ -378,4 +378,3 @@ export default function SocialMediaPosterTool() {
   )
 }
 
-export default SocialMediaPosterTool

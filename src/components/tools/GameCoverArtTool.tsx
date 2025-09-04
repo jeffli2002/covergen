@@ -386,4 +386,3 @@ export default function GameCoverArtTool() {
   )
 }
 
-export default GameCoverArtTool

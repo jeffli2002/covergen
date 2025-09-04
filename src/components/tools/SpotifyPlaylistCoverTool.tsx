@@ -216,4 +216,3 @@ export default function SpotifyPlaylistCoverTool() {
   )
 }
 
-export default SpotifyPlaylistCoverTool

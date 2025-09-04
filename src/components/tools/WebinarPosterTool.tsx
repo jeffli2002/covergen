@@ -201,4 +201,3 @@ export default function WebinarPosterTool() {
   )
 }
 
-export default WebinarPosterTool
