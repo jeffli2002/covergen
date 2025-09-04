@@ -204,9 +204,11 @@ class AuthService {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
+          redirectTo: `${siteUrl}${redirectUrl || `/${locale || 'en'}`}`,
           queryParams: {
             // Force account selection to allow switching accounts
-            prompt: 'select_account'
+            prompt: 'select_account',
+            access_type: 'offline'
           }
         }
       })
@@ -296,6 +298,32 @@ class AuthService {
 
   getCurrentSession() {
     return this.session
+  }
+
+  async setSessionFromTokens(accessToken: string, refreshToken: string) {
+    try {
+      const { data, error } = await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken
+      })
+
+      if (error) throw error
+      
+      if (data.session) {
+        this.storeSession(data.session)
+        this.session = data.session
+        this.user = data.user
+        
+        if (this.authChangeHandler) {
+          await this.authChangeHandler(data.user)
+        }
+      }
+
+      return { success: true, session: data.session }
+    } catch (error: any) {
+      console.error('Failed to set session from tokens:', error)
+      return { success: false, error: error.message }
+    }
   }
 
   async waitForAuth() {
