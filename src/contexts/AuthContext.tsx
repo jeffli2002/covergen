@@ -39,22 +39,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
 
   useEffect(() => {
-    // Handle implicit flow tokens if present in URL
-    const hash = window.location.hash
-    if (hash && hash.includes('access_token')) {
-      const params = new URLSearchParams(hash.substring(1))
-      const accessToken = params.get('access_token')
-      const refreshToken = params.get('refresh_token')
-      
-      if (accessToken && refreshToken) {
-        // Set session from URL tokens
-        authService.setSessionFromTokens(accessToken, refreshToken).then(() => {
-          // Clean URL
-          window.history.replaceState({}, document.title, window.location.pathname + window.location.search)
-        })
-      }
-    }
-
     const initAuth = async () => {
       try {
         // Set up auth change handler first, before initialization
@@ -133,6 +117,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('[AuthContext] Auth initialization error:', error)
       } finally {
         setLoading(false)
+        
+        // Handle implicit flow tokens after initialization
+        const hash = window.location.hash
+        if (hash && hash.includes('access_token')) {
+          const params = new URLSearchParams(hash.substring(1))
+          const accessToken = params.get('access_token')
+          const refreshToken = params.get('refresh_token')
+          
+          if (accessToken && refreshToken) {
+            // Set session from URL tokens
+            authService.setSessionFromTokens(accessToken, refreshToken).then(() => {
+              // Clean URL
+              window.history.replaceState({}, document.title, window.location.pathname + window.location.search)
+            }).catch(error => {
+              console.error('[AuthContext] Failed to set session from tokens:', error)
+            })
+          }
+        }
       }
     }
 
