@@ -131,7 +131,7 @@ export function CompactUsageIndicator({
       </span>
       {percentage >= 100 && (
         <Link href="/pricing">
-          <Button size="xs" variant="outline">
+          <Button size="sm" variant="outline">
             <Zap className="h-3 w-3" />
           </Button>
         </Link>
