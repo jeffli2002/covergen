@@ -101,7 +101,6 @@ class AuthService {
           }
 
           console.log('[Auth] Auth state change:', { event, user: session?.user?.email })
-
           
           if (event === 'SIGNED_IN' && session) {
             await this.onSignIn(session.user)
@@ -237,20 +236,17 @@ class AuthService {
         throw new Error('Supabase not configured')
       }
 
-      // Get redirect URL from browser or environment
-      const redirectUrl = typeof window !== 'undefined' 
-        ? `${window.location.origin}/en` 
-        : `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001'}/en`
-      
-      // Simple OAuth like production - let Supabase handle everything
+      // Get the current pathname to preserve locale
+      const currentPath = window.location.pathname || '/en'
+      const redirectUrl = `${window.location.origin}${currentPath}`
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: redirectUrl,
           queryParams: {
-            // Force account selection to allow switching accounts
-            prompt: 'select_account',
-            access_type: 'offline'
+            access_type: 'offline',
+            prompt: 'consent',
           }
         }
       })
@@ -273,16 +269,35 @@ class AuthService {
 
   async signOut() {
     try {
+      console.log('[Auth] Starting sign out process')
+      
+      // Stop session refresh timer first
+      this.stopSessionRefreshTimer()
+      
+      // Clear local state immediately
+      this.user = null
+      this.session = null
+      this.clearStoredSession()
+      
+      // Notify listeners immediately for instant UI update
+      if (this.onAuthChange) {
+        this.onAuthChange(null)
+      }
+      
+      // Then call Supabase signOut
       const { error } = await supabase.auth.signOut()
 
       if (error) {
+        console.error('[Auth] Sign out error:', error)
         throw error
       }
 
+      console.log('[Auth] Sign out successful')
       return {
         success: true
       }
     } catch (error: any) {
+      console.error('[Auth] Sign out failed:', error)
       return {
         success: false,
         error: error.message
@@ -342,32 +357,6 @@ class AuthService {
     return this.session
   }
 
-  async setSessionFromTokens(accessToken: string, refreshToken: string) {
-    try {
-      const { data, error } = await supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken
-      })
-
-      if (error) throw error
-      
-      if (data.session) {
-        this.storeSession(data.session)
-        this.session = data.session
-        this.user = data.user
-        
-        if (this.onAuthChange) {
-          await this.onAuthChange(data.user)
-        }
-      }
-
-      return { success: true, session: data.session }
-    } catch (error: any) {
-      console.error('Failed to set session from tokens:', error)
-      return { success: false, error: error.message }
-    }
-  }
-
   async waitForAuth() {
     if (!this.initialized) {
       await this.initialize()
@@ -385,39 +374,29 @@ class AuthService {
   }
 
   async getUserUsageToday() {
-    if (!this.user) return 0
+    if (!this.user) {
+      // No user, return 0 without logging error
+      return 0
+    }
 
     try {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
 
-      // First check if table exists with a simple count
-      const { error: tableError } = await supabase
-        .from('user_usage')
-        .select('*', { count: 'exact', head: true })
-        .limit(1)
-
-      if (tableError) {
-        // Table doesn't exist or no access - return 0
-        return 0
-      }
-
       const { data, error } = await supabase
         .from('user_usage')
-        .select('*')
+        .select('generation_count')
         .eq('user_id', this.user.id)
         .gte('date', today.toISOString())
         .single()
 
-      if (error) {
-        // No data for today - return 0
-        return 0
+      if (error && error.code !== 'PGRST116') {
+        throw error
       }
 
-      // Try different possible column names
-      return data?.generation_count || data?.usage_count || data?.count || 0
+      return data?.generation_count || 0
     } catch (error) {
-      // Silently fail - usage tracking is optional
+      console.error('Error getting user usage:', error)
       return 0
     }
   }
@@ -507,6 +486,10 @@ class AuthService {
     this.user = null
     this.session = null
     this.clearStoredSession()
+    
+    if (this.onAuthChange) {
+      this.onAuthChange(null)
+    }
   }
 
   private async syncUserData() {
