@@ -142,14 +142,16 @@ export default function InstagramOptimizedClient({ locale, translations }: { loc
 
       {/* JSON-LD Schema - Lazy loaded */}
       <Suspense fallback={null}>
-        <JsonLdScript type="howto" data={{
-          title: 'How to Create Viral Instagram Content',
+        <JsonLdScript data={{
+          '@context': 'https://schema.org',
+          '@type': 'HowTo',
+          name: 'How to Create Viral Instagram Content',
           description: 'Step-by-step guide to creating engaging Instagram posts, stories, and reels with AI',
-          steps: [
-            { name: 'Select content type', text: 'Choose from feed post, story, reel cover, or carousel' },
-            { name: 'Upload brand elements', text: 'Add your photos, logo, or brand colors for consistency' },
-            { name: 'Choose aesthetic', text: 'Select your preferred style: minimal, bold, vintage, or modern' },
-            { name: 'Generate and customize', text: 'AI creates multiple options in perfect Instagram dimensions' }
+          step: [
+            { '@type': 'HowToStep', name: 'Select content type', text: 'Choose from feed post, story, reel cover, or carousel' },
+            { '@type': 'HowToStep', name: 'Upload brand elements', text: 'Add your photos, logo, or brand colors for consistency' },
+            { '@type': 'HowToStep', name: 'Choose aesthetic', text: 'Select your preferred style: minimal, bold, vintage, or modern' },
+            { '@type': 'HowToStep', name: 'Generate and customize', text: 'AI creates multiple options in perfect Instagram dimensions' }
           ]
         }} />
       </Suspense>
