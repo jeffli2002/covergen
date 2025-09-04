@@ -35,14 +35,17 @@ export async function POST(req: NextRequest) {
 
     // Return license details
     return NextResponse.json({
-      valid: true,
+      valid: result.valid,
       license: {
-        id: result.license.id,
-        status: result.license.status,
-        customerId: result.license.customerId,
-        productId: result.license.productId,
-        metadata: result.license.metadata,
-        expiresAt: result.license.expiresAt
+        key: result.license.key,
+        valid: result.license.valid,
+        // TODO: Add proper license properties when Creem SDK integration is fixed
+        id: result.license.key,
+        status: result.license.valid ? 'active' : 'inactive',
+        customerId: null,
+        productId: null,
+        metadata: {},
+        expiresAt: null
       }
     })
   } catch (error: any) {

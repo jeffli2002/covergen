@@ -258,7 +258,7 @@ test.describe('Database State Verification', () => {
 
     expect(usage.daily_count).toBe(3);
     expect(usage.monthly_count).toBe(3);
-    expect(new Date(usage.last_reset_daily)).toDateString()).toBe(new Date().toDateString());
+    expect(new Date(usage.last_reset_daily).toDateString()).toBe(new Date().toDateString());
   });
 
   test('Should handle subscription cancellation in database', async ({ page, request }) => {
