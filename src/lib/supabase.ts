@@ -15,6 +15,24 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
-    flowType: 'pkce' // Use PKCE flow for OAuth
+    flowType: 'pkce', // Use PKCE flow for OAuth
+    storage: {
+      getItem: (key: string) => {
+        if (typeof window !== 'undefined') {
+          return window.localStorage.getItem(key)
+        }
+        return null
+      },
+      setItem: (key: string, value: string) => {
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(key, value)
+        }
+      },
+      removeItem: (key: string) => {
+        if (typeof window !== 'undefined') {
+          window.localStorage.removeItem(key)
+        }
+      }
+    }
   }
 })
