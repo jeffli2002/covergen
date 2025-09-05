@@ -9,7 +9,6 @@ import { generatePlatformSchema, generateFAQSchema, generateBreadcrumbSchema } f
 import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
 import PlatformShowcaseOptimized from '@/components/platform-showcase-optimized'
 import { platformShowcases } from '@/lib/platform-showcases'
-import { PlatformRateLimitWrapper } from '@/components/platform-rate-limit-wrapper'
 import { useRouter } from 'next/navigation'
 
 const features = [
@@ -309,15 +308,9 @@ export default function YouTubeThumbnailMakerClient({ locale, translations }: { 
   }
   
   return (
-    <PlatformRateLimitWrapper
-      platform="youtube"
-      onGenerate={handleGenerate}
-      showUsageIndicator={true}
-    >
-      <YouTubeThumbnailMakerContent 
-        locale={locale} 
-        translations={translations}
-      />
-    </PlatformRateLimitWrapper>
+    <YouTubeThumbnailMakerContent 
+      locale={locale} 
+      translations={translations}
+    />
   )
 }

@@ -111,7 +111,7 @@ export const SUBSCRIPTION_PLANS = {
     name: 'Pro',
     price: 900, // $9.00 in cents
     priceId: getCreemTestMode() ? 'price_test_pro_900' : 'price_pro_900',
-    credits: 100,
+    credits: 120,
     features: [
       '120 covers per month',
       'No watermark',
