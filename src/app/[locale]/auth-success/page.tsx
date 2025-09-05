@@ -22,8 +22,23 @@ function AuthSuccessContent() {
     // Give the auth state a moment to settle
     await new Promise(resolve => setTimeout(resolve, 1000))
     
+    // First check server-side session
+    try {
+      const serverResponse = await fetch('/api/check-session')
+      const serverData = await serverResponse.json()
+      console.log('[AuthSuccess] Server session check:', serverData)
+    } catch (err) {
+      console.error('[AuthSuccess] Server check error:', err)
+    }
+    
+    // Then check client-side session
     const { data: { session }, error } = await supabase.auth.getSession()
-    console.log('[AuthSuccess] Session check:', { hasSession: !!session, user: session?.user?.email, error })
+    console.log('[AuthSuccess] Client session check:', { 
+      hasSession: !!session, 
+      user: session?.user?.email, 
+      error,
+      cookies: document.cookie
+    })
     
     if (session) {
       setUser(session.user)

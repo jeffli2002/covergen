@@ -72,7 +72,16 @@ export async function GET(request: NextRequest) {
         hasUser: !!data?.user,
         accessToken: data?.session?.access_token ? 'present' : 'missing',
         refreshToken: data?.session?.refresh_token ? 'present' : 'missing',
+        expiresAt: data?.session?.expires_at,
       })
+      
+      // Log the cookies being set
+      console.log('[Auth Callback] Response cookies:', response.cookies.getAll().map(c => ({
+        name: c.name,
+        hasValue: !!c.value,
+        httpOnly: c.httpOnly,
+        sameSite: c.sameSite
+      })))
       
       // Return the response with cookies set
       return response
