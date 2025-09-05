@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
           message: error.message,
           status: error.status,
           name: error.name,
-          cause: error.cause
+          cause: (error as any).cause
         })
         // Include more detailed error information for debugging
         const errorParams = new URLSearchParams({
