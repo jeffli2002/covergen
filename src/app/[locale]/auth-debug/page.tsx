@@ -81,13 +81,13 @@ export default function AuthDebug() {
           }
         }
       })
-      .catch(e => {
+      .catch((e: any) => {
         log(`- Exception: ${e.message}`)
       })
       
     // 5. Check user (async)
     supabase.auth.getUser()
-      .then(({ data, error }) => {
+      .then(({ data, error }: { data: any; error: any }) => {
         log('\n5. USER CHECK:')
         if (error) {
           log(`- Error: ${error.message}`)
