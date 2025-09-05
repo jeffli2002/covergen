@@ -65,9 +65,9 @@ async function checkCreemProducts() {
       xApiKey: apiKey
     })
     
-    console.log(`\nFound ${products.data?.length || 0} products in your account:`)
-    if (products.data && products.data.length > 0) {
-      products.data.forEach((product: any) => {
+    console.log(`\nFound ${products.items?.length || 0} products in your account:`)
+    if (products.items && products.items.length > 0) {
+      products.items.forEach((product: any) => {
         console.log(`- ${product.name} (${product.id})`)
       })
     } else {
