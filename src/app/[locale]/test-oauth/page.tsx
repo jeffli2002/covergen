@@ -65,7 +65,7 @@ export default function TestOAuth() {
     checkOAuth()
     
     // Listen for auth state changes
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event: any, session: any) => {
       addLog(`Auth state changed: ${event}`)
       if (session) {
         setUser(session.user)
