@@ -53,6 +53,7 @@ export async function middleware(request: NextRequest) {
     '/fonts',
     '/test',
     '/auth/callback', // Skip middleware for auth callback
+    '/auth', // Skip all auth routes
     '/oauth-debug',
     '/oauth-safe-debug',
     '/oauth-test-simple',
@@ -76,10 +77,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Special handling for auth routes - update session but skip locale redirect
-  if (pathname.startsWith('/auth')) {
-    return await updateSession(request)
-  }
+  // Auth routes have already been skipped above
 
   // Update Supabase session
   const supabaseResponse = await updateSession(request)

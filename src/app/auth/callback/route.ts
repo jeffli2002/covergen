@@ -24,13 +24,17 @@ export async function GET(request: NextRequest) {
               return request.cookies.get(name)?.value
             },
             set(name: string, value: string, options: CookieOptions) {
-              response.cookies.set({
+              const cookieOptions = {
                 name,
                 value,
                 ...options,
-                sameSite: 'lax',
-                httpOnly: true
-              })
+                sameSite: 'lax' as const,
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                path: '/',
+              }
+              console.log('[Auth Callback] Setting cookie:', name, { ...cookieOptions, value: '***' })
+              response.cookies.set(cookieOptions)
             },
             remove(name: string, options: CookieOptions) {
               response.cookies.set({
