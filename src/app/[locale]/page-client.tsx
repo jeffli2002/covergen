@@ -10,7 +10,6 @@ import { Card, CardContent } from '@/components/ui/card'
 import { useAppStore } from '@/lib/store'
 import { useAnalytics } from '@/lib/analytics'
 import { useAuth } from '@/contexts/AuthContext'
-import { useServerSession } from '@/hooks/useServerSession'
 import { 
   Sparkles, 
   Zap, 
@@ -99,9 +98,6 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
     context: 'general'
   })
   const { user: authUser } = useAuth()
-  
-  // Sync server session after OAuth redirect
-  useServerSession()
 
   // Debug session state
   useEffect(() => {
@@ -112,22 +108,17 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
     })
   }, [authUser])
 
-  // Handle OAuth callback - detect when we have a code and no user yet
+  // Handle OAuth errors
   useEffect(() => {
-    const handleOAuthCallback = async () => {
-      const urlParams = new URLSearchParams(window.location.search)
-      const error = urlParams.get('error')
-      const errorDescription = urlParams.get('error_description')
-      
-      if (error) {
-        console.error('[HomePage] OAuth error:', errorDescription || error)
-        // Clean up URL
-        window.history.replaceState({}, document.title, window.location.pathname)
-        return
-      }
-    }
+    const urlParams = new URLSearchParams(window.location.search)
+    const error = urlParams.get('error')
+    const errorDescription = urlParams.get('error_description')
     
-    handleOAuthCallback()
+    if (error) {
+      console.error('[HomePage] OAuth error:', errorDescription || error)
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
   }, [])
   
   // Handle post-OAuth redirect

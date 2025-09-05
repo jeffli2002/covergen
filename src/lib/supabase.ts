@@ -1,17 +1,10 @@
-import { createClient } from '@supabase/supabase-js'
+// Compatibility layer for existing code that imports from '@/lib/supabase'
+// Creates a singleton client instance for backward compatibility
+import { createClient } from './supabase/client'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+// Create and export a singleton instance
+export const supabase = createClient()
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase credentials not found. Authentication features will be disabled.')
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce'
-  }
-})
+// Note: This is a compatibility layer. New code should import createClient
+// from './supabase/client', './supabase/server', or './supabase/browser-client'
+// directly based on the context (server component, client component, etc.)

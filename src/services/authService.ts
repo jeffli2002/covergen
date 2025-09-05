@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/client'
+import { supabase } from '@/lib/supabase-simple'
 
 let authServiceInstance: AuthService | null = null
 
@@ -262,8 +262,8 @@ class AuthService {
 
       // Get the current pathname to preserve locale
       const currentPath = window.location.pathname || '/en'
-      // Use direct redirect like production (implicit flow)
-      const redirectUrl = `${window.location.origin}${currentPath}`
+      // Use PKCE flow with callback route
+      const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
 
       console.log('[Auth] Google sign in with redirect URL:', redirectUrl)
 
@@ -274,7 +274,8 @@ class AuthService {
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
-          }
+          },
+          skipBrowserRedirect: false
         }
       })
 
@@ -388,32 +389,10 @@ class AuthService {
     return this.supabase
   }
 
+  // Deprecated - PKCE flow doesn't use this method
   async setOAuthSession(accessToken: string, refreshToken: string) {
-    try {
-      if (!this.supabase) {
-        throw new Error('Supabase not configured')
-      }
-
-      console.log('[AuthService] Setting OAuth session...')
-      
-      const { data, error } = await this.supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken
-      })
-      
-      if (error) {
-        console.error('[AuthService] Error setting OAuth session:', error)
-        return { success: false, error: error.message }
-      }
-      
-      console.log('[AuthService] OAuth session set successfully')
-      
-      // Session will be handled by onAuthStateChange listener
-      return { success: true, data }
-    } catch (error: any) {
-      console.error('[AuthService] Failed to set OAuth session:', error)
-      return { success: false, error: error.message }
-    }
+    console.warn('[AuthService] setOAuthSession is deprecated for PKCE flow')
+    return { success: false, error: 'This method is not used in PKCE flow' }
   }
 
   async exchangeCodeForSession(code: string) {
