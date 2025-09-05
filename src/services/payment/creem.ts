@@ -2,7 +2,25 @@ import { Creem } from 'creem'
 
 // Use lazy evaluation for all environment variables to handle edge runtime
 const getCreemTestMode = () => {
-  return process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_CREEM_TEST_MODE === 'true'
+  // Check multiple conditions for test mode
+  const isTestMode = process.env.NEXT_PUBLIC_CREEM_TEST_MODE === 'true'
+  const isVercelPreview = process.env.VERCEL_ENV === 'preview'
+  const isDevEnvironment = process.env.NODE_ENV === 'development'
+  
+  // Log the decision for debugging
+  if (typeof window === 'undefined') {
+    console.log('[Creem] Test mode check:', {
+      NEXT_PUBLIC_CREEM_TEST_MODE: process.env.NEXT_PUBLIC_CREEM_TEST_MODE,
+      NODE_ENV: process.env.NODE_ENV,
+      VERCEL_ENV: process.env.VERCEL_ENV,
+      isTestMode,
+      isVercelPreview,
+      isDevEnvironment,
+      result: isTestMode || isVercelPreview || isDevEnvironment
+    })
+  }
+  
+  return isTestMode || isVercelPreview || isDevEnvironment
 }
 
 // Use lazy evaluation for API keys to handle edge runtime
@@ -14,12 +32,19 @@ const getCreemApiKey = () => {
               process.env.CREEM_TEST_API_KEY || // Alternative test key name
               ''
   
-  if (!key && typeof window === 'undefined') {
-    console.warn('[Creem] No API key found in environment variables. Checked:', {
-      CREEM_SECRET_KEY: !!process.env.CREEM_SECRET_KEY,
-      CREEM_API_KEY: !!process.env.CREEM_API_KEY,
-      NEXT_PUBLIC_CREEM_SECRET_KEY: !!process.env.NEXT_PUBLIC_CREEM_SECRET_KEY,
-      CREEM_TEST_API_KEY: !!process.env.CREEM_TEST_API_KEY
+  // Always log in server context for debugging
+  if (typeof window === 'undefined') {
+    console.log('[Creem] API key retrieval:', {
+      found: !!key,
+      length: key.length,
+      prefix: key ? key.substring(0, 15) + '...' : 'NONE',
+      isTestKey: key.startsWith('creem_test_'),
+      checkedVars: {
+        CREEM_SECRET_KEY: process.env.CREEM_SECRET_KEY ? 'SET' : 'NOT SET',
+        CREEM_API_KEY: process.env.CREEM_API_KEY ? 'SET' : 'NOT SET',
+        NEXT_PUBLIC_CREEM_SECRET_KEY: process.env.NEXT_PUBLIC_CREEM_SECRET_KEY ? 'SET' : 'NOT SET',
+        CREEM_TEST_API_KEY: process.env.CREEM_TEST_API_KEY ? 'SET' : 'NOT SET'
+      }
     })
   }
   return key
@@ -230,8 +255,24 @@ class CreemPaymentService {
       }
       
       // Server-side implementation - use Creem SDK
+      console.log('[Creem] Server-side checkout session creation started')
+      
+      // Get API key with detailed logging
       const CREEM_API_KEY = getCreemApiKey()
+      const testMode = getCreemTestMode()
+      
+      console.log('[Creem] Environment check before validation:', {
+        hasApiKey: !!CREEM_API_KEY,
+        apiKeyLength: CREEM_API_KEY.length,
+        apiKeyPrefix: CREEM_API_KEY ? CREEM_API_KEY.substring(0, 20) + '...' : 'NONE',
+        isTestKey: CREEM_API_KEY.startsWith('creem_test_'),
+        testMode: testMode,
+        nodeEnv: process.env.NODE_ENV,
+        vercelEnv: process.env.VERCEL_ENV
+      })
+      
       if (!CREEM_API_KEY) {
+        console.error('[Creem] No API key found!')
         throw new Error('Creem API key not configured')
       }
 
@@ -247,7 +288,6 @@ class CreemPaymentService {
         throw new Error(`Product ID not configured for plan: ${planId}. Please check environment variables.`)
       }
       
-      const testMode = getCreemTestMode()
       console.log('[Creem] Creating checkout with:', {
         productId,
         planId,
