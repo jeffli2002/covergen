@@ -132,9 +132,15 @@ class CreemPaymentService {
         const baseUrl = window.location.origin
         const apiUrl = `${baseUrl}/api/payment/create-checkout`
         
-        // Get auth token from Supabase
-        const { supabase } = await import('@/lib/supabase')
-        const { data: { session } } = await supabase.auth.getSession()
+        // Get auth token
+        const authService = (await import('@/services/authService')).default
+        
+        // Ensure auth is initialized
+        if (!authService.isAuthenticated()) {
+          await authService.waitForAuth()
+        }
+        
+        const session = authService.getCurrentSession()
         const authToken = session?.access_token
         
         console.log('[CreemService] Session check:', {
