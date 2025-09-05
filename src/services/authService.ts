@@ -20,7 +20,7 @@ class AuthService {
     }
     authServiceInstance = this
     // Initialize Supabase client
-    this.this.supabase = createClient()
+    this.supabase = createClient()
   }
 
   async initialize() {
