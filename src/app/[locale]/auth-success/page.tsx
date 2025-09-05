@@ -2,59 +2,59 @@
 
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { createClient } from '@/utils/supabase/client'
+import { oauthCompletion } from '@/services/auth/oauth-completion'
 import Link from 'next/link'
 
 function AuthSuccessContent() {
   const [user, setUser] = useState<any>(null)
   const [checking, setChecking] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [attempt, setAttempt] = useState(0)
   const router = useRouter()
   const searchParams = useSearchParams()
   
   useEffect(() => {
-    checkAuth()
+    completeOAuth()
   }, [])
   
-  const checkAuth = async () => {
-    console.log('[AuthSuccess] Checking session...')
+  const completeOAuth = async () => {
+    console.log('[AuthSuccess] Starting OAuth completion flow')
     setChecking(true)
+    setError(null)
     
-    // Give the auth state a moment to settle
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    const next = searchParams.get('next') || '/en'
     
-    // First check server-side session
     try {
-      const serverResponse = await fetch('/api/check-session')
-      const serverData = await serverResponse.json()
-      console.log('[AuthSuccess] Server session check:', serverData)
-    } catch (err) {
-      console.error('[AuthSuccess] Server check error:', err)
-    }
-    
-    // Then check client-side session
-    const supabase = createClient()
-    const { data: { session }, error } = await supabase.auth.getSession()
-    console.log('[AuthSuccess] Client session check:', { 
-      hasSession: !!session, 
-      user: session?.user?.email, 
-      error,
-      cookies: document.cookie
-    })
-    
-    if (session) {
-      setUser(session.user)
+      const result = await oauthCompletion.completeOAuthFlow(next, {
+        onRetry: (attemptNum) => {
+          setAttempt(attemptNum + 1)
+        }
+      })
       
-      // Check for redirect parameter
-      const next = searchParams.get('next')
-      if (next && next !== '/en/auth-success') {
-        console.log('[AuthSuccess] Redirecting to:', next)
-        setTimeout(() => {
-          router.push(next)
-        }, 1500)
+      if (result.success && result.session) {
+        console.log('[AuthSuccess] OAuth flow completed successfully:', {
+          user: result.user?.email,
+          redirectPath: result.redirectPath
+        })
+        
+        setUser(result.user)
+        
+        // Redirect to the intended page
+        if (result.redirectPath && result.redirectPath !== '/en/auth-success') {
+          setTimeout(() => {
+            router.push(result.redirectPath!)
+          }, 1500)
+        }
+      } else {
+        console.error('[AuthSuccess] OAuth flow failed:', result.error)
+        setError(result.error || 'Failed to complete authentication')
       }
+    } catch (err: any) {
+      console.error('[AuthSuccess] Unexpected error:', err)
+      setError(err.message || 'An unexpected error occurred')
+    } finally {
+      setChecking(false)
     }
-    
-    setChecking(false)
   }
   
   return (
@@ -74,12 +74,31 @@ function AuthSuccessContent() {
           {checking ? (
             <div className="my-6">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="text-gray-600 mt-4">Verifying your session...</p>
+              <p className="text-gray-600 mt-4">
+                Verifying your session...
+                {attempt > 0 && (
+                  <span className="text-sm text-gray-500 ml-2">
+                    (Attempt {attempt}/5)
+                  </span>
+                )}
+              </p>
             </div>
           ) : user ? (
             <p className="text-gray-600 mb-6">
               You're signed in as {user.email}
             </p>
+          ) : error ? (
+            <div>
+              <p className="text-red-600 mb-4">
+                {error}
+              </p>
+              <button 
+                onClick={completeOAuth}
+                className="text-blue-600 hover:text-blue-700 underline mb-6"
+              >
+                Try again
+              </button>
+            </div>
           ) : (
             <p className="text-red-600 mb-6">
               No active session found. Please try signing in again.
