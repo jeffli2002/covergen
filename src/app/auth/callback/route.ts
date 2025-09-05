@@ -4,7 +4,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
-  const next = requestUrl.searchParams.get('next') || '/en'
+  const next = requestUrl.searchParams.get('next') || '/en/auth-success'
   const origin = requestUrl.origin
 
   console.log('[Auth Callback] Processing OAuth callback:', { code: !!code, next, origin })

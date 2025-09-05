@@ -472,7 +472,8 @@ class AuthService {
         .gte('date', today.toISOString())
         .single()
 
-      if (error && error.code !== 'PGRST116') {
+      if (error && error.code !== 'PGRST116' && error.code !== '42703') {
+        // PGRST116: no rows found, 42703: column does not exist
         throw error
       }
 
