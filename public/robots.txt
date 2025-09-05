@@ -1,5 +1,5 @@
 # robots.txt for CoverGen Pro
-# Last updated: 2025-09-02
+# Last updated: 2025-09-06
 # AI-powered cover and thumbnail generator for content creators
 
 # Default - Allow all crawlers with content prioritization
@@ -25,12 +25,12 @@ Allow: /en/platforms/instagram
 Allow: /en/platforms/spotify
 Allow: /en/platforms/twitch
 Allow: /en/platforms/linkedin
+Allow: /en/platforms/bilibili
 Allow: /en/platforms/wechat
 Allow: /en/platforms/rednote
 
 # Explicitly allow tool pages (low-KD keyword targets)
 Allow: /en/tools/anime-poster-maker
-Allow: /en/tools/bilibili-video-cover
 Allow: /en/tools/spotify-playlist-cover
 Allow: /en/tools/facebook-event-cover
 Allow: /en/tools/social-media-poster
