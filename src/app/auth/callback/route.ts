@@ -55,7 +55,14 @@ export async function GET(request: NextRequest) {
       
       if (error) {
         console.error('[Auth Callback] Code exchange error:', error)
-        return NextResponse.redirect(`${origin}/en?error=auth_failed&message=${encodeURIComponent(error.message)}`)
+        // Include more detailed error information for debugging
+        const errorParams = new URLSearchParams({
+          error: 'auth_failed',
+          message: error.message,
+          error_code: error.status?.toString() || '',
+          error_description: error.error_description || ''
+        })
+        return NextResponse.redirect(`${origin}/en?${errorParams.toString()}`)
       }
 
       console.log('[Auth Callback] Code exchange successful, user:', data?.user?.email)

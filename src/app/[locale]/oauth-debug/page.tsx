@@ -1,10 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
 
 export default function OAuthDebugPage() {
   const [diagnostics, setDiagnostics] = useState<any>({})
   const [loading, setLoading] = useState(true)
+  const [oauthUrl, setOauthUrl] = useState<string>('')
+  const [testError, setTestError] = useState<string>('')
   
   useEffect(() => {
     runDiagnostics()
@@ -182,6 +185,47 @@ export default function OAuthDebugPage() {
               </ol>
             </div>
             
+            {/* OAuth Test */}
+            <div className="bg-white p-6 rounded-lg shadow">
+              <h2 className="text-lg font-semibold mb-4">OAuth Test</h2>
+              <div className="space-y-4">
+                <button 
+                  onClick={testOAuth}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  Test Google OAuth URL Generation
+                </button>
+                
+                {testError && (
+                  <div className="p-3 bg-red-100 text-red-800 rounded">
+                    Error: {testError}
+                  </div>
+                )}
+                
+                {oauthUrl && (
+                  <div className="space-y-3">
+                    <div className="p-3 bg-green-100 text-green-800 rounded">
+                      OAuth URL generated successfully!
+                    </div>
+                    <div className="p-3 bg-gray-100 rounded">
+                      <p className="text-sm font-semibold mb-2">Generated OAuth URL:</p>
+                      <p className="text-xs font-mono break-all">{oauthUrl}</p>
+                    </div>
+                    <div className="p-3 bg-blue-100 rounded">
+                      <p className="text-sm font-semibold mb-2">Required Redirect URLs for Supabase:</p>
+                      <ul className="list-disc list-inside text-sm space-y-1">
+                        <li><code className="bg-white px-1">{window.location.origin}/auth/callback</code></li>
+                        <li><code className="bg-white px-1">http://localhost:3001/auth/callback</code></li>
+                        {window.location.origin !== 'https://covergen.pro' && (
+                          <li><code className="bg-white px-1">https://covergen.pro/auth/callback</code></li>
+                        )}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            
             {/* Raw Data */}
             <details className="bg-gray-900 text-gray-100 p-6 rounded-lg">
               <summary className="cursor-pointer font-semibold">Raw Diagnostic Data</summary>
@@ -194,4 +238,29 @@ export default function OAuthDebugPage() {
       </div>
     </div>
   )
+  
+  async function testOAuth() {
+    try {
+      setTestError('')
+      setOauthUrl('')
+      
+      const redirectUrl = `${window.location.origin}/auth/callback?next=/en`
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectUrl,
+          skipBrowserRedirect: true // Don't redirect, just get the URL
+        }
+      })
+      
+      if (error) {
+        setTestError(error.message)
+      } else if (data?.url) {
+        setOauthUrl(data.url)
+      }
+    } catch (err) {
+      setTestError(String(err))
+    }
+  }
 }
