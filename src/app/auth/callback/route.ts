@@ -62,10 +62,17 @@ export async function GET(request: NextRequest) {
         }
       )
 
+      console.log('[Auth Callback] About to exchange code for session')
       const { data, error } = await supabase.auth.exchangeCodeForSession(code)
       
       if (error) {
         console.error('[Auth Callback] Code exchange error:', error)
+        console.error('[Auth Callback] Error details:', {
+          message: error.message,
+          status: error.status,
+          name: error.name,
+          cause: error.cause
+        })
         // Include more detailed error information for debugging
         const errorParams = new URLSearchParams({
           error: 'auth_failed',

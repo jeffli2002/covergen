@@ -90,7 +90,7 @@ export default function OAuthDebugCompletePage() {
     try {
       const supabase = createSupabaseBrowser()
       const currentUrl = window.location.href
-      const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentUrl)}`
+      const redirectTo = `${window.location.origin}/auth/callback-debug?next=${encodeURIComponent(currentUrl)}`
       
       log('OAuth config:', {
         provider: 'google',
