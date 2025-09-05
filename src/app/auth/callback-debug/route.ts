@@ -1,26 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
+// Store debug logs in memory (will reset on redeploy)
+export const debugLogs: Array<{ timestamp: string; message: string; data?: any }> = []
+
+function debugLog(message: string, data?: any) {
+  const entry = {
+    timestamp: new Date().toISOString(),
+    message,
+    data
+  }
+  debugLogs.push(entry)
+  console.log(`[Auth Callback Debug] ${message}`, data || '')
+  
+  // Keep only last 100 entries
+  if (debugLogs.length > 100) {
+    debugLogs.shift()
+  }
+}
+
 export async function GET(request: NextRequest) {
-  console.log('[Auth Callback Debug] ============ START ============')
+  debugLog('============ START ============')
   
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
   const next = requestUrl.searchParams.get('next') || '/en'
   const origin = requestUrl.origin
   
-  console.log('[Auth Callback Debug] Params:', { code: !!code, next, origin })
-  console.log('[Auth Callback Debug] Full URL:', request.url)
+  debugLog('Params:', { code: !!code, next, origin })
+  debugLog('Full URL:', request.url)
   
   if (!code) {
-    console.log('[Auth Callback Debug] No code provided')
+    debugLog('No code provided')
     return NextResponse.redirect(`${origin}/en?error=no_code`)
   }
   
   try {
     // Create response first
     const redirectUrl = `${origin}/en/auth-success?next=${encodeURIComponent(next)}`
-    console.log('[Auth Callback Debug] Will redirect to:', redirectUrl)
+    debugLog('Will redirect to:', redirectUrl)
     const response = NextResponse.redirect(redirectUrl)
     
     // Log cookie setting attempts
@@ -34,7 +52,7 @@ export async function GET(request: NextRequest) {
         cookies: {
           get(name: string) {
             const value = request.cookies.get(name)?.value
-            console.log(`[Auth Callback Debug] Cookie GET: ${name} = ${value ? 'exists' : 'not found'}`)
+            debugLog(`Cookie GET: ${name} = ${value ? 'exists' : 'not found'}`)
             return value
           },
           set(name: string, value: string, options: CookieOptions) {
@@ -45,7 +63,7 @@ export async function GET(request: NextRequest) {
               options
             }
             cookieLog.push(logEntry)
-            console.log('[Auth Callback Debug] Cookie SET attempt:', logEntry)
+            debugLog('Cookie SET attempt:', logEntry)
             
             try {
               response.cookies.set({
@@ -57,14 +75,14 @@ export async function GET(request: NextRequest) {
                 secure: true, // Always secure on Vercel
                 path: '/',
               })
-              console.log('[Auth Callback Debug] Cookie SET success:', name)
+              debugLog('Cookie SET success:', name)
             } catch (err) {
-              console.error('[Auth Callback Debug] Cookie SET error:', name, err)
+              debugLog('Cookie SET error:', { name, error: String(err) })
             }
           },
           remove(name: string, options: CookieOptions) {
             cookieLog.push({ action: 'REMOVE', name, options })
-            console.log('[Auth Callback Debug] Cookie REMOVE:', name)
+            debugLog('Cookie REMOVE:', name)
             
             response.cookies.set({
               name,
@@ -87,11 +105,11 @@ export async function GET(request: NextRequest) {
       }
     )
     
-    console.log('[Auth Callback Debug] Exchanging code for session...')
+    debugLog('Exchanging code for session...')
     const { data, error } = await supabase.auth.exchangeCodeForSession(code)
     
     if (error) {
-      console.error('[Auth Callback Debug] Exchange error:', {
+      debugLog('Exchange error:', {
         message: error.message,
         status: error.status,
         name: error.name,
@@ -100,15 +118,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${origin}/en?error=exchange_failed&message=${encodeURIComponent(error.message)}`)
     }
     
-    console.log('[Auth Callback Debug] Exchange successful!')
-    console.log('[Auth Callback Debug] User:', data?.user?.email)
-    console.log('[Auth Callback Debug] Session exists:', !!data?.session)
-    console.log('[Auth Callback Debug] Access token length:', data?.session?.access_token?.length)
-    console.log('[Auth Callback Debug] Refresh token length:', data?.session?.refresh_token?.length)
+    debugLog('Exchange successful!')
+    debugLog('User:', data?.user?.email)
+    debugLog('Session exists:', !!data?.session)
+    debugLog('Access token length:', data?.session?.access_token?.length)
+    debugLog('Refresh token length:', data?.session?.refresh_token?.length)
     
     // Log all cookie operations
-    console.log('[Auth Callback Debug] Cookie operations log:', cookieLog)
-    console.log('[Auth Callback Debug] Response cookies:', response.cookies.getAll().map(c => ({
+    debugLog('Cookie operations log:', cookieLog)
+    debugLog('Response cookies:', response.cookies.getAll().map(c => ({
       name: c.name,
       valueLength: c.value?.length || 0,
       httpOnly: c.httpOnly,
@@ -116,11 +134,11 @@ export async function GET(request: NextRequest) {
       sameSite: c.sameSite
     })))
     
-    console.log('[Auth Callback Debug] ============ END ============')
+    debugLog('============ END ============')
     
     return response
   } catch (error) {
-    console.error('[Auth Callback Debug] Unexpected error:', error)
+    debugLog('Unexpected error:', String(error))
     return NextResponse.redirect(`${origin}/en?error=unexpected&details=${encodeURIComponent(String(error))}`)
   }
 }

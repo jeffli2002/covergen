@@ -90,7 +90,7 @@ export default function OAuthDebugCompletePage() {
     try {
       const supabase = createSupabaseBrowser()
       const currentUrl = window.location.href
-      const redirectTo = `${window.location.origin}/auth/callback-debug?next=${encodeURIComponent(currentUrl)}`
+      const redirectTo = `${window.location.origin}/auth/callback-debug?next=${encodeURIComponent('/en/oauth-debug-complete')}`
       
       log('OAuth config:', {
         provider: 'google',
@@ -148,10 +148,32 @@ export default function OAuthDebugCompletePage() {
     }
   }
 
+  // Fetch callback logs from API
+  const fetchCallbackLogs = async () => {
+    log('Fetching OAuth callback logs from server...')
+    try {
+      const response = await fetch('/api/auth-debug-logs')
+      const data = await response.json()
+      log(`Found ${data.count} callback log entries`)
+      if (data.logs && data.logs.length > 0) {
+        data.logs.forEach((entry: any) => {
+          log(`[CALLBACK] ${entry.message}`, entry.data)
+        })
+      } else {
+        log('No callback logs found')
+      }
+    } catch (err) {
+      log('Error fetching callback logs:', String(err))
+    }
+  }
+
   // Check on mount and set up listener
   useEffect(() => {
     log('=== Page loaded ===')
     checkSession()
+    
+    // Fetch callback logs on mount
+    fetchCallbackLogs()
     
     const supabase = createSupabaseBrowser()
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session: any) => {
@@ -235,6 +257,12 @@ export default function OAuthDebugCompletePage() {
                 className="w-full bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
               >
                 Clear All & Reload
+              </button>
+              <button
+                onClick={fetchCallbackLogs}
+                className="w-full bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700"
+              >
+                Fetch Callback Logs
               </button>
             </div>
           </div>
