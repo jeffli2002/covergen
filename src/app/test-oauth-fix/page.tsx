@@ -55,7 +55,7 @@ export default function TestOAuthFix() {
         }
 
         // Set up auth state change listener
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session: any) => {
           addLog(`Auth state change: ${event}, user: ${session?.user?.email || 'none'}`)
           if (session?.user) {
             setUser(session.user)

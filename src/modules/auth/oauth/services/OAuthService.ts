@@ -199,7 +199,7 @@ class OAuthService {
 
   // Initialize auth state listener
   initializeAuthListener(callback: (session: OAuthSession | null) => void) {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
       if (session) {
         const oauthUser: OAuthUser = {
           id: session.user.id,

@@ -11,7 +11,7 @@ export default function OAuthSimplePage() {
   useEffect(() => {
     checkSession()
     
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session: any) => {
       console.log('[OAuth Simple] Auth state change:', event, 'Session:', !!session)
       setSession(session)
       setLoading(false)

@@ -17,7 +17,7 @@ export default function OAuthTestSimple() {
   useEffect(() => {
     checkSession()
     
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session: any) => {
       log(`Auth event: ${event}`)
       if (session) {
         log(`Session detected for: ${session.user.email}`)
