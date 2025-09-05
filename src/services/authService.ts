@@ -35,6 +35,13 @@ class AuthService {
 
   private async _doInitialize() {
     try {
+      // Skip initialization on server-side
+      if (typeof window === 'undefined') {
+        console.log('[Auth] Skipping initialization on server-side')
+        this.initialized = true
+        return false
+      }
+
       console.log('[Auth] Starting initialization, URL:', window.location.href)
       console.log('[Auth] Hash present:', !!window.location.hash)
       
@@ -538,7 +545,7 @@ class AuthService {
   }
 
   private storeSession(session: any) {
-    if (!session) return
+    if (!session || typeof window === 'undefined') return
 
     try {
       const sessionData = {
@@ -556,6 +563,8 @@ class AuthService {
   }
 
   private getStoredSession() {
+    if (typeof window === 'undefined') return null
+    
     try {
       const stored = localStorage.getItem('coverimage_session')
       return stored ? JSON.parse(stored) : null
@@ -566,6 +575,8 @@ class AuthService {
   }
 
   private clearStoredSession() {
+    if (typeof window === 'undefined') return
+    
     try {
       localStorage.removeItem('coverimage_session')
     } catch (error) {
