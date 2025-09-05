@@ -50,7 +50,7 @@ class AuthService {
         this.session = storedSession
         this.user = storedSession.user
 
-        this.supabase.auth.setSession({
+        supabase.auth.setSession({
           access_token: storedSession.access_token,
           refresh_token: storedSession.refresh_token
         }).then(({ error }: { error: any }) => {
@@ -63,7 +63,7 @@ class AuthService {
         })
       }
 
-      const sessionPromise = this.supabase.auth.getSession()
+      const sessionPromise = supabase.auth.getSession()
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Session check timeout')), 3000)
       )
@@ -106,7 +106,7 @@ class AuthService {
       this.initialized = true
 
       if (!this.authSubscription) {
-        const { data: { subscription } } = this.supabase.auth.onAuthStateChange(async (event: any, session: any) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
           this.session = session
           this.user = session?.user || null
           this.lastSessionCheck = Date.now()
@@ -159,7 +159,7 @@ class AuthService {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        const { data, error } = await this.supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -210,7 +210,7 @@ class AuthService {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        const { data, error } = await this.supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password
         })
@@ -253,7 +253,7 @@ class AuthService {
 
   async signInWithGoogle() {
     try {
-      if (!this.supabase) {
+      if (!supabase) {
         throw new Error('Supabase not configured')
       }
 
@@ -264,7 +264,7 @@ class AuthService {
 
       console.log('[Auth] Google sign in with redirect URL:', redirectUrl)
 
-      const { data, error } = await this.supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: redirectUrl,
@@ -310,7 +310,7 @@ class AuthService {
       }
       
       // Then call Supabase signOut
-      const { error } = await this.supabase.auth.signOut()
+      const { error } = await supabase.auth.signOut()
 
       if (error) {
         console.error('[Auth] Sign out error:', error)
@@ -332,7 +332,7 @@ class AuthService {
 
   async resetPassword(email: string) {
     try {
-      const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`
       })
 
@@ -354,7 +354,7 @@ class AuthService {
 
   async updatePassword(newPassword: string) {
     try {
-      const { error } = await this.supabase.auth.updateUser({
+      const { error } = await supabase.auth.updateUser({
         password: newPassword
       })
 
@@ -383,7 +383,7 @@ class AuthService {
   }
 
   getSupabaseClient() {
-    return this.supabase
+    return supabase
   }
 
   // Deprecated - PKCE flow doesn't use this method
@@ -394,13 +394,13 @@ class AuthService {
 
   async exchangeCodeForSession(code: string) {
     try {
-      if (!this.supabase) {
+      if (!supabase) {
         throw new Error('Supabase not configured')
       }
 
       console.log('[AuthService] Exchanging OAuth code for session...')
       
-      const { data, error } = await this.supabase.auth.exchangeCodeForSession(code)
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code)
       
       if (error) {
         console.error('[AuthService] Error exchanging code:', error)
@@ -443,7 +443,7 @@ class AuthService {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
 
-      const { data, error } = await this.supabase
+      const { data, error } = await supabase
         .from('user_usage')
         .select('generation_count')
         .eq('user_id', this.user.id)
@@ -468,7 +468,7 @@ class AuthService {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
 
-      const { error } = await this.supabase.rpc('increment_user_usage', {
+      const { error } = await supabase.rpc('increment_user_usage', {
         p_user_id: this.user.id,
         p_date: today.toISOString()
       })
@@ -488,7 +488,7 @@ class AuthService {
     if (!this.user) return null
 
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await supabase
         .from('subscriptions')
         .select('*')
         .eq('user_id', this.user.id)
@@ -515,7 +515,7 @@ class AuthService {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        const { error: upsertError } = await this.supabase
+        const { error: upsertError } = await supabase
           .from('profiles')
           .upsert({
             id: user.id,
@@ -556,7 +556,7 @@ class AuthService {
     if (!this.user) return
 
     try {
-      const { data: { user }, error } = await this.supabase.auth.getUser()
+      const { data: { user }, error } = await supabase.auth.getUser()
 
       if (error) {
         console.error('Error fetching user data:', error)
@@ -670,11 +670,11 @@ class AuthService {
     this.sessionRefreshInProgress = true
 
     try {
-      const { data: { session }, error } = await this.supabase.auth.refreshSession()
+      const { data: { session }, error } = await supabase.auth.refreshSession()
 
       if (error) {
         if (error.message?.includes('invalid') || error.message?.includes('expired')) {
-          const { data: { session: newSession }, error: sessionError } = await this.supabase.auth.getSession()
+          const { data: { session: newSession }, error: sessionError } = await supabase.auth.getSession()
 
           if (newSession) {
             this.session = newSession
