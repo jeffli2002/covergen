@@ -61,6 +61,15 @@ export async function GET(request: Request) {
       }
 
       console.log('[Auth Callback] Code exchange successful, user:', data?.user?.email)
+      console.log('[Auth Callback] Session data:', {
+        hasSession: !!data?.session,
+        hasUser: !!data?.user,
+        accessToken: data?.session?.access_token ? 'present' : 'missing',
+        refreshToken: data?.session?.refresh_token ? 'present' : 'missing',
+      })
+      
+      // Add a small delay to ensure cookies are set
+      await new Promise(resolve => setTimeout(resolve, 100))
       
       return response
       
