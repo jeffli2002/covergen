@@ -182,3 +182,56 @@ Generation/editing tasks are queued for async processing:
 - API response time: < 200ms (P95)
 - Frontend load time: < 2 seconds (P75)
 - Availability: 99.9% uptime SLA
+
+## Google OAuth Implementation Learning
+
+### Problem: Multiple GoTrueClient Instances Warning
+When implementing Google OAuth with Supabase in Next.js, you may encounter the warning "Multiple GoTrueClient instances detected in the same browser context". This happens when:
+
+1. **Mixing OAuth flows**: Using both implicit flow (tokens in URL hash) and PKCE flow (server-side code exchange)
+2. **Multiple client instances**: Creating Supabase clients in different ways across the codebase
+3. **SSR complications**: Complex SSR client setup conflicting with OAuth callbacks
+
+### Solution: Use a Single, Simple Supabase Client with PKCE Flow
+
+1. **Create a simple Supabase client** (`/src/lib/supabase-simple.ts`):
+   ```typescript
+   export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+     auth: {
+       autoRefreshToken: true,
+       persistSession: true,
+       detectSessionInUrl: true,
+       flowType: 'pkce' // Use PKCE flow consistently
+     }
+   })
+   ```
+
+2. **Use PKCE OAuth callback route** (`/src/app/auth/callback/route.ts`):
+   - Server-side route to exchange OAuth code for session
+   - Handles secure cookie management
+   - Redirects to original page after authentication
+
+3. **Update authService redirect URL**:
+   ```typescript
+   const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
+   ```
+
+4. **Remove conflicting components**:
+   - Remove OAuthHashHandler (for implicit flow)
+   - Remove complex SSR client usage in OAuth-related code
+
+### Key Takeaways
+
+1. **Consistency is crucial**: Pick ONE OAuth flow (PKCE recommended) and stick to it
+2. **Simplify client creation**: Use a single, simple Supabase client for OAuth flows
+3. **Debug systematically**: Use debugging tools to identify mixed flows before making changes
+4. **Type safety**: Always add TypeScript annotations for Supabase callbacks to catch errors early
+
+### Common Pitfalls to Avoid
+
+- Don't mix `@supabase/supabase-js` and `@supabase/ssr` clients for OAuth
+- Don't use implicit flow components with PKCE configuration
+- Don't create multiple Supabase client instances in different files
+- Always match redirect URLs exactly in Supabase dashboard
+
+This approach ensures a clean, working Google OAuth implementation that can be adapted for other OAuth providers supported by Supabase.

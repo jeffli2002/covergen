@@ -386,6 +386,28 @@ class AuthService {
     return supabase
   }
 
+  async ensureValidSession() {
+    try {
+      // Check if we have a session and it's still valid
+      if (this.session && this.isSessionValid(this.session)) {
+        return { success: true, session: this.session }
+      }
+
+      // Try to refresh the session
+      const { session, error } = await this.refreshSession()
+      
+      if (error || !session) {
+        console.error('[Auth] Failed to ensure valid session:', error)
+        return { success: false, error: (error as any)?.message || 'No valid session' }
+      }
+
+      return { success: true, session }
+    } catch (error: any) {
+      console.error('[Auth] Error ensuring valid session:', error)
+      return { success: false, error: error.message || 'Failed to ensure valid session' }
+    }
+  }
+
   // Deprecated - PKCE flow doesn't use this method
   async setOAuthSession(accessToken: string, refreshToken: string) {
     console.warn('[AuthService] setOAuthSession is deprecated for PKCE flow')
@@ -670,23 +692,47 @@ class AuthService {
     this.sessionRefreshInProgress = true
 
     try {
+      // First try to get the current session
+      const { data: { session: currentSession } } = await supabase.auth.getSession()
+      
+      if (currentSession && this.isSessionValid({
+        access_token: currentSession.access_token,
+        refresh_token: currentSession.refresh_token,
+        expires_at: currentSession.expires_at
+      })) {
+        // Session is still valid, use it
+        this.session = currentSession
+        this.user = currentSession.user
+        this.lastSessionCheck = Date.now()
+        this.storeSession(currentSession)
+        if (this.onAuthChange) {
+          this.onAuthChange(this.user)
+        }
+        return { session: currentSession, error: null }
+      }
+
+      // Session is expired or missing, try to refresh
       const { data: { session }, error } = await supabase.auth.refreshSession()
 
       if (error) {
+        // Handle specific error cases
         if (error.message?.includes('invalid') || error.message?.includes('expired')) {
-          const { data: { session: newSession }, error: sessionError } = await supabase.auth.getSession()
-
-          if (newSession) {
-            this.session = newSession
-            this.user = newSession.user
-            this.lastSessionCheck = Date.now()
-            this.storeSession(newSession)
-            if (this.onAuthChange) {
-              this.onAuthChange(this.user)
-            }
-            return { session: newSession, error: null }
+          console.warn('[Auth] Refresh token invalid or expired, clearing session')
+          this.user = null
+          this.session = null
+          this.clearStoredSession()
+          if (this.onAuthChange) {
+            this.onAuthChange(null)
           }
+          return { session: null, error }
         }
+        
+        // For network errors, keep the existing session if we have one
+        if (error.message?.includes('fetch') || error.message?.includes('network')) {
+          console.warn('[Auth] Network error during refresh, keeping existing session')
+          return { session: this.session, error }
+        }
+        
         throw error
       }
 
@@ -703,6 +749,10 @@ class AuthService {
       return { session, error }
     } catch (error) {
       console.error('Error refreshing session:', error)
+      // Keep existing session on error if we have one
+      if (this.session && this.user) {
+        return { session: this.session, error }
+      }
       return { session: null, error }
     } finally {
       this.sessionRefreshInProgress = false

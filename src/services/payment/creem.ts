@@ -132,25 +132,36 @@ class CreemPaymentService {
         const baseUrl = window.location.origin
         const apiUrl = `${baseUrl}/api/payment/create-checkout`
         
-        // Get auth token
+        // Get auth token with error handling
         const authService = (await import('@/services/authService')).default
         
         // Ensure auth is initialized
         if (!authService.isAuthenticated()) {
+          console.log('[CreemService] User not authenticated, waiting for auth...')
           await authService.waitForAuth()
         }
         
-        const session = authService.getCurrentSession()
-        const authToken = session?.access_token
+        // Ensure we have a valid session
+        console.log('[CreemService] Ensuring valid session...')
+        const sessionResult = await authService.ensureValidSession()
         
-        console.log('[CreemService] Session check:', {
+        if (!sessionResult.success || !sessionResult.session) {
+          console.error('[CreemService] Failed to get valid session:', sessionResult.error)
+          throw new Error(sessionResult.error || 'Authentication required - unable to get valid session')
+        }
+        
+        const session = sessionResult.session
+        const authToken = session.access_token
+        
+        console.log('[CreemService] Session validated:', {
           hasSession: !!session,
           hasToken: !!authToken,
-          tokenPrefix: authToken?.substring(0, 20)
+          tokenPrefix: authToken?.substring(0, 20),
+          expiresAt: session.expires_at
         })
         
         if (!authToken) {
-          throw new Error('Authentication required - no session token found')
+          throw new Error('Authentication required - no access token found')
         }
         
         console.log('[CreemService] Making API request to:', apiUrl)
@@ -272,13 +283,16 @@ class CreemPaymentService {
       // Client-side implementation - delegate to API route
       if (typeof window !== 'undefined') {
         const authService = (await import('@/services/authService')).default
-        const session = authService.getCurrentSession()
-        const authToken = session?.access_token
         
-        if (!authToken) {
-          throw new Error('Authentication required')
+        // Ensure we have a valid session
+        const sessionResult = await authService.ensureValidSession()
+        
+        if (!sessionResult.success || !sessionResult.session) {
+          throw new Error(sessionResult.error || 'Authentication required')
         }
-
+        
+        const authToken = sessionResult.session.access_token
+        
         const response = await fetch('/api/payment/create-portal', {
           method: 'POST',
           headers: {
