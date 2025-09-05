@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/utils/supabase/client'
 
 let authServiceInstance: AuthService | null = null
 
@@ -12,12 +12,20 @@ class AuthService {
   private sessionRefreshInterval: NodeJS.Timeout | null = null
   private sessionRefreshInProgress = false
   private lastSessionCheck: number | null = null
+  private supabase: ReturnType<typeof createClient> | null = null
 
   constructor() {
     if (authServiceInstance) {
       return authServiceInstance
     }
     authServiceInstance = this
+  }
+
+  private getSupabase() {
+    if (!this.supabase && typeof window !== 'undefined') {
+      this.supabase = createClient()
+    }
+    return this.supabase
   }
 
   async initialize() {
@@ -39,6 +47,7 @@ class AuthService {
       console.log('[Auth] URL:', window?.location?.href)
       console.log('[Auth] Cookies:', document?.cookie)
       
+      const supabase = this.getSupabase()
       if (!supabase) {
         console.warn('[Auth] Supabase not configured, auth service will be disabled')
         this.initialized = true
@@ -159,7 +168,11 @@ class AuthService {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        const { data, error } = await supabase.auth.signUp({
+        const supabaseClient = this.getSupabase()
+        if (!supabaseClient) {
+          throw new Error('Supabase not initialized')
+        }
+        const { data, error } = await supabaseClient.auth.signUp({
           email,
           password,
           options: {
@@ -210,7 +223,11 @@ class AuthService {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const supabaseClient = this.getSupabase()
+        if (!supabaseClient) {
+          throw new Error('Supabase not initialized')
+        }
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
           email,
           password
         })
@@ -253,6 +270,7 @@ class AuthService {
 
   async signInWithGoogle() {
     try {
+      const supabase = this.getSupabase()
       if (!supabase) {
         throw new Error('Supabase not configured')
       }
@@ -323,11 +341,13 @@ class AuthService {
       }
       
       // Then call Supabase signOut
-      const { error } = await supabase.auth.signOut()
-
-      if (error) {
-        console.error('[Auth] Sign out error:', error)
-        throw error
+      const supabaseClient = this.getSupabase()
+      if (supabaseClient) {
+        const { error } = await supabaseClient.auth.signOut()
+        if (error) {
+          console.error('[Auth] Sign out error:', error)
+          throw error
+        }
       }
 
       console.log('[Auth] Sign out successful')
@@ -345,7 +365,11 @@ class AuthService {
 
   async resetPassword(email: string) {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const supabaseClient = this.getSupabase()
+      if (!supabaseClient) {
+        throw new Error('Supabase not initialized')
+      }
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`
       })
 
@@ -367,7 +391,11 @@ class AuthService {
 
   async updatePassword(newPassword: string) {
     try {
-      const { error } = await supabase.auth.updateUser({
+      const supabaseClient = this.getSupabase()
+      if (!supabaseClient) {
+        throw new Error('Supabase not initialized')
+      }
+      const { error } = await supabaseClient.auth.updateUser({
         password: newPassword
       })
 
@@ -396,7 +424,7 @@ class AuthService {
   }
 
   getSupabaseClient() {
-    return supabase
+    return this.getSupabase()
   }
 
   async ensureValidSession() {
@@ -429,13 +457,14 @@ class AuthService {
 
   async exchangeCodeForSession(code: string) {
     try {
-      if (!supabase) {
+      const supabaseClient = this.getSupabase()
+      if (!supabaseClient) {
         throw new Error('Supabase not configured')
       }
 
       console.log('[AuthService] Exchanging OAuth code for session...')
       
-      const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+      const { data, error } = await supabaseClient.auth.exchangeCodeForSession(code)
       
       if (error) {
         console.error('[AuthService] Error exchanging code:', error)
@@ -478,7 +507,11 @@ class AuthService {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
 
-      const { data, error } = await supabase
+      const supabaseClient = this.getSupabase()
+      if (!supabaseClient) {
+        return 0
+      }
+      const { data, error } = await supabaseClient
         .from('user_usage')
         .select('generation_count')
         .eq('user_id', this.user.id)
@@ -504,7 +537,11 @@ class AuthService {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
 
-      const { error } = await supabase.rpc('increment_user_usage', {
+      const supabaseClient = this.getSupabase()
+      if (!supabaseClient) {
+        throw new Error('Supabase not initialized')
+      }
+      const { error } = await supabaseClient.rpc('increment_user_usage', {
         p_user_id: this.user.id,
         p_date: today.toISOString()
       })
@@ -524,7 +561,11 @@ class AuthService {
     if (!this.user) return null
 
     try {
-      const { data, error } = await supabase
+      const supabaseClient = this.getSupabase()
+      if (!supabaseClient) {
+        return null
+      }
+      const { data, error } = await supabaseClient
         .from('subscriptions')
         .select('*')
         .eq('user_id', this.user.id)
@@ -551,7 +592,12 @@ class AuthService {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        const { error: upsertError } = await supabase
+        const supabaseClient = this.getSupabase()
+        if (!supabaseClient) {
+          console.error('Supabase not initialized')
+          continue
+        }
+        const { error: upsertError } = await supabaseClient
           .from('profiles')
           .upsert({
             id: user.id,
@@ -592,7 +638,12 @@ class AuthService {
     if (!this.user) return
 
     try {
-      const { data: { user }, error } = await supabase.auth.getUser()
+      const supabaseClient = this.getSupabase()
+      if (!supabaseClient) {
+        console.error('Supabase not initialized')
+        return
+      }
+      const { data: { user }, error } = await supabaseClient.auth.getUser()
 
       if (error) {
         console.error('Error fetching user data:', error)
@@ -718,7 +769,11 @@ class AuthService {
 
     try {
       // First try to get the current session
-      const { data: { session: currentSession } } = await supabase.auth.getSession()
+      const supabaseClient = this.getSupabase()
+      if (!supabaseClient) {
+        return { session: this.session, error: new Error('Supabase not initialized') }
+      }
+      const { data: { session: currentSession } } = await supabaseClient.auth.getSession()
       
       if (currentSession && this.isSessionValid({
         access_token: currentSession.access_token,
@@ -737,7 +792,7 @@ class AuthService {
       }
 
       // Session is expired or missing, try to refresh
-      const { data: { session }, error } = await supabase.auth.refreshSession()
+      const { data: { session }, error } = await supabaseClient.auth.refreshSession()
 
       if (error) {
         // Handle specific error cases

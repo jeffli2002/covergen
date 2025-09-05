@@ -6,15 +6,37 @@ export async function GET(request: Request) {
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/en'
 
+  console.log('[Auth Callback Official] Processing OAuth callback:', {
+    hasCode: !!code,
+    next,
+    origin
+  })
+
   if (code) {
-    const supabase = createClient()
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
-    
-    if (!error) {
-      return NextResponse.redirect(`${origin}${next}`)
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+      
+      if (error) {
+        console.error('[Auth Callback Official] Code exchange error:', error)
+        return NextResponse.redirect(`${origin}/en/auth-error?reason=code_exchange_failed&error=${encodeURIComponent(error.message)}`)
+      }
+      
+      console.log('[Auth Callback Official] Code exchange successful:', {
+        user: data?.session?.user?.email,
+        hasSession: !!data?.session
+      })
+      
+      // Redirect to success page that will handle final redirect
+      const successUrl = `${origin}/en/auth-success?next=${encodeURIComponent(next)}`
+      return NextResponse.redirect(successUrl)
+    } catch (error: any) {
+      console.error('[Auth Callback Official] Unexpected error:', error)
+      return NextResponse.redirect(`${origin}/en/auth-error?reason=unexpected_error`)
     }
   }
 
-  // Return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/en/auth-error?reason=invalid_code`)
+  // No code in URL
+  console.error('[Auth Callback Official] No code in URL')
+  return NextResponse.redirect(`${origin}/en/auth-error?reason=no_code`)
 }
