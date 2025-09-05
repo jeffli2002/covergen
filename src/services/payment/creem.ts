@@ -230,8 +230,9 @@ class CreemPaymentService {
       let checkout
       try {
         // Create checkout session with Creem SDK
-        const response = await creemClient.checkout.createCheckout(
-          {
+        checkout = await creemClient.createCheckout({
+          xApiKey: CREEM_API_KEY,
+          createCheckoutRequest: {
             productId: productId,
             requestId: `checkout_${userId}_${Date.now()}`,
             successUrl: successUrl,
@@ -244,13 +245,8 @@ class CreemPaymentService {
             customer: {
               email: userEmail,
             },
-          },
-          {
-            xApiKey: CREEM_API_KEY,
           }
-        )
-        
-        checkout = response
+        })
       } catch (sdkError: any) {
         console.error('[Creem] SDK Error Details:', {
           message: sdkError.message,
@@ -262,22 +258,28 @@ class CreemPaymentService {
         throw new Error(`Creem SDK Error: ${sdkError.message || 'Unknown error'}`)
       }
 
-      console.log('[Creem] Checkout response:', checkout)
+      console.log('[Creem] Checkout response:', {
+        hasCheckout: !!checkout,
+        checkoutKeys: checkout ? Object.keys(checkout) : [],
+        checkoutType: typeof checkout
+      })
 
       // Check if we have a valid checkout response
-      if (!checkout || !checkout.id) {
+      if (!checkout) {
         console.error('Invalid checkout response:', checkout)
         throw new Error('Invalid checkout response from Creem')
       }
 
       // Handle different response structures
-      const checkoutId = checkout.id
-      const checkoutUrl = checkout.checkoutUrl || `https://app.creem.io/checkout/${checkoutId}`
+      // Based on SDK documentation, the response should be a CheckoutEntity
+      const checkoutId = checkout.id || checkout.checkoutId
+      const checkoutUrl = checkout.url || checkout.checkoutUrl || checkout.checkout_url || `https://app.creem.io/checkout/${checkoutId}`
       
       console.log('[Creem] Checkout created:', {
         id: checkoutId,
         url: checkoutUrl,
-        hasUrl: !!checkoutUrl
+        hasUrl: !!checkoutUrl,
+        fullCheckout: checkout
       })
       
       return {
