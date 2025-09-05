@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 
-export default function AuthSuccessPage() {
+function AuthSuccessContent() {
   const [user, setUser] = useState<any>(null)
   const [checking, setChecking] = useState(true)
   const router = useRouter()
@@ -86,5 +86,17 @@ export default function AuthSuccessPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function AuthSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    }>
+      <AuthSuccessContent />
+    </Suspense>
   )
 }
