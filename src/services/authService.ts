@@ -262,8 +262,8 @@ class AuthService {
 
       // Get the current pathname to preserve locale
       const currentPath = window.location.pathname || '/en'
-      // Use the auth callback route for PKCE flow
-      const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
+      // Use direct redirect like production (implicit flow)
+      const redirectUrl = `${window.location.origin}${currentPath}`
 
       console.log('[Auth] Google sign in with redirect URL:', redirectUrl)
 

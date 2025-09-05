@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { useAppStore } from '@/lib/store'
 import { useAnalytics } from '@/lib/analytics'
 import { useAuth } from '@/contexts/AuthContext'
+import { useServerSession } from '@/hooks/useServerSession'
 import { 
   Sparkles, 
   Zap, 
@@ -98,6 +99,9 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
     context: 'general'
   })
   const { user: authUser } = useAuth()
+  
+  // Sync server session after OAuth redirect
+  useServerSession()
 
   // Debug session state
   useEffect(() => {

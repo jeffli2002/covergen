@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
 import authService from '@/services/authService'
 
 /**
@@ -13,7 +12,8 @@ export function useServerSession() {
     const syncSession = async () => {
       console.log('[useServerSession] Checking for server session...')
       
-      // Use shared supabase client
+      // Get the supabase client from authService
+      const supabase = authService.getSupabaseClient()
       if (!supabase) {
         console.log('[useServerSession] Supabase client not available')
         return
