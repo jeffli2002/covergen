@@ -1,5 +1,7 @@
+import FacebookEventCoverClient from './page-client'
+import { Locale } from '@/lib/i18n/config'
+import { getDictionary } from '@/lib/i18n/get-dictionary'
 import { Metadata } from 'next'
-import FacebookEventCoverTool from '@/components/tools/FacebookEventCoverTool'
 
 export const metadata: Metadata = {
   title: 'Facebook Event Cover Maker - Create Event Banners | CoverGen Pro',
@@ -12,11 +14,12 @@ export const metadata: Metadata = {
   },
 }
 
-export default function FacebookEventCoverPage({ params: { locale } }: { params: { locale: string } }) {
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
-      {/* Tool Component - This includes the entire layout with Output Gallery */}
-      <FacebookEventCoverTool />
-    </div>
-  )
+export default async function FacebookEventCoverPage({
+  params,
+}: {
+  params: { locale: Locale }
+}) {
+  const dict = await getDictionary(params.locale)
+
+  return <FacebookEventCoverClient locale={params.locale} translations={dict} />
 }
