@@ -1,21 +1,53 @@
 import { Creem } from 'creem'
 
-// Creem Test Mode Configuration
-const CREEM_TEST_MODE = process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_CREEM_TEST_MODE === 'true'
-const CREEM_API_KEY = process.env.CREEM_SECRET_KEY || ''
-const CREEM_WEBHOOK_SECRET = process.env.CREEM_WEBHOOK_SECRET || ''
+// Use lazy evaluation for all environment variables to handle edge runtime
+const getCreemTestMode = () => {
+  return process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_CREEM_TEST_MODE === 'true'
+}
 
-console.log('[Creem Init] Configuration:', {
-  testMode: CREEM_TEST_MODE,
-  hasApiKey: !!CREEM_API_KEY,
-  apiKeyPrefix: CREEM_API_KEY.substring(0, 10) + '...',
-  nodeEnv: process.env.NODE_ENV
-})
+// Use lazy evaluation for API keys to handle edge runtime
+const getCreemApiKey = () => {
+  // Try multiple possible environment variable names
+  const key = process.env.CREEM_SECRET_KEY || 
+              process.env.CREEM_API_KEY || 
+              process.env.NEXT_PUBLIC_CREEM_SECRET_KEY || // Sometimes mistakenly made public
+              process.env.CREEM_TEST_API_KEY || // Alternative test key name
+              ''
+  
+  if (!key && typeof window === 'undefined') {
+    console.warn('[Creem] No API key found in environment variables. Checked:', {
+      CREEM_SECRET_KEY: !!process.env.CREEM_SECRET_KEY,
+      CREEM_API_KEY: !!process.env.CREEM_API_KEY,
+      NEXT_PUBLIC_CREEM_SECRET_KEY: !!process.env.NEXT_PUBLIC_CREEM_SECRET_KEY,
+      CREEM_TEST_API_KEY: !!process.env.CREEM_TEST_API_KEY
+    })
+  }
+  return key
+}
 
-// Initialize Creem SDK with test mode support
-const creemClient = new Creem({
-  serverIdx: CREEM_TEST_MODE ? 1 : 0, // 0: production, 1: test-mode
-})
+const getCreemWebhookSecret = () => {
+  return process.env.CREEM_WEBHOOK_SECRET || ''
+}
+
+// Lazy initialization of Creem client
+let creemClient: Creem | null = null
+
+const getCreemClient = () => {
+  if (!creemClient) {
+    const testMode = getCreemTestMode()
+    console.log('[Creem] Initializing client:', {
+      testMode,
+      hasApiKey: !!getCreemApiKey(),
+      apiKeyPrefix: getCreemApiKey().substring(0, 10) + '...',
+      nodeEnv: process.env.NODE_ENV,
+      runtime: typeof window === 'undefined' ? 'server' : 'client'
+    })
+    creemClient = new Creem({
+      serverIdx: testMode ? 1 : 0, // 0: production, 1: test-mode
+    })
+  }
+  return creemClient
+}
 
 // Test card numbers for Creem
 export const CREEM_TEST_CARDS = {
@@ -46,7 +78,7 @@ export const SUBSCRIPTION_PLANS = {
     id: 'pro', 
     name: 'Pro',
     price: 900, // $9.00 in cents
-    priceId: CREEM_TEST_MODE ? 'price_test_pro_900' : 'price_pro_900',
+    priceId: getCreemTestMode() ? 'price_test_pro_900' : 'price_pro_900',
     credits: 100,
     features: [
       '120 covers per month',
@@ -60,7 +92,7 @@ export const SUBSCRIPTION_PLANS = {
     id: 'pro_plus',
     name: 'Pro+', 
     price: 1900, // $19.00 in cents
-    priceId: CREEM_TEST_MODE ? 'price_test_proplus_1900' : 'price_proplus_1900',
+    priceId: getCreemTestMode() ? 'price_test_proplus_1900' : 'price_proplus_1900',
     credits: 300,
     features: [
       '300 covers per month',
@@ -82,8 +114,8 @@ export const CREEM_PRODUCTS = {
 
 // Price IDs for subscription tiers (to be created in Creem dashboard)
 export const CREEM_PRICES = {
-  pro: CREEM_TEST_MODE ? 'price_test_pro_900' : 'price_pro_900',
-  pro_plus: CREEM_TEST_MODE ? 'price_test_proplus_1900' : 'price_proplus_1900',
+  pro: getCreemTestMode() ? 'price_test_pro_900' : 'price_pro_900',
+  pro_plus: getCreemTestMode() ? 'price_test_proplus_1900' : 'price_proplus_1900',
 }
 
 export interface CreateCheckoutSessionParams {
@@ -198,6 +230,7 @@ class CreemPaymentService {
       }
       
       // Server-side implementation - use Creem SDK
+      const CREEM_API_KEY = getCreemApiKey()
       if (!CREEM_API_KEY) {
         throw new Error('Creem API key not configured')
       }
@@ -214,6 +247,7 @@ class CreemPaymentService {
         throw new Error(`Product ID not configured for plan: ${planId}. Please check environment variables.`)
       }
       
+      const testMode = getCreemTestMode()
       console.log('[Creem] Creating checkout with:', {
         productId,
         planId,
@@ -221,18 +255,32 @@ class CreemPaymentService {
         apiKey: CREEM_API_KEY ? 'Present' : 'Missing',
         apiKeyPrefix: CREEM_API_KEY.substring(0, 15) + '...',
         apiKeyLength: CREEM_API_KEY.length,
-        testMode: CREEM_TEST_MODE,
-        serverIdx: CREEM_TEST_MODE ? 1 : 0,
+        testMode: testMode,
+        serverIdx: testMode ? 1 : 0,
         isTestKey: CREEM_API_KEY.startsWith('creem_test_'),
-        expectedKeyType: CREEM_TEST_MODE ? 'test' : 'production'
+        expectedKeyType: testMode ? 'test' : 'production'
       })
       
       // Validate API key matches environment
-      if (CREEM_TEST_MODE && !CREEM_API_KEY.startsWith('creem_test_')) {
+      if (CREEM_API_KEY === '') {
+        console.error('[Creem] ERROR: API key is empty!')
+        console.error('[Creem] Environment check:', {
+          CREEM_SECRET_KEY: process.env.CREEM_SECRET_KEY ? `SET (${process.env.CREEM_SECRET_KEY.substring(0, 15)}...)` : 'NOT SET',
+          CREEM_API_KEY: process.env.CREEM_API_KEY ? 'SET' : 'NOT SET',
+          NEXT_PUBLIC_CREEM_SECRET_KEY: process.env.NEXT_PUBLIC_CREEM_SECRET_KEY ? 'SET (WARNING: Should not be public!)' : 'NOT SET',
+          NODE_ENV: process.env.NODE_ENV,
+          VERCEL: process.env.VERCEL,
+          VERCEL_ENV: process.env.VERCEL_ENV
+        })
+        throw new Error('Creem API key not found in environment variables. Please check CREEM_SECRET_KEY is set in Vercel.')
+      }
+      
+      if (testMode && !CREEM_API_KEY.startsWith('creem_test_')) {
         console.error('[Creem] ERROR: Test mode enabled but using production API key')
+        console.error('[Creem] API key prefix:', CREEM_API_KEY.substring(0, 10))
         throw new Error('Test mode requires a test API key (should start with "creem_test_")')
       }
-      if (!CREEM_TEST_MODE && CREEM_API_KEY.startsWith('creem_test_')) {
+      if (!testMode && CREEM_API_KEY.startsWith('creem_test_')) {
         console.error('[Creem] ERROR: Production mode enabled but using test API key')
         throw new Error('Production mode requires a production API key (should not start with "creem_test_")')
       }
@@ -243,15 +291,15 @@ class CreemPaymentService {
         productId: productId,
         requestId: `checkout_${userId}_${Date.now()}`,
         successUrl: successUrl,
-        testMode: CREEM_TEST_MODE,
-        serverUrl: CREEM_TEST_MODE ? 'test-mode' : 'production'
+        testMode: testMode,
+        serverUrl: testMode ? 'test-mode' : 'production'
       })
       
       let checkout
       try {
         // Create checkout session with Creem SDK
-        checkout = await creemClient.createCheckout({
-          xApiKey: CREEM_API_KEY,
+        checkout = await getCreemClient().createCheckout({
+          xApiKey: getCreemApiKey(),
           createCheckoutRequest: {
             productId: productId,
             requestId: `checkout_${userId}_${Date.now()}`,
@@ -358,6 +406,7 @@ class CreemPaymentService {
       }
       
       // Server-side implementation - temporarily simplified
+      const CREEM_API_KEY = getCreemApiKey()
       if (!CREEM_API_KEY) {
         throw new Error('Creem API key not configured')
       }
@@ -388,6 +437,7 @@ class CreemPaymentService {
         throw new Error('This method must be called from server-side')
       }
 
+      const CREEM_API_KEY = getCreemApiKey()
       if (!CREEM_API_KEY) {
         throw new Error('Creem API key not configured')
       }
@@ -420,6 +470,7 @@ class CreemPaymentService {
         throw new Error('This method must be called from server-side')
       }
 
+      const CREEM_API_KEY = getCreemApiKey()
       if (!CREEM_API_KEY) {
         throw new Error('Creem API key not configured')
       }
@@ -451,6 +502,7 @@ class CreemPaymentService {
         throw new Error('This method must be called from server-side')
       }
 
+      const CREEM_API_KEY = getCreemApiKey()
       if (!CREEM_API_KEY) {
         throw new Error('Creem API key not configured')
       }
@@ -475,8 +527,9 @@ class CreemPaymentService {
    * Verify webhook signature
    */
   verifyWebhookSignature(payload: string, signature: string): boolean {
+    const CREEM_WEBHOOK_SECRET = getCreemWebhookSecret()
     // In test mode, skip signature verification if no webhook secret
-    if (CREEM_TEST_MODE && !CREEM_WEBHOOK_SECRET) {
+    if (getCreemTestMode() && !CREEM_WEBHOOK_SECRET) {
       console.warn('Webhook signature verification skipped in test mode')
       return true
     }
@@ -680,7 +733,7 @@ class CreemPaymentService {
    * Check if we're in test mode
    */
   isTestMode(): boolean {
-    return CREEM_TEST_MODE
+    return getCreemTestMode()
   }
 
   /**
@@ -688,6 +741,7 @@ class CreemPaymentService {
    */
   async createOrRetrieveCustomer(userId: string, email: string) {
     try {
+      const CREEM_API_KEY = getCreemApiKey()
       if (!CREEM_API_KEY) {
         throw new Error('Creem API key not configured')
       }
@@ -722,6 +776,7 @@ class CreemPaymentService {
         throw new Error('This method must be called from server-side')
       }
 
+      const CREEM_API_KEY = getCreemApiKey()
       if (!CREEM_API_KEY) {
         throw new Error('Creem API key not configured')
       }
@@ -747,6 +802,7 @@ class CreemPaymentService {
    */
   async validateLicense(licenseKey: string) {
     try {
+      const CREEM_API_KEY = getCreemApiKey()
       if (!CREEM_API_KEY) {
         throw new Error('Creem API key not configured')
       }
@@ -777,15 +833,17 @@ class CreemPaymentService {
    */
   async createProducts() {
     try {
+      const CREEM_API_KEY = getCreemApiKey()
       if (!CREEM_API_KEY) {
         throw new Error('Creem API key not configured')
       }
 
-      console.log('[Creem] Creating products in', CREEM_TEST_MODE ? 'TEST' : 'PRODUCTION', 'mode')
+      const testMode = getCreemTestMode()
+      console.log('[Creem] Creating products in', testMode ? 'TEST' : 'PRODUCTION', 'mode')
 
       // Create Pro product
-      const proProduct = await creemClient.createProduct({
-        xApiKey: CREEM_API_KEY,
+      const proProduct = await getCreemClient().createProduct({
+        xApiKey: getCreemApiKey(),
         createProductRequestEntity: {
           name: 'CoverGen Pro',
           description: 'Professional plan with 120 covers per month and priority support',
@@ -797,8 +855,8 @@ class CreemPaymentService {
       })
 
       // Create Pro+ product
-      const proPlusProduct = await creemClient.createProduct({
-        xApiKey: CREEM_API_KEY,
+      const proPlusProduct = await getCreemClient().createProduct({
+        xApiKey: getCreemApiKey(),
         createProductRequestEntity: {
           name: 'CoverGen Pro+',
           description: 'Premium plan with 300 covers per month, commercial license, and dedicated support',
@@ -812,7 +870,7 @@ class CreemPaymentService {
       console.log('[Creem] Products created:', {
         pro: proProduct.id,
         proPlus: proPlusProduct.id,
-        testMode: CREEM_TEST_MODE
+        testMode: testMode
       })
 
       return [
@@ -833,7 +891,7 @@ class CreemPaymentService {
    * Creates test products and returns their IDs
    */
   async setupTestEnvironment() {
-    if (!CREEM_TEST_MODE) {
+    if (!getCreemTestMode()) {
       throw new Error('This method can only be run in test mode')
     }
 
@@ -860,3 +918,6 @@ class CreemPaymentService {
 }
 
 export const creemService = new CreemPaymentService()
+
+// Export for debugging purposes
+export { getCreemTestMode, getCreemApiKey }

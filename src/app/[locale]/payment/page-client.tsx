@@ -12,7 +12,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import authService from '@/services/authService'
 import { creemService, SUBSCRIPTION_PLANS, CREEM_TEST_CARDS } from '@/services/payment/creem'
 import { toast } from 'sonner'
-import PaymentDebug from '@/components/debug/PaymentDebug'
+import CreemDebug from '@/components/debug/CreemDebug'
 
 interface PaymentPageClientProps {
   locale: string
@@ -247,7 +247,7 @@ export default function PaymentPageClient({
           
           {isTestMode && (
             <div className="mt-6">
-              <PaymentDebug />
+              <CreemDebug />
             </div>
           )}
         </div>
