@@ -73,10 +73,14 @@ export const SUBSCRIPTION_PLANS = {
   }
 }
 
-// Product IDs for subscription tiers (to be created in Creem dashboard)
+// Product IDs for subscription tiers (from Creem dashboard)
 export const CREEM_PRODUCTS = {
-  pro: process.env.CREEM_PRO_PLAN_ID || (CREEM_TEST_MODE ? 'prod_test_pro' : 'prod_pro'),
-  pro_plus: process.env.CREEM_PRO_PLUS_PLAN_ID || (CREEM_TEST_MODE ? 'prod_test_proplus' : 'prod_proplus'),
+  pro: CREEM_TEST_MODE 
+    ? (process.env.CREEM_PRO_PLAN_ID || 'prod_7aQWgvmz1JHGafTEGZtz9g')
+    : 'prod_7HHnnUgLVjiHBQOGQyKPKO',
+  pro_plus: CREEM_TEST_MODE 
+    ? (process.env.CREEM_PRO_PLUS_PLAN_ID || 'prod_3yWSn216dKFHKZJ0Z2Jrcp')
+    : 'prod_5FSXAIuhm6ueniFPAbaOoS',
 }
 
 // Price IDs for subscription tiers (to be created in Creem dashboard)
@@ -209,15 +213,25 @@ class CreemPaymentService {
         userEmail,
         apiKey: CREEM_API_KEY ? 'Present' : 'Missing',
         apiKeyLength: CREEM_API_KEY.length,
-        testMode: CREEM_TEST_MODE
+        testMode: CREEM_TEST_MODE,
+        serverIdx: CREEM_TEST_MODE ? 1 : 0
+      })
+      
+      // Debug: Log the API call details (without exposing sensitive data)
+      console.log('[Creem] API Call Details:', {
+        hasApiKey: !!CREEM_API_KEY,
+        productId: productId,
+        requestId: `checkout_${userId}_${Date.now()}`,
+        successUrl: successUrl,
+        testMode: CREEM_TEST_MODE,
+        serverUrl: CREEM_TEST_MODE ? 'test-mode' : 'production'
       })
       
       let checkout
       try {
         // Create checkout session with Creem SDK
-        checkout = await creemClient.createCheckout({
-          xApiKey: CREEM_API_KEY,
-          createCheckoutRequest: {
+        const response = await creemClient.checkout.createCheckout(
+          {
             productId: productId,
             requestId: `checkout_${userId}_${Date.now()}`,
             successUrl: successUrl,
@@ -230,8 +244,13 @@ class CreemPaymentService {
             customer: {
               email: userEmail,
             },
+          },
+          {
+            xApiKey: CREEM_API_KEY,
           }
-        })
+        )
+        
+        checkout = response
       } catch (sdkError: any) {
         console.error('[Creem] SDK Error Details:', {
           message: sdkError.message,
