@@ -35,28 +35,38 @@ class AuthService {
 
   private async _doInitialize() {
     try {
+      console.log('[Auth] Starting initialization, URL:', window.location.href)
+      console.log('[Auth] Hash present:', !!window.location.hash)
+      
       if (!supabase) {
         console.warn('Supabase not configured, auth service will be disabled')
         this.initialized = true
         return false
       }
 
-      const storedSession = this.getStoredSession()
-      if (storedSession && this.isSessionValid(storedSession)) {
-        this.session = storedSession
-        this.user = storedSession.user
+      // Skip stored session if we have OAuth tokens in URL
+      const hasOAuthTokens = window.location.hash && window.location.hash.includes('access_token')
+      console.log('[Auth] Has OAuth tokens in URL:', hasOAuthTokens)
+      
+      if (!hasOAuthTokens) {
+        const storedSession = this.getStoredSession()
+        if (storedSession && this.isSessionValid(storedSession)) {
+          console.log('[Auth] Using stored session')
+          this.session = storedSession
+          this.user = storedSession.user
 
-        supabase.auth.setSession({
-          access_token: storedSession.access_token,
-          refresh_token: storedSession.refresh_token
-        }).then(({ error }) => {
-          if (error) {
-            console.warn('Stored session invalid, clearing...', error)
-            this.clearStoredSession()
-            this.session = null
-            this.user = null
-          }
-        })
+          supabase.auth.setSession({
+            access_token: storedSession.access_token,
+            refresh_token: storedSession.refresh_token
+          }).then(({ error }) => {
+            if (error) {
+              console.warn('Stored session invalid, clearing...', error)
+              this.clearStoredSession()
+              this.session = null
+              this.user = null
+            }
+          })
+        }
       }
 
       const sessionPromise = supabase.auth.getSession()
@@ -65,17 +75,33 @@ class AuthService {
       )
 
       try {
+        console.log('[Auth] Getting session from Supabase...')
         const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any
         
-        console.log('[Auth] Session check result:', { session, error, user: session?.user?.email })
+        console.log('[Auth] Session check result:', { 
+          hasSession: !!session,
+          hasError: !!error,
+          userEmail: session?.user?.email,
+          userId: session?.user?.id,
+          error: error?.message
+        })
 
         if (error) {
           console.error('Error getting session:', error)
         } else {
           if (session) {
+            console.log('[Auth] Session found, setting user')
             this.session = session
             this.user = session.user
             this.storeSession(session)
+            
+            // If we just got a session from OAuth, notify immediately
+            if (hasOAuthTokens && this.onAuthChange) {
+              console.log('[Auth] Notifying auth change handler after OAuth')
+              this.onAuthChange(this.user)
+            }
+          } else {
+            console.log('[Auth] No session found')
           }
         }
       } catch (timeoutError) {

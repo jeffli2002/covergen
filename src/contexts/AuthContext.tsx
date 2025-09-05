@@ -26,12 +26,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        await authService.initialize()
+        console.log('[AuthContext] Starting initialization')
+        console.log('[AuthContext] URL:', window.location.href)
+        
         authService.setAuthChangeHandler((user) => {
+          console.log('[AuthContext] Auth change handler called:', !!user, user?.email)
           setUser(user)
+          setLoading(false)
         })
+        
+        await authService.initialize()
+        
         const currentUser = authService.getCurrentUser()
-        console.log('[AuthContext] Current user:', currentUser?.email)
+        console.log('[AuthContext] Current user after init:', currentUser?.email)
         setUser(currentUser)
       } catch (error) {
         console.error('Auth initialization error:', error)
