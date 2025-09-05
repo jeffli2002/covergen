@@ -26,11 +26,18 @@ const getCreemTestMode = () => {
 // Use lazy evaluation for API keys to handle edge runtime
 const getCreemApiKey = () => {
   // Try multiple possible environment variable names
-  const key = process.env.CREEM_SECRET_KEY || 
-              process.env.CREEM_API_KEY || 
-              process.env.NEXT_PUBLIC_CREEM_SECRET_KEY || // Sometimes mistakenly made public
-              process.env.CREEM_TEST_API_KEY || // Alternative test key name
-              ''
+  let key = process.env.CREEM_SECRET_KEY || 
+            process.env.CREEM_API_KEY || 
+            process.env.NEXT_PUBLIC_CREEM_SECRET_KEY || // Sometimes mistakenly made public
+            process.env.CREEM_TEST_API_KEY || // Alternative test key name
+            ''
+  
+  // Fix for Vercel environment variable misconfiguration
+  // If the value contains "CREEM_SECRET_KEY=" at the start, extract the actual key
+  if (key.startsWith('CREEM_SECRET_KEY=')) {
+    console.warn('[Creem] Detected misconfigured environment variable, extracting actual key')
+    key = key.substring('CREEM_SECRET_KEY='.length)
+  }
   
   // Always log in server context for debugging
   if (typeof window === 'undefined') {
