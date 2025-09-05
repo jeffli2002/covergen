@@ -12,7 +12,7 @@ class AuthService {
   private sessionRefreshInterval: NodeJS.Timeout | null = null
   private sessionRefreshInProgress = false
   private lastSessionCheck: number | null = null
-  private this.supabase: ReturnType<typeof createClient> | null = null
+  private supabase: ReturnType<typeof createClient> | null = null
 
   constructor() {
     if (authServiceInstance) {
