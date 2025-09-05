@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/this.supabase/client'
+import { createClient } from '@/lib/supabase/client'
 
 let authServiceInstance: AuthService | null = null
 
