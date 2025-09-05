@@ -1,21 +1,44 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 
 export default function AuthSuccessPage() {
   const [user, setUser] = useState<any>(null)
+  const [checking, setChecking] = useState(true)
+  const router = useRouter()
+  const searchParams = useSearchParams()
   
   useEffect(() => {
     checkAuth()
   }, [])
   
   const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession()
+    console.log('[AuthSuccess] Checking session...')
+    setChecking(true)
+    
+    // Give the auth state a moment to settle
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    const { data: { session }, error } = await supabase.auth.getSession()
+    console.log('[AuthSuccess] Session check:', { hasSession: !!session, user: session?.user?.email, error })
+    
     if (session) {
       setUser(session.user)
+      
+      // Check for redirect parameter
+      const next = searchParams.get('next')
+      if (next && next !== '/en/auth-success') {
+        console.log('[AuthSuccess] Redirecting to:', next)
+        setTimeout(() => {
+          router.push(next)
+        }, 1500)
+      }
     }
+    
+    setChecking(false)
   }
   
   return (
@@ -29,12 +52,21 @@ export default function AuthSuccessPage() {
           </div>
           
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Welcome back!
+            {checking ? 'Completing Sign In...' : user ? 'Welcome back!' : 'Authentication Status'}
           </h1>
           
-          {user && (
+          {checking ? (
+            <div className="my-6">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="text-gray-600 mt-4">Verifying your session...</p>
+            </div>
+          ) : user ? (
             <p className="text-gray-600 mb-6">
               You're signed in as {user.email}
+            </p>
+          ) : (
+            <p className="text-red-600 mb-6">
+              No active session found. Please try signing in again.
             </p>
           )}
           

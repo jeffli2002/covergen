@@ -4,7 +4,8 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
-  const next = requestUrl.searchParams.get('next') || '/en/auth-success'
+  const next = requestUrl.searchParams.get('next') || '/en'
+  const finalRedirect = '/en/auth-success' + (next ? `?next=${encodeURIComponent(next)}` : '')
   const origin = requestUrl.origin
 
   console.log('[Auth Callback] Processing OAuth callback:', { code: !!code, next, origin })
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest) {
   if (code) {
     try {
       // Create a Supabase server client that can set cookies
-      const response = NextResponse.redirect(`${origin}${next}`)
+      const response = NextResponse.redirect(`${origin}${finalRedirect}`)
       
       const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
