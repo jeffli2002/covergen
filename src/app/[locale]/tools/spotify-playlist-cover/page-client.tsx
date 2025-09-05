@@ -9,10 +9,13 @@ import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
 import { generateStructuredData } from '@/lib/seo-utils'
 
 // Lazy load the Spotify Playlist Cover Tool
-const SpotifyPlaylistCoverTool = dynamic(() => import('@/components/tools/SpotifyPlaylistCoverTool'), {
-  loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded-lg" />,
-  ssr: false
-})
+const SpotifyPlaylistCoverTool = dynamic(
+  () => import(/* webpackChunkName: "spotify-playlist-cover-tool" */ '@/components/tools/SpotifyPlaylistCoverTool'),
+  {
+    loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded-lg" />,
+    ssr: false
+  }
+)
 
 interface SpotifyPlaylistCoverClientProps {
   locale: Locale
