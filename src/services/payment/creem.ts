@@ -786,28 +786,26 @@ class CreemPaymentService {
       // Create Pro product
       const proProduct = await creemClient.createProduct({
         xApiKey: CREEM_API_KEY,
-        createProductRequest: {
+        createProductRequestEntity: {
           name: 'CoverGen Pro',
           description: 'Professional plan with 120 covers per month and priority support',
-          metadata: {
-            plan_id: 'pro',
-            credits: '100',
-            environment: CREEM_TEST_MODE ? 'test' : 'production'
-          }
+          price: 900, // $9.00 in cents
+          currency: 'USD',
+          billingType: 'recurring',
+          billingPeriod: 'monthly'
         }
       })
 
       // Create Pro+ product
       const proPlusProduct = await creemClient.createProduct({
         xApiKey: CREEM_API_KEY,
-        createProductRequest: {
+        createProductRequestEntity: {
           name: 'CoverGen Pro+',
           description: 'Premium plan with 300 covers per month, commercial license, and dedicated support',
-          metadata: {
-            plan_id: 'pro_plus',
-            credits: '300',
-            environment: CREEM_TEST_MODE ? 'test' : 'production'
-          }
+          price: 1900, // $19.00 in cents
+          currency: 'USD',
+          billingType: 'recurring',
+          billingPeriod: 'monthly'
         }
       })
 
@@ -842,15 +840,17 @@ class CreemPaymentService {
     console.log('[Creem] Setting up test environment...')
     
     const products = await this.createProducts()
-    const successfulProducts = products.filter(p => p.success)
+    const successfulProducts = products.filter(p => p.success && 'product' in p)
     
     if (successfulProducts.length === 2) {
       console.log('[Creem] Test environment setup complete. Product IDs:')
-      console.log('Pro:', successfulProducts[0].product.id)
-      console.log('Pro+:', successfulProducts[1].product.id)
+      const proProd = successfulProducts[0] as { success: boolean; product: any }
+      const proPlusProd = successfulProducts[1] as { success: boolean; product: any }
+      console.log('Pro:', proProd.product.id)
+      console.log('Pro+:', proPlusProd.product.id)
       console.log('\nUpdate your .env file with these product IDs:')
-      console.log(`CREEM_TEST_PRO_PRODUCT_ID=${successfulProducts[0].product.id}`)
-      console.log(`CREEM_TEST_PRO_PLUS_PRODUCT_ID=${successfulProducts[1].product.id}`)
+      console.log(`CREEM_TEST_PRO_PRODUCT_ID=${proProd.product.id}`)
+      console.log(`CREEM_TEST_PRO_PLUS_PRODUCT_ID=${proPlusProd.product.id}`)
     } else {
       console.error('[Creem] Failed to create all test products')
     }

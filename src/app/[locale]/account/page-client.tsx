@@ -17,7 +17,11 @@ import { useAppStore } from '@/lib/store'
 import authService from '@/services/authService'
 import { creemService, SUBSCRIPTION_PLANS } from '@/services/payment/creem'
 import { toast } from 'sonner'
-import { format } from 'date-fns'
+// Simple date formatter to avoid date-fns dependency
+const formatDate = (date: Date) => {
+  const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' }
+  return date.toLocaleDateString('en-US', options)
+}
 
 interface AccountPageClientProps {
   locale: string
@@ -205,8 +209,8 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                       <p>
                         <Calendar className="inline w-4 h-4 mr-1" />
                         {subscription.cancel_at_period_end
-                          ? `Cancels on ${format(new Date(subscription.current_period_end), 'MMM d, yyyy')}`
-                          : `Renews on ${format(new Date(subscription.current_period_end), 'MMM d, yyyy')}`
+                          ? `Cancels on ${formatDate(new Date(subscription.current_period_end))}`
+                          : `Renews on ${formatDate(new Date(subscription.current_period_end))}`
                         }
                       </p>
                     )}

@@ -38,15 +38,13 @@ async function createTestProducts() {
     console.log('\n📦 Creating Pro product...')
     const proProduct = await creem.createProduct({
       xApiKey: CREEM_API_KEY,
-      createProductRequest: {
+      createProductRequestEntity: {
         name: 'CoverGen Pro (Test)',
         description: 'Pro subscription plan - 120 covers per month',
-        productId: 'prod_test_pro',
-        metadata: {
-          tier: 'pro',
-          credits: '100',
-          features: 'No watermark,All platform sizes,Priority support,Basic tool usage'
-        }
+        price: 900, // $9.00 in cents
+        currency: 'USD',
+        billingType: 'recurring',
+        billingPeriod: 'monthly'
       }
     })
     console.log('✅ Pro product created:', proProduct.id)
@@ -55,15 +53,13 @@ async function createTestProducts() {
     console.log('\n📦 Creating Pro+ product...')
     const proPlusProduct = await creem.createProduct({
       xApiKey: CREEM_API_KEY,
-      createProductRequest: {
+      createProductRequestEntity: {
         name: 'CoverGen Pro+ (Test)',
         description: 'Pro+ subscription plan - 300 covers per month with commercial license',
-        productId: 'prod_test_proplus',
-        metadata: {
-          tier: 'pro_plus',
-          credits: '300',
-          features: 'No watermark,Commercial license,All tools usage,Dedicated support,7-day cloud gallery'
-        }
+        price: 1900, // $19.00 in cents
+        currency: 'USD',
+        billingType: 'recurring',
+        billingPeriod: 'monthly'
       }
     })
     console.log('✅ Pro+ product created:', proPlusProduct.id)
