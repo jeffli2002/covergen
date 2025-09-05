@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Check, CreditCard, Crown, Info, Loader2, Shield, Sparkles, Zap } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
+import { useAuth } from '@/contexts/AuthContext'
 import authService from '@/services/authService'
 import { creemService, SUBSCRIPTION_PLANS, CREEM_TEST_CARDS } from '@/services/payment/creem'
 import { toast } from 'sonner'
@@ -28,6 +29,7 @@ export default function PaymentPageClient({
 }: PaymentPageClientProps) {
   const router = useRouter()
   const { user } = useAppStore()
+  const { user: authUser, loading: authLoading } = useAuth()
   const [loading, setLoading] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<'pro' | 'pro_plus'>(initialPlan as any)
   const [isTestMode, setIsTestMode] = useState(false)
@@ -39,13 +41,18 @@ export default function PaymentPageClient({
     setIsTestMode(creemService.isTestMode())
 
     console.log('[PaymentPage] Initial load:', {
-      isAuthenticated: authService.isAuthenticated(),
-      user: user,
+      authUser: !!authUser,
+      authLoading: authLoading,
       session: authService.getCurrentSession() ? 'Present' : 'Missing'
     })
 
-    // Check authentication
-    if (!authService.isAuthenticated()) {
+    // Wait for auth to load
+    if (authLoading) {
+      return
+    }
+
+    // Check authentication after auth has loaded
+    if (!authUser) {
       console.log('[PaymentPage] Not authenticated, redirecting...')
       // Redirect to auth with return URL
       const returnUrl = `/${locale}/payment?plan=${selectedPlan}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
@@ -55,7 +62,7 @@ export default function PaymentPageClient({
 
     // Load current subscription
     loadCurrentSubscription()
-  }, [])
+  }, [authUser, authLoading, locale, router, selectedPlan, redirectUrl])
 
   const loadCurrentSubscription = async () => {
     try {
@@ -176,6 +183,19 @@ export default function PaymentPageClient({
       savings: null
     }
   ]
+
+  // Show loading state while auth is loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">
+        <div className="container max-w-6xl mx-auto px-4">
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">

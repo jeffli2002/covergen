@@ -116,7 +116,7 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
     }
 
     // For paid tiers, check authentication
-    if (!authUser || !user) {
+    if (!authUser) {
       // Store the plan they want to subscribe to
       setPendingPlan(tierKey)
       // Also store in localStorage for OAuth flow
