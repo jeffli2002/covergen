@@ -62,8 +62,7 @@ async function checkCreemProducts() {
   console.log('\nAttempting to list all available products...')
   try {
     const products = await creem.searchProducts({
-      xApiKey: apiKey,
-      limit: 100
+      xApiKey: apiKey
     })
     
     console.log(`\nFound ${products.data?.length || 0} products in your account:`)
