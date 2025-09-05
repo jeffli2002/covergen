@@ -17,8 +17,8 @@ function OAuthTestDashboard() {
     const results: any = {
       timestamp: new Date().toISOString(),
       environment: {
-        port: window.location.port,
-        origin: window.location.origin,
+        port: typeof window !== 'undefined' ? window.location.port : '',
+        origin: typeof window !== 'undefined' ? window.location.origin : '',
         supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ? '✅' : '❌',
         siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'Not set'
       },
@@ -85,7 +85,7 @@ function OAuthTestDashboard() {
               onClick={async () => {
                 const { error } = await supabase.auth.signInWithOAuth({
                   provider: 'google',
-                  options: { redirectTo: `${window.location.origin}/auth/callback?next=${window.location.pathname}` }
+                  options: { redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback?next=${typeof window !== 'undefined' ? window.location.pathname : ''}` }
                 })
                 if (error) alert(error.message)
               }}
@@ -109,7 +109,7 @@ function OAuthTestDashboard() {
       <div className="mt-8 bg-blue-50 p-6 rounded-lg border border-blue-200">
         <h3 className="font-semibold text-blue-900 mb-2">Setup Checklist:</h3>
         <ul className="list-disc list-inside space-y-1 text-blue-800">
-          <li>Current callback URL: <code className="bg-white px-2 py-1 rounded">{window.location.origin}/auth/callback</code></li>
+          <li>Current callback URL: <code className="bg-white px-2 py-1 rounded">{typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '/auth/callback'}</code></li>
           <li>Add this URL to Supabase Dashboard → Authentication → URL Configuration → Redirect URLs</li>
           <li>Enable Google provider in Supabase Dashboard → Authentication → Providers</li>
           <li>Add the callback URL to Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client IDs</li>

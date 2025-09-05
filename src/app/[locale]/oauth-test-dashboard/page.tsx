@@ -73,7 +73,7 @@ function OAuthTestContent() {
                 addLog('Starting direct OAuth sign-in...')
                 const { error } = await supabase.auth.signInWithOAuth({
                   provider: 'google',
-                  options: { redirectTo: `${window.location.origin}/auth/callback?next=${window.location.pathname}` }
+                  options: { redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback?next=${typeof window !== 'undefined' ? window.location.pathname : ''}` }
                 })
                 if (error) {
                   addLog(`OAuth error: ${error.message}`)
@@ -106,10 +106,10 @@ function OAuthTestContent() {
             <strong>Key:</strong> {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✅ Set' : '❌ Not set'}
           </div>
           <div>
-            <strong>Site URL:</strong> {process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}
+            <strong>Site URL:</strong> {process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : '')}
           </div>
           <div>
-            <strong>Callback:</strong> {window.location.origin}/auth/callback
+            <strong>Callback:</strong> {typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '/auth/callback'}
           </div>
         </div>
       </div>
