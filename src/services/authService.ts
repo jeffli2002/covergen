@@ -61,6 +61,17 @@ class AuthService {
         const hashParams = new URLSearchParams(window.location.hash.substring(1))
         const accessToken = hashParams.get('access_token')
         const refreshToken = hashParams.get('refresh_token')
+        const expiresIn = hashParams.get('expires_in')
+        const tokenType = hashParams.get('token_type')
+        
+        console.log('[Auth] Token details:', {
+          hasAccessToken: !!accessToken,
+          hasRefreshToken: !!refreshToken,
+          tokenLength: accessToken?.length,
+          refreshLength: refreshToken?.length,
+          expiresIn,
+          tokenType
+        })
         
         if (accessToken && refreshToken) {
           console.log('[Auth] Setting session from OAuth tokens')
@@ -74,6 +85,7 @@ class AuthService {
               console.error('[Auth] Error setting session from OAuth tokens:', error)
             } else if (data.session) {
               console.log('[Auth] Successfully set session from OAuth tokens')
+              console.log('[Auth] Session user:', data.session.user?.email, data.session.user?.id)
               this.session = data.session
               this.user = data.session.user
               this.storeSession(data.session)
@@ -86,10 +98,16 @@ class AuthService {
                 console.log('[Auth] Notifying auth change handler after OAuth')
                 this.onAuthChange(this.user)
               }
+              
+              // Return early to skip the getSession call
+              this.initialized = true
+              return true
             }
           } catch (err) {
             console.error('[Auth] Exception setting OAuth session:', err)
           }
+        } else {
+          console.warn('[Auth] Missing tokens in hash:', { accessToken: !!accessToken, refreshToken: !!refreshToken })
         }
       } else {
         const storedSession = this.getStoredSession()
@@ -155,6 +173,13 @@ class AuthService {
 
       if (!this.authSubscription) {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+          console.log('[Auth] Auth state change event:', { 
+            event, 
+            hasSession: !!session,
+            user: session?.user?.email,
+            userId: session?.user?.id
+          })
+          
           this.session = session
           this.user = session?.user || null
           this.lastSessionCheck = Date.now()
@@ -168,8 +193,6 @@ class AuthService {
           if (this.onAuthChange) {
             this.onAuthChange(this.user)
           }
-
-          console.log('[Auth] Auth state change:', { event, user: session?.user?.email })
           
           if (event === 'SIGNED_IN' && session) {
             await this.onSignIn(session.user)

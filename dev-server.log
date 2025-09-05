@@ -84,3 +84,150 @@ Extracted images from message.images: [
   'data:image/png;base64,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'... 1622378 more characters
 ]
  POST /api/generate 200 in 21497ms
+ ⨯ Error: Cannot find module './8948.js'
+Require stack:
+- /mnt/d/ai/CoverImage/.next/server/webpack-runtime.js
+- /mnt/d/ai/CoverImage/.next/server/app/_not-found/page.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/server/require.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/server/load-components.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/build/utils.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/hot-middleware.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/router-server.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/start-server.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1144:15)
+    at /mnt/d/ai/CoverImage/node_modules/next/dist/server/require-hook.js:55:36
+    at Module._load (node:internal/modules/cjs/loader:985:27)
+    at Module.require (node:internal/modules/cjs/loader:1235:19)
+    at mod.require (/mnt/d/ai/CoverImage/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:176:18)
+    at __webpack_require__.f.require (/mnt/d/ai/CoverImage/.next/server/webpack-runtime.js:208:28)
+    at /mnt/d/ai/CoverImage/.next/server/webpack-runtime.js:116:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/mnt/d/ai/CoverImage/.next/server/webpack-runtime.js:115:67)
+    at Array.map (<anonymous>)
+    at __webpack_require__.X (/mnt/d/ai/CoverImage/.next/server/webpack-runtime.js:167:22)
+    at /mnt/d/ai/CoverImage/.next/server/app/[locale]/page.js:3:28073
+    at Object.<anonymous> (/mnt/d/ai/CoverImage/.next/server/app/[locale]/page.js:3:28156)
+    at Module._compile (node:internal/modules/cjs/loader:1376:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1435:10)
+    at Module.load (node:internal/modules/cjs/loader:1207:32)
+    at Module._load (node:internal/modules/cjs/loader:1023:12)
+    at Module.require (node:internal/modules/cjs/loader:1235:19)
+    at mod.require (/mnt/d/ai/CoverImage/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:176:18)
+    at requirePage (/mnt/d/ai/CoverImage/node_modules/next/dist/server/require.js:109:84)
+    at /mnt/d/ai/CoverImage/node_modules/next/dist/server/load-components.js:103:84
+    at async loadComponentsImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/load-components.js:103:26)
+    at async DevServer.findPageComponentsImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/next-server.js:714:36)
+    at async DevServer.findPageComponents (/mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js:577:20)
+    at async DevServer.renderPageComponent (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:1910:24)
+    at async DevServer.renderToResponseImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:1962:32)
+    at async DevServer.pipeImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/mnt/d/ai/CoverImage/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:818:17)
+    at async /mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/mnt/d/ai/CoverImage/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/router-server.js:179:21)
+    at async handleRequest (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/router-server.js:359:24)
+    at async requestHandlerImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/router-server.js:383:13)
+    at async Server.requestListener (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/mnt/d/ai/CoverImage/.next/server/webpack-runtime.js',
+    '/mnt/d/ai/CoverImage/.next/server/app/_not-found/page.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/server/require.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/server/load-components.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/build/utils.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/router-server.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/start-server.js'
+  ],
+  page: '/en'
+}
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 9.1s (1330 modules)
+ GET /en 500 in 26400ms
+ GET /favicon.ico 404 in 644ms
+ ⨯ Failed to generate static paths for /[locale]:
+Error: Cannot find module './vendor-chunks/lucide-react.js'
+Require stack:
+- /mnt/d/ai/CoverImage/.next/server/webpack-runtime.js
+- /mnt/d/ai/CoverImage/.next/server/app/[locale]/page.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/server/require.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/server/load-components.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/build/utils.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/static-paths-worker.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/compiled/jest-worker/processChild.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1144:15)
+    at /mnt/d/ai/CoverImage/node_modules/next/dist/server/require-hook.js:55:36
+    at Module._load (node:internal/modules/cjs/loader:985:27)
+    at Module.require (node:internal/modules/cjs/loader:1235:19)
+    at mod.require (/mnt/d/ai/CoverImage/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:176:18)
+    at __webpack_require__.f.require (/mnt/d/ai/CoverImage/.next/server/webpack-runtime.js:203:28)
+    at /mnt/d/ai/CoverImage/.next/server/webpack-runtime.js:111:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/mnt/d/ai/CoverImage/.next/server/webpack-runtime.js:110:67) {
+  type: 'Error',
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/mnt/d/ai/CoverImage/.next/server/webpack-runtime.js',
+    '/mnt/d/ai/CoverImage/.next/server/app/[locale]/page.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/server/require.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/server/load-components.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/build/utils.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/static-paths-worker.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/compiled/jest-worker/processChild.js'
+  ]
+}
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving './_rsc_src_lib_i18n_dictionaries_en_json' in /mnt/d/ai/CoverImage/.next/server for build dependencies doesn't lead to expected result '/mnt/d/ai/CoverImage/.next/server/_rsc_src_lib_i18n_dictionaries_en_json.js', but to 'Error: Can't resolve './_rsc_src_lib_i18n_dictionaries_en_json' in '/mnt/d/ai/CoverImage/.next/server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ./_rsc_src_lib_i18n_dictionaries_en_json (expected /mnt/d/ai/CoverImage/.next/server/_rsc_src_lib_i18n_dictionaries_en_json.js)
+<w>  at file dependencies /mnt/d/ai/CoverImage/.next/server/webpack-runtime.js
+<w>  at file /mnt/d/ai/CoverImage/.next/server/webpack-runtime.js
+<w>  at file dependencies /mnt/d/ai/CoverImage/.next/server/pages/_error.js
+<w>  at file /mnt/d/ai/CoverImage/.next/server/pages/_error.js
+<w>  at file dependencies /mnt/d/ai/CoverImage/node_modules/next/dist/server/require.js
+<w>  at file /mnt/d/ai/CoverImage/node_modules/next/dist/server/require.js
+<w>  at file dependencies /mnt/d/ai/CoverImage/node_modules/next/dist/server/load-components.js
+<w>  at file /mnt/d/ai/CoverImage/node_modules/next/dist/server/load-components.js
+<w>  at file dependencies /mnt/d/ai/CoverImage/node_modules/next/dist/build/utils.js
+<w>  at file /mnt/d/ai/CoverImage/node_modules/next/dist/build/utils.js
+<w>  at file dependencies /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w>  at file /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w>  at resolve commonjs /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat '/mnt/d/ai/CoverImage/.next/server/_rsc_src_lib_i18n_dictionaries_en_json.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving './vendor-chunks/aria-hidden' in /mnt/d/ai/CoverImage/.next/server for build dependencies doesn't lead to expected result '/mnt/d/ai/CoverImage/.next/server/vendor-chunks/aria-hidden.js', but to 'Error: Can't resolve './vendor-chunks/aria-hidden' in '/mnt/d/ai/CoverImage/.next/server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ./vendor-chunks/aria-hidden (expected /mnt/d/ai/CoverImage/.next/server/vendor-chunks/aria-hidden.js)
+<w>  at file dependencies /mnt/d/ai/CoverImage/.next/server/webpack-runtime.js
+<w>  at file /mnt/d/ai/CoverImage/.next/server/webpack-runtime.js
+<w>  at file dependencies /mnt/d/ai/CoverImage/.next/server/pages/_error.js
+<w>  at file /mnt/d/ai/CoverImage/.next/server/pages/_error.js
+<w>  at file dependencies /mnt/d/ai/CoverImage/node_modules/next/dist/server/require.js
+<w>  at file /mnt/d/ai/CoverImage/node_modules/next/dist/server/require.js
+<w>  at file dependencies /mnt/d/ai/CoverImage/node_modules/next/dist/server/load-components.js
+<w>  at file /mnt/d/ai/CoverImage/node_modules/next/dist/server/load-components.js
+<w>  at file dependencies /mnt/d/ai/CoverImage/node_modules/next/dist/build/utils.js
+<w>  at file /mnt/d/ai/CoverImage/node_modules/next/dist/build/utils.js
+<w>  at file dependencies /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w>  at file /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w>  at resolve commonjs /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving './vendor-chunks/get-nonce' in /mnt/d/ai/CoverImage/.next/server for build dependencies doesn't lead to expected result '/mnt/d/ai/CoverImage/.next/server/vendor-chunks/get-nonce.js', but to 'Error: Can't resolve './vendor-chunks/get-nonce' in '/mnt/d/ai/CoverImage/.next/server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ./vendor-chunks/get-nonce (expected /mnt/d/ai/CoverImage/.next/server/vendor-chunks/get-nonce.js)
+<w>  at file dependencies /mnt/d/ai/CoverImage/.next/server/webpack-runtime.js
+<w>  at file /mnt/d/ai/CoverImage/.next/server/webpack-runtime.js
+<w>  at file dependencies /mnt/d/ai/CoverImage/.next/server/pages/_error.js
+<w>  at file /mnt/d/ai/CoverImage/.next/server/pages/_error.js
+<w>  at file dependencies /mnt/d/ai/CoverImage/node_modules/next/dist/server/require.js
+<w>  at file /mnt/d/ai/CoverImage/node_modules/next/dist/server/require.js
+<w>  at file dependencies /mnt/d/ai/CoverImage/node_modules/next/dist/server/load-components.js
+<w>  at file /mnt/d/ai/CoverImage/node_modules/next/dist/server/load-components.js
+<w>  at file dependencies /mnt/d/ai/CoverImage/node_modules/next/dist/build/utils.js
+<w>  at file /mnt/d/ai/CoverImage/node_modules/next/dist/build/utils.js
+<w>  at file dependencies /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w>  at file /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w>  at resolve commonjs /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
