@@ -55,7 +55,43 @@ class AuthService {
       const hasOAuthTokens = window.location.hash && window.location.hash.includes('access_token')
       console.log('[Auth] Has OAuth tokens in URL:', hasOAuthTokens)
       
-      if (!hasOAuthTokens) {
+      // If we have OAuth tokens in the hash, extract and set them
+      if (hasOAuthTokens) {
+        console.log('[Auth] Processing OAuth tokens from URL hash')
+        const hashParams = new URLSearchParams(window.location.hash.substring(1))
+        const accessToken = hashParams.get('access_token')
+        const refreshToken = hashParams.get('refresh_token')
+        
+        if (accessToken && refreshToken) {
+          console.log('[Auth] Setting session from OAuth tokens')
+          try {
+            const { data, error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken
+            })
+            
+            if (error) {
+              console.error('[Auth] Error setting session from OAuth tokens:', error)
+            } else if (data.session) {
+              console.log('[Auth] Successfully set session from OAuth tokens')
+              this.session = data.session
+              this.user = data.session.user
+              this.storeSession(data.session)
+              
+              // Clean up URL after processing
+              window.history.replaceState({}, document.title, window.location.pathname)
+              
+              // Notify auth change handler immediately
+              if (this.onAuthChange) {
+                console.log('[Auth] Notifying auth change handler after OAuth')
+                this.onAuthChange(this.user)
+              }
+            }
+          } catch (err) {
+            console.error('[Auth] Exception setting OAuth session:', err)
+          }
+        }
+      } else {
         const storedSession = this.getStoredSession()
         if (storedSession && this.isSessionValid(storedSession)) {
           console.log('[Auth] Using stored session')
