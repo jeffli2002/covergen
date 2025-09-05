@@ -177,8 +177,14 @@ export default function OAuthDebugCompletePage() {
     Object.entries(allCookies).forEach(([name, value]) => {
       if (name.includes('sb-') && value) {
         try {
-          const decoded = JSON.parse(atob(value.split('.')[1]))
-          log(`Decoded ${name}:`, decoded)
+          const valueStr = String(value)
+          const parts = valueStr.split('.')
+          if (parts.length > 1) {
+            const decoded = JSON.parse(atob(parts[1]))
+            log(`Decoded ${name}:`, decoded)
+          } else {
+            log(`${name} doesn't appear to be a JWT`)
+          }
         } catch (err) {
           log(`Could not decode ${name}`)
         }
