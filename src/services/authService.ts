@@ -35,99 +35,28 @@ class AuthService {
 
   private async _doInitialize() {
     try {
-      // Skip initialization on server-side
-      if (typeof window === 'undefined') {
-        console.log('[Auth] Skipping initialization on server-side')
-        this.initialized = true
-        return false
-      }
-
-      console.log('[Auth] Starting initialization, URL:', window.location.href)
-      console.log('[Auth] Hash present:', !!window.location.hash)
-      
       if (!supabase) {
         console.warn('Supabase not configured, auth service will be disabled')
         this.initialized = true
         return false
       }
 
-      // Skip stored session if we have OAuth tokens in URL
-      const hasOAuthTokens = window.location.hash && window.location.hash.includes('access_token')
-      console.log('[Auth] Has OAuth tokens in URL:', hasOAuthTokens)
-      
-      // If we have OAuth tokens in the hash, extract and set them
-      if (hasOAuthTokens) {
-        console.log('[Auth] Processing OAuth tokens from URL hash')
-        const hashParams = new URLSearchParams(window.location.hash.substring(1))
-        const accessToken = hashParams.get('access_token')
-        const refreshToken = hashParams.get('refresh_token')
-        const expiresIn = hashParams.get('expires_in')
-        const tokenType = hashParams.get('token_type')
-        
-        console.log('[Auth] Token details:', {
-          hasAccessToken: !!accessToken,
-          hasRefreshToken: !!refreshToken,
-          tokenLength: accessToken?.length,
-          refreshLength: refreshToken?.length,
-          expiresIn,
-          tokenType
-        })
-        
-        if (accessToken && refreshToken) {
-          console.log('[Auth] Setting session from OAuth tokens')
-          try {
-            const { data, error } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken
-            })
-            
-            if (error) {
-              console.error('[Auth] Error setting session from OAuth tokens:', error)
-            } else if (data.session) {
-              console.log('[Auth] Successfully set session from OAuth tokens')
-              console.log('[Auth] Session user:', data.session.user?.email, data.session.user?.id)
-              this.session = data.session
-              this.user = data.session.user
-              this.storeSession(data.session)
-              
-              // Clean up URL after processing
-              window.history.replaceState({}, document.title, window.location.pathname)
-              
-              // Notify auth change handler immediately
-              if (this.onAuthChange) {
-                console.log('[Auth] Notifying auth change handler after OAuth')
-                this.onAuthChange(this.user)
-              }
-              
-              // Return early to skip the getSession call
-              this.initialized = true
-              return true
-            }
-          } catch (err) {
-            console.error('[Auth] Exception setting OAuth session:', err)
-          }
-        } else {
-          console.warn('[Auth] Missing tokens in hash:', { accessToken: !!accessToken, refreshToken: !!refreshToken })
-        }
-      } else {
-        const storedSession = this.getStoredSession()
-        if (storedSession && this.isSessionValid(storedSession)) {
-          console.log('[Auth] Using stored session')
-          this.session = storedSession
-          this.user = storedSession.user
+      const storedSession = this.getStoredSession()
+      if (storedSession && this.isSessionValid(storedSession)) {
+        this.session = storedSession
+        this.user = storedSession.user
 
-          supabase.auth.setSession({
-            access_token: storedSession.access_token,
-            refresh_token: storedSession.refresh_token
-          }).then(({ error }) => {
-            if (error) {
-              console.warn('Stored session invalid, clearing...', error)
-              this.clearStoredSession()
-              this.session = null
-              this.user = null
-            }
-          })
-        }
+        supabase.auth.setSession({
+          access_token: storedSession.access_token,
+          refresh_token: storedSession.refresh_token
+        }).then(({ error }) => {
+          if (error) {
+            console.warn('Stored session invalid, clearing...', error)
+            this.clearStoredSession()
+            this.session = null
+            this.user = null
+          }
+        })
       }
 
       const sessionPromise = supabase.auth.getSession()
@@ -136,33 +65,17 @@ class AuthService {
       )
 
       try {
-        console.log('[Auth] Getting session from Supabase...')
         const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any
         
-        console.log('[Auth] Session check result:', { 
-          hasSession: !!session,
-          hasError: !!error,
-          userEmail: session?.user?.email,
-          userId: session?.user?.id,
-          error: error?.message
-        })
+        console.log('[Auth] Session check result:', { session, error, user: session?.user?.email })
 
         if (error) {
           console.error('Error getting session:', error)
         } else {
           if (session) {
-            console.log('[Auth] Session found, setting user')
             this.session = session
             this.user = session.user
             this.storeSession(session)
-            
-            // If we just got a session from OAuth, notify immediately
-            if (hasOAuthTokens && this.onAuthChange) {
-              console.log('[Auth] Notifying auth change handler after OAuth')
-              this.onAuthChange(this.user)
-            }
-          } else {
-            console.log('[Auth] No session found')
           }
         }
       } catch (timeoutError) {
@@ -173,13 +86,6 @@ class AuthService {
 
       if (!this.authSubscription) {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-          console.log('[Auth] Auth state change event:', { 
-            event, 
-            hasSession: !!session,
-            user: session?.user?.email,
-            userId: session?.user?.id
-          })
-          
           this.session = session
           this.user = session?.user || null
           this.lastSessionCheck = Date.now()
@@ -193,6 +99,8 @@ class AuthService {
           if (this.onAuthChange) {
             this.onAuthChange(this.user)
           }
+
+          console.log('[Auth] Auth state change:', { event, user: session?.user?.email })
           
           if (event === 'SIGNED_IN' && session) {
             await this.onSignIn(session.user)
@@ -330,7 +238,10 @@ class AuthService {
 
       // Get the current pathname to preserve locale
       const currentPath = window.location.pathname || '/en'
-      const redirectUrl = `${window.location.origin}${currentPath}`
+      // Use the auth callback route for PKCE flow
+      const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
+
+      console.log('[Auth] Google sign in with redirect URL:', redirectUrl)
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -604,7 +515,7 @@ class AuthService {
   }
 
   private storeSession(session: any) {
-    if (!session || typeof window === 'undefined') return
+    if (!session) return
 
     try {
       const sessionData = {
@@ -622,8 +533,6 @@ class AuthService {
   }
 
   private getStoredSession() {
-    if (typeof window === 'undefined') return null
-    
     try {
       const stored = localStorage.getItem('coverimage_session')
       return stored ? JSON.parse(stored) : null
@@ -634,8 +543,6 @@ class AuthService {
   }
 
   private clearStoredSession() {
-    if (typeof window === 'undefined') return
-    
     try {
       localStorage.removeItem('coverimage_session')
     } catch (error) {

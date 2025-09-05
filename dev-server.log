@@ -231,3 +231,249 @@ Require stack:
 <w>  at file dependencies /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
 <w>  at file /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
 <w>  at resolve commonjs /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+ ○ Compiling /_not-found ...
+ ⨯ Module not found: Error: Can't resolve 'next-flight-client-entry-loader' in '/mnt/d/ai/CoverImage'
+ ⨯ Error: Cannot find module '/mnt/d/ai/CoverImage/node_modules/@swc/helpers/package.json'
+    at createEsmNotFoundErr (node:internal/modules/cjs/loader:1181:15)
+    at finalizeEsmResolution (node:internal/modules/cjs/loader:1169:15)
+    at resolveExports (node:internal/modules/cjs/loader:591:14)
+    at Module._findPath (node:internal/modules/cjs/loader:668:31)
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1130:27)
+    at /mnt/d/ai/CoverImage/node_modules/next/dist/server/require-hook.js:55:36
+    at Function.resolve (node:internal/modules/helpers:187:19)
+    at createWebpackAliases (/mnt/d/ai/CoverImage/node_modules/next/dist/build/create-compiler-aliases.js:129:76)
+    at getBaseWebpackConfig (/mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack-config.js:524:64)
+    at async HotReloaderWebpack.buildFallbackError (/mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/hot-reloader-webpack.js:553:32)
+    at async DevBundlerService.getFallbackErrorComponents (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/dev-bundler-service.js:25:9)
+    at async DevServer.getFallbackErrorComponents (/mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js:593:9)
+    at async DevServer.renderErrorToResponseImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:2203:40)
+    at async DevServer.pipeImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/mnt/d/ai/CoverImage/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:818:17)
+    at async /mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/mnt/d/ai/CoverImage/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/router-server.js:179:21)
+    at async handleRequest (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/router-server.js:359:24)
+    at async requestHandlerImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/router-server.js:383:13)
+    at async Server.requestListener (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  code: 'MODULE_NOT_FOUND',
+  path: '/mnt/d/ai/CoverImage/node_modules/@swc/helpers/package.json'
+}
+Error: Cannot find module '/mnt/d/ai/CoverImage/node_modules/@swc/helpers/package.json'
+    at createEsmNotFoundErr (node:internal/modules/cjs/loader:1181:15)
+    at finalizeEsmResolution (node:internal/modules/cjs/loader:1169:15)
+    at resolveExports (node:internal/modules/cjs/loader:591:14)
+    at Module._findPath (node:internal/modules/cjs/loader:668:31)
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1130:27)
+    at /mnt/d/ai/CoverImage/node_modules/next/dist/server/require-hook.js:55:36
+    at Function.resolve (node:internal/modules/helpers:187:19)
+    at createWebpackAliases (/mnt/d/ai/CoverImage/node_modules/next/dist/build/create-compiler-aliases.js:129:76)
+    at getBaseWebpackConfig (/mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack-config.js:524:64)
+    at async HotReloaderWebpack.buildFallbackError (/mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/hot-reloader-webpack.js:553:32)
+    at async DevBundlerService.getFallbackErrorComponents (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/dev-bundler-service.js:25:9)
+    at async DevServer.getFallbackErrorComponents (/mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js:593:9)
+    at async DevServer.renderErrorToResponseImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:2203:40)
+    at async DevServer.pipeImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/mnt/d/ai/CoverImage/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:818:17)
+    at async /mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/mnt/d/ai/CoverImage/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/router-server.js:179:21)
+    at async handleRequest (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/router-server.js:359:24)
+    at async requestHandlerImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/router-server.js:383:13)
+    at async Server.requestListener (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  code: 'MODULE_NOT_FOUND',
+  path: '/mnt/d/ai/CoverImage/node_modules/@swc/helpers/package.json'
+}
+Error: Cannot find module '/mnt/d/ai/CoverImage/node_modules/@swc/helpers/package.json'
+    at createEsmNotFoundErr (node:internal/modules/cjs/loader:1181:15)
+    at finalizeEsmResolution (node:internal/modules/cjs/loader:1169:15)
+    at resolveExports (node:internal/modules/cjs/loader:591:14)
+    at Module._findPath (node:internal/modules/cjs/loader:668:31)
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1130:27)
+    at /mnt/d/ai/CoverImage/node_modules/next/dist/server/require-hook.js:55:36
+    at Function.resolve (node:internal/modules/helpers:187:19)
+    at createWebpackAliases (/mnt/d/ai/CoverImage/node_modules/next/dist/build/create-compiler-aliases.js:129:76)
+    at getBaseWebpackConfig (/mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack-config.js:524:64)
+    at async HotReloaderWebpack.buildFallbackError (/mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/hot-reloader-webpack.js:553:32)
+    at async DevBundlerService.getFallbackErrorComponents (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/dev-bundler-service.js:25:9)
+    at async DevServer.getFallbackErrorComponents (/mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js:593:9)
+    at async DevServer.renderErrorToResponseImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:2203:40)
+    at async pipe.req.req (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:2056:30)
+    at async DevServer.pipeImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:922:25)
+    at async /mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/mnt/d/ai/CoverImage/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/router-server.js:179:21)
+    at async requestHandlerImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/router-server.js:395:24)
+    at async Server.requestListener (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  code: 'MODULE_NOT_FOUND',
+  path: '/mnt/d/ai/CoverImage/node_modules/@swc/helpers/package.json'
+}
+ GET /en 500 in 1915ms
+ GET /en 500 in 174ms
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: Can't resolve '/mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js' in '/mnt/d/ai/CoverImage'
+<w> while resolving '/mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js' in /mnt/d/ai/CoverImage as file
+<w>  at resolve commonjs /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+ ⨯ Module not found: Error: Can't resolve 'next-client-pages-loader' in '/mnt/d/ai/CoverImage'
+ ⨯ Error: Cannot find module '../shared/lib/constants'
+Require stack:
+- /mnt/d/ai/CoverImage/node_modules/next/dist/pages/_document.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/server/load-default-error-components.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/server/next.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/start-server.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1144:15)
+    at /mnt/d/ai/CoverImage/node_modules/next/dist/server/require-hook.js:55:36
+    at Module._load (node:internal/modules/cjs/loader:985:27)
+    at Module.require (node:internal/modules/cjs/loader:1235:19)
+    at mod.require (/mnt/d/ai/CoverImage/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:176:18)
+    at Object.<anonymous> (/mnt/d/ai/CoverImage/node_modules/next/dist/pages/_document.js:40:20)
+    at Module._compile (node:internal/modules/cjs/loader:1376:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1435:10)
+    at Module.load (node:internal/modules/cjs/loader:1207:32)
+    at Module._load (node:internal/modules/cjs/loader:1023:12)
+    at Module.require (node:internal/modules/cjs/loader:1235:19)
+    at mod.require (/mnt/d/ai/CoverImage/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:176:18)
+    at loadDefaultErrorComponentsImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/load-default-error-components.js:18:58)
+    at DevServer.getFallbackErrorComponents (/mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js:594:81)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async DevServer.renderErrorToResponseImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:2203:40)
+    at async DevServer.renderToResponseImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:2019:30)
+    at async DevServer.pipeImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/mnt/d/ai/CoverImage/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:818:17)
+    at async /mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/mnt/d/ai/CoverImage/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/router-server.js:179:21)
+    at async handleRequest (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/router-server.js:359:24)
+    at async requestHandlerImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/router-server.js:383:13)
+    at async Server.requestListener (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/pages/_document.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/server/load-default-error-components.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/server/next.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/start-server.js'
+  ]
+}
+Error: Cannot find module '../shared/lib/constants'
+Require stack:
+- /mnt/d/ai/CoverImage/node_modules/next/dist/pages/_document.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/server/load-default-error-components.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/server/next.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/start-server.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1144:15)
+    at /mnt/d/ai/CoverImage/node_modules/next/dist/server/require-hook.js:55:36
+    at Module._load (node:internal/modules/cjs/loader:985:27)
+    at Module.require (node:internal/modules/cjs/loader:1235:19)
+    at mod.require (/mnt/d/ai/CoverImage/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:176:18)
+    at Object.<anonymous> (/mnt/d/ai/CoverImage/node_modules/next/dist/pages/_document.js:40:20)
+    at Module._compile (node:internal/modules/cjs/loader:1376:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1435:10)
+    at Module.load (node:internal/modules/cjs/loader:1207:32)
+    at Module._load (node:internal/modules/cjs/loader:1023:12)
+    at Module.require (node:internal/modules/cjs/loader:1235:19)
+    at mod.require (/mnt/d/ai/CoverImage/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:176:18)
+    at loadDefaultErrorComponentsImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/load-default-error-components.js:18:58)
+    at DevServer.getFallbackErrorComponents (/mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js:594:81)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async DevServer.renderErrorToResponseImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:2203:40)
+    at async DevServer.renderToResponseImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:2019:30)
+    at async DevServer.pipeImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/mnt/d/ai/CoverImage/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:818:17)
+    at async /mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/mnt/d/ai/CoverImage/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/router-server.js:179:21)
+    at async handleRequest (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/router-server.js:359:24)
+    at async requestHandlerImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/router-server.js:383:13)
+    at async Server.requestListener (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/pages/_document.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/server/load-default-error-components.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/server/next.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/start-server.js'
+  ]
+}
+Error: Cannot find module '../shared/lib/constants'
+Require stack:
+- /mnt/d/ai/CoverImage/node_modules/next/dist/pages/_document.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/server/load-default-error-components.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/server/next.js
+- /mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/start-server.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1144:15)
+    at /mnt/d/ai/CoverImage/node_modules/next/dist/server/require-hook.js:55:36
+    at Module._load (node:internal/modules/cjs/loader:985:27)
+    at Module.require (node:internal/modules/cjs/loader:1235:19)
+    at mod.require (/mnt/d/ai/CoverImage/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:176:18)
+    at Object.<anonymous> (/mnt/d/ai/CoverImage/node_modules/next/dist/pages/_document.js:40:20)
+    at Module._compile (node:internal/modules/cjs/loader:1376:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1435:10)
+    at Module.load (node:internal/modules/cjs/loader:1207:32)
+    at Module._load (node:internal/modules/cjs/loader:1023:12)
+    at Module.require (node:internal/modules/cjs/loader:1235:19)
+    at mod.require (/mnt/d/ai/CoverImage/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:176:18)
+    at loadDefaultErrorComponentsImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/load-default-error-components.js:18:58)
+    at DevServer.getFallbackErrorComponents (/mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js:594:81)
+    at async DevServer.renderErrorToResponseImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:2203:40)
+    at async pipe.req.req (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:2056:30)
+    at async DevServer.pipeImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/base-server.js:922:25)
+    at async /mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/mnt/d/ai/CoverImage/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/router-server.js:179:21)
+    at async requestHandlerImpl (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/router-server.js:395:24)
+    at async Server.requestListener (/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/pages/_document.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/server/load-default-error-components.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/server/dev/next-dev-server.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/server/next.js',
+    '/mnt/d/ai/CoverImage/node_modules/next/dist/server/lib/start-server.js'
+  ]
+}
+ GET /en 500 in 3402ms
+ GET /en 500 in 263ms
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat '/mnt/d/ai/CoverImage/node_modules/next/dist/build/load-entrypoint.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving 'next/dist/build/load-entrypoint' in /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader for build dependencies doesn't lead to expected result '/mnt/d/ai/CoverImage/node_modules/next/dist/build/load-entrypoint.js', but to 'Error: Can't resolve 'next/dist/build/load-entrypoint' in '/mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader'' instead. Resolving dependencies are ignored for this path.
+<w>  at unknown 4 next/dist/build/load-entrypoint
+<w>  at file dependencies /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w>  at file /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w>  at resolve commonjs /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving 'next/dist/build/utils' in /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader for build dependencies doesn't lead to expected result '/mnt/d/ai/CoverImage/node_modules/next/dist/build/utils.js', but to 'Error: Can't resolve 'next/dist/build/utils' in '/mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader'' instead. Resolving dependencies are ignored for this path.
+<w>  at unknown 4 next/dist/build/utils
+<w>  at file dependencies /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w>  at file /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w>  at resolve commonjs /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving 'next/dist/build/webpack/loaders/utils' in /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader for build dependencies doesn't lead to expected result '/mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/utils.js', but to 'Error: Can't resolve 'next/dist/build/webpack/loaders/utils' in '/mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader'' instead. Resolving dependencies are ignored for this path.
+<w>  at unknown 4 next/dist/build/webpack/loaders/utils
+<w>  at file dependencies /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w>  at file /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w>  at resolve commonjs /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving 'next/dist/server/future/route-kind' in /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader for build dependencies doesn't lead to expected result '/mnt/d/ai/CoverImage/node_modules/next/dist/server/future/route-kind.js', but to 'Error: Can't resolve 'next/dist/server/future/route-kind' in '/mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader'' instead. Resolving dependencies are ignored for this path.
+<w>  at unknown 4 next/dist/server/future/route-kind
+<w>  at file dependencies /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w>  at file /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w>  at resolve commonjs /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving 'next/dist/shared/lib/page-path/normalize-page-path' in /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader for build dependencies doesn't lead to expected result '/mnt/d/ai/CoverImage/node_modules/next/dist/shared/lib/page-path/normalize-page-path.js', but to 'Error: Can't resolve 'next/dist/shared/lib/page-path/normalize-page-path' in '/mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader'' instead. Resolving dependencies are ignored for this path.
+<w>  at unknown 4 next/dist/shared/lib/page-path/normalize-page-path
+<w>  at file dependencies /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w>  at file /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w>  at resolve commonjs /mnt/d/ai/CoverImage/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
