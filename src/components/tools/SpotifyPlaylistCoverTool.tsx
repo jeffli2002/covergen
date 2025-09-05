@@ -46,38 +46,94 @@ export default function SpotifyPlaylistCoverTool() {
   const [additionalElements, setAdditionalElements] = useState('')
   const [loading, setLoading] = useState(false)
   const [outputs, setOutputs] = useState<string[]>([])
+  const [downloadingId, setDownloadingId] = useState<string | null>(null)
 
   const handleGenerate = async () => {
     if (!playlistName) return
 
     setLoading(true)
+    setOutputs([]) // Clear previous results
     
-    // Simulate API call
-    setTimeout(() => {
-      // Mock generated covers using placeholder service
-      const mockCovers = [
-        'https://via.placeholder.com/300/1DB954/FFFFFF?text=Playlist+1',
-        'https://via.placeholder.com/300/191414/1DB954?text=Playlist+2',
-        'https://via.placeholder.com/300/7B1FA2/FFFFFF?text=Playlist+3',
-        'https://via.placeholder.com/300/FF5722/FFFFFF?text=Playlist+4'
-      ]
-      setOutputs(mockCovers)
+    try {
+      // Build the playlist-specific prompt
+      const selectedGenre = genreStyles.find(s => s.value === genre)
+      const playlistPrompt = `Spotify playlist cover design. Playlist name: "${playlistName}". Genre: ${selectedGenre?.label}. Mood: ${mood}. ${description ? `Description: ${description}.` : ''} ${additionalElements ? `Visual elements: ${additionalElements}.` : ''} Professional 300x300 pixel square cover design optimized for Spotify playlists.`
+      
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: playlistPrompt,
+          mode: 'text',
+          style: 'modern',
+          platform: 'spotify', // Spotify specific dimensions
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Generation failed')
+      }
+
+      const data = await response.json()
+      
+      // Set only the first image from the response
+      if (data.images && data.images.length > 0) {
+        setOutputs([data.images[0]])
+      }
+    } catch (error) {
+      console.error('Generation error:', error)
+    } finally {
       setLoading(false)
-    }, 2000)
+    }
+  }
+
+  const handleDownload = async (imageUrl: string, index: number) => {
+    setDownloadingId(`image_${index}`)
+    try {
+      const response = await fetch(imageUrl)
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `spotify-playlist-cover-${Date.now()}.png`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (error) {
+      console.error('Download error:', error)
+    } finally {
+      setDownloadingId(null)
+    }
+  }
+
+  const handleGenerateNew = () => {
+    setOutputs([])
   }
 
   return (
-    <div className="space-y-8">
-      <Card className="p-6">
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-2xl font-bold mb-2">Spotify Playlist Cover Generator</h2>
-            <p className="text-gray-600">
-              Create perfect 300x300 pixel covers for your Spotify playlists with AI
-            </p>
-          </div>
+    <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+      <div className="text-center space-y-4">
+        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
+          Spotify Playlist Cover Generator
+        </h1>
+        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          Create perfect 300x300 pixel covers for your Spotify playlists with AI
+        </p>
+      </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid lg:grid-cols-2 gap-8">
+        <Card className="p-6">
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold mb-2">Design Your Playlist Cover</h2>
+              <p className="text-gray-600">
+                Tell us about your playlist and we'll create the perfect cover
+              </p>
+            </div>
+
             <div className="space-y-4">
               <div>
                 <Label htmlFor="playlist-name">Playlist Name *</Label>
@@ -124,9 +180,7 @@ export default function SpotifyPlaylistCoverTool() {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
 
-            <div className="space-y-4">
               <div>
                 <Label htmlFor="description">Description (Optional)</Label>
                 <Textarea
@@ -149,65 +203,40 @@ export default function SpotifyPlaylistCoverTool() {
                   className="mt-1"
                 />
               </div>
+
+              <Button
+                onClick={handleGenerate}
+                disabled={!playlistName || loading}
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
+                size="lg"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-5 h-5 mr-2" />
+                    Generate Playlist Cover
+                  </>
+                )}
+              </Button>
             </div>
           </div>
+        </Card>
 
-          <div className="flex justify-center">
-            <Button
-              onClick={handleGenerate}
-              disabled={!playlistName || loading}
-              className="bg-green-600 hover:bg-green-700 text-white px-8"
-              size="lg"
-            >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  Generate Playlist Cover
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
-      </Card>
-
-      {/* Debug info */}
-      <Card className="p-4 bg-yellow-50 border-yellow-200">
-        <p className="text-sm text-yellow-800">
-          Debug: outputs.length = {outputs.length}, loading = {loading.toString()}
-        </p>
-        {outputs.length > 0 && (
-          <p className="text-sm text-yellow-800">
-            First output URL: {outputs[0]}
-          </p>
-        )}
-      </Card>
-
-      {outputs.length > 0 && (
-        <Card className="p-6">
-          <h3 className="text-xl font-semibold mb-4">Generated Covers</h3>
+        <div className="space-y-6">
           <OutputGallery
             generatedImages={outputs}
-            downloadingId={null}
-            onDownload={(imageUrl: string, index: number) => {
-              console.log('Download clicked:', imageUrl, index)
-              // Create download link
-              const link = document.createElement('a')
-              link.href = imageUrl
-              link.download = `spotify-playlist-cover-${index + 1}.png`
-              document.body.appendChild(link)
-              link.click()
-              document.body.removeChild(link)
-            }}
-            onGenerateNew={handleGenerate}
+            downloadingId={downloadingId}
+            onDownload={handleDownload}
+            onGenerateNew={handleGenerateNew}
+            isGenerating={loading}
             platform="spotify"
           />
-        </Card>
-      )}
+        </div>
+      </div>
 
       {/* Tips Section */}
       <Card className="p-6 bg-green-50 border-green-200">
@@ -236,4 +265,3 @@ export default function SpotifyPlaylistCoverTool() {
     </div>
   )
 }
-

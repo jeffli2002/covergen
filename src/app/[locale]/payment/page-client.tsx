@@ -63,6 +63,21 @@ export default function PaymentPageClient({
       return
     }
 
+    // Check if session is expiring soon and refresh it proactively
+    if (authService.isSessionExpiringSoon(10)) { // 10 minute buffer
+      console.log('[PaymentPage] Session expiring soon, refreshing...')
+      authService.refreshSession().then((result) => {
+        if (!result.session) {
+          console.error('[PaymentPage] Failed to refresh session')
+          toast.error('Session expired. Please sign in again.')
+          const returnUrl = `/${locale}/payment?plan=${selectedPlan}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
+          router.push(`/${locale}?auth=signin&redirect=${encodeURIComponent(returnUrl)}`)
+        } else {
+          console.log('[PaymentPage] Session refreshed successfully')
+        }
+      })
+    }
+
     // Load current subscription
     loadCurrentSubscription()
   }, [authUser, authLoading, locale, router, selectedPlan, redirectUrl])
@@ -158,8 +173,12 @@ export default function PaymentPageClient({
       
       if (error.message?.includes('Unable to connect to payment server')) {
         errorMessage = 'Payment service is temporarily unavailable. Please try again later.'
-      } else if (error.message?.includes('Authentication required')) {
-        errorMessage = 'Please sign in to continue with your purchase.'
+      } else if (error.message?.includes('Authentication required') || 
+                 error.message?.includes('Session expired') ||
+                 error.message?.includes('invalid JWT') ||
+                 error.message?.includes('token has invalid claims') ||
+                 error.message?.includes('token is expired')) {
+        errorMessage = 'Your session has expired. Please sign in again to continue.'
         // Redirect to auth after a short delay
         setTimeout(() => {
           const returnUrl = `/${locale}/payment?plan=${planId}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`

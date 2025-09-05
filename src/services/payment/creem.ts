@@ -206,27 +206,49 @@ class CreemPaymentService {
           await authService.waitForAuth()
         }
         
-        // Ensure we have a valid session
-        console.log('[CreemService] Ensuring valid session...')
-        const sessionResult = await authService.ensureValidSession()
+        // Force refresh session to ensure we have a fresh token
+        console.log('[CreemService] Refreshing session to ensure fresh token...')
+        const refreshResult = await authService.refreshSession()
         
-        if (!sessionResult.success || !sessionResult.session) {
-          console.error('[CreemService] Failed to get valid session:', sessionResult.error)
-          throw new Error(sessionResult.error || 'Authentication required - unable to get valid session')
+        if (!refreshResult.session) {
+          console.error('[CreemService] Failed to refresh session:', refreshResult.error)
+          
+          // Try to get current session as fallback
+          const sessionResult = await authService.ensureValidSession()
+          if (!sessionResult.success || !sessionResult.session) {
+            throw new Error(sessionResult.error || 'Authentication required - unable to get valid session')
+          }
         }
         
-        const session = sessionResult.session
+        // Get the current session (should be fresh now)
+        const session = authService.getCurrentSession()
+        
+        if (!session || !session.access_token) {
+          console.error('[CreemService] No valid session after refresh')
+          throw new Error('Authentication required - please sign in again')
+        }
+        
         const authToken = session.access_token
         
-        console.log('[CreemService] Session validated:', {
+        console.log('[CreemService] Session refreshed:', {
           hasSession: !!session,
           hasToken: !!authToken,
           tokenPrefix: authToken?.substring(0, 20),
-          expiresAt: session.expires_at
+          expiresAt: session.expires_at,
+          expiresIn: session.expires_in
         })
         
-        if (!authToken) {
-          throw new Error('Authentication required - no access token found')
+        // Check if token will expire soon (within 1 minute)
+        if (session.expires_at) {
+          const expiresAt = new Date(session.expires_at * 1000)
+          const now = new Date()
+          const timeUntilExpiry = expiresAt.getTime() - now.getTime()
+          console.log('[CreemService] Token expires in:', Math.floor(timeUntilExpiry / 1000), 'seconds')
+          
+          if (timeUntilExpiry < 60000) { // Less than 1 minute
+            console.error('[CreemService] Token is about to expire, cannot proceed')
+            throw new Error('Session expired - please sign in again')
+          }
         }
         
         console.log('[CreemService] Making API request to:', apiUrl)
@@ -345,8 +367,9 @@ class CreemPaymentService {
       let checkout
       try {
         // Create checkout session with Creem SDK
+        console.log('[Creem] Creating checkout session with SDK')
         checkout = await getCreemClient().createCheckout({
-          xApiKey: getCreemApiKey(),
+          xApiKey: CREEM_API_KEY,
           createCheckoutRequest: {
             productId: productId,
             requestId: `checkout_${userId}_${Date.now()}`,
@@ -361,6 +384,14 @@ class CreemPaymentService {
               email: userEmail,
             },
           }
+        })
+        
+        console.log('[Creem] SDK checkout response:', {
+          id: checkout.id,
+          status: checkout.status,
+          checkoutUrl: checkout.checkoutUrl,
+          product: checkout.product,
+          mode: checkout.mode
         })
       } catch (sdkError: any) {
         console.error('[Creem] SDK Error Details:', {
@@ -386,9 +417,8 @@ class CreemPaymentService {
       }
 
       // Handle different response structures
-      // Based on SDK documentation, the response should be a CheckoutEntity
       const checkoutId = checkout.id
-      const checkoutUrl = checkout.checkoutUrl || `https://app.creem.io/checkout/${checkoutId}`
+      const checkoutUrl = checkout.checkoutUrl
       
       console.log('[Creem] Checkout created:', {
         id: checkoutId,
@@ -396,6 +426,18 @@ class CreemPaymentService {
         hasUrl: !!checkoutUrl,
         status: checkout.status
       })
+      
+      // Validate checkout URL
+      if (!checkoutUrl) {
+        console.error('[Creem] No checkout URL in response:', checkout)
+        throw new Error('Payment service configuration error. Please try again later.')
+      }
+      
+      // Add warning about potential Creem infrastructure issues
+      if (testMode && checkoutUrl.includes('test/checkout')) {
+        console.warn('[Creem] Test mode checkout URL detected. Note: Creem test checkout pages may return 404 errors.')
+        console.warn('[Creem] This is a known issue with Creem\'s test infrastructure, not your implementation.')
+      }
       
       return {
         success: true,

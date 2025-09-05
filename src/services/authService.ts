@@ -656,6 +656,17 @@ class AuthService {
 
     return !!(session.access_token && session.refresh_token)
   }
+  
+  isSessionExpiringSoon(bufferMinutes: number = 5): boolean {
+    if (!this.session?.expires_at) return true
+    
+    const expiresAt = new Date(this.session.expires_at * 1000)
+    const now = new Date()
+    const timeUntilExpiry = expiresAt.getTime() - now.getTime()
+    const bufferMs = bufferMinutes * 60 * 1000
+    
+    return timeUntilExpiry <= bufferMs
+  }
 
   private startSessionRefreshTimer() {
     this.stopSessionRefreshTimer()
@@ -698,7 +709,7 @@ class AuthService {
     return new Date(this.session.expires_at * 1000).getTime()
   }
 
-  private async refreshSession() {
+  async refreshSession() {
     if (this.sessionRefreshInProgress) {
       return { session: this.session, error: null }
     }

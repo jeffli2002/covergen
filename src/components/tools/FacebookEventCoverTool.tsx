@@ -50,38 +50,93 @@ export default function FacebookEventCoverTool() {
   const [description, setDescription] = useState('')
   const [loading, setLoading] = useState(false)
   const [outputs, setOutputs] = useState<string[]>([])
+  const [downloadingId, setDownloadingId] = useState<string | null>(null)
 
   const handleGenerate = async () => {
     if (!eventName || !eventDate) return
 
     setLoading(true)
+    setOutputs([]) // Clear previous results
     
-    // Simulate API call
-    setTimeout(() => {
-      // Mock generated covers with Facebook event dimensions (1200x628)
-      const mockCovers = [
-        'https://via.placeholder.com/1200x628/1877F2/FFFFFF?text=Event+Cover+1',
-        'https://via.placeholder.com/1200x628/42B883/FFFFFF?text=Event+Cover+2',
-        'https://via.placeholder.com/1200x628/FF6B6B/FFFFFF?text=Event+Cover+3',
-        'https://via.placeholder.com/1200x628/7C3AED/FFFFFF?text=Event+Cover+4'
-      ]
-      setOutputs(mockCovers)
+    try {
+      // Build the event-specific prompt
+      const eventPrompt = `Facebook event cover design. Event name: "${eventName}". Date: ${eventDate}. ${eventTime ? `Time: ${eventTime}.` : ''} ${eventLocation ? `Location: ${eventLocation}.` : ''} Event type: ${eventType}. Style: ${eventStyle}. ${description ? `Description: ${description}.` : ''} Professional 1200x628 pixel Facebook event cover optimized for maximum engagement.`
+      
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: eventPrompt,
+          mode: 'text',
+          style: 'modern',
+          platform: 'facebook', // Facebook specific dimensions
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Generation failed')
+      }
+
+      const data = await response.json()
+      
+      // Set only the first image from the response
+      if (data.images && data.images.length > 0) {
+        setOutputs([data.images[0]])
+      }
+    } catch (error) {
+      console.error('Generation error:', error)
+    } finally {
       setLoading(false)
-    }, 2000)
+    }
+  }
+
+  const handleDownload = async (imageUrl: string, index: number) => {
+    setDownloadingId(`image_${index}`)
+    try {
+      const response = await fetch(imageUrl)
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `facebook-event-cover-${Date.now()}.png`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (error) {
+      console.error('Download error:', error)
+    } finally {
+      setDownloadingId(null)
+    }
+  }
+
+  const handleGenerateNew = () => {
+    setOutputs([])
   }
 
   return (
-    <div className="space-y-8">
-      <Card className="p-6">
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-2xl font-bold mb-2">Facebook Event Cover Generator</h2>
-            <p className="text-gray-600">
-              Create perfect 1200x628 pixel covers for your Facebook events
-            </p>
-          </div>
+    <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+      <div className="text-center space-y-4">
+        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
+          Facebook Event Cover Generator
+        </h1>
+        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          Create perfect 1200x628 pixel covers for your Facebook events
+        </p>
+      </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid lg:grid-cols-2 gap-8">
+        <Card className="p-6">
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold mb-2">Design Your Event Cover</h2>
+              <p className="text-gray-600">
+                Enter your event details to generate a professional cover
+              </p>
+            </div>
+
             <div className="space-y-4">
               <div>
                 <Label htmlFor="event-name">Event Name *</Label>
@@ -94,26 +149,28 @@ export default function FacebookEventCoverTool() {
                 />
               </div>
 
-              <div>
-                <Label htmlFor="event-date">Date *</Label>
-                <Input
-                  id="event-date"
-                  type="date"
-                  value={eventDate}
-                  onChange={(e) => setEventDate(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="event-date">Date *</Label>
+                  <Input
+                    id="event-date"
+                    type="date"
+                    value={eventDate}
+                    onChange={(e) => setEventDate(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
 
-              <div>
-                <Label htmlFor="event-time">Time</Label>
-                <Input
-                  id="event-time"
-                  placeholder="e.g., 7:00 PM EST"
-                  value={eventTime}
-                  onChange={(e) => setEventTime(e.target.value)}
-                  className="mt-1"
-                />
+                <div>
+                  <Label htmlFor="event-time">Time</Label>
+                  <Input
+                    id="event-time"
+                    placeholder="e.g., 7:00 PM EST"
+                    value={eventTime}
+                    onChange={(e) => setEventTime(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
               </div>
 
               <div>
@@ -126,9 +183,7 @@ export default function FacebookEventCoverTool() {
                   className="mt-1"
                 />
               </div>
-            </div>
 
-            <div className="space-y-4">
               <div>
                 <Label htmlFor="event-type">Event Type</Label>
                 <Select value={eventType} onValueChange={setEventType}>
@@ -172,65 +227,40 @@ export default function FacebookEventCoverTool() {
                   rows={3}
                 />
               </div>
+
+              <Button
+                onClick={handleGenerate}
+                disabled={!eventName || !eventDate || loading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                size="lg"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-5 h-5 mr-2" />
+                    Generate Event Cover
+                  </>
+                )}
+              </Button>
             </div>
           </div>
+        </Card>
 
-          <div className="flex justify-center">
-            <Button
-              onClick={handleGenerate}
-              disabled={!eventName || !eventDate || loading}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8"
-              size="lg"
-            >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  Generate Event Cover
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
-      </Card>
-
-      {/* Debug info */}
-      <Card className="p-4 bg-yellow-50 border-yellow-200">
-        <p className="text-sm text-yellow-800">
-          Debug: outputs.length = {outputs.length}, loading = {loading.toString()}
-        </p>
-        {outputs.length > 0 && (
-          <p className="text-sm text-yellow-800">
-            First output URL: {outputs[0]}
-          </p>
-        )}
-      </Card>
-
-      {outputs.length > 0 && (
-        <Card className="p-6">
-          <h3 className="text-xl font-semibold mb-4">Generated Covers</h3>
+        <div className="space-y-6">
           <OutputGallery
             generatedImages={outputs}
-            downloadingId={null}
-            onDownload={(imageUrl: string, index: number) => {
-              console.log('Download clicked:', imageUrl, index)
-              // Create download link
-              const link = document.createElement('a')
-              link.href = imageUrl
-              link.download = `facebook-event-cover-${index + 1}.png`
-              document.body.appendChild(link)
-              link.click()
-              document.body.removeChild(link)
-            }}
-            onGenerateNew={handleGenerate}
+            downloadingId={downloadingId}
+            onDownload={handleDownload}
+            onGenerateNew={handleGenerateNew}
+            isGenerating={loading}
             platform="facebook"
           />
-        </Card>
-      )}
+        </div>
+      </div>
 
       {/* Tips Section */}
       <Card className="p-6 bg-blue-50 border-blue-200">
