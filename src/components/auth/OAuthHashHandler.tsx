@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
 import authService from '@/services/authService'
 
 export function OAuthHashHandler() {
@@ -16,23 +15,20 @@ export function OAuthHashHandler() {
         const accessToken = hashParams.get('access_token')
         const refreshToken = hashParams.get('refresh_token')
         
-        if (accessToken && refreshToken && supabase) {
+        if (accessToken && refreshToken) {
           console.log('[OAuthHashHandler] Found tokens in hash, setting session...')
           
           try {
-            // Set the session with the tokens from the hash
-            const { data, error } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken
-            })
+            // Ensure auth service is initialized first
+            await authService.initialize()
             
-            if (error) {
-              console.error('[OAuthHashHandler] Error setting session:', error)
+            // Set the session with the tokens from the hash using authService
+            const result = await authService.setOAuthSession(accessToken, refreshToken)
+            
+            if (!result.success) {
+              console.error('[OAuthHashHandler] Error setting session:', result.error)
             } else {
               console.log('[OAuthHashHandler] Session set successfully')
-              
-              // Ensure auth service is initialized with the new session
-              await authService.initialize()
               
               // Clear the hash to clean up the URL
               window.history.replaceState(null, '', window.location.pathname)

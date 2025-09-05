@@ -10,7 +10,6 @@ import { Card, CardContent } from '@/components/ui/card'
 import { useAppStore } from '@/lib/store'
 import { useAnalytics } from '@/lib/analytics'
 import { useAuth } from '@/contexts/AuthContext'
-import { supabase } from '@/lib/supabase'
 import { 
   Sparkles, 
   Zap, 
@@ -102,18 +101,11 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
 
   // Debug session state
   useEffect(() => {
-    const debugSession = async () => {
-      if (!supabase) return
-      const { data: { session }, error } = await supabase.auth.getSession()
-      console.log('[PageClient Debug]', {
-        authUser: authUser?.email,
-        session: session?.user?.email,
-        cookies: document.cookie,
-        hasAuthCookies: document.cookie.includes('sb-'),
-        error
-      })
-    }
-    debugSession()
+    console.log('[PageClient Debug]', {
+      authUser: authUser?.email,
+      cookies: document.cookie,
+      hasAuthCookies: document.cookie.includes('sb-')
+    })
   }, [authUser])
 
   // Handle OAuth callback - detect when we have a code and no user yet

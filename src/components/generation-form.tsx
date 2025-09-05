@@ -12,7 +12,7 @@ import { platformSizes, styleTemplates, type Platform, type StyleTemplate } from
 import { useAppStore } from '@/lib/store'
 import { platformIcons, platformGuidelines, platformEnhancements, generatePlatformPrompt } from '@/lib/platform-configs'
 import UpgradePrompt from '@/components/auth/UpgradePrompt'
-import { createClient } from '@/lib/supabase/client'
+import authService from '@/services/authService'
 
 interface DailyLimitStatus {
   daily_count: number
@@ -35,7 +35,6 @@ export default function GenerationForm() {
   const [dailyLimitStatus, setDailyLimitStatus] = useState<DailyLimitStatus | null>(null)
   
   const { user, addTask } = useAppStore()
-  const supabase = createClient()
 
   // Fetch daily limit status when component mounts or user changes
   useEffect(() => {
@@ -48,6 +47,11 @@ export default function GenerationForm() {
     if (!user) return
 
     try {
+      const supabase = authService.getSupabaseClient()
+      if (!supabase) {
+        console.error('Supabase client not available')
+        return
+      }
       const { data } = await supabase.rpc('get_daily_generation_count', {
         p_user_id: user.id
       })

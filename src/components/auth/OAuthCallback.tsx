@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import authService from '@/services/authService'
 
 export default function OAuthCallback() {
   const router = useRouter()
@@ -31,23 +31,26 @@ export default function OAuthCallback() {
 
         console.log('[OAuthCallback] Processing OAuth code...')
 
-        // Exchange the code for a session
-        const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+        // Ensure auth service is initialized first
+        await authService.initialize()
 
-        if (exchangeError) {
-          console.error('[OAuthCallback] Code exchange error:', exchangeError)
-          setError(exchangeError.message)
+        // Exchange the code for a session using authService
+        const result = await authService.exchangeCodeForSession(code)
+
+        if (!result.success) {
+          console.error('[OAuthCallback] Code exchange error:', result.error)
+          setError(result.error)
           setStatus('error')
           return
         }
 
-        if (!data.session) {
+        if (!result.data?.session) {
           setError('No session returned from code exchange')
           setStatus('error')
           return
         }
 
-        console.log('[OAuthCallback] Session established:', data.session.user?.email)
+        console.log('[OAuthCallback] Session established:', result.data.session.user?.email)
         setStatus('success')
 
         // Get the stored locale or default to 'en'

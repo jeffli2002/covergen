@@ -42,7 +42,10 @@ export default function PaymentPageClient({
 
     console.log('[PaymentPage] Initial load:', {
       authUser: !!authUser,
+      authUserEmail: authUser?.email,
       authLoading: authLoading,
+      storeUser: !!user,
+      storeUserEmail: user?.email,
       session: authService.getCurrentSession() ? 'Present' : 'Missing'
     })
 
@@ -105,6 +108,13 @@ export default function PaymentPageClient({
     console.log('[PaymentPage] Current authUser:', authUser)
     console.log('[PaymentPage] Authentication status:', authService.isAuthenticated())
     console.log('[PaymentPage] Current session:', authService.getCurrentSession() ? 'Present' : 'Missing')
+    console.log('[PaymentPage] Auth loading state:', authLoading)
+    
+    if (authLoading) {
+      console.log('[PaymentPage] Auth is still loading')
+      toast.error('Please wait, authentication is loading...')
+      return
+    }
     
     if (!authUser) {
       console.log('[PaymentPage] No authUser found, showing error')
@@ -208,6 +218,22 @@ export default function PaymentPageClient({
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Start creating professional covers with AI. All plans include watermark-free images.
           </p>
+          
+          {/* Debug button */}
+          <div className="mt-4">
+            <Button 
+              onClick={() => {
+                console.log('[DEBUG] Test button clicked!')
+                console.log('[DEBUG] AuthUser:', authUser)
+                console.log('[DEBUG] Loading:', authLoading)
+                toast.success('Test button clicked!')
+              }}
+              variant="outline"
+              size="sm"
+            >
+              Test Button (Debug)
+            </Button>
+          </div>
           
           {isTestMode && (
             <Alert className="mt-6 max-w-2xl mx-auto border-blue-200 bg-blue-50">
@@ -323,8 +349,12 @@ export default function PaymentPageClient({
                     variant={plan.popular ? 'default' : 'outline'}
                     size="lg"
                     disabled={loading || isCurrentPlan}
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault()
                       console.log('[PaymentPage] Button clicked for plan:', plan.id)
+                      console.log('[PaymentPage] Button click event:', e)
+                      console.log('[PaymentPage] Button disabled state:', loading || isCurrentPlan)
+                      console.log('[PaymentPage] Loading:', loading, 'isCurrentPlan:', isCurrentPlan)
                       handleSelectPlan(plan.id as 'pro' | 'pro_plus')
                     }}
                   >

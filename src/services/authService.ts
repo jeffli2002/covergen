@@ -384,6 +384,63 @@ class AuthService {
     return this.session
   }
 
+  getSupabaseClient() {
+    return this.supabase
+  }
+
+  async setOAuthSession(accessToken: string, refreshToken: string) {
+    try {
+      if (!this.supabase) {
+        throw new Error('Supabase not configured')
+      }
+
+      console.log('[AuthService] Setting OAuth session...')
+      
+      const { data, error } = await this.supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken
+      })
+      
+      if (error) {
+        console.error('[AuthService] Error setting OAuth session:', error)
+        return { success: false, error: error.message }
+      }
+      
+      console.log('[AuthService] OAuth session set successfully')
+      
+      // Session will be handled by onAuthStateChange listener
+      return { success: true, data }
+    } catch (error: any) {
+      console.error('[AuthService] Failed to set OAuth session:', error)
+      return { success: false, error: error.message }
+    }
+  }
+
+  async exchangeCodeForSession(code: string) {
+    try {
+      if (!this.supabase) {
+        throw new Error('Supabase not configured')
+      }
+
+      console.log('[AuthService] Exchanging OAuth code for session...')
+      
+      const { data, error } = await this.supabase.auth.exchangeCodeForSession(code)
+      
+      if (error) {
+        console.error('[AuthService] Error exchanging code:', error)
+        return { success: false, error: error.message }
+      }
+      
+      console.log('[AuthService] Code exchange successful')
+      
+      // Session will be handled by onAuthStateChange listener
+      return { success: true, data }
+    } catch (error: any) {
+      console.error('[AuthService] Failed to exchange code:', error)
+      return { success: false, error: error.message }
+    }
+  }
+
   async waitForAuth() {
     if (!this.initialized) {
       await this.initialize()

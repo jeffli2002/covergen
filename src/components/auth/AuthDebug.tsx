@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import authService from '@/services/authService'
 import { useAuth } from '@/contexts/AuthContext'
 
 export function AuthDebug() {
@@ -34,20 +34,18 @@ export function AuthDebug() {
           
           console.log('[AuthDebug] Found new format session:', sessionInfo)
           
-          if (!supabase) {
-            setError('Supabase client not initialized')
-            return
-          }
+          // Ensure auth service is initialized
+          await authService.initialize()
           
-          const { data, error: setSessionError } = await supabase.auth.setSession({
-            access_token: sessionInfo.access_token,
-            refresh_token: sessionInfo.refresh_token
-          })
+          const result = await authService.setOAuthSession(
+            sessionInfo.access_token,
+            sessionInfo.refresh_token
+          )
           
-          if (setSessionError) {
-            setError(setSessionError.message)
+          if (!result.success) {
+            setError(result.error)
           } else {
-            console.log('[AuthDebug] Session set successfully:', data)
+            console.log('[AuthDebug] Session set successfully:', result.data)
             // Store in localStorage for persistence
             localStorage.setItem('coverimage_session', JSON.stringify(sessionInfo))
             window.location.reload()
@@ -74,18 +72,10 @@ export function AuthDebug() {
         // Get all cookies and localStorage
         setCookies(document.cookie)
         
-        // Get session from Supabase
-        if (supabase) {
-          const { data: { session }, error } = await supabase.auth.getSession()
-          
-          if (error) {
-            setError(error.message)
-          } else {
-            setSessionData(session)
-          }
-        } else {
-          setError('Supabase client not initialized')
-        }
+        // Get session from auth service
+        await authService.initialize()
+        const session = authService.getCurrentSession()
+        setSessionData(session)
       } catch (err) {
         setError(err?.toString() || 'Unknown error')
       }
@@ -106,17 +96,15 @@ export function AuthDebug() {
       console.log('[AuthDebug] Initialization result:', success)
       
       if (success) {
-        // Get updated session
-        if (supabase) {
-          const { data: { session }, error } = await supabase.auth.refreshSession()
-          if (session && !error) {
-            setSessionData(session)
-            setError('')
-            // Optionally reload page for complete UI refresh
-            setTimeout(() => window.location.reload(), 1000)
-          } else {
-            setError('Session refresh failed - ' + (error?.message || 'unknown error'))
-          }
+        // Get updated session after refresh
+        const session = authService.getCurrentSession()
+        if (session) {
+          setSessionData(session)
+          setError('')
+          // Optionally reload page for complete UI refresh
+          setTimeout(() => window.location.reload(), 1000)
+        } else {
+          setError('No session available after refresh')
         }
       } else {
         setError('Failed to initialize auth service')
