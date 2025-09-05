@@ -109,7 +109,7 @@ class AuthService {
       this.initialized = true
 
       if (!this.authSubscription) {
-        const { data: { subscription } } = this.supabase.auth.onAuthStateChange(async (event, session) => {
+        const { data: { subscription } } = this.supabase.auth.onAuthStateChange(async (event: any, session: any) => {
           this.session = session
           this.user = session?.user || null
           this.lastSessionCheck = Date.now()
