@@ -272,14 +272,14 @@ class CreemPaymentService {
 
       // Handle different response structures
       // Based on SDK documentation, the response should be a CheckoutEntity
-      const checkoutId = checkout.id || checkout.checkoutId
-      const checkoutUrl = checkout.url || checkout.checkoutUrl || checkout.checkout_url || `https://app.creem.io/checkout/${checkoutId}`
+      const checkoutId = checkout.id
+      const checkoutUrl = checkout.checkoutUrl || `https://app.creem.io/checkout/${checkoutId}`
       
       console.log('[Creem] Checkout created:', {
         id: checkoutId,
         url: checkoutUrl,
         hasUrl: !!checkoutUrl,
-        fullCheckout: checkout
+        status: checkout.status
       })
       
       return {
