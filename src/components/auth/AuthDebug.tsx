@@ -43,9 +43,9 @@ export function AuthDebug() {
           )
           
           if (!result.success) {
-            setError(result.error)
+            setError(result.error || 'Failed to set session')
           } else {
-            console.log('[AuthDebug] Session set successfully:', result.data)
+            console.log('[AuthDebug] Session set successfully:', result)
             // Store in localStorage for persistence
             localStorage.setItem('coverimage_session', JSON.stringify(sessionInfo))
             window.location.reload()

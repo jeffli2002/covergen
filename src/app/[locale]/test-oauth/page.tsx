@@ -190,7 +190,7 @@ export default function TestOAuth() {
       
       // Try async session check
       addLog('Checking session...')
-      supabase.auth.getSession().then(({ data: { session }, error }) => {
+      supabase.auth.getSession().then(({ data: { session }, error }: { data: { session: any }, error: any }) => {
         if (error) {
           addLog(`Session error: ${error.message}`)
         } else {
@@ -200,7 +200,7 @@ export default function TestOAuth() {
             addLog(`Expires at: ${new Date(session.expires_at! * 1000).toLocaleString()}`)
           }
         }
-      }).catch(err => {
+      }).catch((err: any) => {
         addLog(`Session check failed: ${err.message}`)
       })
       

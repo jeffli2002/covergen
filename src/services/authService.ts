@@ -12,15 +12,12 @@ class AuthService {
   private sessionRefreshInterval: NodeJS.Timeout | null = null
   private sessionRefreshInProgress = false
   private lastSessionCheck: number | null = null
-  private supabase: ReturnType<typeof createClient> | null = null
 
   constructor() {
     if (authServiceInstance) {
       return authServiceInstance
     }
     authServiceInstance = this
-    // Initialize Supabase client
-    this.supabase = createClient()
   }
 
   async initialize() {
@@ -42,7 +39,7 @@ class AuthService {
       console.log('[Auth] URL:', window?.location?.href)
       console.log('[Auth] Cookies:', document?.cookie)
       
-      if (!this.supabase) {
+      if (!supabase) {
         console.warn('[Auth] Supabase not configured, auth service will be disabled')
         this.initialized = true
         return false
