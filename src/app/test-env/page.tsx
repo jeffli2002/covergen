@@ -62,7 +62,7 @@ export default function TestEnvPage() {
         <div className="space-y-2 font-mono text-sm">
           {Object.entries(clientEnv).map(([key, value]) => (
             <div key={key} className={value === 'NOT SET' ? 'text-red-600' : 'text-green-600'}>
-              {key}: {value}
+              {key}: {value as React.ReactNode}
             </div>
           ))}
         </div>

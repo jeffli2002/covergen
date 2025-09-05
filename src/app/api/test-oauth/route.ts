@@ -18,8 +18,8 @@ export async function GET(request: NextRequest) {
         authEnabled: false
       },
       session: {
-        currentSession: null,
-        error: null
+        currentSession: null as any,
+        error: null as string | null
       }
     }
     

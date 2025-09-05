@@ -26,7 +26,7 @@ export async function GET() {
     supabase: {
       canCreateClient: false,
       authWorking: false,
-      error: null
+      error: null as string | null
     }
   }
   
