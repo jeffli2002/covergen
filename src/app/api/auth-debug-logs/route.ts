@@ -1,17 +1,18 @@
 import { NextResponse } from 'next/server'
-import { debugLogs } from '@/app/auth/callback-debug/route'
+import { debugLogStore } from '@/lib/oauth-debug-store'
 
 export async function GET() {
   // Return the debug logs from memory
+  const logs = debugLogStore.getLogs()
   return NextResponse.json({
-    logs: debugLogs,
-    count: debugLogs.length,
+    logs,
+    count: logs.length,
     message: 'These are the most recent OAuth callback debug logs'
   })
 }
 
 // Clear logs endpoint
 export async function DELETE() {
-  debugLogs.length = 0
+  debugLogStore.clear()
   return NextResponse.json({ message: 'Debug logs cleared' })
 }

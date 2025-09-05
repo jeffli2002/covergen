@@ -1,22 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
-
-// Store debug logs in memory (will reset on redeploy)
-export const debugLogs: Array<{ timestamp: string; message: string; data?: any }> = []
+import { debugLogStore } from '@/lib/oauth-debug-store'
 
 function debugLog(message: string, data?: any) {
-  const entry = {
-    timestamp: new Date().toISOString(),
-    message,
-    data
-  }
-  debugLogs.push(entry)
-  console.log(`[Auth Callback Debug] ${message}`, data || '')
-  
-  // Keep only last 100 entries
-  if (debugLogs.length > 100) {
-    debugLogs.shift()
-  }
+  debugLogStore.add(message, data)
 }
 
 export async function GET(request: NextRequest) {
