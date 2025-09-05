@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useRateLimit } from '@/hooks/useRateLimit'
 import { useAuth } from '@/contexts/AuthContext'
-import { useSubscription } from '@/hooks/useSubscription'
 import { RateLimitModal, PlatformRestrictedModal } from '@/components/rate-limit-modal'
 import { UsageIndicator, CompactUsageIndicator } from '@/components/usage-indicator'
 import { FREE_TIER_LIMITS } from '@/lib/rate-limit'
@@ -23,7 +22,6 @@ export function PlatformRateLimitWrapper({
   showUsageIndicator = true,
 }: PlatformRateLimitWrapperProps) {
   const { user } = useAuth()
-  const { subscription } = useSubscription()
   const {
     remainingCovers,
     hasReachedLimit,
@@ -53,8 +51,8 @@ export function PlatformRateLimitWrapper({
       return
     }
     
-    // Check rate limit for free users
-    if (!user || subscription?.tier === 'free') {
+    // Check rate limit for anonymous users
+    if (!user) {
       if (hasReachedLimit) {
         setShowRateLimitModal(true)
         return
@@ -86,17 +84,15 @@ export function PlatformRateLimitWrapper({
   
   // Calculate usage for display
   const usedCovers = user
-    ? (subscription?.monthlyUsage || 0)
+    ? 0 // We don't track authenticated user usage here
     : (FREE_TIER_LIMITS.MONTHLY_COVERS - remainingCovers)
     
-  const totalCovers = user && subscription?.tier !== 'free'
-    ? subscription?.quotaLimit || 0
-    : FREE_TIER_LIMITS.MONTHLY_COVERS
+  const totalCovers = FREE_TIER_LIMITS.MONTHLY_COVERS
   
   return (
     <>
       {/* Usage Indicator */}
-      {showUsageIndicator && (!user || subscription?.tier === 'free') && (
+      {showUsageIndicator && !user && (
         <div className="mb-6">
           <UsageIndicator
             usedCovers={usedCovers}
@@ -111,12 +107,12 @@ export function PlatformRateLimitWrapper({
         {React.cloneElement(children as React.ReactElement, {
           onGenerate: handleGenerate,
           isGenerating,
-          disabled: !canAccessPlatform(platform) || (hasReachedLimit && (!user || subscription?.tier === 'free')),
+          disabled: !canAccessPlatform(platform) || (hasReachedLimit && !user),
         })}
       </div>
       
       {/* Compact usage indicator in corner */}
-      {(!user || subscription?.tier === 'free') && (
+      {!user && (
         <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 z-40">
           <CompactUsageIndicator
             usedCovers={usedCovers}

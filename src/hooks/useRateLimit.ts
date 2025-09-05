@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useSubscription } from '@/hooks/useSubscription';
 import {
   generateDeviceFingerprint,
   hashFingerprint,
@@ -25,7 +24,6 @@ export interface RateLimitState {
 
 export function useRateLimit(): RateLimitState {
   const { user } = useAuth();
-  const { subscription } = useSubscription();
   const [isLoading, setIsLoading] = useState(true);
   const [anonymousId, setAnonymousId] = useState<string | null>(null);
   const [usage, setUsage] = useState(getAnonymousUsage());
@@ -67,22 +65,22 @@ export function useRateLimit(): RateLimitState {
 
   // Calculate remaining covers based on user status
   const remainingCovers = user 
-    ? (subscription?.tier === 'free' ? FREE_TIER_LIMITS.MONTHLY_COVERS - (subscription?.monthlyUsage || 0) : -1)
+    ? -1 // For authenticated users, we don't track here
     : getRemainingFreeCovers(usage);
 
   // Check if limit is reached
   const hasReachedLimit = user
-    ? (subscription?.tier === 'free' && (subscription?.monthlyUsage || 0) >= FREE_TIER_LIMITS.MONTHLY_COVERS)
+    ? false // For authenticated users, we don't track here
     : hasReachedFreeLimit(usage);
 
   // Check platform access
   const canAccessPlatform = (platform: string): boolean => {
-    // Authenticated users with paid subscriptions can access all platforms
-    if (user && subscription?.tier !== 'free') {
+    // Authenticated users can access all platforms
+    if (user) {
       return true;
     }
     
-    // Free tier (authenticated or anonymous) can only access basic platforms
+    // Anonymous users can only access basic platforms
     return isPlatformAllowedForFreeTier(platform);
   };
 
