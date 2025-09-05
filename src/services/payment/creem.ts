@@ -132,15 +132,22 @@ class CreemPaymentService {
         const baseUrl = window.location.origin
         const apiUrl = `${baseUrl}/api/payment/create-checkout`
         
-        // Get auth token
-        const authService = (await import('@/services/authService')).default
-        const session = authService.getCurrentSession()
+        // Get auth token from Supabase
+        const { supabase } = await import('@/lib/supabase')
+        const { data: { session } } = await supabase.auth.getSession()
         const authToken = session?.access_token
         
+        console.log('[CreemService] Session check:', {
+          hasSession: !!session,
+          hasToken: !!authToken,
+          tokenPrefix: authToken?.substring(0, 20)
+        })
+        
         if (!authToken) {
-          throw new Error('Authentication required')
+          throw new Error('Authentication required - no session token found')
         }
         
+        console.log('[CreemService] Making API request to:', apiUrl)
         const response = await fetch(apiUrl, {
           method: 'POST',
           headers: {
@@ -152,6 +159,11 @@ class CreemPaymentService {
             successUrl,
             cancelUrl
           })
+        })
+        
+        console.log('[CreemService] API response:', {
+          status: response.status,
+          ok: response.ok
         })
 
         if (!response.ok) {

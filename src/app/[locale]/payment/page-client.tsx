@@ -102,12 +102,12 @@ export default function PaymentPageClient({
 
   const handleSelectPlan = async (planId: 'pro' | 'pro_plus') => {
     console.log('[PaymentPage] handleSelectPlan called with planId:', planId)
-    console.log('[PaymentPage] Current user:', user)
+    console.log('[PaymentPage] Current authUser:', authUser)
     console.log('[PaymentPage] Authentication status:', authService.isAuthenticated())
     console.log('[PaymentPage] Current session:', authService.getCurrentSession() ? 'Present' : 'Missing')
     
-    if (!user) {
-      console.log('[PaymentPage] No user found, showing error')
+    if (!authUser) {
+      console.log('[PaymentPage] No authUser found, showing error')
       toast.error('Please sign in to continue')
       return
     }
@@ -126,8 +126,8 @@ export default function PaymentPageClient({
     try {
       // Create checkout session
       const result = await creemService.createCheckoutSession({
-        userId: user.id,
-        userEmail: user.email,
+        userId: authUser.id,
+        userEmail: authUser.email,
         planId,
         successUrl: `${window.location.origin}/${locale}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
         cancelUrl: `${window.location.origin}/${locale}/payment/cancel`,
