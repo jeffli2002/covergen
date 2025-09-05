@@ -56,7 +56,7 @@ class AuthService {
         this.supabase.auth.setSession({
           access_token: storedSession.access_token,
           refresh_token: storedSession.refresh_token
-        }).then(({ error }) => {
+        }).then(({ error }: { error: any }) => {
           if (error) {
             console.warn('Stored session invalid, clearing...', error)
             this.clearStoredSession()
