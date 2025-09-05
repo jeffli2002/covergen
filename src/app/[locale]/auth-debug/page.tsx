@@ -69,7 +69,7 @@ export default function AuthDebug() {
     // 4. Check session (async)
     log('\n4. CHECKING SESSION...')
     supabase.auth.getSession()
-      .then(({ data, error }) => {
+      .then(({ data, error }: { data: any; error: any }) => {
         if (error) {
           log(`- Error: ${error.message}`)
         } else {
