@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase-simple'
+import { supabase } from '@/lib/supabase'
 
 let authServiceInstance: AuthService | null = null
 

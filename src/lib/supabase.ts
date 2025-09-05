@@ -1,10 +1,20 @@
-// Compatibility layer for existing code that imports from '@/lib/supabase'
-// Creates a singleton client instance for backward compatibility
-import { createClient } from './supabase/client'
+// Single source of truth for Supabase client
+// This ensures consistent OAuth flow handling across the application
+import { createClient } from '@supabase/supabase-js'
 
-// Create and export a singleton instance
-export const supabase = createClient()
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
-// Note: This is a compatibility layer. New code should import createClient
-// from './supabase/client', './supabase/server', or './supabase/browser-client'
-// directly based on the context (server component, client component, etc.)
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.warn('Supabase credentials not found. Authentication features will be disabled.')
+}
+
+// Create a single client instance with PKCE flow
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+    flowType: 'pkce' // Use PKCE flow for OAuth
+  }
+})

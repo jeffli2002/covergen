@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
@@ -11,45 +11,17 @@ export async function GET(request: Request) {
 
   if (code) {
     try {
-      // Create response to handle cookies properly
-      const response = NextResponse.redirect(`${origin}${next}`)
-      
-      // Create a Supabase client with proper cookie handling for the response
-      const supabase = createServerClient(
+      // Create a Supabase client consistent with client-side
+      const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
-          cookies: {
-            get(name: string) {
-              return request.headers.get('cookie')
-                ?.split(';')
-                ?.find(c => c.trim().startsWith(`${name}=`))
-                ?.split('=')[1]
-            },
-            set(name: string, value: string, options: CookieOptions) {
-              response.cookies.set({
-                name,
-                value,
-                ...options,
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax',
-                path: '/',
-              })
-            },
-            remove(name: string, options: CookieOptions) {
-              response.cookies.set({
-                name,
-                value: '',
-                ...options,
-                expires: new Date(0),
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax',
-                path: '/',
-              })
-            },
-          },
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false,
+            detectSessionInUrl: false,
+            flowType: 'pkce'
+          }
         }
       )
 
@@ -68,10 +40,9 @@ export async function GET(request: Request) {
         refreshToken: data?.session?.refresh_token ? 'present' : 'missing',
       })
       
-      // Add a small delay to ensure cookies are set
-      await new Promise(resolve => setTimeout(resolve, 100))
-      
-      return response
+      // Redirect to the target page
+      // The client-side will detect and handle the session
+      return NextResponse.redirect(`${origin}${next}`)
       
     } catch (error) {
       console.error('[Auth Callback] Unexpected error:', error)
