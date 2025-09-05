@@ -125,6 +125,22 @@ export default function OAuthDebugVercelPage() {
               >
                 Clear All & Reload
               </button>
+              <button
+                onClick={async () => {
+                  addLog('Testing cookie setting...')
+                  const res = await fetch('/api/test-cookies?action=set')
+                  const data = await res.json()
+                  addLog(`Cookie set response: ${JSON.stringify(data)}`)
+                  
+                  // Check if cookies were set
+                  const checkRes = await fetch('/api/test-cookies')
+                  const checkData = await checkRes.json()
+                  addLog(`Cookies after set: ${JSON.stringify(checkData.cookies)}`)
+                }}
+                className="w-full bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700"
+              >
+                Test Cookie Setting
+              </button>
             </div>
           </div>
 

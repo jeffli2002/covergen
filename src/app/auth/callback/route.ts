@@ -8,7 +8,13 @@ export async function GET(request: NextRequest) {
   const finalRedirect = '/en/auth-success' + (next ? `?next=${encodeURIComponent(next)}` : '')
   const origin = requestUrl.origin
 
-  console.log('[Auth Callback] Processing OAuth callback:', { code: !!code, next, origin })
+  console.log('[Auth Callback] Processing OAuth callback:', { 
+    code: !!code, 
+    next, 
+    origin,
+    url: request.url,
+    headers: Object.fromEntries(request.headers.entries())
+  })
 
   if (code) {
     try {

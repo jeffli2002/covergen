@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { createSupabaseBrowser } from '@/lib/supabase-browser'
 import Link from 'next/link'
 
 function AuthSuccessContent() {
@@ -32,6 +32,7 @@ function AuthSuccessContent() {
     }
     
     // Then check client-side session
+    const supabase = createSupabaseBrowser()
     const { data: { session }, error } = await supabase.auth.getSession()
     console.log('[AuthSuccess] Client session check:', { 
       hasSession: !!session, 
