@@ -11,8 +11,10 @@ export default function OAuthSimplePage() {
   useEffect(() => {
     checkSession()
     
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('[OAuth Simple] Auth state change:', event, 'Session:', !!session)
       setSession(session)
+      setLoading(false)
     })
     
     return () => subscription.unsubscribe()
@@ -48,9 +50,47 @@ export default function OAuthSimplePage() {
   const signOut = async () => {
     try {
       setError(null)
+      console.log('[OAuth Simple] Starting sign out...')
+      console.log('[OAuth Simple] Current session before signout:', session)
+      
+      // Clear local state first
+      setSession(null)
+      
+      // Sign out from Supabase
       const { error } = await supabase.auth.signOut()
-      if (error) throw error
+      if (error) {
+        console.error('[OAuth Simple] Sign out error:', error)
+        throw error
+      }
+      
+      console.log('[OAuth Simple] Sign out successful, clearing localStorage...')
+      
+      // Clear all possible storage locations
+      try {
+        // Clear Supabase auth storage
+        const keys = Object.keys(localStorage)
+        keys.forEach(key => {
+          if (key.startsWith('sb-') || key.includes('supabase')) {
+            console.log('[OAuth Simple] Removing localStorage key:', key)
+            localStorage.removeItem(key)
+          }
+        })
+        
+        // Also clear our custom session storage
+        localStorage.removeItem('coverimage_session')
+      } catch (e) {
+        console.error('[OAuth Simple] Error clearing storage:', e)
+      }
+      
+      // Check session after signout
+      const { data: { session: checkSession } } = await supabase.auth.getSession()
+      console.log('[OAuth Simple] Session after signout:', checkSession)
+      
+      // Force reload to ensure clean state
+      console.log('[OAuth Simple] Reloading page...')
+      window.location.href = window.location.pathname
     } catch (error: any) {
+      console.error('[OAuth Simple] Sign out exception:', error)
       setError(error.message)
     }
   }

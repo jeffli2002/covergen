@@ -309,6 +309,19 @@ class AuthService {
         this.onAuthChange(null)
       }
       
+      // Clear all auth-related localStorage items
+      try {
+        const keys = Object.keys(localStorage)
+        keys.forEach(key => {
+          if (key.startsWith('sb-') || key.includes('supabase') || key === 'coverimage_session') {
+            console.log('[Auth] Removing localStorage key:', key)
+            localStorage.removeItem(key)
+          }
+        })
+      } catch (e) {
+        console.error('[Auth] Error clearing localStorage:', e)
+      }
+      
       // Then call Supabase signOut
       const { error } = await supabase.auth.signOut()
 
