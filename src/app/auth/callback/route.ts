@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
           error: 'auth_failed',
           message: error.message,
           error_code: error.status?.toString() || '',
-          error_description: error.error_description || ''
+          error_description: (error as any).error_description || ''
         })
         return NextResponse.redirect(`${origin}/en?${errorParams.toString()}`)
       }
