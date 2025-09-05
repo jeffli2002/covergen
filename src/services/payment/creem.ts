@@ -74,13 +74,10 @@ export const SUBSCRIPTION_PLANS = {
 }
 
 // Product IDs for subscription tiers (from Creem dashboard)
+// Same product IDs are used for both test and production modes
 export const CREEM_PRODUCTS = {
-  pro: CREEM_TEST_MODE 
-    ? (process.env.CREEM_PRO_PLAN_ID || 'prod_7aQWgvmz1JHGafTEGZtz9g')
-    : 'prod_7HHnnUgLVjiHBQOGQyKPKO',
-  pro_plus: CREEM_TEST_MODE 
-    ? (process.env.CREEM_PRO_PLUS_PLAN_ID || 'prod_3yWSn216dKFHKZJ0Z2Jrcp')
-    : 'prod_5FSXAIuhm6ueniFPAbaOoS',
+  pro: process.env.CREEM_PRO_PLAN_ID || '',
+  pro_plus: process.env.CREEM_PRO_PLUS_PLAN_ID || ''
 }
 
 // Price IDs for subscription tiers (to be created in Creem dashboard)
@@ -207,15 +204,38 @@ class CreemPaymentService {
 
       const productId = CREEM_PRODUCTS[planId as keyof typeof CREEM_PRODUCTS]
       
+      if (!productId) {
+        console.error('[Creem] Product ID not found for plan:', planId)
+        console.error('[Creem] Available products:', CREEM_PRODUCTS)
+        console.error('[Creem] Environment variables:', {
+          CREEM_PRO_PLAN_ID: process.env.CREEM_PRO_PLAN_ID || 'NOT SET',
+          CREEM_PRO_PLUS_PLAN_ID: process.env.CREEM_PRO_PLUS_PLAN_ID || 'NOT SET'
+        })
+        throw new Error(`Product ID not configured for plan: ${planId}. Please check environment variables.`)
+      }
+      
       console.log('[Creem] Creating checkout with:', {
         productId,
         planId,
         userEmail,
         apiKey: CREEM_API_KEY ? 'Present' : 'Missing',
+        apiKeyPrefix: CREEM_API_KEY.substring(0, 15) + '...',
         apiKeyLength: CREEM_API_KEY.length,
         testMode: CREEM_TEST_MODE,
-        serverIdx: CREEM_TEST_MODE ? 1 : 0
+        serverIdx: CREEM_TEST_MODE ? 1 : 0,
+        isTestKey: CREEM_API_KEY.startsWith('creem_test_'),
+        expectedKeyType: CREEM_TEST_MODE ? 'test' : 'production'
       })
+      
+      // Validate API key matches environment
+      if (CREEM_TEST_MODE && !CREEM_API_KEY.startsWith('creem_test_')) {
+        console.error('[Creem] ERROR: Test mode enabled but using production API key')
+        throw new Error('Test mode requires a test API key (should start with "creem_test_")')
+      }
+      if (!CREEM_TEST_MODE && CREEM_API_KEY.startsWith('creem_test_')) {
+        console.error('[Creem] ERROR: Production mode enabled but using test API key')
+        throw new Error('Production mode requires a production API key (should not start with "creem_test_")')
+      }
       
       // Debug: Log the API call details (without exposing sensitive data)
       console.log('[Creem] API Call Details:', {
@@ -753,6 +773,7 @@ class CreemPaymentService {
 
   /**
    * Create products in Creem (run once during setup)
+   * This should be run separately for test and production environments
    */
   async createProducts() {
     try {
@@ -760,12 +781,45 @@ class CreemPaymentService {
         throw new Error('Creem API key not configured')
       }
 
-      // TODO: Fix Creem SDK integration for product creation
-      console.log('[Creem] Would create products: Pro and Pro+')
+      console.log('[Creem] Creating products in', CREEM_TEST_MODE ? 'TEST' : 'PRODUCTION', 'mode')
+
+      // Create Pro product
+      const proProduct = await creemClient.createProduct({
+        xApiKey: CREEM_API_KEY,
+        createProductRequest: {
+          name: 'CoverGen Pro',
+          description: 'Professional plan with 120 covers per month and priority support',
+          metadata: {
+            plan_id: 'pro',
+            credits: '100',
+            environment: CREEM_TEST_MODE ? 'test' : 'production'
+          }
+        }
+      })
+
+      // Create Pro+ product
+      const proPlusProduct = await creemClient.createProduct({
+        xApiKey: CREEM_API_KEY,
+        createProductRequest: {
+          name: 'CoverGen Pro+',
+          description: 'Premium plan with 300 covers per month, commercial license, and dedicated support',
+          metadata: {
+            plan_id: 'pro_plus',
+            credits: '300',
+            environment: CREEM_TEST_MODE ? 'test' : 'production'
+          }
+        }
+      })
+
+      console.log('[Creem] Products created:', {
+        pro: proProduct.id,
+        proPlus: proPlusProduct.id,
+        testMode: CREEM_TEST_MODE
+      })
 
       return [
-        { success: true, product: { id: CREEM_PRODUCTS.pro, name: 'CoverGen Pro' } },
-        { success: true, product: { id: CREEM_PRODUCTS.pro_plus, name: 'CoverGen Pro+' } }
+        { success: true, product: proProduct },
+        { success: true, product: proPlusProduct }
       ]
     } catch (error: any) {
       console.error('Creem create products error:', error)
@@ -774,6 +828,34 @@ class CreemPaymentService {
         error: error.message || 'Failed to create products'
       }]
     }
+  }
+
+  /**
+   * Helper method to setup test environment
+   * Creates test products and returns their IDs
+   */
+  async setupTestEnvironment() {
+    if (!CREEM_TEST_MODE) {
+      throw new Error('This method can only be run in test mode')
+    }
+
+    console.log('[Creem] Setting up test environment...')
+    
+    const products = await this.createProducts()
+    const successfulProducts = products.filter(p => p.success)
+    
+    if (successfulProducts.length === 2) {
+      console.log('[Creem] Test environment setup complete. Product IDs:')
+      console.log('Pro:', successfulProducts[0].product.id)
+      console.log('Pro+:', successfulProducts[1].product.id)
+      console.log('\nUpdate your .env file with these product IDs:')
+      console.log(`CREEM_TEST_PRO_PRODUCT_ID=${successfulProducts[0].product.id}`)
+      console.log(`CREEM_TEST_PRO_PLUS_PRODUCT_ID=${successfulProducts[1].product.id}`)
+    } else {
+      console.error('[Creem] Failed to create all test products')
+    }
+
+    return products
   }
 }
 

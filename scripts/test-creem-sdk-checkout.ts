@@ -33,7 +33,7 @@ async function testCreemCheckout() {
     const checkoutResult = await creem.createCheckout({
       xApiKey: CREEM_API_KEY,
       createCheckoutRequest: {
-        productId: TEST_MODE ? 'prod_test_pro' : 'prod_pro',
+        productId: 'prod_test_pro', // Always use test product ID in test script
         requestId: `test_checkout_${Date.now()}`,
         successUrl: 'https://localhost:3000/payment/success',
         metadata: {
