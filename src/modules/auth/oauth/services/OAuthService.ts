@@ -41,7 +41,7 @@ class OAuthService {
   // OAuth methods
   async signIn(provider: OAuthProvider): Promise<{ success: boolean; error?: OAuthError }> {
     try {
-      const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(window.location.pathname)}`
+      const redirectUrl = `${window.location.origin}/auth/callback-official?next=${encodeURIComponent(window.location.pathname)}`
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
