@@ -868,19 +868,55 @@ class UserSessionService {
 
   private isSessionValid(session: any): boolean {
     if (!session?.expires_at) return false
-    const expiresAt = new Date(session.expires_at * 1000)
-    return new Date() < expiresAt
+    
+    // Handle both Unix timestamp formats:
+    // - If expires_at > 9999999999 (year 2286), it's already in milliseconds
+    // - Otherwise, it's in seconds and needs to be multiplied by 1000
+    const expiresAtMs = session.expires_at > 9999999999 
+      ? session.expires_at 
+      : session.expires_at * 1000
+      
+    const expiresAt = new Date(expiresAtMs)
+    const isValid = new Date() < expiresAt
+    
+    console.log('[UserSessionService] Session validity check:', {
+      expires_at: session.expires_at,
+      expiresAtMs,
+      expiresAtDate: expiresAt.toISOString(),
+      nowDate: new Date().toISOString(),
+      isValid
+    })
+    
+    return isValid
   }
 
   private isSessionExpiringSoon(bufferMinutes: number = 5): boolean {
     if (!this.user?.session.expiresAt) return true
     
-    const expiresAt = new Date(this.user.session.expiresAt * 1000)
+    // Handle both Unix timestamp formats:
+    // - If expiresAt > 9999999999 (year 2286), it's already in milliseconds
+    // - Otherwise, it's in seconds and needs to be multiplied by 1000
+    const expiresAtMs = this.user.session.expiresAt > 9999999999 
+      ? this.user.session.expiresAt 
+      : this.user.session.expiresAt * 1000
+      
+    const expiresAt = new Date(expiresAtMs)
     const now = new Date()
     const timeUntilExpiry = expiresAt.getTime() - now.getTime()
     const bufferMs = bufferMinutes * 60 * 1000
+    const isExpiring = timeUntilExpiry <= bufferMs
     
-    return timeUntilExpiry <= bufferMs
+    console.log('[UserSessionService] Session expiry check:', {
+      expiresAt: this.user.session.expiresAt,
+      expiresAtMs,
+      expiresAtDate: expiresAt.toISOString(),
+      nowDate: now.toISOString(),
+      bufferMinutes,
+      timeUntilExpiryMin: Math.round(timeUntilExpiry / 60000),
+      isExpiring
+    })
+    
+    return isExpiring
   }
 
   private startSessionRefreshTimer(): void {

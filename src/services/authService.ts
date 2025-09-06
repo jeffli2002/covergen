@@ -47,6 +47,27 @@ class AuthService {
       console.log('[Auth] URL:', window?.location?.href)
       console.log('[Auth] Cookies:', document?.cookie)
       
+      // Debug JWT token format from cookie if available
+      const cookies = document?.cookie?.split(';') || []
+      const authCookie = cookies.find(c => c.trim().startsWith('sb-'))
+      if (authCookie) {
+        try {
+          const tokenPart = authCookie.split('.')[1]
+          if (tokenPart) {
+            const decoded = JSON.parse(atob(tokenPart))
+            console.log('[Auth] JWT token claims (exp format check):', {
+              exp: decoded.exp,
+              expType: typeof decoded.exp,
+              expDate: new Date(decoded.exp * 1000).toISOString(),
+              iat: decoded.iat,
+              iatDate: decoded.iat ? new Date(decoded.iat * 1000).toISOString() : null
+            })
+          }
+        } catch (e) {
+          console.log('[Auth] Could not decode JWT for debugging')
+        }
+      }
+      
       // Check if we just completed an OAuth callback
       const isAfterOAuth = document?.cookie?.includes('auth-callback-success=true')
       if (isAfterOAuth) {
@@ -442,6 +463,19 @@ class AuthService {
   }
 
   getCurrentSession() {
+    if (this.session) {
+      console.log('[Auth] getCurrentSession called, session details:', {
+        hasSession: true,
+        userId: this.session.user?.id,
+        email: this.session.user?.email,
+        expires_at: this.session.expires_at,
+        expires_in: this.session.expires_in,
+        hasAccessToken: !!this.session.access_token,
+        hasRefreshToken: !!this.session.refresh_token
+      })
+    } else {
+      console.log('[Auth] getCurrentSession called, no session')
+    }
     return this.session
   }
 
@@ -719,9 +753,25 @@ class AuthService {
   private isSessionValid(session: any) {
     if (!session || !session.expires_at) return false
 
-    const expiresAt = new Date(session.expires_at * 1000)
+    // Handle both Unix timestamp formats:
+    // - If expires_at > 9999999999 (year 2286), it's already in milliseconds
+    // - Otherwise, it's in seconds and needs to be multiplied by 1000
+    const expiresAtMs = session.expires_at > 9999999999 
+      ? session.expires_at 
+      : session.expires_at * 1000
+    
+    const expiresAt = new Date(expiresAtMs)
     const now = new Date()
     const hasExpired = now >= expiresAt
+
+    console.log('[Auth] Session validity check:', {
+      expires_at: session.expires_at,
+      expiresAtMs,
+      expiresAtDate: expiresAt.toISOString(),
+      nowDate: now.toISOString(),
+      hasExpired,
+      timeRemaining: hasExpired ? 0 : Math.round((expiresAt.getTime() - now.getTime()) / 1000) + 's'
+    })
 
     if (hasExpired) {
       return false
@@ -731,14 +781,37 @@ class AuthService {
   }
   
   isSessionExpiringSoon(bufferMinutes: number = 5): boolean {
-    if (!this.session?.expires_at) return true
+    if (!this.session?.expires_at) {
+      console.log('[Auth] isSessionExpiringSoon: No session or expires_at')
+      return true
+    }
     
-    const expiresAt = new Date(this.session.expires_at * 1000)
+    // Handle both Unix timestamp formats:
+    // - If expires_at > 9999999999 (year 2286), it's already in milliseconds
+    // - Otherwise, it's in seconds and needs to be multiplied by 1000
+    const expiresAtMs = this.session.expires_at > 9999999999 
+      ? this.session.expires_at 
+      : this.session.expires_at * 1000
+      
+    const expiresAt = new Date(expiresAtMs)
     const now = new Date()
     const timeUntilExpiry = expiresAt.getTime() - now.getTime()
     const bufferMs = bufferMinutes * 60 * 1000
+    const isExpiring = timeUntilExpiry <= bufferMs
     
-    return timeUntilExpiry <= bufferMs
+    console.log('[Auth] Session expiry check:', {
+      expires_at: this.session.expires_at,
+      expiresAtMs,
+      expiresAtDate: expiresAt.toISOString(),
+      nowDate: now.toISOString(),
+      bufferMinutes,
+      timeUntilExpiryMs: timeUntilExpiry,
+      timeUntilExpiryMin: Math.round(timeUntilExpiry / 60000),
+      bufferMs,
+      isExpiring
+    })
+    
+    return isExpiring
   }
 
   private startSessionRefreshTimer() {
@@ -779,7 +852,15 @@ class AuthService {
 
   private getSessionExpiryTime() {
     if (!this.session?.expires_at) return null
-    return new Date(this.session.expires_at * 1000).getTime()
+    
+    // Handle both Unix timestamp formats:
+    // - If expires_at > 9999999999 (year 2286), it's already in milliseconds
+    // - Otherwise, it's in seconds and needs to be multiplied by 1000
+    const expiresAtMs = this.session.expires_at > 9999999999 
+      ? this.session.expires_at 
+      : this.session.expires_at * 1000
+      
+    return expiresAtMs
   }
 
   async refreshSession() {
