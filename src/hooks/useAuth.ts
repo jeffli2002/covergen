@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { User } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase/client'
+import { createSimpleClient } from '@/lib/supabase/simple-client'
 
 interface AuthState {
   user: User | null
@@ -38,6 +38,7 @@ export function useAuth() {
           setTimeout(() => resolve(null), 2000)
         })
 
+        const supabase = createSimpleClient()
         const userCheck = supabase.auth.getUser()
         const result = await Promise.race([userCheck, timeout])
 
@@ -71,6 +72,7 @@ export function useAuth() {
     checkAuth()
 
     // Subscribe to auth changes
+    const supabase = createSimpleClient()
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return
@@ -99,6 +101,7 @@ export function useAuth() {
 
   const signOut = async () => {
     try {
+      const supabase = createSimpleClient()
       await supabase.auth.signOut()
       setAuthState({
         user: null,
