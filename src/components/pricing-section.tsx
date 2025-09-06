@@ -43,6 +43,7 @@ const tiers = [
     icon: Zap,
     features: [
       '120 covers per month',
+      'No daily limit',
       'No watermark',
       'All platform sizes',
       'Priority support',
@@ -52,7 +53,7 @@ const tiers = [
     limitations: [],
     cta: 'Start 7-Day Trial',
     popular: true,
-    badge: '7-Day Free Trial'
+    badge: '7-Day Trial (First-Time Only)'
   },
   {
     id: 'pro_plus',
@@ -63,6 +64,7 @@ const tiers = [
     icon: Crown,
     features: [
       '300 covers per month',
+      'No daily limit',
       'No watermark',
       'Full commercial license',
       'Custom brand templates',
@@ -73,7 +75,7 @@ const tiers = [
     limitations: [],
     cta: 'Start 7-Day Trial',
     popular: false,
-    badge: '7-Day Free Trial'
+    badge: '7-Day Trial (First-Time Only)'
   }
 ]
 

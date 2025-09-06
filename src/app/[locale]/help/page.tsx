@@ -23,7 +23,7 @@ const faqCategories = [
       },
       {
         question: 'How many images can I generate?',
-        answer: 'Free users get 10 covers per month. Pro users get 120 per month, and Pro+ users get 300 per month.'
+        answer: 'Free users get 10 covers per month with a daily limit of 3. Pro users get 120 per month with no daily limit, and Pro+ users get 300 per month with no daily limit. New subscribers get a 7-day free trial with Pro (28 total, 4/day) or Pro+ (42 total, 6/day).'
       }
     ]
   },
@@ -79,11 +79,15 @@ const faqCategories = [
       },
       {
         question: 'How do I upgrade to Pro?',
-        answer: 'Click the upgrade button in your dashboard or visit the pricing page to choose your plan. All plans include a 7-day free trial.'
+        answer: 'Click the upgrade button in your dashboard or visit the pricing page to choose your plan. First-time subscribers get a 7-day free trial.'
+      },
+      {
+        question: 'Who is eligible for the 7-day trial?',
+        answer: 'The 7-day free trial is available only for first-time Pro or Pro+ subscribers. If you\'ve had a paid subscription before, you\'ll start your subscription immediately without a trial period.'
       },
       {
         question: 'Can I cancel my subscription?',
-        answer: 'Yes, you can cancel anytime from your account settings. Your access continues until the end of your billing period.'
+        answer: 'Yes, you can cancel anytime from your account settings. For paid subscriptions, your access continues until the end of your billing period. If you cancel during the 7-day trial, you\'ll immediately revert to the free plan (3 covers/day, 10/month).'
       },
       {
         question: 'What\'s included in download history and cloud gallery?',

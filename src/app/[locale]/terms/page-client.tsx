@@ -150,7 +150,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                     <p className="text-sm font-medium text-gray-900 mb-2">$0/forever</p>
                     <ul className="space-y-1 text-sm text-gray-600">
                       <li>✓ 10 covers per month</li>
-                      <li>✓ 3 covers per day max</li>
+                      <li>✓ 3 covers per day hard limit</li>
                       <li>✓ No watermark</li>
                       <li>✓ All platform sizes</li>
                       <li>✓ Email support</li>
@@ -161,8 +161,9 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                     <h4 className="font-semibold text-gray-900 mb-2">Pro Plan</h4>
                     <p className="text-sm font-medium text-gray-900 mb-2">$9/month</p>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ 7-day free trial</li>
+                      <li>✓ 7-day free trial (first-time only)</li>
                       <li>✓ 120 covers per month</li>
+                      <li>✓ No daily limit</li>
                       <li>✓ No watermark</li>
                       <li>✓ All platform sizes</li>
                       <li>✓ Priority support</li>
@@ -174,8 +175,9 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                     <h4 className="font-semibold text-gray-900 mb-2">Pro+ Plan</h4>
                     <p className="text-sm font-medium text-gray-900 mb-2">$19/month</p>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ 7-day free trial</li>
+                      <li>✓ 7-day free trial (first-time only)</li>
                       <li>✓ 300 covers per month</li>
+                      <li>✓ No daily limit</li>
                       <li>✓ No watermark</li>
                       <li>✓ Full commercial license</li>
                       <li>✓ Custom brand templates</li>
@@ -217,7 +219,8 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">4.4 Cancellation Policy</h3>
                 <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                   <p className="text-gray-700">• <strong>Cancel Anytime:</strong> You can cancel your subscription at any time</p>
-                  <p className="text-gray-700">• <strong>Access Until End of Period:</strong> You'll retain access until the end of your current billing period</p>
+                  <p className="text-gray-700">• <strong>Paid Plans:</strong> You'll retain access until the end of your current billing period</p>
+                  <p className="text-gray-700">• <strong>Trial Cancellation:</strong> Cancelling during the 7-day trial immediately reverts you to the free plan</p>
                   <p className="text-gray-700">• <strong>No Partial Refunds:</strong> We don't offer refunds for partial billing periods</p>
                   <p className="text-gray-700">• <strong>Reactivation:</strong> You can reactivate your subscription anytime without losing your data</p>
                 </div>
@@ -236,15 +239,16 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">4.6 Pro/Pro+ Trial Terms</h3>
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <p className="text-gray-700 mb-2">Pro and Pro+ plans include a 7-day trial with these terms:</p>
+                  <p className="text-gray-700 mb-2">Pro and Pro+ plans include a 7-day trial for first-time subscribers only:</p>
                   <ul className="space-y-1 text-gray-700 text-sm">
-                    <li>• <strong>Pro Trial:</strong> 28 covers total (4 per day average) during 7-day trial</li>
-                    <li>• <strong>Pro+ Trial:</strong> 70 covers total (10 per day average) during 7-day trial</li>
+                    <li>• <strong>Pro Trial:</strong> 28 covers total (4 per day limit) during 7-day trial</li>
+                    <li>• <strong>Pro+ Trial:</strong> 42 covers total (6 per day limit) during 7-day trial</li>
+                    <li>• <strong>First-Time Only:</strong> Trial available only for users who have never had a paid subscription</li>
                     <li>• <strong>Automatic Billing:</strong> Subscription begins after trial unless cancelled</li>
                     <li>• <strong>Fresh Start:</strong> Trial usage doesn't count against your first paid month</li>
                     <li>• <strong>Full Features:</strong> Access to all plan features during trial</li>
-                    <li>• <strong>Cancel Anytime:</strong> Cancel before trial ends to avoid charges</li>
-                    <li>• <strong>One Trial Per Account:</strong> Limited to one trial per payment method</li>
+                    <li>• <strong>Cancel During Trial:</strong> Cancellation immediately reverts you to free plan (3/day, 10/month)</li>
+                    <li>• <strong>Returning Users:</strong> Previous subscribers start paid subscription immediately without trial</li>
                   </ul>
                 </div>
               </div>

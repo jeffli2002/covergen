@@ -46,7 +46,7 @@ export default function PricingPage({
         name: 'Free Plan',
         price: '0',
         priceCurrency: 'USD',
-        description: '10 covers per month, 3 per day max, personal use only'
+        description: '10 covers per month, 3 per day limit, personal use only'
       },
       {
         '@type': 'Offer',
@@ -61,7 +61,7 @@ export default function PricingPage({
           billingDuration: 'P1M',
           trialDuration: 'P7D'
         },
-        description: '7-day free trial, 120 covers per month, commercial use, all features'
+        description: '7-day free trial (first-time only), 120 covers per month, no daily limit, commercial use, all features'
       },
       {
         '@type': 'Offer',
@@ -76,7 +76,7 @@ export default function PricingPage({
           billingDuration: 'P1M',
           trialDuration: 'P7D'
         },
-        description: '7-day free trial, 300 covers per month, full commercial license, API access'
+        description: '7-day free trial (first-time only), 300 covers per month, no daily limit, full commercial license, API access'
       }
     ]
   }
@@ -134,9 +134,10 @@ export default function PricingPage({
                     How does the Pro/Pro+ trial work?
                   </h3>
                   <p className="text-gray-600">
-                    Pro and Pro+ plans include a 7-day free trial. During the trial, Pro users get 28 covers 
-                    (4/day) and Pro+ users get 70 covers (10/day). Trial usage doesn't count against your 
-                    first paid month - you'll get the full monthly quota when your subscription begins.
+                    Pro and Pro+ plans include a 7-day free trial for first-time subscribers only. During the trial, Pro users get 28 covers 
+                    (4/day) and Pro+ users get 42 covers (6/day). Trial usage doesn't count against your 
+                    first paid month - you'll get the full monthly quota when your subscription begins. You can cancel 
+                    anytime during the trial and immediately revert to the free plan.
                   </p>
                 </div>
                 
