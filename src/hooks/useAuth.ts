@@ -101,19 +101,33 @@ export function useAuth() {
 
   const signOut = async () => {
     try {
-      const supabase = createSimpleClient()
-      await supabase.auth.signOut()
-      setAuthState({
-        user: null,
-        loading: false,
-        error: null
-      })
+      // Use server-side signout for reliability
+      const response = await fetch('/api/auth/signout', { method: 'POST' })
+      const data = await response.json()
+      
+      if (data.success) {
+        // Clear local state
+        setAuthState({
+          user: null,
+          loading: false,
+          error: null
+        })
+        
+        // Also try client-side signout
+        const supabase = createSimpleClient()
+        supabase.auth.signOut().catch(console.error)
+        
+        return { success: true }
+      } else {
+        throw new Error(data.error || 'Sign out failed')
+      }
     } catch (error) {
       console.error('[useAuth] Error signing out:', error)
       setAuthState(prev => ({
         ...prev,
         error: error instanceof Error ? error.message : 'Sign out failed'
       }))
+      return { success: false, error: error instanceof Error ? error.message : 'Sign out failed' }
     }
   }
 

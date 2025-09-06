@@ -196,10 +196,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     },
     
     signOut: async () => {
-      const result = await userSessionService.signOut()
-      return {
-        success: result.success,
-        error: result.error?.message
+      try {
+        // Use server-side signout for reliability
+        const response = await fetch('/api/auth/signout', { method: 'POST' })
+        const data = await response.json()
+        
+        if (data.success) {
+          // Clear local state
+          setUser(null)
+          
+          // Try to sign out from userSessionService too
+          userSessionService.signOut().catch(console.error)
+          
+          return { success: true }
+        }
+        
+        return {
+          success: false,
+          error: data.error || 'Sign out failed'
+        }
+      } catch (error) {
+        console.error('[AuthContext] Sign out error:', error)
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Sign out failed'
+        }
       }
     },
     

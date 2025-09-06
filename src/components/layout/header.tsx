@@ -37,6 +37,8 @@ export default function Header({ locale, translations: t }: HeaderProps) {
       console.error('[Header] Sign out failed:', result.error)
     } else {
       console.log('[Header] Sign out successful')
+      // Force reload to clear auth state
+      window.location.href = `/${locale}`
     }
   }
 

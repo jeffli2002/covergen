@@ -18,6 +18,9 @@ export function UnifiedAuthButton() {
     const result = await signOut()
     if (!result.success) {
       console.error('[UnifiedAuthButton] Sign out failed:', result.error)
+    } else {
+      // Force reload to ensure clean state
+      window.location.reload()
     }
   }
 
