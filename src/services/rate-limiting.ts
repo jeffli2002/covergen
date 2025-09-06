@@ -15,6 +15,7 @@ export interface RateLimitConfig {
   tier: 'free' | 'pro' | 'pro_plus'
   isTrialing: boolean
   trialEndsAt?: Date
+  trialStartedAt?: Date
 }
 
 export interface RateLimitResult {
@@ -47,11 +48,11 @@ export class RateLimitingService {
     },
     pro_trial: {
       daily: 4,
-      total: 28 // 7 days × 4
+      total: null // Calculated dynamically based on trial days
     },
     pro_plus_trial: {
       daily: 6,
-      total: 42 // 7 days × 6
+      total: null // Calculated dynamically based on trial days
     },
     pro: {
       daily: null, // No daily limit
@@ -90,11 +91,19 @@ export class RateLimitingService {
       // Trial period limits
       if (tier === 'pro') {
         dailyLimit = this.LIMITS.pro_trial.daily
-        trialTotalLimit = this.LIMITS.pro_trial.total
+        // Calculate total based on trial duration
+        if (config.trialStartedAt && config.trialEndsAt) {
+          const trialDays = Math.ceil((config.trialEndsAt.getTime() - config.trialStartedAt.getTime()) / (1000 * 60 * 60 * 24))
+          trialTotalLimit = trialDays * this.LIMITS.pro_trial.daily
+        }
         monthlyLimit = this.LIMITS.pro.monthly // For display purposes
       } else {
         dailyLimit = this.LIMITS.pro_plus_trial.daily
-        trialTotalLimit = this.LIMITS.pro_plus_trial.total
+        // Calculate total based on trial duration
+        if (config.trialStartedAt && config.trialEndsAt) {
+          const trialDays = Math.ceil((config.trialEndsAt.getTime() - config.trialStartedAt.getTime()) / (1000 * 60 * 60 * 24))
+          trialTotalLimit = trialDays * this.LIMITS.pro_plus_trial.daily
+        }
         monthlyLimit = this.LIMITS.pro_plus.monthly // For display purposes
       }
     } else {

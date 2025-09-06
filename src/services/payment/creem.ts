@@ -91,6 +91,29 @@ export const CREEM_TEST_CARDS = {
   threeDSecure: '4000000000003220', // 3D Secure required
 }
 
+// Default trial days - can be overridden by environment variables
+const DEFAULT_TRIAL_DAYS = {
+  pro: 7,
+  pro_plus: 7
+}
+
+// Get trial days from environment variables or use defaults
+const getTrialDays = (plan: 'pro' | 'pro_plus'): number => {
+  const envVar = plan === 'pro' 
+    ? process.env.NEXT_PUBLIC_PRO_TRIAL_DAYS 
+    : process.env.NEXT_PUBLIC_PRO_PLUS_TRIAL_DAYS
+  
+  if (envVar !== undefined) {
+    const days = parseInt(envVar, 10)
+    // Allow 0 for no trial, or any positive number
+    if (!isNaN(days) && days >= 0) {
+      return days
+    }
+  }
+  
+  return DEFAULT_TRIAL_DAYS[plan]
+}
+
 // Subscription Plans
 export const SUBSCRIPTION_PLANS = {
   free: {
@@ -99,6 +122,7 @@ export const SUBSCRIPTION_PLANS = {
     price: 0,
     priceId: '', // No Creem price ID for free tier
     credits: 0,
+    trialDays: 0, // No trial for free tier
     features: [
       '10 covers per month',
       'No watermark',
@@ -112,6 +136,7 @@ export const SUBSCRIPTION_PLANS = {
     price: 900, // $9.00 in cents
     priceId: getCreemTestMode() ? 'price_test_pro_900' : 'price_pro_900',
     credits: 120,
+    trialDays: getTrialDays('pro'), // Configurable trial days
     features: [
       '120 covers per month',
       'No watermark',
@@ -126,6 +151,7 @@ export const SUBSCRIPTION_PLANS = {
     price: 1900, // $19.00 in cents
     priceId: getCreemTestMode() ? 'price_test_proplus_1900' : 'price_proplus_1900',
     credits: 300,
+    trialDays: getTrialDays('pro_plus'), // Configurable trial days
     features: [
       '300 covers per month',
       'No watermark',
@@ -340,6 +366,10 @@ class CreemPaymentService {
       try {
         // Create checkout session with Creem SDK
         console.log('[Creem] Creating checkout session with SDK')
+        
+        // Get trial days for the selected plan
+        const trialDays = plan.trialDays || 0
+        
         checkout = await getCreemClient().createCheckout({
           xApiKey: CREEM_API_KEY,
           createCheckoutRequest: {
@@ -351,10 +381,17 @@ class CreemPaymentService {
               userEmail: userEmail,
               planId: planId,
               currentPlan: currentPlan,
+              isTrialCheckout: trialDays > 0 ? 'true' : 'false',
+              trialDays: String(trialDays)
             },
             customer: {
               email: userEmail,
             },
+            // Add trial period if applicable
+            ...(trialDays > 0 && {
+              trialPeriodDays: trialDays,
+              paymentMethodRequired: true // Require payment method for trial
+            })
           }
         })
         
@@ -650,13 +687,17 @@ class CreemPaymentService {
     // Extract user ID from metadata or customer external ID
     const userId = metadata?.internal_customer_id || metadata?.userId || customer?.external_id
     const planId = metadata?.planId || this.getPlanFromProduct(order?.product)
+    const isTrialCheckout = metadata?.isTrialCheckout === 'true'
+    const trialDays = parseInt(metadata?.trialDays || '0')
     
     return {
       type: 'checkout_complete',
       userId: userId,
       customerId: customer?.id,
       subscriptionId: subscription?.id,
-      planId: planId
+      planId: planId,
+      isTrialCheckout: isTrialCheckout,
+      trialDays: trialDays
     }
   }
 

@@ -313,6 +313,13 @@ export default function PaymentPageClient({
                     <span className="text-gray-600">/month</span>
                   </div>
                   
+                  {/* Show trial badge */}
+                  {plan.trialDays > 0 && !isCurrentPlan && (
+                    <Badge className="mt-3 bg-green-100 text-green-800 border-green-200">
+                      {plan.trialDays}-day free trial
+                    </Badge>
+                  )}
+                  
                   {/* Show prorated amount for upgrades */}
                   {isUpgrade && currentSubscription?.tier === 'pro' && plan.id === 'pro_plus' && proratedAmount !== null && (
                     <div className="mt-2 text-sm text-gray-600">
@@ -384,7 +391,9 @@ export default function PaymentPageClient({
                         <CreditCard className="mr-2 h-4 w-4" />
                         {isUpgrade && currentSubscription?.tier === 'pro' && plan.id === 'pro_plus'
                           ? 'Upgrade Now'
-                          : 'Get Started'
+                          : plan.trialDays > 0 
+                            ? `Start ${plan.trialDays}-Day Free Trial`
+                            : 'Get Started'
                         }
                       </>
                     )}
@@ -414,7 +423,10 @@ export default function PaymentPageClient({
 
           <p className="text-xs text-gray-500 max-w-2xl mx-auto">
             By subscribing, you agree to our Terms of Service and Privacy Policy. 
-            Subscriptions automatically renew unless cancelled.
+            {selectedPlan && SUBSCRIPTION_PLANS[selectedPlan].trialDays > 0 
+              ? `Your ${SUBSCRIPTION_PLANS[selectedPlan].trialDays}-day free trial will automatically convert to a paid subscription unless cancelled.`
+              : 'Subscriptions automatically renew unless cancelled.'
+            }
           </p>
 
           {/* Free Tier Info */}

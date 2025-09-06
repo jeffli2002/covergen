@@ -204,7 +204,41 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
 
                 {subscription && (
                   <div className="space-y-2 text-sm text-gray-600">
-                    {subscription.current_period_end && (
+                    {/* Show trial information if applicable */}
+                    {subscription.is_trial_active && subscription.trial_end && (
+                      <div className="p-3 bg-green-50 border border-green-200 rounded-lg mb-3">
+                        <p className="text-green-800 font-medium">
+                          🎉 Free trial active
+                        </p>
+                        <p className="text-green-700 text-sm mt-1">
+                          Trial ends on {formatDate(new Date(subscription.trial_end))}
+                        </p>
+                        <p className="text-green-700 text-xs mt-1">
+                          {subscription.tier === 'pro' ? '4 covers/day during trial' : '6 covers/day during trial'}
+                        </p>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="mt-2 text-green-700 border-green-300 hover:bg-green-100"
+                          onClick={async () => {
+                            const response = await fetch('/api/payment/convert-trial', {
+                              method: 'POST'
+                            })
+                            const data = await response.json()
+                            if (data.success) {
+                              toast.success('Trial converted to paid subscription!')
+                              await loadAccountData()
+                            } else {
+                              toast.error(data.error || 'Failed to convert trial')
+                            }
+                          }}
+                        >
+                          Start subscription now (no rate limits)
+                        </Button>
+                      </div>
+                    )}
+                    
+                    {subscription.current_period_end && !subscription.is_trial_active && (
                       <p>
                         <Calendar className="inline w-4 h-4 mr-1" />
                         {subscription.cancel_at_period_end
