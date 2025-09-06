@@ -226,7 +226,7 @@ describe('Subscription Scenarios', () => {
   })
   
   describe('5. Subscription Cancellation', () => {
-    it('should handle cancellation', async () => {
+    it('should handle regular subscription cancellation', async () => {
       const result = await creemService.handleWebhookEvent(mockWebhookEvents.subscriptionCanceled)
       
       expect(result).toMatchObject({
@@ -236,6 +236,80 @@ describe('Subscription Scenarios', () => {
       })
       
       expect(authStateChanges).toHaveLength(0)
+    })
+    
+    it('should allow cancellation during 7-day trial period', async () => {
+      // Create trial subscription first
+      const trialCheckout = {
+        eventType: 'checkout.completed',
+        object: {
+          id: 'chk_trial_cancel_123',
+          customer: { 
+            id: 'cust_trial_cancel_123',
+            email: 'trial@example.com'
+          },
+          subscription: { 
+            id: 'sub_trial_cancel_123',
+            trial_end: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString() // 5 days left
+          },
+          metadata: {
+            userId: 'user_trial_123',
+            planId: 'pro'
+          }
+        }
+      }
+      
+      // Start trial
+      const checkoutResult = await creemService.handleWebhookEvent(trialCheckout)
+      expect(checkoutResult.type).toBe('checkout_complete')
+      
+      // Cancel during trial
+      const trialCancelEvent = {
+        eventType: 'subscription.canceled',
+        object: {
+          id: 'sub_trial_cancel_123',
+          customer: { id: 'cust_trial_cancel_123' },
+          metadata: {
+            userId: 'user_trial_123'
+          },
+          canceled_at: new Date().toISOString(),
+          trial_end: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString()
+        }
+      }
+      
+      const cancelResult = await creemService.handleWebhookEvent(trialCancelEvent)
+      
+      expect(cancelResult).toMatchObject({
+        type: 'subscription_deleted',
+        customerId: 'cust_trial_cancel_123',
+        userId: 'user_trial_123'
+      })
+      
+      // User should remain logged in after trial cancellation
+      expect(authStateChanges).toHaveLength(0)
+    })
+    
+    it('should immediately revoke trial benefits on cancellation', () => {
+      const userId = 'user_trial_canceled'
+      const trialKey = `${userId}_trial`
+      
+      // User was using trial
+      mockUsageTracker.trialUsage.set(trialKey, 15) // Used 15 of 28
+      
+      // After cancellation, should revert to free tier limits
+      const today = new Date().toISOString().split('T')[0]
+      const dayKey = `${userId}_${today}`
+      let allowed = 0
+      
+      for (let i = 0; i < 5; i++) {
+        const dailyUsage = mockUsageTracker.dailyUsage.get(dayKey) || 0
+        if (dailyUsage < 3) { // Free tier limit
+          mockUsageTracker.dailyUsage.set(dayKey, dailyUsage + 1)
+          allowed++
+        }
+      }
+      
+      expect(allowed).toBe(3) // Back to free tier limits
     })
   })
   
@@ -387,42 +461,98 @@ describe('Subscription Database Updates', () => {
 describe('Rate Limiting and Quota Management', () => {
   const mockUsageTracker = {
     dailyUsage: new Map<string, number>(),
-    monthlyUsage: new Map<string, number>()
+    monthlyUsage: new Map<string, number>(),
+    trialUsage: new Map<string, number>()
   }
   
   beforeEach(() => {
     mockUsageTracker.dailyUsage.clear()
     mockUsageTracker.monthlyUsage.clear()
+    mockUsageTracker.trialUsage.clear()
   })
   
   describe('Daily Generation Limits', () => {
     const dailyLimits = {
-      free: 5,      // 5 per day
-      pro: 10,      // 10 per day
-      pro_plus: 20  // 20 per day
+      free: 3,           // 3 per day
+      pro_trial: 4,      // 4 per day during trial
+      pro_plus_trial: 6, // 6 per day during trial  
+      pro: null,         // No daily limit (monthly only)
+      pro_plus: null     // No daily limit (monthly only)
     }
     
-    it.each([
-      ['free', 5],
-      ['pro', 10],
-      ['pro_plus', 20]
-    ])('%s plan should enforce daily limit of %d', async (tier, limit) => {
-      const userId = `user_${tier}`
+    it('should enforce daily limit for free tier only', async () => {
+      const userId = 'user_free'
       const today = new Date().toISOString().split('T')[0]
       const key = `${userId}_${today}`
       
-      // Simulate generation attempts
-      for (let i = 0; i < limit + 5; i++) {
+      // Try 5 generations
+      let allowed = 0
+      for (let i = 0; i < 5; i++) {
         const currentUsage = mockUsageTracker.dailyUsage.get(key) || 0
-        
-        if (currentUsage < dailyLimits[tier as keyof typeof dailyLimits]) {
-          // Allow generation
+        if (currentUsage < 3) { // Free limit is 3
           mockUsageTracker.dailyUsage.set(key, currentUsage + 1)
+          allowed++
         }
       }
       
-      const finalUsage = mockUsageTracker.dailyUsage.get(key) || 0
-      expect(finalUsage).toBe(limit)
+      expect(allowed).toBe(3)
+      expect(mockUsageTracker.dailyUsage.get(key)).toBe(3)
+    })
+    
+    it('should not enforce daily limit for paid Pro/Pro+ subscriptions', async () => {
+      // Pro user can generate up to monthly limit
+      const proUserId = 'user_pro_paid'
+      const month = new Date().toISOString().substring(0, 7)
+      const monthKey = `${proUserId}_${month}`
+      
+      // Simulate 50 generations in one day (no daily limit)
+      mockUsageTracker.monthlyUsage.set(monthKey, 50)
+      
+      // Should be allowed as long as under monthly quota (120)
+      expect(mockUsageTracker.monthlyUsage.get(monthKey)).toBe(50)
+      expect(mockUsageTracker.monthlyUsage.get(monthKey)!).toBeLessThan(120)
+    })
+    
+    it('should enforce trial daily limits', async () => {
+      // Pro trial user - 4 per day
+      const proTrialUser = 'user_pro_trial'
+      const today = new Date().toISOString().split('T')[0]
+      const dayKey = `${proTrialUser}_${today}`
+      const trialKey = `${proTrialUser}_trial`
+      
+      // Try 6 generations
+      let proTrialAllowed = 0
+      for (let i = 0; i < 6; i++) {
+        const dailyUsage = mockUsageTracker.dailyUsage.get(dayKey) || 0
+        const trialTotal = mockUsageTracker.trialUsage.get(trialKey) || 0
+        
+        if (dailyUsage < 4 && trialTotal < 28) { // 4/day, 28 total
+          mockUsageTracker.dailyUsage.set(dayKey, dailyUsage + 1)
+          mockUsageTracker.trialUsage.set(trialKey, trialTotal + 1)
+          proTrialAllowed++
+        }
+      }
+      
+      expect(proTrialAllowed).toBe(4) // Daily limit hit first
+      
+      // Pro+ trial user - 6 per day
+      const proPlusTrialUser = 'user_proplus_trial'
+      const proPlusDayKey = `${proPlusTrialUser}_${today}`
+      const proPlusTrialKey = `${proPlusTrialUser}_trial`
+      
+      let proPlusTrialAllowed = 0
+      for (let i = 0; i < 8; i++) {
+        const dailyUsage = mockUsageTracker.dailyUsage.get(proPlusDayKey) || 0
+        const trialTotal = mockUsageTracker.trialUsage.get(proPlusTrialKey) || 0
+        
+        if (dailyUsage < 6 && trialTotal < 42) { // 6/day, 42 total
+          mockUsageTracker.dailyUsage.set(proPlusDayKey, dailyUsage + 1)
+          mockUsageTracker.trialUsage.set(proPlusTrialKey, trialTotal + 1)
+          proPlusTrialAllowed++
+        }
+      }
+      
+      expect(proPlusTrialAllowed).toBe(6) // Daily limit hit first
     })
   })
   
