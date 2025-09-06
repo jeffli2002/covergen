@@ -16,6 +16,16 @@ export function SessionRecovery() {
       // Check if we need to recover session after OAuth callback
       const authCallback = searchParams.get('auth_callback')
       const authError = searchParams.get('error')
+      const vercelAuth = searchParams.get('vercel_auth')
+      
+      console.log('[SessionRecovery] Initial check:', {
+        authCallback,
+        authError,
+        vercelAuth,
+        recoveryAttempted: recoveryAttempted.current,
+        url: window.location.href,
+        cookies: document.cookie.substring(0, 200) + '...'
+      })
       
       if (authError) {
         console.error('[SessionRecovery] Auth error detected:', authError)
@@ -23,6 +33,7 @@ export function SessionRecovery() {
       }
       
       if (authCallback !== 'success' || recoveryAttempted.current) {
+        console.log('[SessionRecovery] Skipping recovery:', { authCallback, recoveryAttempted: recoveryAttempted.current })
         return
       }
       

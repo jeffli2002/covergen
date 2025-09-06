@@ -6,23 +6,44 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/en'
+  const error = searchParams.get('error')
+  const errorDescription = searchParams.get('error_description')
+
+  // Detect Vercel preview environment early
+  const isVercelPreview = request.headers.get('host')?.includes('vercel.app') || 
+                         process.env.VERCEL_ENV === 'preview'
 
   console.log('[Auth Callback] Processing OAuth callback:', {
     hasCode: !!code,
+    hasError: !!error,
+    error,
+    errorDescription,
     next,
     origin,
     url: request.url,
+    isVercelPreview,
     headers: {
       host: request.headers.get('host'),
       origin: request.headers.get('origin'),
-      referer: request.headers.get('referer')
+      referer: request.headers.get('referer'),
+      userAgent: request.headers.get('user-agent')
     },
     env: {
       NODE_ENV: process.env.NODE_ENV,
       VERCEL_ENV: process.env.VERCEL_ENV,
       VERCEL_URL: process.env.VERCEL_URL
-    }
+    },
+    allSearchParams: Object.fromEntries(searchParams.entries())
   })
+
+  // Handle OAuth error from provider
+  if (error) {
+    console.error('[Auth Callback] OAuth provider error:', { error, errorDescription })
+    const redirectUrl = new URL(`${origin}${next}`)
+    redirectUrl.searchParams.set('error', 'oauth_failed')
+    redirectUrl.searchParams.set('message', errorDescription || error)
+    return NextResponse.redirect(redirectUrl.toString())
+  }
 
   if (code) {
     try {
@@ -36,9 +57,7 @@ export async function GET(request: Request) {
       const redirectUrl = new URL(`${origin}${next}`)
       redirectUrl.searchParams.set('auth_callback', 'success')
       
-      // Detect Vercel preview environment and add marker
-      const isVercelPreview = request.headers.get('host')?.includes('vercel.app') || 
-                             process.env.VERCEL_ENV === 'preview'
+      // Add Vercel auth marker if on Vercel preview
       if (isVercelPreview) {
         redirectUrl.searchParams.set('vercel_auth', 'true')
       }
@@ -59,10 +78,6 @@ export async function GET(request: Request) {
               return value
             },
             set(name: string, value: string, options: any) {
-              // Detect Vercel preview environment
-              const isVercelPreview = request.headers.get('host')?.includes('vercel.app') || 
-                                     process.env.VERCEL_ENV === 'preview'
-              
               // CRITICAL: Do NOT set httpOnly for auth cookies on Vercel preview
               // The client needs to read these cookies for session recovery
               const isAuthCookie = name.includes('auth-token') || name.includes('sb-')
