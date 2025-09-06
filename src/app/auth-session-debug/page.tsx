@@ -172,11 +172,17 @@ export default function AuthSessionDebugPage() {
             <CardTitle>Environment Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <div><strong>Origin:</strong> {window.location.origin}</div>
-            <div><strong>Hostname:</strong> {window.location.hostname}</div>
-            <div><strong>Protocol:</strong> {window.location.protocol}</div>
-            <div><strong>User Agent:</strong> {navigator.userAgent}</div>
-            <div><strong>Secure Context:</strong> {window.isSecureContext ? 'Yes' : 'No'}</div>
+            {typeof window !== 'undefined' ? (
+              <>
+                <div><strong>Origin:</strong> {window.location.origin}</div>
+                <div><strong>Hostname:</strong> {window.location.hostname}</div>
+                <div><strong>Protocol:</strong> {window.location.protocol}</div>
+                <div><strong>User Agent:</strong> {navigator.userAgent}</div>
+                <div><strong>Secure Context:</strong> {window.isSecureContext ? 'Yes' : 'No'}</div>
+              </>
+            ) : (
+              <p className="text-gray-500">Environment info only available in browser</p>
+            )}
           </CardContent>
         </Card>
       </div>
