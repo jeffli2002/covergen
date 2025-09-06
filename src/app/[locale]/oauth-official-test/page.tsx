@@ -14,7 +14,7 @@ export default function OAuthOfficialTestPage() {
   useEffect(() => {
     checkUser()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null)
     })
 
