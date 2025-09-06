@@ -53,6 +53,7 @@ export async function middleware(request: NextRequest) {
     '/fonts',
     '/test',
     '/auth/callback', // Skip middleware for auth callback
+    '/auth/callback-vercel', // Skip middleware for Vercel auth callback
     '/auth/callback-universal', // Skip middleware for universal auth callback
     '/auth/callback-official', // Skip middleware for official auth callback
     '/auth', // Skip all auth routes
@@ -66,6 +67,8 @@ export async function middleware(request: NextRequest) {
     '/test-oauth-fix',
     '/auth-session-debug',
     '/auth-state-test',
+    '/debug-vercel-auth',
+    '/vercel-auth-test',
     '.html',
     '.png',
     '.jpg',
