@@ -19,15 +19,21 @@ export default function ForceAuthPage() {
         setStatus('Getting session from client...')
         
         // Add timeout to prevent hanging
-        const sessionPromise = supabase.auth.getSession()
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('getSession timeout')), 5000)
-        )
+        let session = null
+        let error = null
         
-        const { data: { session }, error } = await Promise.race([
-          sessionPromise,
-          timeoutPromise
-        ]).catch(err => ({ data: { session: null }, error: err }))
+        try {
+          const result = await Promise.race([
+            supabase.auth.getSession(),
+            new Promise<never>((_, reject) => 
+              setTimeout(() => reject(new Error('getSession timeout')), 5000)
+            )
+          ])
+          session = result.data.session
+          error = result.error
+        } catch (err) {
+          error = err as Error
+        }
         
         if (error) {
           setStatus(`Error: ${error.message}`)
