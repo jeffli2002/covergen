@@ -16,23 +16,40 @@ export default function ForceAuthPage() {
         // Try simple client first
         const supabase = createSimpleClient()
         
-        setStatus('Getting session from client...')
+        setStatus('Getting user from client (using getUser instead of getSession)...')
         
-        // Add timeout to prevent hanging
+        // Use getUser instead of getSession to avoid hanging
+        const { data: { user }, error: userError } = await supabase.auth.getUser()
+        
         let session = null
-        let error = null
+        let error = userError
         
-        try {
-          const result = await Promise.race([
-            supabase.auth.getSession(),
-            new Promise<never>((_, reject) => 
-              setTimeout(() => reject(new Error('getSession timeout')), 5000)
-            )
-          ])
-          session = result.data.session
-          error = result.error
-        } catch (err) {
-          error = err as Error
+        if (user && !userError) {
+          // User exists, try to get the full session
+          setStatus('User found, attempting to get session...')
+          try {
+            // Try with a very short timeout since we know user exists
+            const result = await Promise.race([
+              supabase.auth.getSession(),
+              new Promise<never>((_, reject) => 
+                setTimeout(() => reject(new Error('getSession timeout')), 1000)
+              )
+            ])
+            session = result.data.session
+          } catch (err) {
+            // If getSession times out, manually construct from localStorage
+            setStatus('getSession timed out, checking localStorage...')
+            const storageKey = 'sb-exungkcoaihcemcmhqdr-auth-token'
+            const stored = localStorage.getItem(storageKey)
+            if (stored) {
+              const sessionData = JSON.parse(stored)
+              session = {
+                access_token: sessionData.access_token,
+                refresh_token: sessionData.refresh_token,
+                user: user
+              } as any
+            }
+          }
         }
         
         if (error) {
@@ -40,8 +57,8 @@ export default function ForceAuthPage() {
           return
         }
         
-        if (session) {
-          setStatus(`Session found! User: ${session.user.email}. Redirecting...`)
+        if (user) {
+          setStatus(`User found! Email: ${user.email}. Setting up session...`)
           
           // Force auth state update
           await supabase.auth.setSession({

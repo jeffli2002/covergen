@@ -28,6 +28,7 @@ import { AuthDebugSimple } from '@/components/auth/AuthDebugSimple'
 import { SessionRecovery } from '@/components/auth/SessionRecovery'
 import { OAuthCallbackDetector } from '@/components/auth/OAuthCallbackDetector'
 import { ForceSessionSync } from '@/components/auth/ForceSessionSync'
+import { WorkingAuthButton } from '@/components/auth/WorkingAuthButton'
 
 interface HomePageClientProps {
   locale: Locale
@@ -175,6 +176,12 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
       
       {/* Debug panel */}
       <AuthDebugSimple />
+      
+      {/* Working auth button for testing */}
+      <div className="fixed top-20 right-4 bg-white p-4 rounded shadow-lg border z-50">
+        <p className="text-sm mb-2">Test Auth (uses getUser):</p>
+        <WorkingAuthButton />
+      </div>
       
       {/* Temporary debug text */}
       {process.env.NODE_ENV === 'development' && (
