@@ -1,4 +1,4 @@
-import { supabase, getSession } from '@/lib/supabase-simple'
+import { getSupabaseBrowserClient } from '@/lib/supabase-singleton'
 
 interface OAuthCompletionOptions {
   onRetry?: (attempt: number) => void
@@ -25,6 +25,9 @@ class OAuthCompletion {
       timestamp: new Date().toISOString()
     })
 
+    // Get the singleton client
+    const supabase = getSupabaseBrowserClient()
+
     for (let attempt = 0; attempt < this.maxRetries; attempt++) {
       if (attempt > 0) {
         console.log(`[OAuth Completion] Retry attempt ${attempt}/${this.maxRetries - 1}`)
@@ -34,7 +37,7 @@ class OAuthCompletion {
 
       try {
         // Try to get the session
-        const session = await getSession()
+        const { data: { session }, error } = await supabase.auth.getSession()
         
         if (session) {
           console.log('[OAuth Completion] Session detected:', {
@@ -49,6 +52,8 @@ class OAuthCompletion {
             user: session.user,
             redirectPath: nextPath
           }
+        } else if (error) {
+          console.error('[OAuth Completion] Error getting session:', error)
         } else {
           console.log('[OAuth Completion] No session found on attempt', attempt + 1)
           
@@ -58,7 +63,7 @@ class OAuthCompletion {
             if (typeof window !== 'undefined' && document.cookie.includes('sb-')) {
               console.warn('[OAuth Completion] Cookies present but session not detected')
               
-              // Try one more time with a fresh client instance
+              // Try one more time with a fresh session check
               const { data: { session: freshSession } } = await supabase.auth.getSession()
               if (freshSession) {
                 return {
