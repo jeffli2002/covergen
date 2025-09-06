@@ -167,7 +167,11 @@ export default function PaymentPageClient({
     }
     
     // Check session validity at payment time
-    if (!PaymentAuthWrapper.isSessionValidForPayment()) {
+    console.log('[PaymentPage] About to check session validity...')
+    const isSessionValid = PaymentAuthWrapper.isSessionValidForPayment()
+    console.log('[PaymentPage] Session validity result:', isSessionValid)
+    
+    if (!isSessionValid) {
       console.log('[PaymentPage] Session not valid for payment at checkout time')
       toast.error('Your session has expired. Please sign in again to continue.')
       const returnUrl = `/${locale}/payment?plan=${planId}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
