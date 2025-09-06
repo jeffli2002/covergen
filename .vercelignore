@@ -1,0 +1,4 @@
+# Force cache refresh
+.vercel
+node_modules
+.next
