@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -36,8 +36,12 @@ export default function PaymentPageClient({
   const [isTestMode, setIsTestMode] = useState(false)
   const [currentSubscription, setCurrentSubscription] = useState<any>(null)
   const [proratedAmount, setProratedAmount] = useState<number | null>(null)
+  const isMounted = useRef(true)
 
   useEffect(() => {
+    // Set mounted to true
+    isMounted.current = true
+    
     // Check if we're in test mode
     setIsTestMode(creemService.isTestMode())
 
@@ -52,29 +56,42 @@ export default function PaymentPageClient({
 
     // Wait for auth to load
     if (authLoading) {
+      console.log('[PaymentPage] Auth is loading, waiting...')
       return
     }
 
     // Check authentication after auth has loaded
-    if (!authUser) {
+    if (!authLoading && !authUser) {
       console.log('[PaymentPage] Not authenticated, redirecting...')
-      // Redirect to auth with return URL
-      const returnUrl = `/${locale}/payment?plan=${selectedPlan}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
-      router.push(`/${locale}?auth=signin&redirect=${encodeURIComponent(returnUrl)}`)
+      // Only redirect if component is still mounted
+      if (isMounted.current) {
+        // Redirect to auth with return URL
+        const returnUrl = `/${locale}/payment?plan=${selectedPlan}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
+        router.push(`/${locale}?auth=signin&redirect=${encodeURIComponent(returnUrl)}`)
+      }
       return
     }
 
     // Check if session is valid for payment operations
     if (!PaymentAuthWrapper.isSessionValidForPayment()) {
       console.log('[PaymentPage] Session not valid for payment operations')
-      toast.error('Please sign in again to continue with payment')
-      const returnUrl = `/${locale}/payment?plan=${selectedPlan}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
-      router.push(`/${locale}?auth=signin&redirect=${encodeURIComponent(returnUrl)}`)
+      if (isMounted.current) {
+        toast.error('Please sign in again to continue with payment')
+        const returnUrl = `/${locale}/payment?plan=${selectedPlan}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
+        router.push(`/${locale}?auth=signin&redirect=${encodeURIComponent(returnUrl)}`)
+      }
       return
     }
 
     // Load current subscription
-    loadCurrentSubscription()
+    if (isMounted.current) {
+      loadCurrentSubscription()
+    }
+    
+    // Cleanup function
+    return () => {
+      isMounted.current = false
+    }
   }, [authUser, authLoading, locale, router, selectedPlan, redirectUrl])
 
   const loadCurrentSubscription = async () => {
