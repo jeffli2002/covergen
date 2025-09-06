@@ -14,6 +14,9 @@ export function createVercelOptimizedClient() {
     cookies: typeof document !== 'undefined' ? document.cookie : 'server-side'
   })
   
+  // Session recovery is now handled by SessionRecovery component and VercelSessionBridge
+  // This prevents duplicate processing and race conditions
+  
   return createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -100,11 +103,49 @@ export function createVercelOptimizedClient() {
         detectSessionInUrl: true,
         persistSession: true,
         autoRefreshToken: true,
-        // Use a custom storage key to avoid conflicts
-        storageKey: 'sb-auth-token',
+        // Use the correct storage key format that matches Supabase's internal format
+        storageKey: `sb-${process.env.NEXT_PUBLIC_SUPABASE_URL!.split('//')[1].split('.')[0]}-auth-token`,
         // Aggressive session recovery for Vercel
         flowType: 'pkce',
-        debug: isVercelPreview // Enable debug mode on Vercel preview
+        debug: isVercelPreview, // Enable debug mode on Vercel preview
+        // Custom storage implementation for better control
+        storage: {
+          getItem: (key: string) => {
+            if (typeof window === 'undefined') return null
+            try {
+              const value = localStorage.getItem(key)
+              if (value && isVercelPreview) {
+                console.log(`[Vercel Client Storage] Retrieved ${key}:`, value ? 'has value' : 'empty')
+              }
+              return value
+            } catch (error) {
+              console.error('[Vercel Client Storage] Error getting item:', error)
+              return null
+            }
+          },
+          setItem: (key: string, value: string) => {
+            if (typeof window === 'undefined') return
+            try {
+              localStorage.setItem(key, value)
+              if (isVercelPreview) {
+                console.log(`[Vercel Client Storage] Stored ${key}`)
+              }
+            } catch (error) {
+              console.error('[Vercel Client Storage] Error setting item:', error)
+            }
+          },
+          removeItem: (key: string) => {
+            if (typeof window === 'undefined') return
+            try {
+              localStorage.removeItem(key)
+              if (isVercelPreview) {
+                console.log(`[Vercel Client Storage] Removed ${key}`)
+              }
+            } catch (error) {
+              console.error('[Vercel Client Storage] Error removing item:', error)
+            }
+          }
+        }
       }
     }
   )

@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { userSessionService } from '@/services/unified/UserSessionService'
+import { VercelSessionBridge } from '@/lib/supabase/session-bridge'
 
 export function SessionRecovery() {
   const router = useRouter()
@@ -33,15 +34,47 @@ export function SessionRecovery() {
         
         // Detect if running on Vercel preview
         const isVercelPreview = window.location.hostname.includes('vercel.app')
+        const isVercelAuth = searchParams.get('vercel_auth') === 'true'
         console.log('[SessionRecovery] Environment check:', {
           hostname: window.location.hostname,
           isVercelPreview,
-          cookies: document.cookie.split('; ').filter(c => c.includes('sb-')).map(c => c.substring(0, 50) + '...')
+          isVercelAuth,
+          cookies: document.cookie.split('; ').filter(c => c.includes('sb-') || c.includes('auth')).map(c => c.substring(0, 50) + '...')
         })
         
+        // First, wait for cookies to be available (important for Vercel redirects)
+        if (isVercelPreview && isVercelAuth) {
+          console.log('[SessionRecovery] Waiting for Vercel cookies...')
+          await VercelSessionBridge.waitForCookies(3000)
+        }
+        
+        // Attempt to recover session using the bridge
+        if (isVercelPreview && (isVercelAuth || VercelSessionBridge.hasAuthMarkers())) {
+          console.log('[SessionRecovery] Using VercelSessionBridge for recovery...')
+          const recovered = await VercelSessionBridge.recoverSession(supabase)
+          
+          if (recovered) {
+            console.log('[SessionRecovery] Session recovered successfully via bridge')
+            
+            // Ensure UserSessionService is synchronized
+            await userSessionService.initialize()
+            
+            // Clean up URL and reload
+            const url = new URL(window.location.href)
+            url.searchParams.delete('auth_callback')
+            url.searchParams.delete('vercel_auth')
+            router.replace(url.pathname + url.search)
+            
+            setTimeout(() => {
+              window.location.reload()
+            }, 500)
+            return
+          }
+        }
+        
         // Enhanced retry logic for Vercel preview deployments
-        const maxRetries = isVercelPreview ? 7 : 5 // More retries for Vercel
-        const retryDelays = [500, 1000, 1500, 2000, 3000, 4000, 5000] // Progressive delays
+        const maxRetries = isVercelPreview ? 10 : 5 // More retries for Vercel
+        const retryDelays = [100, 300, 500, 800, 1000, 1500, 2000, 2500, 3000, 4000] // Progressive delays
         
         for (let attempt = 0; attempt < maxRetries; attempt++) {
           // Wait with progressive delays
@@ -51,7 +84,8 @@ export function SessionRecovery() {
           
           // Check for auth callback success marker cookie
           const hasAuthMarker = document.cookie.includes('auth-callback-success')
-          console.log('[SessionRecovery] Auth marker cookie present:', hasAuthMarker)
+          const hasVercelMarker = document.cookie.includes('vercel-auth-complete')
+          console.log('[SessionRecovery] Auth markers:', { hasAuthMarker, hasVercelMarker })
           
           // Try to get the session
           const { data: { session }, error } = await supabase.auth.getSession()
