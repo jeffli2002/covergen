@@ -1,25 +1,48 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/utils/supabase/client'
 import { createSimpleClient } from '@/lib/supabase/simple-client'
 import { useRouter } from 'next/navigation'
 
 export default function ForceAuthPage() {
   const [status, setStatus] = useState('Checking...')
+  const [details, setDetails] = useState<any>(null)
   const router = useRouter()
   
   useEffect(() => {
     async function forceAuth() {
       try {
-        setStatus('Creating Supabase client...')
-        // Try simple client first
+        // First try manual API check
+        setStatus('Checking authentication via API...')
+        const apiResponse = await fetch('/api/auth/verify')
+        const apiData = await apiResponse.json()
+        
+        if (apiData.authenticated && apiData.user) {
+          setStatus(`Authenticated! User: ${apiData.user.email || apiData.user.id}`)
+          setDetails(apiData)
+          
+          setTimeout(() => {
+            router.push('/en')
+          }, 2000)
+          return
+        }
+        
+        setStatus('API check failed, trying Supabase client with timeout...')
+        
+        // Try client with aggressive timeout
         const supabase = createSimpleClient()
         
-        setStatus('Getting user from client (using getUser instead of getSession)...')
+        const result = await Promise.race([
+          supabase.auth.getUser(),
+          new Promise<{ data: { user: null }, error: Error }>((resolve) => 
+            setTimeout(() => resolve({ 
+              data: { user: null }, 
+              error: new Error('Client timeout after 3 seconds') 
+            }), 3000)
+          )
+        ])
         
-        // Use getUser instead of getSession to avoid hanging
-        const { data: { user }, error: userError } = await supabase.auth.getUser()
+        const { data: { user }, error: userError } = result
         
         let session = null
         let error = userError
@@ -52,25 +75,18 @@ export default function ForceAuthPage() {
           }
         }
         
-        if (error) {
-          setStatus(`Error: ${error.message}`)
-          return
-        }
-        
-        if (user) {
-          setStatus(`User found! Email: ${user.email}. Setting up session...`)
-          
-          // Force auth state update
-          await supabase.auth.setSession({
-            access_token: session.access_token,
-            refresh_token: session.refresh_token
-          })
+        if (userError) {
+          setStatus(`Client error: ${userError.message}`)
+          setDetails({ error: userError.message })
+        } else if (user) {
+          setStatus(`User found via client! Email: ${user.email}`)
+          setDetails({ user })
           
           setTimeout(() => {
             router.push('/en')
           }, 2000)
         } else {
-          setStatus('No session found in Supabase client')
+          setStatus('No user found via client')
           
           // Try to manually restore from localStorage
           const storageKey = 'sb-exungkcoaihcemcmhqdr-auth-token'
@@ -105,9 +121,14 @@ export default function ForceAuthPage() {
   
   return (
     <div className="min-h-screen flex items-center justify-center p-8">
-      <div className="text-center">
+      <div className="text-center max-w-2xl">
         <h1 className="text-2xl font-bold mb-4">Force Auth Check</h1>
-        <p className="text-lg">{status}</p>
+        <p className="text-lg mb-4">{status}</p>
+        {details && (
+          <pre className="text-left bg-gray-100 p-4 rounded text-xs overflow-auto">
+            {JSON.stringify(details, null, 2)}
+          </pre>
+        )}
       </div>
     </div>
   )

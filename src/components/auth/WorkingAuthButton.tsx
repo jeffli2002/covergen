@@ -11,28 +11,45 @@ export function WorkingAuthButton() {
   
   useEffect(() => {
     async function checkUser() {
-      const supabase = createSimpleClient()
-      
-      // Use getUser instead of getSession
-      const { data: { user }, error } = await supabase.auth.getUser()
-      
-      if (!error && user) {
-        setUser(user)
-      }
-      setLoading(false)
-      
-      // Listen for auth changes
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log('[WorkingAuthButton] Auth state changed:', event, session?.user?.email)
+      try {
+        // First try manual auth check to bypass hanging Supabase client
+        const response = await fetch('/api/debug/manual-auth-check')
+        const data = await response.json()
         
-        if (event === 'SIGNED_IN' && session?.user) {
-          setUser(session.user)
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null)
+        if (data.userApiResponse?.status === 200 && data.userApiResponse?.data?.id) {
+          setUser(data.userApiResponse.data)
+          setLoading(false)
+          return
         }
-      })
+      } catch (err) {
+        console.log('[WorkingAuthButton] Manual auth check failed, falling back to client')
+      }
       
-      return () => subscription.unsubscribe()
+      // Fallback to client with timeout
+      try {
+        const supabase = createSimpleClient()
+        
+        // Use Promise.race with timeout
+        const result = await Promise.race([
+          supabase.auth.getUser(),
+          new Promise<{ data: { user: null }, error: Error }>((resolve) => 
+            setTimeout(() => resolve({ 
+              data: { user: null }, 
+              error: new Error('getUser timeout') 
+            }), 3000)
+          )
+        ])
+        
+        const { data: { user }, error } = result
+        
+        if (!error && user) {
+          setUser(user)
+        }
+      } catch (err) {
+        console.error('[WorkingAuthButton] Client check error:', err)
+      }
+      
+      setLoading(false)
     }
     
     checkUser()
@@ -55,12 +72,22 @@ export function WorkingAuthButton() {
   }
   
   const handleSignOut = async () => {
-    const supabase = createSimpleClient()
-    const { error } = await supabase.auth.signOut()
-    
-    if (error) {
+    try {
+      const supabase = createSimpleClient()
+      await supabase.auth.signOut()
+      setUser(null)
+      
+      // Clear all auth-related cookies
+      document.cookie.split(';').forEach(cookie => {
+        if (cookie.includes('sb-') || cookie.includes('auth-')) {
+          const name = cookie.split('=')[0].trim()
+          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
+        }
+      })
+      
+      window.location.reload()
+    } catch (error) {
       console.error('[WorkingAuthButton] Sign out error:', error)
-    } else {
       setUser(null)
       window.location.reload()
     }
