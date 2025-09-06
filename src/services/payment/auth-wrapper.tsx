@@ -138,16 +138,26 @@ export class PaymentAuthWrapper {
   }
 
   /**
-   * Server-side session validation for payment webhooks
-   * Uses service role to validate without modifying state
+   * Server-side session validation for payment webhooks ONLY
+   * WARNING: This method creates an admin client and should ONLY be used in webhook handlers
+   * DO NOT use this in regular payment flows - use getAuthContext instead
+   * 
+   * @param accessToken - The token to validate
+   * @returns Validation result with user details if valid
    */
   static async validateWebhookSession(accessToken: string): Promise<{
     valid: boolean
     userId?: string
     email?: string
   }> {
+    // This method should only be called in webhook context
+    if (typeof window !== 'undefined') {
+      throw new Error('validateWebhookSession must only be called server-side in webhook handlers')
+    }
+    
     try {
       // For webhook validation, we need to use the admin client
+      // This is acceptable ONLY in webhook context where we need service role access
       const { createClient } = require('@supabase/supabase-js')
       const supabaseAdmin = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -155,7 +165,8 @@ export class PaymentAuthWrapper {
         {
           auth: {
             autoRefreshToken: false,
-            persistSession: false
+            persistSession: false,
+            detectSessionInUrl: false
           }
         }
       )
