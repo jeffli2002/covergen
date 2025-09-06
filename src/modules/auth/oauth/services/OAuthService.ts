@@ -41,9 +41,19 @@ class OAuthService {
   // OAuth methods
   async signIn(provider: OAuthProvider): Promise<{ success: boolean; error?: OAuthError }> {
     try {
-      const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(window.location.pathname)}`
+      // Use dynamic URL to support Vercel preview deployments
+      const origin = window.location.origin
+      const currentPath = window.location.pathname
+      const redirectUrl = `${origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
       
-      const { error } = await supabase.auth.signInWithOAuth({
+      console.log('[OAuthService] Initiating OAuth sign-in:', {
+        provider,
+        redirectUrl,
+        origin,
+        currentPath
+      })
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: redirectUrl,
@@ -53,6 +63,10 @@ class OAuthService {
           }
         }
       })
+
+      if (data?.url) {
+        console.log('[OAuthService] OAuth URL generated:', data.url)
+      }
 
       if (error) {
         const oauthError: OAuthError = {
