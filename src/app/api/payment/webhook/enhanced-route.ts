@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
         .eq('user_id', userId)
         .single()
       
-      const subscriptionData = {
+      const subscriptionData: any = {
         user_id: userId,
         tier: planId,
         status: 'active',
