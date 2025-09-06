@@ -27,6 +27,7 @@ import { Locale } from '@/lib/i18n/config'
 import { AuthDebugSimple } from '@/components/auth/AuthDebugSimple'
 import { SessionRecovery } from '@/components/auth/SessionRecovery'
 import { OAuthCallbackDetector } from '@/components/auth/OAuthCallbackDetector'
+import { OAuthCodeHandler } from '@/components/auth/OAuthCodeHandler'
 
 interface HomePageClientProps {
   locale: Locale
@@ -161,6 +162,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
   return (
     <div className="min-h-screen bg-background">
       {/* OAuth detection and session recovery */}
+      <OAuthCodeHandler />
       <OAuthCallbackDetector />
       <SessionRecovery />
       
