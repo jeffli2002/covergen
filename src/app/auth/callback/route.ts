@@ -32,10 +32,12 @@ export async function GET(request: Request) {
       console.log('[Auth Callback] Existing cookies:', cookieStore.getAll().map(c => ({ name: c.name, value: c.value.substring(0, 20) + '...' })))
       
       // Create a response that we'll use for the redirect
-      const redirectUrl = `${origin}${next}`
-      console.log('[Auth Callback] Will redirect to:', redirectUrl)
+      // Add auth_callback=success to trigger SessionRecovery
+      const redirectUrl = new URL(`${origin}${next}`)
+      redirectUrl.searchParams.set('auth_callback', 'success')
+      console.log('[Auth Callback] Will redirect to:', redirectUrl.toString())
       
-      const response = NextResponse.redirect(redirectUrl)
+      const response = NextResponse.redirect(redirectUrl.toString())
       
       // Create Supabase client with proper cookie handling
       const supabase = createServerClient(
@@ -49,13 +51,17 @@ export async function GET(request: Request) {
               return value
             },
             set(name: string, value: string, options: any) {
+              // Detect Vercel preview environment
+              const isVercelPreview = request.headers.get('host')?.includes('vercel.app') || 
+                                     process.env.VERCEL_ENV === 'preview'
+              
               // Set cookie on the response
               const cookieOptions = {
                 name,
                 value,
                 ...options,
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
+                secure: process.env.NODE_ENV === 'production' || isVercelPreview,
                 sameSite: 'lax' as const,
                 path: '/',
                 // Important: Don't set domain for preview deployments
@@ -68,12 +74,16 @@ export async function GET(request: Request) {
                 secure: cookieOptions.secure,
                 sameSite: cookieOptions.sameSite,
                 path: cookieOptions.path,
-                maxAge: cookieOptions.maxAge
+                maxAge: cookieOptions.maxAge,
+                isVercelPreview,
+                host: request.headers.get('host')
               })
               
               response.cookies.set(cookieOptions)
             },
             remove(name: string, options: any) {
+              const isVercelPreview = request.headers.get('host')?.includes('vercel.app') || 
+                                     process.env.VERCEL_ENV === 'preview'
               console.log(`[Auth Callback] Cookie remove: ${name}`)
               response.cookies.set({
                 name,
@@ -81,7 +91,7 @@ export async function GET(request: Request) {
                 ...options,
                 maxAge: 0,
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
+                secure: process.env.NODE_ENV === 'production' || isVercelPreview,
                 sameSite: 'lax',
                 path: '/'
               })
@@ -115,12 +125,14 @@ export async function GET(request: Request) {
       })
       
       // Add a marker cookie to signal successful OAuth callback
+      const isVercelPreview = request.headers.get('host')?.includes('vercel.app') || 
+                             process.env.VERCEL_ENV === 'preview'
       response.cookies.set({
         name: 'auth-callback-success',
         value: 'true',
         maxAge: 60, // Expires in 1 minute
         httpOnly: false,
-        secure: process.env.NODE_ENV === 'production',
+        secure: process.env.NODE_ENV === 'production' || isVercelPreview,
         sameSite: 'lax',
         path: '/'
       })
