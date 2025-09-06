@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
+import { createSimpleClient } from '@/lib/supabase/simple-client'
 import { useRouter } from 'next/navigation'
 
 export default function ForceAuthPage() {
@@ -12,10 +13,21 @@ export default function ForceAuthPage() {
     async function forceAuth() {
       try {
         setStatus('Creating Supabase client...')
-        const supabase = createClient()
+        // Try simple client first
+        const supabase = createSimpleClient()
         
         setStatus('Getting session from client...')
-        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        // Add timeout to prevent hanging
+        const sessionPromise = supabase.auth.getSession()
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('getSession timeout')), 5000)
+        )
+        
+        const { data: { session }, error } = await Promise.race([
+          sessionPromise,
+          timeoutPromise
+        ]).catch(err => ({ data: { session: null }, error: err }))
         
         if (error) {
           setStatus(`Error: ${error.message}`)
