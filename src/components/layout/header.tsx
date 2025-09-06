@@ -28,7 +28,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
   const { user: storeUser } = useAppStore()
   const router = useRouter()
   const [showAuthModal, setShowAuthModal] = useState(false)
-  const currentTier = storeUser?.tier || 'free'
+  const currentTier = storeUser?.subscription?.tier || 'free'
 
   const handleLogout = async () => {
     console.log('[Header] Signing out...')

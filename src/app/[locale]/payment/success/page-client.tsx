@@ -16,7 +16,7 @@ interface PaymentSuccessClientProps {
 
 export default function PaymentSuccessClient({ locale, sessionId }: PaymentSuccessClientProps) {
   const router = useRouter()
-  const { user, setUser } = useAppStore()
+  const { user } = useAppStore()
   const [loading, setLoading] = useState(true)
   const [subscription, setSubscription] = useState<any>(null)
 
@@ -44,19 +44,7 @@ export default function PaymentSuccessClient({ locale, sessionId }: PaymentSucce
       if (updatedSubscription) {
         setSubscription(updatedSubscription)
         
-        // Update app store with new tier
-        if (user) {
-          const quotaLimits = {
-            pro: 120,
-            pro_plus: 300
-          }
-          setUser({
-            ...user,
-            tier: updatedSubscription.tier,
-            quotaLimit: quotaLimits[updatedSubscription.tier as keyof typeof quotaLimits] || 10,
-            quotaUsed: 0
-          })
-        }
+        // User state will be automatically updated via webhooks and unified service
       }
     } catch (error) {
       console.error('Error loading subscription:', error)

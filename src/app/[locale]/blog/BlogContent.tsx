@@ -14,8 +14,15 @@ import {
   Eye,
   Heart,
   Share2,
-  ArrowRight
+  ArrowRight,
+  Twitter,
+  Facebook,
+  Linkedin,
+  Copy,
+  Check
 } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 const blogPosts = [
   {
@@ -77,8 +84,11 @@ const categories = [
 ]
 
 export default function BlogContent() {
+  const router = useRouter()
   const [activeCategory, setActiveCategory] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [shareMenuOpen, setShareMenuOpen] = useState<number | null>(null)
+  const [copiedPost, setCopiedPost] = useState<number | null>(null)
 
   const filteredPosts = blogPosts.filter(post => {
     const matchesCategory = activeCategory === 'all' || 
@@ -88,6 +98,48 @@ export default function BlogContent() {
                          post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
     return matchesCategory && matchesSearch
   })
+
+  const handleReadMore = (postId: number) => {
+    router.push(`/blog/${postId}`)
+  }
+
+  const handleShare = async (postId: number, platform: string) => {
+    const post = blogPosts.find(p => p.id === postId)
+    if (!post) return
+
+    const url = `${window.location.origin}/blog/${postId}`
+    const text = `Check out this article: ${post.title}`
+    
+    switch (platform) {
+      case 'twitter':
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank')
+        break
+      case 'facebook':
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank')
+        break
+      case 'linkedin':
+        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank')
+        break
+      case 'copy':
+        try {
+          await navigator.clipboard.writeText(url)
+          setCopiedPost(postId)
+          setTimeout(() => setCopiedPost(null), 2000)
+        } catch (err) {
+          // Fallback for older browsers
+          const textArea = document.createElement('textarea')
+          textArea.value = url
+          document.body.appendChild(textArea)
+          textArea.select()
+          document.execCommand('copy')
+          document.body.removeChild(textArea)
+          setCopiedPost(postId)
+          setTimeout(() => setCopiedPost(null), 2000)
+        }
+        break
+    }
+    setShareMenuOpen(null)
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -203,10 +255,62 @@ export default function BlogContent() {
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Button size="sm" variant="ghost">
-                      <Share2 className="w-4 h-4" />
-                    </Button>
-                    <Button size="sm" className="group-hover:bg-primary transition-colors">
+                    <div className="relative">
+                      <Button 
+                        size="sm" 
+                        variant="ghost"
+                        onClick={() => setShareMenuOpen(shareMenuOpen === post.id ? null : post.id)}
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </Button>
+
+                      {shareMenuOpen === post.id && (
+                        <div className="absolute top-full right-0 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border p-2 z-10 min-w-[160px]">
+                          <button
+                            onClick={() => handleShare(post.id, 'twitter')}
+                            className="flex items-center gap-2 w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-sm"
+                          >
+                            <Twitter className="w-4 h-4" />
+                            Twitter
+                          </button>
+                          <button
+                            onClick={() => handleShare(post.id, 'facebook')}
+                            className="flex items-center gap-2 w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-sm"
+                          >
+                            <Facebook className="w-4 h-4" />
+                            Facebook
+                          </button>
+                          <button
+                            onClick={() => handleShare(post.id, 'linkedin')}
+                            className="flex items-center gap-2 w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-sm"
+                          >
+                            <Linkedin className="w-4 h-4" />
+                            LinkedIn
+                          </button>
+                          <button
+                            onClick={() => handleShare(post.id, 'copy')}
+                            className="flex items-center gap-2 w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-sm"
+                          >
+                            {copiedPost === post.id ? (
+                              <>
+                                <Check className="w-4 h-4 text-green-500" />
+                                <span className="text-green-500">Copied!</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-4 h-4" />
+                                Copy Link
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    <Button 
+                      size="sm" 
+                      className="group-hover:bg-primary transition-colors"
+                      onClick={() => handleReadMore(post.id)}
+                    >
                       Read More
                       <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
                     </Button>
@@ -241,6 +345,14 @@ export default function BlogContent() {
           </div>
         </div>
       </div>
+
+      {/* Click outside to close share menu */}
+      {shareMenuOpen !== null && (
+        <div
+          className="fixed inset-0 z-5"
+          onClick={() => setShareMenuOpen(null)}
+        />
+      )}
     </div>
   )
 }

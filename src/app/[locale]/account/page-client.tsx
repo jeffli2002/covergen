@@ -29,7 +29,7 @@ interface AccountPageClientProps {
 
 export default function AccountPageClient({ locale }: AccountPageClientProps) {
   const router = useRouter()
-  const { user, setUser } = useAppStore()
+  const { user } = useAppStore()
   const [loading, setLoading] = useState(true)
   const [subscription, setSubscription] = useState<any>(null)
   const [usage, setUsage] = useState(0)
@@ -134,7 +134,6 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
 
   const handleSignOut = async () => {
     await authService.signOut()
-    setUser(null)
     router.push(`/${locale}`)
   }
 

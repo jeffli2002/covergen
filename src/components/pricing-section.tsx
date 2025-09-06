@@ -159,7 +159,7 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto px-4">
           {tiers.map((tier) => {
             const Icon = tier.icon
-            const isCurrentTier = user?.tier === tier.id
+            const isCurrentTier = user?.subscription?.tier === tier.id
             
             return (
               <Card 
