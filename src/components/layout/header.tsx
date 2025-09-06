@@ -72,7 +72,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
 
           {/* Navigation */}
           <nav className="flex items-center space-x-8">
-            <a href="#features" className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">
+            <a href={`/${locale}#features`} className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">
               {t.navigation.features}
             </a>
             
