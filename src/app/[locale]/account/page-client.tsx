@@ -221,15 +221,27 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                           variant="outline"
                           className="mt-2 text-green-700 border-green-300 hover:bg-green-100"
                           onClick={async () => {
-                            const response = await fetch('/api/payment/convert-trial', {
-                              method: 'POST'
-                            })
-                            const data = await response.json()
-                            if (data.success) {
-                              toast.success('Trial converted to paid subscription!')
-                              await loadAccountData()
-                            } else {
-                              toast.error(data.error || 'Failed to convert trial')
+                            try {
+                              const response = await fetch('/api/payment/convert-trial', {
+                                method: 'POST'
+                              })
+                              const data = await response.json()
+                              
+                              if (data.success) {
+                                if (data.checkoutUrl) {
+                                  // Redirect to Creem checkout
+                                  window.location.href = data.checkoutUrl
+                                } else {
+                                  // Fallback: just refresh the data
+                                  toast.success('Trial conversion initiated!')
+                                  await loadAccountData()
+                                }
+                              } else {
+                                toast.error(data.error || 'Failed to convert trial')
+                              }
+                            } catch (error) {
+                              console.error('Trial conversion error:', error)
+                              toast.error('Failed to convert trial. Please try again.')
                             }
                           }}
                         >

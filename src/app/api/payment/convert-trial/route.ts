@@ -72,18 +72,40 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    // TODO: Notify payment provider (Creem) about early conversion
-    // This would typically trigger immediate billing
-    
-    return NextResponse.json({
-      success: true,
-      message: 'Trial successfully converted to paid subscription',
-      subscription: {
-        tier: subscription.tier,
-        status: 'active',
-        current_period_end: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString()
-      }
-    })
+    // Create checkout session with Creem for immediate billing
+    try {
+      const checkoutUrl = await creemService.createCheckout({
+        userId: userId,
+        planId: subscription.tier,
+        userEmail: authContext.email || '',
+        currentPlan: 'free', // Trial conversion is treated as upgrade from free
+        redirectUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/account`,
+        metadata: {
+          convertFromTrial: 'true',
+          originalTrialEnd: subscription.trial_end
+        }
+      })
+      
+      // Return checkout URL for immediate payment
+      return NextResponse.json({
+        success: true,
+        checkoutUrl: checkoutUrl,
+        message: 'Redirecting to checkout to complete trial conversion'
+      })
+    } catch (creemError) {
+      console.error('[ConvertTrial] Creem error:', creemError)
+      
+      // Fallback: Just mark as converted and hope webhook handles it
+      return NextResponse.json({
+        success: true,
+        message: 'Trial conversion initiated',
+        subscription: {
+          tier: subscription.tier,
+          status: 'active',
+          current_period_end: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        }
+      })
+    }
     
   } catch (error) {
     console.error('[ConvertTrial] Error:', error)

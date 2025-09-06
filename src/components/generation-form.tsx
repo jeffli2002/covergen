@@ -11,7 +11,7 @@ import { Upload, Sparkles, Info, CheckCircle, ChevronDown, ChevronUp } from 'luc
 import { platformSizes, styleTemplates, type Platform, type StyleTemplate } from '@/lib/utils'
 import { useAppStore } from '@/lib/store'
 import { platformIcons, platformGuidelines, platformEnhancements, generatePlatformPrompt } from '@/lib/platform-configs'
-import UpgradePrompt from '@/components/auth/UpgradePrompt'
+import { RateLimitModal } from '@/components/rate-limit-modal'
 import authService from '@/services/authService'
 
 interface DailyLimitStatus {
@@ -21,6 +21,16 @@ interface DailyLimitStatus {
   is_trial: boolean
   subscription_tier: string
   remaining?: number
+}
+
+interface RateLimitInfo {
+  daily_usage: number
+  daily_limit: number
+  monthly_usage: number
+  monthly_limit: number
+  is_trial: boolean
+  trial_ends_at?: string
+  tier: 'free' | 'pro' | 'pro_plus'
 }
 
 export default function GenerationForm() {
@@ -33,6 +43,7 @@ export default function GenerationForm() {
   const [showPromptDetails, setShowPromptDetails] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [dailyLimitStatus, setDailyLimitStatus] = useState<DailyLimitStatus | null>(null)
+  const [rateLimitInfo, setRateLimitInfo] = useState<RateLimitInfo | null>(null)
   
   const { user, addTask } = useAppStore()
 
@@ -75,6 +86,16 @@ export default function GenerationForm() {
     
     // Check if user has reached daily limit
     if (dailyLimitStatus && !dailyLimitStatus.can_generate) {
+      // Set rate limit info for modal
+      setRateLimitInfo({
+        daily_usage: dailyLimitStatus.daily_count,
+        daily_limit: dailyLimitStatus.daily_limit,
+        monthly_usage: dailyLimitStatus.daily_count, // Using daily count as approximation
+        monthly_limit: dailyLimitStatus.subscription_tier === 'free' ? 10 : 
+                      dailyLimitStatus.subscription_tier === 'pro' ? 120 : 300,
+        is_trial: dailyLimitStatus.is_trial,
+        tier: (dailyLimitStatus.subscription_tier as 'free' | 'pro' | 'pro_plus') || 'free'
+      })
       setShowUpgradeModal(true)
       return
     }
@@ -122,12 +143,20 @@ export default function GenerationForm() {
       if (!response.ok) {
         // Check if it's a rate limit error
         if (response.status === 429 && data.limit_reached) {
-          setDailyLimitStatus({
-            daily_count: data.daily_count,
+          // Calculate reset time (tomorrow at midnight)
+          const now = new Date()
+          const tomorrow = new Date(now)
+          tomorrow.setHours(0, 0, 0, 0)
+          tomorrow.setDate(tomorrow.getDate() + 1)
+          
+          setRateLimitInfo({
+            daily_usage: data.daily_usage,
             daily_limit: data.daily_limit,
-            can_generate: false,
+            monthly_usage: data.monthly_usage,
+            monthly_limit: data.monthly_limit,
             is_trial: data.is_trial,
-            subscription_tier: data.subscription_tier
+            trial_ends_at: data.trial_ends_at,
+            tier: data.subscription_tier || 'free'
           })
           setShowUpgradeModal(true)
           useAppStore.getState().updateTask(task.id, {
@@ -464,17 +493,25 @@ export default function GenerationForm() {
         </Button>
       </CardContent>
       
-      {/* Upgrade Modal */}
-      {showUpgradeModal && dailyLimitStatus && (
-        <UpgradePrompt
+      {/* Rate Limit Modal */}
+      {showUpgradeModal && rateLimitInfo && (
+        <RateLimitModal
+          isOpen={showUpgradeModal}
           onClose={() => setShowUpgradeModal(false)}
-          onUpgrade={() => {
-            setShowUpgradeModal(false)
-            window.location.href = '/pricing'
-          }}
-          dailyCount={dailyLimitStatus.daily_count}
-          dailyLimit={dailyLimitStatus.daily_limit}
-          isTrial={dailyLimitStatus.is_trial}
+          limitType="daily"
+          dailyLimit={rateLimitInfo.daily_limit}
+          dailyUsed={rateLimitInfo.daily_usage}
+          monthlyLimit={rateLimitInfo.monthly_limit}
+          monthlyUsed={rateLimitInfo.monthly_usage}
+          resetTime={(() => {
+            const now = new Date()
+            const tomorrow = new Date(now)
+            tomorrow.setHours(0, 0, 0, 0)
+            tomorrow.setDate(tomorrow.getDate() + 1)
+            return tomorrow
+          })()}
+          isTrialing={rateLimitInfo.is_trial}
+          tier={rateLimitInfo.tier}
         />
       )}
     </Card>
