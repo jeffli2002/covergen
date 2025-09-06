@@ -186,7 +186,7 @@ export class PaymentAuthWrapper {
 export function withPaymentAuth<P extends object>(
   Component: React.ComponentType<P>
 ): React.ComponentType<P> {
-  return (props: P) => {
+  const WithPaymentAuthComponent = (props: P) => {
     const [authReady, setAuthReady] = React.useState(false)
     const [needsAuth, setNeedsAuth] = React.useState(false)
 
@@ -229,6 +229,10 @@ export function withPaymentAuth<P extends object>(
     // Auth is ready and valid for payment
     return <Component {...props} />
   }
+
+  WithPaymentAuthComponent.displayName = `WithPaymentAuth(${Component.displayName || Component.name || 'Component'})`
+  
+  return WithPaymentAuthComponent
 }
 
 // Type guard for auth context
