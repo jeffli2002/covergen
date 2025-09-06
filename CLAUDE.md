@@ -319,3 +319,64 @@ Before deploying OAuth to production:
 The breakthrough came when we realized that the complexity was the enemy. By removing all the "smart" SSR optimizations and middleware checks, and going back to a simple client-side auth flow with a server-side callback, everything just worked. Sometimes, the best solution is the simplest one.
 
 This approach ensures a clean, working Google OAuth implementation that can be adapted for other OAuth providers supported by Supabase. The 3-day struggle taught us that when dealing with authentication, simplicity and consistency triumph over clever optimizations.
+
+## Critical: Payment and OAuth Integration Separation
+
+### The Golden Rule: Payment Services Must NEVER Modify Auth State
+
+After fixing OAuth with a simplified architecture, it's crucial that payment integrations don't reintroduce the complexity that caused the original issues. Payment services must be **read-only consumers** of authentication state.
+
+### Payment Integration Architecture
+
+1. **Use PaymentAuthWrapper** (`/src/services/payment/auth-wrapper.ts`):
+   - Provides read-only access to auth context
+   - Validates session has sufficient time remaining (5+ minutes)
+   - Never refreshes or modifies sessions
+   - Returns auth headers without state manipulation
+
+2. **Forbidden Operations in Payment Code**:
+   ```typescript
+   // ❌ NEVER do these in payment flows:
+   await authService.refreshSession()
+   await authService.ensureValidSession()
+   await supabase.auth.setSession()
+   await supabase.auth.refreshSession()
+   
+   // ✅ ALWAYS use read-only access:
+   const context = await PaymentAuthWrapper.getAuthContext()
+   const isValid = PaymentAuthWrapper.isSessionValidForPayment()
+   ```
+
+3. **Session Validity Requirements**:
+   - Checkout initiation: Requires 5+ minutes remaining
+   - If invalid: Redirect to sign-in, don't refresh
+   - Webhooks: Use admin client, never touch user sessions
+
+4. **Webhook Processing Isolation**:
+   - Use service role Supabase client
+   - No auto-refresh: `autoRefreshToken: false`
+   - No session persistence: `persistSession: false`
+   - Database operations only, no auth state changes
+
+### Why This Matters
+
+The OAuth implementation uses a single, simple Supabase client with PKCE flow. Any attempt by payment services to create new clients, refresh sessions, or manipulate auth state can trigger the "Multiple GoTrueClient instances" error and break the entire auth flow.
+
+### Quick Reference
+
+| Component | Auth Approach | Key Rule |
+|-----------|--------------|----------|
+| Payment Pages | Read auth via wrapper | Never refresh sessions |
+| API Routes | Validate token only | No setSession calls |
+| Webhooks | Use admin client | No user auth interaction |
+| Creem Service | Get headers from wrapper | No direct auth access |
+
+### Testing Payment Features
+
+Always verify these after payment changes:
+1. No "Multiple GoTrueClient" warnings in console
+2. OAuth login still works after payment attempts
+3. Sessions persist correctly across payment redirects
+4. Logout functions properly after payments
+
+Remember: If payment code needs fresh auth, **redirect to sign-in**, don't try to refresh inline. The auth system will handle it correctly.
