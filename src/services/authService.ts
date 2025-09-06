@@ -47,6 +47,14 @@ class AuthService {
       console.log('[Auth] URL:', window?.location?.href)
       console.log('[Auth] Cookies:', document?.cookie)
       
+      // Check if we just completed an OAuth callback
+      const isAfterOAuth = document?.cookie?.includes('auth-callback-success=true')
+      if (isAfterOAuth) {
+        console.log('[Auth] Detected OAuth callback success, will wait longer for session')
+        // Clear the marker cookie
+        document.cookie = 'auth-callback-success=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+      }
+      
       const supabase = this.getSupabase()
       if (!supabase) {
         console.warn('[Auth] Supabase not configured, auth service will be disabled')
@@ -72,14 +80,28 @@ class AuthService {
         })
       }
 
-      const sessionPromise = supabase.auth.getSession()
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Session check timeout')), 3000)
-      )
-
-      try {
-        console.log('[Auth] Checking for session from Supabase...')
-        const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any
+      // After OAuth redirect, we might need to wait for session to be available
+      let session = null
+      let error = null
+      
+      // Try multiple times with increasing delays to handle OAuth callback timing
+      const maxAttempts = isAfterOAuth ? 5 : 3
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        console.log(`[Auth] Checking for session from Supabase (attempt ${attempt}/${maxAttempts})...`)
+        
+        const { data, error: sessionError } = await supabase.auth.getSession()
+        session = data.session
+        error = sessionError
+        
+        if (session || error || attempt === maxAttempts) {
+          break
+        }
+        
+        // Wait longer between attempts, especially after OAuth callback
+        const delay = isAfterOAuth ? 1000 * attempt : 500 * attempt
+        console.log(`[Auth] No session found, waiting ${delay}ms before retry...`)
+        await new Promise(resolve => setTimeout(resolve, delay))
+      }
         
         console.log('[Auth] Session check result:', { 
           hasSession: !!session,
@@ -108,9 +130,6 @@ class AuthService {
             console.log('[Auth] No session found from Supabase')
           }
         }
-      } catch (timeoutError) {
-        console.warn('[Auth] Session check timed out, continuing with stored session if available')
-      }
 
       this.initialized = true
 
