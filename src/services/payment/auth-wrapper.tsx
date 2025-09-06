@@ -73,13 +73,35 @@ export class PaymentAuthWrapper {
     try {
       const session = authService.getCurrentSession()
       
+      console.log('[PaymentAuth] isSessionValidForPayment check:', {
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        hasAccessToken: !!session?.access_token,
+        sessionData: session ? {
+          userId: session.user?.id,
+          email: session.user?.email,
+          expiresAt: session.expires_at,
+          expiresIn: session.expires_in
+        } : null,
+        timestamp: new Date().toISOString()
+      })
+      
       if (!session || !session.user || !session.access_token) {
+        console.log('[PaymentAuth] Session invalid - missing required fields')
         return false
       }
 
       // Require at least 5 minutes remaining for payment operations
       const minMinutesRequired = 5
-      return !authService.isSessionExpiringSoon(minMinutesRequired)
+      const isExpiringSoon = authService.isSessionExpiringSoon(minMinutesRequired)
+      
+      console.log('[PaymentAuth] Session expiry check:', {
+        minMinutesRequired,
+        isExpiringSoon,
+        result: !isExpiringSoon
+      })
+      
+      return !isExpiringSoon
     } catch (error) {
       console.error('[PaymentAuth] Error validating session for payment:', error)
       return false

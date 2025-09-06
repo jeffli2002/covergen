@@ -37,6 +37,8 @@ export default function PaymentPageClient({
   const [currentSubscription, setCurrentSubscription] = useState<any>(null)
   const [proratedAmount, setProratedAmount] = useState<number | null>(null)
   const isMounted = useRef(true)
+  const [hasInitialized, setHasInitialized] = useState(false)
+  const initCheckCount = useRef(0)
 
   useEffect(() => {
     // Set mounted to true
@@ -49,9 +51,11 @@ export default function PaymentPageClient({
       authUser: !!authUser,
       authUserEmail: authUser?.email,
       authLoading: authLoading,
+      hasInitialized,
       storeUser: !!user,
       storeUserEmail: user?.email,
-      session: authService.getCurrentSession() ? 'Present' : 'Missing'
+      session: authService.getCurrentSession() ? 'Present' : 'Missing',
+      timestamp: new Date().toISOString()
     })
 
     // Wait for auth to load
@@ -60,9 +64,28 @@ export default function PaymentPageClient({
       return
     }
 
-    // Check authentication after auth has loaded
-    if (!authLoading && !authUser) {
-      console.log('[PaymentPage] Not authenticated, redirecting...')
+    // Mark as initialized once auth has loaded
+    if (!authLoading && !hasInitialized) {
+      initCheckCount.current += 1
+      console.log('[PaymentPage] Auth loaded, check count:', initCheckCount.current)
+      
+      // Give auth context 3 render cycles to stabilize
+      if (initCheckCount.current >= 3) {
+        console.log('[PaymentPage] Auth stabilized, marking as initialized')
+        setHasInitialized(true)
+      }
+      return
+    }
+
+    // Check authentication after auth has loaded and initialized
+    if (!authLoading && hasInitialized && !authUser) {
+      console.log('[PaymentPage] Not authenticated after initialization, redirecting...', {
+        authLoading,
+        hasInitialized,
+        authUser: !!authUser,
+        initCheckCount: initCheckCount.current,
+        timestamp: new Date().toISOString()
+      })
       // Only redirect if component is still mounted
       if (isMounted.current) {
         // Redirect to auth with return URL
@@ -72,19 +95,13 @@ export default function PaymentPageClient({
       return
     }
 
-    // Check if session is valid for payment operations
-    if (!PaymentAuthWrapper.isSessionValidForPayment()) {
-      console.log('[PaymentPage] Session not valid for payment operations')
-      if (isMounted.current) {
-        toast.error('Please sign in again to continue with payment')
-        const returnUrl = `/${locale}/payment?plan=${selectedPlan}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
-        router.push(`/${locale}?auth=signin&redirect=${encodeURIComponent(returnUrl)}`)
-      }
-      return
-    }
+    // Skip session validity check here - we'll check when user actually clicks pay
+    // This prevents immediate redirects due to timing issues
+    console.log('[PaymentPage] Skipping session validity check in useEffect')
 
-    // Load current subscription
-    if (isMounted.current) {
+    // Load current subscription (only after initialization and auth)
+    if (isMounted.current && hasInitialized && authUser) {
+      console.log('[PaymentPage] Loading current subscription')
       loadCurrentSubscription()
     }
     
@@ -92,7 +109,7 @@ export default function PaymentPageClient({
     return () => {
       isMounted.current = false
     }
-  }, [authUser, authLoading, locale, router, selectedPlan, redirectUrl])
+  }, [authUser, authLoading, locale, router, selectedPlan, redirectUrl, hasInitialized])
 
   const loadCurrentSubscription = async () => {
     try {
@@ -146,6 +163,15 @@ export default function PaymentPageClient({
     if (!authUser) {
       console.log('[PaymentPage] No authUser found, showing error')
       toast.error('Please sign in to continue')
+      return
+    }
+    
+    // Check session validity at payment time
+    if (!PaymentAuthWrapper.isSessionValidForPayment()) {
+      console.log('[PaymentPage] Session not valid for payment at checkout time')
+      toast.error('Your session has expired. Please sign in again to continue.')
+      const returnUrl = `/${locale}/payment?plan=${planId}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
+      router.push(`/${locale}?auth=signin&redirect=${encodeURIComponent(returnUrl)}`)
       return
     }
 
