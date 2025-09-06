@@ -25,6 +25,8 @@ import {
 import { TikTokIcon, SpotifyIcon, TwitterXIcon } from '@/components/icons/brand-icons'
 import { Locale } from '@/lib/i18n/config'
 import { AuthDebugSimple } from '@/components/auth/AuthDebugSimple'
+import { SessionRecovery } from '@/components/auth/SessionRecovery'
+import { OAuthCallbackDetector } from '@/components/auth/OAuthCallbackDetector'
 
 interface HomePageClientProps {
   locale: Locale
@@ -158,6 +160,10 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
 
   return (
     <div className="min-h-screen bg-background">
+      {/* OAuth detection and session recovery */}
+      <OAuthCallbackDetector />
+      <SessionRecovery />
+      
       {/* Debug panel */}
       <AuthDebugSimple />
       
