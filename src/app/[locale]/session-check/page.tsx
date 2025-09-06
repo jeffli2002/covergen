@@ -6,12 +6,16 @@ import { createClient } from '@/utils/supabase/client'
 export default function SessionCheckPage() {
   const [sessionInfo, setSessionInfo] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   
   useEffect(() => {
     async function checkSession() {
-      console.log('[SessionCheck] Starting session check...')
-      
-      const supabase = createClient()
+      try {
+        console.log('[SessionCheck] Starting session check...')
+        setSessionInfo({ status: 'Starting check...' })
+        
+        const supabase = createClient()
+        console.log('[SessionCheck] Supabase client created')
       
       // Try different methods to get session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession()
@@ -50,6 +54,11 @@ export default function SessionCheckPage() {
       
       // Cleanup
       authState.subscription.unsubscribe()
+      } catch (err) {
+        console.error('[SessionCheck] Error:', err)
+        setError(err instanceof Error ? err.message : 'Unknown error')
+        setLoading(false)
+      }
     }
     
     checkSession()
@@ -58,6 +67,11 @@ export default function SessionCheckPage() {
   return (
     <div className="p-8">
       <h1 className="text-2xl font-bold mb-4">Session Check</h1>
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          Error: {error}
+        </div>
+      )}
       {loading ? (
         <p>Checking session...</p>
       ) : (
@@ -65,6 +79,9 @@ export default function SessionCheckPage() {
           {JSON.stringify(sessionInfo, null, 2)}
         </pre>
       )}
+      <div className="mt-4 text-sm text-gray-500">
+        Check browser console for detailed logs
+      </div>
     </div>
   )
 }
