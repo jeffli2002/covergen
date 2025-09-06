@@ -10,15 +10,31 @@ export async function GET(request: Request) {
   console.log('[Auth Callback] Processing OAuth callback:', {
     hasCode: !!code,
     next,
-    origin
+    origin,
+    url: request.url,
+    headers: {
+      host: request.headers.get('host'),
+      origin: request.headers.get('origin'),
+      referer: request.headers.get('referer')
+    },
+    env: {
+      NODE_ENV: process.env.NODE_ENV,
+      VERCEL_ENV: process.env.VERCEL_ENV,
+      VERCEL_URL: process.env.VERCEL_URL
+    }
   })
 
   if (code) {
     try {
       const cookieStore = cookies()
       
+      // Log existing cookies before processing
+      console.log('[Auth Callback] Existing cookies:', cookieStore.getAll().map(c => ({ name: c.name, value: c.value.substring(0, 20) + '...' })))
+      
       // Create a response that we'll use for the redirect
       const redirectUrl = `${origin}${next}`
+      console.log('[Auth Callback] Will redirect to:', redirectUrl)
+      
       const response = NextResponse.redirect(redirectUrl)
       
       // Create Supabase client with proper cookie handling
@@ -28,7 +44,9 @@ export async function GET(request: Request) {
         {
           cookies: {
             get(name: string) {
-              return cookieStore.get(name)?.value
+              const value = cookieStore.get(name)?.value
+              console.log(`[Auth Callback] Cookie get: ${name} = ${value ? 'exists' : 'missing'}`)
+              return value
             },
             set(name: string, value: string, options: any) {
               // Set cookie on the response
@@ -45,9 +63,18 @@ export async function GET(request: Request) {
                 maxAge: options.maxAge || 60 * 60 * 24 * 7 // Default 7 days
               }
               
+              console.log(`[Auth Callback] Cookie set: ${name}`, {
+                httpOnly: cookieOptions.httpOnly,
+                secure: cookieOptions.secure,
+                sameSite: cookieOptions.sameSite,
+                path: cookieOptions.path,
+                maxAge: cookieOptions.maxAge
+              })
+              
               response.cookies.set(cookieOptions)
             },
             remove(name: string, options: any) {
+              console.log(`[Auth Callback] Cookie remove: ${name}`)
               response.cookies.set({
                 name,
                 value: '',
@@ -64,17 +91,38 @@ export async function GET(request: Request) {
       )
       
       // Exchange code for session
+      console.log('[Auth Callback] Exchanging code for session...')
       const { data, error } = await supabase.auth.exchangeCodeForSession(code)
       
       if (error) {
-        console.error('[Auth Callback] Code exchange error:', error)
+        console.error('[Auth Callback] Code exchange error:', {
+          error: error,
+          message: error.message,
+          status: error.status,
+          code: error.code
+        })
         return NextResponse.redirect(`${origin}/en?error=auth_failed&message=${encodeURIComponent(error.message)}`)
       }
       
       console.log('[Auth Callback] Code exchange successful:', {
         user: data?.session?.user?.email,
+        userId: data?.session?.user?.id,
         hasSession: !!data?.session,
-        cookies: response.cookies.getAll().map(c => c.name)
+        hasAccessToken: !!data?.session?.access_token,
+        hasRefreshToken: !!data?.session?.refresh_token,
+        expiresAt: data?.session?.expires_at,
+        cookiesSetOnResponse: response.cookies.getAll().map(c => ({ name: c.name, httpOnly: c.httpOnly, secure: c.secure }))
+      })
+      
+      // Add a marker cookie to signal successful OAuth callback
+      response.cookies.set({
+        name: 'auth-callback-success',
+        value: 'true',
+        maxAge: 60, // Expires in 1 minute
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/'
       })
       
       // Return the response with cookies properly set

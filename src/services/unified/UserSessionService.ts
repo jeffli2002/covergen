@@ -152,8 +152,18 @@ class UserSessionService {
     try {
       const currentPath = window.location.pathname || '/en'
       const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
+      
+      console.log('[UserSession] Google sign-in initiated:', {
+        currentPath,
+        origin: window.location.origin,
+        hostname: window.location.hostname,
+        redirectUrl,
+        href: window.location.href,
+        isVercelPreview: window.location.hostname.includes('vercel.app'),
+        isLocalhost: window.location.hostname === 'localhost'
+      })
 
-      const { error } = await this.supabase.auth.signInWithOAuth({
+      const { data, error } = await this.supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: redirectUrl,
@@ -166,6 +176,7 @@ class UserSessionService {
       })
 
       if (error) {
+        console.error('[UserSession] OAuth initiation error:', error)
         return {
           success: false,
           error: {
@@ -174,6 +185,11 @@ class UserSessionService {
           }
         }
       }
+      
+      console.log('[UserSession] OAuth initiated successfully:', {
+        authUrl: data?.url,
+        provider: 'google'
+      })
 
       return { success: true }
     } catch (error: any) {

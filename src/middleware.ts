@@ -64,6 +64,8 @@ export async function middleware(request: NextRequest) {
     '/test-env',
     '/test-modular-oauth',
     '/test-oauth-fix',
+    '/auth-session-debug',
+    '/auth-state-test',
     '.html',
     '.png',
     '.jpg',
