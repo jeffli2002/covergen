@@ -53,6 +53,8 @@ export async function middleware(request: NextRequest) {
     '/fonts',
     '/test',
     '/auth/callback', // Skip middleware for auth callback
+    '/auth/callback-universal', // Skip middleware for universal auth callback
+    '/auth/callback-official', // Skip middleware for official auth callback
     '/auth', // Skip all auth routes
     '/oauth-debug',
     '/oauth-safe-debug',

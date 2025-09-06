@@ -32,15 +32,20 @@ export async function GET(request: Request) {
             },
             set(name: string, value: string, options: any) {
               // Set cookie on the response
-              response.cookies.set({
+              const cookieOptions = {
                 name,
                 value,
                 ...options,
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax',
-                path: '/'
-              })
+                sameSite: 'lax' as const,
+                path: '/',
+                // Important: Don't set domain for preview deployments
+                // This allows the cookie to work on dynamic Vercel URLs
+                maxAge: options.maxAge || 60 * 60 * 24 * 7 // Default 7 days
+              }
+              
+              response.cookies.set(cookieOptions)
             },
             remove(name: string, options: any) {
               response.cookies.set({
