@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Handle subscription cancellation
-    if (result.type === 'subscription_deleted' && result.customerId) {
+    if (result && 'type' in result && result.type === 'subscription_deleted' && 'customerId' in result && result.customerId) {
       await supabaseAdmin
         .from('subscriptions')
         .update({
@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
           cancel_at_period_end: true,
           updated_at: new Date()
         })
-        .eq('stripe_customer_id', result.customerId)
+        .eq('stripe_customer_id', (result as any).customerId)
     }
     
     return NextResponse.json({ received: true })
