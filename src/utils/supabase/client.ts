@@ -1,2 +1,8 @@
-// Re-export the singleton client to ensure consistency
-export { getSupabaseBrowserClient as createClient } from '@/lib/supabase-singleton'
+import { createBrowserClient } from '@supabase/ssr'
+
+export function createClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
