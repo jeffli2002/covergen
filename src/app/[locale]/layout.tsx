@@ -173,7 +173,9 @@ export default async function LocaleLayout({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(globalSchema) }}
       />
       <Providers>
-        <SessionRecovery />
+        <Suspense fallback={null}>
+          <SessionRecovery />
+        </Suspense>
         <div className={`min-h-screen flex flex-col ${inter.className}`}>
           <Header locale={locale} translations={dict} />
           <main className="flex-grow">
