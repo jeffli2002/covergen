@@ -151,10 +151,8 @@ class UserSessionService {
   async signInWithGoogle(): Promise<AuthResult> {
     try {
       const currentPath = window.location.pathname || '/en'
-      // Use Vercel-specific callback route for Vercel preview deployments
-      const isVercelPreview = window.location.hostname.includes('vercel.app')
-      const callbackRoute = isVercelPreview ? '/auth/callback-vercel' : '/auth/callback-universal'
-      const redirectUrl = `${window.location.origin}${callbackRoute}?next=${encodeURIComponent(currentPath)}`
+      // Use simple callback for all environments
+      const redirectUrl = `${window.location.origin}/auth/callback-simple?next=${encodeURIComponent(currentPath)}`
       
       console.log('[UserSession] Google sign-in initiated:', {
         currentPath,
