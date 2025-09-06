@@ -167,6 +167,77 @@ export default async function LocaleLayout({
         }}
       />
       <Script
+        id="session-recovery-direct"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              console.log('[Direct Session Recovery] Running...');
+              
+              // Check if we have session cookies but no localStorage
+              const cookies = document.cookie.split('; ');
+              const hasAuthToken = cookies.some(c => c.includes('sb-') && c.includes('auth-token'));
+              const hasSessionData = cookies.some(c => c.includes('sb-session-data'));
+              const hasAuthMarkers = cookies.some(c => c.includes('auth-callback-success') || c.includes('vercel-auth-complete'));
+              
+              console.log('[Direct Session Recovery] Cookie status:', {
+                hasAuthToken,
+                hasSessionData,
+                hasAuthMarkers,
+                cookieCount: cookies.length
+              });
+              
+              // Check localStorage
+              const storageKeys = Object.keys(localStorage);
+              const hasStoredSession = storageKeys.some(k => k.includes('sb-') || k.includes('supabase'));
+              
+              console.log('[Direct Session Recovery] Storage status:', {
+                hasStoredSession,
+                storageKeys: storageKeys.filter(k => k.includes('sb-') || k.includes('supabase'))
+              });
+              
+              // If we have cookies but no localStorage, attempt recovery
+              if (hasSessionData && !hasStoredSession) {
+                console.log('[Direct Session Recovery] Attempting to recover session from cookies...');
+                
+                const sessionCookie = cookies.find(c => c.startsWith('sb-session-data='));
+                if (sessionCookie) {
+                  try {
+                    const encodedData = sessionCookie.split('=')[1];
+                    const decodedData = decodeURIComponent(encodedData);
+                    const sessionData = JSON.parse(decodedData);
+                    
+                    console.log('[Direct Session Recovery] Parsed session data:', {
+                      hasAccessToken: !!sessionData.access_token,
+                      hasRefreshToken: !!sessionData.refresh_token,
+                      userEmail: sessionData.user?.email
+                    });
+                    
+                    // Store in localStorage for Supabase client
+                    const storageKey = 'sb-exungkcoaihcemcmhqdr-auth-token';
+                    localStorage.setItem(storageKey, JSON.stringify(sessionData));
+                    
+                    console.log('[Direct Session Recovery] Stored session in localStorage, reloading...');
+                    
+                    // Clean up temporary cookies
+                    document.cookie = 'sb-session-data=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT';
+                    document.cookie = 'auth-callback-success=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT';
+                    document.cookie = 'vercel-auth-complete=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT';
+                    
+                    // Reload the page
+                    setTimeout(() => {
+                      window.location.reload();
+                    }, 100);
+                  } catch (error) {
+                    console.error('[Direct Session Recovery] Error:', error);
+                  }
+                }
+              }
+            })();
+          `
+        }}
+      />
+      <Script
         id="structured-data"
         type="application/ld+json"
         strategy="afterInteractive"
