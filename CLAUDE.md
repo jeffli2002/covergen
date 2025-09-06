@@ -183,16 +183,21 @@ Generation/editing tasks are queued for async processing:
 - Frontend load time: < 2 seconds (P75)
 - Availability: 99.9% uptime SLA
 
-## Google OAuth Implementation Learning
+## Google OAuth Implementation Learning (3-Day Journey)
 
-### Problem: Multiple GoTrueClient Instances Warning
-When implementing Google OAuth with Supabase in Next.js, you may encounter the warning "Multiple GoTrueClient instances detected in the same browser context". This happens when:
+### The Core Problem: Multiple GoTrueClient Instances Warning
+When implementing Google OAuth with Supabase in Next.js, you may encounter the warning "Multiple GoTrueClient instances detected in the same browser context". This seemingly simple warning led to a 3-day debugging journey with several key discoveries.
+
+### Root Causes Identified
 
 1. **Mixing OAuth flows**: Using both implicit flow (tokens in URL hash) and PKCE flow (server-side code exchange)
 2. **Multiple client instances**: Creating Supabase clients in different ways across the codebase
 3. **SSR complications**: Complex SSR client setup conflicting with OAuth callbacks
+4. **Vercel deployment issues**: Environment-specific behavior differences between local and production
 
-### Solution: Use a Single, Simple Supabase Client with PKCE Flow
+### The Ultimate Solution: Simplified Architecture
+
+After extensive debugging, the solution was to simplify the entire OAuth architecture:
 
 1. **Create a simple Supabase client** (`/src/lib/supabase-simple.ts`):
    ```typescript
@@ -216,22 +221,101 @@ When implementing Google OAuth with Supabase in Next.js, you may encounter the w
    const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
    ```
 
-4. **Remove conflicting components**:
+4. **Remove ALL conflicting components**:
    - Remove OAuthHashHandler (for implicit flow)
    - Remove complex SSR client usage in OAuth-related code
+   - Remove any middleware that touches authentication state
 
-### Key Takeaways
+### Critical Debugging Steps That Led to the Solution
 
-1. **Consistency is crucial**: Pick ONE OAuth flow (PKCE recommended) and stick to it
-2. **Simplify client creation**: Use a single, simple Supabase client for OAuth flows
-3. **Debug systematically**: Use debugging tools to identify mixed flows before making changes
-4. **Type safety**: Always add TypeScript annotations for Supabase callbacks to catch errors early
+1. **Session State Analysis**:
+   - Added comprehensive logging to track session states across components
+   - Discovered race conditions between different auth state checks
+   - Found that `onAuthStateChange` events were firing multiple times
 
-### Common Pitfalls to Avoid
+2. **Vercel-Specific Issues**:
+   - Local development worked but production failed
+   - Environment variable timing issues in edge functions
+   - Cookie handling differences between environments
 
-- Don't mix `@supabase/supabase-js` and `@supabase/ssr` clients for OAuth
-- Don't use implicit flow components with PKCE configuration
-- Don't create multiple Supabase client instances in different files
-- Always match redirect URLs exactly in Supabase dashboard
+3. **AuthContext Refactoring**:
+   - Moved from complex SSR client to simple client-only approach
+   - Added proper cleanup for auth listeners
+   - Implemented single source of truth for auth state
 
-This approach ensures a clean, working Google OAuth implementation that can be adapted for other OAuth providers supported by Supabase.
+### Implementation Details That Matter
+
+1. **AuthContext Simplification**:
+   ```typescript
+   // BEFORE: Complex SSR setup
+   const [supabaseClient] = useState(() => createServerClient(...))
+   
+   // AFTER: Simple client
+   const supabaseClient = supabase // imported from supabase-simple.ts
+   ```
+
+2. **Session Management**:
+   - Use `supabase.auth.getSession()` for initial state
+   - Use `onAuthStateChange` for updates ONLY
+   - Never mix server and client session checks in the same component
+
+3. **Logout Implementation**:
+   ```typescript
+   // Ensure complete logout with server-side signout
+   await supabase.auth.signOut()
+   await fetch('/api/auth/signout', { method: 'POST' })
+   router.push('/auth/signin')
+   ```
+
+### Environment-Specific Learnings
+
+1. **Vercel Deployment**:
+   - Edge functions have different behavior than Node.js runtime
+   - Environment variables may not be available immediately
+   - Use `force-dynamic` for auth-related API routes
+
+2. **Cookie Configuration**:
+   - Ensure cookies are set with proper domain and path
+   - Use `sameSite: 'lax'` for OAuth compatibility
+   - Set `secure: true` in production only
+
+3. **Redirect URL Handling**:
+   - Always use absolute URLs for OAuth redirects
+   - Encode the 'next' parameter to preserve return paths
+   - Handle both successful and error callbacks
+
+### Key Takeaways from 3 Days of Debugging
+
+1. **Start Simple**: Begin with the simplest possible implementation and add complexity only when needed
+2. **Consistency is King**: Pick ONE OAuth flow (PKCE) and ONE client type - stick to them everywhere
+3. **Debug Systematically**: Add logging at every auth touchpoint to understand the flow
+4. **Test in Production**: Vercel/production environment behaves differently than local development
+5. **Read the Source**: Understanding Supabase's GoTrueClient source code helped identify the root cause
+
+### Common Pitfalls We Hit (So You Don't Have To)
+
+- **Don't mix** `@supabase/supabase-js` and `@supabase/ssr` clients for OAuth
+- **Don't use** implicit flow components with PKCE configuration
+- **Don't create** multiple Supabase client instances in different files
+- **Don't trust** that local development behavior matches production
+- **Don't forget** to clean up auth listeners in useEffect
+- **Always match** redirect URLs exactly in Supabase dashboard (trailing slashes matter!)
+
+### Production Checklist
+
+Before deploying OAuth to production:
+
+1. ✓ Single Supabase client instance used everywhere
+2. ✓ PKCE flow configured consistently
+3. ✓ OAuth callback route properly implemented
+4. ✓ Environment variables verified in deployment settings
+5. ✓ Redirect URLs match exactly in provider dashboards
+6. ✓ Proper error handling for OAuth failures
+7. ✓ Logout clears both client and server sessions
+8. ✓ Auth state persists across page refreshes
+
+### The "Aha!" Moment
+
+The breakthrough came when we realized that the complexity was the enemy. By removing all the "smart" SSR optimizations and middleware checks, and going back to a simple client-side auth flow with a server-side callback, everything just worked. Sometimes, the best solution is the simplest one.
+
+This approach ensures a clean, working Google OAuth implementation that can be adapted for other OAuth providers supported by Supabase. The 3-day struggle taught us that when dealing with authentication, simplicity and consistency triumph over clever optimizations.

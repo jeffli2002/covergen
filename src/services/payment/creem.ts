@@ -197,59 +197,31 @@ class CreemPaymentService {
         const baseUrl = window.location.origin
         const apiUrl = `${baseUrl}/api/payment/create-checkout`
         
-        // Get auth token with error handling
-        const authService = (await import('@/services/authService')).default
+        // Get auth context using the isolated wrapper
+        const { PaymentAuthWrapper } = await import('./auth-wrapper')
         
-        // Ensure auth is initialized
-        if (!authService.isAuthenticated()) {
-          console.log('[CreemService] User not authenticated, waiting for auth...')
-          await authService.waitForAuth()
+        // Check if session is valid for payment operations
+        if (!PaymentAuthWrapper.isSessionValidForPayment()) {
+          console.error('[CreemService] Session not valid for payment operations')
+          throw new Error('Please sign in again to continue with payment')
         }
         
-        // Force refresh session to ensure we have a fresh token
-        console.log('[CreemService] Refreshing session to ensure fresh token...')
-        const refreshResult = await authService.refreshSession()
+        // Get auth context without modifying auth state
+        const authContext = await PaymentAuthWrapper.getAuthContext()
         
-        if (!refreshResult.session) {
-          console.error('[CreemService] Failed to refresh session:', refreshResult.error)
-          
-          // Try to get current session as fallback
-          const sessionResult = await authService.ensureValidSession()
-          if (!sessionResult.success || !sessionResult.session) {
-            throw new Error(sessionResult.error || 'Authentication required - unable to get valid session')
-          }
+        if (!authContext || !authContext.isValid) {
+          console.error('[CreemService] Unable to get valid auth context')
+          throw new Error('Authentication required - please sign in to continue')
         }
         
-        // Get the current session (should be fresh now)
-        const session = authService.getCurrentSession()
+        const authToken = authContext.accessToken
         
-        if (!session || !session.access_token) {
-          console.error('[CreemService] No valid session after refresh')
-          throw new Error('Authentication required - please sign in again')
-        }
-        
-        const authToken = session.access_token
-        
-        console.log('[CreemService] Session refreshed:', {
-          hasSession: !!session,
+        console.log('[CreemService] Auth context obtained:', {
+          hasContext: !!authContext,
           hasToken: !!authToken,
-          tokenPrefix: authToken?.substring(0, 20),
-          expiresAt: session.expires_at,
-          expiresIn: session.expires_in
+          userId: authContext.userId,
+          email: authContext.email
         })
-        
-        // Check if token will expire soon (within 1 minute)
-        if (session.expires_at) {
-          const expiresAt = new Date(session.expires_at * 1000)
-          const now = new Date()
-          const timeUntilExpiry = expiresAt.getTime() - now.getTime()
-          console.log('[CreemService] Token expires in:', Math.floor(timeUntilExpiry / 1000), 'seconds')
-          
-          if (timeUntilExpiry < 60000) { // Less than 1 minute
-            console.error('[CreemService] Token is about to expire, cannot proceed')
-            throw new Error('Session expired - please sign in again')
-          }
-        }
         
         console.log('[CreemService] Making API request to:', apiUrl)
         const response = await fetch(apiUrl, {
@@ -460,22 +432,20 @@ class CreemPaymentService {
     try {
       // Client-side implementation - delegate to API route
       if (typeof window !== 'undefined') {
-        const authService = (await import('@/services/authService')).default
+        const { PaymentAuthWrapper } = await import('./auth-wrapper')
         
-        // Ensure we have a valid session
-        const sessionResult = await authService.ensureValidSession()
+        // Get auth headers for payment operations
+        const authHeaders = await PaymentAuthWrapper.getPaymentAuthHeaders()
         
-        if (!sessionResult.success || !sessionResult.session) {
-          throw new Error(sessionResult.error || 'Authentication required')
+        if (!authHeaders) {
+          throw new Error('Authentication required - please sign in to continue')
         }
-        
-        const authToken = sessionResult.session.access_token
         
         const response = await fetch('/api/payment/create-portal', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken}`
+            ...authHeaders
           },
           body: JSON.stringify({
             returnUrl

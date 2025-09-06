@@ -11,6 +11,7 @@ import { useAppStore } from '@/lib/store'
 import { useAuth } from '@/contexts/AuthContext'
 import authService from '@/services/authService'
 import { creemService, SUBSCRIPTION_PLANS, CREEM_TEST_CARDS } from '@/services/payment/creem'
+import { PaymentAuthWrapper } from '@/services/payment/auth-wrapper'
 import { toast } from 'sonner'
 import CreemDebug from '@/components/debug/CreemDebug'
 
@@ -63,19 +64,13 @@ export default function PaymentPageClient({
       return
     }
 
-    // Check if session is expiring soon and refresh it proactively
-    if (authService.isSessionExpiringSoon(10)) { // 10 minute buffer
-      console.log('[PaymentPage] Session expiring soon, refreshing...')
-      authService.refreshSession().then((result) => {
-        if (!result.session) {
-          console.error('[PaymentPage] Failed to refresh session')
-          toast.error('Session expired. Please sign in again.')
-          const returnUrl = `/${locale}/payment?plan=${selectedPlan}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
-          router.push(`/${locale}?auth=signin&redirect=${encodeURIComponent(returnUrl)}`)
-        } else {
-          console.log('[PaymentPage] Session refreshed successfully')
-        }
-      })
+    // Check if session is valid for payment operations
+    if (!PaymentAuthWrapper.isSessionValidForPayment()) {
+      console.log('[PaymentPage] Session not valid for payment operations')
+      toast.error('Please sign in again to continue with payment')
+      const returnUrl = `/${locale}/payment?plan=${selectedPlan}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
+      router.push(`/${locale}?auth=signin&redirect=${encodeURIComponent(returnUrl)}`)
+      return
     }
 
     // Load current subscription
