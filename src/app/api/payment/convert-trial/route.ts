@@ -74,16 +74,14 @@ export async function POST(request: NextRequest) {
     
     // Create checkout session with Creem for immediate billing
     try {
-      const checkoutUrl = await creemService.createCheckout({
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+      const checkoutUrl = await creemService.createCheckoutSession({
         userId: userId,
-        planId: subscription.tier,
+        planId: subscription.tier as 'pro' | 'pro_plus',
         userEmail: authContext.email || '',
         currentPlan: 'free', // Trial conversion is treated as upgrade from free
-        redirectUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/account`,
-        metadata: {
-          convertFromTrial: 'true',
-          originalTrialEnd: subscription.trial_end
-        }
+        successUrl: `${baseUrl}/account?converted=true`,
+        cancelUrl: `${baseUrl}/account`
       })
       
       // Return checkout URL for immediate payment
