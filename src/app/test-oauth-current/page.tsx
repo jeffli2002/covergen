@@ -123,7 +123,10 @@ export default function TestOAuthCurrentPage() {
         setSession(result.session)
         setSessionExpiring(authService.isSessionExpiringSoon(10))
       } else {
-        throw new Error(result.error?.message || 'Failed to refresh session')
+        const errorMessage = result.error instanceof Error 
+          ? result.error.message 
+          : (result.error as any)?.message || 'Failed to refresh session'
+        throw new Error(errorMessage)
       }
     } catch (error: any) {
       const errorMsg = error.message || 'Refresh failed'
