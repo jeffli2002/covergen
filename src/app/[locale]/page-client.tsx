@@ -66,6 +66,13 @@ const features = [
 ]
 
 export default function HomePageClient({ locale, translations: t }: HomePageClientProps) {
+  // Debug log to ensure code is running
+  useEffect(() => {
+    console.log('[HomePageClient] Component mounted, URL:', window.location.href)
+    console.log('[HomePageClient] Search params:', window.location.search)
+    console.log('[HomePageClient] Has auth_callback:', window.location.search.includes('auth_callback'))
+  }, [])
+  
   // Structured data for SEO
   const structuredData = {
     '@context': 'https://schema.org',

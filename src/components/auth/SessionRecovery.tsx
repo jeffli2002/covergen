@@ -12,7 +12,11 @@ function SessionRecoveryInner() {
   const searchParams = useSearchParams()
   const recoveryAttempted = useRef(false)
   
+  // Log immediately when component mounts
+  console.log('[SessionRecovery] Component mounted!')
+  
   useEffect(() => {
+    console.log('[SessionRecovery] Effect running...')
     async function recoverSession() {
       // Check if we need to recover session after OAuth callback
       const authCallback = searchParams.get('auth_callback')

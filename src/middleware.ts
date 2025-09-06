@@ -43,7 +43,11 @@ export async function middleware(request: NextRequest) {
   
   // If OAuth code is present and we're not already in the callback route, redirect to callback
   if (code && !error && !pathname.includes('/auth/callback')) {
-    console.log('[Middleware] OAuth code detected, redirecting to callback route')
+    console.log('[Middleware] OAuth code detected, redirecting to callback route', {
+      code: code.substring(0, 10) + '...',
+      pathname,
+      host: request.headers.get('host')
+    })
     const callbackUrl = new URL('/auth/callback', request.url)
     callbackUrl.searchParams.set('code', code)
     callbackUrl.searchParams.set('next', pathname)
