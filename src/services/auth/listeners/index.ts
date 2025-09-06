@@ -1,5 +1,4 @@
 // Central initialization for all auth listeners
-import { profileSyncListener } from './profileSync'
 import { sessionManagerListener } from './sessionManager'
 
 let initialized = false
@@ -13,7 +12,6 @@ export function initializeAuthListeners() {
   console.log('[AuthListeners] Initializing all listeners')
   
   // Start all listeners
-  profileSyncListener.start()
   sessionManagerListener.start()
   
   initialized = true
@@ -27,11 +25,10 @@ export function stopAuthListeners() {
 
   console.log('[AuthListeners] Stopping all listeners')
   
-  profileSyncListener.stop()
   sessionManagerListener.stop()
   
   initialized = false
 }
 
 // Export individual listeners for direct access if needed
-export { profileSyncListener, sessionManagerListener }
+export { sessionManagerListener }
