@@ -2,6 +2,7 @@
 
 import { useAuth } from '@/hooks/useAuth'
 import { WorkingAuthButton } from '@/components/auth/WorkingAuthButton'
+import { UnifiedAuthButton } from '@/components/auth/UnifiedAuthButton'
 
 export default function TestAuthPage() {
   const { user, loading } = useAuth()
@@ -24,8 +25,16 @@ export default function TestAuthPage() {
           )}
         </div>
 
-        <div className="flex justify-center">
-          <WorkingAuthButton />
+        <div className="flex flex-col items-center space-y-4">
+          <div>
+            <p className="text-sm text-gray-600 mb-2">Current Implementation:</p>
+            <WorkingAuthButton />
+          </div>
+          
+          <div>
+            <p className="text-sm text-gray-600 mb-2">Unified Auth (New):</p>
+            <UnifiedAuthButton />
+          </div>
         </div>
 
         <div className="text-center text-sm text-gray-600">
