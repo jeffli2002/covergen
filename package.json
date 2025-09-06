@@ -28,6 +28,7 @@
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",
     "test:watch": "vitest watch",
+    "test:payment-flow": "tsx scripts/test-payment-flow.ts",
     "test:coverage": "vitest run --coverage",
     "test:all": "./tests/run-all-tests.sh",
     "migrate:optimize": "node scripts/migrate-to-optimized-pages.js",
