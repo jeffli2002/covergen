@@ -58,7 +58,7 @@ export default function VercelAuthTestPage() {
       }
     } catch (err: any) {
       console.error('[Vercel Auth Test] Error:', err)
-      setDebugInfo(prev => ({ ...prev, error: err.message }))
+      setDebugInfo((prev: any) => ({ ...prev, error: err.message }))
     } finally {
       setLoading(false)
     }
