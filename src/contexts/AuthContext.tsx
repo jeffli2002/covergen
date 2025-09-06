@@ -36,6 +36,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('[AuthContext] Starting unified service initialization')
         console.log('[AuthContext] URL:', window.location.href)
         
+        // First try API verification (works on Vercel)
+        try {
+          const apiResponse = await fetch('/api/auth/verify')
+          const apiData = await apiResponse.json()
+          
+          if (apiData.authenticated && apiData.user) {
+            console.log('[AuthContext] API verification successful:', apiData.user.email)
+            // Convert API user to unified format
+            const unifiedUser: UnifiedUser = {
+              id: apiData.user.id,
+              email: apiData.user.email,
+              name: apiData.user.user_metadata?.full_name,
+              avatar: apiData.user.user_metadata?.avatar_url,
+              provider: 'google',
+              subscription: {
+                tier: 'free',
+                status: 'active',
+                customerId: undefined,
+                subscriptionId: undefined,
+                currentPeriodEnd: undefined,
+                cancelAtPeriodEnd: false,
+                trialEndsAt: undefined
+              },
+              usage: {
+                monthly: 0,
+                monthlyLimit: 10,
+                daily: 0,
+                dailyLimit: 3,
+                remaining: 3
+              },
+              session: {
+                accessToken: '',
+                refreshToken: '',
+                expiresAt: 0,
+                isValid: true
+              }
+            }
+            setUser(unifiedUser)
+            setLoading(false)
+            
+            // Still try to initialize unified service for subscription data
+            userSessionService.initialize().catch(console.error)
+            return
+          }
+        } catch (apiError) {
+          console.log('[AuthContext] API verification failed, trying unified service')
+        }
+        
         // Initialize the unified service
         const initialized = await userSessionService.initialize()
         
