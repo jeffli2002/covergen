@@ -39,9 +39,9 @@ export class PaymentAuthWrapper {
         return null
       }
 
-      // Validate the session is not expired
-      if (!authService.isSessionValid(session)) {
-        console.log('[PaymentAuth] Session is expired')
+      // Check if we have valid user data
+      if (!session.user || !session.user.id) {
+        console.log('[PaymentAuth] Session missing user data')
         return null
       }
 
@@ -73,7 +73,7 @@ export class PaymentAuthWrapper {
     try {
       const session = authService.getCurrentSession()
       
-      if (!session || !authService.isSessionValid(session)) {
+      if (!session || !session.user || !session.access_token) {
         return false
       }
 
