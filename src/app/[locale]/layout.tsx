@@ -11,6 +11,7 @@ import { Providers } from '@/components/providers'
 import { organizationSchema, websiteSchema, softwareApplicationSchema } from '@/lib/seo/schema'
 import { Suspense, lazy } from 'react'
 import { SessionRecovery } from '@/components/auth/SessionRecovery'
+import { AuthStatusDebug } from '@/components/debug/AuthStatusDebug'
 import '@/app/globals.css'
 
 // Lazy load performance monitor for development
@@ -255,6 +256,9 @@ export default async function LocaleLayout({
           <Footer locale={locale} translations={dict} />
         </div>
         <Analytics />
+        
+        {/* Auth Debug - Remove in production */}
+        <AuthStatusDebug />
         
         {/* Performance Monitor - Development only */}
         <Suspense fallback={null}>
