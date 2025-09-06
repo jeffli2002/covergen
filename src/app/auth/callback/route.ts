@@ -35,6 +35,14 @@ export async function GET(request: Request) {
       // Add auth_callback=success to trigger SessionRecovery
       const redirectUrl = new URL(`${origin}${next}`)
       redirectUrl.searchParams.set('auth_callback', 'success')
+      
+      // Detect Vercel preview environment and add marker
+      const isVercelPreview = request.headers.get('host')?.includes('vercel.app') || 
+                             process.env.VERCEL_ENV === 'preview'
+      if (isVercelPreview) {
+        redirectUrl.searchParams.set('vercel_auth', 'true')
+      }
+      
       console.log('[Auth Callback] Will redirect to:', redirectUrl.toString())
       
       const response = NextResponse.redirect(redirectUrl.toString())
@@ -55,12 +63,16 @@ export async function GET(request: Request) {
               const isVercelPreview = request.headers.get('host')?.includes('vercel.app') || 
                                      process.env.VERCEL_ENV === 'preview'
               
+              // CRITICAL: Do NOT set httpOnly for auth cookies on Vercel preview
+              // The client needs to read these cookies for session recovery
+              const isAuthCookie = name.includes('auth-token') || name.includes('sb-')
+              
               // Set cookie on the response
               const cookieOptions = {
                 name,
                 value,
                 ...options,
-                httpOnly: true,
+                httpOnly: isVercelPreview && isAuthCookie ? false : true, // Auth cookies must be readable on Vercel
                 secure: process.env.NODE_ENV === 'production' || isVercelPreview,
                 sameSite: 'lax' as const,
                 path: '/',
@@ -124,9 +136,28 @@ export async function GET(request: Request) {
         cookiesSetOnResponse: response.cookies.getAll().map(c => ({ name: c.name, httpOnly: c.httpOnly, secure: c.secure }))
       })
       
+      // Add session data cookie for Vercel preview deployments
+      if (isVercelPreview && data?.session) {
+        // Create a session storage cookie that the client can read
+        response.cookies.set({
+          name: 'sb-session-data',
+          value: JSON.stringify({
+            access_token: data.session.access_token,
+            refresh_token: data.session.refresh_token,
+            expires_at: data.session.expires_at,
+            expires_in: data.session.expires_in,
+            token_type: data.session.token_type,
+            user: data.session.user
+          }),
+          httpOnly: false, // Client must be able to read this
+          secure: true,
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 60 // Short-lived, just for the redirect
+        })
+      }
+      
       // Add a marker cookie to signal successful OAuth callback
-      const isVercelPreview = request.headers.get('host')?.includes('vercel.app') || 
-                             process.env.VERCEL_ENV === 'preview'
       response.cookies.set({
         name: 'auth-callback-success',
         value: 'true',
@@ -136,6 +167,19 @@ export async function GET(request: Request) {
         sameSite: 'lax',
         path: '/'
       })
+      
+      // Add Vercel marker if on Vercel preview
+      if (isVercelPreview) {
+        response.cookies.set({
+          name: 'vercel-auth-complete',
+          value: Date.now().toString(),
+          maxAge: 60, // 1 minute
+          httpOnly: false,
+          secure: true,
+          sameSite: 'lax',
+          path: '/'
+        })
+      }
       
       // Return the response with cookies properly set
       return response
