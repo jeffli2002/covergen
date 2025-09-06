@@ -24,7 +24,9 @@ export function PlatformRateLimitWrapper({
   const { user } = useAuth()
   const {
     remainingCovers,
+    remainingDailyCovers,
     hasReachedLimit,
+    hasReachedDailyLimit,
     canAccessPlatform,
     incrementUsage,
     anonymousId,
@@ -82,12 +84,18 @@ export function PlatformRateLimitWrapper({
     }
   }
   
-  // Calculate usage for display
+  // Calculate usage for display - show daily limit if it's the constraining factor
   const usedCovers = user
     ? 0 // We don't track authenticated user usage here
-    : (FREE_TIER_LIMITS.MONTHLY_COVERS - remainingCovers)
+    : hasReachedDailyLimit 
+      ? (FREE_TIER_LIMITS.DAILY_COVERS_FREE - remainingDailyCovers)
+      : (FREE_TIER_LIMITS.MONTHLY_COVERS - remainingCovers)
     
-  const totalCovers = FREE_TIER_LIMITS.MONTHLY_COVERS
+  const totalCovers = user
+    ? FREE_TIER_LIMITS.MONTHLY_COVERS // Show monthly for authenticated users
+    : hasReachedDailyLimit 
+      ? FREE_TIER_LIMITS.DAILY_COVERS_FREE  // Show daily limit if that's the constraint
+      : FREE_TIER_LIMITS.MONTHLY_COVERS     // Otherwise show monthly
   
   return (
     <>
@@ -125,8 +133,13 @@ export function PlatformRateLimitWrapper({
       <RateLimitModal
         isOpen={showRateLimitModal}
         onClose={() => setShowRateLimitModal(false)}
-        remainingCovers={remainingCovers}
-        isSignedIn={!!user}
+        limitType={hasReachedDailyLimit ? 'daily' : 'monthly'}
+        monthlyLimit={FREE_TIER_LIMITS.MONTHLY_COVERS}
+        monthlyUsed={FREE_TIER_LIMITS.MONTHLY_COVERS - remainingCovers}
+        dailyLimit={FREE_TIER_LIMITS.DAILY_COVERS_FREE}
+        dailyUsed={FREE_TIER_LIMITS.DAILY_COVERS_FREE - remainingDailyCovers}
+        tier="free"
+        isTrialing={false}
       />
       
       <PlatformRestrictedModal

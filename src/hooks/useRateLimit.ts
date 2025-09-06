@@ -8,6 +8,10 @@ import {
   updateAnonymousUsage,
   hasReachedFreeLimit,
   getRemainingFreeCovers,
+  getDailyUsage,
+  updateDailyUsage,
+  hasReachedDailyLimit,
+  getRemainingDailyCovers,
   isPlatformAllowedForFreeTier,
   STORAGE_KEYS,
   FREE_TIER_LIMITS,
@@ -17,7 +21,9 @@ export interface RateLimitState {
   isLoading: boolean;
   anonymousId: string | null;
   remainingCovers: number;
+  remainingDailyCovers: number;
   hasReachedLimit: boolean;
+  hasReachedDailyLimit: boolean;
   canAccessPlatform: (platform: string) => boolean;
   incrementUsage: () => Promise<void>;
 }
@@ -27,6 +33,7 @@ export function useRateLimit(): RateLimitState {
   const [isLoading, setIsLoading] = useState(true);
   const [anonymousId, setAnonymousId] = useState<string | null>(null);
   const [usage, setUsage] = useState(getAnonymousUsage());
+  const [dailyUsage, setDailyUsage] = useState(getDailyUsage());
 
   // Initialize anonymous ID on mount
   useEffect(() => {
@@ -53,6 +60,7 @@ export function useRateLimit(): RateLimitState {
         
         setAnonymousId(anonId);
         setUsage(getAnonymousUsage());
+        setDailyUsage(getDailyUsage());
       } catch (error) {
         console.error('Failed to initialize anonymous ID:', error);
       } finally {
@@ -67,11 +75,22 @@ export function useRateLimit(): RateLimitState {
   const remainingCovers = user 
     ? -1 // For authenticated users, we don't track here
     : getRemainingFreeCovers(usage);
+    
+  const remainingDailyCovers = user
+    ? -1 // For authenticated users, we don't track here
+    : getRemainingDailyCovers(dailyUsage, FREE_TIER_LIMITS.DAILY_COVERS_FREE);
 
   // Check if limit is reached
-  const hasReachedLimit = user
+  const hasReachedMonthlyLimit = user
     ? false // For authenticated users, we don't track here
     : hasReachedFreeLimit(usage);
+    
+  const hasReachedDailyLimitValue = user
+    ? false // For authenticated users, we don't track here
+    : hasReachedDailyLimit(dailyUsage, FREE_TIER_LIMITS.DAILY_COVERS_FREE);
+    
+  // Overall limit is reached if either daily or monthly limit is reached
+  const hasReachedLimit = hasReachedMonthlyLimit || hasReachedDailyLimitValue;
 
   // Check platform access
   const canAccessPlatform = (platform: string): boolean => {
@@ -105,7 +124,9 @@ export function useRateLimit(): RateLimitState {
         // Update local storage for anonymous users
         if (!user && anonymousId) {
           const newUsage = updateAnonymousUsage(anonymousId);
+          const newDailyUsage = updateDailyUsage(anonymousId);
           setUsage(newUsage);
+          setDailyUsage(newDailyUsage);
         }
         
         // For authenticated users, refresh subscription data
@@ -122,7 +143,9 @@ export function useRateLimit(): RateLimitState {
     isLoading,
     anonymousId,
     remainingCovers,
+    remainingDailyCovers,
     hasReachedLimit,
+    hasReachedDailyLimit: hasReachedDailyLimitValue,
     canAccessPlatform,
     incrementUsage,
   };

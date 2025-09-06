@@ -2,6 +2,9 @@ import * as crypto from 'crypto';
 
 export const FREE_TIER_LIMITS = {
   MONTHLY_COVERS: 10,
+  DAILY_COVERS_FREE: 3,
+  DAILY_COVERS_PRO_TRIAL: 4,
+  DAILY_COVERS_PRO_PLUS_TRIAL: 6,
   ALLOWED_PLATFORMS: ['youtube', 'instagram', 'tiktok', 'spotify', 'wechat'] as const,
 };
 
@@ -98,11 +101,20 @@ export const STORAGE_KEYS = {
   DEVICE_FINGERPRINT: 'covergen_device_fp',
   ANONYMOUS_ID: 'covergen_anon_id',
   USAGE_DATA: 'covergen_usage',
+  DAILY_USAGE_DATA: 'covergen_daily_usage',
 } as const;
 
 // Anonymous usage tracking interface
 export interface AnonymousUsage {
   monthKey: string;
+  count: number;
+  lastUsed: string;
+  anonymousId: string;
+}
+
+// Daily usage tracking interface
+export interface DailyUsage {
+  dateKey: string;
   count: number;
   lastUsed: string;
   anonymousId: string;
@@ -159,4 +171,63 @@ export function hasReachedFreeLimit(usage: AnonymousUsage | null): boolean {
 export function getRemainingFreeCovers(usage: AnonymousUsage | null): number {
   if (!usage) return FREE_TIER_LIMITS.MONTHLY_COVERS;
   return Math.max(0, FREE_TIER_LIMITS.MONTHLY_COVERS - usage.count);
+}
+
+// Get current date key for daily tracking
+export function getCurrentDateKey(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+}
+
+// Get daily usage from localStorage
+export function getDailyUsage(): DailyUsage | null {
+  if (typeof window === 'undefined') return null;
+  
+  try {
+    const data = localStorage.getItem(STORAGE_KEYS.DAILY_USAGE_DATA);
+    if (!data) return null;
+    
+    const usage = JSON.parse(data) as DailyUsage;
+    const currentDate = getCurrentDateKey();
+    
+    // Reset if new day
+    if (usage.dateKey !== currentDate) {
+      return null;
+    }
+    
+    return usage;
+  } catch {
+    return null;
+  }
+}
+
+// Update daily usage in localStorage
+export function updateDailyUsage(anonymousId: string): DailyUsage {
+  const currentDate = getCurrentDateKey();
+  const existingUsage = getDailyUsage();
+  
+  const usage: DailyUsage = {
+    dateKey: currentDate,
+    count: existingUsage ? existingUsage.count + 1 : 1,
+    lastUsed: new Date().toISOString(),
+    anonymousId,
+  };
+  
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(STORAGE_KEYS.DAILY_USAGE_DATA, JSON.stringify(usage));
+  }
+  
+  return usage;
+}
+
+// Check if user has reached daily limit
+export function hasReachedDailyLimit(dailyUsage: DailyUsage | null, dailyLimit: number): boolean {
+  if (!dailyUsage) return false;
+  return dailyUsage.count >= dailyLimit;
+}
+
+// Get remaining daily covers
+export function getRemainingDailyCovers(dailyUsage: DailyUsage | null, dailyLimit: number): number {
+  if (!dailyUsage) return dailyLimit;
+  return Math.max(0, dailyLimit - dailyUsage.count);
 }
