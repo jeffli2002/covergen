@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createSupabaseBrowser } from '@/lib/supabase-browser'
+import { createClient } from '@/utils/supabase/client'
 
 export default function OAuthDebugVercelPage() {
   const [logs, setLogs] = useState<string[]>([])
@@ -33,7 +33,7 @@ export default function OAuthDebugVercelPage() {
   const checkClientSession = async () => {
     addLog('Checking client-side session...')
     try {
-      const supabase = createSupabaseBrowser()
+      const supabase = createClient()
       const { data: { session }, error } = await supabase.auth.getSession()
       if (error) {
         addLog(`Client error: ${error.message}`)
@@ -53,7 +53,7 @@ export default function OAuthDebugVercelPage() {
 
   const startOAuthFlow = async () => {
     addLog('Starting OAuth flow...')
-    const supabase = createSupabaseBrowser()
+    const supabase = createClient()
     const currentUrl = window.location.href
     const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentUrl)}`
     
@@ -79,7 +79,7 @@ export default function OAuthDebugVercelPage() {
 
   const clearAll = async () => {
     addLog('Clearing all auth data...')
-    const supabase = createSupabaseBrowser()
+    const supabase = createClient()
     await supabase.auth.signOut()
     localStorage.clear()
     sessionStorage.clear()

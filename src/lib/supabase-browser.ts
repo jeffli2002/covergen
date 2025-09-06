@@ -1,5 +1,5 @@
-import { getSupabaseBrowserClient } from './supabase-singleton'
+import { createClient } from '@/utils/supabase/client'
 
 export function createSupabaseBrowser() {
-  return getSupabaseBrowserClient()
+  return createClient()
 }
