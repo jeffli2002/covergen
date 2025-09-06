@@ -32,9 +32,10 @@ export async function GET(request: Request) {
   try {
     const cookieStore = cookies()
     
-    // Create the redirect response
-    const redirectUrl = `${origin}${next}`
-    const response = NextResponse.redirect(redirectUrl)
+    // Create the redirect response with auth callback marker
+    const redirectUrl = new URL(`${origin}${next}`)
+    redirectUrl.searchParams.set('auth_callback', 'success')
+    const response = NextResponse.redirect(redirectUrl.toString())
     
     // Enhanced cookie options for Vercel preview deployments
     const isProduction = process.env.NODE_ENV === 'production'
@@ -43,7 +44,8 @@ export async function GET(request: Request) {
     console.log('[Universal Auth Callback] Cookie configuration:', {
       isProduction,
       isVercelPreview,
-      hostname
+      hostname,
+      cookieStore: cookieStore.getAll().map(c => ({ name: c.name, hasValue: !!c.value }))
     })
     
     // Create Supabase client with enhanced cookie handling
@@ -63,25 +65,20 @@ export async function GET(request: Request) {
               options
             })
             
-            // For Vercel preview deployments, don't set domain to allow default
-            const cookieOptions = {
+            // Enhanced cookie configuration for all environments
+            const cookieOptions: any = {
               name,
               value,
               path: '/',
               httpOnly: true,
               secure: true, // Always true for OAuth
               sameSite: 'lax' as const,
-              ...options
+              maxAge: options.maxAge || 60 * 60 * 24 * 7, // Default 7 days
             }
             
-            // Don't set domain for preview deployments
-            if (!isVercelPreview && isProduction) {
-              // Only set domain for production non-preview URLs
-              const productionDomain = process.env.PRODUCTION_DOMAIN
-              if (productionDomain) {
-                cookieOptions.domain = productionDomain
-              }
-            }
+            // IMPORTANT: Never set domain for any deployment
+            // This allows cookies to work on dynamic Vercel URLs
+            // The browser will automatically set the cookie for the current domain
             
             response.cookies.set(cookieOptions)
           },

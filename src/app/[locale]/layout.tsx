@@ -10,6 +10,7 @@ import { Analytics } from '@vercel/analytics/react'
 import { Providers } from '@/components/providers'
 import { organizationSchema, websiteSchema, softwareApplicationSchema } from '@/lib/seo/schema'
 import { Suspense, lazy } from 'react'
+import { SessionRecovery } from '@/components/auth/SessionRecovery'
 import '@/app/globals.css'
 
 // Lazy load performance monitor for development
@@ -172,6 +173,7 @@ export default async function LocaleLayout({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(globalSchema) }}
       />
       <Providers>
+        <SessionRecovery />
         <div className={`min-h-screen flex flex-col ${inter.className}`}>
           <Header locale={locale} translations={dict} />
           <main className="flex-grow">

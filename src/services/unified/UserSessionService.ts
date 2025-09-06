@@ -151,7 +151,7 @@ class UserSessionService {
   async signInWithGoogle(): Promise<AuthResult> {
     try {
       const currentPath = window.location.pathname || '/en'
-      const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
+      const redirectUrl = `${window.location.origin}/auth/callback-universal?next=${encodeURIComponent(currentPath)}`
       
       console.log('[UserSession] Google sign-in initiated:', {
         currentPath,

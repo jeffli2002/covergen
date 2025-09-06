@@ -296,7 +296,7 @@ class AuthService {
 
       // Get the current pathname to preserve locale
       const currentPath = window.location.pathname || '/en'
-      // Use PKCE flow with universal callback route for better error handling
+      // Use unified callback route that both services share
       const redirectUrl = `${window.location.origin}/auth/callback-universal?next=${encodeURIComponent(currentPath)}`
 
       console.log('[Auth] Google sign in with redirect URL:', redirectUrl)
