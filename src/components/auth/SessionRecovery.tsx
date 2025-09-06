@@ -25,7 +25,11 @@ function SessionRecoveryInner() {
         vercelAuth,
         recoveryAttempted: recoveryAttempted.current,
         url: window.location.href,
-        cookies: document.cookie.substring(0, 200) + '...'
+        cookiesLength: document.cookie.length,
+        hasSessionDataCookie: document.cookie.includes('sb-session-data'),
+        hasAuthMarkers: document.cookie.includes('auth-callback-success'),
+        hasVercelMarkers: document.cookie.includes('vercel-auth-complete'),
+        allCookies: document.cookie.split('; ').map(c => c.split('=')[0])
       })
       
       if (authError) {
@@ -34,7 +38,11 @@ function SessionRecoveryInner() {
       }
       
       if (authCallback !== 'success' || recoveryAttempted.current) {
-        console.log('[SessionRecovery] Skipping recovery:', { authCallback, recoveryAttempted: recoveryAttempted.current })
+        console.log('[SessionRecovery] Skipping recovery:', { 
+          authCallback, 
+          recoveryAttempted: recoveryAttempted.current,
+          allParams: Object.fromEntries(searchParams.entries())
+        })
         return
       }
       
