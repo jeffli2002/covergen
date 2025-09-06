@@ -1,10 +1,11 @@
 'use client'
 
-import { useAuth } from '@/hooks/use-auth'
+import { useAuth } from '@/hooks/useAuth'
 import { WorkingAuthButton } from '@/components/auth/WorkingAuthButton'
 
 export default function TestAuthPage() {
-  const { user, loading, isAuthenticated } = useAuth()
+  const { user, loading } = useAuth()
+  const isAuthenticated = !!user
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-8">

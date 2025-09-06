@@ -1,63 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
-    // Get the auth token from cookies
+    // Create Supabase server client
+    const supabase = createClient()
+    
+    // Get all cookies for debugging
     const cookies = request.cookies.getAll()
     const authCookies = cookies.filter(c => c.name.includes('sb-') && c.name.includes('auth-token'))
     
-    if (authCookies.length === 0) {
-      return NextResponse.json({ 
-        error: 'No auth cookies found',
-        allCookies: cookies.map(c => c.name)
-      })
-    }
+    // Get the current session
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
     
-    // Reconstruct the token from chunks
-    let fullToken = ''
-    for (let i = 0; i < authCookies.length; i++) {
-      const chunk = authCookies.find(c => c.name.endsWith(`.${i}`))
-      if (chunk) {
-        fullToken += chunk.value
-      }
-    }
+    // Get the current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
     
-    // Decode the token
-    let tokenData
-    try {
-      const decoded = Buffer.from(fullToken, 'base64').toString('utf8')
-      tokenData = JSON.parse(decoded)
-    } catch (e) {
-      return NextResponse.json({ 
-        error: 'Failed to decode token',
-        message: e instanceof Error ? e.message : 'Unknown error'
-      })
-    }
-    
-    // Make a direct API call to Supabase to verify the token
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
-      headers: {
-        'Authorization': `Bearer ${tokenData.access_token}`,
-        'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      }
-    })
-    
-    const userData = await response.json()
-    
+    // Debug information
     return NextResponse.json({
-      cookieFound: true,
-      tokenDecoded: true,
-      hasAccessToken: !!tokenData.access_token,
-      userApiResponse: {
-        status: response.status,
-        data: userData
+      success: true,
+      debug: {
+        totalCookies: cookies.length,
+        authCookies: authCookies.length,
+        cookieNames: cookies.map(c => c.name),
+        authCookieNames: authCookies.map(c => c.name)
       },
-      supabaseUrl,
+      session: {
+        exists: !!session,
+        error: sessionError?.message,
+        hasAccessToken: !!session?.access_token,
+        hasRefreshToken: !!session?.refresh_token,
+        expiresAt: session?.expires_at,
+        userEmail: session?.user?.email
+      },
+      user: {
+        exists: !!user,
+        error: userError?.message,
+        id: user?.id,
+        email: user?.email,
+        emailVerified: user?.email_confirmed_at,
+        lastSignIn: user?.last_sign_in_at
+      },
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
       timestamp: new Date().toISOString()
     })
   } catch (error) {
     return NextResponse.json({
+      success: false,
       error: 'Server error',
       message: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString()
