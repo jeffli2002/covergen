@@ -10,11 +10,16 @@ function OAuthCodeHandlerInner() {
   const searchParams = useSearchParams()
   const processingRef = useRef(false)
   
+  console.log('[OAuthCodeHandler] Component mounted')
+  
   useEffect(() => {
     async function handleOAuthCode() {
       const code = searchParams.get('code')
       
+      console.log('[OAuthCodeHandler] Effect running, code:', code ? code.substring(0, 10) + '...' : 'none')
+      
       if (!code || processingRef.current) {
+        console.log('[OAuthCodeHandler] Skipping:', { hasCode: !!code, isProcessing: processingRef.current })
         return
       }
       
