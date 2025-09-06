@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     const result = await creemService.handleWebhookEvent(event)
     
     // Handle checkout completion (new subscription or trial start)
-    if (result?.type === 'checkout_complete' && result.userId) {
+    if (result && 'type' in result && result.type === 'checkout_complete' && 'userId' in result && result.userId) {
       const { userId, customerId, subscriptionId, planId, isTrialCheckout, trialDays } = result as any
       
       // Calculate all necessary timestamps
@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Handle subscription updates (renewals, trial conversions, plan changes)
-    if (result?.type === 'subscription_updated' && result.customerId) {
+    if (result && 'type' in result && result.type === 'subscription_updated' && 'customerId' in result && result.customerId) {
       const { customerId, status, planId, currentPeriodEnd, metadata } = result as any
       
       // Find subscription by customer ID
@@ -263,7 +263,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Handle subscription cancellation
-    if (result?.type === 'subscription_deleted' && result.customerId) {
+    if (result && 'type' in result && result.type === 'subscription_deleted' && 'customerId' in result && result.customerId) {
       const { data: subscription } = await supabaseAdmin
         .from('subscriptions')
         .select('*')
