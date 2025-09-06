@@ -194,7 +194,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
             <LanguageSwitcher currentLocale={locale} />
             {user ? (
               <>
-                <UserMenu />
+                {/* <UserMenu /> */}
                 
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <User className="w-4 h-4" />
