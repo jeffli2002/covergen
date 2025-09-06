@@ -25,9 +25,7 @@ export async function GET(request: NextRequest) {
       authCookies: authCookies.map(c => ({
         name: c.name,
         hasValue: !!c.value,
-        httpOnly: c.httpOnly,
-        secure: c.secure,
-        sameSite: c.sameSite
+        valueLength: c.value?.length || 0
       })),
       hasSbSessionData: allCookies.some(c => c.name === 'sb-session-data'),
       hasAuthCallbackSuccess: allCookies.some(c => c.name === 'auth-callback-success'),
