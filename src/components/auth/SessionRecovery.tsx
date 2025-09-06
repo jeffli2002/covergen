@@ -5,8 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { userSessionService } from '@/services/unified/UserSessionService'
 import { VercelSessionBridge } from '@/lib/supabase/session-bridge'
+import { Suspense } from 'react'
 
-export function SessionRecovery() {
+function SessionRecoveryInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const recoveryAttempted = useRef(false)
@@ -187,4 +188,12 @@ export function SessionRecovery() {
   }, [searchParams, router])
   
   return null
+}
+
+export function SessionRecovery() {
+  return (
+    <Suspense fallback={null}>
+      <SessionRecoveryInner />
+    </Suspense>
+  )
 }

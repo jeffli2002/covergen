@@ -3,8 +3,9 @@
 import { useEffect, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
+import { Suspense } from 'react'
 
-export function OAuthCallbackDetector() {
+function OAuthCallbackDetectorInner() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const processed = useRef(false)
@@ -96,4 +97,12 @@ export function OAuthCallbackDetector() {
   }, [searchParams, router])
   
   return null
+}
+
+export function OAuthCallbackDetector() {
+  return (
+    <Suspense fallback={null}>
+      <OAuthCallbackDetectorInner />
+    </Suspense>
+  )
 }
