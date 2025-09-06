@@ -27,7 +27,6 @@ import { Locale } from '@/lib/i18n/config'
 import { AuthDebugSimple } from '@/components/auth/AuthDebugSimple'
 import { SessionRecovery } from '@/components/auth/SessionRecovery'
 import { OAuthCallbackDetector } from '@/components/auth/OAuthCallbackDetector'
-import { OAuthCodeHandler } from '@/components/auth/OAuthCodeHandler'
 
 interface HomePageClientProps {
   locale: Locale
@@ -111,47 +110,16 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
     })
   }, [authUser])
 
-  // Handle OAuth errors and codes
+  // Handle OAuth errors
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
     const error = urlParams.get('error')
     const errorDescription = urlParams.get('error_description')
-    const code = urlParams.get('code')
-    
-    console.log('[HomePage] OAuth check:', { error, code: code ? code.substring(0, 10) + '...' : null })
     
     if (error) {
       console.error('[HomePage] OAuth error:', errorDescription || error)
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname)
-    }
-    
-    // Handle OAuth code if present (backup for OAuthCodeHandler)
-    if (code && !error) {
-      console.log('[HomePage] Found OAuth code, attempting exchange...')
-      
-      import('@/utils/supabase/client').then(async ({ createClient }) => {
-        const supabase = createClient()
-        
-        try {
-          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
-          
-          if (exchangeError) {
-            console.error('[HomePage] Code exchange failed:', exchangeError)
-            window.location.href = '/auth/error?error=' + encodeURIComponent(exchangeError.message)
-          } else if (data?.session) {
-            console.log('[HomePage] Session established!', data.session.user.email)
-            
-            // Clean URL and reload
-            const cleanUrl = new URL(window.location.href)
-            cleanUrl.searchParams.delete('code')
-            cleanUrl.searchParams.set('auth_callback', 'success')
-            window.location.href = cleanUrl.toString()
-          }
-        } catch (err) {
-          console.error('[HomePage] Code exchange error:', err)
-        }
-      })
     }
   }, [])
   
@@ -193,7 +161,6 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
   return (
     <div className="min-h-screen bg-background">
       {/* OAuth detection and session recovery */}
-      <OAuthCodeHandler />
       <OAuthCallbackDetector />
       <SessionRecovery />
       

@@ -35,6 +35,20 @@ function getLocale(request: NextRequest): string {
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
+  const searchParams = request.nextUrl.searchParams
+  
+  // Check for OAuth code in URL
+  const code = searchParams.get('code')
+  const error = searchParams.get('error')
+  
+  // If OAuth code is present and we're not already in the callback route, redirect to callback
+  if (code && !error && !pathname.includes('/auth/callback')) {
+    console.log('[Middleware] OAuth code detected, redirecting to callback route')
+    const callbackUrl = new URL('/auth/callback', request.url)
+    callbackUrl.searchParams.set('code', code)
+    callbackUrl.searchParams.set('next', pathname)
+    return NextResponse.redirect(callbackUrl)
+  }
   
   // Check if the pathname is missing a locale
   const pathnameIsMissingLocale = locales.every(
