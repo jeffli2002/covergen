@@ -169,7 +169,7 @@ export default function PaymentPageClient({
     // Check session validity at payment time
     console.log('[PaymentPage] Checking session validity...')
     
-    const isSessionValid = PaymentAuthWrapper.isSessionValidForPayment()
+    const isSessionValid = await PaymentAuthWrapper.isSessionValidForPayment()
     console.log('[PaymentPage] Session validity result:', isSessionValid)
     
     if (!isSessionValid) {

@@ -227,7 +227,7 @@ class CreemPaymentService {
         const { PaymentAuthWrapper } = await import('./auth-wrapper')
         
         // Check if session is valid for payment operations
-        if (!PaymentAuthWrapper.isSessionValidForPayment()) {
+        if (!(await PaymentAuthWrapper.isSessionValidForPayment())) {
           console.error('[CreemService] Session not valid for payment operations')
           throw new Error('Please sign in again to continue with payment')
         }

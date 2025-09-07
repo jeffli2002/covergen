@@ -33,6 +33,9 @@ export class PaymentAuthWrapper {
    */
   static async getAuthContext(): Promise<PaymentAuthContext | null> {
     try {
+      // Ensure auth service is initialized before getting session
+      await authService.initialize()
+      
       // First try the authService which maintains the single source of truth
       const session = authService.getCurrentSession()
       
@@ -71,8 +74,11 @@ export class PaymentAuthWrapper {
    * Validate if current session is suitable for payment operations
    * Requires at least 5 minutes of validity remaining
    */
-  static isSessionValidForPayment(): boolean {
+  static async isSessionValidForPayment(): Promise<boolean> {
     try {
+      // Ensure auth service is initialized before checking session
+      await authService.initialize()
+      
       const session = authService.getCurrentSession()
       
       console.log('[PaymentAuth] isSessionValidForPayment check:', {
@@ -131,8 +137,8 @@ export class PaymentAuthWrapper {
   /**
    * Check if user needs to re-authenticate before payment
    */
-  static needsReauthForPayment(): boolean {
-    return !this.isSessionValidForPayment()
+  static async needsReauthForPayment(): Promise<boolean> {
+    return !(await this.isSessionValidForPayment())
   }
 
   /**
@@ -147,6 +153,9 @@ export class PaymentAuthWrapper {
    * This doesn't modify auth state, just waits for it to be available
    */
   static async waitForAuth(maxWaitMs = 5000): Promise<boolean> {
+    // Ensure auth service is initialized
+    await authService.initialize()
+    
     const startTime = Date.now()
     
     while (Date.now() - startTime < maxWaitMs) {
@@ -219,7 +228,7 @@ export function withPaymentAuth<P extends object>(
         // Wait for auth to be ready
         const ready = await PaymentAuthWrapper.waitForAuth()
         
-        if (!ready || PaymentAuthWrapper.needsReauthForPayment()) {
+        if (!ready || await PaymentAuthWrapper.needsReauthForPayment()) {
           setNeedsAuth(true)
         } else {
           setAuthReady(true)
