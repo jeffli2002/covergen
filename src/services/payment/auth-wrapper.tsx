@@ -75,8 +75,12 @@ export class PaymentAuthWrapper {
   static isSessionValidForPayment(): boolean {
     // TEMPORARY: Always return true to bypass ALL checks while debugging
     // TODO: Remove this once session retrieval issue is resolved
-    console.error('[PaymentAuth] !!!! BYPASS ACTIVE !!!! Always returning true for debugging')
-    console.error('[PaymentAuth] !!!! THIS SHOULD APPEAR IN CONSOLE !!!!')
+    if (typeof window !== 'undefined') {
+      (window as any).__PAYMENT_AUTH_BYPASS_CALLED = true
+      console.error('[PaymentAuth] !!!! BYPASS ACTIVE !!!! Always returning true for debugging')
+      console.error('[PaymentAuth] !!!! THIS SHOULD APPEAR IN CONSOLE !!!!')
+      console.error('[PaymentAuth] Stack trace:', new Error().stack)
+    }
     return true
     
     try {
