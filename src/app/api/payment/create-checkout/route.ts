@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { creemService } from '@/services/payment/creem'
-import { PaymentAuthWrapper } from '@/services/payment/auth-wrapper'
 import { getUserSubscription } from '@/services/payment/database-helper'
 
 export async function POST(req: NextRequest) {
@@ -40,22 +39,27 @@ export async function POST(req: NextRequest) {
 
     const token = authHeader.substring(7)
     
-    // Validate session using PaymentAuthWrapper (read-only)
-    const { valid, userId, email } = await PaymentAuthWrapper.validateWebhookSession(token)
+    // Get the authenticated user from the token
+    const { getUserFromRequest } = await import('@/lib/supabase-server')
+    const { user, error } = await getUserFromRequest(req)
     
     console.log('[DEBUG] Auth validation result:', {
-      valid,
-      userId,
-      email
+      hasUser: !!user,
+      userId: user?.id,
+      email: user?.email,
+      error
     })
     
-    if (!valid || !userId || !email) {
-      console.error('Auth validation failed')
+    if (error || !user || !user.id || !user.email) {
+      console.error('Auth validation failed:', error)
       return NextResponse.json(
         { error: 'Invalid authentication' },
         { status: 401 }
       )
     }
+    
+    const userId = user.id
+    const email = user.email
 
     // Get current subscription using the database helper (no new clients)
     const subscription = await getUserSubscription(userId)

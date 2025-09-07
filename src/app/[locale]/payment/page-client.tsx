@@ -206,15 +206,24 @@ export default function PaymentPageClient({
         cancelUrl: `${window.location.origin}/${locale}/payment/cancel`,
         currentPlan: currentSubscription?.tier || 'free'
       })
+      
+      console.log('[PaymentPage] Checkout result:', {
+        success: result.success,
+        hasUrl: !!result.url,
+        error: result.error,
+        fullResult: result
+      })
 
       if (result.success && result.url) {
+        console.log('[PaymentPage] Redirecting to checkout URL:', result.url)
         // Redirect to Creem checkout
         window.location.href = result.url
       } else {
         throw new Error(result.error || 'Failed to create checkout session')
       }
     } catch (error: any) {
-      console.error('Payment error:', error)
+      console.error('[PaymentPage] Payment error:', error)
+      console.error('[PaymentPage] Error stack:', error.stack)
       
       // Provide user-friendly error messages
       let errorMessage = 'Something went wrong. Please try again.'
