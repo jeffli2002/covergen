@@ -15,8 +15,21 @@ import { PaymentAuthWrapper } from '@/services/payment/auth-wrapper'
 import { toast } from 'sonner'
 import CreemDebug from '@/components/debug/CreemDebug'
 
-console.log('[PaymentPage] Module loaded at:', new Date().toISOString())
-alert('[PaymentPage] Module loaded!')
+// Test if console.log works
+try {
+  console.log('[PaymentPage] Module loaded at:', new Date().toISOString());
+  console.error('[PaymentPage] This is an error log');
+  console.warn('[PaymentPage] This is a warning log');
+  console.info('[PaymentPage] This is an info log');
+  
+  // Store in window to verify
+  if (typeof window !== 'undefined') {
+    window.paymentPageLoaded = true;
+    window.paymentPageLoadTime = new Date().toISOString();
+  }
+} catch (e) {
+  alert('Console.log error: ' + e);
+}
 
 // Global test to verify JavaScript is running
 if (typeof window !== 'undefined') {
@@ -43,9 +56,23 @@ export default function PaymentPageClient({
   isUpgrade = false,
   redirectUrl 
 }: PaymentPageClientProps) {
-  // Immediate console log to verify component is rendering
-  console.log('[PaymentPage] ===== COMPONENT RENDER START =====', new Date().toISOString())
-  console.log('[PaymentPage] Component rendering with props:', { locale, initialPlan, isUpgrade, redirectUrl })
+  // Test different logging methods
+  const logPrefix = '[PaymentPage]';
+  const timestamp = new Date().toISOString();
+  
+  // Try multiple logging approaches
+  try {
+    console.log(logPrefix + ' ===== COMPONENT RENDER START ===== ' + timestamp);
+    console.log(logPrefix + ' Component rendering with props:', { locale, initialPlan, isUpgrade, redirectUrl });
+    
+    // Also store in window for verification
+    if (typeof window !== 'undefined') {
+      window.paymentComponentRendered = true;
+      window.paymentComponentRenderTime = timestamp;
+    }
+  } catch (e) {
+    alert('Component logging error: ' + e);
+  }
   
   const router = useRouter()
   const { user } = useAppStore()
@@ -466,9 +493,36 @@ export default function PaymentPageClient({
           {/* Simple inline test */}
           <div 
             className="mt-2 p-2 bg-yellow-100 cursor-pointer inline-block"
-            onClick={() => { console.log('[INLINE TEST] Div clicked!'); alert('Inline div clicked!'); }}
+            onClick={() => { 
+              alert('Inline div clicked!');
+              
+              // Test console in different ways
+              try {
+                console.log('[INLINE TEST] Standard console.log');
+                window.console.log('[INLINE TEST] Window.console.log');
+                
+                // Check window variables
+                alert('Window vars: paymentPageLoaded=' + window.paymentPageLoaded + ', componentRendered=' + window.paymentComponentRendered);
+                
+                // Try to find console logs
+                const logs = [];
+                const originalLog = console.log;
+                console.log = function(...args) {
+                  logs.push(args.join(' '));
+                  originalLog.apply(console, args);
+                };
+                
+                console.log('[INLINE TEST] Test after override');
+                alert('Captured logs: ' + logs.join('\n'));
+                
+                // Restore
+                console.log = originalLog;
+              } catch (e) {
+                alert('Console test error: ' + e);
+              }
+            }}
           >
-            Click this yellow box to test if ANY onClick works
+            Click this yellow box to test console.log
           </div>
           
           {/* Debug button */}
@@ -488,8 +542,19 @@ export default function PaymentPageClient({
             <button
               onClick={() => {
                 alert('[DEBUG] Native button clicked!');
-                console.log('[DEBUG] Native button clicked!');
-                console.log('[DEBUG] handleSelectPlan type:', typeof handleSelectPlan);
+                
+                // Test console directly
+                try {
+                  window.console.log('[DEBUG] Native button clicked via window.console!');
+                  console.log('[DEBUG] Native button clicked!');
+                  console.log('[DEBUG] handleSelectPlan type:', typeof handleSelectPlan);
+                  
+                  // Check if console is overridden
+                  alert('Console.log is: ' + typeof console.log);
+                  alert('Window.console.log is: ' + typeof window.console.log);
+                } catch (e) {
+                  alert('Console error in button: ' + e);
+                }
                 try {
                   console.log('[DEBUG] About to call handleSelectPlan');
                   handleSelectPlan('pro').catch(err => {
