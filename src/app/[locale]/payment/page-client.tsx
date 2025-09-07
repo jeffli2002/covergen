@@ -158,11 +158,32 @@ export default function PaymentPageClient({
       // Check session validity at payment time
       window.console.log('[PaymentPage] About to check session validity...');
       console.log('[PaymentPage] Checking session validity...')
-      const isSessionValid = await PaymentAuthWrapper.isSessionValidForPayment()
-      window.console.log('[PaymentPage] Session validity result:', isSessionValid);
-      console.log('[PaymentPage] Session validity result:', isSessionValid)
+      
+      let isSessionValid = false;
+      try {
+        // Add timeout to prevent hanging
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Session check timeout')), 5000)
+        );
+        
+        const sessionCheckPromise = PaymentAuthWrapper.isSessionValidForPayment();
+        
+        isSessionValid = await Promise.race([
+          sessionCheckPromise,
+          timeoutPromise
+        ]) as boolean;
+        
+        window.console.log('[PaymentPage] Session validity result:', isSessionValid);
+        console.log('[PaymentPage] Session validity result:', isSessionValid)
+      } catch (sessionError: any) {
+        window.console.error('[PaymentPage] Error checking session:', sessionError);
+        console.error('[PaymentPage] Error checking session:', sessionError);
+        // Assume session is invalid if check fails
+        isSessionValid = false;
+      }
       
       if (!isSessionValid) {
+        window.console.log('[PaymentPage] Session not valid for payment - will redirect');
         console.log('[PaymentPage] Session not valid for payment')
         toast.error('Your session has expired. Please sign in again to continue.')
         const returnUrl = `/${locale}/payment?plan=${planId}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
@@ -170,6 +191,7 @@ export default function PaymentPageClient({
         return
       }
 
+      window.console.log('[PaymentPage] Session is valid, proceeding with payment...');
       setLoading(true)
       console.log('[PaymentPage] Creating checkout session...')
       
