@@ -11,7 +11,7 @@ type SubscriptionRow = Database['public']['Tables']['subscriptions']['Row']
 type CustomerMappingRow = Database['public']['Tables']['customer_mapping']['Row']
 
 // Singleton admin client for database operations
-let adminClient: ReturnType<typeof createClient> | null = null
+let adminClient: ReturnType<typeof createClient<Database>> | null = null
 
 function getAdminClient() {
   if (!adminClient) {
@@ -19,7 +19,7 @@ function getAdminClient() {
       throw new Error('Missing Supabase environment variables')
     }
     
-    adminClient = createClient(
+    adminClient = createClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.SUPABASE_SERVICE_ROLE_KEY,
       {
@@ -94,7 +94,7 @@ export async function updateSubscriptionStatus(
   status: string,
   tier: string,
   subscriptionData: any
-) {
+): Promise<boolean> {
   try {
     const supabase = getAdminClient()
     
@@ -102,8 +102,8 @@ export async function updateSubscriptionStatus(
       .from('subscriptions')
       .upsert({
         user_id: userId,
-        status,
-        tier,
+        status: status as 'active' | 'cancelled' | 'past_due',
+        tier: tier as 'free' | 'pro' | 'pro_plus',
         ...subscriptionData,
         updated_at: new Date().toISOString()
       })
@@ -152,9 +152,15 @@ export async function upsertSubscription(subscriptionData: Partial<SubscriptionR
   try {
     const supabase = getAdminClient()
     
+    // Ensure required fields are present for upsert
+    const dataToUpsert = {
+      ...subscriptionData,
+      updated_at: new Date().toISOString()
+    }
+    
     const { data, error } = await supabase
       .from('subscriptions')
-      .upsert(subscriptionData)
+      .upsert(dataToUpsert as any) // Type assertion needed due to Supabase's strict typing
       .select()
       .single()
     
