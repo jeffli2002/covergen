@@ -153,31 +153,44 @@ export default function PaymentPageClient({
   }
 
   const handleSelectPlan = async (planId: 'pro' | 'pro_plus') => {
-    console.log('[PaymentPage] handleSelectPlan called with planId:', planId)
-    console.log('[PaymentPage] Current authUser:', authUser)
-    console.log('[PaymentPage] Authentication status:', authService.isAuthenticated())
-    console.log('[PaymentPage] authLoading:', authLoading)
-    console.log('[PaymentPage] user from context:', user)
-    
-    console.log('[PaymentPage] Starting payment process for plan:', planId)
-    
-    if (authLoading) {
-      console.log('[PaymentPage] Auth is still loading')
-      toast.error('Please wait, authentication is loading...')
+    try {
+      console.log('[PaymentPage] handleSelectPlan START')
+      alert(`handleSelectPlan called with planId: ${planId}`)
+      
+      console.log('[PaymentPage] handleSelectPlan called with planId:', planId)
+      console.log('[PaymentPage] Current authUser:', authUser)
+      console.log('[PaymentPage] Authentication status:', authService.isAuthenticated())
+      console.log('[PaymentPage] authLoading:', authLoading)
+      console.log('[PaymentPage] user from context:', user)
+      
+      console.log('[PaymentPage] Starting payment process for plan:', planId)
+      
+      if (authLoading) {
+        console.log('[PaymentPage] Auth is still loading')
+        alert('Auth is still loading')
+        toast.error('Please wait, authentication is loading...')
+        return
+      }
+      
+      if (!authUser) {
+        console.log('[PaymentPage] No authUser found')
+        console.log('[PaymentPage] Will redirect to signin')
+        alert('No authUser found, will redirect to signin')
+        toast.error('Please sign in to continue')
+        const returnUrl = `/${locale}/payment?plan=${planId}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
+        router.push(`/${locale}?auth=signin&redirect=${encodeURIComponent(returnUrl)}`)
+        return
+      }
+    } catch (error: any) {
+      console.error('[PaymentPage] Error in handleSelectPlan (early):', error)
+      alert(`Error in handleSelectPlan: ${error.message}`)
       return
     }
     
-    if (!authUser) {
-      console.log('[PaymentPage] No authUser found')
-      console.log('[PaymentPage] Will redirect to signin')
-      toast.error('Please sign in to continue')
-      const returnUrl = `/${locale}/payment?plan=${planId}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
-      router.push(`/${locale}?auth=signin&redirect=${encodeURIComponent(returnUrl)}`)
-      return
-    }
-    
-    // Check session validity at payment time
-    console.log('[PaymentPage] Checking session validity...')
+    try {
+      // Check session validity at payment time
+      console.log('[PaymentPage] Checking session validity...')
+      alert('About to check session validity')
     
     const isSessionValid = await PaymentAuthWrapper.isSessionValidForPayment()
     console.log('[PaymentPage] Session validity result:', isSessionValid)
@@ -449,7 +462,12 @@ export default function PaymentPageClient({
                       console.log('[PaymentPage] Button click event:', e)
                       console.log('[PaymentPage] Button disabled state:', loading || isCurrentPlan)
                       console.log('[PaymentPage] Loading:', loading, 'isCurrentPlan:', isCurrentPlan)
-                      handleSelectPlan(plan.id as 'pro' | 'pro_plus')
+                      
+                      // Call handleSelectPlan and catch any errors
+                      handleSelectPlan(plan.id as 'pro' | 'pro_plus').catch(err => {
+                        console.error('[PaymentPage] Error calling handleSelectPlan:', err)
+                        alert(`Error calling handleSelectPlan: ${err.message}`)
+                      })
                     }}
                   >
                     {loading && selectedPlan === plan.id ? (
