@@ -171,33 +171,43 @@ export default function PaymentPageClient({
       window.console.log('[PaymentPage] Creating checkout with:', { userId, userEmail, planId });
       console.log('[PaymentPage] Creating checkout with:', { userId, userEmail, planId })
       
-      window.console.log('[PaymentPage] About to call creemService.createCheckoutSession...');
+      window.console.log('[PaymentPage] Making direct API call to create checkout...');
       
+      // Make direct API call to bypass hanging service
       let result: any;
       try {
-        // Add timeout to prevent hanging
-        const checkoutTimeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Checkout creation timeout')), 10000)
-        );
+        // Get the access token from the auth context
+        const session = authService.getCurrentSession();
+        const accessToken = session?.access_token;
         
-        const checkoutPromise = creemService.createCheckoutSession({
-          userId,
-          userEmail,
-          planId,
-          successUrl: `${window.location.origin}/${locale}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-          cancelUrl: `${window.location.origin}/${locale}/payment/cancel`,
-          currentPlan: currentSubscription?.tier || 'free'
+        window.console.log('[PaymentPage] Making API call with auth token:', accessToken ? 'Present' : 'Missing');
+        
+        const response = await fetch('/api/payment/create-checkout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': accessToken ? `Bearer ${accessToken}` : '',
+          },
+          body: JSON.stringify({
+            userId,
+            userEmail,
+            planId,
+            successUrl: `${window.location.origin}/${locale}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancelUrl: `${window.location.origin}/${locale}/payment/cancel`,
+            currentPlan: currentSubscription?.tier || 'free'
+          })
         });
         
-        result = await Promise.race([
-          checkoutPromise,
-          checkoutTimeoutPromise
-        ]) as any;
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Failed to parse error response' }));
+          throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        }
         
-        window.console.log('[PaymentPage] Creem service returned:', result);
-      } catch (timeoutError: any) {
-        window.console.error('[PaymentPage] Checkout creation error:', timeoutError);
-        throw new Error('Failed to create checkout session: ' + timeoutError.message);
+        result = await response.json();
+        window.console.log('[PaymentPage] API response:', result);
+      } catch (apiError: any) {
+        window.console.error('[PaymentPage] API call error:', apiError);
+        throw new Error('Failed to create checkout session: ' + apiError.message);
       }
       
       console.log('[PaymentPage] Checkout result:', {
