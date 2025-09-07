@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Test 2: Session validity for payments
-    results.tests.sessionValidForPayment = PaymentAuthWrapper.isSessionValidForPayment()
+    results.tests.sessionValidForPayment = await PaymentAuthWrapper.isSessionValidForPayment()
 
     // Test 3: Auth context retrieval
     const authContext = await PaymentAuthWrapper.getAuthContext()
