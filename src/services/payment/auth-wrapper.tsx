@@ -182,7 +182,7 @@ export class PaymentAuthWrapper {
     try {
       // For webhook validation, we need to use the admin client
       // Use the existing admin client to avoid creating multiple instances
-      const { supabaseAdmin } = await import('@/lib/supabase-server')
+      const { supabaseAdmin } = await import('@/lib/supabase-admin')
 
       const { data: { user }, error } = await supabaseAdmin.auth.getUser(accessToken)
       

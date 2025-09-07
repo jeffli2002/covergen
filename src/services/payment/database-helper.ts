@@ -4,7 +4,7 @@
  * This prevents the "Multiple GoTrueClient instances" error
  */
 
-import { supabaseAdmin } from '@/lib/supabase-server'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import { Database } from '@/types/supabase'
 
 type SubscriptionRow = Database['public']['Tables']['subscriptions']['Row']
