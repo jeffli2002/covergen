@@ -41,10 +41,10 @@ export default function PaymentPageClient({
   isUpgrade = false,
   redirectUrl 
 }: PaymentPageClientProps) {
-  try {
-    // Immediate console log to verify component is rendering
-    console.log('[PaymentPage] ===== COMPONENT RENDER START =====', new Date().toISOString())
-    console.log('[PaymentPage] Component rendering with props:', { locale, initialPlan, isUpgrade, redirectUrl })
+  // Immediate console log to verify component is rendering
+  console.log('[PaymentPage] ===== COMPONENT RENDER START =====', new Date().toISOString())
+  console.log('[PaymentPage] Component rendering with props:', { locale, initialPlan, isUpgrade, redirectUrl })
+  
   const router = useRouter()
   const { user } = useAppStore()
   const { user: authUser, loading: authLoading } = useAuth()
@@ -56,6 +56,7 @@ export default function PaymentPageClient({
   const isMounted = useRef(true)
   const [hasInitialized, setHasInitialized] = useState(false)
   const initCheckCount = useRef(0)
+  const [componentError, setComponentError] = useState<Error | null>(null)
 
   // Debug button click issues
   useEffect(() => {
@@ -420,30 +421,32 @@ export default function PaymentPageClient({
     }
   ]
 
-  // Show loading state while auth is loading
-  if (authLoading) {
-    console.log('[PaymentPage] Showing auth loading state')
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">
-        <div className="container max-w-6xl mx-auto px-4">
-          <div className="flex items-center justify-center h-64">
-            <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+  // Use try-catch for rendering logic only, not hooks
+  try {
+    // Show loading state while auth is loading
+    if (authLoading) {
+      console.log('[PaymentPage] Showing auth loading state')
+      return (
+        <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">
+          <div className="container max-w-6xl mx-auto px-4">
+            <div className="flex items-center justify-center h-64">
+              <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+            </div>
           </div>
         </div>
-      </div>
-    )
-  }
+      )
+    }
 
-  console.log('[PaymentPage] Rendering main payment UI')
-  console.log('[PaymentPage] Current state:', {
-    authUser: !!authUser,
-    authLoading,
-    loading,
-    currentSubscription: currentSubscription?.tier || 'none',
-    plans: plans.length
-  })
-  
-  return (
+    console.log('[PaymentPage] Rendering main payment UI')
+    console.log('[PaymentPage] Current state:', {
+      authUser: !!authUser,
+      authLoading,
+      loading,
+      currentSubscription: currentSubscription?.tier || 'none',
+      plans: plans.length
+    })
+    
+    return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">
       <div className="container max-w-6xl mx-auto px-4">
         {/* Header */}
@@ -772,7 +775,7 @@ export default function PaymentPageClient({
       </div>
     </div>
   )
-  } catch (error) {
+  } catch (error: any) {
     console.error('[PaymentPage] CRITICAL ERROR IN COMPONENT:', error)
     return (
       <div className="min-h-screen bg-red-50 py-12">
