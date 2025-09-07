@@ -65,17 +65,17 @@ export async function POST(request: NextRequest) {
       
       const subscriptionData = {
         user_id: userId,
-        tier: planId,
-        status: 'active',
+        tier: planId as 'free' | 'pro' | 'pro_plus',
+        status: 'active' as const,
         stripe_customer_id: customerId, // Using stripe fields for Creem data
         stripe_subscription_id: subscriptionId,
-        trial_start: trialStart,
-        trial_end: trialEnd,
+        trial_start: trialStart?.toISOString() || null,
+        trial_end: trialEnd?.toISOString() || null,
         is_trial_active: isTrialActive,
-        current_period_start: currentPeriodStart,
-        current_period_end: currentPeriodEnd,
+        current_period_start: currentPeriodStart.toISOString(),
+        current_period_end: currentPeriodEnd.toISOString(),
         cancel_at_period_end: false,
-        updated_at: new Date()
+        updated_at: new Date().toISOString()
       }
       
       // Use upsert to handle both create and update cases
@@ -98,8 +98,8 @@ export async function POST(request: NextRequest) {
       
       if (subscription) {
         const updateData: any = {
-          status: status,
-          updated_at: new Date()
+          status: status as 'active' | 'cancelled' | 'past_due',
+          updated_at: new Date().toISOString()
         }
         
         // Check if trial is ending
@@ -111,8 +111,8 @@ export async function POST(request: NextRequest) {
             // Trial has ended, convert to paid subscription
             updateData.is_trial_active = false
             updateData.converted_from_trial = true
-            updateData.current_period_start = now
-            updateData.current_period_end = currentPeriodEnd || new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+            updateData.current_period_start = now.toISOString()
+            updateData.current_period_end = currentPeriodEnd?.toISOString() || new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString()
             
             console.log('[Webhook] Trial converted to paid subscription:', {
               userId: subscription.user_id,
@@ -122,11 +122,11 @@ export async function POST(request: NextRequest) {
         }
         
         if (currentPeriodEnd) {
-          updateData.current_period_end = currentPeriodEnd
+          updateData.current_period_end = currentPeriodEnd.toISOString()
         }
         
         if (planId) {
-          updateData.tier = planId
+          updateData.tier = planId as 'free' | 'pro' | 'pro_plus'
         }
         
         await updateSubscriptionById(subscription.id, updateData)
@@ -138,9 +138,9 @@ export async function POST(request: NextRequest) {
       const subscription = await getSubscriptionByCustomerId((result as any).customerId)
       if (subscription) {
         await updateSubscriptionById(subscription.id, {
-          status: 'cancelled',
+          status: 'cancelled' as const,
           cancel_at_period_end: true,
-          updated_at: new Date()
+          updated_at: new Date().toISOString()
         })
       }
     }
