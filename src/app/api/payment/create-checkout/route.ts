@@ -1,18 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { creemService } from '@/services/payment/creem'
-import { createClient } from '@supabase/supabase-js'
-
-// Create service role Supabase client
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  }
-)
+import { supabaseAdmin, getUserFromRequest } from '@/lib/supabase-server'
 
 export async function POST(req: NextRequest) {
   try {
@@ -40,71 +28,56 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Verify user is authenticated
-    const authHeader = req.headers.get('authorization')
-    console.log('Auth header present:', !!authHeader)
-    
-    if (!authHeader?.startsWith('Bearer ')) {
-      console.error('Missing or invalid auth header')
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      )
-    }
-
-    const token = authHeader.substring(7)
-    console.log('Token extracted:', token.substring(0, 20) + '...')
-    
-    // Verify the token and get user
-    console.log('[DEBUG] Attempting to verify token with supabaseAdmin.auth.getUser')
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
+    // Verify user is authenticated using the new server auth helper
+    console.log('[DEBUG] Attempting to get user from request')
+    const { user, error: authError } = await getUserFromRequest(req)
     
     console.log('[DEBUG] Auth verification result:', {
       hasUser: !!user,
       userId: user?.id,
       email: user?.email,
-      error: authError?.message,
-      errorCode: authError?.code,
-      errorStatus: authError?.status
+      error: authError
     })
     
-    if (authError || !user) {
+    if (!user) {
       console.error('Auth verification failed:', authError)
-      console.error('User data:', user)
       
       // TEMPORARY DEBUG BYPASS - Remove after fixing auth issue
       if (process.env.PAYMENT_DEBUG_MODE === 'true') {
         console.error('[DEBUG] PAYMENT_DEBUG_MODE enabled - bypassing auth check')
         // Try to extract user info from JWT token manually for debugging
         try {
-          const [header, payload] = token.split('.')
-          const decodedPayload = JSON.parse(Buffer.from(payload, 'base64').toString())
-          console.log('[DEBUG] Decoded JWT payload:', decodedPayload)
-          
-          // Create a mock user object for testing
-          const mockUser = {
-            id: decodedPayload.sub,
-            email: decodedPayload.email || 'debug@example.com',
-            app_metadata: {},
-            user_metadata: {},
-            aud: decodedPayload.aud,
-            created_at: new Date().toISOString()
-          }
-          
-          console.log('[DEBUG] Using mock user:', mockUser)
-          
-          // Continue with mock user
-          const userForCheckout = mockUser
-          
-          // Get current subscription
-          const { data: subscription } = await supabaseAdmin
-            .from('subscriptions')
-            .select('*')
-            .eq('user_id', userForCheckout.id)
-            .single()
+          const authHeader = req.headers.get('authorization')
+          if (authHeader?.startsWith('Bearer ')) {
+            const token = authHeader.substring(7)
+            const [header, payload] = token.split('.')
+            const decodedPayload = JSON.parse(Buffer.from(payload, 'base64').toString())
+            console.log('[DEBUG] Decoded JWT payload:', decodedPayload)
+            
+            // Create a mock user object for testing
+            const mockUser = {
+              id: decodedPayload.sub,
+              email: decodedPayload.email || 'debug@example.com',
+              app_metadata: {},
+              user_metadata: {},
+              aud: decodedPayload.aud,
+              created_at: new Date().toISOString()
+            }
+            
+            console.log('[DEBUG] Using mock user:', mockUser)
+            
+            // Continue with mock user
+            const userForCheckout = mockUser
+            
+              // Get current subscription
+            const { data: subscription } = await supabaseAdmin
+              .from('subscriptions')
+              .select('*')
+              .eq('user_id', userForCheckout.id)
+              .single()
 
-          // Create checkout session with Creem
-          console.log('Creating Creem checkout session:', {
+            // Create checkout session with Creem
+            console.log('Creating Creem checkout session:', {
             userId: userForCheckout.id,
             planId,
             env: {
@@ -112,43 +85,44 @@ export async function POST(req: NextRequest) {
               hasProPlanId: !!process.env.CREEM_PRO_PLAN_ID,
               hasProPlusPlanId: !!process.env.CREEM_PRO_PLUS_PLAN_ID
             }
-          })
-          
-          const result = await creemService.createCheckoutSession({
+            })
+            
+            const result = await creemService.createCheckoutSession({
             userId: userForCheckout.id,
             userEmail: userForCheckout.email!,
             planId: planId as 'pro' | 'pro_plus',
             successUrl,
             cancelUrl,
             currentPlan: subscription?.tier || 'free'
-          })
+            })
 
-          console.log('Creem checkout result:', {
+            console.log('Creem checkout result:', {
             success: result.success,
             hasUrl: !!result.url,
             url: result.url?.substring(0, 50) + '...',
             error: result.error
-          })
+            })
 
-          if (!result.success) {
+            if (!result.success) {
             console.error('Creem checkout error:', result.error)
             return NextResponse.json(
               { error: result.error },
               { status: 400 }
             )
-          }
+            }
 
-          console.log('Created Creem checkout session:', {
+            console.log('Created Creem checkout session:', {
             sessionId: result.sessionId,
             planId,
             userId: userForCheckout.id,
             email: userForCheckout.email
-          })
+            })
 
-          return NextResponse.json({
+            return NextResponse.json({
             sessionId: result.sessionId,
             url: result.url
-          })
+            })
+          }
         } catch (decodeError) {
           console.error('[DEBUG] Failed to decode JWT:', decodeError)
         }
