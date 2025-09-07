@@ -40,7 +40,7 @@ export function getSupabaseClient() {
 
     // Add auth state change listener for debugging
     if (process.env.NODE_ENV === 'development') {
-      singletonClient.auth.onAuthStateChange((event, session) => {
+      singletonClient.auth.onAuthStateChange((event: any, session: any) => {
         console.log('[Unified Client] Auth state changed:', event, session?.user?.email)
       })
     }

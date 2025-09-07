@@ -49,7 +49,7 @@ export default function AuthSessionDebugPage() {
     
     // Listen for auth changes
     const supabase = createClient()
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session: any) => {
       console.log('[Session Debug] Auth state change:', event, session)
       setSession(session)
     })

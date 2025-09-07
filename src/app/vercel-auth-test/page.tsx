@@ -46,7 +46,7 @@ export default function VercelAuthTestPage() {
       })
       
       // Listen for auth changes
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, newSession: any) => {
         console.log('[Vercel Auth Test] Auth state changed:', event, newSession?.user?.email)
         if (newSession) {
           setSession(newSession)
