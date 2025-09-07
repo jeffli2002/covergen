@@ -41,9 +41,10 @@ export default function PaymentPageClient({
   isUpgrade = false,
   redirectUrl 
 }: PaymentPageClientProps) {
-  // Immediate console log to verify component is rendering
-  console.log('[PaymentPage] ===== COMPONENT RENDER START =====', new Date().toISOString())
-  console.log('[PaymentPage] Component rendering with props:', { locale, initialPlan, isUpgrade, redirectUrl })
+  try {
+    // Immediate console log to verify component is rendering
+    console.log('[PaymentPage] ===== COMPONENT RENDER START =====', new Date().toISOString())
+    console.log('[PaymentPage] Component rendering with props:', { locale, initialPlan, isUpgrade, redirectUrl })
   const router = useRouter()
   const { user } = useAppStore()
   const { user: authUser, loading: authLoading } = useAuth()
@@ -457,6 +458,14 @@ export default function PaymentPageClient({
             Start creating professional covers with AI. All plans include watermark-free images.
           </p>
           
+          {/* Simple inline test */}
+          <div 
+            className="mt-2 p-2 bg-yellow-100 cursor-pointer inline-block"
+            onClick={() => { console.log('[INLINE TEST] Div clicked!'); alert('Inline div clicked!'); }}
+          >
+            Click this yellow box to test if ANY onClick works
+          </div>
+          
           {/* Debug button */}
           <div className="mt-4 space-x-2">
             <Button 
@@ -763,4 +772,20 @@ export default function PaymentPageClient({
       </div>
     </div>
   )
+  } catch (error) {
+    console.error('[PaymentPage] CRITICAL ERROR IN COMPONENT:', error)
+    return (
+      <div className="min-h-screen bg-red-50 py-12">
+        <div className="container max-w-6xl mx-auto px-4">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-red-600 mb-4">Payment Page Error</h1>
+            <p className="text-red-700">An error occurred loading the payment page. Please refresh and try again.</p>
+            <pre className="mt-4 p-4 bg-red-100 rounded text-left text-sm overflow-auto">
+              {error?.toString()}
+            </pre>
+          </div>
+        </div>
+      </div>
+    )
+  }
 }
