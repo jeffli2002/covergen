@@ -639,9 +639,9 @@ export default function PaymentPageClient({
                           console.error('[PaymentPage] Error calling handleSelectPlan:', err)
                           alert(`Error calling handleSelectPlan: ${err.message}`)
                         })
-                      } catch (syncError) {
+                      } catch (syncError: any) {
                         console.error('[PaymentPage] Synchronous error calling handleSelectPlan:', syncError)
-                        alert(`Sync error: ${syncError.message}`)
+                        alert(`Sync error: ${syncError.message || syncError}`)
                       }
                     }}
                     style={{ cursor: loading || isCurrentPlan ? 'not-allowed' : 'pointer' }}
