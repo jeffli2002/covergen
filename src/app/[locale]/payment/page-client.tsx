@@ -173,7 +173,7 @@ export default function PaymentPageClient({
       
       window.console.log('[PaymentPage] About to call creemService.createCheckoutSession...');
       
-      let result;
+      let result: any;
       try {
         // Add timeout to prevent hanging
         const checkoutTimeoutPromise = new Promise((_, reject) => 
@@ -192,7 +192,7 @@ export default function PaymentPageClient({
         result = await Promise.race([
           checkoutPromise,
           checkoutTimeoutPromise
-        ]);
+        ]) as any;
         
         window.console.log('[PaymentPage] Creem service returned:', result);
       } catch (timeoutError: any) {
