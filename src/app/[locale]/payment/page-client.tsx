@@ -15,6 +15,8 @@ import { PaymentAuthWrapper } from '@/services/payment/auth-wrapper'
 import { toast } from 'sonner'
 import CreemDebug from '@/components/debug/CreemDebug'
 
+console.log('[PaymentPage] Module loaded at:', new Date().toISOString())
+
 interface PaymentPageClientProps {
   locale: string
   initialPlan?: string
@@ -28,6 +30,7 @@ export default function PaymentPageClient({
   isUpgrade = false,
   redirectUrl 
 }: PaymentPageClientProps) {
+  console.log('[PaymentPage] Component rendering with props:', { locale, initialPlan, isUpgrade, redirectUrl })
   const router = useRouter()
   const { user } = useAppStore()
   const { user: authUser, loading: authLoading } = useAuth()
@@ -441,6 +444,7 @@ export default function PaymentPageClient({
                     disabled={loading || isCurrentPlan}
                     onClick={(e) => {
                       e.preventDefault()
+                      alert(`Button clicked for plan: ${plan.id}`)
                       console.log('[PaymentPage] Button clicked for plan:', plan.id)
                       console.log('[PaymentPage] Button click event:', e)
                       console.log('[PaymentPage] Button disabled state:', loading || isCurrentPlan)
