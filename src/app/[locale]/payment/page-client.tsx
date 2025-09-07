@@ -106,7 +106,7 @@ export default function PaymentPageClient({
     
     // Debug: Find all payment buttons after component mounts
     setTimeout(() => {
-      const buttons = document.querySelectorAll('button[data-payment-button]')
+      const buttons = document.querySelectorAll<HTMLButtonElement>('button[data-payment-button]')
       console.log('[PaymentPage] Found buttons:', buttons.length)
       buttons.forEach((btn, index) => {
         const computedStyle = window.getComputedStyle(btn)
@@ -134,7 +134,7 @@ export default function PaymentPageClient({
     
     // Also check if any elements might be blocking the buttons
     setTimeout(() => {
-      const buttons = document.querySelectorAll('button[data-payment-button]')
+      const buttons = document.querySelectorAll<HTMLButtonElement>('button[data-payment-button]')
       buttons.forEach((btn) => {
         const rect = btn.getBoundingClientRect()
         const elementAtPoint = document.elementFromPoint(
@@ -457,7 +457,7 @@ export default function PaymentPageClient({
                 console.log('[DEBUG] session:', authService.getCurrentSession())
                 
                 // Find all payment buttons and check their state
-                const paymentButtons = document.querySelectorAll('button[data-payment-button]')
+                const paymentButtons = document.querySelectorAll<HTMLButtonElement>('button[data-payment-button]')
                 console.log('[DEBUG] Payment buttons found:', paymentButtons.length)
                 paymentButtons.forEach((btn) => {
                   console.log('[DEBUG] Button state:', {
