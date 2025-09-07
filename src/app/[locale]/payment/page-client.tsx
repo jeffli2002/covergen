@@ -135,13 +135,17 @@ export default function PaymentPageClient({
     
     try {
       // Check authentication first
+      window.console.log('[PaymentPage] Checking auth state - authLoading:', authLoading, 'authUser:', !!authUser);
+      
       if (authLoading) {
+        window.console.log('[PaymentPage] Auth is still loading');
         console.log('[PaymentPage] Auth is still loading')
         toast.error('Please wait, authentication is loading...')
         return
       }
       
       if (!authUser) {
+        window.console.log('[PaymentPage] No authUser found - redirecting to signin');
         console.log('[PaymentPage] No authUser found')
         toast.error('Please sign in to continue')
         const returnUrl = `/${locale}/payment?plan=${planId}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
@@ -149,9 +153,13 @@ export default function PaymentPageClient({
         return
       }
       
+      window.console.log('[PaymentPage] Auth check passed, user:', authUser.email);
+      
       // Check session validity at payment time
+      window.console.log('[PaymentPage] About to check session validity...');
       console.log('[PaymentPage] Checking session validity...')
       const isSessionValid = await PaymentAuthWrapper.isSessionValidForPayment()
+      window.console.log('[PaymentPage] Session validity result:', isSessionValid);
       console.log('[PaymentPage] Session validity result:', isSessionValid)
       
       if (!isSessionValid) {
@@ -193,6 +201,9 @@ export default function PaymentPageClient({
         throw new Error(result.error || 'Failed to create checkout session')
       }
     } catch (error: any) {
+      window.console.error('[PaymentPage] CAUGHT ERROR in handleSelectPlan:', error);
+      window.console.error('[PaymentPage] Error message:', error.message);
+      window.console.error('[PaymentPage] Error stack:', error.stack);
       console.error('[PaymentPage] Error in handleSelectPlan:', error)
       console.error('[PaymentPage] Error stack:', error.stack)
       
