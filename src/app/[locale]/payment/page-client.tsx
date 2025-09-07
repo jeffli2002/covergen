@@ -172,15 +172,33 @@ export default function PaymentPageClient({
       console.log('[PaymentPage] Creating checkout with:', { userId, userEmail, planId })
       
       window.console.log('[PaymentPage] About to call creemService.createCheckoutSession...');
-      const result = await creemService.createCheckoutSession({
-        userId,
-        userEmail,
-        planId,
-        successUrl: `${window.location.origin}/${locale}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancelUrl: `${window.location.origin}/${locale}/payment/cancel`,
-        currentPlan: currentSubscription?.tier || 'free'
-      })
-      window.console.log('[PaymentPage] Creem service returned:', result);
+      
+      let result;
+      try {
+        // Add timeout to prevent hanging
+        const checkoutTimeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Checkout creation timeout')), 10000)
+        );
+        
+        const checkoutPromise = creemService.createCheckoutSession({
+          userId,
+          userEmail,
+          planId,
+          successUrl: `${window.location.origin}/${locale}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancelUrl: `${window.location.origin}/${locale}/payment/cancel`,
+          currentPlan: currentSubscription?.tier || 'free'
+        });
+        
+        result = await Promise.race([
+          checkoutPromise,
+          checkoutTimeoutPromise
+        ]);
+        
+        window.console.log('[PaymentPage] Creem service returned:', result);
+      } catch (timeoutError: any) {
+        window.console.error('[PaymentPage] Checkout creation error:', timeoutError);
+        throw new Error('Failed to create checkout session: ' + timeoutError.message);
+      }
       
       console.log('[PaymentPage] Checkout result:', {
         success: result.success,
