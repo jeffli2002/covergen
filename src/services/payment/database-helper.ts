@@ -5,6 +5,10 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
+import { Database } from '@/types/supabase'
+
+type SubscriptionRow = Database['public']['Tables']['subscriptions']['Row']
+type CustomerMappingRow = Database['public']['Tables']['customer_mapping']['Row']
 
 // Singleton admin client for database operations
 let adminClient: ReturnType<typeof createClient> | null = null
@@ -33,7 +37,7 @@ function getAdminClient() {
  * Get user subscription information
  * This is a read-only operation that doesn't affect auth state
  */
-export async function getUserSubscription(userId: string) {
+export async function getUserSubscription(userId: string): Promise<SubscriptionRow | null> {
   try {
     const supabase = getAdminClient()
     
@@ -59,7 +63,7 @@ export async function getUserSubscription(userId: string) {
  * Get customer mapping information
  * This is a read-only operation that doesn't affect auth state
  */
-export async function getCustomerMapping(userId: string) {
+export async function getCustomerMapping(userId: string): Promise<CustomerMappingRow | null> {
   try {
     const supabase = getAdminClient()
     
@@ -119,7 +123,7 @@ export async function updateSubscriptionStatus(
 /**
  * Get subscription by customer ID (webhook use only)
  */
-export async function getSubscriptionByCustomerId(customerId: string) {
+export async function getSubscriptionByCustomerId(customerId: string): Promise<SubscriptionRow | null> {
   try {
     const supabase = getAdminClient()
     
@@ -144,7 +148,7 @@ export async function getSubscriptionByCustomerId(customerId: string) {
 /**
  * Upsert subscription data (webhook use only)
  */
-export async function upsertSubscription(subscriptionData: any) {
+export async function upsertSubscription(subscriptionData: Partial<SubscriptionRow>): Promise<SubscriptionRow | null> {
   try {
     const supabase = getAdminClient()
     
@@ -169,7 +173,7 @@ export async function upsertSubscription(subscriptionData: any) {
 /**
  * Update subscription by ID (webhook use only)
  */
-export async function updateSubscriptionById(id: string, updateData: any) {
+export async function updateSubscriptionById(id: string, updateData: Partial<SubscriptionRow>): Promise<boolean> {
   try {
     const supabase = getAdminClient()
     
