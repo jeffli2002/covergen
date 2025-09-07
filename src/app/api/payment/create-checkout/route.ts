@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
       }
       
       return NextResponse.json(
-        { error: authError?.message || 'Invalid authentication' },
+        { error: authError || 'Invalid authentication' },
         { status: 401 }
       )
     }
