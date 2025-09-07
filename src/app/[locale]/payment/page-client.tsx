@@ -15,6 +15,16 @@ import { PaymentAuthWrapper } from '@/services/payment/auth-wrapper'
 import { toast } from 'sonner'
 import CreemDebug from '@/components/debug/CreemDebug'
 
+// Declare window properties for TypeScript
+declare global {
+  interface Window {
+    paymentPageLoaded?: boolean;
+    paymentPageLoadTime?: string;
+    paymentComponentRendered?: boolean;
+    paymentComponentRenderTime?: string;
+  }
+}
+
 // Test if console.log works
 try {
   console.log('[PaymentPage] Module loaded at:', new Date().toISOString());
