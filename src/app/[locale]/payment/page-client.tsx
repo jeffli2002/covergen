@@ -271,8 +271,6 @@ export default function PaymentPageClient({
     
     try {
       console.log('[PaymentPage] handleSelectPlan START')
-      alert(`handleSelectPlan called with planId: ${planId}`)
-      
       console.log('[PaymentPage] handleSelectPlan called with planId:', planId)
       console.log('[PaymentPage] Current authUser:', authUser)
       console.log('[PaymentPage] Authentication status:', authService.isAuthenticated())
@@ -283,7 +281,6 @@ export default function PaymentPageClient({
       
       if (authLoading) {
         console.log('[PaymentPage] Auth is still loading')
-        alert('Auth is still loading')
         toast.error('Please wait, authentication is loading...')
         return
       }
@@ -291,7 +288,6 @@ export default function PaymentPageClient({
       if (!authUser) {
         console.log('[PaymentPage] No authUser found')
         console.log('[PaymentPage] Will redirect to signin')
-        alert('No authUser found, will redirect to signin')
         toast.error('Please sign in to continue')
         const returnUrl = `/${locale}/payment?plan=${planId}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
         router.push(`/${locale}?auth=signin&redirect=${encodeURIComponent(returnUrl)}`)
@@ -299,13 +295,12 @@ export default function PaymentPageClient({
       }
     } catch (error: any) {
       console.error('[PaymentPage] Error in handleSelectPlan (early):', error)
-      alert(`Error in handleSelectPlan: ${error.message}`)
+      toast.error(`Error: ${error.message}`)
       return
     }
     
     // Check session validity at payment time
     console.log('[PaymentPage] Checking session validity...')
-    alert('About to check session validity')
     
     const isSessionValid = await PaymentAuthWrapper.isSessionValidForPayment()
     console.log('[PaymentPage] Session validity result:', isSessionValid)
@@ -616,7 +611,6 @@ export default function PaymentPageClient({
                       e.stopPropagation()
                       
                       console.log('[PaymentPage] === BUTTON CLICK START ===')
-                      alert(`Button clicked for plan: ${plan.id}`)
                       console.log('[PaymentPage] Button clicked for plan:', plan.id)
                       console.log('[PaymentPage] Button click event:', e)
                       console.log('[PaymentPage] Button disabled state:', loading || isCurrentPlan)
@@ -625,7 +619,6 @@ export default function PaymentPageClient({
                       // Ensure button is not disabled
                       if (loading || isCurrentPlan) {
                         console.log('[PaymentPage] Button is disabled, not processing click')
-                        alert('Button is disabled')
                         return
                       }
                       
@@ -637,11 +630,11 @@ export default function PaymentPageClient({
                         // Call handleSelectPlan and catch any errors
                         handleSelectPlan(plan.id as 'pro' | 'pro_plus').catch(err => {
                           console.error('[PaymentPage] Error calling handleSelectPlan:', err)
-                          alert(`Error calling handleSelectPlan: ${err.message}`)
+                          toast.error(`Error: ${err.message}`)
                         })
                       } catch (syncError: any) {
                         console.error('[PaymentPage] Synchronous error calling handleSelectPlan:', syncError)
-                        alert(`Sync error: ${syncError.message || syncError}`)
+                        toast.error(`Error: ${syncError.message || syncError}`)
                       }
                     }}
                     style={{ cursor: loading || isCurrentPlan ? 'not-allowed' : 'pointer' }}
