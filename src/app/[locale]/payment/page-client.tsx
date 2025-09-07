@@ -9,7 +9,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Check, CreditCard, Crown, Info, Loader2, Shield, Sparkles, Zap } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
 import { useAuth } from '@/contexts/AuthContext'
-import authService from '@/services/authService'
 import { creemService, SUBSCRIPTION_PLANS, CREEM_TEST_CARDS } from '@/services/payment/creem'
 import { PaymentAuthWrapper } from '@/services/payment/auth-wrapper'
 import { toast } from 'sonner'
@@ -92,12 +91,15 @@ export default function PaymentPageClient({
 
   const loadCurrentSubscription = async () => {
     try {
-      const subscription = await authService.getUserSubscription()
-      setCurrentSubscription(subscription)
-      
-      // Calculate prorated amount if upgrading
-      if (subscription && subscription.tier === 'pro' && initialPlan === 'pro_plus' && isUpgrade) {
-        calculateProratedAmount(subscription)
+      // Get subscription directly from authUser
+      const subscription = authUser?.subscription
+      if (subscription) {
+        setCurrentSubscription(subscription)
+        
+        // Calculate prorated amount if upgrading
+        if (subscription.tier === 'pro' && initialPlan === 'pro_plus' && isUpgrade) {
+          calculateProratedAmount(subscription)
+        }
       }
     } catch (error) {
       console.error('Error loading subscription:', error)
@@ -105,10 +107,10 @@ export default function PaymentPageClient({
   }
 
   const calculateProratedAmount = (subscription: any) => {
-    if (!subscription.current_period_end) return
+    if (!subscription.currentPeriodEnd) return
     
     const now = new Date()
-    const periodEnd = new Date(subscription.current_period_end)
+    const periodEnd = new Date(subscription.currentPeriodEnd)
     const daysRemaining = Math.max(0, Math.ceil((periodEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
     
     if (daysRemaining > 0) {
@@ -176,76 +178,23 @@ export default function PaymentPageClient({
       // Make direct API call to bypass hanging service
       let result: any;
       try {
-        // Try multiple ways to get the access token
-        let accessToken: string | undefined;
+        // Get access token directly from authUser (UnifiedUser from AuthContext)
+        // This avoids creating new Supabase client instances
+        const accessToken = authUser.session?.accessToken;
         
-        // Method 1: Get from Supabase client
-        window.console.log('[PaymentPage] Method 1: Getting session from Supabase client...');
-        try {
-          const { supabase } = await import('@/lib/supabase-simple');
-          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-          
-          window.console.log('[PaymentPage] Supabase getSession result:', {
-            hasSession: !!session,
-            sessionError: sessionError,
-            sessionUser: session?.user?.email,
-            hasAccessToken: !!session?.access_token,
-          });
-          
-          if (session?.access_token) {
-            accessToken = session.access_token;
-          }
-        } catch (error) {
-          window.console.error('[PaymentPage] Error with Method 1:', error);
-        }
-        
-        // Method 2: Check localStorage directly
-        if (!accessToken) {
-          window.console.log('[PaymentPage] Method 2: Checking localStorage...');
-          try {
-            // Log all localStorage keys that might contain auth data
-            const allKeys = Object.keys(localStorage);
-            const authKeys = allKeys.filter(key => 
-              key.includes('auth') || key.includes('supabase') || key.includes('token') || key.includes('session')
-            );
-            window.console.log('[PaymentPage] Found auth-related keys in localStorage:', authKeys);
-            
-            // Try the standard Supabase key
-            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-            const projectRef = supabaseUrl.split('//')[1]?.split('.')[0] || '';
-            const storageKey = `sb-${projectRef}-auth-token`;
-            const storedData = localStorage.getItem(storageKey);
-            window.console.log('[PaymentPage] Storage key:', storageKey, 'Has data:', !!storedData);
-            
-            if (storedData) {
-              const parsed = JSON.parse(storedData);
-              window.console.log('[PaymentPage] Parsed storage data has access_token:', !!parsed.access_token);
-              accessToken = parsed.access_token;
-            }
-          } catch (error) {
-            window.console.error('[PaymentPage] Error with Method 2:', error);
-          }
-        }
-        
-        // Method 3: Try authService as last resort
-        if (!accessToken) {
-          window.console.log('[PaymentPage] Method 3: Trying authService...');
-          try {
-            const session = authService.getCurrentSession();
-            if (session?.access_token) {
-              accessToken = session.access_token;
-            }
-          } catch (error) {
-            window.console.error('[PaymentPage] Error with Method 3:', error);
-          }
-        }
+        window.console.log('[PaymentPage] Got access token from AuthContext:', {
+          hasToken: !!accessToken,
+          userEmail: authUser.email,
+          sessionValid: authUser.session?.isValid,
+          expiresAt: authUser.session?.expiresAt ? new Date(authUser.session.expiresAt * 1000).toISOString() : 'N/A'
+        });
         
         if (!accessToken) {
-          window.console.error('[PaymentPage] All methods failed to get access token');
-          throw new Error('Unable to get authentication token');
+          window.console.error('[PaymentPage] No access token in authUser session');
+          throw new Error('Unable to get authentication token from session');
         }
         
-        window.console.log('[PaymentPage] Making API call with auth token:', accessToken ? 'Present' : 'Missing');
+        window.console.log('[PaymentPage] Making API call with auth token from AuthContext');
         
         const response = await fetch('/api/payment/create-checkout', {
           method: 'POST',

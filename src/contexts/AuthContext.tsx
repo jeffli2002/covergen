@@ -43,7 +43,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           if (apiData.authenticated && apiData.user) {
             console.log('[AuthContext] API verification successful:', apiData.user.email)
-            // Convert API user to unified format
+            
+            // Get the actual session from authService to get access token
+            await authService.initialize()
+            const session = authService.getCurrentSession()
+            
+            // Convert API user to unified format with proper session data
             const unifiedUser: UnifiedUser = {
               id: apiData.user.id,
               email: apiData.user.email,
@@ -67,10 +72,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 remaining: 3
               },
               session: {
-                accessToken: '',
-                refreshToken: '',
-                expiresAt: 0,
-                isValid: true
+                accessToken: session?.access_token || '',
+                refreshToken: session?.refresh_token || '',
+                expiresAt: session?.expires_at || 0,
+                isValid: !!session?.access_token
               }
             }
             setUser(unifiedUser)
@@ -109,6 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.log('[AuthContext] Legacy auth change:', !!legacyUser, legacyUser?.email)
             // Convert legacy user to unified format
             if (legacyUser) {
+              const session = authService.getCurrentSession()
               const unifiedUser: UnifiedUser = {
                 id: legacyUser.id,
                 email: legacyUser.email,
@@ -132,10 +138,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   remaining: 3
                 },
                 session: {
-                  accessToken: '',
-                  refreshToken: '',
-                  expiresAt: 0,
-                  isValid: false
+                  accessToken: session?.access_token || '',
+                  refreshToken: session?.refresh_token || '',
+                  expiresAt: session?.expires_at || 0,
+                  isValid: !!session?.access_token
                 }
               }
               setUser(unifiedUser)
@@ -148,6 +154,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await authService.initialize()
           const legacyUser = authService.getCurrentUser()
           if (legacyUser) {
+            const session = authService.getCurrentSession()
             const unifiedUser: UnifiedUser = {
               id: legacyUser.id,
               email: legacyUser.email,
@@ -156,7 +163,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               provider: 'google',
               subscription: { tier: 'free', status: 'active', customerId: undefined, subscriptionId: undefined, currentPeriodEnd: undefined, cancelAtPeriodEnd: false, trialEndsAt: undefined },
               usage: { monthly: 0, monthlyLimit: 10, daily: 0, dailyLimit: 3, remaining: 3 },
-              session: { accessToken: '', refreshToken: '', expiresAt: 0, isValid: false }
+              session: { accessToken: session?.access_token || '', refreshToken: session?.refresh_token || '', expiresAt: session?.expires_at || 0, isValid: !!session?.access_token }
             }
             setUser(unifiedUser)
           }
