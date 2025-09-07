@@ -16,9 +16,11 @@ import { toast } from 'sonner'
 import CreemDebug from '@/components/debug/CreemDebug'
 
 console.log('[PaymentPage] Module loaded at:', new Date().toISOString())
+alert('[PaymentPage] Module loaded!')
 
 // Global test to verify JavaScript is running
 if (typeof window !== 'undefined') {
+  console.log('[PaymentPage] Window is defined')
   window.addEventListener('DOMContentLoaded', () => {
     console.log('[PaymentPage] DOM Content Loaded')
   })
@@ -485,12 +487,19 @@ export default function PaymentPageClient({
             </Button>
             <button
               onClick={() => {
-                console.log('[DEBUG] Native button clicked!')
-                console.log('[DEBUG] Testing handleSelectPlan with pro plan')
-                handleSelectPlan('pro').catch(err => {
-                  console.error('[DEBUG] Error from native button:', err)
-                  toast.error(`Error: ${err.message}`)
-                })
+                alert('[DEBUG] Native button clicked!');
+                console.log('[DEBUG] Native button clicked!');
+                console.log('[DEBUG] handleSelectPlan type:', typeof handleSelectPlan);
+                try {
+                  console.log('[DEBUG] About to call handleSelectPlan');
+                  handleSelectPlan('pro').catch(err => {
+                    console.error('[DEBUG] Error from native button:', err);
+                    alert(`Error: ${err.message}`);
+                  });
+                } catch (e) {
+                  console.error('[DEBUG] Sync error:', e);
+                  alert(`Sync error: ${e}`);
+                }
               }}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
@@ -498,12 +507,17 @@ export default function PaymentPageClient({
             </button>
             <Button
               onClick={() => {
-                console.log('[DEBUG] Testing auth state')
-                console.log('[DEBUG] authUser:', authUser)
-                console.log('[DEBUG] authLoading:', authLoading)
-                console.log('[DEBUG] currentSubscription:', currentSubscription)
-                console.log('[DEBUG] loading:', loading)
-                console.log('[DEBUG] session:', authService.getCurrentSession())
+                alert('[DEBUG] Test Auth State clicked!');
+                console.log('[DEBUG] Testing auth state');
+                console.log('[DEBUG] authUser:', authUser);
+                console.log('[DEBUG] authLoading:', authLoading);
+                console.log('[DEBUG] currentSubscription:', currentSubscription);
+                console.log('[DEBUG] loading:', loading);
+                try {
+                  console.log('[DEBUG] session:', authService.getCurrentSession());
+                } catch (e) {
+                  console.error('[DEBUG] Error getting session:', e);
+                }
                 
                 // Find all payment buttons and check their state
                 const paymentButtons = document.querySelectorAll<HTMLButtonElement>('button[data-payment-button]')
