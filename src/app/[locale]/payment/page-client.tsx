@@ -15,43 +15,6 @@ import { PaymentAuthWrapper } from '@/services/payment/auth-wrapper'
 import { toast } from 'sonner'
 import CreemDebug from '@/components/debug/CreemDebug'
 
-// Declare window properties for TypeScript
-declare global {
-  interface Window {
-    paymentPageLoaded?: boolean;
-    paymentPageLoadTime?: string;
-    paymentComponentRendered?: boolean;
-    paymentComponentRenderTime?: string;
-  }
-}
-
-// Test if console.log works
-try {
-  console.log('[PaymentPage] Module loaded at:', new Date().toISOString());
-  console.error('[PaymentPage] This is an error log');
-  console.warn('[PaymentPage] This is a warning log');
-  console.info('[PaymentPage] This is an info log');
-  
-  // Store in window to verify
-  if (typeof window !== 'undefined') {
-    window.paymentPageLoaded = true;
-    window.paymentPageLoadTime = new Date().toISOString();
-  }
-} catch (e) {
-  alert('Console.log error: ' + e);
-}
-
-// Global test to verify JavaScript is running
-if (typeof window !== 'undefined') {
-  console.log('[PaymentPage] Window is defined')
-  window.addEventListener('DOMContentLoaded', () => {
-    console.log('[PaymentPage] DOM Content Loaded')
-  })
-  
-  window.addEventListener('load', () => {
-    console.log('[PaymentPage] Window fully loaded')
-  })
-}
 
 interface PaymentPageClientProps {
   locale: string
@@ -66,23 +29,6 @@ export default function PaymentPageClient({
   isUpgrade = false,
   redirectUrl 
 }: PaymentPageClientProps) {
-  // Test different logging methods
-  const logPrefix = '[PaymentPage]';
-  const timestamp = new Date().toISOString();
-  
-  // Try multiple logging approaches
-  try {
-    console.log(logPrefix + ' ===== COMPONENT RENDER START ===== ' + timestamp);
-    console.log(logPrefix + ' Component rendering with props:', { locale, initialPlan, isUpgrade, redirectUrl });
-    
-    // Also store in window for verification
-    if (typeof window !== 'undefined') {
-      window.paymentComponentRendered = true;
-      window.paymentComponentRenderTime = timestamp;
-    }
-  } catch (e) {
-    alert('Component logging error: ' + e);
-  }
   
   const router = useRouter()
   const { user } = useAppStore()
@@ -97,59 +43,6 @@ export default function PaymentPageClient({
   const initCheckCount = useRef(0)
   const [componentError, setComponentError] = useState<Error | null>(null)
 
-  // Debug button click issues
-  useEffect(() => {
-    const checkButtons = () => {
-      const buttons = document.querySelectorAll('button')
-      console.log('[PaymentPage] Found buttons:', buttons.length)
-      buttons.forEach((button, index) => {
-        const styles = window.getComputedStyle(button)
-        if (button.textContent?.includes('Get Started') || 
-            button.textContent?.includes('Upgrade') || 
-            button.textContent?.includes('Trial')) {
-          console.log(`[PaymentPage] Payment button ${index}:`, {
-            text: button.textContent,
-            disabled: button.disabled,
-            pointerEvents: styles.pointerEvents,
-            cursor: styles.cursor,
-            opacity: styles.opacity,
-            visibility: styles.visibility,
-            zIndex: styles.zIndex,
-            position: styles.position,
-            hasClickHandler: button.onclick !== null || button.hasAttribute('onClick')
-          })
-          
-          // Add a direct onclick handler to test
-          button.addEventListener('click', (e) => {
-            console.log('[PaymentPage] Direct addEventListener click fired for:', button.textContent)
-            console.log('[PaymentPage] Event details:', {
-              type: e.type,
-              target: e.target,
-              currentTarget: e.currentTarget,
-              defaultPrevented: e.defaultPrevented,
-              propagationStopped: e.cancelBubble
-            })
-          }, true)
-        }
-      })
-    }
-    
-    // Check for global event handlers
-    const checkGlobalHandlers = () => {
-      console.log('[PaymentPage] Checking global event handlers...')
-      const listeners = (window as any).getEventListeners
-      if (listeners) {
-        console.log('[PaymentPage] Document click listeners:', listeners(document, 'click'))
-        console.log('[PaymentPage] Window click listeners:', listeners(window, 'click'))
-      }
-    }
-    
-    // Check buttons after a short delay to ensure DOM is ready
-    setTimeout(() => {
-      checkButtons()
-      checkGlobalHandlers()
-    }, 1000)
-  }, [loading, currentSubscription])
 
   useEffect(() => {
     // Set mounted to true
@@ -158,95 +51,18 @@ export default function PaymentPageClient({
     // Check if we're in test mode
     setIsTestMode(creemService.isTestMode())
     
-    // Debug: Find all payment buttons after component mounts
-    console.log('[PaymentPage] Setting up debug timeouts...')
-    setTimeout(() => {
-      console.log('[PaymentPage] Debug timeout 1 second fired')
-      const buttons = document.querySelectorAll<HTMLButtonElement>('button[data-payment-button]')
-      console.log('[PaymentPage] Found buttons:', buttons.length)
-      buttons.forEach((btn, index) => {
-        const computedStyle = window.getComputedStyle(btn)
-        console.log(`[PaymentPage] Payment button ${index}:`, {
-          exists: !!btn,
-          disabled: btn.disabled,
-          ariaDisabled: btn.getAttribute('aria-disabled'),
-          pointerEvents: computedStyle.pointerEvents,
-          opacity: computedStyle.opacity,
-          visibility: computedStyle.visibility,
-          display: computedStyle.display,
-          position: computedStyle.position,
-          zIndex: computedStyle.zIndex,
-          className: btn.className,
-          innerHTML: btn.innerHTML.substring(0, 50)
-        })
-        
-        // Add a direct event listener to verify events work
-        btn.addEventListener('click', (e) => {
-          console.log('[PaymentPage] Direct addEventListener click fired for button:', index)
-          console.log('[PaymentPage] Button dataset:', btn.dataset)
-        })
-      })
-    }, 1000)
-    
-    // Also check if any elements might be blocking the buttons
-    setTimeout(() => {
-      console.log('[PaymentPage] Debug timeout 2 seconds fired')
-      const buttons = document.querySelectorAll<HTMLButtonElement>('button[data-payment-button]')
-      buttons.forEach((btn) => {
-        const rect = btn.getBoundingClientRect()
-        const elementAtPoint = document.elementFromPoint(
-          rect.left + rect.width / 2,
-          rect.top + rect.height / 2
-        )
-        
-        console.log('[PaymentPage] Element at button center:', {
-          buttonId: btn.dataset.paymentButton,
-          elementAtPoint: elementAtPoint,
-          isButton: elementAtPoint === btn,
-          actualElement: elementAtPoint?.tagName,
-          actualClass: elementAtPoint?.className
-        })
-        
-        // Check if button is actually clickable
-        const isClickable = btn.offsetWidth > 0 && 
-                          btn.offsetHeight > 0 && 
-                          window.getComputedStyle(btn).visibility !== 'hidden'
-        console.log('[PaymentPage] Button clickability:', {
-          id: btn.dataset.paymentButton,
-          isClickable,
-          offsetWidth: btn.offsetWidth,
-          offsetHeight: btn.offsetHeight
-        })
-      })
-    }, 2000)
-
-    console.log('[PaymentPage] Initial load:', {
-      authUser: !!authUser,
-      authUserEmail: authUser?.email,
-      authUserId: authUser?.id,
-      authLoading: authLoading,
-      hasInitialized,
-      storeUser: !!user,
-      storeUserEmail: user?.email,
-      storeUserId: user?.id,
-      session: authService.getCurrentSession() ? 'Present' : 'Missing',
-      timestamp: new Date().toISOString()
-    })
 
     // Wait for auth to load
     if (authLoading) {
-      console.log('[PaymentPage] Auth is loading, waiting...')
       return
     }
 
     // Mark as initialized once auth has loaded
     if (!authLoading && !hasInitialized) {
       initCheckCount.current += 1
-      console.log('[PaymentPage] Auth loaded, check count:', initCheckCount.current)
       
       // Give auth context 3 render cycles to stabilize
       if (initCheckCount.current >= 3) {
-        console.log('[PaymentPage] Auth stabilized, marking as initialized')
         setHasInitialized(true)
       }
       return
@@ -254,13 +70,6 @@ export default function PaymentPageClient({
 
     // Check authentication after auth has loaded and initialized
     if (!authLoading && hasInitialized && !authUser) {
-      console.log('[PaymentPage] Not authenticated after initialization, redirecting...', {
-        authLoading,
-        hasInitialized,
-        authUser: !!authUser,
-        initCheckCount: initCheckCount.current,
-        timestamp: new Date().toISOString()
-      })
       // Only redirect if component is still mounted
       if (isMounted.current) {
         // Redirect to auth with return URL
@@ -270,13 +79,8 @@ export default function PaymentPageClient({
       return
     }
 
-    // Skip session validity check here - we'll check when user actually clicks pay
-    // This prevents immediate redirects due to timing issues
-    console.log('[PaymentPage] Skipping session validity check in useEffect')
-
     // Load current subscription (only after initialization and auth)
     if (isMounted.current && hasInitialized && authUser) {
-      console.log('[PaymentPage] Loading current subscription')
       loadCurrentSubscription()
     }
     
@@ -323,19 +127,14 @@ export default function PaymentPageClient({
   }
 
   const handleSelectPlan = async (planId: 'pro' | 'pro_plus') => {
-    console.log('[PaymentPage] handleSelectPlan ENTRY POINT')
-    console.log('[PaymentPage] Stack trace:', new Error().stack)
+    // Add immediate window logging to verify function is called
+    if (typeof window !== 'undefined') {
+      window.console.log('[PaymentPage] handleSelectPlan START - planId:', planId);
+    }
+    console.log('[PaymentPage] handleSelectPlan called with planId:', planId)
     
     try {
-      console.log('[PaymentPage] handleSelectPlan START')
-      console.log('[PaymentPage] handleSelectPlan called with planId:', planId)
-      console.log('[PaymentPage] Current authUser:', authUser)
-      console.log('[PaymentPage] Authentication status:', authService.isAuthenticated())
-      console.log('[PaymentPage] authLoading:', authLoading)
-      console.log('[PaymentPage] user from context:', user)
-      
-      console.log('[PaymentPage] Starting payment process for plan:', planId)
-      
+      // Check authentication first
       if (authLoading) {
         console.log('[PaymentPage] Auth is still loading')
         toast.error('Please wait, authentication is loading...')
@@ -344,44 +143,28 @@ export default function PaymentPageClient({
       
       if (!authUser) {
         console.log('[PaymentPage] No authUser found')
-        console.log('[PaymentPage] Will redirect to signin')
         toast.error('Please sign in to continue')
         const returnUrl = `/${locale}/payment?plan=${planId}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
         router.push(`/${locale}?auth=signin&redirect=${encodeURIComponent(returnUrl)}`)
         return
       }
-    } catch (error: any) {
-      console.error('[PaymentPage] Error in handleSelectPlan (early):', error)
-      toast.error(`Error: ${error.message}`)
-      return
-    }
-    
-    // Check session validity at payment time
-    console.log('[PaymentPage] Checking session validity...')
-    
-    const isSessionValid = await PaymentAuthWrapper.isSessionValidForPayment()
-    console.log('[PaymentPage] Session validity result:', isSessionValid)
-    
-    if (!isSessionValid) {
-      console.log('[PaymentPage] Session not valid for payment at checkout time')
-      toast.error('Your session has expired. Please sign in again to continue.')
-      const returnUrl = `/${locale}/payment?plan=${planId}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
-      router.push(`/${locale}?auth=signin&redirect=${encodeURIComponent(returnUrl)}`)
-      return
-    }
+      
+      // Check session validity at payment time
+      console.log('[PaymentPage] Checking session validity...')
+      const isSessionValid = await PaymentAuthWrapper.isSessionValidForPayment()
+      console.log('[PaymentPage] Session validity result:', isSessionValid)
+      
+      if (!isSessionValid) {
+        console.log('[PaymentPage] Session not valid for payment')
+        toast.error('Your session has expired. Please sign in again to continue.')
+        const returnUrl = `/${locale}/payment?plan=${planId}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
+        router.push(`/${locale}?auth=signin&redirect=${encodeURIComponent(returnUrl)}`)
+        return
+      }
 
-    setLoading(true)
-    console.log('[PaymentPage] Creating checkout session...')
-    
-    // Debug session details
-    const session = authService.getCurrentSession()
-    console.log('[PaymentPage] Session details:', {
-      hasAccessToken: !!session?.access_token,
-      tokenLength: session?.access_token?.length,
-      tokenPrefix: session?.access_token?.substring(0, 20)
-    })
-    
-    try {
+      setLoading(true)
+      console.log('[PaymentPage] Creating checkout session...')
+      
       // Create checkout session
       const userId = authUser.id
       const userEmail = authUser.email || ''
@@ -400,19 +183,17 @@ export default function PaymentPageClient({
       console.log('[PaymentPage] Checkout result:', {
         success: result.success,
         hasUrl: !!result.url,
-        error: result.error,
-        fullResult: result
+        error: result.error
       })
 
       if (result.success && result.url) {
-        console.log('[PaymentPage] Redirecting to checkout URL:', result.url)
-        // Redirect to Creem checkout
+        console.log('[PaymentPage] Redirecting to checkout URL')
         window.location.href = result.url
       } else {
         throw new Error(result.error || 'Failed to create checkout session')
       }
     } catch (error: any) {
-      console.error('[PaymentPage] Payment error:', error)
+      console.error('[PaymentPage] Error in handleSelectPlan:', error)
       console.error('[PaymentPage] Error stack:', error.stack)
       
       // Provide user-friendly error messages
@@ -441,7 +222,9 @@ export default function PaymentPageClient({
       
       toast.error(errorMessage)
     } finally {
-      setLoading(false)
+      if (isMounted.current) {
+        setLoading(false)
+      }
     }
   }
 
@@ -464,7 +247,6 @@ export default function PaymentPageClient({
   try {
     // Show loading state while auth is loading
     if (authLoading) {
-      console.log('[PaymentPage] Showing auth loading state')
       return (
         <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">
           <div className="container max-w-6xl mx-auto px-4">
@@ -475,143 +257,20 @@ export default function PaymentPageClient({
         </div>
       )
     }
-
-    console.log('[PaymentPage] Rendering main payment UI')
-    console.log('[PaymentPage] Current state:', {
-      authUser: !!authUser,
-      authLoading,
-      loading,
-      currentSubscription: currentSubscription?.tier || 'none',
-      plans: plans.length
-    })
     
     return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">
       <div className="container max-w-6xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 
-            className="text-4xl font-bold mb-4 text-gray-900 cursor-pointer"
-            onClick={() => console.log('[TEST] H1 clicked!')}
-          >
+          <h1 className="text-4xl font-bold mb-4 text-gray-900">
             {isUpgrade ? 'Upgrade Your Plan' : 'Choose Your Plan'}
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Start creating professional covers with AI. All plans include watermark-free images.
           </p>
           
-          {/* Simple inline test */}
-          <div 
-            className="mt-2 p-2 bg-yellow-100 cursor-pointer inline-block"
-            onClick={() => { 
-              alert('Inline div clicked!');
-              
-              // Test console in different ways
-              try {
-                console.log('[INLINE TEST] Standard console.log');
-                window.console.log('[INLINE TEST] Window.console.log');
-                
-                // Check window variables
-                alert('Window vars: paymentPageLoaded=' + window.paymentPageLoaded + ', componentRendered=' + window.paymentComponentRendered);
-                
-                // Try to find console logs
-                const logs: string[] = [];
-                const originalLog = console.log;
-                console.log = function(...args: any[]) {
-                  logs.push(args.join(' '));
-                  originalLog.apply(console, args);
-                };
-                
-                console.log('[INLINE TEST] Test after override');
-                alert('Captured logs: ' + logs.join('\n'));
-                
-                // Restore
-                console.log = originalLog;
-              } catch (e) {
-                alert('Console test error: ' + e);
-              }
-            }}
-          >
-            Click this yellow box to test console.log
-          </div>
           
-          {/* Debug button */}
-          <div className="mt-4 space-x-2">
-            <Button 
-              onClick={() => {
-                console.log('[DEBUG] Test button clicked!')
-                console.log('[DEBUG] AuthUser:', authUser)
-                console.log('[DEBUG] Loading:', authLoading)
-                toast.success('Test button clicked!')
-              }}
-              variant="outline"
-              size="sm"
-            >
-              Test Button (Debug)
-            </Button>
-            <button
-              onClick={() => {
-                alert('[DEBUG] Native button clicked!');
-                
-                // Test console directly
-                try {
-                  window.console.log('[DEBUG] Native button clicked via window.console!');
-                  console.log('[DEBUG] Native button clicked!');
-                  console.log('[DEBUG] handleSelectPlan type:', typeof handleSelectPlan);
-                  
-                  // Check if console is overridden
-                  alert('Console.log is: ' + typeof console.log);
-                  alert('Window.console.log is: ' + typeof window.console.log);
-                } catch (e) {
-                  alert('Console error in button: ' + e);
-                }
-                try {
-                  console.log('[DEBUG] About to call handleSelectPlan');
-                  handleSelectPlan('pro').catch(err => {
-                    console.error('[DEBUG] Error from native button:', err);
-                    alert(`Error: ${err.message}`);
-                  });
-                } catch (e) {
-                  console.error('[DEBUG] Sync error:', e);
-                  alert(`Sync error: ${e}`);
-                }
-              }}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Native Test Pro Plan
-            </button>
-            <Button
-              onClick={() => {
-                alert('[DEBUG] Test Auth State clicked!');
-                console.log('[DEBUG] Testing auth state');
-                console.log('[DEBUG] authUser:', authUser);
-                console.log('[DEBUG] authLoading:', authLoading);
-                console.log('[DEBUG] currentSubscription:', currentSubscription);
-                console.log('[DEBUG] loading:', loading);
-                try {
-                  console.log('[DEBUG] session:', authService.getCurrentSession());
-                } catch (e) {
-                  console.error('[DEBUG] Error getting session:', e);
-                }
-                
-                // Find all payment buttons and check their state
-                const paymentButtons = document.querySelectorAll<HTMLButtonElement>('button[data-payment-button]')
-                console.log('[DEBUG] Payment buttons found:', paymentButtons.length)
-                paymentButtons.forEach((btn) => {
-                  console.log('[DEBUG] Button state:', {
-                    id: btn.dataset.paymentButton,
-                    disabled: btn.disabled,
-                    ariaDisabled: btn.getAttribute('aria-disabled'),
-                    hasOnClick: !!btn.onclick
-                  })
-                })
-              }}
-              variant="outline"
-              size="sm"
-            >
-              Test Auth State
-            </Button>
-          </div>
           
           {isTestMode && (
             <Alert className="mt-6 max-w-2xl mx-auto border-blue-200 bg-blue-50">
@@ -636,13 +295,6 @@ export default function PaymentPageClient({
             const Icon = plan.icon
             const isCurrentPlan = currentSubscription?.tier === plan.id
             const isSelected = selectedPlan === plan.id
-            
-            console.log('[PaymentPage] Rendering plan:', plan.id, {
-              isCurrentPlan,
-              currentSubscriptionTier: currentSubscription?.tier,
-              loading,
-              disabled: loading || isCurrentPlan
-            })
             
             return (
               <Card 
@@ -725,24 +377,6 @@ export default function PaymentPageClient({
                 </CardContent>
 
                 <CardFooter>
-                  <div 
-                    className="w-full"
-                    onClick={(e) => {
-                      console.log('[PaymentPage] CardFooter div clicked for plan:', plan.id)
-                      console.log('[PaymentPage] Click target:', e.target)
-                      console.log('[PaymentPage] Current target:', e.currentTarget)
-                      
-                      // If button is not disabled, trigger the payment flow
-                      if (!loading && !isCurrentPlan) {
-                        console.log('[PaymentPage] Div click triggering handleSelectPlan for:', plan.id)
-                        handleSelectPlan(plan.id as 'pro' | 'pro_plus').catch(err => {
-                          console.error('[PaymentPage] Error from div click handler:', err)
-                          toast.error(`Error: ${err.message}`)
-                        })
-                      }
-                    }}
-                    style={{ cursor: loading || isCurrentPlan ? 'not-allowed' : 'pointer' }}
-                  >
                   <Button
                     data-payment-button={plan.id}
                     className={`w-full ${
@@ -752,42 +386,22 @@ export default function PaymentPageClient({
                     }`}
                     variant={plan.popular ? 'default' : 'outline'}
                     size="lg"
-                    disabled={false}
-                    onMouseDown={(e) => {
-                      console.log('[PaymentPage] Mouse down on button for plan:', plan.id)
-                    }}
-                    onPointerDown={(e) => {
-                      console.log('[PaymentPage] Pointer down on button for plan:', plan.id)
-                    }}
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
+                    disabled={loading || isCurrentPlan}
+                    onClick={async () => {
+                      window.console.log('[PaymentPage] Payment button clicked for plan:', plan.id);
                       
-                      console.log('[PaymentPage] === BUTTON CLICK START ===')
-                      console.log('[PaymentPage] Button clicked for plan:', plan.id)
-                      console.log('[PaymentPage] Button click event:', e)
-                      console.log('[PaymentPage] Button disabled state:', loading || isCurrentPlan)
-                      console.log('[PaymentPage] Loading:', loading, 'isCurrentPlan:', isCurrentPlan)
-                      
-                      // Ensure button is not disabled
                       if (loading || isCurrentPlan) {
-                        console.log('[PaymentPage] Button is disabled, not processing click')
-                        return
+                        window.console.log('[PaymentPage] Button is disabled, returning');
+                        return;
                       }
                       
-                      // Debug: Check if handleSelectPlan exists
-                      console.log('[PaymentPage] handleSelectPlan function exists:', typeof handleSelectPlan)
-                      console.log('[PaymentPage] About to call handleSelectPlan')
-                      
                       try {
-                        // Call handleSelectPlan and catch any errors
-                        handleSelectPlan(plan.id as 'pro' | 'pro_plus').catch(err => {
-                          console.error('[PaymentPage] Error calling handleSelectPlan:', err)
-                          toast.error(`Error: ${err.message}`)
-                        })
-                      } catch (syncError: any) {
-                        console.error('[PaymentPage] Synchronous error calling handleSelectPlan:', syncError)
-                        toast.error(`Error: ${syncError.message || syncError}`)
+                        window.console.log('[PaymentPage] About to call handleSelectPlan');
+                        await handleSelectPlan(plan.id as 'pro' | 'pro_plus');
+                      } catch (error: any) {
+                        window.console.error('[PaymentPage] Error selecting plan:', error);
+                        console.error('[PaymentPage] Error selecting plan:', error);
+                        toast.error(`Error: ${error.message || 'Failed to select plan'}`);
                       }
                     }}
                     style={{ 
@@ -813,7 +427,6 @@ export default function PaymentPageClient({
                       </>
                     )}
                   </Button>
-                  </div>
                 </CardFooter>
               </Card>
             )
