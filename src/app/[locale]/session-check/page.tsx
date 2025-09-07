@@ -22,7 +22,7 @@ export default function SessionCheckPage() {
       const { data: { user }, error: userError } = await supabase.auth.getUser()
       
       // Check auth state
-      const { data: authState } = supabase.auth.onAuthStateChange((event, session) => {
+      const { data: authState } = supabase.auth.onAuthStateChange((event: any, session: any) => {
         console.log('[SessionCheck] Auth state change:', event, session?.user?.email)
       })
       
