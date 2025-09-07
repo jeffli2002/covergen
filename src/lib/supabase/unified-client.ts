@@ -71,7 +71,7 @@ export async function getSession() {
 
 export function onAuthStateChange(callback: (session: any) => void) {
   const client = getSupabaseClient()
-  const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => {
+  const { data: { subscription } } = client.auth.onAuthStateChange((_event: any, session: any) => {
     callback(session)
   })
   return subscription

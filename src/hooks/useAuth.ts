@@ -74,7 +74,7 @@ export function useAuth() {
     // Subscribe to auth changes
     const supabase = createSimpleClient()
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event: any, session: any) => {
         if (!mounted) return
         
         if (session?.user) {

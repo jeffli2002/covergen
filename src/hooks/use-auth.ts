@@ -55,7 +55,7 @@ export function useAuth() {
     // Listen for auth changes if client works
     const supabase = createSimpleClient()
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event: any, session: any) => {
         if (event === 'SIGNED_IN' && session?.user) {
           setUser(session.user)
         } else if (event === 'SIGNED_OUT') {

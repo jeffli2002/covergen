@@ -118,7 +118,7 @@ class UserSessionService {
       }
 
       // Set up auth state listener
-      this.supabase.auth.onAuthStateChange(async (event, session) => {
+      this.supabase.auth.onAuthStateChange(async (event: any, session: any) => {
         console.log('[UserSession] Auth state change:', event)
         
         if (session?.user) {
