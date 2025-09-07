@@ -13,7 +13,6 @@
  */
 
 import authService from '@/services/authService'
-import { supabase } from '@/lib/supabase-simple'
 import React from 'react'
 
 // Module load check
@@ -182,19 +181,8 @@ export class PaymentAuthWrapper {
     
     try {
       // For webhook validation, we need to use the admin client
-      // This is acceptable ONLY in webhook context where we need service role access
-      const { createClient } = require('@supabase/supabase-js')
-      const supabaseAdmin = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-        {
-          auth: {
-            autoRefreshToken: false,
-            persistSession: false,
-            detectSessionInUrl: false
-          }
-        }
-      )
+      // Use the existing admin client to avoid creating multiple instances
+      const { supabaseAdmin } = await import('@/lib/supabase-server')
 
       const { data: { user }, error } = await supabaseAdmin.auth.getUser(accessToken)
       

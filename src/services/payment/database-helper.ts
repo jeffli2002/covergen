@@ -4,33 +4,15 @@
  * This prevents the "Multiple GoTrueClient instances" error
  */
 
-import { createClient } from '@supabase/supabase-js'
+import { supabaseAdmin } from '@/lib/supabase-server'
 import { Database } from '@/types/supabase'
 
 type SubscriptionRow = Database['public']['Tables']['subscriptions']['Row']
 type CustomerMappingRow = Database['public']['Tables']['customer_mapping']['Row']
 
-// Singleton admin client for database operations
-let adminClient: ReturnType<typeof createClient<Database>> | null = null
-
+// Use the existing admin client from supabase-server
 function getAdminClient() {
-  if (!adminClient) {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      throw new Error('Missing Supabase environment variables')
-    }
-    
-    adminClient = createClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY,
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
-      }
-    )
-  }
-  return adminClient
+  return supabaseAdmin
 }
 
 /**
