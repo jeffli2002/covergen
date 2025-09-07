@@ -17,6 +17,17 @@ import CreemDebug from '@/components/debug/CreemDebug'
 
 console.log('[PaymentPage] Module loaded at:', new Date().toISOString())
 
+// Global test to verify JavaScript is running
+if (typeof window !== 'undefined') {
+  window.addEventListener('DOMContentLoaded', () => {
+    console.log('[PaymentPage] DOM Content Loaded')
+  })
+  
+  window.addEventListener('load', () => {
+    console.log('[PaymentPage] Window fully loaded')
+  })
+}
+
 interface PaymentPageClientProps {
   locale: string
   initialPlan?: string
@@ -30,6 +41,8 @@ export default function PaymentPageClient({
   isUpgrade = false,
   redirectUrl 
 }: PaymentPageClientProps) {
+  // Immediate console log to verify component is rendering
+  console.log('[PaymentPage] ===== COMPONENT RENDER START =====', new Date().toISOString())
   console.log('[PaymentPage] Component rendering with props:', { locale, initialPlan, isUpgrade, redirectUrl })
   const router = useRouter()
   const { user } = useAppStore()
@@ -105,7 +118,9 @@ export default function PaymentPageClient({
     setIsTestMode(creemService.isTestMode())
     
     // Debug: Find all payment buttons after component mounts
+    console.log('[PaymentPage] Setting up debug timeouts...')
     setTimeout(() => {
+      console.log('[PaymentPage] Debug timeout 1 second fired')
       const buttons = document.querySelectorAll<HTMLButtonElement>('button[data-payment-button]')
       console.log('[PaymentPage] Found buttons:', buttons.length)
       buttons.forEach((btn, index) => {
@@ -134,6 +149,7 @@ export default function PaymentPageClient({
     
     // Also check if any elements might be blocking the buttons
     setTimeout(() => {
+      console.log('[PaymentPage] Debug timeout 2 seconds fired')
       const buttons = document.querySelectorAll<HTMLButtonElement>('button[data-payment-button]')
       buttons.forEach((btn) => {
         const rect = btn.getBoundingClientRect()
@@ -405,6 +421,7 @@ export default function PaymentPageClient({
 
   // Show loading state while auth is loading
   if (authLoading) {
+    console.log('[PaymentPage] Showing auth loading state')
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">
         <div className="container max-w-6xl mx-auto px-4">
@@ -416,12 +433,24 @@ export default function PaymentPageClient({
     )
   }
 
+  console.log('[PaymentPage] Rendering main payment UI')
+  console.log('[PaymentPage] Current state:', {
+    authUser: !!authUser,
+    authLoading,
+    loading,
+    currentSubscription: currentSubscription?.tier || 'none',
+    plans: plans.length
+  })
+  
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">
       <div className="container max-w-6xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4 text-gray-900">
+          <h1 
+            className="text-4xl font-bold mb-4 text-gray-900 cursor-pointer"
+            onClick={() => console.log('[TEST] H1 clicked!')}
+          >
             {isUpgrade ? 'Upgrade Your Plan' : 'Choose Your Plan'}
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -442,6 +471,19 @@ export default function PaymentPageClient({
             >
               Test Button (Debug)
             </Button>
+            <button
+              onClick={() => {
+                console.log('[DEBUG] Native button clicked!')
+                console.log('[DEBUG] Testing handleSelectPlan with pro plan')
+                handleSelectPlan('pro').catch(err => {
+                  console.error('[DEBUG] Error from native button:', err)
+                  toast.error(`Error: ${err.message}`)
+                })
+              }}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Native Test Pro Plan
+            </button>
             <Button
               onClick={() => {
                 console.log('[DEBUG] Testing auth state')
@@ -588,7 +630,17 @@ export default function PaymentPageClient({
                       console.log('[PaymentPage] CardFooter div clicked for plan:', plan.id)
                       console.log('[PaymentPage] Click target:', e.target)
                       console.log('[PaymentPage] Current target:', e.currentTarget)
+                      
+                      // If button is not disabled, trigger the payment flow
+                      if (!loading && !isCurrentPlan) {
+                        console.log('[PaymentPage] Div click triggering handleSelectPlan for:', plan.id)
+                        handleSelectPlan(plan.id as 'pro' | 'pro_plus').catch(err => {
+                          console.error('[PaymentPage] Error from div click handler:', err)
+                          toast.error(`Error: ${err.message}`)
+                        })
+                      }
                     }}
+                    style={{ cursor: loading || isCurrentPlan ? 'not-allowed' : 'pointer' }}
                   >
                   <Button
                     data-payment-button={plan.id}
@@ -599,7 +651,7 @@ export default function PaymentPageClient({
                     }`}
                     variant={plan.popular ? 'default' : 'outline'}
                     size="lg"
-                    disabled={loading || isCurrentPlan}
+                    disabled={false}
                     onMouseDown={(e) => {
                       console.log('[PaymentPage] Mouse down on button for plan:', plan.id)
                     }}
@@ -637,7 +689,9 @@ export default function PaymentPageClient({
                         toast.error(`Error: ${syncError.message || syncError}`)
                       }
                     }}
-                    style={{ cursor: loading || isCurrentPlan ? 'not-allowed' : 'pointer' }}
+                    style={{ 
+                      cursor: loading || isCurrentPlan ? 'not-allowed' : 'pointer'
+                    }}
                   >
                     {loading && selectedPlan === plan.id ? (
                       <>
