@@ -152,21 +152,7 @@ export default function PaymentPageClient({
     console.log('[PaymentPage] Current authUser:', authUser)
     console.log('[PaymentPage] Authentication status:', authService.isAuthenticated())
     
-    // TEMPORARY: Ultra-aggressive bypass for testing
-    console.error('[PaymentPage] ULTRA BYPASS ACTIVE - Skipping ALL client-side checks')
-    console.error('[PaymentPage] This bypass should appear in console immediately')
-    
-    // Get and log the actual session
-    const currentSession = authService.getCurrentSession()
-    console.log('[PaymentPage] Current session:', currentSession ? 'Present' : 'Missing')
-    console.log('[PaymentPage] Session details:', currentSession ? {
-      userId: currentSession.user?.id,
-      email: currentSession.user?.email,
-      hasAccessToken: !!currentSession.access_token,
-      expiresAt: currentSession.expires_at,
-      expiresIn: currentSession.expires_in
-    } : 'No session')
-    console.log('[PaymentPage] Auth loading state:', authLoading)
+    console.log('[PaymentPage] Starting payment process for plan:', planId)
     
     if (authLoading) {
       console.log('[PaymentPage] Auth is still loading')
@@ -176,36 +162,16 @@ export default function PaymentPageClient({
     
     if (!authUser) {
       console.log('[PaymentPage] No authUser found')
-      // TEMPORARY: Continue anyway for debugging
-      console.error('[PaymentPage] BYPASS: No authUser but continuing with mock data')
-      // Don't return here during debugging
-      // toast.error('Please sign in to continue')
-      // return
+      toast.error('Please sign in to continue')
+      return
     }
     
     // Check session validity at payment time
-    console.log('[PaymentPage] About to check session validity...')
-    console.error('[PaymentPage] PaymentAuthWrapper available?', typeof PaymentAuthWrapper)
-    console.error('[PaymentPage] isSessionValidForPayment available?', typeof PaymentAuthWrapper?.isSessionValidForPayment)
+    console.log('[PaymentPage] Checking session validity...')
     
-    let isSessionValid = false
-    try {
-      isSessionValid = PaymentAuthWrapper.isSessionValidForPayment()
-      console.log('[PaymentPage] Session validity result:', isSessionValid)
-      console.error('[PaymentPage] Bypass called?', (window as any).__PAYMENT_AUTH_BYPASS_CALLED)
-    } catch (error) {
-      console.error('[PaymentPage] Error checking session validity:', error)
-    }
+    const isSessionValid = PaymentAuthWrapper.isSessionValidForPayment()
+    console.log('[PaymentPage] Session validity result:', isSessionValid)
     
-    // TEMPORARY: Force bypass for debugging
-    if (!isSessionValid) {
-      console.error('[PaymentPage] FORCING BYPASS - session check returned false but continuing anyway')
-      isSessionValid = true // Force bypass
-    }
-    
-    // This check has been temporarily disabled because of the force bypass above
-    // TODO: Re-enable once auth issue is fixed
-    /*
     if (!isSessionValid) {
       console.log('[PaymentPage] Session not valid for payment at checkout time')
       toast.error('Your session has expired. Please sign in again to continue.')
@@ -213,7 +179,6 @@ export default function PaymentPageClient({
       router.push(`/${locale}?auth=signin&redirect=${encodeURIComponent(returnUrl)}`)
       return
     }
-    */
 
     setLoading(true)
     console.log('[PaymentPage] Creating checkout session...')
@@ -228,9 +193,8 @@ export default function PaymentPageClient({
     
     try {
       // Create checkout session
-      // TEMPORARY: Use mock data if authUser is missing
-      const userId = authUser?.id || 'debug-user-id'
-      const userEmail = authUser?.email || 'debug@example.com'
+      const userId = authUser.id
+      const userEmail = authUser.email || ''
       
       console.log('[PaymentPage] Creating checkout with:', { userId, userEmail, planId })
       

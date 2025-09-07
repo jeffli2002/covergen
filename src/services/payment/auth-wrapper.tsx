@@ -73,16 +73,6 @@ export class PaymentAuthWrapper {
    * Requires at least 5 minutes of validity remaining
    */
   static isSessionValidForPayment(): boolean {
-    // TEMPORARY: Always return true to bypass ALL checks while debugging
-    // TODO: Remove this once session retrieval issue is resolved
-    if (typeof window !== 'undefined') {
-      (window as any).__PAYMENT_AUTH_BYPASS_CALLED = true
-      console.error('[PaymentAuth] !!!! BYPASS ACTIVE !!!! Always returning true for debugging')
-      console.error('[PaymentAuth] !!!! THIS SHOULD APPEAR IN CONSOLE !!!!')
-      console.error('[PaymentAuth] Stack trace:', new Error().stack)
-    }
-    return true
-    
     try {
       const session = authService.getCurrentSession()
       
@@ -114,13 +104,7 @@ export class PaymentAuthWrapper {
         result: !isExpiringSoon
       })
       
-      // TEMPORARY: Always return true to bypass expiry check while debugging
-      // TODO: Remove this once timestamp format issue is resolved
-      console.warn('[PaymentAuth] TEMPORARY: Bypassing session expiry check for debugging')
-      return true
-      
-      // Original return statement - restore after debugging
-      // return !isExpiringSoon
+      return !isExpiringSoon
     } catch (error) {
       console.error('[PaymentAuth] Error validating session for payment:', error)
       return false

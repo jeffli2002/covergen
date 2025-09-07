@@ -1,17 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { creemService } from '@/services/payment/creem'
-import { createClient } from '@supabase/supabase-js'
-
-// Create Supabase admin client for webhook processing
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-})
+import { 
+  getUserSubscription,
+  getSubscriptionByCustomerId,
+  upsertSubscription,
+  updateSubscriptionById
+} from '@/services/payment/database-helper'
 
 export async function POST(request: NextRequest) {
   const body = await request.text()
@@ -67,11 +61,7 @@ export async function POST(request: NextRequest) {
       }
       
       // Update or create subscription record
-      const { data: existingSub } = await supabaseAdmin
-        .from('subscriptions')
-        .select('id')
-        .eq('user_id', userId)
-        .single()
+      const existingSub = await getUserSubscription(userId)
       
       const subscriptionData = {
         user_id: userId,
@@ -88,16 +78,8 @@ export async function POST(request: NextRequest) {
         updated_at: new Date()
       }
       
-      if (existingSub) {
-        await supabaseAdmin
-          .from('subscriptions')
-          .update(subscriptionData)
-          .eq('id', existingSub.id)
-      } else {
-        await supabaseAdmin
-          .from('subscriptions')
-          .insert(subscriptionData)
-      }
+      // Use upsert to handle both create and update cases
+      await upsertSubscription(subscriptionData)
       
       console.log('[Webhook] Subscription created/updated:', {
         userId,
@@ -112,11 +94,7 @@ export async function POST(request: NextRequest) {
       const { customerId, status, planId, currentPeriodEnd } = result as any
       
       // Find subscription by customer ID
-      const { data: subscription } = await supabaseAdmin
-        .from('subscriptions')
-        .select('*')
-        .eq('stripe_customer_id', customerId)
-        .single()
+      const subscription = await getSubscriptionByCustomerId(customerId)
       
       if (subscription) {
         const updateData: any = {
@@ -151,23 +129,20 @@ export async function POST(request: NextRequest) {
           updateData.tier = planId
         }
         
-        await supabaseAdmin
-          .from('subscriptions')
-          .update(updateData)
-          .eq('id', subscription.id)
+        await updateSubscriptionById(subscription.id, updateData)
       }
     }
     
     // Handle subscription cancellation
     if (result && 'type' in result && result.type === 'subscription_deleted' && 'customerId' in result && result.customerId) {
-      await supabaseAdmin
-        .from('subscriptions')
-        .update({
+      const subscription = await getSubscriptionByCustomerId((result as any).customerId)
+      if (subscription) {
+        await updateSubscriptionById(subscription.id, {
           status: 'cancelled',
           cancel_at_period_end: true,
           updated_at: new Date()
         })
-        .eq('stripe_customer_id', (result as any).customerId)
+      }
     }
     
     return NextResponse.json({ received: true })
