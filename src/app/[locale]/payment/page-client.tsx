@@ -515,9 +515,9 @@ export default function PaymentPageClient({
                 alert('Window vars: paymentPageLoaded=' + window.paymentPageLoaded + ', componentRendered=' + window.paymentComponentRendered);
                 
                 // Try to find console logs
-                const logs = [];
+                const logs: string[] = [];
                 const originalLog = console.log;
-                console.log = function(...args) {
+                console.log = function(...args: any[]) {
                   logs.push(args.join(' '));
                   originalLog.apply(console, args);
                 };
