@@ -43,12 +43,125 @@ export default function PaymentPageClient({
   const [hasInitialized, setHasInitialized] = useState(false)
   const initCheckCount = useRef(0)
 
+  // Debug button click issues
+  useEffect(() => {
+    const checkButtons = () => {
+      const buttons = document.querySelectorAll('button')
+      console.log('[PaymentPage] Found buttons:', buttons.length)
+      buttons.forEach((button, index) => {
+        const styles = window.getComputedStyle(button)
+        if (button.textContent?.includes('Get Started') || 
+            button.textContent?.includes('Upgrade') || 
+            button.textContent?.includes('Trial')) {
+          console.log(`[PaymentPage] Payment button ${index}:`, {
+            text: button.textContent,
+            disabled: button.disabled,
+            pointerEvents: styles.pointerEvents,
+            cursor: styles.cursor,
+            opacity: styles.opacity,
+            visibility: styles.visibility,
+            zIndex: styles.zIndex,
+            position: styles.position,
+            hasClickHandler: button.onclick !== null || button.hasAttribute('onClick')
+          })
+          
+          // Add a direct onclick handler to test
+          button.addEventListener('click', (e) => {
+            console.log('[PaymentPage] Direct addEventListener click fired for:', button.textContent)
+            console.log('[PaymentPage] Event details:', {
+              type: e.type,
+              target: e.target,
+              currentTarget: e.currentTarget,
+              defaultPrevented: e.defaultPrevented,
+              propagationStopped: e.cancelBubble
+            })
+          }, true)
+        }
+      })
+    }
+    
+    // Check for global event handlers
+    const checkGlobalHandlers = () => {
+      console.log('[PaymentPage] Checking global event handlers...')
+      const listeners = (window as any).getEventListeners
+      if (listeners) {
+        console.log('[PaymentPage] Document click listeners:', listeners(document, 'click'))
+        console.log('[PaymentPage] Window click listeners:', listeners(window, 'click'))
+      }
+    }
+    
+    // Check buttons after a short delay to ensure DOM is ready
+    setTimeout(() => {
+      checkButtons()
+      checkGlobalHandlers()
+    }, 1000)
+  }, [loading, currentSubscription])
+
   useEffect(() => {
     // Set mounted to true
     isMounted.current = true
     
     // Check if we're in test mode
     setIsTestMode(creemService.isTestMode())
+    
+    // Debug: Find all payment buttons after component mounts
+    setTimeout(() => {
+      const buttons = document.querySelectorAll('button[data-payment-button]')
+      console.log('[PaymentPage] Found buttons:', buttons.length)
+      buttons.forEach((btn, index) => {
+        const computedStyle = window.getComputedStyle(btn)
+        console.log(`[PaymentPage] Payment button ${index}:`, {
+          exists: !!btn,
+          disabled: btn.disabled,
+          ariaDisabled: btn.getAttribute('aria-disabled'),
+          pointerEvents: computedStyle.pointerEvents,
+          opacity: computedStyle.opacity,
+          visibility: computedStyle.visibility,
+          display: computedStyle.display,
+          position: computedStyle.position,
+          zIndex: computedStyle.zIndex,
+          className: btn.className,
+          innerHTML: btn.innerHTML.substring(0, 50)
+        })
+        
+        // Add a direct event listener to verify events work
+        btn.addEventListener('click', (e) => {
+          console.log('[PaymentPage] Direct addEventListener click fired for button:', index)
+          console.log('[PaymentPage] Button dataset:', btn.dataset)
+        })
+      })
+    }, 1000)
+    
+    // Also check if any elements might be blocking the buttons
+    setTimeout(() => {
+      const buttons = document.querySelectorAll('button[data-payment-button]')
+      buttons.forEach((btn) => {
+        const rect = btn.getBoundingClientRect()
+        const elementAtPoint = document.elementFromPoint(
+          rect.left + rect.width / 2,
+          rect.top + rect.height / 2
+        )
+        
+        console.log('[PaymentPage] Element at button center:', {
+          buttonId: btn.dataset.paymentButton,
+          elementAtPoint: elementAtPoint,
+          isButton: elementAtPoint === btn,
+          actualElement: elementAtPoint?.tagName,
+          actualClass: elementAtPoint?.className
+        })
+        
+        // Check if button is actually clickable
+        const isClickable = btn.offsetWidth > 0 && 
+                          btn.offsetHeight > 0 && 
+                          window.getComputedStyle(btn).visibility !== 'hidden'
+        console.log('[PaymentPage] Button clickability:', {
+          id: btn.dataset.paymentButton,
+          isClickable,
+          offsetWidth: btn.offsetWidth,
+          offsetHeight: btn.offsetHeight
+        })
+      })
+    }, 2000)
 
     console.log('[PaymentPage] Initial load:', {
       authUser: !!authUser,
@@ -153,6 +266,9 @@ export default function PaymentPageClient({
   }
 
   const handleSelectPlan = async (planId: 'pro' | 'pro_plus') => {
+    console.log('[PaymentPage] handleSelectPlan ENTRY POINT')
+    console.log('[PaymentPage] Stack trace:', new Error().stack)
+    
     try {
       console.log('[PaymentPage] handleSelectPlan START')
       alert(`handleSelectPlan called with planId: ${planId}`)
@@ -318,7 +434,7 @@ export default function PaymentPageClient({
           </p>
           
           {/* Debug button */}
-          <div className="mt-4">
+          <div className="mt-4 space-x-2">
             <Button 
               onClick={() => {
                 console.log('[DEBUG] Test button clicked!')
@@ -330,6 +446,32 @@ export default function PaymentPageClient({
               size="sm"
             >
               Test Button (Debug)
+            </Button>
+            <Button
+              onClick={() => {
+                console.log('[DEBUG] Testing auth state')
+                console.log('[DEBUG] authUser:', authUser)
+                console.log('[DEBUG] authLoading:', authLoading)
+                console.log('[DEBUG] currentSubscription:', currentSubscription)
+                console.log('[DEBUG] loading:', loading)
+                console.log('[DEBUG] session:', authService.getCurrentSession())
+                
+                // Find all payment buttons and check their state
+                const paymentButtons = document.querySelectorAll('button[data-payment-button]')
+                console.log('[DEBUG] Payment buttons found:', paymentButtons.length)
+                paymentButtons.forEach((btn) => {
+                  console.log('[DEBUG] Button state:', {
+                    id: btn.dataset.paymentButton,
+                    disabled: btn.disabled,
+                    ariaDisabled: btn.getAttribute('aria-disabled'),
+                    hasOnClick: !!btn.onclick
+                  })
+                })
+              }}
+              variant="outline"
+              size="sm"
+            >
+              Test Auth State
             </Button>
           </div>
           
@@ -445,7 +587,16 @@ export default function PaymentPageClient({
                 </CardContent>
 
                 <CardFooter>
+                  <div 
+                    className="w-full"
+                    onClick={(e) => {
+                      console.log('[PaymentPage] CardFooter div clicked for plan:', plan.id)
+                      console.log('[PaymentPage] Click target:', e.target)
+                      console.log('[PaymentPage] Current target:', e.currentTarget)
+                    }}
+                  >
                   <Button
+                    data-payment-button={plan.id}
                     className={`w-full ${
                       plan.popular 
                         ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white'
@@ -454,20 +605,46 @@ export default function PaymentPageClient({
                     variant={plan.popular ? 'default' : 'outline'}
                     size="lg"
                     disabled={loading || isCurrentPlan}
+                    onMouseDown={(e) => {
+                      console.log('[PaymentPage] Mouse down on button for plan:', plan.id)
+                    }}
+                    onPointerDown={(e) => {
+                      console.log('[PaymentPage] Pointer down on button for plan:', plan.id)
+                    }}
                     onClick={(e) => {
                       e.preventDefault()
+                      e.stopPropagation()
+                      
+                      console.log('[PaymentPage] === BUTTON CLICK START ===')
                       alert(`Button clicked for plan: ${plan.id}`)
                       console.log('[PaymentPage] Button clicked for plan:', plan.id)
                       console.log('[PaymentPage] Button click event:', e)
                       console.log('[PaymentPage] Button disabled state:', loading || isCurrentPlan)
                       console.log('[PaymentPage] Loading:', loading, 'isCurrentPlan:', isCurrentPlan)
                       
-                      // Call handleSelectPlan and catch any errors
-                      handleSelectPlan(plan.id as 'pro' | 'pro_plus').catch(err => {
-                        console.error('[PaymentPage] Error calling handleSelectPlan:', err)
-                        alert(`Error calling handleSelectPlan: ${err.message}`)
-                      })
+                      // Ensure button is not disabled
+                      if (loading || isCurrentPlan) {
+                        console.log('[PaymentPage] Button is disabled, not processing click')
+                        alert('Button is disabled')
+                        return
+                      }
+                      
+                      // Debug: Check if handleSelectPlan exists
+                      console.log('[PaymentPage] handleSelectPlan function exists:', typeof handleSelectPlan)
+                      console.log('[PaymentPage] About to call handleSelectPlan')
+                      
+                      try {
+                        // Call handleSelectPlan and catch any errors
+                        handleSelectPlan(plan.id as 'pro' | 'pro_plus').catch(err => {
+                          console.error('[PaymentPage] Error calling handleSelectPlan:', err)
+                          alert(`Error calling handleSelectPlan: ${err.message}`)
+                        })
+                      } catch (syncError) {
+                        console.error('[PaymentPage] Synchronous error calling handleSelectPlan:', syncError)
+                        alert(`Sync error: ${syncError.message}`)
+                      }
                     }}
+                    style={{ cursor: loading || isCurrentPlan ? 'not-allowed' : 'pointer' }}
                   >
                     {loading && selectedPlan === plan.id ? (
                       <>
@@ -488,6 +665,7 @@ export default function PaymentPageClient({
                       </>
                     )}
                   </Button>
+                  </div>
                 </CardFooter>
               </Card>
             )
