@@ -50,10 +50,12 @@ export default function PaymentPageClient({
     console.log('[PaymentPage] Initial load:', {
       authUser: !!authUser,
       authUserEmail: authUser?.email,
+      authUserId: authUser?.id,
       authLoading: authLoading,
       hasInitialized,
       storeUser: !!user,
       storeUserEmail: user?.email,
+      storeUserId: user?.id,
       session: authService.getCurrentSession() ? 'Present' : 'Missing',
       timestamp: new Date().toISOString()
     })
@@ -151,6 +153,8 @@ export default function PaymentPageClient({
     console.log('[PaymentPage] handleSelectPlan called with planId:', planId)
     console.log('[PaymentPage] Current authUser:', authUser)
     console.log('[PaymentPage] Authentication status:', authService.isAuthenticated())
+    console.log('[PaymentPage] authLoading:', authLoading)
+    console.log('[PaymentPage] user from context:', user)
     
     console.log('[PaymentPage] Starting payment process for plan:', planId)
     
@@ -162,7 +166,10 @@ export default function PaymentPageClient({
     
     if (!authUser) {
       console.log('[PaymentPage] No authUser found')
+      console.log('[PaymentPage] Will redirect to signin')
       toast.error('Please sign in to continue')
+      const returnUrl = `/${locale}/payment?plan=${planId}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
+      router.push(`/${locale}?auth=signin&redirect=${encodeURIComponent(returnUrl)}`)
       return
     }
     
