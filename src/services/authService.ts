@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/client'
+import { supabase } from '@/lib/supabase-simple'
 
 let authServiceInstance: AuthService | null = null
 
@@ -12,8 +12,6 @@ class AuthService {
   private sessionRefreshInterval: NodeJS.Timeout | null = null
   private sessionRefreshInProgress = false
   private lastSessionCheck: number | null = null
-  private supabase: ReturnType<typeof createClient> | null = null
-
   constructor() {
     if (authServiceInstance) {
       return authServiceInstance
@@ -22,10 +20,8 @@ class AuthService {
   }
 
   private getSupabase() {
-    if (!this.supabase && typeof window !== 'undefined') {
-      this.supabase = createClient()
-    }
-    return this.supabase
+    // Always use the simple supabase client to avoid multiple instances
+    return supabase
   }
 
   async initialize() {
