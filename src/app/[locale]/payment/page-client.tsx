@@ -1,5 +1,6 @@
 'use client'
 
+// Trigger Vercel redeploy - OAuth fix at commit 138004e
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
