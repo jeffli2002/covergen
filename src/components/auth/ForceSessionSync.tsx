@@ -30,7 +30,7 @@ export function ForceSessionSync() {
         })
         
         // Get Supabase client and set the session
-        const supabase = createClient()
+        const supabase = createClient
         const { data, error } = await supabase.auth.setSession({
           access_token: sessionData.access_token,
           refresh_token: sessionData.refresh_token
