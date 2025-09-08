@@ -1,7 +1,9 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-export function createClient() {
+// This is specifically for server components and API routes that need cookie handling
+// For OAuth flows and unified auth, use the singleton from @/lib/supabase-simple instead
+export function createServerComponentClient() {
   const cookieStore = cookies()
 
   return createServerClient(
@@ -27,3 +29,6 @@ export function createClient() {
     }
   )
 }
+
+// Maintain backward compatibility
+export const createClient = createServerComponentClient

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase-simple'
 
 export default function TestPKCEOAuth() {
-  const [debugInfo, setDebugInfo] = useState<any>({})
+  const [debugInfo, setDebugInfo] = useState<Record<string, any>>({})
   const [isLoading, setIsLoading] = useState(false)
   
   useEffect(() => {
@@ -13,7 +13,7 @@ export default function TestPKCEOAuth() {
       const hasCodeVerifier = localStorage.getItem(`sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.replace('https://', '').replace('.supabase.co', '')}-auth-token-code-verifier`)
       const sessionStorageToken = sessionStorage.getItem(`sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.replace('https://', '').replace('.supabase.co', '')}-auth-token`)
       
-      setDebugInfo(prev => ({
+      setDebugInfo((prev: Record<string, any>) => ({
         ...prev,
         storage: {
           hasCodeVerifierInLocalStorage: !!hasCodeVerifier,
@@ -28,7 +28,7 @@ export default function TestPKCEOAuth() {
     // Check current session
     const checkSession = async () => {
       const { data: { session }, error } = await supabase.auth.getSession()
-      setDebugInfo(prev => ({
+      setDebugInfo((prev: Record<string, any>) => ({
         ...prev,
         session: {
           exists: !!session,
@@ -68,7 +68,7 @@ export default function TestPKCEOAuth() {
       
       if (error) {
         console.error('[PKCE Test] OAuth initiation error:', error)
-        setDebugInfo(prev => ({
+        setDebugInfo((prev: Record<string, any>) => ({
           ...prev,
           lastError: {
             message: error.message,
@@ -77,7 +77,7 @@ export default function TestPKCEOAuth() {
         }))
       } else {
         console.log('[PKCE Test] OAuth initiated successfully:', data)
-        setDebugInfo(prev => ({
+        setDebugInfo((prev: Record<string, any>) => ({
           ...prev,
           lastSuccess: {
             url: data.url,
@@ -87,7 +87,7 @@ export default function TestPKCEOAuth() {
       }
     } catch (err: any) {
       console.error('[PKCE Test] Unexpected error:', err)
-      setDebugInfo(prev => ({
+      setDebugInfo((prev: Record<string, any>) => ({
         ...prev,
         unexpectedError: err.message
       }))

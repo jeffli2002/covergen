@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { userSessionService, type UnifiedUser } from '@/services/unified/UserSessionService'
-import authService from '@/services/authService'
 
 interface AuthContextType {
   user: UnifiedUser | null
@@ -33,63 +32,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        console.log('[AuthContext] Starting unified service initialization')
-        console.log('[AuthContext] URL:', window.location.href)
+        console.log('[AuthContext] Starting simplified initialization')
         
-        // First try API verification (works on Vercel)
-        try {
-          const apiResponse = await fetch('/api/auth/verify')
-          const apiData = await apiResponse.json()
-          
-          if (apiData.authenticated && apiData.user) {
-            console.log('[AuthContext] API verification successful:', apiData.user.email)
-            
-            // Get the actual session from authService to get access token
-            await authService.initialize()
-            const session = authService.getCurrentSession()
-            
-            // Convert API user to unified format with proper session data
-            const unifiedUser: UnifiedUser = {
-              id: apiData.user.id,
-              email: apiData.user.email,
-              name: apiData.user.user_metadata?.full_name,
-              avatar: apiData.user.user_metadata?.avatar_url,
-              provider: 'google',
-              subscription: {
-                tier: 'free',
-                status: 'active',
-                customerId: undefined,
-                subscriptionId: undefined,
-                currentPeriodEnd: undefined,
-                cancelAtPeriodEnd: false,
-                trialEndsAt: undefined
-              },
-              usage: {
-                monthly: 0,
-                monthlyLimit: 10,
-                daily: 0,
-                dailyLimit: 3,
-                remaining: 3
-              },
-              session: {
-                accessToken: session?.access_token || '',
-                refreshToken: session?.refresh_token || '',
-                expiresAt: session?.expires_at || 0,
-                isValid: !!session?.access_token
-              }
-            }
-            setUser(unifiedUser)
-            setLoading(false)
-            
-            // Still try to initialize unified service for subscription data
-            userSessionService.initialize().catch(console.error)
-            return
-          }
-        } catch (apiError) {
-          console.log('[AuthContext] API verification failed, trying unified service')
-        }
-        
-        // Initialize the unified service
+        // Only use the unified service - no fallbacks, no legacy auth service
         const initialized = await userSessionService.initialize()
         
         if (initialized) {
@@ -104,93 +49,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const currentUser = userSessionService.getCurrentUser()
           console.log('[AuthContext] Current unified user:', currentUser?.email)
           setUser(currentUser)
+          setLoading(false)
           
           return unsubscribe
         } else {
-          // Fallback to old auth service if unified service fails
-          console.warn('[AuthContext] Unified service failed, falling back to old auth service')
-          
-          authService.setAuthChangeHandler((legacyUser) => {
-            console.log('[AuthContext] Legacy auth change:', !!legacyUser, legacyUser?.email)
-            // Convert legacy user to unified format
-            if (legacyUser) {
-              const session = authService.getCurrentSession()
-              const unifiedUser: UnifiedUser = {
-                id: legacyUser.id,
-                email: legacyUser.email,
-                name: legacyUser.user_metadata?.full_name,
-                avatar: legacyUser.user_metadata?.avatar_url,
-                provider: 'google',
-                subscription: {
-                  tier: 'free',
-                  status: 'active',
-                  customerId: undefined,
-                  subscriptionId: undefined,
-                  currentPeriodEnd: undefined,
-                  cancelAtPeriodEnd: false,
-                  trialEndsAt: undefined
-                },
-                usage: {
-                  monthly: 0,
-                  monthlyLimit: 10,
-                  daily: 0,
-                  dailyLimit: 3,
-                  remaining: 3
-                },
-                session: {
-                  accessToken: session?.access_token || '',
-                  refreshToken: session?.refresh_token || '',
-                  expiresAt: session?.expires_at || 0,
-                  isValid: !!session?.access_token
-                }
-              }
-              setUser(unifiedUser)
-            } else {
-              setUser(null)
-            }
-            setLoading(false)
-          })
-          
-          await authService.initialize()
-          const legacyUser = authService.getCurrentUser()
-          if (legacyUser) {
-            const session = authService.getCurrentSession()
-            const unifiedUser: UnifiedUser = {
-              id: legacyUser.id,
-              email: legacyUser.email,
-              name: legacyUser.user_metadata?.full_name,
-              avatar: legacyUser.user_metadata?.avatar_url,
-              provider: 'google',
-              subscription: { tier: 'free', status: 'active', customerId: undefined, subscriptionId: undefined, currentPeriodEnd: undefined, cancelAtPeriodEnd: false, trialEndsAt: undefined },
-              usage: { monthly: 0, monthlyLimit: 10, daily: 0, dailyLimit: 3, remaining: 3 },
-              session: { accessToken: session?.access_token || '', refreshToken: session?.refresh_token || '', expiresAt: session?.expires_at || 0, isValid: !!session?.access_token }
-            }
-            setUser(unifiedUser)
-          }
+          console.error('[AuthContext] Failed to initialize unified service')
+          setLoading(false)
         }
       } catch (error) {
         console.error('[AuthContext] Initialization error:', error)
-      } finally {
         setLoading(false)
       }
     }
 
-    const cleanup = initAuth()
+    const cleanupPromise = initAuth()
 
     return () => {
-      cleanup?.then(unsubscribe => unsubscribe?.())
-      authService.destroy()
+      cleanupPromise?.then(unsubscribe => unsubscribe?.())
     }
   }, [])
 
   const authContextValue: AuthContextType = {
     user,
     loading,
-    // Legacy email/password methods (keep for backward compatibility)
-    signUp: authService.signUp.bind(authService),
-    signIn: authService.signIn.bind(authService),
-    resetPassword: authService.resetPassword.bind(authService),
-    updatePassword: authService.updatePassword.bind(authService),
+    // Email/password methods - redirect to unified service
+    signUp: async (email: string, password: string, metadata?: any) => {
+      // For now, return not implemented since unified service focuses on OAuth
+      return {
+        success: false,
+        error: 'Email/password signup not implemented in unified service'
+      }
+    },
+    signIn: async (email: string, password: string) => {
+      // For now, return not implemented since unified service focuses on OAuth
+      return {
+        success: false,
+        error: 'Email/password signin not implemented in unified service'
+      }
+    },
+    resetPassword: async (email: string) => {
+      return {
+        success: false,
+        error: 'Password reset not implemented in unified service'
+      }
+    },
+    updatePassword: async (newPassword: string) => {
+      return {
+        success: false,
+        error: 'Password update not implemented in unified service'
+      }
+    },
     
     // OAuth and payment methods from unified service
     signInWithGoogle: async () => {

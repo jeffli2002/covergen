@@ -1,21 +1,34 @@
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
-  // Simple pass-through to client-side handler
-  // No Supabase client usage to avoid multiple instances
-  const url = new URL(request.url)
-  const redirectUrl = new URL('/auth/callback-handler', url.origin)
-  
-  // Copy all search params
-  url.searchParams.forEach((value, key) => {
-    redirectUrl.searchParams.set(key, value)
+  const requestUrl = new URL(request.url)
+  const code = requestUrl.searchParams.get('code')
+  const next = requestUrl.searchParams.get('next') || '/en'
+
+  console.log('[Auth Callback] OAuth redirect handler:', {
+    hasCode: !!code,
+    next,
+    origin: requestUrl.origin
   })
-  
-  // Ensure next param exists
-  if (!redirectUrl.searchParams.has('next')) {
-    redirectUrl.searchParams.set('next', '/en')
+
+  // For PKCE flow, we must redirect to a client-side page that can access
+  // the code_verifier from localStorage to complete the exchange
+  if (code) {
+    // Redirect to the PKCE callback page with all parameters
+    const params = new URLSearchParams({
+      code,
+      next
+    })
+    
+    // Copy any other OAuth parameters
+    const state = requestUrl.searchParams.get('state')
+    if (state) params.append('state', state)
+    
+    console.log('[Auth Callback] Redirecting to PKCE handler')
+    return NextResponse.redirect(`${requestUrl.origin}/auth/callback-pkce?${params.toString()}`)
   }
 
-  console.log('[Auth Callback] Simple redirect to client handler:', redirectUrl.toString())
-  return NextResponse.redirect(redirectUrl.toString())
+  // No code present, redirect with error
+  console.error('[Auth Callback] No OAuth code received')
+  return NextResponse.redirect(`${requestUrl.origin}${next}?error=no_code`)
 }

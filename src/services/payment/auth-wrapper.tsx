@@ -12,11 +12,8 @@
  * 4. Clear separation of concerns
  */
 
-import authService from '@/services/authService'
+import { userSessionService } from '@/services/unified/UserSessionService'
 import React from 'react'
-
-// Module load check
-console.error('[PaymentAuthWrapper] !!!! MODULE LOADED !!!!', new Date().toISOString())
 
 export interface PaymentAuthContext {
   userId: string
@@ -33,36 +30,32 @@ export class PaymentAuthWrapper {
    */
   static async getAuthContext(): Promise<PaymentAuthContext | null> {
     try {
-      // Ensure auth service is initialized before getting session
-      await authService.initialize()
+      // Get current user from unified service
+      const user = userSessionService.getCurrentUser()
       
-      // First try the authService which maintains the single source of truth
-      const session = authService.getCurrentSession()
-      
-      if (!session || !session.access_token) {
-        console.log('[PaymentAuth] No session from authService')
-        return null
-      }
-
-      // Check if we have valid user data
-      if (!session.user || !session.user.id) {
-        console.log('[PaymentAuth] Session missing user data')
+      if (!user || !user.session.isValid) {
+        console.log('[PaymentAuth] No valid session from unified service')
         return null
       }
 
       // Check if session is expiring within 2 minutes (critical for payment flows)
+      const expiresAt = user.session.expiresAt
+      const now = Date.now()
+      const expiresAtMs = expiresAt > 9999999999 ? expiresAt : expiresAt * 1000
+      const timeUntilExpiry = expiresAtMs - now
       const criticalExpiryMinutes = 2
-      if (authService.isSessionExpiringSoon(criticalExpiryMinutes)) {
+      
+      if (timeUntilExpiry <= criticalExpiryMinutes * 60 * 1000) {
         console.warn('[PaymentAuth] Session expiring within 2 minutes - too risky for payment flow')
         return null
       }
 
       return {
-        userId: session.user.id,
-        email: session.user.email || '',
-        accessToken: session.access_token,
+        userId: user.id,
+        email: user.email,
+        accessToken: user.session.accessToken,
         isValid: true,
-        expiresAt: session.expires_at
+        expiresAt: user.session.expiresAt
       }
     } catch (error) {
       console.error('[PaymentAuth] Error getting auth context:', error)
@@ -76,35 +69,36 @@ export class PaymentAuthWrapper {
    */
   static async isSessionValidForPayment(): Promise<boolean> {
     try {
-      // Ensure auth service is initialized before checking session
-      await authService.initialize()
-      
-      const session = authService.getCurrentSession()
+      const user = userSessionService.getCurrentUser()
       
       console.log('[PaymentAuth] isSessionValidForPayment check:', {
-        hasSession: !!session,
-        hasUser: !!session?.user,
-        hasAccessToken: !!session?.access_token,
-        sessionData: session ? {
-          userId: session.user?.id,
-          email: session.user?.email,
-          expiresAt: session.expires_at,
-          expiresIn: session.expires_in
+        hasUser: !!user,
+        hasValidSession: !!user?.session?.isValid,
+        sessionData: user ? {
+          userId: user.id,
+          email: user.email,
+          expiresAt: user.session.expiresAt
         } : null,
         timestamp: new Date().toISOString()
       })
       
-      if (!session || !session.user || !session.access_token) {
-        console.log('[PaymentAuth] Session invalid - missing required fields')
+      if (!user || !user.session.isValid) {
+        console.log('[PaymentAuth] Session invalid - no user or invalid session')
         return false
       }
 
       // Require at least 5 minutes remaining for payment operations
+      const expiresAt = user.session.expiresAt
+      const now = Date.now()
+      const expiresAtMs = expiresAt > 9999999999 ? expiresAt : expiresAt * 1000
+      const timeUntilExpiry = expiresAtMs - now
       const minMinutesRequired = 5
-      const isExpiringSoon = authService.isSessionExpiringSoon(minMinutesRequired)
+      const isExpiringSoon = timeUntilExpiry <= minMinutesRequired * 60 * 1000
       
       console.log('[PaymentAuth] Session expiry check:', {
         minMinutesRequired,
+        timeUntilExpiryMs: timeUntilExpiry,
+        timeUntilExpiryMin: Math.round(timeUntilExpiry / 60000),
         isExpiringSoon,
         result: !isExpiringSoon
       })
@@ -153,13 +147,10 @@ export class PaymentAuthWrapper {
    * This doesn't modify auth state, just waits for it to be available
    */
   static async waitForAuth(maxWaitMs = 5000): Promise<boolean> {
-    // Ensure auth service is initialized
-    await authService.initialize()
-    
     const startTime = Date.now()
     
     while (Date.now() - startTime < maxWaitMs) {
-      if (authService.isAuthenticated()) {
+      if (userSessionService.isAuthenticated()) {
         return true
       }
       
