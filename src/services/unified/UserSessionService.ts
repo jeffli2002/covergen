@@ -4,7 +4,7 @@
  * Maintains session continuity across all user flows
  */
 
-import { createClient } from '@/utils/supabase/client'
+import { supabase } from '@/lib/supabase-simple'
 import { creemService } from '@/services/payment/creem'
 import type { OAuthProvider } from '@/modules/auth/oauth/types'
 
@@ -84,7 +84,7 @@ class UserSessionService {
   private initialized = false
   private listeners = new Set<(user: UnifiedUser | null) => void>()
   private sessionRefreshTimer: NodeJS.Timeout | null = null
-  private supabase = createClient()
+  private supabase = supabase
 
   private constructor() {}
 
@@ -151,8 +151,10 @@ class UserSessionService {
   async signInWithGoogle(): Promise<AuthResult> {
     try {
       const currentPath = window.location.pathname || '/en'
-      // Use simple callback for all environments
-      const redirectUrl = `${window.location.origin}/auth/callback-simple?next=${encodeURIComponent(currentPath)}`
+      // Use Vercel-specific callback route for Vercel preview deployments
+      const isVercelPreview = window.location.hostname.includes('vercel.app')
+      const callbackRoute = isVercelPreview ? '/auth/callback-vercel' : '/auth/callback'
+      const redirectUrl = `${window.location.origin}${callbackRoute}?next=${encodeURIComponent(currentPath)}`
       
       console.log('[UserSession] Google sign-in initiated:', {
         currentPath,

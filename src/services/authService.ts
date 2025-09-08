@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/client'
+import { supabase } from '@/lib/supabase-simple'
 
 let authServiceInstance: AuthService | null = null
 
@@ -20,8 +20,8 @@ class AuthService {
   }
 
   private getSupabase() {
-    // Use the singleton client to avoid multiple instances
-    return createClient()
+    // Use the singleton simple client to avoid multiple instances
+    return supabase
   }
 
   async initialize() {
@@ -39,38 +39,7 @@ class AuthService {
 
   private async _doInitialize() {
     try {
-      console.log('[Auth] Starting initialization...')
-      console.log('[Auth] URL:', window?.location?.href)
-      console.log('[Auth] Cookies:', document?.cookie)
-      
-      // Debug JWT token format from cookie if available
-      const cookies = document?.cookie?.split(';') || []
-      const authCookie = cookies.find(c => c.trim().startsWith('sb-'))
-      if (authCookie) {
-        try {
-          const tokenPart = authCookie.split('.')[1]
-          if (tokenPart) {
-            const decoded = JSON.parse(atob(tokenPart))
-            console.log('[Auth] JWT token claims (exp format check):', {
-              exp: decoded.exp,
-              expType: typeof decoded.exp,
-              expDate: new Date(decoded.exp * 1000).toISOString(),
-              iat: decoded.iat,
-              iatDate: decoded.iat ? new Date(decoded.iat * 1000).toISOString() : null
-            })
-          }
-        } catch (e) {
-          console.log('[Auth] Could not decode JWT for debugging')
-        }
-      }
-      
-      // Check if we just completed an OAuth callback
-      const isAfterOAuth = document?.cookie?.includes('auth-callback-success=true')
-      if (isAfterOAuth) {
-        console.log('[Auth] Detected OAuth callback success, will wait longer for session')
-        // Clear the marker cookie
-        document.cookie = 'auth-callback-success=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
-      }
+      console.log('[Auth] Starting simplified initialization...')
       
       const supabase = this.getSupabase()
       if (!supabase) {
@@ -79,79 +48,36 @@ class AuthService {
         return false
       }
 
-      const storedSession = this.getStoredSession()
-      if (storedSession && this.isSessionValid(storedSession)) {
-        this.session = storedSession
-        this.user = storedSession.user
-
-        supabase.auth.setSession({
-          access_token: storedSession.access_token,
-          refresh_token: storedSession.refresh_token
-        }).then(({ error }: { error: any }) => {
-          if (error) {
-            console.warn('Stored session invalid, clearing...', error)
-            this.clearStoredSession()
-            this.session = null
-            this.user = null
-          }
-        })
-      }
-
-      // After OAuth redirect, we might need to wait for session to be available
-      let session = null
-      let error = null
+      // Simple session check - let Supabase handle the complexity
+      const { data: { session }, error } = await supabase.auth.getSession()
       
-      // Try multiple times with increasing delays to handle OAuth callback timing
-      const maxAttempts = isAfterOAuth ? 5 : 3
-      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        console.log(`[Auth] Checking for session from Supabase (attempt ${attempt}/${maxAttempts})...`)
-        
-        const { data, error: sessionError } = await supabase.auth.getSession()
-        session = data.session
-        error = sessionError
-        
-        if (session || error || attempt === maxAttempts) {
-          break
-        }
-        
-        // Wait longer between attempts, especially after OAuth callback
-        const delay = isAfterOAuth ? 1000 * attempt : 500 * attempt
-        console.log(`[Auth] No session found, waiting ${delay}ms before retry...`)
-        await new Promise(resolve => setTimeout(resolve, delay))
-      }
-        
-        console.log('[Auth] Session check result:', { 
-          hasSession: !!session,
-          hasError: !!error,
-          user: session?.user?.email,
-          userId: session?.user?.id,
-          accessToken: session?.access_token ? 'present' : 'missing',
-          error: error?.message 
-        })
+      console.log('[Auth] Initial session check:', { 
+        hasSession: !!session,
+        hasError: !!error,
+        user: session?.user?.email,
+        error: error?.message 
+      })
 
-        if (error) {
-          console.error('[Auth] Error getting session:', error)
-        } else {
-          if (session) {
-            console.log('[Auth] Setting session from Supabase')
-            this.session = session
-            this.user = session.user
-            this.storeSession(session)
-            
-            // Notify auth change handler if we got a new session
-            if (this.onAuthChange) {
-              console.log('[Auth] Notifying auth change handler')
-              this.onAuthChange(this.user)
-            }
-          } else {
-            console.log('[Auth] No session found from Supabase')
-          }
+      if (error) {
+        console.error('[Auth] Error getting initial session:', error)
+      } else if (session) {
+        this.session = session
+        this.user = session.user
+        this.storeSession(session)
+        
+        // Notify auth change handler
+        if (this.onAuthChange) {
+          this.onAuthChange(this.user)
         }
+      }
 
       this.initialized = true
 
+      // Set up auth state change listener
       if (!this.authSubscription) {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
+          console.log('[Auth] Auth state change:', { event, user: session?.user?.email })
+          
           this.session = session
           this.user = session?.user || null
           this.lastSessionCheck = Date.now()
@@ -165,16 +91,12 @@ class AuthService {
           if (this.onAuthChange) {
             this.onAuthChange(this.user)
           }
-
-          console.log('[Auth] Auth state change:', { event, user: session?.user?.email })
           
           if (event === 'SIGNED_IN' && session) {
             await this.onSignIn(session.user)
             this.startSessionRefreshTimer()
           } else if (event === 'SIGNED_OUT') {
             this.stopSessionRefreshTimer()
-            // Don't call onSignOut here as we already handle it in signOut method
-            // to avoid duplicate state updates
           } else if (event === 'TOKEN_REFRESHED') {
             this.lastSessionCheck = Date.now()
             if (session) {

@@ -1,0 +1,210 @@
+1. Use a single Supabase client instance
+Why
+Supabase JS creates a GoTrueClient under the hood. When you import/create the client in more than one place (e.g., different modules, a custom hook, and a component library) each import constructs its own client, which triggers the “multiple instances” error.
+
+How
+Create one shared file (e.g., src/lib/supabaseClient.ts) and export a single instance.
+
+// src/lib/supabaseClient.ts
+import { createClient } from "npm:@supabase/supabase-js@2.44.0";
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+export const supabase = createClient(supabaseUrl, supabaseKey);
+
+Import the same instance everywhere:
+
+import { supabase } from "@/lib/supabaseClient";
+
+Avoid calling createClient in React hooks, pages, or other modules – those create extra instances.
+
+2. Implement a PKCE‑enabled OAuth flow (recommended for SPAs and Vercel)
+PKCE (Proof Key for Code Exchange) prevents the “redirect‑to‑home” problem caused by the server‑side callback trying to set cookies that don’t exist in the client context.
+
+Server‑side (Edge Function or API route)
+Create a tiny Edge Function that only exchanges the authorization code for a session and returns the session data in a JSON payload.
+
+// supabase/functions/oauth-callback.ts
+import { createClient } from "npm:@supabase/supabase-js@2.44.0";
+
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+);
+
+Deno.serve(async (req) => {
+  const url = new URL(req.url);
+  const code = url.searchParams.get("code");
+  const codeVerifier = url.searchParams.get("code_verifier");
+
+  if (!code || !codeVerifier) {
+    return new Response(
+      JSON.stringify({ error: "Missing code or verifier" }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  const { data, error } = await supabase.auth.exchangeCodeForSession(
+    code,
+    codeVerifier
+  );
+
+  if (error) {
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  // Return the session (access_token, refresh_token, expires_at, etc.)
+  return new Response(JSON.stringify({ session: data.session }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
+});
+
+Deploy this as an Edge Function (e.g., supabase/functions/oauth-callback.ts) and note its URL: https://<project>.functions.supabase.co/oauth-callback.
+
+
+Client side (React/Vue/etc.)
+
+// pages/auth/callback.tsx (Next.js example)
+import { useEffect } from "react";
+import { useRouter } from "next/router";
+import { supabase } from "@/lib/supabaseClient";
+
+export default function Callback() {
+  const router = useRouter();
+
+  useEffect(() => {
+    async function handleCallback() {
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get("code");
+      const verifier = url.searchParams.get("code_verifier"); // persisted by the library
+
+      if (!code || !verifier) {
+        router.replace("/"); // fallback
+        return;
+      }
+
+      // Call the Edge Function
+      const res = await fetch("/api/oauth-callback", {
+        method: "POST",
+        body: JSON.stringify({ code, codeVerifier: verifier }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const { session, error } = await res.json();
+      if (error) {
+        console.error(error);
+        router.replace("/");
+        return;
+      }
+
+      // Set the session on the single client instance
+      supabase.auth.setSession(session);
+      router.replace("/dashboard"); // or wherever you want the user to land
+    }
+
+    handleCallback();
+  }, [router]);
+
+  return <p>Signing you in…</p>;
+}
+
+Create a client route (/auth/callback) that calls the Edge Function:
+
+// pages/auth/callback.tsx (Next.js example)
+import { useEffect } from "react";
+import { useRouter } from "next/router";
+import { supabase } from "@/lib/supabaseClient";
+
+export default function Callback() {
+  const router = useRouter();
+
+  useEffect(() => {
+    async function handleCallback() {
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get("code");
+      const verifier = url.searchParams.get("code_verifier"); // persisted by the library
+
+      if (!code || !verifier) {
+        router.replace("/"); // fallback
+        return;
+      }
+
+      // Call the Edge Function
+      const res = await fetch("/api/oauth-callback", {
+        method: "POST",
+        body: JSON.stringify({ code, codeVerifier: verifier }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const { session, error } = await res.json();
+      if (error) {
+        console.error(error);
+        router.replace("/");
+        return;
+      }
+
+      // Set the session on the single client instance
+      supabase.auth.setSession(session);
+      router.replace("/dashboard"); // or wherever you want the user to land
+    }
+
+    handleCallback();
+  }, [router]);
+
+  return <p>Signing you in…</p>;
+}
+
+
+Key points
+
+Never call supabase.auth.getSession() before setSession. The client must be empty when the OAuth flow begins.
+Only one call to signInWithOAuth should exist on the page. If you have multiple “Login” buttons that each create a client, they’ll clash.
+Store code_verifier in sessionStorage (the library does this automatically). Do not generate a new verifier on the callback page.
+
+
+
+3. Remove any SSR‑related Supabase instances
+If you are using Next.js or Remix with server‑side rendering:
+
+Do not initialize Supabase in getServerSideProps or loader unless you need a service‑role client (e.g., for admin APIs).
+For user‑facing pages, always use the browser‑only client (the one exported from supabaseClient.ts).
+
+Guard the window object when accessing the client:
+
+// safe import
+const supabase = typeof window !== "undefined" ? supabaseBrowser : null;
+
+Avoid mixing supabase.auth.session() (client) with supabase.auth.api.getUser() (server) in the same component.
+
+ Verify Vercel / Netlify deployment settings
+Redirect URI in the Supabase Auth dashboard must exactly match the client route you use (https://myapp.vercel.app/auth/callback).
+No trailing slash unless you also include it in the code.
+
+Environment variables (NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY) must be exposed to the browser (NEXT_PUBLIC_ prefix for Vercel).
+The service‑role key should only be used in server‑side functions (Edge Functions, API routes).
+
+Cookie settings – Supabase sets an sb:token cookie on the domain of your frontend. If you deploy a separate sub‑domain for the callback, set the cookie domain to the parent domain or keep the callback on the same origin.
+
+5. Quick sanity‑check checklist
+✅	Item
+Single client	All imports reference the same supabase instance.
+PKCE flow	signInWithOAuth called once, redirects to /auth/callback.
+Edge function	Exchanges code for session and returns JSON.
+Callback page	Calls the Edge function, then supabase.auth.setSession.
+Supabase Auth settings	Redirect URI matches the client callback URL exactly.
+Vercel env vars	NEXT_PUBLIC_SUPABASE_URL & NEXT_PUBLIC_SUPABASE_ANON_KEY are public; SUPABASE_SERVICE_ROLE_KEY is only in serverless functions.
+No SSR client	No createClient inside getServerSideProps or similar.
+If any of the rows above remain unchecked, that is likely the source of the “multiple GoTrueClient” error and the redirect loop.
+
+TL;DR
+Create one shared Supabase client (supabaseClient.ts) and import it everywhere.
+Use PKCE OAuth with a dedicated callback route (/auth/callback).
+Exchange the code in a server‑side Edge Function and return the session.
+Set the session on the single client (supabase.auth.setSession).
+Ensure redirect URIs & env vars are correct for your Vercel deployment.
+Following these steps will eliminate the duplicate‑client detection and allow the user to finish the OAuth sign‑in flow without being sent back to the home page.

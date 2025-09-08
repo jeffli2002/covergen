@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { createClient } from '@/utils/supabase/client'
+import { supabase } from '@/lib/supabase-simple'
 import { Suspense } from 'react'
 
 function OAuthCodeHandlerInner() {
@@ -15,31 +15,40 @@ function OAuthCodeHandlerInner() {
   useEffect(() => {
     async function handleOAuthCode() {
       const code = searchParams.get('code')
+      const authCallback = searchParams.get('auth_callback')
       
-      console.log('[OAuthCodeHandler] Effect running, code:', code ? code.substring(0, 10) + '...' : 'none')
+      console.log('[OAuthCodeHandler] Effect running:', { 
+        hasCode: !!code, 
+        authCallback,
+        isProcessing: processingRef.current 
+      })
       
+      // Skip if already processing or no code
       if (!code || processingRef.current) {
-        console.log('[OAuthCodeHandler] Skipping:', { hasCode: !!code, isProcessing: processingRef.current })
+        return
+      }
+      
+      // Skip if this is already a callback success redirect
+      if (authCallback === 'success') {
+        console.log('[OAuthCodeHandler] Already processed callback, skipping')
         return
       }
       
       processingRef.current = true
       
-      console.log('[OAuthCodeHandler] Found OAuth code in URL, processing...', {
-        code: code.substring(0, 10) + '...',
-        url: window.location.href
-      })
+      console.log('[OAuthCodeHandler] Processing OAuth code...')
       
       try {
-        const supabase = createClient()
-        
-        // Exchange the code for a session
+        // Exchange the code for a session using PKCE flow
         const { data, error } = await supabase.auth.exchangeCodeForSession(code)
         
         if (error) {
           console.error('[OAuthCodeHandler] Failed to exchange code:', error)
-          // Redirect to error page
-          router.push('/auth/error?error=' + encodeURIComponent(error.message))
+          // Clean URL and redirect to home with error
+          const url = new URL(window.location.href)
+          url.searchParams.delete('code')
+          url.searchParams.set('error', 'oauth_failed')
+          window.location.href = url.toString()
           return
         }
         
@@ -49,19 +58,27 @@ function OAuthCodeHandlerInner() {
             provider: data.session.user.app_metadata?.provider
           })
           
-          // Clean up URL and reload to trigger auth state update
+          // Clean up URL parameters and redirect to clean URL
           const url = new URL(window.location.href)
           url.searchParams.delete('code')
+          url.searchParams.delete('state')
+          url.searchParams.delete('scope')
           
-          // Add success marker
-          url.searchParams.set('auth_callback', 'success')
-          
-          // Redirect to clean URL
+          // Redirect to clean URL - the auth state change will be handled by AuthService
+          window.location.href = url.toString()
+        } else {
+          console.error('[OAuthCodeHandler] No session returned from code exchange')
+          const url = new URL(window.location.href)
+          url.searchParams.delete('code')
+          url.searchParams.set('error', 'no_session')
           window.location.href = url.toString()
         }
       } catch (error) {
         console.error('[OAuthCodeHandler] Unexpected error:', error)
-        router.push('/auth/error?error=unexpected_error')
+        const url = new URL(window.location.href)
+        url.searchParams.delete('code')
+        url.searchParams.set('error', 'unexpected_error')
+        window.location.href = url.toString()
       }
     }
     
