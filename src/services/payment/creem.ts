@@ -315,6 +315,17 @@ class CreemPaymentService {
 
       const productId = CREEM_PRODUCTS[planId as keyof typeof CREEM_PRODUCTS]
       
+      // Enhanced debugging for product ID resolution
+      console.log('[Creem] Product ID Resolution:', {
+        requestedPlanId: planId,
+        resolvedProductId: productId,
+        CREEM_PRODUCTS,
+        envVars: {
+          CREEM_PRO_PLAN_ID: process.env.CREEM_PRO_PLAN_ID,
+          CREEM_PRO_PLUS_PLAN_ID: process.env.CREEM_PRO_PLUS_PLAN_ID
+        }
+      })
+      
       if (!productId) {
         console.error('[Creem] Product ID not found for plan:', planId)
         console.error('[Creem] Available products:', CREEM_PRODUCTS)

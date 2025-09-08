@@ -71,7 +71,18 @@ export async function POST(request: NextRequest) {
     console.log('[API] Current subscription tier:', currentTier)
 
     // Create checkout session using the server-side Creem service
-    const { creemService } = await import('@/services/payment/creem')
+    const { creemService, CREEM_PRODUCTS } = await import('@/services/payment/creem')
+    
+    // Debug log environment and product IDs
+    console.log('[API] Creem Product Configuration:', {
+      planId,
+      CREEM_PRODUCTS,
+      envVars: {
+        CREEM_PRO_PLAN_ID: process.env.CREEM_PRO_PLAN_ID,
+        CREEM_PRO_PLUS_PLAN_ID: process.env.CREEM_PRO_PLUS_PLAN_ID,
+      },
+      resolvedProductId: CREEM_PRODUCTS[planId as keyof typeof CREEM_PRODUCTS]
+    })
     
     const checkoutResult = await creemService.createCheckoutSession({
       userId: user.id,
