@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { supabase } from '@/lib/supabase-simple'
 import { useSearchParams } from 'next/navigation'
 
-export default function DebugOAuthState() {
+function DebugOAuthStateInner() {
   const searchParams = useSearchParams()
   const [state, setState] = useState<any>({})
   
@@ -82,5 +82,13 @@ export default function DebugOAuthState() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function DebugOAuthState() {
+  return (
+    <Suspense fallback={<div className="p-8">Loading...</div>}>
+      <DebugOAuthStateInner />
+    </Suspense>
   )
 }
