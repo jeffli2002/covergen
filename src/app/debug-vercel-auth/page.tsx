@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabaseClient } from '@/lib/supabaseClient-simple'
+import { supabase } from '@/lib/supabase-simple'
 
 export default function DebugVercelAuth() {
   const [debugInfo, setDebugInfo] = useState<any>({
@@ -30,7 +30,7 @@ export default function DebugVercelAuth() {
         const cookies: any = {}
         document.cookie.split('; ').forEach(cookie => {
           const [name, value] = cookie.split('=')
-          if (name.includes('sb-') || name.includes('auth') || name.includes('supabaseClient')) {
+          if (name.includes('sb-') || name.includes('auth') || name.includes('supabase')) {
             cookies[name] = value ? value.substring(0, 50) + '...' : 'empty'
           }
         })
@@ -39,14 +39,14 @@ export default function DebugVercelAuth() {
         const localStorage: any = {}
         const keys = Object.keys(window.localStorage)
         keys.forEach(key => {
-          if (key.includes('sb-') || key.includes('supabaseClient') || key === 'coverimage_session') {
+          if (key.includes('sb-') || key.includes('supabase') || key === 'coverimage_session') {
             const value = window.localStorage.getItem(key)
             localStorage[key] = value ? value.substring(0, 50) + '...' : 'empty'
           }
         })
 
         // Supabase session
-        const supabaseClient = supabase
+        const supabase = supabase
         let session = null
         let error = null
         const refreshAttempts: any[] = []
@@ -59,7 +59,7 @@ export default function DebugVercelAuth() {
           }
 
           try {
-            const { data, error: sessionError } = await supabaseClient.auth.getSession()
+            const { data, error: sessionError } = await supabase.auth.getSession()
             attemptInfo.hasSession = !!data.session
             attemptInfo.error = sessionError?.message
             
@@ -91,7 +91,7 @@ export default function DebugVercelAuth() {
         // Try to refresh session if no session found
         if (!session) {
           try {
-            const { data: refreshData, error: refreshError } = await supabaseClient.auth.refreshSession()
+            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
             refreshAttempts.push({
               attempt: 'refresh',
               timestamp: new Date().toISOString(),
@@ -202,9 +202,9 @@ export default function DebugVercelAuth() {
             </button>
             <button
               onClick={async () => {
-                const supabaseClient = supabase
+                const supabase = supabase
                 try {
-                  await supabaseClient.auth.signInWithOAuth({
+                  await supabase.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
                       redirectTo: `${window.location.origin}/auth/callback?next=/debug-vercel-auth`,
@@ -224,8 +224,8 @@ export default function DebugVercelAuth() {
             </button>
             <button
               onClick={async () => {
-                const supabaseClient = supabase
-                await supabaseClient.auth.signOut()
+                const supabase = supabase
+                await supabase.auth.signOut()
                 window.location.reload()
               }}
               className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"

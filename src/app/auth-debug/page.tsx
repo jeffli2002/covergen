@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabaseClient } from '@/lib/supabaseClient-simple'
+import { supabase } from '@/lib/supabase-simple'
 import { Button } from '@/components/ui/button'
 
 export default function AuthDebugPage() {
@@ -10,7 +10,7 @@ export default function AuthDebugPage() {
 
   useEffect(() => {
     async function gatherDebugInfo() {
-      const supabaseClient = supabase
+      const supabase = supabase
       
       // Gather all debug information
       const info: any = {
@@ -27,7 +27,7 @@ export default function AuthDebugPage() {
           all: document.cookie,
           authCookies: document.cookie.split('; ').filter(c => 
             c.includes('sb-') || 
-            c.includes('supabaseClient') || 
+            c.includes('supabase') || 
             c.includes('auth-')
           ),
           count: document.cookie.split('; ').length
@@ -35,7 +35,7 @@ export default function AuthDebugPage() {
         localStorage: {
           keys: Object.keys(localStorage),
           authKeys: Object.keys(localStorage).filter(k => 
-            k.includes('supabaseClient') || 
+            k.includes('supabase') || 
             k.includes('auth') || 
             k.includes('covergen')
           )
@@ -44,7 +44,7 @@ export default function AuthDebugPage() {
 
       // Check Supabase session
       try {
-        const { data: { session }, error } = await supabaseClient.auth.getSession()
+        const { data: { session }, error } = await supabase.auth.getSession()
         info.session = {
           exists: !!session,
           error: error?.message,
@@ -59,7 +59,7 @@ export default function AuthDebugPage() {
 
       // Check Supabase auth state
       try {
-        const { data: { user }, error } = await supabaseClient.auth.getUser()
+        const { data: { user }, error } = await supabase.auth.getUser()
         info.user = {
           exists: !!user,
           error: error?.message,
@@ -99,8 +99,8 @@ export default function AuthDebugPage() {
   }
 
   const signOut = async () => {
-    const supabaseClient = supabase
-    await supabaseClient.auth.signOut()
+    const supabase = supabase
+    await supabase.auth.signOut()
     window.location.reload()
   }
 
