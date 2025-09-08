@@ -11,13 +11,13 @@ export default function TestPKCEOAuth() {
     // Check for PKCE parameters in storage
     const checkPKCEParams = () => {
       const hasCodeVerifier = localStorage.getItem(`sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.replace('https://', '').replace('.supabase.co', '')}-auth-token-code-verifier`)
-      const sessionStorage = sessionStorage.getItem(`sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.replace('https://', '').replace('.supabase.co', '')}-auth-token`)
+      const sessionStorageToken = sessionStorage.getItem(`sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.replace('https://', '').replace('.supabase.co', '')}-auth-token`)
       
       setDebugInfo(prev => ({
         ...prev,
         storage: {
           hasCodeVerifierInLocalStorage: !!hasCodeVerifier,
-          hasSessionInStorage: !!sessionStorage,
+          hasSessionInStorage: !!sessionStorageToken,
           supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL
         }
       }))
