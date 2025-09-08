@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabaseClient } from '@/lib/supabaseClient-simple'
+import { supabase } from '@/lib/supabase-simple'
 
 export default function SessionCheckPage() {
   const [sessionInfo, setSessionInfo] = useState<any>(null)
@@ -14,15 +14,15 @@ export default function SessionCheckPage() {
         console.log('[SessionCheck] Starting session check...')
         setSessionInfo({ status: 'Starting check...' })
         
-        const supabaseClientClient = supabaseClient
+        const supabaseClient = supabase
         console.log('[SessionCheck] Supabase client created')
       
       // Try different methods to get session
-      const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession()
-      const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
       
       // Check auth state
-      const { data: authState } = supabaseClient.auth.onAuthStateChange((event: any, session: any) => {
+      const { data: authState } = supabase.auth.onAuthStateChange((event: any, session: any) => {
         console.log('[SessionCheck] Auth state change:', event, session?.user?.email)
       })
       
@@ -45,7 +45,7 @@ export default function SessionCheckPage() {
           userError: userError?.message || null
         },
         cookies: document.cookie.split('; ').filter(c => c.includes('sb-') || c.includes('auth')),
-        localStorage: Object.keys(localStorage).filter(k => k.includes('sb-') || k.includes('supabaseClient'))
+        localStorage: Object.keys(localStorage).filter(k => k.includes('sb-') || k.includes('supabase'))
       }
       
       console.log('[SessionCheck] Results:', info)

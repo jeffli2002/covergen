@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabaseClient } from '@/lib/supabaseClient-simple'
+import { supabase } from '@/lib/supabase-simple'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -17,10 +17,10 @@ export default function AuthSessionDebugPage() {
     setError(null)
     
     try {
-      const supabaseClient = supabase
+      const supabase = supabase
       
       // Get current session
-      const { data: { session }, error } = await supabaseClient.auth.getSession()
+      const { data: { session }, error } = await supabase.auth.getSession()
       
       if (error) {
         setError(error.message)
@@ -35,7 +35,7 @@ export default function AuthSessionDebugPage() {
       // Log for debugging
       console.log('[Session Debug] Session:', session)
       console.log('[Session Debug] Cookies:', allCookies)
-      console.log('[Session Debug] Auth cookies:', allCookies.filter(c => c.includes('sb-') || c.includes('supabaseClient')))
+      console.log('[Session Debug] Auth cookies:', allCookies.filter(c => c.includes('sb-') || c.includes('supabase')))
       
     } catch (err: any) {
       setError(err.message)
@@ -48,8 +48,8 @@ export default function AuthSessionDebugPage() {
     checkSession()
     
     // Listen for auth changes
-    const supabaseClient = supabase
-    const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event: any, session: any) => {
+    const supabase = supabase
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session: any) => {
       console.log('[Session Debug] Auth state change:', event, session)
       setSession(session)
     })
@@ -60,14 +60,14 @@ export default function AuthSessionDebugPage() {
   }, [])
 
   const handleSignOut = async () => {
-    const supabaseClient = supabase
-    await supabaseClient.auth.signOut()
+    const supabase = supabase
+    await supabase.auth.signOut()
     await checkSession()
   }
 
   const handleRefreshSession = async () => {
-    const supabaseClient = supabase
-    const { data, error } = await supabaseClient.auth.refreshSession()
+    const supabase = supabase
+    const { data, error } = await supabase.auth.refreshSession()
     if (error) {
       setError(error.message)
     } else {
@@ -140,13 +140,13 @@ export default function AuthSessionDebugPage() {
               <h3 className="font-semibold">Auth-related Cookies:</h3>
               <div className="text-sm font-mono bg-gray-100 p-4 rounded max-h-64 overflow-y-auto">
                 {cookies
-                  .filter(c => c.includes('sb-') || c.includes('supabaseClient') || c.includes('auth'))
+                  .filter(c => c.includes('sb-') || c.includes('supabase') || c.includes('auth'))
                   .map((cookie, i) => (
                     <div key={i} className="mb-2 break-all">
                       {cookie.substring(0, 100)}{cookie.length > 100 && '...'}
                     </div>
                   ))}
-                {cookies.filter(c => c.includes('sb-') || c.includes('supabaseClient') || c.includes('auth')).length === 0 && (
+                {cookies.filter(c => c.includes('sb-') || c.includes('supabase') || c.includes('auth')).length === 0 && (
                   <p className="text-gray-500">No auth-related cookies found</p>
                 )}
               </div>
