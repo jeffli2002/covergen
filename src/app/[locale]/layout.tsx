@@ -12,7 +12,6 @@ import { organizationSchema, websiteSchema, softwareApplicationSchema } from '@/
 import { Suspense, lazy } from 'react'
 import { SessionRecovery } from '@/components/auth/SessionRecovery'
 import { AuthStatusDebug } from '@/components/debug/AuthStatusDebug'
-import { OAuthCodeHandler } from '@/components/auth/OAuthCodeHandler'
 import '@/app/globals.css'
 
 // Lazy load performance monitor for development
@@ -178,7 +177,6 @@ export default async function LocaleLayout({
         <Suspense fallback={null}>
           <SessionRecovery />
         </Suspense>
-        <OAuthCodeHandler />
         <div className={`min-h-screen flex flex-col ${inter.className}`}>
           <Header locale={locale} translations={dict} />
           <main className="flex-grow">
