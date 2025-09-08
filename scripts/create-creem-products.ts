@@ -41,15 +41,12 @@ async function createProducts() {
         price: 900, // $9.00 in cents
         currency: 'USD',
         billingType: 'recurring',
-        billingPeriod: 'monthly',
+        billingPeriod: 'every-month',
         // Add success URL for after payment
-        successUrl: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://covergen.ai'}/payment/success?plan=pro`,
-        // Add other metadata
-        metadata: {
-          plan: 'pro',
-          credits: '120',
-          features: 'priority_support,basic_tools'
-        }
+        defaultSuccessUrl: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://covergen.ai'}/payment/success?plan=pro`,
+        // Tax configuration
+        taxMode: 'inclusive',
+        taxCategory: 'saas'
       }
     })
     console.log('✅ Pro product created:', proProduct.id)
@@ -61,18 +58,15 @@ async function createProducts() {
       createProductRequestEntity: {
         name: 'CoverGen Pro+',
         description: 'Premium plan with 300 covers per month, commercial license, all tools, and dedicated support',
-        amount: 1900, // $19.00 in cents
+        price: 1900, // $19.00 in cents
         currency: 'USD',
-        type: 'recurring',
-        interval: 'monthly',
+        billingType: 'recurring',
+        billingPeriod: 'every-month',
         // Add success URL for after payment
-        successUrl: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://covergen.ai'}/payment/success?plan=pro_plus`,
-        // Add other metadata
-        metadata: {
-          plan: 'pro_plus',
-          credits: '300',
-          features: 'commercial_license,all_tools,dedicated_support,cloud_gallery'
-        }
+        defaultSuccessUrl: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://covergen.ai'}/payment/success?plan=pro_plus`,
+        // Tax configuration
+        taxMode: 'inclusive',
+        taxCategory: 'saas'
       }
     })
     console.log('✅ Pro+ product created:', proPlusProduct.id)
