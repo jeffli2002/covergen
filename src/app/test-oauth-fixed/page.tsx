@@ -1,14 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 
-// Force dynamic rendering to prevent static generation issues
-export const dynamic = 'force-dynamic'
-
-export default function TestOAuthFixed() {
+function TestOAuthContent() {
   const router = useRouter()
   const { user, loading, signInWithGoogle, signOut } = useAuth()
   const [testResults, setTestResults] = useState<Record<string, any>>({})
@@ -232,5 +229,20 @@ export default function TestOAuthFixed() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function TestOAuthFixed() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 p-8 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading OAuth test page...</p>
+        </div>
+      </div>
+    }>
+      <TestOAuthContent />
+    </Suspense>
   )
 }
