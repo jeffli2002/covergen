@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createVercelOptimizedClient } from '@/lib/supabase/vercel-client'
+import { createSimpleClient } from '@/lib/supabase/simple-client'
 import { Button } from '@/components/ui/button'
 
 export default function VercelAuthTestPage() {
@@ -15,7 +15,7 @@ export default function VercelAuthTestPage() {
   
   const checkSession = async () => {
     try {
-      const supabase = createVercelOptimizedClient()
+      const supabase = createSimpleClient()
       
       // Get current session
       const { data: { session: currentSession }, error } = await supabase.auth.getSession()
@@ -66,7 +66,7 @@ export default function VercelAuthTestPage() {
   
   const handleSignIn = async () => {
     try {
-      const supabase = createVercelOptimizedClient()
+      const supabase = createSimpleClient()
       
       // Get current path for redirect
       const currentPath = window.location.pathname
@@ -94,7 +94,7 @@ export default function VercelAuthTestPage() {
   
   const handleSignOut = async () => {
     try {
-      const supabase = createVercelOptimizedClient()
+      const supabase = createSimpleClient()
       const { error } = await supabase.auth.signOut()
       if (error) throw error
       

@@ -1,4 +1,4 @@
-import { getSupabaseClient } from './unified-client'
+import { supabase } from '@/lib/supabase-simple'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 /**
@@ -36,10 +36,10 @@ export function createBrowserClient(
     [key: string]: any
   }
 ): SupabaseClient {
-  // Return the unified client instance
+  // Return the singleton instance from supabase-simple
   // This ensures we always use the same GoTrueClient
-  console.log('[SSR Compat] Returning unified client instead of creating new SSR client')
-  return getSupabaseClient()
+  console.log('[SSR Compat] Returning singleton client instead of creating new SSR client')
+  return supabase
 }
 
 // For server-side, we should still use the proper server client

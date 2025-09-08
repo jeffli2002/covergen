@@ -1,18 +1,8 @@
-import { createBrowserClient } from '@supabase/ssr'
+// Re-export the singleton instance from supabase-simple
+// This ensures all code paths use the exact same instance
+import { supabase } from '@/lib/supabase-simple'
 
 export function createSimpleClient() {
-  console.log('[Simple Client] Creating basic Supabase client...')
-  
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: true,
-        flowType: 'pkce'
-      }
-    }
-  )
+  console.log('[Simple Client] Returning singleton instance from supabase-simple')
+  return supabase
 }

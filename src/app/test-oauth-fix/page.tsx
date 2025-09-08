@@ -1,169 +1,90 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
-import authService from '@/services/authService'
+import { supabase } from '@/lib/supabase-simple'
+import { createSimpleClient } from '@/lib/supabase/simple-client'
+import { createClient } from '@/utils/supabase/client'
 
 export default function TestOAuthFix() {
-  const [logs, setLogs] = useState<string[]>([])
-  const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-
-  const addLog = (message: string) => {
-    const timestamp = new Date().toISOString()
-    const logMessage = `[${timestamp}] ${message}`
-    setLogs(prev => [...prev, logMessage])
-    console.log(logMessage)
-  }
-
+  const [instancesCreated, setInstancesCreated] = useState<string[]>([])
+  
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        addLog('Starting auth check...')
-        
-        // Check for multiple client instances warning
-        const consoleWarnOriginal = console.warn
-        console.warn = (...args) => {
-          if (args[0]?.includes('Multiple GoTrueClient')) {
-            addLog('WARNING: Multiple GoTrueClient instances detected!')
-          }
-          consoleWarnOriginal(...args)
-        }
-
-        // Initialize auth service
-        addLog('Initializing auth service...')
-        await authService.initialize()
-        
-        const currentUser = authService.getCurrentUser()
-        if (currentUser) {
-          addLog(`User found: ${currentUser.email}`)
-          setUser(currentUser)
-        } else {
-          addLog('No user found')
-        }
-
-        // Check Supabase session directly
-        addLog('Checking Supabase session...')
-        const { data: { session }, error } = await supabase.auth.getSession()
-        
-        if (error) {
-          addLog(`Supabase session error: ${error.message}`)
-        } else if (session) {
-          addLog(`Supabase session found: ${session.user.email}`)
-        } else {
-          addLog('No Supabase session')
-        }
-
-        // Set up auth state change listener
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session: any) => {
-          addLog(`Auth state change: ${event}, user: ${session?.user?.email || 'none'}`)
-          if (session?.user) {
-            setUser(session.user)
-          } else {
-            setUser(null)
-          }
-        })
-
-        return () => {
-          subscription.unsubscribe()
-          console.warn = consoleWarnOriginal
-        }
-      } catch (error) {
-        addLog(`Error: ${error}`)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    checkAuth()
+    // Test that all imports return the same instance
+    const instances: string[] = []
+    
+    // Test 1: Direct import
+    instances.push(`Direct import (supabase): ${supabase}`)
+    
+    // Test 2: createSimpleClient function
+    const client1 = createSimpleClient()
+    instances.push(`createSimpleClient(): ${client1}`)
+    
+    // Test 3: createClient from utils
+    const client2 = createClient()
+    instances.push(`createClient(): ${client2}`)
+    
+    // Test 4: Multiple calls to createSimpleClient
+    const client3 = createSimpleClient()
+    const client4 = createSimpleClient()
+    instances.push(`Multiple createSimpleClient calls same instance: ${client3 === client4}`)
+    
+    // Test 5: All should be the same instance
+    instances.push(`All same instance: ${supabase === client1 && client1 === client2 && client2 === client3}`)
+    
+    setInstancesCreated(instances)
+    
+    // Check console for "Multiple GoTrueClient instances" warning
+    console.log('OAuth Fix Test - Check console for any warnings about multiple instances')
   }, [])
-
-  const handleGoogleSignIn = async () => {
+  
+  const handleOAuthTest = async () => {
     try {
-      addLog('Starting Google sign-in...')
-      const result = await authService.signInWithGoogle()
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=${window.location.pathname}`
+        }
+      })
       
-      if (result.success) {
-        addLog('Google sign-in initiated successfully')
-      } else {
-        addLog(`Google sign-in failed: ${result.error}`)
+      if (error) {
+        console.error('OAuth error:', error)
       }
-    } catch (error) {
-      addLog(`Google sign-in error: ${error}`)
+    } catch (err) {
+      console.error('OAuth test error:', err)
     }
   }
-
-  const handleSignOut = async () => {
-    try {
-      addLog('Starting sign out...')
-      const result = await authService.signOut()
-      
-      if (result.success) {
-        addLog('Sign out successful')
-        setUser(null)
-      } else {
-        addLog(`Sign out failed: ${result.error}`)
-      }
-    } catch (error) {
-      addLog(`Sign out error: ${error}`)
-    }
-  }
-
+  
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">OAuth Fix Test Page</h1>
-        
-        {/* User Status */}
-        <div className="bg-white rounded-lg p-6 mb-6 shadow">
-          <h2 className="text-lg font-semibold mb-4">Current Status</h2>
-          <div className="space-y-2">
-            <p><strong>Loading:</strong> {loading ? 'Yes' : 'No'}</p>
-            <p><strong>User:</strong> {user ? user.email : 'Not signed in'}</p>
-            <p><strong>User ID:</strong> {user ? user.id : 'N/A'}</p>
-          </div>
+    <div className="container mx-auto p-8">
+      <h1 className="text-2xl font-bold mb-4">OAuth Fix Test</h1>
+      
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-2">Instance Creation Test</h2>
+        <div className="bg-gray-100 p-4 rounded">
+          {instancesCreated.map((instance, i) => (
+            <div key={i} className="mb-2 font-mono text-sm">{instance}</div>
+          ))}
         </div>
-
-        {/* Actions */}
-        <div className="bg-white rounded-lg p-6 mb-6 shadow">
-          <h2 className="text-lg font-semibold mb-4">Actions</h2>
-          <div className="space-x-4">
-            {!user && (
-              <button
-                onClick={handleGoogleSignIn}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                disabled={loading}
-              >
-                Sign in with Google
-              </button>
-            )}
-            {user && (
-              <button
-                onClick={handleSignOut}
-                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-                disabled={loading}
-              >
-                Sign Out
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Logs */}
-        <div className="bg-white rounded-lg p-6 shadow">
-          <h2 className="text-lg font-semibold mb-4">Debug Logs</h2>
-          <div className="bg-gray-100 p-4 rounded font-mono text-sm max-h-96 overflow-y-auto">
-            {logs.length === 0 ? (
-              <p className="text-gray-500">No logs yet...</p>
-            ) : (
-              logs.map((log, index) => (
-                <div key={index} className={log.includes('WARNING') ? 'text-red-600' : ''}>
-                  {log}
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+      </div>
+      
+      <div>
+        <h2 className="text-xl font-semibold mb-2">OAuth Flow Test</h2>
+        <p className="mb-4">Open browser console and click the button below. There should be NO warnings about "Multiple GoTrueClient instances"</p>
+        <button 
+          onClick={handleOAuthTest}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Test Google OAuth
+        </button>
+      </div>
+      
+      <div className="mt-8 text-sm text-gray-600">
+        <p>If the fix is working correctly:</p>
+        <ul className="list-disc ml-5 mt-2">
+          <li>All instances should be the same (true)</li>
+          <li>No "Multiple GoTrueClient instances" warning in console</li>
+          <li>OAuth flow should work without errors</li>
+        </ul>
       </div>
     </div>
   )
