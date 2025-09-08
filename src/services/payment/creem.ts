@@ -166,19 +166,21 @@ export const SUBSCRIPTION_PLANS = {
 // Product IDs for subscription tiers (from Creem dashboard)
 // Same product IDs are used for both test and production modes
 export const CREEM_PRODUCTS = {
-  pro: process.env.CREEM_PRO_PLAN_ID || '',
-  pro_plus: process.env.CREEM_PRO_PLUS_PLAN_ID || ''
+  pro: process.env.CREEM_PRO_PLAN_ID || 'prod_7HHnnUgLVjiHBQOGQyKPKO',
+  pro_plus: process.env.CREEM_PRO_PLUS_PLAN_ID || 'prod_5FSXAIuhm6ueniFPAbaOoS'
 }
 
 // Debug log to verify correct product IDs are loaded
-console.log('[Creem Config] Product IDs loaded:', {
-  pro: CREEM_PRODUCTS.pro,
-  pro_plus: CREEM_PRODUCTS.pro_plus,
-  fromEnv: {
-    CREEM_PRO_PLAN_ID: process.env.CREEM_PRO_PLAN_ID,
-    CREEM_PRO_PLUS_PLAN_ID: process.env.CREEM_PRO_PLUS_PLAN_ID
-  }
-})
+if (typeof window === 'undefined') { // Only log on server-side
+  console.log('[Creem Config] Product IDs loaded:', {
+    pro: CREEM_PRODUCTS.pro,
+    pro_plus: CREEM_PRODUCTS.pro_plus,
+    fromEnv: {
+      CREEM_PRO_PLAN_ID: process.env.CREEM_PRO_PLAN_ID || 'NOT SET - using fallback',
+      CREEM_PRO_PLUS_PLAN_ID: process.env.CREEM_PRO_PLUS_PLAN_ID || 'NOT SET - using fallback'
+    }
+  })
+}
 
 // Price IDs for subscription tiers (to be created in Creem dashboard)
 export const CREEM_PRICES = {

@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { userSessionService } from '@/services/unified/UserSessionService'
-import { createClient } from '@/utils/supabase/server'
+import { createClient } from '@supabase/supabase-js'
 
 export async function POST(request: NextRequest) {
   console.log('[API] Session-aware unified checkout request received')
@@ -32,8 +32,18 @@ export async function POST(request: NextRequest) {
 
     const token = authHeader.substring(7)
     
-    // Create Supabase client with service role for server operations
-    const supabase = createClient()
+    // Create a simple admin client for server operations
+    // This avoids conflicts with the browser's OAuth session client
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        }
+      }
+    )
     
     // Verify session and get user with enhanced error handling
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
