@@ -72,7 +72,7 @@ export default function OAuthDiagnostic() {
     
     if (error) {
       console.error('[Diagnostic] OAuth error:', error)
-      setInfo((prev: any) => ({ ...prev, oauthError: error.message }))
+      setInfo(prev => ({ ...prev, oauthError: error.message }))
     } else {
       console.log('[Diagnostic] OAuth data:', data)
     }
