@@ -14,7 +14,7 @@ function OAuthCodeHandlerInner() {
   
   useEffect(() => {
     console.log('[OAuthCodeHandler] useEffect running')
-    setDebugInfo(prev => ({ ...prev, effectRan: true }))
+    setDebugInfo((prev: any) => ({ ...prev, effectRan: true }))
     
     async function handleOAuthCode() {
       const code = searchParams.get('code')
@@ -28,7 +28,7 @@ function OAuthCodeHandlerInner() {
         url: window.location.href
       })
       
-      setDebugInfo(prev => ({ 
+      setDebugInfo((prev: any) => ({ 
         ...prev, 
         hasCode: !!code,
         codePrefix: code?.substring(0, 10),
