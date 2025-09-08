@@ -26,8 +26,10 @@ interface DiagnosticInfo {
 
 export default function OAuthDiagnostic() {
   const [info, setInfo] = useState<DiagnosticInfo>({})
+  const [mounted, setMounted] = useState(false)
   
   useEffect(() => {
+    setMounted(true)
     const gatherInfo = async () => {
       // Get current URL components
       const currentUrl = window.location.href
@@ -127,17 +129,17 @@ export default function OAuthDiagnostic() {
           <div className="bg-white p-3 rounded mb-2">
             <p className="font-semibold">Site URL (MUST be exact):</p>
             <code className="text-sm bg-gray-100 px-2 py-1 rounded">
-              {typeof window !== 'undefined' ? window.location.origin : 'Loading...'}
+              {mounted ? window.location.origin : 'Loading...'}
             </code>
           </div>
           
           <div className="bg-white p-3 rounded mb-2">
             <p className="font-semibold">Redirect URLs (add both):</p>
             <code className="text-sm bg-gray-100 px-2 py-1 rounded block mb-1">
-              {typeof window !== 'undefined' ? window.location.origin : 'Loading...'}/auth/callback
+              {mounted ? `${window.location.origin}/auth/callback` : 'Loading...'}
             </code>
             <code className="text-sm bg-gray-100 px-2 py-1 rounded block">
-              {typeof window !== 'undefined' ? window.location.origin : 'Loading...'}{'/**'}
+              {mounted ? `${window.location.origin}/**` : 'Loading...'}
             </code>
           </div>
         </div>
