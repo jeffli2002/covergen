@@ -46,7 +46,7 @@ export default function DebugVercelAuth() {
         })
 
         // Supabase session
-        const supabase = supabase
+        const supabaseClient = supabase
         let session = null
         let error = null
         const refreshAttempts: any[] = []
@@ -59,7 +59,7 @@ export default function DebugVercelAuth() {
           }
 
           try {
-            const { data, error: sessionError } = await supabase.auth.getSession()
+            const { data, error: sessionError } = await supabaseClient.auth.getSession()
             attemptInfo.hasSession = !!data.session
             attemptInfo.error = sessionError?.message
             
@@ -91,7 +91,7 @@ export default function DebugVercelAuth() {
         // Try to refresh session if no session found
         if (!session) {
           try {
-            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
+            const { data: refreshData, error: refreshError } = await supabaseClient.auth.refreshSession()
             refreshAttempts.push({
               attempt: 'refresh',
               timestamp: new Date().toISOString(),
@@ -202,9 +202,9 @@ export default function DebugVercelAuth() {
             </button>
             <button
               onClick={async () => {
-                const supabase = supabase
+                const supabaseClient = supabase
                 try {
-                  await supabase.auth.signInWithOAuth({
+                  await supabaseClient.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
                       redirectTo: `${window.location.origin}/auth/callback?next=/debug-vercel-auth`,
@@ -224,8 +224,8 @@ export default function DebugVercelAuth() {
             </button>
             <button
               onClick={async () => {
-                const supabase = supabase
-                await supabase.auth.signOut()
+                const supabaseClient = supabase
+                await supabaseClient.auth.signOut()
                 window.location.reload()
               }}
               className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"

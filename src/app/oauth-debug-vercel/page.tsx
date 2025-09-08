@@ -10,7 +10,7 @@ export default function OAuthDebugVercel() {
   const testOAuthFlow = async () => {
     setLoading(true)
     try {
-      const supabase = supabase
+      const supabaseClient = supabase
       const currentPath = window.location.pathname
       const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
       
@@ -55,13 +55,13 @@ export default function OAuthDebugVercel() {
   const actualOAuthTest = async () => {
     setLoading(true)
     try {
-      const supabase = supabase
+      const supabaseClient = supabase
       const currentPath = window.location.pathname
       const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
       
       console.log('[OAuth Debug] Actually starting OAuth...')
       
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabaseClient.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: redirectUrl,

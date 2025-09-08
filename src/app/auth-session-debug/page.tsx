@@ -17,10 +17,10 @@ export default function AuthSessionDebugPage() {
     setError(null)
     
     try {
-      const supabase = supabase
+      const supabaseClient = supabase
       
       // Get current session
-      const { data: { session }, error } = await supabase.auth.getSession()
+      const { data: { session }, error } = await supabaseClient.auth.getSession()
       
       if (error) {
         setError(error.message)
@@ -48,8 +48,8 @@ export default function AuthSessionDebugPage() {
     checkSession()
     
     // Listen for auth changes
-    const supabase = supabase
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session: any) => {
+    const supabaseClient = supabase
+    const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event: any, session: any) => {
       console.log('[Session Debug] Auth state change:', event, session)
       setSession(session)
     })
@@ -60,14 +60,14 @@ export default function AuthSessionDebugPage() {
   }, [])
 
   const handleSignOut = async () => {
-    const supabase = supabase
-    await supabase.auth.signOut()
+    const supabaseClient = supabase
+    await supabaseClient.auth.signOut()
     await checkSession()
   }
 
   const handleRefreshSession = async () => {
-    const supabase = supabase
-    const { data, error } = await supabase.auth.refreshSession()
+    const supabaseClient = supabase
+    const { data, error } = await supabaseClient.auth.refreshSession()
     if (error) {
       setError(error.message)
     } else {

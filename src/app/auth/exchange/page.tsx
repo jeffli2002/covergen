@@ -22,10 +22,10 @@ function AuthExchangeContent() {
     console.log('[Auth Exchange] Starting manual code exchange:', code)
 
     try {
-      const supabase = supabase
+      const supabaseClient = supabase
       
       // Try to exchange the code
-      const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+      const { data, error: exchangeError } = await supabaseClient.auth.exchangeCodeForSession(code)
       
       if (exchangeError) {
         console.error('[Auth Exchange] Exchange error:', exchangeError)

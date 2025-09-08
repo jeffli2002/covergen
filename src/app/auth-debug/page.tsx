@@ -10,7 +10,7 @@ export default function AuthDebugPage() {
 
   useEffect(() => {
     async function gatherDebugInfo() {
-      const supabase = supabase
+      const supabaseClientClient = supabaseClient
       
       // Gather all debug information
       const info: any = {
@@ -27,7 +27,7 @@ export default function AuthDebugPage() {
           all: document.cookie,
           authCookies: document.cookie.split('; ').filter(c => 
             c.includes('sb-') || 
-            c.includes('supabase') || 
+            c.includes('supabaseClient') || 
             c.includes('auth-')
           ),
           count: document.cookie.split('; ').length
@@ -35,7 +35,7 @@ export default function AuthDebugPage() {
         localStorage: {
           keys: Object.keys(localStorage),
           authKeys: Object.keys(localStorage).filter(k => 
-            k.includes('supabase') || 
+            k.includes('supabaseClient') || 
             k.includes('auth') || 
             k.includes('covergen')
           )
@@ -44,7 +44,7 @@ export default function AuthDebugPage() {
 
       // Check Supabase session
       try {
-        const { data: { session }, error } = await supabase.auth.getSession()
+        const { data: { session }, error } = await supabaseClient.auth.getSession()
         info.session = {
           exists: !!session,
           error: error?.message,
@@ -59,7 +59,7 @@ export default function AuthDebugPage() {
 
       // Check Supabase auth state
       try {
-        const { data: { user }, error } = await supabase.auth.getUser()
+        const { data: { user }, error } = await supabaseClient.auth.getUser()
         info.user = {
           exists: !!user,
           error: error?.message,
@@ -99,8 +99,8 @@ export default function AuthDebugPage() {
   }
 
   const signOut = async () => {
-    const supabase = supabase
-    await supabase.auth.signOut()
+    const supabaseClient = supabaseClient
+    await supabaseClient.auth.signOut()
     window.location.reload()
   }
 
