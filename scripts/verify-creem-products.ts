@@ -44,7 +44,7 @@ async function verifyProducts() {
   // Check Pro product
   try {
     console.log(`Checking Pro product (${PRODUCT_IDS.pro})...`)
-    const proProduct = await creem.products.getProduct({
+    const proProduct = await creem.retrieveProduct({
       xApiKey: API_KEY,
       productId: PRODUCT_IDS.pro
     })
@@ -62,7 +62,7 @@ async function verifyProducts() {
   // Check Pro+ product
   try {
     console.log(`Checking Pro+ product (${PRODUCT_IDS.pro_plus})...`)
-    const proPlusProduct = await creem.products.getProduct({
+    const proPlusProduct = await creem.retrieveProduct({
       xApiKey: API_KEY,
       productId: PRODUCT_IDS.pro_plus
     })

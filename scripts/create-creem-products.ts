@@ -33,15 +33,15 @@ async function createProducts() {
   try {
     // Create Pro product
     console.log('Creating Pro product...')
-    const proProduct = await creem.products.createProduct({
+    const proProduct = await creem.createProduct({
       xApiKey: API_KEY,
       createProductRequestEntity: {
         name: 'CoverGen Pro',
         description: 'Professional plan with 120 covers per month, priority support, and basic tool usage',
-        amount: 900, // $9.00 in cents
+        price: 900, // $9.00 in cents
         currency: 'USD',
-        type: 'recurring',
-        interval: 'monthly',
+        billingType: 'recurring',
+        billingPeriod: 'monthly',
         // Add success URL for after payment
         successUrl: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://covergen.ai'}/payment/success?plan=pro`,
         // Add other metadata
@@ -56,7 +56,7 @@ async function createProducts() {
 
     // Create Pro+ product
     console.log('\nCreating Pro+ product...')
-    const proPlusProduct = await creem.products.createProduct({
+    const proPlusProduct = await creem.createProduct({
       xApiKey: API_KEY,
       createProductRequestEntity: {
         name: 'CoverGen Pro+',
