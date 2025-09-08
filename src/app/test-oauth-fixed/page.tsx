@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
-import dynamic from 'next/dynamic'
 
 // Force dynamic rendering to prevent static generation issues
 export const dynamic = 'force-dynamic'
