@@ -11,7 +11,6 @@ import { Providers } from '@/components/providers'
 import { organizationSchema, websiteSchema, softwareApplicationSchema } from '@/lib/seo/schema'
 import { Suspense, lazy } from 'react'
 import { SessionRecovery } from '@/components/auth/SessionRecovery'
-import { OAuthCodeHandler } from '@/components/auth/OAuthCodeHandler'
 import { AuthStatusDebug } from '@/components/debug/AuthStatusDebug'
 import '@/app/globals.css'
 
@@ -177,7 +176,6 @@ export default async function LocaleLayout({
       <Providers>
         <Suspense fallback={null}>
           <SessionRecovery />
-          <OAuthCodeHandler />
         </Suspense>
         <div className={`min-h-screen flex flex-col ${inter.className}`}>
           <Header locale={locale} translations={dict} />

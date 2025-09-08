@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { cookies } from 'next/headers'
 
-// Vercel-specific callback handler that works the same as the main callback
+// Vercel-specific callback handler with server-side code exchange
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
@@ -28,14 +30,53 @@ export async function GET(request: Request) {
   }
 
   if (code) {
-    // PKCE flow: Redirect back to the original page with the code
-    // The OAuthCodeHandler component will handle the code exchange
-    const redirectUrl = new URL(`${origin}${next}`)
-    redirectUrl.searchParams.set('code', code)
+    // Create a Supabase client for server-side operations
+    const supabase = createClient()
     
-    console.log('[Auth Callback Vercel] Redirecting with code for client-side exchange:', redirectUrl.toString())
+    console.log('[Auth Callback Vercel] Exchanging code for session server-side...')
     
-    return NextResponse.redirect(redirectUrl.toString())
+    // Exchange the code for a session using PKCE flow
+    const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+    
+    if (exchangeError) {
+      console.error('[Auth Callback Vercel] Failed to exchange code:', exchangeError)
+      const redirectUrl = new URL(`${origin}${next}`)
+      redirectUrl.searchParams.set('error', 'exchange_failed')
+      redirectUrl.searchParams.set('message', exchangeError.message)
+      return NextResponse.redirect(redirectUrl.toString())
+    }
+    
+    if (data?.session) {
+      console.log('[Auth Callback Vercel] Session established successfully:', {
+        user: data.session.user.email,
+        provider: data.session.user.app_metadata?.provider,
+        userId: data.session.user.id
+      })
+      
+      // Create response with redirect
+      const redirectUrl = new URL(`${origin}${next}`)
+      redirectUrl.searchParams.set('auth_callback', 'success')
+      redirectUrl.searchParams.set('vercel_auth', 'true')
+      
+      const response = NextResponse.redirect(redirectUrl.toString())
+      
+      // Set marker cookies for debugging
+      response.cookies.set('auth-callback-success', 'true', {
+        path: '/',
+        maxAge: 10, // expires in 10 seconds
+        httpOnly: false,
+        sameSite: 'lax'
+      })
+      
+      response.cookies.set('vercel-auth-complete', 'true', {
+        path: '/',
+        maxAge: 10, // expires in 10 seconds
+        httpOnly: false,
+        sameSite: 'lax'
+      })
+      
+      return response
+    }
   }
 
   // No code in URL

@@ -37,22 +37,7 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   const searchParams = request.nextUrl.searchParams
   
-  // Check for OAuth code in URL
-  const code = searchParams.get('code')
-  const error = searchParams.get('error')
-  
-  // If OAuth code is present and we're not already in the callback route, redirect to callback
-  if (code && !error && !pathname.includes('/auth/callback')) {
-    console.log('[Middleware] OAuth code detected, redirecting to callback route', {
-      code: code.substring(0, 10) + '...',
-      pathname,
-      host: request.headers.get('host')
-    })
-    const callbackUrl = new URL('/auth/callback', request.url)
-    callbackUrl.searchParams.set('code', code)
-    callbackUrl.searchParams.set('next', pathname)
-    return NextResponse.redirect(callbackUrl)
-  }
+  // Skip OAuth code handling - let the OAuth provider redirect directly to /auth/callback
   
   // Check if the pathname is missing a locale
   const pathnameIsMissingLocale = locales.every(
