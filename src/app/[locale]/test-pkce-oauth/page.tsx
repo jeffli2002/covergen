@@ -166,7 +166,7 @@ export default function TestPKCEOAuth() {
           <h2 className="font-bold mb-2">Required Supabase Redirect URLs:</h2>
           <code className="text-xs block mb-1">{window.location.origin}/auth/callback</code>
           <code className="text-xs block mb-1">{window.location.origin}/auth/callback-handler</code>
-          <code className="text-xs block">{window.location.origin}/**</code>
+          <code className="text-xs block">{window.location.origin}{'/**'}</code>
         </div>
       </div>
     </div>
