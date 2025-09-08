@@ -1,8 +1,3 @@
-import { createClient } from '@/utils/supabase/client'
-
-// Create a singleton instance for the browser
-let supabaseInstance: typeof createClient | null = null
-
-export const supabase = typeof window !== 'undefined' 
-  ? (supabaseInstance || (supabaseInstance = createClient))
-  : null as any
+// Re-export the singleton instance from supabase-simple
+// This ensures all imports use the same instance
+export { supabase } from '@/lib/supabase-simple'

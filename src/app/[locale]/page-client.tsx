@@ -170,9 +170,11 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
   return (
     <div className="min-h-screen bg-background">
       {/* OAuth detection and session recovery */}
+      {/* Temporarily disabled to fix multiple client instances issue
       <ForceSessionSync />
       <OAuthCallbackDetector />
       <SessionRecovery />
+      */}
       
       {/* Debug panel */}
       <AuthDebugSimple />

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { createClient } from '@/utils/supabase/client'
+import { supabase } from '@/lib/supabase-simple'
 import { Suspense } from 'react'
 
 function OAuthCallbackDetectorInner() {
@@ -39,8 +39,6 @@ function OAuthCallbackDetectorInner() {
       processed.current = true
       
       try {
-        const supabase = createClient
-        
         // Check if we have a session (Supabase might have already processed it)
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         

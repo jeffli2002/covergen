@@ -1,5 +1,5 @@
 // OAuth Service - Isolated authentication logic
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase-simple'
 import type { OAuthProvider, OAuthUser, OAuthSession, OAuthError } from '../types'
 
 class OAuthService {
