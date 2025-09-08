@@ -58,10 +58,6 @@ export async function middleware(request: NextRequest) {
     '/auth/callback', // Skip middleware for auth callback
     '/auth/callback-handler', // Skip middleware for client-side callback handler
     '/auth/callback-pkce', // Skip middleware for PKCE callback
-    '/auth/callback-simple', // Skip middleware for simple auth callback
-    '/auth/callback-vercel', // Skip middleware for Vercel auth callback
-    '/auth/callback-universal', // Skip middleware for universal auth callback
-    '/auth/callback-official', // Skip middleware for official auth callback
     '/auth', // Skip all auth routes
     '/oauth-debug',
     '/oauth-safe-debug',

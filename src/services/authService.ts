@@ -236,12 +236,10 @@ class AuthService {
       // Get the current pathname to preserve locale
       const currentPath = window.location.pathname || '/en'
       
-      // Use Vercel-specific callback route for Vercel preview deployments
-      const isVercelPreview = window.location.hostname.includes('vercel.app')
-      const callbackRoute = isVercelPreview ? '/auth/callback-vercel' : '/auth/callback'
-      const redirectUrl = `${window.location.origin}${callbackRoute}?next=${encodeURIComponent(currentPath)}`
+      // Always use the standard callback route - it works on all deployments
+      const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
 
-      console.log('[Auth] Google sign in with redirect URL:', redirectUrl, { isVercelPreview })
+      console.log('[Auth] Google sign in with redirect URL:', redirectUrl)
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
