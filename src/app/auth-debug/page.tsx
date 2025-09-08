@@ -10,7 +10,6 @@ export default function AuthDebugPage() {
 
   useEffect(() => {
     async function gatherDebugInfo() {
-      const supabaseClientClient = supabaseClient
       
       // Gather all debug information
       const info: any = {
@@ -44,7 +43,7 @@ export default function AuthDebugPage() {
 
       // Check Supabase session
       try {
-        const { data: { session }, error } = await supabaseClient.auth.getSession()
+        const { data: { session }, error } = await supabase.auth.getSession()
         info.session = {
           exists: !!session,
           error: error?.message,
@@ -59,7 +58,7 @@ export default function AuthDebugPage() {
 
       // Check Supabase auth state
       try {
-        const { data: { user }, error } = await supabaseClient.auth.getUser()
+        const { data: { user }, error } = await supabase.auth.getUser()
         info.user = {
           exists: !!user,
           error: error?.message,
@@ -99,8 +98,7 @@ export default function AuthDebugPage() {
   }
 
   const signOut = async () => {
-    const supabaseClient = supabaseClient
-    await supabaseClient.auth.signOut()
+    await supabase.auth.signOut()
     window.location.reload()
   }
 
