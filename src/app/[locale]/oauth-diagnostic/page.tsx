@@ -3,8 +3,29 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase-simple'
 
+interface DiagnosticInfo {
+  url?: {
+    full: string
+    origin: string
+    pathname: string
+    search: string
+    hasAuthParams: boolean
+    authParams: Record<string, string>
+  }
+  supabase?: {
+    url: string | undefined
+    sessionInfo: any
+  }
+  recommendations?: {
+    siteUrl: string
+    redirectUrl: string
+    issue: string | null
+  }
+  oauthError?: string
+}
+
 export default function OAuthDiagnostic() {
-  const [info, setInfo] = useState<any>({})
+  const [info, setInfo] = useState<DiagnosticInfo>({})
   
   useEffect(() => {
     const gatherInfo = async () => {
