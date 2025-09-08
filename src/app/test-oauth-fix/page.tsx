@@ -20,8 +20,8 @@ export default function TestOAuthFix() {
     instances.push(`createSimpleClient(): ${client1}`)
     
     // Test 3: createClient from utils
-    const client2 = createClient()
-    instances.push(`createClient(): ${client2}`)
+    const client2 = createClient
+    instances.push(`createClient: ${client2}`)
     
     // Test 4: Multiple calls to createSimpleClient
     const client3 = createSimpleClient()
