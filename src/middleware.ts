@@ -85,8 +85,11 @@ export async function middleware(request: NextRequest) {
   if (shouldSkip) {
     return NextResponse.next()
   }
-
-  // Auth routes have already been skipped above
+  
+  // Skip Supabase session update for auth routes to avoid interference
+  if (pathname.startsWith('/auth/')) {
+    return NextResponse.next()
+  }
 
   // Update Supabase session
   const supabaseResponse = await updateSession(request)
@@ -127,9 +130,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Match all routes except Next.js internals and static files
-    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|ads.txt).*)',
-    // Specifically include auth routes
-    '/auth/:path*',
+    // Match all routes except Next.js internals, static files, and auth routes
+    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|ads.txt|auth/).*)',
   ],
 }

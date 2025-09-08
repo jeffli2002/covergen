@@ -320,6 +320,20 @@ The breakthrough came when we realized that the complexity was the enemy. By rem
 
 This approach ensures a clean, working Google OAuth implementation that can be adapted for other OAuth providers supported by Supabase. The 3-day struggle taught us that when dealing with authentication, simplicity and consistency triumph over clever optimizations.
 
+### OAuth Flow Architecture
+
+1. User clicks "Sign in with Google"
+2. Redirected to Google OAuth
+3. Google redirects to /auth/callback with code
+4. Server route redirects to /auth/callback-pkce
+5. Client-side PKCE handler exchanges code for session
+6. Session established, user redirected to original page
+
+The implementation now strictly follows:
+- SupabaseGuideline.txt - Single client, PKCE flow
+- CLAUDE.md - Lessons from 3-day debugging journey
+- Web应用技术方案.md - Overall architecture patterns
+
 ## Critical: Payment and OAuth Integration Separation
 
 ### The Golden Rule: Payment Services Must NEVER Modify Auth State

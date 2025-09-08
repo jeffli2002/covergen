@@ -24,6 +24,8 @@
     "test:webhook-signature": "tsx scripts/test-webhook-signature.ts",
     "test:creem-checkout": "tsx scripts/test-creem-sdk-checkout.ts",
     "check:creem-products": "tsx scripts/check-creem-products.ts",
+    "create-creem-products": "tsx scripts/create-creem-products.ts",
+    "verify-creem-products": "tsx scripts/verify-creem-products.ts",
     "test": "vitest",
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",

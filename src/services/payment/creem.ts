@@ -164,7 +164,7 @@ export const SUBSCRIPTION_PLANS = {
 }
 
 // Product IDs for subscription tiers (from Creem dashboard)
-// Same product IDs are used for both test and production modes
+// Same product IDs are used for both test and production - API key determines environment
 export const CREEM_PRODUCTS = {
   pro: process.env.CREEM_PRO_PLAN_ID || 'prod_7HHnnUgLVjiHBQOGQyKPKO',
   pro_plus: process.env.CREEM_PRO_PLUS_PLAN_ID || 'prod_5FSXAIuhm6ueniFPAbaOoS'

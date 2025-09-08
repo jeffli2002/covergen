@@ -7,9 +7,14 @@ import { supabase } from '@/lib/supabase'
 export default function CallbackPKCE() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
+  const [isProcessing, setIsProcessing] = useState(false)
   
   useEffect(() => {
+    // Prevent multiple executions
+    if (isProcessing) return
+    
     const handleCallback = async () => {
+      setIsProcessing(true)
       try {
         const params = new URLSearchParams(window.location.search)
         const code = params.get('code')
@@ -27,39 +32,49 @@ export default function CallbackPKCE() {
           return
         }
 
-        // The Supabase client with detectSessionInUrl: true will automatically
-        // exchange the code for a session when initialized on a page with OAuth params
-        // We need to wait for this process to complete
+        // For PKCE flow, we need to manually exchange the code for a session
+        console.log('[Callback PKCE] Exchanging code for session...')
         
-        // Check if session was established
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        // Exchange the code for a session using PKCE
+        const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
         
-        if (sessionError) {
-          console.error('[Callback PKCE] Session error:', sessionError)
-          setError('Authentication failed')
+        if (exchangeError) {
+          console.error('[Callback PKCE] Exchange error:', exchangeError)
+          setError(`Authentication failed: ${exchangeError.message}`)
           setTimeout(() => router.push(`${next}?error=auth_failed`), 2000)
           return
         }
 
-        if (session) {
-          console.log('[Callback PKCE] Session established:', session.user.email)
-          // Session is established, redirect to the intended page
-          router.push(next)
+        if (data?.session) {
+          console.log('[Callback PKCE] Session established successfully:', {
+            email: data.session.user.email,
+            provider: data.session.user.app_metadata?.provider
+          })
+          
+          // Small delay to ensure session is properly stored
+          setTimeout(() => {
+            console.log('[Callback PKCE] Redirecting to:', next)
+            router.push(next)
+          }, 100)
         } else {
-          console.log('[Callback PKCE] No session found after callback')
-          setError('Authentication incomplete')
+          console.error('[Callback PKCE] No session in exchange response')
+          setError('Authentication incomplete - no session returned')
           setTimeout(() => router.push(`${next}?error=no_session`), 2000)
         }
-      } catch (err) {
-        console.error('[Callback PKCE] Unexpected error:', err)
-        setError('An unexpected error occurred')
+      } catch (err: any) {
+        console.error('[Callback PKCE] Unexpected error:', {
+          error: err,
+          message: err?.message,
+          stack: err?.stack
+        })
+        setError(`Error: ${err?.message || 'An unexpected error occurred'}`)
         const next = new URLSearchParams(window.location.search).get('next') || '/en'
         setTimeout(() => router.push(`${next}?error=unexpected`), 2000)
       }
     }
     
     handleCallback()
-  }, [router])
+  }, [router, isProcessing])
   
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
