@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { supabaseClient } from '@/lib/supabaseClient-simple'
 
 export default function OAuthDebugCompletePage() {
   const [logs, setLogs] = useState<string[]>([])
@@ -41,7 +41,7 @@ export default function OAuthDebugCompletePage() {
     setLoading(true)
     
     try {
-      const supabase = createClient()
+      const supabaseClientClient = supabaseClient
       log('Supabase client created')
       
       // First check cookies
@@ -49,7 +49,7 @@ export default function OAuthDebugCompletePage() {
       
       // Get session
       log('Calling getSession()...')
-      const { data: { session }, error } = await supabase.auth.getSession()
+      const { data: { session }, error } = await supabaseClient.auth.getSession()
       
       if (error) {
         log('getSession error:', error.message)
@@ -67,7 +67,7 @@ export default function OAuthDebugCompletePage() {
       
       // Also check getUser
       log('Calling getUser()...')
-      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
       if (userError) {
         log('getUser error:', userError.message)
       } else if (user) {
@@ -88,7 +88,7 @@ export default function OAuthDebugCompletePage() {
     log('=== Starting OAuth flow ===')
     
     try {
-      const supabase = createClient()
+      const supabaseClient = createClient()
       const currentUrl = window.location.href
       const redirectTo = `${window.location.origin}/auth/callback-official?next=${encodeURIComponent('/en/oauth-debug-complete')}`
       
@@ -99,7 +99,7 @@ export default function OAuthDebugCompletePage() {
         currentUrl
       })
       
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabaseClient.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo,
@@ -125,8 +125,8 @@ export default function OAuthDebugCompletePage() {
     log('Clearing all auth data...')
     
     try {
-      const supabase = createClient()
-      await supabase.auth.signOut()
+      const supabaseClient = createClient()
+      await supabaseClient.auth.signOut()
       
       // Clear all cookies
       document.cookie.split(';').forEach(cookie => {
@@ -175,8 +175,8 @@ export default function OAuthDebugCompletePage() {
     // Fetch callback logs on mount
     fetchCallbackLogs()
     
-    const supabase = createClient()
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session: any) => {
+    const supabaseClient = createClient()
+    const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event: any, session: any) => {
       log(`Auth state changed: ${event}`, session ? { user: session.user.email } : null)
       if (event === 'SIGNED_IN') {
         setSession(session)

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { supabaseClient } from '@/lib/supabaseClient-simple'
 import { userSessionService } from '@/services/unified/UserSessionService'
 import { useAppStore } from '@/lib/store'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 export default function AuthStateTestPage() {
-  const [supabaseState, setSupabaseState] = useState<any>(null)
+  const [supabaseClientState, setSupabaseState] = useState<any>(null)
   const [unifiedServiceState, setUnifiedServiceState] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [authMismatch, setAuthMismatch] = useState(false)
@@ -21,15 +21,15 @@ export default function AuthStateTestPage() {
     
     try {
       // 1. Check Supabase directly
-      const supabase = createClient()
-      const { data: { session }, error } = await supabase.auth.getSession()
-      const supabaseAuth = {
+      const supabaseClientClient = supabaseClient
+      const { data: { session }, error } = await supabaseClient.auth.getSession()
+      const supabaseClientAuth = {
         hasSession: !!session,
         userEmail: session?.user?.email || null,
         userId: session?.user?.id || null,
         error: error?.message || null
       }
-      setSupabaseState(supabaseAuth)
+      setSupabaseState(supabaseClientAuth)
       
       // 2. Check UserSessionService
       const serviceUser = userSessionService.getCurrentUser()
@@ -41,8 +41,8 @@ export default function AuthStateTestPage() {
       setUnifiedServiceState(serviceAuth)
       
       // 3. Check for mismatches
-      const mismatch = (supabaseAuth.hasSession !== serviceAuth.hasUser) || 
-                      (supabaseAuth.hasSession !== storeIsAuth)
+      const mismatch = (supabaseClientAuth.hasSession !== serviceAuth.hasUser) || 
+                      (supabaseClientAuth.hasSession !== storeIsAuth)
       setAuthMismatch(mismatch)
       
     } catch (err: any) {
@@ -56,8 +56,8 @@ export default function AuthStateTestPage() {
     checkAllAuthStates()
     
     // Listen for auth changes
-    const supabase = createClient()
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+    const supabaseClientClient = supabaseClient
+    const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(() => {
       checkAllAuthStates()
     })
     
@@ -91,16 +91,16 @@ export default function AuthStateTestPage() {
       
       <div className="grid gap-6">
         {/* Supabase Direct State */}
-        <Card className={supabaseState?.hasSession ? 'border-green-500' : 'border-gray-300'}>
+        <Card className={supabaseClientState?.hasSession ? 'border-green-500' : 'border-gray-300'}>
           <CardHeader>
             <CardTitle>Supabase Direct State</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <div><strong>Has Session:</strong> {supabaseState?.hasSession ? 'Yes ✅' : 'No ❌'}</div>
-              <div><strong>Email:</strong> {supabaseState?.userEmail || 'None'}</div>
-              <div><strong>User ID:</strong> {supabaseState?.userId || 'None'}</div>
-              <div><strong>Error:</strong> {supabaseState?.error || 'None'}</div>
+              <div><strong>Has Session:</strong> {supabaseClientState?.hasSession ? 'Yes ✅' : 'No ❌'}</div>
+              <div><strong>Email:</strong> {supabaseClientState?.userEmail || 'None'}</div>
+              <div><strong>User ID:</strong> {supabaseClientState?.userId || 'None'}</div>
+              <div><strong>Error:</strong> {supabaseClientState?.error || 'None'}</div>
             </div>
           </CardContent>
         </Card>
@@ -165,8 +165,8 @@ export default function AuthStateTestPage() {
               </Button>
               <Button 
                 onClick={async () => {
-                  const supabase = createClient()
-                  await supabase.auth.signOut()
+                  const supabaseClientClient = supabaseClient
+                  await supabaseClient.auth.signOut()
                   window.location.reload()
                 }} 
                 variant="destructive"

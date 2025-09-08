@@ -1,6 +1,6 @@
 'use client'
 
-import { createClient } from '@/utils/supabase/client'
+import { supabaseClient } from '@/lib/supabaseClient-simple'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -9,12 +9,12 @@ export default function OAuthOfficialTestPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-  const supabase = createClient()
+  const supabaseClientClient = supabaseClient
 
   useEffect(() => {
     checkUser()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+    const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null)
     })
 
@@ -23,7 +23,7 @@ export default function OAuthOfficialTestPage() {
 
   const checkUser = async () => {
     try {
-      const { data: { user }, error } = await supabase.auth.getUser()
+      const { data: { user }, error } = await supabaseClient.auth.getUser()
       if (error) throw error
       setUser(user)
     } catch (error: any) {
@@ -38,7 +38,7 @@ export default function OAuthOfficialTestPage() {
     
     try {
       const origin = window.location.origin
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabaseClient.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${origin}/auth/callback-official?next=${encodeURIComponent(window.location.pathname)}`,
@@ -62,7 +62,7 @@ export default function OAuthOfficialTestPage() {
 
   const signOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut()
+      const { error } = await supabaseClient.auth.signOut()
       if (error) throw error
       
       // Clear all auth-related data
@@ -131,7 +131,7 @@ export default function OAuthOfficialTestPage() {
         <div className="mt-6 p-4 bg-gray-50 rounded">
           <h3 className="text-sm font-semibold text-gray-700 mb-2">Test Information:</h3>
           <ul className="text-xs text-gray-600 space-y-1">
-            <li>• Using official @supabase/ssr pattern</li>
+            <li>• Using official @supabaseClient/ssr pattern</li>
             <li>• Client-side OAuth initiation</li>
             <li>• Server-side code exchange at /auth/callback-official</li>
             <li>• Proper cookie handling with SSR</li>
