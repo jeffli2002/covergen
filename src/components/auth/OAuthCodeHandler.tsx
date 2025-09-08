@@ -1,27 +1,39 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase-simple'
-import { Suspense } from 'react'
 
 function OAuthCodeHandlerInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const processingRef = useRef(false)
+  const [debugInfo, setDebugInfo] = useState<any>({ mounted: true })
   
-  console.log('[OAuthCodeHandler] Component mounted')
+  console.log('[OAuthCodeHandler] Component mounted, URL:', typeof window !== 'undefined' ? window.location.href : 'SSR')
   
   useEffect(() => {
+    console.log('[OAuthCodeHandler] useEffect running')
+    setDebugInfo(prev => ({ ...prev, effectRan: true }))
+    
     async function handleOAuthCode() {
       const code = searchParams.get('code')
       const authCallback = searchParams.get('auth_callback')
       
       console.log('[OAuthCodeHandler] Effect running:', { 
         hasCode: !!code, 
+        codePrefix: code?.substring(0, 10),
         authCallback,
-        isProcessing: processingRef.current 
+        isProcessing: processingRef.current,
+        url: window.location.href
       })
+      
+      setDebugInfo(prev => ({ 
+        ...prev, 
+        hasCode: !!code,
+        codePrefix: code?.substring(0, 10),
+        isProcessing: processingRef.current
+      }))
       
       // Skip if already processing or no code
       if (!code || processingRef.current) {
@@ -84,6 +96,18 @@ function OAuthCodeHandlerInner() {
     
     handleOAuthCode()
   }, [searchParams, router])
+  
+  // Show debug info if code is present
+  if (searchParams.get('code') || process.env.NODE_ENV === 'development') {
+    return (
+      <div className="fixed bottom-20 right-4 bg-purple-100 border border-purple-400 text-purple-700 px-4 py-2 rounded text-xs z-50 max-w-sm">
+        <div className="font-semibold">OAuth Handler Debug:</div>
+        <pre className="text-xs overflow-auto">
+          {JSON.stringify(debugInfo, null, 2)}
+        </pre>
+      </div>
+    )
+  }
   
   return null
 }
