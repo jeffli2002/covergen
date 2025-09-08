@@ -49,13 +49,34 @@ function OAuthCodeHandlerInner() {
       processingRef.current = true
       
       console.log('[OAuthCodeHandler] Processing OAuth code...')
+      setDebugInfo((prev: any) => ({ ...prev, status: 'exchanging' }))
       
       try {
         // Exchange the code for a session using PKCE flow
+        console.log('[OAuthCodeHandler] Calling exchangeCodeForSession with code:', code.substring(0, 10) + '...')
         const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+        
+        console.log('[OAuthCodeHandler] Exchange result:', { 
+          hasData: !!data, 
+          hasSession: !!data?.session,
+          error: error?.message 
+        })
+        
+        setDebugInfo((prev: any) => ({ 
+          ...prev, 
+          status: 'exchange_complete',
+          exchangeError: error?.message,
+          hasSession: !!data?.session
+        }))
         
         if (error) {
           console.error('[OAuthCodeHandler] Failed to exchange code:', error)
+          setDebugInfo((prev: any) => ({ 
+            ...prev, 
+            status: 'exchange_failed',
+            error: error.message
+          }))
+          
           // Clean URL and redirect to home with error
           const url = new URL(window.location.href)
           url.searchParams.delete('code')
@@ -70,23 +91,43 @@ function OAuthCodeHandlerInner() {
             provider: data.session.user.app_metadata?.provider
           })
           
+          setDebugInfo((prev: any) => ({ 
+            ...prev, 
+            status: 'success',
+            userEmail: data.session.user.email
+          }))
+          
           // Clean up URL parameters and redirect to clean URL
           const url = new URL(window.location.href)
           url.searchParams.delete('code')
           url.searchParams.delete('state')
           url.searchParams.delete('scope')
           
-          // Redirect to clean URL - the auth state change will be handled by AuthService
-          window.location.href = url.toString()
+          // Wait a moment for state to update
+          setTimeout(() => {
+            // Redirect to clean URL - the auth state change will be handled by AuthService
+            window.location.href = url.toString()
+          }, 500)
         } else {
           console.error('[OAuthCodeHandler] No session returned from code exchange')
+          setDebugInfo((prev: any) => ({ 
+            ...prev, 
+            status: 'no_session'
+          }))
+          
           const url = new URL(window.location.href)
           url.searchParams.delete('code')
           url.searchParams.set('error', 'no_session')
           window.location.href = url.toString()
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('[OAuthCodeHandler] Unexpected error:', error)
+        setDebugInfo((prev: any) => ({ 
+          ...prev, 
+          status: 'error',
+          error: error.message || 'Unknown error'
+        }))
+        
         const url = new URL(window.location.href)
         url.searchParams.delete('code')
         url.searchParams.set('error', 'unexpected_error')
