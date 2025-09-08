@@ -116,7 +116,7 @@ export default function OAuthDiagnostic() {
               {typeof window !== 'undefined' ? window.location.origin : 'Loading...'}/auth/callback
             </code>
             <code className="text-sm bg-gray-100 px-2 py-1 rounded block">
-              {typeof window !== 'undefined' ? window.location.origin : 'Loading...'}/**
+              {typeof window !== 'undefined' ? window.location.origin : 'Loading...'}{'/**'}
             </code>
           </div>
         </div>
