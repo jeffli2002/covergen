@@ -54,7 +54,7 @@ function SessionRecoveryInner() {
       console.log('[SessionRecovery] Attempting session recovery after OAuth callback...')
       
       try {
-        const supabase = createClient()
+        const supabase = createClient
         
         // Detect if running on Vercel preview
         const isVercelPreview = window.location.hostname.includes('vercel.app')

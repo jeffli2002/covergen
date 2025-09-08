@@ -39,7 +39,7 @@ function OAuthCallbackDetectorInner() {
       processed.current = true
       
       try {
-        const supabase = createClient()
+        const supabase = createClient
         
         // Check if we have a session (Supabase might have already processed it)
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
