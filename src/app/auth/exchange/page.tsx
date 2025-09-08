@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, Suspense } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { supabaseClient } from '@/lib/supabaseClient-simple'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 
@@ -22,10 +22,10 @@ function AuthExchangeContent() {
     console.log('[Auth Exchange] Starting manual code exchange:', code)
 
     try {
-      const supabase = createClient()
+      const supabaseClient = supabase
       
       // Try to exchange the code
-      const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+      const { data, error: exchangeError } = await supabaseClient.auth.exchangeCodeForSession(code)
       
       if (exchangeError) {
         console.error('[Auth Exchange] Exchange error:', exchangeError)
@@ -66,7 +66,7 @@ function AuthExchangeContent() {
     console.log('[Auth Exchange] Page loaded:', {
       code: code?.substring(0, 20) + '...',
       cookies: document.cookie,
-      localStorage: Object.keys(localStorage).filter(k => k.includes('supabase'))
+      localStorage: Object.keys(localStorage).filter(k => k.includes('supabaseClient'))
     })
   }, [code])
 
