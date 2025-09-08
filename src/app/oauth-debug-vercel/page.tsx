@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { supabaseClient } from '@/lib/supabaseClient-simple'
 
 export default function OAuthDebugVercel() {
   const [debugInfo, setDebugInfo] = useState<any>(null)
@@ -10,7 +10,7 @@ export default function OAuthDebugVercel() {
   const testOAuthFlow = async () => {
     setLoading(true)
     try {
-      const supabase = createClient()
+      const supabaseClient = supabase
       const currentPath = window.location.pathname
       const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
       
@@ -55,13 +55,13 @@ export default function OAuthDebugVercel() {
   const actualOAuthTest = async () => {
     setLoading(true)
     try {
-      const supabase = createClient()
+      const supabaseClient = supabase
       const currentPath = window.location.pathname
       const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
       
       console.log('[OAuth Debug] Actually starting OAuth...')
       
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabaseClient.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: redirectUrl,

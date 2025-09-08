@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { supabaseClient } from '@/lib/supabaseClient-simple'
 
 export default function OAuthDebugVercelPage() {
   const [logs, setLogs] = useState<string[]>([])
@@ -33,8 +33,8 @@ export default function OAuthDebugVercelPage() {
   const checkClientSession = async () => {
     addLog('Checking client-side session...')
     try {
-      const supabase = createClient()
-      const { data: { session }, error } = await supabase.auth.getSession()
+      const supabaseClientClient = supabaseClient
+      const { data: { session }, error } = await supabaseClient.auth.getSession()
       if (error) {
         addLog(`Client error: ${error.message}`)
       } else if (session) {
@@ -53,13 +53,13 @@ export default function OAuthDebugVercelPage() {
 
   const startOAuthFlow = async () => {
     addLog('Starting OAuth flow...')
-    const supabase = createClient()
+    const supabaseClientClient = supabaseClient
     const currentUrl = window.location.href
     const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentUrl)}`
     
     addLog(`Redirect URL: ${redirectUrl}`)
     
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { data, error } = await supabaseClient.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: redirectUrl,
@@ -79,8 +79,8 @@ export default function OAuthDebugVercelPage() {
 
   const clearAll = async () => {
     addLog('Clearing all auth data...')
-    const supabase = createClient()
-    await supabase.auth.signOut()
+    const supabaseClientClient = supabaseClient
+    await supabaseClient.auth.signOut()
     localStorage.clear()
     sessionStorage.clear()
     document.cookie.split(";").forEach((c) => {
@@ -182,7 +182,7 @@ export default function OAuthDebugVercelPage() {
                   <h3 className="font-medium text-gray-700">Cookies</h3>
                   <div className="mt-2 p-3 bg-gray-50 rounded text-sm">
                     <p><strong>Total:</strong> {serverSession.cookies.count}</p>
-                    <p><strong>Supabase:</strong> {serverSession.cookies.supabaseCookies.join(', ') || 'None'}</p>
+                    <p><strong>Supabase:</strong> {serverSession.cookies.supabaseClientCookies.join(', ') || 'None'}</p>
                   </div>
                 </div>
               )}
