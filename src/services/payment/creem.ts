@@ -170,6 +170,16 @@ export const CREEM_PRODUCTS = {
   pro_plus: process.env.CREEM_PRO_PLUS_PLAN_ID || ''
 }
 
+// Debug log to verify correct product IDs are loaded
+console.log('[Creem Config] Product IDs loaded:', {
+  pro: CREEM_PRODUCTS.pro,
+  pro_plus: CREEM_PRODUCTS.pro_plus,
+  fromEnv: {
+    CREEM_PRO_PLAN_ID: process.env.CREEM_PRO_PLAN_ID,
+    CREEM_PRO_PLUS_PLAN_ID: process.env.CREEM_PRO_PLUS_PLAN_ID
+  }
+})
+
 // Price IDs for subscription tiers (to be created in Creem dashboard)
 export const CREEM_PRICES = {
   pro: getCreemTestMode() ? 'price_test_pro_900' : 'price_pro_900',
