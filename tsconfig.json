@@ -25,5 +25,5 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/types/global.d.ts"],
-  "exclude": ["node_modules", "backend", "backend/**/*", "**/*.test.ts", "**/*.test.tsx", "tests/**/*", "vitest.config.ts"]
+  "exclude": ["node_modules", "backend", "backend/**/*", "**/*.test.ts", "**/*.test.tsx", "tests/**/*", "vitest.config.ts", "scripts/**/*"]
 }
