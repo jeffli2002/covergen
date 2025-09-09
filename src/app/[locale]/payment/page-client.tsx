@@ -1,7 +1,7 @@
 'use client'
 
 // Trigger Vercel redeploy - OAuth fix at commit 138004e
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -88,9 +88,9 @@ export default function PaymentPageClient({
     return () => {
       isMounted.current = false
     }
-  }, [authUser, authLoading, locale, router, selectedPlan, redirectUrl, hasInitialized])
+  }, [authUser, authLoading, locale, router, selectedPlan, redirectUrl, hasInitialized, loadCurrentSubscription])
 
-  const loadCurrentSubscription = async () => {
+  const loadCurrentSubscription = useCallback(async () => {
     try {
       // Get subscription directly from authUser
       const subscription = authUser?.subscription
@@ -105,7 +105,7 @@ export default function PaymentPageClient({
     } catch (error) {
       console.error('Error loading subscription:', error)
     }
-  }
+  }, [authUser])
 
   const calculateProratedAmount = (subscription: any) => {
     if (!subscription.currentPeriodEnd) return

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -52,9 +52,9 @@ export default function GenerationForm() {
     if (user) {
       fetchDailyLimitStatus()
     }
-  }, [user])
+  }, [user, fetchDailyLimitStatus])
 
-  const fetchDailyLimitStatus = async () => {
+  const fetchDailyLimitStatus = useCallback(async () => {
     if (!user) return
 
     try {
@@ -73,7 +73,7 @@ export default function GenerationForm() {
     } catch (error) {
       console.error('Failed to fetch daily limit status:', error)
     }
-  }
+  }, [user])
 
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {

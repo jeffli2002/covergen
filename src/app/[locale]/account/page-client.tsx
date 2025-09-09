@@ -43,7 +43,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
     }
 
     loadAccountData()
-  }, [])
+  }, [locale, router])
 
   const loadAccountData = async () => {
     try {

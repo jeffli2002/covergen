@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, Suspense } from 'react'
+import { useEffect, useState, Suspense, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import Link from 'next/link'
@@ -12,16 +12,7 @@ function AuthSuccessContent() {
   const searchParams = useSearchParams()
   const { user, loading } = useAuth()
   
-  useEffect(() => {
-    // Give the auth system time to initialize and detect the session
-    const timer = setTimeout(() => {
-      checkAuthAndRedirect()
-    }, 1000) // Wait 1 second before checking
-    
-    return () => clearTimeout(timer)
-  }, [user, loading])
-  
-  const checkAuthAndRedirect = () => {
+  const checkAuthAndRedirect = useCallback(() => {
     const next = searchParams.get('next') || '/en'
     
     if (user) {
@@ -36,7 +27,16 @@ function AuthSuccessContent() {
       console.log('[AuthSuccess] No user found after loading')
       setError('Authentication session not found. Please try signing in again.')
     }
-  }
+  }, [user, loading, router, searchParams])
+  
+  useEffect(() => {
+    // Give the auth system time to initialize and detect the session
+    const timer = setTimeout(() => {
+      checkAuthAndRedirect()
+    }, 1000) // Wait 1 second before checking
+    
+    return () => clearTimeout(timer)
+  }, [checkAuthAndRedirect])
   
   // Still loading the auth state
   if (loading) {
