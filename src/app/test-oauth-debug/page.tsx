@@ -61,6 +61,18 @@ export default function TestOAuthDebugPage() {
     addLog('Starting Google OAuth flow...')
     
     try {
+      // Log localStorage before OAuth
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const keys = Object.keys(window.localStorage)
+        const supabaseKeys = keys.filter(k => k.includes('supabase'))
+        addLog(`Pre-OAuth Supabase localStorage keys: ${supabaseKeys.length} keys found`)
+        supabaseKeys.forEach(key => {
+          if (key.includes('auth-code-verifier')) {
+            addLog(`Pre-OAuth: Found existing code verifier key: ${key}`)
+          }
+        })
+      }
+      
       const redirectUrl = typeof window !== 'undefined' 
         ? `${window.location.origin}/auth/callback?next=${encodeURIComponent('/test-oauth-debug')}`
         : `/auth/callback?next=${encodeURIComponent('/test-oauth-debug')}`
@@ -81,6 +93,22 @@ export default function TestOAuthDebugPage() {
         addLog(`OAuth error: ${error.message}`)
       } else {
         addLog('OAuth initiated successfully')
+        
+        // Log localStorage after OAuth initiation
+        if (typeof window !== 'undefined' && window.localStorage) {
+          const keys = Object.keys(window.localStorage)
+          const supabaseKeys = keys.filter(k => k.includes('supabase'))
+          addLog(`Post-OAuth Supabase localStorage keys: ${supabaseKeys.length} keys found`)
+          
+          const codeVerifierKey = supabaseKeys.find(k => k.includes('auth-code-verifier'))
+          if (codeVerifierKey) {
+            addLog(`Post-OAuth: Code verifier stored at key: ${codeVerifierKey}`)
+            // Don't log the actual value for security
+          } else {
+            addLog('WARNING: No code verifier found after OAuth initiation!')
+          }
+        }
+        
         if (data.url) {
           setAuthUrl(data.url)
           addLog(`Auth URL: ${data.url}`)

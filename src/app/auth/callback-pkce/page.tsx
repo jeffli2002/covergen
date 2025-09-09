@@ -35,7 +35,37 @@ export default function CallbackPKCE() {
         // For PKCE flow, we need to manually exchange the code for a session
         console.log('[Callback PKCE] Exchanging code for session...')
         
+        // Log localStorage keys to debug
+        if (typeof window !== 'undefined' && window.localStorage) {
+          const keys = Object.keys(window.localStorage)
+          const supabaseKeys = keys.filter(k => k.includes('supabase'))
+          console.log('[Callback PKCE] All localStorage keys:', keys)
+          console.log('[Callback PKCE] Supabase localStorage keys:', supabaseKeys)
+          
+          // Check for any PKCE-related keys
+          const pkceKeys = keys.filter(k => 
+            k.includes('pkce') || 
+            k.includes('verifier') || 
+            k.includes('code-verifier') ||
+            k.includes('code_verifier')
+          )
+          console.log('[Callback PKCE] PKCE-related keys:', pkceKeys)
+          
+          // Log code verifier if present
+          const codeVerifierKey = supabaseKeys.find(k => 
+            k.includes('auth-code-verifier') || 
+            k.includes('code-verifier') || 
+            k.includes('code_verifier')
+          )
+          if (codeVerifierKey) {
+            console.log('[Callback PKCE] Found code verifier key:', codeVerifierKey)
+          } else {
+            console.warn('[Callback PKCE] No code verifier found in localStorage')
+          }
+        }
+        
         // Exchange the code for a session using PKCE
+        // The Supabase client should automatically retrieve the code verifier from localStorage
         const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
         
         if (exchangeError) {
