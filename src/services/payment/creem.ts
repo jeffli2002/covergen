@@ -164,20 +164,28 @@ export const SUBSCRIPTION_PLANS = {
 }
 
 // Product IDs for subscription tiers (from Creem dashboard)
-// Same product IDs are used for both test and production - API key determines environment
+// Different product IDs for test and production environments
 export const CREEM_PRODUCTS = {
-  pro: process.env.CREEM_PRO_PLAN_ID || 'prod_7HHnnUgLVjiHBQOGQyKPKO',
-  pro_plus: process.env.CREEM_PRO_PLUS_PLAN_ID || 'prod_5FSXAIuhm6ueniFPAbaOoS'
+  pro: getCreemTestMode() 
+    ? (process.env.CREEM_TEST_PRO_PLAN_ID || process.env.CREEM_PRO_PLAN_ID || 'prod_7HHnnUgLVjiHBQOGQyKPKO')
+    : (process.env.CREEM_PRO_PLAN_ID || 'prod_7HHnnUgLVjiHBQOGQyKPKO'),
+  pro_plus: getCreemTestMode()
+    ? (process.env.CREEM_TEST_PRO_PLUS_PLAN_ID || process.env.CREEM_PRO_PLUS_PLAN_ID || 'prod_5FSXAIuhm6ueniFPAbaOoS')
+    : (process.env.CREEM_PRO_PLUS_PLAN_ID || 'prod_5FSXAIuhm6ueniFPAbaOoS')
 }
 
 // Debug log to verify correct product IDs are loaded
 if (typeof window === 'undefined') { // Only log on server-side
+  const testMode = getCreemTestMode()
   console.log('[Creem Config] Product IDs loaded:', {
+    testMode: testMode,
     pro: CREEM_PRODUCTS.pro,
     pro_plus: CREEM_PRODUCTS.pro_plus,
     fromEnv: {
       CREEM_PRO_PLAN_ID: process.env.CREEM_PRO_PLAN_ID || 'NOT SET - using fallback',
-      CREEM_PRO_PLUS_PLAN_ID: process.env.CREEM_PRO_PLUS_PLAN_ID || 'NOT SET - using fallback'
+      CREEM_PRO_PLUS_PLAN_ID: process.env.CREEM_PRO_PLUS_PLAN_ID || 'NOT SET - using fallback',
+      CREEM_TEST_PRO_PLAN_ID: process.env.CREEM_TEST_PRO_PLAN_ID || 'NOT SET',
+      CREEM_TEST_PRO_PLUS_PLAN_ID: process.env.CREEM_TEST_PRO_PLUS_PLAN_ID || 'NOT SET'
     }
   })
 }
