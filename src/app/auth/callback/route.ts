@@ -1,7 +1,8 @@
-import { NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
+import { NextResponse, NextRequest } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
   const next = requestUrl.searchParams.get('next') || '/en'
@@ -14,8 +15,40 @@ export async function GET(request: Request) {
 
   if (code) {
     try {
-      // Create server-side Supabase client
-      const supabase = createClient()
+      const cookieStore = cookies()
+      
+      // Create a response object first
+      const response = NextResponse.redirect(`${requestUrl.origin}${next}`)
+      
+      // Create server-side Supabase client with proper cookie handling
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            getAll() {
+              return cookieStore.getAll()
+            },
+            setAll(cookiesToSet) {
+              // Set cookies on both the request and response
+              cookiesToSet.forEach(({ name, value, options }) => {
+                // Ensure proper cookie options for auth cookies
+                const cookieOptions = {
+                  ...options,
+                  httpOnly: true,
+                  secure: process.env.NODE_ENV === 'production',
+                  sameSite: 'lax' as const,
+                  path: '/',
+                  // Don't set domain to work with dynamic Vercel URLs
+                }
+                
+                cookieStore.set({ name, value, ...cookieOptions })
+                response.cookies.set(name, value, cookieOptions)
+              })
+            },
+          },
+        }
+      )
       
       // Exchange the code for session on the server
       const { data, error } = await supabase.auth.exchangeCodeForSession(code)
@@ -27,11 +60,13 @@ export async function GET(request: Request) {
       
       console.log('[Auth Callback] Code exchange successful:', {
         user: data?.session?.user?.email,
-        hasSession: !!data?.session
+        hasSession: !!data?.session,
+        accessTokenLength: data?.session?.access_token?.length,
+        expiresAt: data?.session?.expires_at
       })
       
-      // Redirect to the originally requested page
-      return NextResponse.redirect(`${requestUrl.origin}${next}`)
+      // The cookies have been set on the response, return it
+      return response
     } catch (error: any) {
       console.error('[Auth Callback] Unexpected error:', error)
       return NextResponse.redirect(`${requestUrl.origin}${next}?error=unexpected_error`)

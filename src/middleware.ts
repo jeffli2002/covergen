@@ -56,6 +56,7 @@ export async function middleware(request: NextRequest) {
     '/fonts',
     '/test',
     '/auth/callback', // Skip middleware for auth callback
+    '/auth/callback-fixed', // Skip middleware for fixed auth callback
     '/auth/callback-handler', // Skip middleware for client-side callback handler
     '/auth/callback-pkce', // Skip middleware for PKCE callback
     '/auth', // Skip all auth routes
@@ -130,7 +131,10 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Match all routes except Next.js internals, static files, and auth routes
-    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|ads.txt|auth/).*)',
+    // Skip all middleware for:
+    // - API routes (/_next/*, /api/*)
+    // - Static files (*.ico, *.png, *.jpg, etc)
+    // - Auth routes (/auth/*)
+    '/((?!api|_next/static|_next/image|favicon.ico|auth).*)',
   ],
 }

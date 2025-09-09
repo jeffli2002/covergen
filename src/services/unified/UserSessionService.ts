@@ -151,8 +151,8 @@ class UserSessionService {
   async signInWithGoogle(): Promise<AuthResult> {
     try {
       const currentPath = window.location.pathname || '/en'
-      // Always use the standard callback route - it works on all deployments
-      const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
+      // Use the fixed callback route with better cookie handling
+      const redirectUrl = `${window.location.origin}/auth/callback-fixed?next=${encodeURIComponent(currentPath)}`
       
       console.log('[UserSession] Google sign-in initiated:', {
         currentPath,
