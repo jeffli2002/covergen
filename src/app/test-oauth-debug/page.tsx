@@ -42,13 +42,15 @@ export default function TestOAuthDebugPage() {
       }
     })
     
-    // Check URL for OAuth params
-    const params = new URLSearchParams(window.location.search)
-    if (params.get('code')) {
-      addLog(`OAuth code detected in URL: ${params.get('code')}`)
-    }
-    if (params.get('error')) {
-      addLog(`OAuth error detected: ${params.get('error')}`)
+    // Check URL for OAuth params (only in browser)
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('code')) {
+        addLog(`OAuth code detected in URL: ${params.get('code')}`)
+      }
+      if (params.get('error')) {
+        addLog(`OAuth error detected: ${params.get('error')}`)
+      }
     }
     
     return () => subscription.unsubscribe()
@@ -59,7 +61,9 @@ export default function TestOAuthDebugPage() {
     addLog('Starting Google OAuth flow...')
     
     try {
-      const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent('/test-oauth-debug')}`
+      const redirectUrl = typeof window !== 'undefined' 
+        ? `${window.location.origin}/auth/callback?next=${encodeURIComponent('/test-oauth-debug')}`
+        : `/auth/callback?next=${encodeURIComponent('/test-oauth-debug')}`
       addLog(`Redirect URL: ${redirectUrl}`)
       
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -129,8 +133,8 @@ export default function TestOAuthDebugPage() {
         <h2 className="text-xl font-semibold mb-3">Configuration</h2>
         <pre className="text-sm bg-gray-100 p-2 rounded overflow-x-auto">
 {`NEXT_PUBLIC_SUPABASE_URL: ${process.env.NEXT_PUBLIC_SUPABASE_URL}
-Auth Callback URL: ${window.location.origin}/auth/callback
-PKCE Callback URL: ${window.location.origin}/auth/callback-pkce`}
+Auth Callback URL: ${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback
+PKCE Callback URL: ${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback-pkce`}
         </pre>
         {authUrl && (
           <div className="mt-3">
