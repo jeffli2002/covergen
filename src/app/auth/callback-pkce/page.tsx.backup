@@ -1,0 +1,88 @@
+'use client'
+
+import { useEffect, useState, useRef } from 'react'
+import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase-simple'
+
+export default function CallbackPKCE() {
+  const router = useRouter()
+  const [error, setError] = useState<string | null>(null)
+  const hasProcessed = useRef(false)
+  
+  useEffect(() => {
+    // Prevent multiple executions
+    if (hasProcessed.current) return
+    hasProcessed.current = true
+    
+    const handleCallback = async () => {
+      try {
+        const params = new URLSearchParams(window.location.search)
+        const next = params.get('next') || '/en'
+        
+        console.log('[Callback PKCE] OAuth callback page loaded')
+        
+        // Extract the code from URL
+        const code = params.get('code')
+        
+        if (!code) {
+          console.error('[Callback PKCE] No authorization code in URL')
+          setError('No authorization code received')
+          setTimeout(() => router.push(`${next}?error=no_code`), 2000)
+          return
+        }
+        
+        // Get the code_verifier from storage (Supabase stores it during OAuth initiation)
+        const codeVerifier = localStorage.getItem(`sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/https?:\/\//, '')}-auth-code-verifier`)
+        
+        console.log('[Callback PKCE] Code verifier:', {
+          hasVerifier: !!codeVerifier,
+          storageKey: `sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/https?:\/\//, '')}-auth-code-verifier`
+        })
+        
+        // Exchange the code for a session
+        const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+        
+        if (exchangeError) {
+          console.error('[Callback PKCE] Exchange error:', exchangeError)
+          setError(`Authentication failed: ${exchangeError.message}`)
+          setTimeout(() => router.push(`${next}?error=exchange_failed`), 2000)
+          return
+        }
+        
+        if (data?.session) {
+          console.log('[Callback PKCE] Session established successfully')
+          router.push(next)
+        } else {
+          console.error('[Callback PKCE] No session received after exchange')
+          setError('Failed to establish session')
+          setTimeout(() => router.push(`${next}?error=no_session`), 2000)
+        }
+      } catch (err: any) {
+        console.error('[Callback PKCE] Unexpected error:', err)
+        setError(`Error: ${err?.message || 'An unexpected error occurred'}`)
+        const next = new URLSearchParams(window.location.search).get('next') || '/en'
+        setTimeout(() => router.push(`${next}?error=unexpected`), 2000)
+      }
+    }
+    
+    handleCallback()
+  }, [router])
+  
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <h2 className="text-2xl font-semibold text-gray-900">
+          {error ? 'Authentication Error' : 'Completing sign in...'}
+        </h2>
+        <p className="mt-2 text-gray-600">
+          {error || 'Please wait while we authenticate you.'}
+        </p>
+        {!error && (
+          <div className="mt-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

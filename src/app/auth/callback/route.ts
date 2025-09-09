@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { createClient } from '@/utils/supabase/server'
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
@@ -11,21 +12,30 @@ export async function GET(request: Request) {
     origin: requestUrl.origin
   })
 
-  // For PKCE flow, we must redirect to a client-side page that can access
-  // the code_verifier from localStorage to complete the exchange
   if (code) {
-    // Redirect to the PKCE callback page with all parameters
-    const params = new URLSearchParams({
-      code,
-      next
-    })
-    
-    // Copy any other OAuth parameters
-    const state = requestUrl.searchParams.get('state')
-    if (state) params.append('state', state)
-    
-    console.log('[Auth Callback] Redirecting to PKCE handler')
-    return NextResponse.redirect(`${requestUrl.origin}/auth/callback-pkce?${params.toString()}`)
+    try {
+      // Create server-side Supabase client
+      const supabase = createClient()
+      
+      // Exchange the code for session on the server
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+      
+      if (error) {
+        console.error('[Auth Callback] Code exchange error:', error)
+        return NextResponse.redirect(`${requestUrl.origin}${next}?error=exchange_failed&message=${encodeURIComponent(error.message)}`)
+      }
+      
+      console.log('[Auth Callback] Code exchange successful:', {
+        user: data?.session?.user?.email,
+        hasSession: !!data?.session
+      })
+      
+      // Redirect to the originally requested page
+      return NextResponse.redirect(`${requestUrl.origin}${next}`)
+    } catch (error: any) {
+      console.error('[Auth Callback] Unexpected error:', error)
+      return NextResponse.redirect(`${requestUrl.origin}${next}?error=unexpected_error`)
+    }
   }
 
   // No code present, redirect with error
