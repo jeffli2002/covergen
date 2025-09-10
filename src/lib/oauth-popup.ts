@@ -12,6 +12,7 @@ export class OAuthPopupHandler {
   private popup: Window | null = null;
   private checkInterval: NodeJS.Timeout | null = null;
   private messageListener: ((event: MessageEvent) => void) | null = null;
+  private authTimeout: NodeJS.Timeout | null = null;
 
   constructor(private options: OAuthPopupOptions = {}) {
     this.options = {
@@ -52,45 +53,77 @@ export class OAuthPopupHandler {
 
     window.addEventListener('message', this.messageListener);
 
-    // Check if popup is closed
-    this.checkInterval = setInterval(() => {
-      try {
-        // Wrap in try-catch to handle COOP policy restrictions
-        if (this.popup && this.popup.closed) {
-          this.cleanup();
-          this.options.onClose?.();
+    // Set up a timeout for the OAuth flow (5 minutes)
+    this.authTimeout = setTimeout(() => {
+      this.cleanup();
+      this.options.onError?.(new Error('OAuth authentication timed out. Please try again.'));
+    }, 5 * 60 * 1000);
+
+    // For browsers that support it, try to detect when the popup is closed
+    // This won't work with COOP restrictions, but it's a nice-to-have
+    if (this.popup.closed !== undefined) {
+      this.checkInterval = setInterval(() => {
+        try {
+          if (this.popup?.closed === true) {
+            if (this.authTimeout) {
+              clearTimeout(this.authTimeout);
+            }
+            this.cleanup();
+            this.options.onClose?.();
+          }
+        } catch (e) {
+          // COOP restriction - stop checking and rely on postMessage
+          if (this.checkInterval) {
+            clearInterval(this.checkInterval);
+            this.checkInterval = null;
+          }
         }
-      } catch (e) {
-        // If we can't access the popup due to COOP, assume it's still open
-        // The popup will communicate via postMessage when done
-        console.debug('Unable to check popup status due to COOP policy');
-      }
-    }, 500);
+      }, 1000);
+    }
   }
 
   private handleSuccess(data: any): void {
+    // Clear the auth timeout on success
+    if (this.authTimeout) {
+      clearTimeout(this.authTimeout);
+    }
     this.cleanup();
     this.options.onSuccess?.(data);
   }
 
   private handleError(error: Error): void {
+    // Clear the auth timeout on error
+    if (this.authTimeout) {
+      clearTimeout(this.authTimeout);
+    }
     this.cleanup();
     this.options.onError?.(error);
   }
 
   private cleanup(): void {
-    if (this.popup && !this.popup.closed) {
-      this.popup.close();
+    // Try to close the popup, but don't error if COOP prevents it
+    try {
+      if (this.popup && !this.popup.closed) {
+        this.popup.close();
+      }
+    } catch (e) {
+      // COOP restriction - popup will close itself
     }
+    
     if (this.checkInterval) {
       clearInterval(this.checkInterval);
     }
     if (this.messageListener) {
       window.removeEventListener('message', this.messageListener);
     }
+    if (this.authTimeout) {
+      clearTimeout(this.authTimeout);
+    }
+    
     this.popup = null;
     this.checkInterval = null;
     this.messageListener = null;
+    this.authTimeout = null;
   }
 
   close(): void {
