@@ -81,16 +81,12 @@ export default function TestOAuthFix() {
   const handleGoogleSignIn = async () => {
     try {
       addLog('Starting Google sign-in...')
-      const result = await authService.signInWithGoogle()
+      const result = await authService.signInWithGoogle() as { success: boolean; error?: string; data?: any }
       
-      if (result && 'success' in result) {
-        if (result.success) {
-          addLog('Google sign-in initiated successfully')
-        } else {
-          addLog(`Google sign-in failed: ${(result as any).error || 'Unknown error'}`)
-        }
+      if (result.success) {
+        addLog('Google sign-in initiated successfully')
       } else {
-        addLog('Google sign-in returned unexpected result')
+        addLog(`Google sign-in failed: ${result.error || 'Unknown error'}`)
       }
     } catch (error) {
       addLog(`Google sign-in error: ${error}`)
