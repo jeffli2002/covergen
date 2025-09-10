@@ -1,6 +1,6 @@
 'use client'
 
-import { CreditCard, Clock, CheckCircle2, XCircle, AlertCircle, Mail, Shield, HelpCircle, ArrowLeft } from 'lucide-react'
+import { ArrowLeft, CreditCard, Clock, CheckCircle2, XCircle, AlertCircle, Mail, Shield, HelpCircle } from 'lucide-react'
 import { Locale } from '@/lib/i18n/config'
 import Link from 'next/link'
 import { getClientSubscriptionConfig, getTrialPeriodFullText, isTrialEnabledClient } from '@/lib/subscription-config-client'
@@ -11,9 +11,10 @@ interface RefundPageClientProps {
 }
 
 export default function RefundPageClient({ locale, translations: t }: RefundPageClientProps) {
-  const config = getClientSubscriptionConfig()
-  const trialFullText = getTrialPeriodFullText()
-  const hasTrials = isTrialEnabledClient()
+  // Get configuration for dynamic values
+  const config = getClientSubscriptionConfig();
+  const trialFullText = getTrialPeriodFullText();
+  const hasTrials = isTrialEnabledClient();
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -31,7 +32,6 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
             <p className="text-lg">Last Updated: January 2025</p>
           </div>
         </div>
-
         <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-8 mb-12 border border-green-100">
           <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
             <Shield className="w-6 h-6 text-green-600" />
@@ -70,7 +70,6 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
             </div>
           </div>
         </div>
-
         <div className="space-y-8">
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Sales Policy</h2>
@@ -106,6 +105,7 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
                 </div>
               </div>
 
+
               <div className="border-l-4 border-blue-500 pl-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 text-blue-500" />
@@ -122,7 +122,6 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
                   </ul>
                 </div>
               </div>
-
               <div className="border-l-4 border-green-500 pl-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
                   <CreditCard className="w-5 h-5 text-green-500" />
@@ -142,7 +141,6 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
               </div>
             </div>
           </section>
-
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
               <XCircle className="w-6 h-6 text-red-500" />
@@ -215,7 +213,6 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
               </p>
             </div>
           </section>
-
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">How to Report Billing Errors</h2>
             
@@ -284,7 +281,6 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
               </div>
             </div>
           </section>
-
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Subscription Plans & Usage Rights</h2>
             
@@ -327,7 +323,6 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
               </p>
             </div>
           </section>
-
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Special Cases</h2>
             
@@ -376,7 +371,6 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
               </div>
             </div>
           </section>
-
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
               <HelpCircle className="w-6 h-6 text-blue-600" />
@@ -424,7 +418,6 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
               </div>
             </div>
           </section>
-
           <section className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-sm border border-blue-100 p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Need Help?</h2>
             
@@ -459,7 +452,6 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
             </div>
           </section>
         </div>
-
         <div className="mt-12 text-center">
           <p className="text-gray-600">
             © 2025 CoverGen Pro. All rights reserved. | This policy is part of our <Link href={`/${locale}/terms`} className="text-blue-600 hover:text-blue-700">Terms of Service</Link>
