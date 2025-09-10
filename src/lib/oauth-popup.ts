@@ -10,7 +10,6 @@ export interface OAuthPopupOptions {
 
 export class OAuthPopupHandler {
   private popup: Window | null = null;
-  private checkInterval: NodeJS.Timeout | null = null;
   private messageListener: ((event: MessageEvent) => void) | null = null;
   private authTimeout: NodeJS.Timeout | null = null;
 
@@ -59,27 +58,9 @@ export class OAuthPopupHandler {
       this.options.onError?.(new Error('OAuth authentication timed out. Please try again.'));
     }, 5 * 60 * 1000);
 
-    // For browsers that support it, try to detect when the popup is closed
-    // This won't work with COOP restrictions, but it's a nice-to-have
-    if (this.popup.closed !== undefined) {
-      this.checkInterval = setInterval(() => {
-        try {
-          if (this.popup?.closed === true) {
-            if (this.authTimeout) {
-              clearTimeout(this.authTimeout);
-            }
-            this.cleanup();
-            this.options.onClose?.();
-          }
-        } catch (e) {
-          // COOP restriction - stop checking and rely on postMessage
-          if (this.checkInterval) {
-            clearInterval(this.checkInterval);
-            this.checkInterval = null;
-          }
-        }
-      }, 1000);
-    }
+    // Note: We don't check popup.closed due to Cross-Origin-Opener-Policy restrictions.
+    // Instead, we rely on postMessage communication and the timeout mechanism.
+    // The popup callback page will send appropriate messages for success/error/close scenarios.
   }
 
   private handleSuccess(data: any): void {
@@ -103,16 +84,16 @@ export class OAuthPopupHandler {
   private cleanup(): void {
     // Try to close the popup, but don't error if COOP prevents it
     try {
-      if (this.popup && !this.popup.closed) {
+      // Only attempt to close if we still have a popup reference
+      // Don't check popup.closed as it triggers COOP violations
+      if (this.popup) {
         this.popup.close();
       }
     } catch (e) {
       // COOP restriction - popup will close itself
+      // This is expected behavior when Cross-Origin-Opener-Policy is set
     }
     
-    if (this.checkInterval) {
-      clearInterval(this.checkInterval);
-    }
     if (this.messageListener) {
       window.removeEventListener('message', this.messageListener);
     }
@@ -121,7 +102,6 @@ export class OAuthPopupHandler {
     }
     
     this.popup = null;
-    this.checkInterval = null;
     this.messageListener = null;
     this.authTimeout = null;
   }

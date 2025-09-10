@@ -8,6 +8,12 @@ export function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      auth: {
+        autoRefreshToken: false, // Server-side doesn't need auto refresh
+        persistSession: false,   // Server-side doesn't persist sessions
+        detectSessionInUrl: false, // Server-side doesn't need URL detection
+        flowType: 'pkce'
+      },
       cookies: {
         get(name: string) {
           return cookieStore.get(name)?.value

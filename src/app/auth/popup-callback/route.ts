@@ -68,6 +68,16 @@ export async function GET(request: NextRequest) {
           `}
         </div>
         <script>
+          // Notify parent when user manually closes popup
+          window.addEventListener('beforeunload', function() {
+            if (window.opener && !window.authComplete) {
+              window.opener.postMessage({
+                type: 'oauth-error',
+                error: 'Authentication cancelled by user'
+              }, '${searchParams.get('origin') || '*'}');
+            }
+          });
+
           ${error ? `
             // Send error message to parent window
             if (window.opener) {
@@ -97,6 +107,8 @@ export async function GET(request: NextRequest) {
 
                   if (response.ok) {
                     const data = await response.json();
+                    // Mark auth as complete to prevent beforeunload message
+                    window.authComplete = true;
                     // Send success message to parent window
                     window.opener.postMessage({
                       type: 'oauth-success',
