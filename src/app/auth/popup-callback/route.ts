@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
             if (window.opener) {
               window.opener.postMessage({
                 type: 'oauth-error',
-                error: '${error_description || error}'
+                error: ${JSON.stringify(error_description || error || 'Authentication failed')}
               }, '${searchParams.get('origin') || '*'}');
             }
             // Show message about manual close (COOP prevents auto-close)
@@ -127,6 +127,7 @@ export async function GET(request: NextRequest) {
                   }
                   // Update UI to show error
                   document.querySelector('.container').innerHTML = '<h3>Authentication Failed</h3><div class="error"><p>' + error.message + '</p></div><p>You can close this window.</p>';
+                }
               }
             }
             
