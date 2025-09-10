@@ -37,8 +37,7 @@ export default function PaymentPageClient({
   const [proratedAmount, setProratedAmount] = useState<number | null>(null)
   
   // Get trial days from environment variables
-  const proTrialDays = parseInt(process.env.NEXT_PUBLIC_PRO_TRIAL_DAYS || '7')
-  const proPlusTrialDays = parseInt(process.env.NEXT_PUBLIC_PRO_PLUS_TRIAL_DAYS || '7')
+  const trialDays = parseInt(process.env.NEXT_PUBLIC_TRIAL_DAYS || '3')
 
   useEffect(() => {
     // Check if we're in test mode
@@ -285,14 +284,14 @@ export default function PaymentPageClient({
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-1">
+                    <Badge className="bg-orange-500 text-white px-4 py-1">
                       Most Popular
                     </Badge>
                   </div>
                 )}
                 
-                {isSelected && plan.popular && (
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg opacity-20"></div>
+                {isSelected && (
+                  <div className="absolute -inset-0.5 bg-orange-500 rounded-lg opacity-20"></div>
                 )}
                 
                 {/* Click hint on hover */}
@@ -308,7 +307,7 @@ export default function PaymentPageClient({
                   <div className="flex justify-center mb-4">
                     <div className={`p-4 rounded-full ${
                       plan.popular 
-                        ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
+                        ? 'bg-orange-500 text-white'
                         : 'bg-gray-100 text-gray-700'
                     }`}>
                       <Icon className="w-8 h-8" />
@@ -326,7 +325,7 @@ export default function PaymentPageClient({
                   <div className="mt-3">
                     <Badge className="bg-green-50 text-green-700 border-green-200">
                       <Sparkles className="w-3 h-3 mr-1" />
-                      {plan.id === 'pro' ? proTrialDays : proPlusTrialDays}-day free trial
+                      {trialDays}-day free trial
                     </Badge>
                   </div>
                   
@@ -375,10 +374,10 @@ export default function PaymentPageClient({
                     className={`w-full transition-all duration-300 ${
                       isSelected
                         ? plan.popular
-                          ? 'bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white shadow-lg scale-105'
+                          ? 'bg-orange-600 hover:bg-orange-700 text-white shadow-lg scale-105'
                           : 'bg-gray-800 hover:bg-gray-900 text-white shadow-lg scale-105'
                         : plan.popular 
-                          ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white'
+                          ? 'bg-orange-500 hover:bg-orange-600 text-white'
                           : ''
                     }`}
                     variant={!isSelected && !plan.popular ? 'outline' : 'default'}
