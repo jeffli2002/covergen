@@ -15,16 +15,16 @@ export class OAuthPopupHandler {
 
   constructor(private options: OAuthPopupOptions = {}) {
     this.options = {
-      width: 800,
-      height: 300,
+      width: 1200,
+      height: 500,
       ...options
     };
   }
 
   open(url: string): void {
     // Calculate center position
-    const left = (window.screen.width - (this.options.width || 800)) / 2;
-    const top = (window.screen.height - (this.options.height || 300)) / 2;
+    const left = (window.screen.width - (this.options.width || 1200)) / 2;
+    const top = (window.screen.height - (this.options.height || 500)) / 2;
 
     // Open popup window
     this.popup = window.open(

@@ -347,8 +347,8 @@ class AuthService {
         if (data?.url) {
           // Open OAuth in popup
           const popupHandler = new OAuthPopupHandler({
-            width: 800,
-            height: 300,
+            width: 1200,
+            height: 500,
             onSuccess: async (authData) => {
               // Session should already be set by the exchange-code endpoint
               await this.initialize() // Refresh auth state

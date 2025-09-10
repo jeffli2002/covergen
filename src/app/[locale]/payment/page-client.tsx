@@ -277,7 +277,7 @@ export default function PaymentPageClient({
               <Card 
                 key={plan.id}
                 className={`relative transition-all duration-300 cursor-pointer hover:shadow-2xl hover:scale-[1.02] ${
-                  isSelected ? 'ring-2 ring-orange-500 scale-105 shadow-2xl' : ''
+                  isSelected ? 'ring-2 ring-gray-400 scale-105 shadow-2xl' : ''
                 } ${plan.popular ? 'shadow-xl' : ''} ${
                   isCurrentPlan ? 'opacity-75 cursor-not-allowed' : ''
                 }`}
@@ -285,15 +285,12 @@ export default function PaymentPageClient({
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-1">
+                    <Badge className="bg-gray-700 text-white px-4 py-1">
                       Most Popular
                     </Badge>
                   </div>
                 )}
                 
-                {isSelected && (
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg opacity-20"></div>
-                )}
                 
                 {/* Click hint on hover */}
                 {!isCurrentPlan && !isSelected && (
@@ -308,7 +305,7 @@ export default function PaymentPageClient({
                   <div className="flex justify-center mb-4">
                     <div className={`p-4 rounded-full ${
                       plan.popular 
-                        ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
+                        ? 'bg-gray-100 text-gray-700'
                         : 'bg-gray-100 text-gray-700'
                     }`}>
                       <Icon className="w-8 h-8" />
@@ -354,7 +351,7 @@ export default function PaymentPageClient({
 
                 <CardContent className="space-y-4">
                   <div className="text-center py-2 bg-gray-50 rounded-lg">
-                    <span className="text-2xl font-bold text-orange-600">
+                    <span className="text-2xl font-bold text-gray-700">
                       {plan.credits}
                     </span>
                     <span className="text-gray-600 ml-1">credits/month</span>
@@ -374,12 +371,10 @@ export default function PaymentPageClient({
                   <Button
                     className={`w-full transition-all duration-300 ${
                       isSelected
-                        ? 'bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white shadow-lg scale-105'
-                        : plan.popular 
-                          ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white'
-                          : ''
+                        ? 'bg-gray-800 hover:bg-gray-900 text-white shadow-lg scale-105'
+                        : ''
                     }`}
-                    variant={!isSelected && !plan.popular ? 'outline' : 'default'}
+                    variant={!isSelected ? 'outline' : 'default'}
                     size="lg"
                     disabled={loading || isCurrentPlan}
                     onClick={(e) => {
