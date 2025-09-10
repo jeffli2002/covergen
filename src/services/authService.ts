@@ -233,23 +233,11 @@ class AuthService {
         throw new Error('Supabase not configured')
       }
 
-      // Get the current pathname to preserve locale
-      const currentPath = window.location.pathname || '/en'
-      
-      // Always use the standard callback route - it works on all deployments
-      const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
-
-      console.log('[Auth] Google sign in with redirect URL:', redirectUrl)
-
+      // Match my-saas implementation exactly
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: redirectUrl,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
-          skipBrowserRedirect: false
+          redirectTo: `${window.location.origin}/auth/callback`,
         }
       })
 
