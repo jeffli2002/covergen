@@ -6,10 +6,18 @@ import { supabase } from '@/lib/supabase'
 export const dynamic = 'force-dynamic'
 
 export async function POST(req: NextRequest) {
+  console.log('[Webhook] Creem webhook endpoint called at:', new Date().toISOString())
+  
   try {
     // Get raw body for signature verification
     const rawBody = await req.text()
     const signature = req.headers.get('creem-signature') || ''
+    
+    console.log('[Webhook] Request headers:', {
+      'creem-signature': signature ? 'present' : 'missing',
+      'content-type': req.headers.get('content-type'),
+      'content-length': req.headers.get('content-length')
+    })
 
     // Verify webhook signature
     if (process.env.CREEM_WEBHOOK_SECRET) {
@@ -27,10 +35,18 @@ export async function POST(req: NextRequest) {
     // Parse the webhook event
     const event = JSON.parse(rawBody)
     const eventType = event.eventType || event.type
-    console.log(`[Webhook] Received event: ${eventType}`, event.id)
+    console.log(`[Webhook] Received event: ${eventType}`, {
+      id: event.id,
+      type: eventType,
+      metadata: event.metadata,
+      customer: event.customer,
+      subscription: event.subscription,
+      checkout: event.checkout
+    })
 
     // Handle the webhook event
     const result = await creemService.handleWebhookEvent(event)
+    console.log('[Webhook] Processed result:', result)
 
     // Check if result has a type property
     if (!result || typeof result !== 'object' || !('type' in result)) {
@@ -76,7 +92,7 @@ export async function POST(req: NextRequest) {
 }
 
 async function handleCheckoutComplete(data: any) {
-  const { userId, customerId, subscriptionId, planId, trialEnd } = data
+  const { userId, customerId, subscriptionId, planId, isTrialCheckout, trialDays } = data
 
   if (!userId || !planId) {
     console.error('[Webhook] Missing required data for checkout complete')
@@ -93,9 +109,11 @@ async function handleCheckoutComplete(data: any) {
       pro_plus: 300
     }
 
-    // Check if this is a trial subscription
-    const isTrialSubscription = trialEnd && new Date(trialEnd) > new Date()
-    const trialEndsAt = isTrialSubscription ? new Date(trialEnd).toISOString() : null
+    // Check if this is a trial subscription and calculate trial end date
+    const isTrialSubscription = isTrialCheckout && trialDays > 0
+    const trialEndsAt = isTrialSubscription 
+      ? new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000).toISOString() 
+      : null
 
     // Update auth.users table with Creem trial info using raw SQL
     // Note: Supabase doesn't allow direct updates to auth.users via API, so we use RPC
@@ -111,6 +129,16 @@ async function handleCheckoutComplete(data: any) {
       }
     }
 
+    // Calculate subscription dates properly
+    const now = new Date()
+    const periodStart = now.toISOString()
+    
+    // For trials: period end is trial end date
+    // For paid: period end is 30 days from now (monthly billing)
+    const periodEnd = isTrialSubscription 
+      ? trialEndsAt 
+      : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString()
+
     // Update or create subscription record
     const { error: subError } = await adminSupabase
       .from('subscriptions')
@@ -118,11 +146,16 @@ async function handleCheckoutComplete(data: any) {
         user_id: userId,
         tier: planId,
         status: isTrialSubscription ? 'trialing' : 'active',
-        stripe_customer_id: customerId,
-        stripe_subscription_id: subscriptionId,
-        current_period_start: new Date().toISOString(),
-        current_period_end: trialEndsAt || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        updated_at: new Date().toISOString()
+        stripe_customer_id: customerId || null,
+        stripe_subscription_id: subscriptionId || null,
+        current_period_start: periodStart,
+        current_period_end: periodEnd,
+        trial_start: isTrialSubscription ? periodStart : null,
+        trial_end: trialEndsAt,
+        is_trial_active: isTrialSubscription,
+        converted_from_trial: false,
+        cancel_at_period_end: false,
+        updated_at: now.toISOString()
       }, {
         onConflict: 'user_id'
       })
