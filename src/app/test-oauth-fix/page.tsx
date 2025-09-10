@@ -83,10 +83,14 @@ export default function TestOAuthFix() {
       addLog('Starting Google sign-in...')
       const result = await authService.signInWithGoogle()
       
-      if (result.success) {
-        addLog('Google sign-in initiated successfully')
+      if (result && 'success' in result) {
+        if (result.success) {
+          addLog('Google sign-in initiated successfully')
+        } else {
+          addLog(`Google sign-in failed: ${(result as any).error || 'Unknown error'}`)
+        }
       } else {
-        addLog(`Google sign-in failed: ${result.error}`)
+        addLog('Google sign-in returned unexpected result')
       }
     } catch (error) {
       addLog(`Google sign-in error: ${error}`)
