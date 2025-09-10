@@ -15,16 +15,16 @@ export class OAuthPopupHandler {
 
   constructor(private options: OAuthPopupOptions = {}) {
     this.options = {
-      width: 500,
-      height: 600,
+      width: 800,
+      height: 300,
       ...options
     };
   }
 
   open(url: string): void {
     // Calculate center position
-    const left = (window.screen.width - (this.options.width || 500)) / 2;
-    const top = (window.screen.height - (this.options.height || 600)) / 2;
+    const left = (window.screen.width - (this.options.width || 800)) / 2;
+    const top = (window.screen.height - (this.options.height || 300)) / 2;
 
     // Open popup window
     this.popup = window.open(
@@ -54,9 +54,16 @@ export class OAuthPopupHandler {
 
     // Check if popup is closed
     this.checkInterval = setInterval(() => {
-      if (this.popup?.closed) {
-        this.cleanup();
-        this.options.onClose?.();
+      try {
+        // Wrap in try-catch to handle COOP policy restrictions
+        if (this.popup && this.popup.closed) {
+          this.cleanup();
+          this.options.onClose?.();
+        }
+      } catch (e) {
+        // If we can't access the popup due to COOP, assume it's still open
+        // The popup will communicate via postMessage when done
+        console.debug('Unable to check popup status due to COOP policy');
       }
     }, 500);
   }
