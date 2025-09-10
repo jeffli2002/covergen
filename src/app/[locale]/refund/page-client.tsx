@@ -19,7 +19,6 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="container mx-auto px-4 py-16 max-w-5xl">
-        {/* Header */}
         <div className="text-center mb-16">
           <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
             <CreditCard className="w-10 h-10 text-white" />
@@ -33,8 +32,6 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
             <p className="text-lg">Last Updated: January 2025</p>
           </div>
         </div>
-
-        {/* Quick Summary Card */}
         <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-8 mb-12 border border-green-100">
           <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
             <Shield className="w-6 h-6 text-green-600" />
@@ -73,16 +70,10 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
             </div>
           </div>
         </div>
-
-        {/* Main Content */}
-        <div className="space-y-8">
-          {/* Eligibility Section */}
-          <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+        <div className="space-y-8">          <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Sales Policy</h2>
             
-            <div className="space-y-6">
-              {/* No Refunds Policy */}
-              <div className="border-l-4 border-red-500 pl-6">
+            <div className="space-y-6">              <div className="border-l-4 border-red-500 pl-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
                   <XCircle className="w-5 h-5 text-red-500" />
                   All Sales Are Final
@@ -113,7 +104,6 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
               </div>
 
 
-              {/* Service Issues */}
               <div className="border-l-4 border-blue-500 pl-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 text-blue-500" />
@@ -130,8 +120,6 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
                   </ul>
                 </div>
               </div>
-
-              {/* Billing Errors - Only Exception */}
               <div className="border-l-4 border-green-500 pl-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
                   <CreditCard className="w-5 h-5 text-green-500" />
@@ -151,8 +139,6 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
               </div>
             </div>
           </section>
-
-          {/* Non-Refundable Section */}
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
               <XCircle className="w-6 h-6 text-red-500" />
@@ -225,8 +211,6 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
               </p>
             </div>
           </section>
-
-          {/* How to Request Section */}
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">How to Report Billing Errors</h2>
             
@@ -295,8 +279,6 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
               </div>
             </div>
           </section>
-
-          {/* Subscription Plans Overview */}
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Subscription Plans & Usage Rights</h2>
             
@@ -339,8 +321,6 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
               </p>
             </div>
           </section>
-
-          {/* Special Cases Section */}
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Special Cases</h2>
             
@@ -389,8 +369,6 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
               </div>
             </div>
           </section>
-
-          {/* FAQ Section */}
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
               <HelpCircle className="w-6 h-6 text-blue-600" />
@@ -438,8 +416,6 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
               </div>
             </div>
           </section>
-
-          {/* Contact Section */}
           <section className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-sm border border-blue-100 p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Need Help?</h2>
             
@@ -474,8 +450,6 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
             </div>
           </section>
         </div>
-
-        {/* Footer */}
         <div className="mt-12 text-center">
           <p className="text-gray-600">
             © 2025 CoverGen Pro. All rights reserved. | This policy is part of our <Link href={`/${locale}/terms`} className="text-blue-600 hover:text-blue-700">Terms of Service</Link>
