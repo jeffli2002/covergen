@@ -5,10 +5,10 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Refund Policy - CoverGen Pro',
-  description: 'All sales are final. Pro/Pro+ plans include a 7-day free trial. Learn about our sales policy and billing error corrections.',
+  description: 'All sales are final. Pro/Pro+ plans include a free trial. Learn about our sales policy and billing error corrections.',
   openGraph: {
     title: 'Refund Policy - CoverGen Pro',
-    description: 'Digital service with no refunds. Try Pro/Pro+ risk-free with our 7-day trial period.',
+    description: 'Digital service with no refunds. Try Pro/Pro+ risk-free with our trial period.',
   },
 }
 

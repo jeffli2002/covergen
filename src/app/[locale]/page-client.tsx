@@ -98,6 +98,10 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
     context: 'general'
   })
   const { user: authUser } = useAuth()
+  
+  // Get trial days from environment variables
+  const proTrialDays = parseInt(process.env.NEXT_PUBLIC_PRO_TRIAL_DAYS || '7')
+  const proPlusTrialDays = parseInt(process.env.NEXT_PUBLIC_PRO_PLUS_TRIAL_DAYS || '7')
 
   // Debug session state
   useEffect(() => {
@@ -383,8 +387,8 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                   What's the difference between free and Pro plans?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Free users get 10 covers per month (3/day max) for personal use only. Pro ($9/month) includes a 7-day trial and 
-                  120 covers per month with commercial rights. Pro+ ($19/month) also includes a 7-day trial and 300 covers per 
+                  Free users get 10 covers per month (3/day max) for personal use only. Pro ($9/month) includes a {proTrialDays}-day trial and 
+                  120 covers per month with commercial rights. Pro+ ($19/month) also includes a {proPlusTrialDays}-day trial and 300 covers per 
                   month with full commercial license and 7-day cloud gallery.
                 </p>
               </div>
@@ -424,8 +428,8 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                   How does the Pro/Pro+ trial work?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Pro and Pro+ plans come with a 7-day free trial. During the trial, Pro users get 28 covers total 
-                  and Pro+ users get 70 covers total. Trial usage doesn't count against your first paid month - you'll 
+                  Pro and Pro+ plans come with a {proTrialDays}-day free trial. During the trial, Pro users get {Math.floor(120 * proTrialDays / 30)} covers total 
+                  and Pro+ users get {Math.floor(300 * proPlusTrialDays / 30)} covers total. Trial usage doesn't count against your first paid month - you'll 
                   get the full monthly quota when your subscription begins.
                 </p>
               </div>

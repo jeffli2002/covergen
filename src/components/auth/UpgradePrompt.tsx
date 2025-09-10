@@ -20,6 +20,9 @@ export default function UpgradePrompt({
   dailyLimit = 3, 
   isTrial = false 
 }: UpgradePromptProps) {
+  // Get trial days from environment variable
+  const trialDays = parseInt(process.env.NEXT_PUBLIC_PRO_TRIAL_DAYS || '7')
+  
   const features = [
     { icon: Zap, text: 'Unlimited daily generations' },
     { icon: Sparkles, text: 'Priority AI processing' },
@@ -46,7 +49,7 @@ export default function UpgradePrompt({
           </div>
           <p className="text-gray-600 text-sm mt-2">
             {isTrial 
-              ? `You've used all ${dailyLimit} generations for today during your 7-day free trial.`
+              ? `You've used all ${dailyLimit} generations for today during your ${trialDays}-day free trial.`
               : `You've used all ${dailyLimit} free generations for today.`
             }
           </p>
