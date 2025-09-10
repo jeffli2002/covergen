@@ -673,6 +673,12 @@ class CreemPaymentService {
       case 'subscription.expired':
         return this.handleSubscriptionExpired(eventData)
       
+      case 'subscription.trial_will_end':
+        return this.handleSubscriptionTrialWillEnd(eventData)
+      
+      case 'subscription.trial_ended':
+        return this.handleSubscriptionTrialEnded(eventData)
+      
       case 'subscription.paused':
         return this.handleSubscriptionPaused(eventData)
       
@@ -689,36 +695,53 @@ class CreemPaymentService {
   }
 
   private async handleCheckoutComplete(checkout: any) {
-    const { customer, subscription, metadata, order } = checkout
+    const { customer, subscription, metadata, order, trial_period_days } = checkout
     
     // Extract user ID from metadata or customer external ID
     const userId = metadata?.internal_customer_id || metadata?.userId || customer?.external_id
     const planId = metadata?.planId || this.getPlanFromProduct(order?.product)
+    
+    // Calculate trial end date if applicable
+    let trialEnd = null
+    if (trial_period_days && trial_period_days > 0) {
+      const trialEndDate = new Date()
+      trialEndDate.setDate(trialEndDate.getDate() + trial_period_days)
+      trialEnd = trialEndDate.toISOString()
+    }
     
     return {
       type: 'checkout_complete',
       userId: userId,
       customerId: customer?.id,
       subscriptionId: subscription?.id,
-      planId: planId
+      planId: planId,
+      trialEnd: trialEnd
     }
   }
 
   private async handleSubscriptionUpdate(subscription: any) {
-    const { customer, status, metadata, current_period_end_date, canceled_at, product } = subscription
+    const { customer, status, metadata, current_period_end_date, canceled_at, product, cancel_at_period_end } = subscription
     
     const customerId = typeof customer === 'string' ? customer : customer?.id
     const userId = metadata?.internal_customer_id || metadata?.userId
     const planId = metadata?.planId || this.getPlanFromProduct(product?.id)
     
+    // Map Creem status to our expected status
+    let mappedStatus = status
+    if (status === 'trialing') {
+      mappedStatus = 'trialing'
+    } else if (status === 'active' && cancel_at_period_end) {
+      mappedStatus = 'active' // Still active but will cancel at period end
+    }
+    
     return {
       type: 'subscription_update',
       customerId: customerId,
-      status,
+      status: mappedStatus,
       userId: userId,
       planId: planId,
       currentPeriodEnd: current_period_end_date ? new Date(current_period_end_date) : undefined,
-      cancelAtPeriodEnd: !!canceled_at
+      cancelAtPeriodEnd: cancel_at_period_end || !!canceled_at
     }
   }
 
@@ -804,6 +827,38 @@ class CreemPaymentService {
       customerId: customer?.id,
       subscriptionId: subscription?.id,
       amount: dispute.amount
+    }
+  }
+
+  private async handleSubscriptionTrialWillEnd(subscription: any) {
+    const { customer, metadata, trial_end_date, product } = subscription
+    
+    const customerId = typeof customer === 'string' ? customer : customer?.id
+    const userId = metadata?.internal_customer_id || metadata?.userId
+    const planId = metadata?.planId || this.getPlanFromProduct(product?.id)
+    
+    return {
+      type: 'subscription_trial_will_end',
+      customerId: customerId,
+      userId: userId,
+      planId: planId,
+      trialEndDate: trial_end_date ? new Date(trial_end_date) : undefined
+    }
+  }
+
+  private async handleSubscriptionTrialEnded(subscription: any) {
+    const { customer, metadata, id, product } = subscription
+    
+    const customerId = typeof customer === 'string' ? customer : customer?.id
+    const userId = metadata?.internal_customer_id || metadata?.userId
+    const planId = metadata?.planId || this.getPlanFromProduct(product?.id)
+    
+    return {
+      type: 'subscription_trial_ended',
+      customerId: customerId,
+      userId: userId,
+      subscriptionId: id,
+      planId: planId
     }
   }
 

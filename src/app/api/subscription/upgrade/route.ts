@@ -1,0 +1,153 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { creemService } from '@/services/payment/creem'
+import { PaymentAuthWrapper } from '@/services/payment/auth-wrapper'
+import { TrialUpgradeService } from '@/services/payment/trial-upgrade'
+import { getSubscriptionConfig } from '@/lib/subscription-config'
+
+export async function POST(req: NextRequest) {
+  try {
+    // Get auth context using PaymentAuthWrapper
+    const authContext = await PaymentAuthWrapper.getAuthContext()
+    
+    if (!authContext.isAuthenticated || !authContext.userId) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+    
+    const { userId, userEmail } = authContext
+    const { targetTier } = await req.json()
+    
+    // Validate target tier
+    if (!targetTier || !['pro', 'pro_plus'].includes(targetTier)) {
+      return NextResponse.json(
+        { error: 'Invalid subscription tier' },
+        { status: 400 }
+      )
+    }
+    
+    // Get current subscription
+    const supabase = createClient()
+    const { data: subscription, error: subError } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', userId)
+      .single()
+    
+    if (subError || !subscription) {
+      return NextResponse.json(
+        { error: 'No active subscription found' },
+        { status: 404 }
+      )
+    }
+    
+    // Check if user is on trial
+    const isTrialing = subscription.status === 'trialing'
+    const currentTier = subscription.tier
+    
+    // Use TrialUpgradeService to check if upgrade is allowed
+    const upgradeCheck = await TrialUpgradeService.canUpgradeDuringTrial({
+      userId,
+      currentTier: currentTier as 'free' | 'pro' | 'pro_plus',
+      targetTier: targetTier as 'pro' | 'pro_plus',
+      isTrialing
+    })
+    
+    if (!upgradeCheck.canUpgrade) {
+      return NextResponse.json(
+        { error: upgradeCheck.message },
+        { status: 400 }
+      )
+    }
+    
+    // If user is on a trial, we need to handle the upgrade differently
+    if (isTrialing) {
+      console.log('[Upgrade] Upgrading trial subscription from', currentTier, 'to', targetTier)
+      
+      // For trial upgrades, create a new checkout session
+      // This will convert the trial to a paid subscription immediately
+      const successUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?upgraded=true`
+      const cancelUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/pricing`
+      
+      const checkoutResult = await creemService.createCheckoutSession({
+        userId,
+        userEmail,
+        planId: targetTier as 'pro' | 'pro_plus',
+        successUrl,
+        cancelUrl,
+        currentPlan: currentTier as 'free' | 'pro' | 'pro_plus'
+      })
+      
+      if (!checkoutResult.success) {
+        return NextResponse.json(
+          { error: checkoutResult.error || 'Failed to create checkout session' },
+          { status: 500 }
+        )
+      }
+      
+      return NextResponse.json({
+        success: true,
+        checkoutUrl: checkoutResult.url,
+        message: 'Redirecting to payment page to complete upgrade'
+      })
+    } else {
+      // For paid subscriptions, use Creem's upgrade API
+      const upgradeResult = await creemService.upgradeSubscription(
+        subscription.stripe_subscription_id,
+        targetTier as 'pro' | 'pro_plus'
+      )
+      
+      if (!upgradeResult.success) {
+        return NextResponse.json(
+          { error: upgradeResult.error || 'Failed to upgrade subscription' },
+          { status: 500 }
+        )
+      }
+      
+      // Update local subscription record
+      const config = getSubscriptionConfig()
+      const newLimit = targetTier === 'pro_plus' 
+        ? config.limits.pro_plus.monthly 
+        : config.limits.pro.monthly
+      
+      const { error: updateError } = await supabase
+        .from('subscriptions')
+        .update({
+          tier: targetTier,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId)
+      
+      if (updateError) {
+        console.error('[Upgrade] Error updating subscription:', updateError)
+      }
+      
+      // Update user profile
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          subscription_tier: targetTier,
+          quota_limit: newLimit,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId)
+      
+      if (profileError) {
+        console.error('[Upgrade] Error updating profile:', profileError)
+      }
+      
+      return NextResponse.json({
+        success: true,
+        message: 'Subscription upgraded successfully'
+      })
+    }
+  } catch (error) {
+    console.error('[Upgrade] Error:', error)
+    return NextResponse.json(
+      { error: 'Failed to upgrade subscription' },
+      { status: 500 }
+    )
+  }
+}

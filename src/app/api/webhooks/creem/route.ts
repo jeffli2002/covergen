@@ -49,6 +49,14 @@ export async function POST(req: NextRequest) {
         await handleSubscriptionUpdate(result)
         break
 
+      case 'subscription_trial_will_end':
+        await handleSubscriptionTrialWillEnd(result)
+        break
+
+      case 'subscription_trial_ended':
+        await handleSubscriptionTrialEnded(result)
+        break
+
       case 'subscription_deleted':
         await handleSubscriptionDeleted(result)
         break
@@ -203,6 +211,22 @@ async function handleSubscriptionUpdate(data: any) {
     if (status === 'canceled' || status === 'expired') {
       await downgradeUserToFree(userId || customerId)
     }
+    
+    // If subscription transitions from trialing to active, clear trial data
+    if (status === 'active') {
+      // Clear trial end date from auth.users
+      const { error: rpcError } = await adminSupabase.rpc('update_user_trial_status', {
+        p_user_id: userId,
+        p_trial_ends_at: null,
+        p_subscription_tier: planId
+      })
+      
+      if (rpcError) {
+        console.error('[Webhook] Error clearing trial status:', rpcError)
+      }
+      
+      console.log(`[Webhook] Trial converted to paid subscription for user ${userId}`)
+    }
 
     console.log(`[Webhook] Updated subscription status to ${status} for customer ${customerId}`)
   } catch (error) {
@@ -339,6 +363,68 @@ async function downgradeUserToFree(userIdOrCustomerId: string) {
     console.log(`[Webhook] User ${userId} downgraded to free tier`)
   } catch (error) {
     console.error('[Webhook] Error downgrading user:', error)
+    throw error
+  }
+}
+
+// Handler for subscription trial will end event (notification before trial ends)
+async function handleSubscriptionTrialWillEnd(data: any) {
+  const { customerId, userId, planId, trialEndDate } = data
+
+  try {
+    console.log(`[Webhook] Trial will end soon for user ${userId}, trial ends at ${trialEndDate}`)
+    
+    // TODO: Send email notification to user about upcoming trial end
+    // This would be handled by your email service
+    
+    // Log the upcoming trial end for monitoring
+    const adminSupabase = createAdminSupabaseClient()
+    
+    // You could also store this in a notifications table for the user
+    console.log(`[Webhook] User ${userId} should be notified that their trial ends on ${trialEndDate}`)
+  } catch (error) {
+    console.error('[Webhook] Error in handleSubscriptionTrialWillEnd:', error)
+    // Don't throw - this is just a notification
+  }
+}
+
+// Handler for subscription trial ended event (auto-conversion to paid)
+async function handleSubscriptionTrialEnded(data: any) {
+  const { customerId, userId, planId, subscriptionId } = data
+
+  try {
+    const adminSupabase = createAdminSupabaseClient()
+    
+    console.log(`[Webhook] Trial ended for user ${userId}, converting to paid subscription`)
+    
+    // Update subscription status from trialing to active
+    const { error: subError } = await adminSupabase
+      .from('subscriptions')
+      .update({
+        status: 'active',
+        updated_at: new Date().toISOString()
+      })
+      .eq('user_id', userId)
+
+    if (subError) {
+      console.error('[Webhook] Error updating subscription to active:', subError)
+      throw subError
+    }
+    
+    // Clear trial data from auth.users
+    const { error: rpcError } = await adminSupabase.rpc('update_user_trial_status', {
+      p_user_id: userId,
+      p_trial_ends_at: null,
+      p_subscription_tier: planId
+    })
+    
+    if (rpcError) {
+      console.error('[Webhook] Error clearing trial status:', rpcError)
+    }
+    
+    console.log(`[Webhook] Successfully converted trial to paid subscription for user ${userId}`)
+  } catch (error) {
+    console.error('[Webhook] Error in handleSubscriptionTrialEnded:', error)
     throw error
   }
 }
