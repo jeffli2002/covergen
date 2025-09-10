@@ -39,9 +39,7 @@ export async function POST(req: NextRequest) {
     const result = await creemService.createCheckoutSession({
       userId: authContext.userId,
       userEmail: authContext.userEmail || '',
-      customerName: authContext.userEmail?.split('@')[0] || '',
-      planType: plan as 'pro' | 'pro_plus',
-      isUpgrade: false,
+      planId: plan as 'pro' | 'pro_plus',
       successUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/payment/success`,
       cancelUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/pricing`
     })
