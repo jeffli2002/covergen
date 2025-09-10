@@ -47,13 +47,6 @@ export default function GenerationForm() {
   
   const { user, addTask } = useAppStore()
 
-  // Fetch daily limit status when component mounts or user changes
-  useEffect(() => {
-    if (user) {
-      fetchDailyLimitStatus()
-    }
-  }, [user, fetchDailyLimitStatus])
-
   const fetchDailyLimitStatus = useCallback(async () => {
     if (!user) return
 
@@ -74,6 +67,13 @@ export default function GenerationForm() {
       console.error('Failed to fetch daily limit status:', error)
     }
   }, [user])
+
+  // Fetch daily limit status when component mounts or user changes
+  useEffect(() => {
+    if (user) {
+      fetchDailyLimitStatus()
+    }
+  }, [user, fetchDailyLimitStatus])
 
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
