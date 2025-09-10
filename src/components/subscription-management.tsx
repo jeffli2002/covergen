@@ -9,7 +9,7 @@ import { Loader2, CheckCircle, AlertCircle, CreditCard } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { getClientSubscriptionConfig, getTrialPeriodText } from '@/lib/subscription-config-client'
 import { format } from 'date-fns'
-import { toast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 
 interface SubscriptionInfo {
   status: string
@@ -71,24 +71,17 @@ export function SubscriptionManagement() {
       const data = await response.json()
       
       if (response.ok) {
-        toast({
-          title: 'Subscription cancelled',
+        toast.success('Subscription cancelled', {
           description: data.message
         })
         await fetchSubscriptionInfo()
       } else {
-        toast({
-          title: 'Error',
-          description: data.error || 'Failed to cancel subscription',
-          variant: 'destructive'
+        toast.error('Error', {
+          description: data.error || 'Failed to cancel subscription'
         })
       }
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to cancel subscription',
-        variant: 'destructive'
-      })
+      toast.error('Failed to cancel subscription')
     } finally {
       setProcessing(false)
     }
@@ -106,24 +99,17 @@ export function SubscriptionManagement() {
       const data = await response.json()
       
       if (response.ok) {
-        toast({
-          title: 'Subscription resumed',
+        toast.success('Subscription resumed', {
           description: 'Your subscription will continue after the current period.'
         })
         await fetchSubscriptionInfo()
       } else {
-        toast({
-          title: 'Error',
-          description: data.error || 'Failed to resume subscription',
-          variant: 'destructive'
+        toast.error('Error', {
+          description: data.error || 'Failed to resume subscription'
         })
       }
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to resume subscription',
-        variant: 'destructive'
-      })
+      toast.error('Failed to resume subscription')
     } finally {
       setProcessing(false)
     }
@@ -147,25 +133,18 @@ export function SubscriptionManagement() {
           // Redirect to checkout for trial upgrades
           window.location.href = data.checkoutUrl
         } else {
-          toast({
-            title: 'Subscription upgraded',
+          toast.success('Subscription upgraded', {
             description: data.message
           })
           await fetchSubscriptionInfo()
         }
       } else {
-        toast({
-          title: 'Error',
-          description: data.error || 'Failed to upgrade subscription',
-          variant: 'destructive'
+        toast.error('Error', {
+          description: data.error || 'Failed to upgrade subscription'
         })
       }
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to upgrade subscription',
-        variant: 'destructive'
-      })
+      toast.error('Failed to upgrade subscription')
     } finally {
       setProcessing(false)
     }
