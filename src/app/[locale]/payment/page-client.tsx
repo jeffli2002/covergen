@@ -238,22 +238,6 @@ export default function PaymentPageClient({
             Start creating professional covers with AI. All plans include watermark-free images.
           </p>
           
-          {/* Debug button */}
-          <div className="mt-4">
-            <Button 
-              onClick={() => {
-                console.log('[DEBUG] Test button clicked!')
-                console.log('[DEBUG] AuthUser:', authUser)
-                console.log('[DEBUG] Loading:', authLoading)
-                toast.success('Test button clicked!')
-              }}
-              variant="outline"
-              size="sm"
-            >
-              Test Button (Debug)
-            </Button>
-          </div>
-          
           {isTestMode && (
             <Alert className="mt-6 max-w-2xl mx-auto border-blue-200 bg-blue-50">
               <Info className="h-4 w-4 text-blue-600" />
