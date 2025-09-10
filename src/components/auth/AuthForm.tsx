@@ -124,8 +124,8 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
     setMessage({ type: '', text: '' })
 
     try {
-      // Use redirect OAuth to avoid COOP issues
-      const result = await signInWithGoogle(false)
+      // Use popup OAuth with safe implementation
+      const result = await signInWithGoogle(true)
       
       if (result.success) {
         setMessage({ type: 'success', text: 'Sign in successful!' })

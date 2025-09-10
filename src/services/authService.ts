@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/client'
+import { OAuthPopupHandler } from '@/lib/oauth-popup'
 
 let authServiceInstance: AuthService | null = null
 
@@ -279,10 +280,56 @@ class AuthService {
       const currentPath = window.location.pathname || '/en'
       
       if (usePopup) {
-        console.log('[Auth] Popup disabled to avoid COOP errors, using redirect instead')
+        console.log('[Auth] Using popup flow for Google sign in')
+        
+        // For popup flow, we need a different callback URL
+        const popupCallbackUrl = `${window.location.origin}/auth/popup-callback?next=${encodeURIComponent(currentPath)}&origin=${encodeURIComponent(window.location.origin)}`
+        
+        // Get the OAuth URL with skipBrowserRedirect
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: popupCallbackUrl,
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'consent',
+            },
+            skipBrowserRedirect: true // Important for popup flow
+          }
+        })
+
+        if (error) {
+          throw error
+        }
+
+        if (!data?.url) {
+          throw new Error('No OAuth URL received')
+        }
+
+        // Open popup and return promise
+        return new Promise((resolve, reject) => {
+          const popupHandler = new OAuthPopupHandler({
+            width: 500,
+            height: 800,
+            onSuccess: (authData) => {
+              console.log('[Auth] Popup OAuth successful')
+              resolve({ success: true, data: authData })
+            },
+            onError: (error) => {
+              console.error('[Auth] Popup OAuth error:', error)
+              reject({ success: false, error: error.message })
+            },
+            onClose: () => {
+              console.log('[Auth] Popup closed without completing auth')
+              reject({ success: false, error: 'Authentication cancelled' })
+            }
+          })
+
+          popupHandler.open(data.url)
+        })
       }
       
-      // Use PKCE flow with callback route
+      // Use PKCE flow with callback route for redirect
       const redirectUrl = `${window.location.origin}/auth/callback-official?next=${encodeURIComponent(currentPath)}`
 
       console.log('[Auth] Google sign in with redirect URL:', redirectUrl)

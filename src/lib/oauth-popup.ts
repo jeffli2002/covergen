@@ -16,7 +16,7 @@ export class OAuthPopupHandler {
   constructor(private options: OAuthPopupOptions = {}) {
     this.options = {
       width: 500,
-      height: 700,
+      height: 800,
       ...options
     };
   }
@@ -24,7 +24,7 @@ export class OAuthPopupHandler {
   open(url: string): void {
     // Calculate center position
     const left = (window.screen.width - (this.options.width || 500)) / 2;
-    const top = (window.screen.height - (this.options.height || 700)) / 2;
+    const top = (window.screen.height - (this.options.height || 800)) / 2;
 
     // Open popup window
     this.popup = window.open(
