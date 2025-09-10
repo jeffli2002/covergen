@@ -1,10 +1,25 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { userSessionService, type UnifiedUser } from '@/services/unified/UserSessionService'
+import { supabase } from '@/lib/supabase-simple'
+import { User } from '@supabase/supabase-js'
+
+interface AuthUser {
+  id: string
+  email: string
+  provider: 'google' | 'email'
+  subscription?: {
+    tier: 'free' | 'pro' | 'pro_plus'
+    status: string
+  }
+  usage?: {
+    daily: number
+    monthly: number
+  }
+}
 
 interface AuthContextType {
-  user: UnifiedUser | null
+  user: AuthUser | null
   loading: boolean
   signUp: (email: string, password: string, metadata?: any) => Promise<any>
   signIn: (email: string, password: string) => Promise<any>
@@ -26,48 +41,127 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<UnifiedUser | null>(null)
+  const [user, setUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const initAuth = async () => {
       try {
-        console.log('[AuthContext] Starting simplified initialization')
+        console.log('[AuthContext] Starting simple auth initialization')
         
-        // Only use the unified service - no fallbacks, no legacy auth service
-        const initialized = await userSessionService.initialize()
+        // Check if we're returning from OAuth
+        const params = new URLSearchParams(window.location.search)
+        const oauthSuccess = params.get('oauth_success')
+        const oauthReturn = params.get('oauth_return')
         
-        if (initialized) {
-          // Subscribe to unified user changes
-          const unsubscribe = userSessionService.subscribe((unifiedUser) => {
-            console.log('[AuthContext] Unified user change:', !!unifiedUser, unifiedUser?.email)
-            setUser(unifiedUser)
-            setLoading(false)
-          })
-          
-          // Get current user immediately
-          const currentUser = userSessionService.getCurrentUser()
-          console.log('[AuthContext] Current unified user:', currentUser?.email)
-          setUser(currentUser)
-          setLoading(false)
-          
-          return unsubscribe
-        } else {
-          console.error('[AuthContext] Failed to initialize unified service')
-          setLoading(false)
+        if (oauthSuccess || oauthReturn) {
+          console.log('[AuthContext] Detected OAuth return, checking session...')
+          // Remove the OAuth params from URL
+          const newUrl = new URL(window.location.href)
+          newUrl.searchParams.delete('oauth_success')
+          newUrl.searchParams.delete('oauth_return')
+          window.history.replaceState({}, '', newUrl.toString())
         }
+        
+        // Get initial session
+        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        if (error) {
+          console.error('[AuthContext] Error getting session:', error)
+        } else if (session?.user) {
+          console.log('[AuthContext] Found session for:', session.user.email)
+          // Build simple user object
+          const authUser = await buildAuthUser(session.user)
+          setUser(authUser)
+        } else {
+          console.log('[AuthContext] No session found')
+        }
+        
+        setLoading(false)
+        
+        // Listen for auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+          console.log('[AuthContext] Auth state change:', event)
+          
+          if (session?.user) {
+            const authUser = await buildAuthUser(session.user)
+            setUser(authUser)
+          } else {
+            setUser(null)
+          }
+        })
+        
+        return () => subscription.unsubscribe()
       } catch (error) {
         console.error('[AuthContext] Initialization error:', error)
         setLoading(false)
       }
     }
 
-    const cleanupPromise = initAuth()
+    const cleanup = initAuth()
 
     return () => {
-      cleanupPromise?.then(unsubscribe => unsubscribe?.())
+      cleanup?.then(unsubscribe => unsubscribe?.())
     }
   }, [])
+
+  // Helper function to build auth user from Supabase user
+  async function buildAuthUser(supabaseUser: User): Promise<AuthUser> {
+    try {
+      // Get subscription data
+      const { data: subscription, error: subError } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', supabaseUser.id)
+        .eq('status', 'active')
+        .single()
+
+      if (subError && subError.code !== 'PGRST116') {
+        console.error('[AuthContext] Error fetching subscription:', subError)
+      }
+
+      // Get usage data
+      const { data: usage, error: usageError } = await supabase
+        .rpc('check_generation_limit', {
+          p_user_id: supabaseUser.id,
+          p_subscription_tier: subscription?.subscription_tier || 'free'
+        })
+
+      if (usageError) {
+        console.error('[AuthContext] Error fetching usage:', usageError)
+      }
+
+      return {
+        id: supabaseUser.id,
+        email: supabaseUser.email || '',
+        provider: (supabaseUser.app_metadata?.provider as 'google' | 'email') || 'email',
+        subscription: {
+          tier: subscription?.subscription_tier || 'free',
+          status: subscription?.status || 'active'
+        },
+        usage: {
+          daily: usage?.daily_usage || 0,
+          monthly: usage?.monthly_usage || 0
+        }
+      }
+    } catch (error) {
+      console.error('[AuthContext] Error building auth user:', error)
+      // Return minimal user object on error
+      return {
+        id: supabaseUser.id,
+        email: supabaseUser.email || '',
+        provider: (supabaseUser.app_metadata?.provider as 'google' | 'email') || 'email',
+        subscription: {
+          tier: 'free',
+          status: 'active'
+        },
+        usage: {
+          daily: 0,
+          monthly: 0
+        }
+      }
+    }
+  }
 
   const authContextValue: AuthContextType = {
     user,
@@ -100,36 +194,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     },
     
-    // OAuth and payment methods from unified service
+    // OAuth and payment methods
     signInWithGoogle: async () => {
-      const result = await userSessionService.signInWithGoogle()
-      return {
-        success: result.success,
-        error: result.error?.message,
-        data: result.success ? 'redirecting' : undefined
+      try {
+        const currentPath = window.location.pathname || '/en'
+        const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
+        
+        console.log('[AuthContext] Google sign-in initiated with redirect:', redirectUrl)
+
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: redirectUrl,
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'consent',
+            }
+          }
+        })
+
+        if (error) {
+          console.error('[AuthContext] OAuth error:', error)
+          return {
+            success: false,
+            error: error.message
+          }
+        }
+
+        return { success: true, data: 'redirecting' }
+      } catch (error: any) {
+        console.error('[AuthContext] Sign in error:', error)
+        return {
+          success: false,
+          error: error.message || 'Failed to sign in'
+        }
       }
     },
     
     signOut: async () => {
       try {
-        // Use server-side signout for reliability
-        const response = await fetch('/api/auth/signout', { method: 'POST' })
-        const data = await response.json()
+        // Sign out from Supabase
+        const { error } = await supabase.auth.signOut()
         
-        if (data.success) {
-          // Clear local state
-          setUser(null)
-          
-          // Try to sign out from userSessionService too
-          userSessionService.signOut().catch(console.error)
-          
-          return { success: true }
+        if (error) {
+          console.error('[AuthContext] Sign out error:', error)
+          return {
+            success: false,
+            error: error.message
+          }
         }
         
-        return {
-          success: false,
-          error: data.error || 'Sign out failed'
-        }
+        // Also call server-side signout for cleanup
+        await fetch('/api/auth/signout', { method: 'POST' }).catch(console.error)
+        
+        // Clear local state
+        setUser(null)
+        
+        return { success: true }
       } catch (error) {
         console.error('[AuthContext] Sign out error:', error)
         return {
@@ -139,17 +260,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     },
     
-    // Usage methods from unified service
+    // Usage methods
     getUserUsageToday: async () => {
-      return user?.usage.daily || 0
+      return user?.usage?.daily || 0
     },
     
     incrementUsage: async () => {
-      const result = await userSessionService.incrementUsage()
-      return {
-        success: result.success,
-        error: result.error,
-        remaining: result.remaining
+      if (!user) {
+        return { success: false, error: 'Not authenticated' }
+      }
+
+      try {
+        const { data, error } = await supabase.rpc('increment_generation_count', {
+          p_user_id: user.id,
+          p_subscription_tier: user.subscription?.tier || 'free'
+        })
+
+        if (error) {
+          return { success: false, error: error.message }
+        }
+
+        // Update local user state
+        if (data) {
+          setUser(prev => prev ? {
+            ...prev,
+            usage: {
+              daily: data.daily_usage || 0,
+              monthly: data.monthly_usage || 0
+            }
+          } : null)
+        }
+
+        return { success: true, remaining: data?.remaining_daily || 0 }
+      } catch (error: any) {
+        return { success: false, error: error.message }
       }
     },
     
@@ -157,32 +301,107 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return user?.subscription || null
     },
     
-    // New unified service methods
+    // Payment methods
     createCheckoutSession: async (planId: 'pro' | 'pro_plus') => {
-      const result = await userSessionService.createCheckoutSession(planId)
-      return {
-        success: result.success,
-        url: result.url,
-        error: result.error?.message
+      if (!user) {
+        return { success: false, error: 'Not authenticated' }
+      }
+
+      try {
+        const session = await supabase.auth.getSession()
+        if (!session.data.session) {
+          return { success: false, error: 'No valid session' }
+        }
+
+        const response = await fetch('/api/payment/unified-checkout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.data.session.access_token}`
+          },
+          body: JSON.stringify({
+            planId,
+            successUrl: `${window.location.origin}/payment/success?plan=${planId}&user=${user.id}`,
+            cancelUrl: `${window.location.origin}/payment/cancel?plan=${planId}`
+          })
+        })
+
+        const result = await response.json()
+        
+        if (!response.ok) {
+          return { success: false, error: result.error || 'Failed to create checkout session' }
+        }
+
+        return { success: true, url: result.url }
+      } catch (error: any) {
+        return { success: false, error: error.message || 'Failed to create checkout session' }
       }
     },
     
     createPortalSession: async () => {
-      const result = await userSessionService.createPortalSession()
-      return {
-        success: result.success,
-        url: result.url,
-        error: result.error?.message
+      if (!user) {
+        return { success: false, error: 'Not authenticated' }
+      }
+
+      try {
+        const session = await supabase.auth.getSession()
+        if (!session.data.session) {
+          return { success: false, error: 'No valid session' }
+        }
+
+        const response = await fetch('/api/payment/portal', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.data.session.access_token}`
+          },
+          body: JSON.stringify({
+            returnUrl: `${window.location.origin}/account?portal_return=true`
+          })
+        })
+
+        const result = await response.json()
+        
+        if (!response.ok) {
+          return { success: false, error: result.error || 'Failed to access portal' }
+        }
+
+        return { success: true, url: result.url }
+      } catch (error: any) {
+        return { success: false, error: error.message || 'Failed to access portal' }
       }
     },
     
     checkUsageLimit: async () => {
-      return await userSessionService.checkUsageLimit()
+      if (!user) {
+        return { canGenerate: false, remaining: 0, limit: 0 }
+      }
+
+      try {
+        const { data, error } = await supabase.rpc('check_generation_limit', {
+          p_user_id: user.id,
+          p_subscription_tier: user.subscription?.tier || 'free'
+        })
+
+        if (error) {
+          console.error('[AuthContext] Usage check error:', error)
+          return { canGenerate: false, remaining: 0, limit: 0 }
+        }
+
+        return {
+          canGenerate: data?.can_generate || false,
+          remaining: data?.remaining_daily || 0,
+          limit: data?.daily_limit || 0
+        }
+      } catch (error) {
+        console.error('[AuthContext] Usage check error:', error)
+        return { canGenerate: false, remaining: 0, limit: 0 }
+      }
     },
     
     // Computed properties
-    hasValidSubscription: userSessionService.hasValidSubscription(),
-    isTrialing: userSessionService.isTrialing()
+    hasValidSubscription: user?.subscription?.tier !== 'free' && user?.subscription?.status === 'active',
+    isTrialing: user?.subscription?.status === 'trialing'
   }
 
   return (

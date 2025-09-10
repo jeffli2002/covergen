@@ -72,8 +72,20 @@ export async function GET(request: NextRequest) {
                 expiresAt: data.session.expires_at
             })
             
+            // Important: For OAuth to work properly, we need to ensure the client
+            // can detect the session. Add a flag to indicate OAuth success.
+            redirectUrl.searchParams.set('oauth_success', 'true')
+            
+            // Update the response with the new URL
+            const finalResponse = NextResponse.redirect(redirectUrl)
+            
+            // Copy all cookies from the original response
+            response.cookies.getAll().forEach(cookie => {
+                finalResponse.cookies.set(cookie.name, cookie.value, cookie)
+            })
+            
             // Return response with cookies set
-            return response
+            return finalResponse
         } catch (error: any) {
             console.error('[OAuth Callback] Unexpected error:', error)
             return NextResponse.redirect(
