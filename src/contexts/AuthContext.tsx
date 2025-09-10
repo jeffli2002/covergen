@@ -8,7 +8,7 @@ interface AuthContextType {
   loading: boolean
   signUp: (email: string, password: string, metadata?: any) => Promise<any>
   signIn: (email: string, password: string) => Promise<any>
-  signInWithGoogle: () => Promise<any>
+  signInWithGoogle: (usePopup?: boolean) => Promise<any>
   signOut: () => Promise<any>
   resetPassword: (email: string) => Promise<any>
   updatePassword: (newPassword: string) => Promise<any>
