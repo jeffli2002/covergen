@@ -10,7 +10,7 @@ export function createClient() {
         persistSession: true,
         detectSessionInUrl: false, // Disable to prevent COOP issues with popup handling
         flowType: 'pkce', // Explicitly set PKCE flow for OAuth
-        debug: false // Set to true for debugging auth flow
+        debug: false, // Set to true for debugging auth flow
         storage: {
           getItem: (key) => {
             if (typeof window === 'undefined') {
