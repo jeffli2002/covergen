@@ -38,6 +38,7 @@ export async function GET(request: Request) {
             background: white;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 400px;
           }
           .spinner {
             width: 40px;
@@ -57,48 +58,123 @@ export async function GET(request: Request) {
             margin-top: 1rem;
           }
           .manual-close {
-            margin-top: 1rem;
+            margin-top: 1.5rem;
             color: #666;
             font-size: 0.9rem;
+            display: none;
           }
           button {
             margin-top: 1rem;
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1.5rem;
             background: #3498db;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 1rem;
           }
           button:hover {
             background: #2980b9;
+          }
+          .success-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
           }
         </style>
       </head>
       <body>
         <div class="container">
-          ${success ? '<div class="spinner"></div>' : ''}
+          ${success ? '<div class="spinner"></div>' : '<div class="success-icon">❌</div>'}
           <h2>${success ? 'Completing Sign In...' : 'Sign In Failed'}</h2>
           ${errorMsg ? `<p class="error">${errorMsg}</p>` : ''}
-          <p class="manual-close">If this window doesn't close automatically, you can <button onclick="window.close()">close it manually</button></p>
+          <div class="manual-close">
+            <p>If this window doesn't close automatically:</p>
+            <button onclick="handleClose()">Close Window</button>
+          </div>
         </div>
         <script>
-          // Post message to parent window
-          if (window.opener && !window.opener.closed) {
-            window.opener.postMessage({
-              type: '${success ? 'oauth-success' : 'oauth-error'}',
-              ${success ? `payload: ${JSON.stringify(data)}` : `error: ${JSON.stringify(errorMsg || 'Authentication failed')}`}
-            }, '${origin}');
-          }
-          
-          // Try to close the window after a short delay
-          setTimeout(() => {
-            window.close();
-            // If window.close() doesn't work, show instructions
+          (function() {
+            const parentOrigin = '${origin}';
+            let closeFailed = false;
+            
+            // Resilient postMessage handler
+            function sendMessageToParent() {
+              try {
+                if (window.opener && !window.opener.closed) {
+                  window.opener.postMessage({
+                    type: '${success ? 'oauth-success' : 'oauth-error'}',
+                    ${success ? `payload: ${JSON.stringify(data)}` : `error: ${JSON.stringify(errorMsg || 'Authentication failed')}`}
+                  }, parentOrigin);
+                  return true;
+                }
+              } catch (err) {
+                console.error('Failed to send message to parent:', err);
+              }
+              return false;
+            }
+            
+            // Attempt to close window
+            function attemptClose() {
+              try {
+                window.close();
+                // Check if close worked after a delay
+                setTimeout(() => {
+                  // If we're still here, close didn't work
+                  closeFailed = true;
+                  showManualClose();
+                }, 500);
+              } catch (err) {
+                console.error('window.close() failed:', err);
+                closeFailed = true;
+                showManualClose();
+              }
+            }
+            
+            // Show manual close UI
+            function showManualClose() {
+              const manualCloseDiv = document.querySelector('.manual-close');
+              if (manualCloseDiv) {
+                manualCloseDiv.style.display = 'block';
+              }
+              // Hide spinner if showing
+              const spinner = document.querySelector('.spinner');
+              if (spinner) {
+                spinner.style.display = 'none';
+              }
+              // Update title if success
+              if (${success}) {
+                const title = document.querySelector('h2');
+                if (title) {
+                  title.textContent = 'Sign In Successful!';
+                }
+              }
+            }
+            
+            // Handle close button click
+            window.handleClose = function() {
+              try {
+                window.close();
+              } catch (e) {
+                // If close still fails, redirect to parent origin
+                window.location.href = parentOrigin + '${next}';
+              }
+            }
+            
+            // Execute flow
+            const messageSent = sendMessageToParent();
+            
+            // Attempt to close after a delay
             setTimeout(() => {
-              document.querySelector('.manual-close').style.display = 'block';
-            }, 1000);
-          }, ${success ? '1000' : '2000'});
+              attemptClose();
+            }, ${success ? '1500' : '2500'});
+            
+            // Fallback: show manual close after longer delay if still open
+            setTimeout(() => {
+              if (!closeFailed) {
+                showManualClose();
+              }
+            }, ${success ? '3000' : '4000'});
+          })();
         </script>
       </body>
     </html>
@@ -110,7 +186,10 @@ export async function GET(request: Request) {
     return new NextResponse(
       htmlTemplate(false, null, searchParams.get('error_description') || error),
       { 
-        headers: { 'Content-Type': 'text/html' },
+        headers: { 
+          'Content-Type': 'text/html',
+          'Cross-Origin-Opener-Policy': 'same-origin-allow-popups'
+        },
         status: 200 
       }
     )
@@ -147,7 +226,10 @@ export async function GET(request: Request) {
         return new NextResponse(
           htmlTemplate(false, null, exchangeError.message),
           { 
-            headers: { 'Content-Type': 'text/html' },
+            headers: { 
+              'Content-Type': 'text/html',
+              'Cross-Origin-Opener-Policy': 'same-origin-allow-popups'
+            },
             status: 200 
           }
         )
@@ -165,7 +247,10 @@ export async function GET(request: Request) {
           next
         }),
         { 
-          headers: { 'Content-Type': 'text/html' },
+          headers: { 
+            'Content-Type': 'text/html',
+            'Cross-Origin-Opener-Policy': 'same-origin-allow-popups'
+          },
           status: 200 
         }
       )
@@ -174,7 +259,10 @@ export async function GET(request: Request) {
       return new NextResponse(
         htmlTemplate(false, null, 'An unexpected error occurred'),
         { 
-          headers: { 'Content-Type': 'text/html' },
+          headers: { 
+            'Content-Type': 'text/html',
+            'Cross-Origin-Opener-Policy': 'same-origin-allow-popups'
+          },
           status: 200 
         }
       )
@@ -186,7 +274,10 @@ export async function GET(request: Request) {
   return new NextResponse(
     htmlTemplate(false, null, 'No authorization code received'),
     { 
-      headers: { 'Content-Type': 'text/html' },
+      headers: { 
+        'Content-Type': 'text/html',
+        'Cross-Origin-Opener-Policy': 'same-origin-allow-popups'
+      },
       status: 200 
     }
   )
