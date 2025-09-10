@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
+import { getSubscriptionConfig } from './subscription-config'
 
 export interface GenerationLimitStatus {
   monthly_usage: number
@@ -19,27 +20,41 @@ export interface GenerationLimitStatus {
 
 export async function checkGenerationLimit(userId: string | null): Promise<GenerationLimitStatus | null> {
   const supabase = await createClient()
+  const config = getSubscriptionConfig()
 
   // For unauthenticated users, always return free tier limits
   if (!userId) {
     return {
       monthly_usage: 0,
-      monthly_limit: 10,
+      monthly_limit: config.limits.free.monthly,
       daily_usage: 0,
-      daily_limit: 3,
+      daily_limit: config.limits.free.daily,
       trial_usage: 0,
       trial_limit: null,
       can_generate: true,
       is_trial: false,
       trial_ends_at: null,
       subscription_tier: 'free',
-      remaining_monthly: 10,
+      remaining_monthly: config.limits.free.monthly,
       remaining_trial: null,
-      remaining_daily: 3
+      remaining_daily: config.limits.free.daily
     }
   }
 
   try {
+    // First set the configuration for this session
+    const configData = {
+      trial_days: config.trialDays,
+      free_daily: config.limits.free.daily,
+      free_monthly: config.limits.free.monthly,
+      pro_monthly: config.limits.pro.monthly,
+      pro_trial_daily: config.limits.pro.trial_daily,
+      pro_plus_monthly: config.limits.pro_plus.monthly,
+      pro_plus_trial_daily: config.limits.pro_plus.trial_daily
+    }
+    
+    await supabase.rpc('set_subscription_config', { p_config: configData })
+
     // Get current generation limit status
     const { data, error } = await supabase
       .rpc('check_generation_limit', { 
@@ -61,8 +76,22 @@ export async function checkGenerationLimit(userId: string | null): Promise<Gener
 
 export async function incrementGenerationCount(userId: string, subscriptionTier: string = 'free'): Promise<GenerationLimitStatus | null> {
   const supabase = await createClient()
+  const config = getSubscriptionConfig()
 
   try {
+    // First set the configuration for this session
+    const configData = {
+      trial_days: config.trialDays,
+      free_daily: config.limits.free.daily,
+      free_monthly: config.limits.free.monthly,
+      pro_monthly: config.limits.pro.monthly,
+      pro_trial_daily: config.limits.pro.trial_daily,
+      pro_plus_monthly: config.limits.pro_plus.monthly,
+      pro_plus_trial_daily: config.limits.pro_plus.trial_daily
+    }
+    
+    await supabase.rpc('set_subscription_config', { p_config: configData })
+
     const { data, error } = await supabase
       .rpc('increment_generation_count', { 
         p_user_id: userId,

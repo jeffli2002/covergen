@@ -1,4 +1,5 @@
 import { Creem } from 'creem'
+import { getSubscriptionConfig, isTrialEnabled, calculateTrialEndDate } from '@/lib/subscription-config'
 
 // Use lazy evaluation for all environment variables to handle edge runtime
 const getCreemTestMode = () => {
@@ -368,22 +369,35 @@ class CreemPaymentService {
       try {
         // Create checkout session with Creem SDK
         console.log('[Creem] Creating checkout session with SDK')
+        
+        // Check if trials are enabled
+        const config = getSubscriptionConfig()
+        const trialEnabled = isTrialEnabled() && currentPlan === 'free'
+        
+        const checkoutRequest: any = {
+          productId: productId,
+          requestId: `checkout_${userId}_${Date.now()}`,
+          successUrl: successUrl,
+          metadata: {
+            userId: userId,
+            userEmail: userEmail,
+            planId: planId,
+            currentPlan: currentPlan,
+          },
+          customer: {
+            email: userEmail,
+          }
+        }
+        
+        // Add trial period if enabled and user is upgrading from free
+        if (trialEnabled) {
+          checkoutRequest.trialPeriodDays = config.trialDays
+          console.log(`[Creem] Adding ${config.trialDays} day trial period to checkout`)
+        }
+        
         checkout = await getCreemClient().createCheckout({
           xApiKey: CREEM_API_KEY,
-          createCheckoutRequest: {
-            productId: productId,
-            requestId: `checkout_${userId}_${Date.now()}`,
-            successUrl: successUrl,
-            metadata: {
-              userId: userId,
-              userEmail: userEmail,
-              planId: planId,
-              currentPlan: currentPlan,
-            },
-            customer: {
-              email: userEmail,
-            },
-          }
+          createCheckoutRequest: checkoutRequest
         })
         
         console.log('[Creem] SDK checkout response:', {

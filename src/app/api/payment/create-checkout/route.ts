@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { creemService } from '@/services/payment/creem'
 import { createClient } from '@supabase/supabase-js'
+import { TrialUpgradeService } from '@/services/payment/trial-upgrade'
 
 // Create service role Supabase client
 const supabaseAdmin = createClient(
@@ -74,10 +75,54 @@ export async function POST(req: NextRequest) {
       .eq('user_id', user.id)
       .single()
 
-    // Create checkout session with Creem
+    // Check if this is a trial upgrade
+    let isTrialUpgrade = false
+    if (subscription && subscription.status === 'trialing') {
+      const upgradeCheck = await TrialUpgradeService.canUpgradeDuringTrial({
+        userId: user.id,
+        fromTier: subscription.tier as 'free' | 'pro' | 'pro_plus',
+        toTier: planId as 'pro' | 'pro_plus',
+        isTrialActive: true,
+        trialEndsAt: subscription.current_period_end ? new Date(subscription.current_period_end) : null
+      })
+
+      if (!upgradeCheck.success) {
+        return NextResponse.json(
+          { error: upgradeCheck.message },
+          { status: 400 }
+        )
+      }
+
+      isTrialUpgrade = !upgradeCheck.shouldCreateNewSubscription
+
+      // If this is an upgrade during trial, update the subscription directly
+      if (isTrialUpgrade) {
+        const updateResult = await TrialUpgradeService.updateTrialUpgrade(
+          user.id,
+          planId as 'pro' | 'pro_plus',
+          subscription.current_period_end ? new Date(subscription.current_period_end) : null
+        )
+
+        if (updateResult.success) {
+          // Return success without creating a new checkout session
+          return NextResponse.json({
+            success: true,
+            message: 'Trial upgraded successfully',
+            isTrialUpgrade: true
+          })
+        } else {
+          console.error('Failed to update trial:', updateResult.error)
+          // Fall back to creating a new subscription
+          isTrialUpgrade = false
+        }
+      }
+    }
+
+    // Create checkout session with Creem (only if not a trial upgrade)
     console.log('Creating Creem checkout session:', {
       userId: user.id,
       planId,
+      isTrialUpgrade,
       env: {
         hasApiKey: !!process.env.CREEM_SECRET_KEY,
         hasProPlanId: !!process.env.CREEM_PRO_PLAN_ID,

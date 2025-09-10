@@ -1,3 +1,0 @@
-[33m74a3cad[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Fix 413 payload too large error for image generation
-[33m4bed264[m Improve error handling for image generation API
-[33m015e038[m Change hero text from '100% FREE Generation' to 'TRY FREE TODAY'

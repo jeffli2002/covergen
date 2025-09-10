@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { creemService, WebhookEvent } from '@/services/payment/creem'
 import { supabase } from '@/lib/supabase'
+import { getSubscriptionConfig, calculateTrialEndDate } from '@/lib/subscription-config'
 
 // Disable body parsing to get raw body for signature verification
 export const dynamic = 'force-dynamic'
@@ -87,15 +88,34 @@ async function handleCheckoutComplete(data: any) {
     // Create service role client for admin operations
     const adminSupabase = createAdminSupabaseClient()
 
-    // Get the plan details
+    // Get subscription configuration
+    const config = getSubscriptionConfig()
+    
+    // Get the plan details from configuration
     const planLimits = {
-      pro: 120,
-      pro_plus: 300
+      pro: config.limits.pro.monthly,
+      pro_plus: config.limits.pro_plus.monthly
     }
 
     // Check if this is a trial subscription
-    const isTrialSubscription = trialEnd && new Date(trialEnd) > new Date()
-    const trialEndsAt = isTrialSubscription ? new Date(trialEnd).toISOString() : null
+    // If trial days is 0, no trials are offered
+    let isTrialSubscription = false
+    let trialEndsAt: string | null = null
+    
+    if (config.trialDays > 0) {
+      // If trialEnd is provided in webhook, use it
+      if (trialEnd && new Date(trialEnd) > new Date()) {
+        isTrialSubscription = true
+        trialEndsAt = new Date(trialEnd).toISOString()
+      } else if (!trialEnd) {
+        // If no trialEnd provided but trials are enabled, calculate it
+        const calculatedTrialEnd = calculateTrialEndDate()
+        if (calculatedTrialEnd) {
+          isTrialSubscription = true
+          trialEndsAt = calculatedTrialEnd.toISOString()
+        }
+      }
+    }
 
     // Update auth.users table with Creem trial info using raw SQL
     // Note: Supabase doesn't allow direct updates to auth.users via API, so we use RPC
@@ -302,11 +322,12 @@ async function downgradeUserToFree(userIdOrCustomerId: string) {
     }
 
     // Update user profile to free tier
+    const config = getSubscriptionConfig()
     const { error: profileError } = await adminSupabase
       .from('profiles')
       .update({
         subscription_tier: 'free',
-        quota_limit: 10,
+        quota_limit: config.limits.free.monthly,
         updated_at: new Date().toISOString()
       })
       .eq('id', userId)
