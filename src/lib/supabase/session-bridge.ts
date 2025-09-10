@@ -127,6 +127,7 @@ export class VercelSessionBridge {
     const startTime = Date.now()
     
     while (Date.now() - startTime < timeout) {
+      // Check for any of our marker cookies or session data
       if (this.getCookie(this.SESSION_COOKIE_NAME) || this.hasAuthMarkers()) {
         console.log('[VercelSessionBridge] Cookies detected after', Date.now() - startTime, 'ms')
         return true
@@ -136,6 +137,15 @@ export class VercelSessionBridge {
       const storageKey = `sb-${process.env.NEXT_PUBLIC_SUPABASE_URL!.split('//')[1].split('.')[0]}-auth-token`
       if (typeof localStorage !== 'undefined' && localStorage.getItem(storageKey)) {
         console.log('[VercelSessionBridge] Session already in localStorage')
+        return true
+      }
+      
+      // On Vercel, also check for supabase auth cookies directly
+      const authCookies = document.cookie.split('; ').filter(c => 
+        c.startsWith('sb-') || c.startsWith('supabase-auth-token')
+      )
+      if (authCookies.length > 0) {
+        console.log('[VercelSessionBridge] Found Supabase auth cookies:', authCookies.map(c => c.split('=')[0]))
         return true
       }
       

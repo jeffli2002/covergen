@@ -146,13 +146,46 @@ class UserSessionService {
     }
   }
 
+  async forceRefreshSession(): Promise<boolean> {
+    try {
+      console.log('[UserSession] Force refreshing session...')
+      
+      // Try to refresh the session
+      const { data: { session }, error } = await this.supabase.auth.refreshSession()
+      
+      if (error) {
+        console.error('[UserSession] Force refresh error:', error)
+        // If refresh fails, try to get current session
+        const { data: { session: currentSession } } = await this.supabase.auth.getSession()
+        if (currentSession) {
+          this.user = await this.buildUnifiedUser(currentSession)
+          this.notifyListeners(this.user)
+          return true
+        }
+        return false
+      }
+      
+      if (session) {
+        console.log('[UserSession] Session refreshed successfully')
+        this.user = await this.buildUnifiedUser(session)
+        this.notifyListeners(this.user)
+        return true
+      }
+      
+      return false
+    } catch (error) {
+      console.error('[UserSession] Force refresh failed:', error)
+      return false
+    }
+  }
+
   // ==================== Authentication Methods ====================
 
   async signInWithGoogle(): Promise<AuthResult> {
     try {
       const currentPath = window.location.pathname || '/en'
-      // Use the fixed callback route with better cookie handling
-      const redirectUrl = `${window.location.origin}/auth/callback-fixed?next=${encodeURIComponent(currentPath)}`
+      // Use the standard callback route that handles Vercel deployments
+      const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
       
       console.log('[UserSession] Google sign-in initiated:', {
         currentPath,

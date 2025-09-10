@@ -96,6 +96,36 @@ function SessionRecoveryInner() {
           }
         }
         
+        // For Vercel preview deployments, try the dedicated session verification endpoint
+        if (isVercelPreview) {
+          console.log('[SessionRecovery] Checking Vercel session endpoint...')
+          try {
+            const sessionResponse = await fetch('/auth/vercel-session')
+            const sessionData = await sessionResponse.json()
+            
+            if (sessionData.success) {
+              console.log('[SessionRecovery] Server confirms session exists:', sessionData.session)
+              // Session exists on server, but client might not have it yet
+              // Force a refresh to sync
+              const { data: { session: refreshedSession } } = await supabase.auth.refreshSession()
+              if (refreshedSession) {
+                console.log('[SessionRecovery] Session refreshed successfully')
+                await userSessionService.initialize()
+                
+                const url = new URL(window.location.href)
+                url.searchParams.delete('auth_callback')
+                url.searchParams.delete('vercel_auth')
+                router.replace(url.pathname + url.search)
+                
+                setTimeout(() => window.location.reload(), 500)
+                return
+              }
+            }
+          } catch (error) {
+            console.error('[SessionRecovery] Vercel session check failed:', error)
+          }
+        }
+        
         // Enhanced retry logic for Vercel preview deployments
         const maxRetries = isVercelPreview ? 10 : 5 // More retries for Vercel
         const retryDelays = [100, 300, 500, 800, 1000, 1500, 2000, 2500, 3000, 4000] // Progressive delays
@@ -110,6 +140,32 @@ function SessionRecoveryInner() {
           const hasAuthMarker = document.cookie.includes('auth-callback-success')
           const hasVercelMarker = document.cookie.includes('vercel-auth-complete')
           console.log('[SessionRecovery] Auth markers:', { hasAuthMarker, hasVercelMarker })
+          
+          // On Vercel, first check server-side session
+          if (isVercelPreview && attempt > 2) {
+            console.log('[SessionRecovery] Checking server-side session...')
+            try {
+              const verifyResponse = await fetch('/api/auth/verify-session')
+              const verifyData = await verifyResponse.json()
+              
+              if (verifyData.hasSession) {
+                console.log('[SessionRecovery] Server has session, setting client session...')
+                const { data: setData, error: setError } = await supabase.auth.setSession({
+                  access_token: verifyData.session.access_token,
+                  refresh_token: verifyData.session.refresh_token
+                })
+                
+                if (setData?.session) {
+                  console.log('[SessionRecovery] Session set from server verification')
+                  // Continue to process this session below
+                } else if (setError) {
+                  console.error('[SessionRecovery] Failed to set session from server:', setError)
+                }
+              }
+            } catch (verifyError) {
+              console.error('[SessionRecovery] Server verification error:', verifyError)
+            }
+          }
           
           // Try to get the session
           const { data: { session }, error } = await supabase.auth.getSession()
@@ -132,6 +188,8 @@ function SessionRecoveryInner() {
             const initialized = await userSessionService.initialize()
             if (initialized) {
               console.log('[SessionRecovery] UserSessionService synchronized')
+              // Force refresh to ensure latest session data
+              await userSessionService.forceRefreshSession()
             }
             
             // Clean up URL parameters

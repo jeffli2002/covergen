@@ -65,8 +65,55 @@ export async function GET(request: NextRequest) {
         expiresAt: data?.session?.expires_at
       })
       
-      // The cookies have been set on the response, return it
-      return response
+      // For Vercel preview deployments, add a marker cookie to help with recovery
+      if (requestUrl.hostname.includes('vercel.app')) {
+        response.cookies.set({
+          name: 'auth-callback-success',
+          value: 'true',
+          httpOnly: false, // Allow client-side access for recovery
+          secure: true,
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 60 // Short-lived marker
+        })
+        
+        // Add session data cookie for Vercel session bridge
+        const sessionData = {
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+          expires_at: data.session.expires_at,
+          expires_in: data.session.expires_in,
+          token_type: data.session.token_type,
+          user: data.session.user
+        }
+        
+        response.cookies.set({
+          name: 'sb-session-data',
+          value: encodeURIComponent(JSON.stringify(sessionData)),
+          httpOnly: false,
+          secure: true,
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 60
+        })
+      }
+      
+      // Update redirect to include auth_callback parameter
+      const redirectUrl = new URL(`${requestUrl.origin}${next}`)
+      redirectUrl.searchParams.set('auth_callback', 'success')
+      if (requestUrl.hostname.includes('vercel.app')) {
+        redirectUrl.searchParams.set('vercel_auth', 'true')
+      }
+      
+      // Create new response with updated URL
+      const finalResponse = NextResponse.redirect(redirectUrl.toString())
+      
+      // Copy all cookies from original response to final response
+      response.cookies.getAll().forEach(cookie => {
+        finalResponse.cookies.set(cookie)
+      })
+      
+      return finalResponse
     } catch (error: any) {
       console.error('[Auth Callback] Unexpected error:', error)
       return NextResponse.redirect(`${requestUrl.origin}${next}?error=unexpected_error`)
