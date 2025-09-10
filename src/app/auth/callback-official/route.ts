@@ -1,5 +1,6 @@
-import { createClient } from '@/utils/supabase/server'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -14,7 +15,35 @@ export async function GET(request: Request) {
 
   if (code) {
     try {
-      const supabase = createClient()
+      const cookieStore = cookies()
+      
+      // Create response first to properly handle cookies
+      const successUrl = `${origin}/en/auth-success?next=${encodeURIComponent(next)}`
+      const response = NextResponse.redirect(successUrl)
+      
+      // Create Supabase client with cookie handling
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            get(name: string) {
+              return cookieStore.get(name)?.value
+            },
+            set(name: string, value: string, options: CookieOptions) {
+              // Set cookies on both the request store and the response
+              cookieStore.set({ name, value, ...options })
+              response.cookies.set({ name, value, ...options })
+            },
+            remove(name: string, options: CookieOptions) {
+              cookieStore.set({ name, value: '', ...options })
+              response.cookies.set({ name, value: '', ...options })
+            },
+          },
+        }
+      )
+      
+      // Exchange code for session
       const { data, error } = await supabase.auth.exchangeCodeForSession(code)
       
       if (error) {
@@ -27,9 +56,9 @@ export async function GET(request: Request) {
         hasSession: !!data?.session
       })
       
-      // Redirect to success page that will handle final redirect
-      const successUrl = `${origin}/en/auth-success?next=${encodeURIComponent(next)}`
-      return NextResponse.redirect(successUrl)
+      // The session cookies have been set via the cookie handler above
+      // Return the response with the cookies properly set
+      return response
     } catch (error: any) {
       console.error('[Auth Callback Official] Unexpected error:', error)
       return NextResponse.redirect(`${origin}/en/auth-error?reason=unexpected_error`)

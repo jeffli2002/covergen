@@ -12,7 +12,10 @@ function AuthSuccessContent() {
   const searchParams = useSearchParams()
   
   useEffect(() => {
-    checkAuth()
+    // Delay initial check to allow cookies to settle
+    const timeoutId = setTimeout(() => {
+      checkAuth()
+    }, 500)
     
     // Also listen for auth state changes
     const supabase = createClient()
@@ -34,6 +37,7 @@ function AuthSuccessContent() {
     })
     
     return () => {
+      clearTimeout(timeoutId)
       authListener?.subscription?.unsubscribe()
     }
   }, [searchParams, router])
@@ -41,6 +45,9 @@ function AuthSuccessContent() {
   const checkAuth = async () => {
     console.log('[AuthSuccess] Checking session...')
     setChecking(true)
+    
+    // Give cookies time to settle before checking
+    await new Promise(resolve => setTimeout(resolve, 300))
     
     const supabase = createClient()
     let retryCount = 0
@@ -53,6 +60,33 @@ function AuthSuccessContent() {
       // Give the auth state time to settle
       if (retryCount > 0) {
         await new Promise(resolve => setTimeout(resolve, 1500))
+      }
+      
+      // First, try to refresh the session to ensure cookies are properly read
+      if (retryCount === 0) {
+        console.log('[AuthSuccess] Attempting to refresh session...')
+        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
+        if (refreshData?.session) {
+          console.log('[AuthSuccess] Session refreshed successfully')
+          setUser(refreshData.session.user)
+          
+          // Check for redirect parameter
+          const next = searchParams.get('next')
+          if (next && next !== '/en/auth-success') {
+            console.log('[AuthSuccess] Redirecting to:', next)
+            setTimeout(() => {
+              router.push(next)
+            }, 1000)
+          } else {
+            // Default redirect to home after successful auth
+            setTimeout(() => {
+              router.push('/en')
+            }, 1000)
+          }
+          
+          setChecking(false)
+          return
+        }
       }
       
       // Check session
