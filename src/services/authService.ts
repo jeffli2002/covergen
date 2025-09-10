@@ -350,8 +350,8 @@ class AuthService {
         if (data?.url) {
           // Open OAuth in popup
           const popupHandler = new OAuthPopupHandler({
-            width: 500,
-            height: 700,
+            width: 800,
+            height: 300,
             onSuccess: async (authData) => {
               // Session should already be set by the exchange-code endpoint
               await this.initialize() // Refresh auth state
@@ -367,8 +367,10 @@ class AuthService {
 
           popupHandler.open(data.url)
         } else {
-          resolve({ success: false, error: 'Failed to get OAuth URL' })
+          resolve({ success: false, error: 'No OAuth URL returned' })
         }
+      }).catch((error) => {
+        resolve({ success: false, error: error.message })
       })
     })
   }
