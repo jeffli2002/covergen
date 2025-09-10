@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
       trialEndsAt: subscription?.trial_end ? new Date(subscription.trial_end) : null
     })
     
-    if (!upgradeCheck.canUpgrade) {
+    if (!upgradeCheck.success) {
       return NextResponse.json(
         { error: upgradeCheck.message },
         { status: 400 }
