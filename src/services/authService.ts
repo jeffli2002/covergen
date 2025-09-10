@@ -233,11 +233,16 @@ class AuthService {
         throw new Error('Supabase not configured')
       }
 
-      // Match my-saas implementation exactly
+      // Preserve the current URL to return to after OAuth
+      const currentUrl = window.location.pathname + window.location.search
+      const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentUrl)}`
+
+      console.log('[Auth] Initiating Google OAuth with redirect:', redirectTo)
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo,
         }
       })
 

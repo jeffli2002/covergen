@@ -1,45 +1,90 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
     const requestUrl = new URL(request.url)
     const code = requestUrl.searchParams.get('code')
-    const next = requestUrl.searchParams.get('next') || '/en' // Updated default path
+    const next = requestUrl.searchParams.get('next') || '/en'
+    const error = requestUrl.searchParams.get('error')
+    
+    console.log('[OAuth Callback] Processing:', { 
+        hasCode: !!code, 
+        hasError: !!error, 
+        next 
+    })
 
-    if (code) {
-        const cookieStore = cookies()
-        
-        const supabase = createServerClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-            {
-                cookies: {
-                    getAll() {
-                        return cookieStore.getAll()
-                    },
-                    setAll(cookiesToSet) {
-                        try {
-                            cookiesToSet.forEach(({ name, value, options }) =>
-                                cookieStore.set(name, value, options)
-                            )
-                        } catch {
-                            // The `setAll` method was called from a Server Component.
-                            // This can be ignored if you have middleware refreshing
-                            // user sessions.
-                        }
-                    },
-                },
-            }
+    // Handle OAuth errors from provider
+    if (error) {
+        console.error('[OAuth Callback] Provider error:', error)
+        return NextResponse.redirect(
+            `${requestUrl.origin}${next}?error=oauth_failed&message=${encodeURIComponent(error)}`
         )
-        
-        // Exchange the code for a session
-        await supabase.auth.exchangeCodeForSession(code)
-
-        // Redirect to the original page
-        return NextResponse.redirect(new URL(next, request.url))
     }
 
-    // If no code provided, redirect to login
-    return NextResponse.redirect(new URL('/auth/signin', request.url))
+    if (code) {
+        try {
+            const cookieStore = cookies()
+            
+            // Create response object that we'll add cookies to
+            const redirectUrl = new URL(next, requestUrl.origin)
+            redirectUrl.searchParams.set('oauth_return', 'true') // Mark that we're returning from OAuth
+            const response = NextResponse.redirect(redirectUrl)
+            
+            // Create Supabase client with cookie handling
+            const supabase = createServerClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+                {
+                    cookies: {
+                        getAll() {
+                            return cookieStore.getAll()
+                        },
+                        setAll(cookiesToSet) {
+                            // Set cookies on the response object
+                            cookiesToSet.forEach(({ name, value, options }) => {
+                                response.cookies.set(name, value, options)
+                            })
+                        },
+                    },
+                }
+            )
+            
+            // Exchange the code for a session
+            const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+            
+            if (exchangeError) {
+                console.error('[OAuth Callback] Code exchange failed:', exchangeError)
+                return NextResponse.redirect(
+                    `${requestUrl.origin}${next}?error=exchange_failed&message=${encodeURIComponent(exchangeError.message)}`
+                )
+            }
+
+            if (!data.session) {
+                console.error('[OAuth Callback] No session returned')
+                return NextResponse.redirect(
+                    `${requestUrl.origin}${next}?error=no_session&message=Failed to establish session`
+                )
+            }
+
+            console.log('[OAuth Callback] Code exchange successful:', {
+                user: data.session.user.email,
+                expiresAt: data.session.expires_at
+            })
+            
+            // Return response with cookies set
+            return response
+        } catch (error: any) {
+            console.error('[OAuth Callback] Unexpected error:', error)
+            return NextResponse.redirect(
+                `${requestUrl.origin}${next}?error=unexpected&message=${encodeURIComponent(error.message || 'An unexpected error occurred')}`
+            )
+        }
+    }
+
+    // No code provided
+    console.error('[OAuth Callback] No code parameter')
+    return NextResponse.redirect(
+        `${requestUrl.origin}${next}?error=no_code&message=OAuth authorization code missing`
+    )
 }

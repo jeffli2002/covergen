@@ -12,6 +12,7 @@ import { organizationSchema, websiteSchema, softwareApplicationSchema } from '@/
 import { Suspense, lazy } from 'react'
 // Removed SessionRecovery - using my-saas approach with middleware
 import { AuthStatusDebug } from '@/components/debug/AuthStatusDebug'
+import { OAuthSessionRecovery } from '@/components/auth/OAuthSessionRecovery'
 import '@/app/globals.css'
 
 // Lazy load performance monitor for development
@@ -174,6 +175,9 @@ export default async function LocaleLayout({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(globalSchema) }}
       />
       <Providers>
+        <Suspense fallback={null}>
+          <OAuthSessionRecovery />
+        </Suspense>
         <div className={`min-h-screen flex flex-col ${inter.className}`}>
           <Header locale={locale} translations={dict} />
           <main className="flex-grow">
