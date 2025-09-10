@@ -70,10 +70,12 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
             </div>
           </div>
         </div>
-        <div className="space-y-8">          <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+        <div className="space-y-8">
+          <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Sales Policy</h2>
             
-            <div className="space-y-6">              <div className="border-l-4 border-red-500 pl-6">
+            <div className="space-y-6">
+              <div className="border-l-4 border-red-500 pl-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
                   <XCircle className="w-5 h-5 text-red-500" />
                   All Sales Are Final
