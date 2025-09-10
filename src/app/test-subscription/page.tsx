@@ -1,3 +1,5 @@
+'use client'
+
 import { SubscriptionManagement } from '@/components/subscription-management'
 
 export default function TestSubscriptionPage() {
