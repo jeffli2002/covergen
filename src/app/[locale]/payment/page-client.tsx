@@ -272,14 +272,30 @@ export default function PaymentPageClient({
             return (
               <Card 
                 key={plan.id}
-                className={`relative transition-all duration-300 ${
-                  isSelected ? 'ring-2 ring-orange-500 scale-105' : ''
-                } ${plan.popular ? 'shadow-xl' : ''}`}
+                className={`relative transition-all duration-300 cursor-pointer hover:shadow-2xl hover:scale-[1.02] ${
+                  isSelected ? 'ring-2 ring-orange-500 scale-105 shadow-2xl' : ''
+                } ${plan.popular ? 'shadow-xl' : ''} ${
+                  isCurrentPlan ? 'opacity-75 cursor-not-allowed' : ''
+                }`}
+                onClick={() => !isCurrentPlan && !loading && setSelectedPlan(plan.id as any)}
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                     <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-1">
                       Most Popular
+                    </Badge>
+                  </div>
+                )}
+                
+                {isSelected && (
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg opacity-20"></div>
+                )}
+                
+                {/* Click hint on hover */}
+                {!isCurrentPlan && !isSelected && (
+                  <div className="absolute top-2 right-2 opacity-0 hover:opacity-100 transition-opacity">
+                    <Badge variant="secondary" className="text-xs">
+                      Click to select
                     </Badge>
                   </div>
                 )}
@@ -300,6 +316,14 @@ export default function PaymentPageClient({
                   <div className="mt-4">
                     <span className="text-4xl font-bold">${plan.price / 100}</span>
                     <span className="text-gray-600">/month</span>
+                  </div>
+                  
+                  {/* Free Trial Badge */}
+                  <div className="mt-3">
+                    <Badge className="bg-green-50 text-green-700 border-green-200">
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      7-day free trial
+                    </Badge>
                   </div>
                   
                   {/* Show prorated amount for upgrades */}
@@ -344,22 +368,24 @@ export default function PaymentPageClient({
 
                 <CardFooter>
                   <Button
-                    className={`w-full ${
-                      plan.popular 
-                        ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white'
-                        : ''
+                    className={`w-full transition-all duration-300 ${
+                      isSelected
+                        ? 'bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white shadow-lg scale-105'
+                        : plan.popular 
+                          ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white'
+                          : ''
                     }`}
-                    variant={plan.popular ? 'default' : 'outline'}
+                    variant={!isSelected && !plan.popular ? 'outline' : 'default'}
                     size="lg"
                     disabled={loading || isCurrentPlan}
                     onClick={(e) => {
-                      e.preventDefault()
+                      e.stopPropagation()
                       console.log('[PaymentPage] Button clicked for plan:', plan.id)
                       console.log('[PaymentPage] Button click event:', e)
                       console.log('[PaymentPage] Button disabled state:', loading || isCurrentPlan)
                       console.log('[PaymentPage] Loading:', loading, 'isCurrentPlan:', isCurrentPlan)
                       handleSelectPlan(plan.id as 'pro' | 'pro_plus')
-                    }}
+                    }
                   >
                     {loading && selectedPlan === plan.id ? (
                       <>
