@@ -16,7 +16,7 @@ export function getSupabaseBrowserClient() {
       auth: {
         autoRefreshToken: true,
         persistSession: true,
-        detectSessionInUrl: true,
+        detectSessionInUrl: false, // Disable to prevent COOP issues
         flowType: 'pkce'
       },
       cookies: {
