@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
       
       const checkoutResult = await creemService.createCheckoutSession({
         userId,
-        userEmail,
+        userEmail: userEmail || '',
         planId: targetTier as 'pro' | 'pro_plus',
         successUrl,
         cancelUrl,
