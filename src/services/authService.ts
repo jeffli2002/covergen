@@ -269,7 +269,7 @@ class AuthService {
     return { success: false, error: 'Failed to sign in' }
   }
 
-  async signInWithGoogle(usePopup: boolean = false) {
+  async signInWithGoogle(usePopup: boolean = true) {
     try {
       const supabase = this.getSupabase()
       if (!supabase) {
@@ -325,7 +325,7 @@ class AuthService {
       }
 
       const currentPath = window.location.pathname || '/en'
-      const popupCallbackUrl = `${window.location.origin}/auth/popup-callback?origin=${encodeURIComponent(window.location.origin)}`
+      const popupCallbackUrl = `${window.location.origin}/auth/callback-popup?next=${encodeURIComponent(currentPath)}`
       
       // Get OAuth URL
       supabase.auth.signInWithOAuth({
@@ -348,7 +348,7 @@ class AuthService {
           // Open OAuth in popup
           const popupHandler = new OAuthPopupHandler({
             width: 500,
-            height: 600,
+            height: 700,
             onSuccess: async (authData) => {
               // Session should already be set by the exchange-code endpoint
               await this.initialize() // Refresh auth state
@@ -357,7 +357,7 @@ class AuthService {
             onError: (error) => {
               resolve({ success: false, error: error.message })
             },
-            onClose: () => {
+            onClosed: () => {
               resolve({ success: false, error: 'Authentication cancelled' })
             }
           })

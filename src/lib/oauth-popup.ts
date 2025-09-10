@@ -5,7 +5,7 @@ export interface OAuthPopupOptions {
   height?: number;
   onSuccess?: (data: any) => void;
   onError?: (error: Error) => void;
-  onClose?: () => void;
+  onClosed?: () => void;
 }
 
 export class OAuthPopupHandler {
@@ -16,7 +16,7 @@ export class OAuthPopupHandler {
   constructor(private options: OAuthPopupOptions = {}) {
     this.options = {
       width: 500,
-      height: 600,
+      height: 700,
       ...options
     };
   }
@@ -24,7 +24,7 @@ export class OAuthPopupHandler {
   open(url: string): void {
     // Calculate center position
     const left = (window.screen.width - (this.options.width || 500)) / 2;
-    const top = (window.screen.height - (this.options.height || 600)) / 2;
+    const top = (window.screen.height - (this.options.height || 700)) / 2;
 
     // Open popup window
     this.popup = window.open(
@@ -56,7 +56,7 @@ export class OAuthPopupHandler {
     this.checkInterval = setInterval(() => {
       if (this.popup?.closed) {
         this.cleanup();
-        this.options.onClose?.();
+        this.options.onClosed?.();
       }
     }, 500);
   }
@@ -90,3 +90,6 @@ export class OAuthPopupHandler {
     this.cleanup();
   }
 }
+
+// Singleton instance for easy usage
+export const oauthPopup = new OAuthPopupHandler();
