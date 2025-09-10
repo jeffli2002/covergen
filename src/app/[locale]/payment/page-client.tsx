@@ -35,6 +35,10 @@ export default function PaymentPageClient({
   const [isTestMode, setIsTestMode] = useState(false)
   const [currentSubscription, setCurrentSubscription] = useState<any>(null)
   const [proratedAmount, setProratedAmount] = useState<number | null>(null)
+  
+  // Get trial days from environment variables
+  const proTrialDays = parseInt(process.env.NEXT_PUBLIC_PRO_TRIAL_DAYS || '7')
+  const proPlusTrialDays = parseInt(process.env.NEXT_PUBLIC_PRO_PLUS_TRIAL_DAYS || '7')
 
   useEffect(() => {
     // Check if we're in test mode
@@ -322,7 +326,7 @@ export default function PaymentPageClient({
                   <div className="mt-3">
                     <Badge className="bg-green-50 text-green-700 border-green-200">
                       <Sparkles className="w-3 h-3 mr-1" />
-                      7-day free trial
+                      {plan.id === 'pro' ? proTrialDays : proPlusTrialDays}-day free trial
                     </Badge>
                   </div>
                   
