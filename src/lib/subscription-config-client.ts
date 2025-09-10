@@ -3,7 +3,7 @@
 
 export const getClientSubscriptionConfig = () => {
   const config = {
-    trialDays: parseInt(process.env.NEXT_PUBLIC_TRIAL_DAYS || '7'),
+    trialDays: parseInt(process.env.NEXT_PUBLIC_TRIAL_DAYS || '3'),
     limits: {
       free: {
         daily: parseInt(process.env.NEXT_PUBLIC_FREE_DAILY_LIMIT || '3'),
@@ -11,11 +11,13 @@ export const getClientSubscriptionConfig = () => {
       },
       pro: {
         monthly: parseInt(process.env.NEXT_PUBLIC_PRO_MONTHLY_LIMIT || '120'),
-        trial_daily: parseInt(process.env.NEXT_PUBLIC_PRO_TRIAL_DAILY_LIMIT || '4')
+        trial_daily: parseInt(process.env.NEXT_PUBLIC_PRO_TRIAL_DAILY_LIMIT || '4'),
+        trial_total: 0 // Will be calculated below
       },
       pro_plus: {
         monthly: parseInt(process.env.NEXT_PUBLIC_PRO_PLUS_MONTHLY_LIMIT || '300'),
-        trial_daily: parseInt(process.env.NEXT_PUBLIC_PRO_PLUS_TRIAL_DAILY_LIMIT || '7')
+        trial_daily: parseInt(process.env.NEXT_PUBLIC_PRO_PLUS_TRIAL_DAILY_LIMIT || '6'),
+        trial_total: 0 // Will be calculated below
       }
     }
   }

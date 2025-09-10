@@ -1,7 +1,7 @@
 // Configuration for subscription tiers and limits
 export const getSubscriptionConfig = () => {
   const config = {
-    trialDays: parseInt(process.env.TRIAL_DAYS || '7'),
+    trialDays: parseInt(process.env.TRIAL_DAYS || '3'),
     limits: {
       free: {
         daily: parseInt(process.env.FREE_DAILY_LIMIT || '3'),
@@ -13,7 +13,7 @@ export const getSubscriptionConfig = () => {
       },
       pro_plus: {
         monthly: parseInt(process.env.PRO_PLUS_MONTHLY_LIMIT || '300'),
-        trial_daily: parseInt(process.env.PRO_PLUS_TRIAL_DAILY_LIMIT || '7')
+        trial_daily: parseInt(process.env.PRO_PLUS_TRIAL_DAILY_LIMIT || '6')
       }
     }
   }
