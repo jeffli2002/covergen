@@ -98,6 +98,20 @@ const nextConfig = {
           },
         ],
       },
+      // OAuth popup callback headers
+      {
+        source: '/auth/callback-popup',
+        headers: [
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin-allow-popups',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self' 'unsafe-inline' https: data:;",
+          },
+        ],
+      },
       // Optimize caching for static images
       {
         source: '/platform-examples/:all*',

@@ -1,200 +1,28 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
-import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import type { NextRequest } from 'next/server'
 
-export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url)
+export async function GET(request: NextRequest) {
+  // Get the parent origin from environment or use the request origin
+  const PARENT_ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin
+
+  const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
   const error = searchParams.get('error')
-  const next = searchParams.get('next') ?? '/en'
+  const errorDescription = searchParams.get('error_description')
+  const state = searchParams.get('state')
 
   console.log('[Auth Popup Callback] Processing OAuth callback:', {
     hasCode: !!code,
     hasError: !!error,
     error,
-    next,
-    origin
+    parentOrigin: PARENT_ORIGIN
   })
 
-  // HTML template for popup callback handling
-  const htmlTemplate = (success: boolean, data?: any, errorMsg?: string) => `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <title>Completing Sign In...</title>
-        <style>
-          body {
-            font-family: system-ui, -apple-system, sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background: #f5f5f5;
-          }
-          .container {
-            text-align: center;
-            padding: 2rem;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            max-width: 400px;
-          }
-          .spinner {
-            width: 40px;
-            height: 40px;
-            margin: 0 auto 1rem;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3498db;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-          }
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-          .error {
-            color: #e74c3c;
-            margin-top: 1rem;
-          }
-          .manual-close {
-            margin-top: 1.5rem;
-            color: #666;
-            font-size: 0.9rem;
-            display: none;
-          }
-          button {
-            margin-top: 1rem;
-            padding: 0.75rem 1.5rem;
-            background: #3498db;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-          }
-          button:hover {
-            background: #2980b9;
-          }
-          .success-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          ${success ? '<div class="spinner"></div>' : '<div class="success-icon">❌</div>'}
-          <h2>${success ? 'Completing Sign In...' : 'Sign In Failed'}</h2>
-          ${errorMsg ? `<p class="error">${errorMsg}</p>` : ''}
-          <div class="manual-close">
-            <p>If this window doesn't close automatically:</p>
-            <button onclick="handleClose()">Close Window</button>
-          </div>
-        </div>
-        <script>
-          (function() {
-            const parentOrigin = '${origin}';
-            let closeFailed = false;
-            
-            // Resilient postMessage handler
-            function sendMessageToParent() {
-              try {
-                if (window.opener && !window.opener.closed) {
-                  window.opener.postMessage({
-                    type: '${success ? 'oauth-success' : 'oauth-error'}',
-                    ${success ? `payload: ${JSON.stringify(data)}` : `error: ${JSON.stringify(errorMsg || 'Authentication failed')}`}
-                  }, parentOrigin);
-                  return true;
-                }
-              } catch (err) {
-                console.error('Failed to send message to parent:', err);
-              }
-              return false;
-            }
-            
-            // Attempt to close window
-            function attemptClose() {
-              try {
-                window.close();
-                // Check if close worked after a delay
-                setTimeout(() => {
-                  // If we're still here, close didn't work
-                  closeFailed = true;
-                  showManualClose();
-                }, 500);
-              } catch (err) {
-                console.error('window.close() failed:', err);
-                closeFailed = true;
-                showManualClose();
-              }
-            }
-            
-            // Show manual close UI
-            function showManualClose() {
-              const manualCloseDiv = document.querySelector('.manual-close');
-              if (manualCloseDiv) {
-                manualCloseDiv.style.display = 'block';
-              }
-              // Hide spinner if showing
-              const spinner = document.querySelector('.spinner');
-              if (spinner) {
-                spinner.style.display = 'none';
-              }
-              // Update title if success
-              if (${success}) {
-                const title = document.querySelector('h2');
-                if (title) {
-                  title.textContent = 'Sign In Successful!';
-                }
-              }
-            }
-            
-            // Handle close button click
-            window.handleClose = function() {
-              try {
-                window.close();
-              } catch (e) {
-                // If close still fails, redirect to parent origin
-                window.location.href = parentOrigin + '${next}';
-              }
-            }
-            
-            // Execute flow
-            const messageSent = sendMessageToParent();
-            
-            // Attempt to close after a delay
-            setTimeout(() => {
-              attemptClose();
-            }, ${success ? '1500' : '2500'});
-            
-            // Fallback: show manual close after longer delay if still open
-            setTimeout(() => {
-              if (!closeFailed) {
-                showManualClose();
-              }
-            }, ${success ? '3000' : '4000'});
-          })();
-        </script>
-      </body>
-    </html>
-  `;
+  let sessionData = null
+  let sessionError = null
 
-  // Handle OAuth error
-  if (error) {
-    console.error('[Auth Popup Callback] OAuth error:', error)
-    return new NextResponse(
-      htmlTemplate(false, null, searchParams.get('error_description') || error),
-      { 
-        headers: { 
-          'Content-Type': 'text/html',
-          'Cross-Origin-Opener-Policy': 'same-origin-allow-popups'
-        },
-        status: 200 
-      }
-    )
-  }
-
+  // If we have a code, exchange it for a session
   if (code) {
     try {
       const cookieStore = cookies()
@@ -223,62 +51,109 @@ export async function GET(request: Request) {
       
       if (exchangeError) {
         console.error('[Auth Popup Callback] Code exchange error:', exchangeError)
-        return new NextResponse(
-          htmlTemplate(false, null, exchangeError.message),
-          { 
-            headers: { 
-              'Content-Type': 'text/html',
-              'Cross-Origin-Opener-Policy': 'same-origin-allow-popups'
-            },
-            status: 200 
-          }
-        )
-      }
-      
-      console.log('[Auth Popup Callback] Code exchange successful:', {
-        user: data?.session?.user?.email,
-        hasSession: !!data?.session
-      })
-      
-      // Return success HTML
-      return new NextResponse(
-        htmlTemplate(true, {
+        sessionError = exchangeError.message
+      } else {
+        console.log('[Auth Popup Callback] Code exchange successful:', {
+          user: data?.session?.user?.email,
+          hasSession: !!data?.session
+        })
+        sessionData = {
           user: data?.session?.user,
-          next
-        }),
-        { 
-          headers: { 
-            'Content-Type': 'text/html',
-            'Cross-Origin-Opener-Policy': 'same-origin-allow-popups'
-          },
-          status: 200 
+          session: !!data?.session
         }
-      )
+      }
     } catch (error: any) {
       console.error('[Auth Popup Callback] Unexpected error:', error)
-      return new NextResponse(
-        htmlTemplate(false, null, 'An unexpected error occurred'),
-        { 
-          headers: { 
-            'Content-Type': 'text/html',
-            'Cross-Origin-Opener-Policy': 'same-origin-allow-popups'
-          },
-          status: 200 
-        }
-      )
+      sessionError = 'An unexpected error occurred'
     }
   }
 
-  // No code in URL
-  console.error('[Auth Popup Callback] No code in URL')
-  return new NextResponse(
-    htmlTemplate(false, null, 'No authorization code received'),
-    { 
-      headers: { 
-        'Content-Type': 'text/html',
-        'Cross-Origin-Opener-Policy': 'same-origin-allow-popups'
-      },
-      status: 200 
-    }
-  )
+  // The HTML payload that posts message back to opener then closes (with fallback UI)
+  const html = `<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Auth Complete</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        padding: 24px;
+      }
+      .fallback {
+        max-width: 540px;
+        margin: 36px auto;
+        text-align: center;
+      }
+      button {
+        padding: 8px 14px;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      (function () {
+        // replace with your expected parent origin
+        const parentOrigin = '${PARENT_ORIGIN}';
+
+        // parse URL params to forward a code or error to parent (do not send secrets)
+        const params = new URLSearchParams(location.search);
+        const payload = {
+          type: 'oauth_result',
+          code: params.get('code'),
+          state: params.get('state'),
+          error: ${error ? `'${error}'` : 'null'},
+          errorDescription: ${errorDescription ? `'${errorDescription}'` : 'null'},
+          sessionError: ${sessionError ? `'${sessionError}'` : 'null'},
+          sessionData: ${sessionData ? JSON.stringify(sessionData) : 'null'}
+        };
+
+        function showFallback() {
+          document.body.innerHTML = \`
+            <div class="fallback">
+              <h2>Authentication complete</h2>
+              <p>If this window does not close automatically, please close it and return to the application.</p>
+              <p><button id="closeBtn">Close window</button></p>
+            </div>
+          \`;
+          document.getElementById('closeBtn').addEventListener('click', function () {
+            try { window.close(); } catch (e) { /* ignore */ }
+          });
+        }
+
+        try {
+          // If opener exists and not closed, post message to parent and attempt close
+          if (window.opener && !window.opener.closed) {
+            window.opener.postMessage(payload, parentOrigin);
+            // attempt to close the popup - will succeed if popup was opened with window.open and COOP allows it
+            window.close();
+            // Some browsers may block close() — show fallback after slight delay
+            setTimeout(function () {
+              if (!window.closed) showFallback();
+            }, 300);
+          } else {
+            // opener missing or closed
+            showFallback();
+          }
+        } catch (err) {
+          // blocked by COOP or other cross-origin access errors
+          console.error('popup postMessage/close failed', err);
+          showFallback();
+        }
+      })();
+    </script>
+  </body>
+</html>`;
+
+  // Return the response with the key header to allow popups to keep opener
+  const headers = new Headers({
+    'Content-Type': 'text/html; charset=utf-8',
+    // critical header to preserve opener for popups
+    'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+    // optionally tighten content security - adjust as needed
+    'Content-Security-Policy': "default-src 'self' 'unsafe-inline' https: data:;",
+  });
+
+  return new Response(html, { status: 200, headers });
 }

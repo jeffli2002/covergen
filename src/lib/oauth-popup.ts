@@ -47,6 +47,15 @@ export class OAuthPopupHandler {
         this.handleSuccess(event.data.payload);
       } else if (event.data.type === 'oauth-error') {
         this.handleError(new Error(event.data.error || 'OAuth authentication failed'));
+      } else if (event.data.type === 'oauth_result') {
+        // Handle new Supabase format
+        if (event.data.error || event.data.sessionError) {
+          this.handleError(new Error(event.data.sessionError || event.data.errorDescription || event.data.error || 'OAuth authentication failed'));
+        } else if (event.data.sessionData) {
+          this.handleSuccess(event.data.sessionData);
+        } else {
+          this.handleError(new Error('No session data received'));
+        }
       }
     };
 
