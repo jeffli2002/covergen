@@ -10,13 +10,13 @@ export interface OAuthPopupOptions {
 
 export class OAuthPopupHandler {
   private popup: Window | null = null;
+  private checkInterval: NodeJS.Timeout | null = null;
   private messageListener: ((event: MessageEvent) => void) | null = null;
-  private authTimeout: NodeJS.Timeout | null = null;
 
   constructor(private options: OAuthPopupOptions = {}) {
     this.options = {
       width: 500,
-      height: 700,
+      height: 600,
       ...options
     };
   }
@@ -24,7 +24,7 @@ export class OAuthPopupHandler {
   open(url: string): void {
     // Calculate center position
     const left = (window.screen.width - (this.options.width || 500)) / 2;
-    const top = (window.screen.height - (this.options.height || 700)) / 2;
+    const top = (window.screen.height - (this.options.height || 600)) / 2;
 
     // Open popup window
     this.popup = window.open(
@@ -52,58 +52,38 @@ export class OAuthPopupHandler {
 
     window.addEventListener('message', this.messageListener);
 
-    // Set up a timeout for the OAuth flow (5 minutes)
-    this.authTimeout = setTimeout(() => {
-      this.cleanup();
-      this.options.onError?.(new Error('OAuth authentication timed out. Please try again.'));
-    }, 5 * 60 * 1000);
-
-    // Note: We don't check popup.closed due to Cross-Origin-Opener-Policy restrictions.
-    // Instead, we rely on postMessage communication and the timeout mechanism.
-    // The popup callback page will send appropriate messages for success/error/close scenarios.
+    // Check if popup is closed
+    this.checkInterval = setInterval(() => {
+      if (this.popup?.closed) {
+        this.cleanup();
+        this.options.onClose?.();
+      }
+    }, 500);
   }
 
   private handleSuccess(data: any): void {
-    // Clear the auth timeout on success
-    if (this.authTimeout) {
-      clearTimeout(this.authTimeout);
-    }
     this.cleanup();
     this.options.onSuccess?.(data);
   }
 
   private handleError(error: Error): void {
-    // Clear the auth timeout on error
-    if (this.authTimeout) {
-      clearTimeout(this.authTimeout);
-    }
     this.cleanup();
     this.options.onError?.(error);
   }
 
   private cleanup(): void {
-    // Try to close the popup, but don't error if COOP prevents it
-    try {
-      // Only attempt to close if we still have a popup reference
-      // Don't check popup.closed as it triggers COOP violations
-      if (this.popup) {
-        this.popup.close();
-      }
-    } catch (e) {
-      // COOP restriction - popup will close itself
-      // This is expected behavior when Cross-Origin-Opener-Policy is set
+    if (this.popup && !this.popup.closed) {
+      this.popup.close();
     }
-    
+    if (this.checkInterval) {
+      clearInterval(this.checkInterval);
+    }
     if (this.messageListener) {
       window.removeEventListener('message', this.messageListener);
     }
-    if (this.authTimeout) {
-      clearTimeout(this.authTimeout);
-    }
-    
     this.popup = null;
+    this.checkInterval = null;
     this.messageListener = null;
-    this.authTimeout = null;
   }
 
   close(): void {
