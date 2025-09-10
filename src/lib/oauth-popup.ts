@@ -82,17 +82,8 @@ export class OAuthPopupHandler {
   }
 
   private cleanup(): void {
-    // Try to close the popup, but don't error if COOP prevents it
-    try {
-      // Only attempt to close if we still have a popup reference
-      // Don't check popup.closed as it triggers COOP violations
-      if (this.popup) {
-        this.popup.close();
-      }
-    } catch (e) {
-      // COOP restriction - popup will close itself
-      // This is expected behavior when Cross-Origin-Opener-Policy is set
-    }
+    // Don't try to close popup due to COOP restrictions
+    // The popup will handle its own lifecycle
     
     if (this.messageListener) {
       window.removeEventListener('message', this.messageListener);

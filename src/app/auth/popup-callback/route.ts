@@ -68,15 +68,8 @@ export async function GET(request: NextRequest) {
           `}
         </div>
         <script>
-          // Notify parent when user manually closes popup
-          window.addEventListener('beforeunload', function() {
-            if (window.opener && !window.authComplete) {
-              window.opener.postMessage({
-                type: 'oauth-error',
-                error: 'Authentication cancelled by user'
-              }, '${searchParams.get('origin') || '*'}');
-            }
-          });
+          // Track if auth is complete
+          window.authComplete = false;
 
           ${error ? `
             // Send error message to parent window
@@ -86,8 +79,10 @@ export async function GET(request: NextRequest) {
                 error: '${error_description || error}'
               }, '${searchParams.get('origin') || '*'}');
             }
-            // Close window after 3 seconds
-            setTimeout(() => window.close(), 3000);
+            // Show message about manual close (COOP prevents auto-close)
+            setTimeout(() => {
+              document.querySelector('.container').innerHTML = '<h3>Authentication complete!</h3><p>You can close this window.</p>';
+            }, 2000);
           ` : `
             // Process successful authentication
             async function handleCallback() {
@@ -107,25 +102,31 @@ export async function GET(request: NextRequest) {
 
                   if (response.ok) {
                     const data = await response.json();
-                    // Mark auth as complete to prevent beforeunload message
+                    // Mark auth as complete
                     window.authComplete = true;
                     // Send success message to parent window
-                    window.opener.postMessage({
-                      type: 'oauth-success',
-                      payload: data
-                    }, '${searchParams.get('origin') || '*'}');
+                    if (window.opener) {
+                      window.opener.postMessage({
+                        type: 'oauth-success',
+                        payload: data
+                      }, '${searchParams.get('origin') || '*'}');
+                    }
+                    // Update UI to show success
+                    document.querySelector('.container').innerHTML = '<h3>Sign in successful!</h3><p>You can close this window now.</p>';
                   } else {
-                    throw new Error('Failed to exchange code');
+                    const error = await response.text();
+                    throw new Error(error || 'Failed to exchange code');
                   }
                 } catch (error) {
-                  window.opener.postMessage({
-                    type: 'oauth-error',
-                    error: error.message
-                  }, '${searchParams.get('origin') || '*'}');
-                }
-                
-                // Close window
-                window.close();
+                  console.error('OAuth error:', error);
+                  if (window.opener) {
+                    window.opener.postMessage({
+                      type: 'oauth-error',
+                      error: error.message
+                    }, '${searchParams.get('origin') || '*'}');
+                  }
+                  // Update UI to show error
+                  document.querySelector('.container').innerHTML = '<h3>Authentication Failed</h3><div class="error"><p>' + error.message + '</p></div><p>You can close this window.</p>';
               }
             }
             

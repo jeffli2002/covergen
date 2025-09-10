@@ -311,9 +311,15 @@ class AuthService {
           const popupHandler = new OAuthPopupHandler({
             width: 500,
             height: 800,
-            onSuccess: (authData) => {
-              console.log('[Auth] Popup OAuth successful')
-              resolve({ success: true, data: authData })
+            onSuccess: async (authData) => {
+              console.log('[Auth] Popup OAuth successful, re-initializing session')
+              // Re-initialize to get the new session from cookies
+              const initialized = await this.initialize()
+              if (initialized && this.user) {
+                resolve({ success: true, data: authData, user: this.user })
+              } else {
+                resolve({ success: true, data: authData })
+              }
             },
             onError: (error) => {
               console.error('[Auth] Popup OAuth error:', error)
