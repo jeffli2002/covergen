@@ -124,10 +124,17 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
     setMessage({ type: '', text: '' })
 
     try {
-      const result = await signInWithGoogle()
+      // Use popup OAuth for better UX
+      const result = await signInWithGoogle(true)
       
       if (result.success) {
-        setMessage({ type: 'success', text: 'Redirecting to Google...' })
+        setMessage({ type: 'success', text: 'Sign in successful!' })
+        // Close the auth modal if sign in was successful
+        if (onClose) {
+          setTimeout(() => {
+            onClose()
+          }, 1000)
+        }
       } else {
         setMessage({ type: 'error', text: result.error })
       }
@@ -168,7 +175,7 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <Wand2 className="h-12 w-12 text-purple-600" />
-            <span className="text-3xl font-bold text-white ml-2">CoverImage AI</span>
+            <span className="text-3xl font-bold text-white ml-2">CoverGen Pro</span>
           </div>
           <p className="text-gray-200">Create stunning covers with AI</p>
         </div>
@@ -177,7 +184,7 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle className="text-center">
-                {isLogin ? 'Welcome Back!' : 'Join CoverImage AI'}
+                {isLogin ? 'Welcome Back!' : 'Join CoverGen Pro'}
               </CardTitle>
               {onClose && (
                 <Button
@@ -354,7 +361,7 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
         </Card>
 
         <div className="mt-8 text-center">
-          <h3 className="text-lg font-semibold text-white mb-4">Why Choose CoverImage AI?</h3>
+          <h3 className="text-lg font-semibold text-white mb-4">Why Choose CoverGen Pro?</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3">
               <div className="font-medium text-purple-300">AI-Powered</div>
