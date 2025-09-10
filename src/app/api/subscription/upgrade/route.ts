@@ -50,9 +50,10 @@ export async function POST(req: NextRequest) {
     // Use TrialUpgradeService to check if upgrade is allowed
     const upgradeCheck = await TrialUpgradeService.canUpgradeDuringTrial({
       userId,
-      currentTier: currentTier as 'free' | 'pro' | 'pro_plus',
-      targetTier: targetTier as 'pro' | 'pro_plus',
-      isTrialing
+      fromTier: currentTier as 'free' | 'pro' | 'pro_plus',
+      toTier: targetTier as 'pro' | 'pro_plus',
+      isTrialActive: isTrialing,
+      trialEndsAt: subscription?.trial_end ? new Date(subscription.trial_end) : null
     })
     
     if (!upgradeCheck.canUpgrade) {
