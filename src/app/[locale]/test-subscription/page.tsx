@@ -2,8 +2,6 @@
 
 import { SubscriptionManagement } from '@/components/subscription-management'
 
-export const dynamic = 'force-dynamic'
-
 export default function TestSubscriptionPage() {
   return (
     <div className="container mx-auto py-8 max-w-2xl">
