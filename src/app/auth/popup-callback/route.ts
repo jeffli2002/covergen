@@ -89,8 +89,11 @@ export async function GET(request: NextRequest) {
               const params = new URLSearchParams(window.location.search);
               const code = params.get('code');
               
+              console.log('[OAuth Popup] Starting callback with code:', code ? 'present' : 'missing');
+              
               if (code && window.opener) {
                 try {
+                  console.log('[OAuth Popup] Exchanging code for session...');
                   // Exchange code for session via parent window's API
                   const response = await fetch('/api/auth/exchange-code', {
                     method: 'POST',
@@ -100,8 +103,17 @@ export async function GET(request: NextRequest) {
                     body: JSON.stringify({ code })
                   });
 
+                  console.log('[OAuth Popup] Exchange response status:', response.status);
+                  
                   if (response.ok) {
                     const data = await response.json();
+                    console.log('[OAuth Popup] Exchange successful, user:', data.user?.email);
+                    
+                    // Verify we actually got a session
+                    if (!data.user || !data.session) {
+                      throw new Error('No user or session data received');
+                    }
+                    
                     // Mark auth as complete
                     window.authComplete = true;
                     // Send success message to parent window
@@ -114,11 +126,19 @@ export async function GET(request: NextRequest) {
                     // Update UI to show success
                     document.querySelector('.container').innerHTML = '<h3>Sign in successful!</h3><p>You can close this window now.</p>';
                   } else {
-                    const error = await response.text();
-                    throw new Error(error || 'Failed to exchange code');
+                    let errorMsg = 'Failed to exchange code';
+                    try {
+                      const errorData = await response.json();
+                      errorMsg = errorData.error || errorMsg;
+                    } catch (e) {
+                      // If not JSON, try text
+                      errorMsg = await response.text() || errorMsg;
+                    }
+                    console.error('[OAuth Popup] Exchange failed:', errorMsg);
+                    throw new Error(errorMsg);
                   }
                 } catch (error) {
-                  console.error('OAuth error:', error);
+                  console.error('[OAuth Popup] Error:', error);
                   if (window.opener) {
                     window.opener.postMessage({
                       type: 'oauth-error',
@@ -128,6 +148,9 @@ export async function GET(request: NextRequest) {
                   // Update UI to show error
                   document.querySelector('.container').innerHTML = '<h3>Authentication Failed</h3><div class="error"><p>' + error.message + '</p></div><p>You can close this window.</p>';
                 }
+              } else if (!code) {
+                console.error('[OAuth Popup] No code parameter in URL');
+                document.querySelector('.container').innerHTML = '<h3>Authentication Failed</h3><div class="error"><p>No authorization code received</p></div><p>You can close this window.</p>';
               }
             }
             

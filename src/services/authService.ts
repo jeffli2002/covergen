@@ -315,10 +315,13 @@ class AuthService {
               console.log('[Auth] Popup OAuth successful, re-initializing session')
               // Re-initialize to get the new session from cookies
               const initialized = await this.initialize()
+              console.log('[Auth] Re-initialization result:', { initialized, hasUser: !!this.user })
+              
               if (initialized && this.user) {
                 resolve({ success: true, data: authData, user: this.user })
               } else {
-                resolve({ success: true, data: authData })
+                console.error('[Auth] Failed to establish session after OAuth success')
+                reject({ success: false, error: 'Failed to establish session. Please try again.' })
               }
             },
             onError: (error) => {
