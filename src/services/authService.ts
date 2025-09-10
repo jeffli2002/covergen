@@ -340,15 +340,18 @@ class AuthService {
         }
       }).then(({ data, error }) => {
         if (error) {
+          console.error('[Auth] OAuth URL generation error:', error)
           resolve({ success: false, error: error.message })
           return
         }
 
+        console.log('[Auth] OAuth URL generated:', data?.url ? 'Success' : 'No URL')
+        
         if (data?.url) {
           // Open OAuth in popup
           const popupHandler = new OAuthPopupHandler({
-            width: 450,
-            height: 600,
+            width: 500,
+            height: 700,
             onSuccess: async (authData) => {
               // Session should already be set by the exchange-code endpoint
               await this.initialize() // Refresh auth state
