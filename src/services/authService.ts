@@ -280,65 +280,10 @@ class AuthService {
       const currentPath = window.location.pathname || '/en'
       
       if (usePopup) {
-        console.log('[Auth] Using popup flow for Google sign in')
-        
-        // For popup flow, we need a different callback URL
-        const popupCallbackUrl = `${window.location.origin}/auth/popup-callback?next=${encodeURIComponent(currentPath)}&origin=${encodeURIComponent(window.location.origin)}`
-        
-        // Get the OAuth URL with skipBrowserRedirect
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: popupCallbackUrl,
-            queryParams: {
-              access_type: 'offline',
-              prompt: 'consent',
-            },
-            skipBrowserRedirect: true // Important for popup flow
-          }
-        })
-
-        if (error) {
-          throw error
-        }
-
-        if (!data?.url) {
-          throw new Error('No OAuth URL received')
-        }
-
-        // Open popup and return promise
-        return new Promise((resolve, reject) => {
-          const popupHandler = new OAuthPopupHandler({
-            width: 500,
-            height: 800,
-            onSuccess: async (authData) => {
-              console.log('[Auth] Popup OAuth successful, re-initializing session')
-              // Re-initialize to get the new session from cookies
-              const initialized = await this.initialize()
-              console.log('[Auth] Re-initialization result:', { initialized, hasUser: !!this.user })
-              
-              if (initialized && this.user) {
-                resolve({ success: true, data: authData, user: this.user })
-              } else {
-                console.error('[Auth] Failed to establish session after OAuth success')
-                reject({ success: false, error: 'Failed to establish session. Please try again.' })
-              }
-            },
-            onError: (error) => {
-              console.error('[Auth] Popup OAuth error:', error)
-              reject({ success: false, error: error.message })
-            },
-            onClose: () => {
-              console.log('[Auth] Popup closed without completing auth')
-              reject({ success: false, error: 'Authentication cancelled' })
-            }
-          })
-
-          popupHandler.open(data.url)
-        })
+        return this.signInWithGooglePopup()
       }
       
-      // Use PKCE flow with callback route for redirect
+      // Use PKCE flow with callback route
       const redirectUrl = `${window.location.origin}/auth/callback-official?next=${encodeURIComponent(currentPath)}`
 
       console.log('[Auth] Google sign in with redirect URL:', redirectUrl)
@@ -369,6 +314,63 @@ class AuthService {
         error: error.message
       }
     }
+  }
+
+  async signInWithGooglePopup() {
+    return new Promise((resolve) => {
+      const supabase = this.getSupabase()
+      if (!supabase) {
+        resolve({ success: false, error: 'Supabase not configured' })
+        return
+      }
+
+      const currentPath = window.location.pathname || '/en'
+      const popupCallbackUrl = `${window.location.origin}/auth/popup-callback?origin=${encodeURIComponent(window.location.origin)}`
+      
+      // Get OAuth URL
+      supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: popupCallbackUrl,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+          skipBrowserRedirect: true // Important: don't redirect the main window
+        }
+      }).then(({ data, error }) => {
+        if (error) {
+          console.error('[Auth] OAuth URL generation error:', error)
+          resolve({ success: false, error: error.message })
+          return
+        }
+
+        console.log('[Auth] OAuth URL generated:', data?.url ? 'Success' : 'No URL')
+        
+        if (data?.url) {
+          // Open OAuth in popup
+          const popupHandler = new OAuthPopupHandler({
+            width: 500,
+            height: 700,
+            onSuccess: async (authData) => {
+              // Session should already be set by the exchange-code endpoint
+              await this.initialize() // Refresh auth state
+              resolve({ success: true, data: authData })
+            },
+            onError: (error) => {
+              resolve({ success: false, error: error.message })
+            },
+            onClose: () => {
+              resolve({ success: false, error: 'Authentication cancelled' })
+            }
+          })
+
+          popupHandler.open(data.url)
+        } else {
+          resolve({ success: false, error: 'Failed to get OAuth URL' })
+        }
+      })
+    })
   }
 
 

@@ -68,32 +68,24 @@ export async function GET(request: NextRequest) {
           `}
         </div>
         <script>
-          // Track if auth is complete
-          window.authComplete = false;
-
           ${error ? `
             // Send error message to parent window
             if (window.opener) {
               window.opener.postMessage({
                 type: 'oauth-error',
-                error: ${JSON.stringify(error_description || error || 'Authentication failed')}
+                error: '${error_description || error}'
               }, '${searchParams.get('origin') || '*'}');
             }
-            // Show message about manual close (COOP prevents auto-close)
-            setTimeout(() => {
-              document.querySelector('.container').innerHTML = '<h3>Authentication complete!</h3><p>You can close this window.</p>';
-            }, 2000);
+            // Close window after 3 seconds
+            setTimeout(() => window.close(), 3000);
           ` : `
             // Process successful authentication
             async function handleCallback() {
               const params = new URLSearchParams(window.location.search);
               const code = params.get('code');
               
-              console.log('[OAuth Popup] Starting callback with code:', code ? 'present' : 'missing');
-              
               if (code && window.opener) {
                 try {
-                  console.log('[OAuth Popup] Exchanging code for session...');
                   // Exchange code for session via parent window's API
                   const response = await fetch('/api/auth/exchange-code', {
                     method: 'POST',
@@ -103,54 +95,25 @@ export async function GET(request: NextRequest) {
                     body: JSON.stringify({ code })
                   });
 
-                  console.log('[OAuth Popup] Exchange response status:', response.status);
-                  
                   if (response.ok) {
                     const data = await response.json();
-                    console.log('[OAuth Popup] Exchange successful, user:', data.user?.email);
-                    
-                    // Verify we actually got a session
-                    if (!data.user || !data.session) {
-                      throw new Error('No user or session data received');
-                    }
-                    
-                    // Mark auth as complete
-                    window.authComplete = true;
                     // Send success message to parent window
-                    if (window.opener) {
-                      window.opener.postMessage({
-                        type: 'oauth-success',
-                        payload: data
-                      }, '${searchParams.get('origin') || '*'}');
-                    }
-                    // Update UI to show success
-                    document.querySelector('.container').innerHTML = '<h3>Sign in successful!</h3><p>You can close this window now.</p>';
+                    window.opener.postMessage({
+                      type: 'oauth-success',
+                      payload: data
+                    }, '${searchParams.get('origin') || '*'}');
                   } else {
-                    let errorMsg = 'Failed to exchange code';
-                    try {
-                      const errorData = await response.json();
-                      errorMsg = errorData.error || errorMsg;
-                    } catch (e) {
-                      // If not JSON, try text
-                      errorMsg = await response.text() || errorMsg;
-                    }
-                    console.error('[OAuth Popup] Exchange failed:', errorMsg);
-                    throw new Error(errorMsg);
+                    throw new Error('Failed to exchange code');
                   }
                 } catch (error) {
-                  console.error('[OAuth Popup] Error:', error);
-                  if (window.opener) {
-                    window.opener.postMessage({
-                      type: 'oauth-error',
-                      error: error.message
-                    }, '${searchParams.get('origin') || '*'}');
-                  }
-                  // Update UI to show error
-                  document.querySelector('.container').innerHTML = '<h3>Authentication Failed</h3><div class="error"><p>' + error.message + '</p></div><p>You can close this window.</p>';
+                  window.opener.postMessage({
+                    type: 'oauth-error',
+                    error: error.message
+                  }, '${searchParams.get('origin') || '*'}');
                 }
-              } else if (!code) {
-                console.error('[OAuth Popup] No code parameter in URL');
-                document.querySelector('.container').innerHTML = '<h3>Authentication Failed</h3><div class="error"><p>No authorization code received</p></div><p>You can close this window.</p>';
+                
+                // Close window
+                window.close();
               }
             }
             
