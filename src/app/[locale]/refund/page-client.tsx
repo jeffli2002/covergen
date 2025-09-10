@@ -91,10 +91,12 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
                     <strong>Due to the digital nature of our service</strong>, we do not offer refunds. However:
                   </p>
                   <ul className="space-y-2 text-gray-600">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                      {hasTrials && <span>Pro and Pro+ plans include a {trialFullText}</span>}
-                    </li>
+                    {hasTrials && (
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span>Pro and Pro+ plans include a {trialFullText}</span>
+                      </li>
+                    )}
                     {hasTrials && (
                       <li className="flex items-start gap-2">
                         <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
