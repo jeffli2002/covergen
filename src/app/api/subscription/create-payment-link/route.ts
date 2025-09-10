@@ -35,32 +35,29 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Create payment link using Creem service
-    const result = await creemService.createPaymentLink({
-      plan: plan as 'pro' | 'pro_plus',
-      payment_method: 'creem', // Default to creem
+    // Create checkout session using Creem service
+    const result = await creemService.createCheckoutSession({
       userId: authContext.userId,
-      customerEmail: authContext.userEmail || '',
+      userEmail: authContext.userEmail || '',
       customerName: authContext.userEmail?.split('@')[0] || '',
-      metadata: {
-        user_id: authContext.userId,
-        plan: plan,
-        email: authContext.userEmail || ''
-      }
+      planType: plan as 'pro' | 'pro_plus',
+      isUpgrade: false,
+      successUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/payment/success`,
+      cancelUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/pricing`
     })
 
-    if (!result.success || !result.payment_link) {
-      console.error('[CreatePaymentLink] Failed to create payment link:', result.error)
+    if (!result.success || !result.url) {
+      console.error('[CreatePaymentLink] Failed to create checkout session:', result.error)
       return NextResponse.json(
-        { error: result.error || 'Failed to create payment link' },
+        { error: result.error || 'Failed to create checkout session' },
         { status: 500 }
       )
     }
 
     return NextResponse.json({
       success: true,
-      payment_link: result.payment_link,
-      expires_at: result.expires_at,
+      payment_link: result.url,
+      sessionId: result.sessionId,
       plan: planDetails
     })
 
