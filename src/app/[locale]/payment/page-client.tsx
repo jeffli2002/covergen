@@ -389,7 +389,7 @@ export default function PaymentPageClient({
                       console.log('[PaymentPage] Button disabled state:', loading || isCurrentPlan)
                       console.log('[PaymentPage] Loading:', loading, 'isCurrentPlan:', isCurrentPlan)
                       handleSelectPlan(plan.id as 'pro' | 'pro_plus')
-                    }
+                    }}
                   >
                     {loading && selectedPlan === plan.id ? (
                       <>
