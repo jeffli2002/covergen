@@ -44,6 +44,45 @@ export default function PaymentPageClient({
   const [componentError, setComponentError] = useState<Error | null>(null)
 
 
+  const calculateProratedAmount = useCallback((subscription: any) => {
+    if (!subscription.currentPeriodEnd) return
+    
+    const now = new Date()
+    const periodEnd = new Date(subscription.currentPeriodEnd)
+    const daysRemaining = Math.max(0, Math.ceil((periodEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
+    
+    if (daysRemaining > 0) {
+      // Calculate unused Pro credit
+      const proPricePerDay = SUBSCRIPTION_PLANS.pro.price / 30
+      const unusedCredit = proPricePerDay * daysRemaining
+      
+      // Calculate Pro+ cost for remaining days
+      const proPlusPricePerDay = SUBSCRIPTION_PLANS.pro_plus.price / 30
+      const proPlusCost = proPlusPricePerDay * daysRemaining
+      
+      // Prorated amount is the difference
+      const prorated = Math.max(0, proPlusCost - unusedCredit)
+      setProratedAmount(prorated)
+    }
+  }, [setProratedAmount])
+
+  const loadCurrentSubscription = useCallback(async () => {
+    try {
+      // Get subscription directly from authUser
+      const subscription = authUser?.subscription
+      if (subscription) {
+        setCurrentSubscription(subscription)
+        
+        // Calculate prorated amount if upgrading
+        if (subscription.tier === 'pro' && initialPlan === 'pro_plus' && isUpgrade) {
+          calculateProratedAmount(subscription)
+        }
+      }
+    } catch (error) {
+      console.error('Error loading subscription:', error)
+    }
+  }, [authUser, initialPlan, isUpgrade, calculateProratedAmount])
+
   useEffect(() => {
     // Set mounted to true
     isMounted.current = true
@@ -89,45 +128,6 @@ export default function PaymentPageClient({
       isMounted.current = false
     }
   }, [authUser, authLoading, locale, router, selectedPlan, redirectUrl, hasInitialized, loadCurrentSubscription])
-
-  const loadCurrentSubscription = useCallback(async () => {
-    try {
-      // Get subscription directly from authUser
-      const subscription = authUser?.subscription
-      if (subscription) {
-        setCurrentSubscription(subscription)
-        
-        // Calculate prorated amount if upgrading
-        if (subscription.tier === 'pro' && initialPlan === 'pro_plus' && isUpgrade) {
-          calculateProratedAmount(subscription)
-        }
-      }
-    } catch (error) {
-      console.error('Error loading subscription:', error)
-    }
-  }, [authUser])
-
-  const calculateProratedAmount = (subscription: any) => {
-    if (!subscription.currentPeriodEnd) return
-    
-    const now = new Date()
-    const periodEnd = new Date(subscription.currentPeriodEnd)
-    const daysRemaining = Math.max(0, Math.ceil((periodEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
-    
-    if (daysRemaining > 0) {
-      // Calculate unused Pro credit
-      const proPricePerDay = SUBSCRIPTION_PLANS.pro.price / 30
-      const unusedCredit = proPricePerDay * daysRemaining
-      
-      // Calculate Pro+ cost for remaining days
-      const proPlusPricePerDay = SUBSCRIPTION_PLANS.pro_plus.price / 30
-      const proPlusCost = proPlusPricePerDay * daysRemaining
-      
-      // Prorated amount is the difference
-      const prorated = Math.max(0, proPlusCost - unusedCredit)
-      setProratedAmount(prorated)
-    }
-  }
 
   const handleSelectPlan = async (planId: 'pro' | 'pro_plus') => {
     // Add immediate window logging to verify function is called

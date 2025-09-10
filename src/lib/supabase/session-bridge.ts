@@ -3,7 +3,8 @@
  * This handles the transfer of session data from server-side cookies to client-side storage
  */
 
-import { createBrowserClient } from '@supabase/ssr'
+import { supabase } from '@/lib/supabase-simple'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 interface SessionData {
   access_token: string
@@ -23,8 +24,11 @@ export class VercelSessionBridge {
    * Attempts to recover session from temporary server-side cookie
    * and properly initialize the Supabase client
    */
-  static async recoverSession(supabase: ReturnType<typeof createBrowserClient>): Promise<boolean> {
+  static async recoverSession(supabaseClient?: SupabaseClient): Promise<boolean> {
     console.log('[VercelSessionBridge] Attempting session recovery...')
+    
+    // Use the provided client or fallback to the singleton
+    const client = supabaseClient || supabase
     
     // Check for session data cookie
     const sessionDataCookie = this.getCookie(this.SESSION_COOKIE_NAME)
@@ -38,7 +42,7 @@ export class VercelSessionBridge {
       console.log('[VercelSessionBridge] Found session data, attempting to set session...')
       
       // Set the session in Supabase
-      const { data, error } = await supabase.auth.setSession({
+      const { data, error } = await client.auth.setSession({
         access_token: sessionData.access_token,
         refresh_token: sessionData.refresh_token
       })
@@ -65,7 +69,7 @@ export class VercelSessionBridge {
       this.deleteCookie(this.VERCEL_MARKER_COOKIE)
       
       // Force a session refresh to ensure it's properly stored
-      const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
+      const { data: refreshData, error: refreshError } = await client.auth.refreshSession()
       if (refreshError) {
         console.error('[VercelSessionBridge] Failed to refresh session:', refreshError)
       } else {

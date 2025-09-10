@@ -25,9 +25,7 @@ import {
 import { TikTokIcon, SpotifyIcon, TwitterXIcon } from '@/components/icons/brand-icons'
 import { Locale } from '@/lib/i18n/config'
 import { AuthDebugSimple } from '@/components/auth/AuthDebugSimple'
-import { SessionRecovery } from '@/components/auth/SessionRecovery'
-import { OAuthCallbackDetector } from '@/components/auth/OAuthCallbackDetector'
-import { ForceSessionSync } from '@/components/auth/ForceSessionSync'
+// OAuth handlers moved to layout.tsx to avoid duplication
 import { WorkingAuthButton } from '@/components/auth/WorkingAuthButton'
 
 interface HomePageClientProps {
@@ -169,12 +167,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
 
   return (
     <div className="min-h-screen bg-background">
-      {/* OAuth detection and session recovery */}
-      {/* Temporarily disabled to fix multiple client instances issue
-      <ForceSessionSync />
-      <OAuthCallbackDetector />
-      <SessionRecovery />
-      */}
+      {/* OAuth handlers are in layout.tsx to avoid duplication */}
       
       {/* Debug panel */}
       <AuthDebugSimple />
