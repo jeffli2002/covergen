@@ -179,29 +179,28 @@ export default function PaymentPageClient({
       // Make direct API call to bypass hanging service
       let result: any;
       try {
-        // Get access token directly from authUser (UnifiedUser from AuthContext)
-        // This avoids creating new Supabase client instances
-        const accessToken = authUser.session?.accessToken;
+        // Get access token using PaymentAuthWrapper to avoid OAuth conflicts
+        const authContext = await PaymentAuthWrapper.getAuthContext();
         
-        window.console.log('[PaymentPage] Got access token from AuthContext:', {
-          hasToken: !!accessToken,
-          userEmail: authUser.email,
-          sessionValid: authUser.session?.isValid,
-          expiresAt: authUser.session?.expiresAt ? new Date(authUser.session.expiresAt * 1000).toISOString() : 'N/A'
+        window.console.log('[PaymentPage] Got auth context from wrapper:', {
+          hasContext: !!authContext,
+          userEmail: authContext?.email,
+          isValid: authContext?.isValid,
+          expiresAt: authContext?.expiresAt ? new Date(authContext.expiresAt * 1000).toISOString() : 'N/A'
         });
         
-        if (!accessToken) {
-          window.console.error('[PaymentPage] No access token in authUser session');
+        if (!authContext || !authContext.accessToken) {
+          window.console.error('[PaymentPage] No valid auth context from wrapper');
           throw new Error('Unable to get authentication token from session');
         }
         
-        window.console.log('[PaymentPage] Making API call with auth token from AuthContext');
+        window.console.log('[PaymentPage] Making API call with auth token from wrapper');
         
         const response = await fetch('/api/payment/create-checkout', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': accessToken ? `Bearer ${accessToken}` : '',
+            'Authorization': authContext.accessToken ? `Bearer ${authContext.accessToken}` : '',
           },
           body: JSON.stringify({
             userId,

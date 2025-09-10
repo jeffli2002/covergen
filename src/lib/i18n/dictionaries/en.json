@@ -167,5 +167,35 @@
       "description": "An unexpected error occurred.",
       "button": "Refresh Page"
     }
+  },
+  "checkout": {
+    "title": "Checkout",
+    "loading": "Loading checkout...",
+    "addressLine1": "Address Line 1",
+    "addressLine2": "Address Line 2",
+    "city": "City",
+    "stateProvince": "State/Province",
+    "postalCode": "Postal Code",
+    "country": "Country",
+    "cardNumber": "Card Number",
+    "expiryDate": "Expiry Date",
+    "cvc": "CVC",
+    "nameOnCard": "Name on Card",
+    "email": "Email",
+    "phone": "Phone",
+    "billingAddress": "Billing Address",
+    "shippingAddress": "Shipping Address",
+    "sameAsBilling": "Same as billing address",
+    "completePayment": "Complete Payment",
+    "back": "Back",
+    "paymentMethod": "Payment Method",
+    "orderSummary": "Order Summary",
+    "subtotal": "Subtotal",
+    "tax": "Tax",
+    "total": "Total",
+    "processingPayment": "Processing payment...",
+    "paymentSuccessful": "Payment successful!",
+    "paymentFailed": "Payment failed. Please try again.",
+    "securePayment": "Your payment information is secure and encrypted."
   }
 }

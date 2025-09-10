@@ -12,7 +12,7 @@
  * 4. Clear separation of concerns
  */
 
-import { userSessionService } from '@/services/unified/UserSessionService'
+import { supabase } from '@/lib/supabase-simple'
 import React from 'react'
 
 export interface PaymentAuthContext {
@@ -30,19 +30,18 @@ export class PaymentAuthWrapper {
    */
   static async getAuthContext(): Promise<PaymentAuthContext | null> {
     try {
-      // Get current user from unified service
-      const user = userSessionService.getCurrentUser()
+      // Get current session from Supabase directly
+      const { data: { session }, error } = await supabase.auth.getSession()
       
-      if (!user || !user.session.isValid) {
-        console.log('[PaymentAuth] No valid session from unified service')
+      if (error || !session || !session.user) {
+        console.log('[PaymentAuth] No valid session from Supabase')
         return null
       }
 
       // Check if session is expiring within 2 minutes (critical for payment flows)
-      const expiresAt = user.session.expiresAt
+      const expiresAt = session.expires_at ? new Date(session.expires_at).getTime() : 0
       const now = Date.now()
-      const expiresAtMs = expiresAt > 9999999999 ? expiresAt : expiresAt * 1000
-      const timeUntilExpiry = expiresAtMs - now
+      const timeUntilExpiry = expiresAt - now
       const criticalExpiryMinutes = 2
       
       if (timeUntilExpiry <= criticalExpiryMinutes * 60 * 1000) {
@@ -51,11 +50,11 @@ export class PaymentAuthWrapper {
       }
 
       return {
-        userId: user.id,
-        email: user.email,
-        accessToken: user.session.accessToken,
+        userId: session.user.id,
+        email: session.user.email || '',
+        accessToken: session.access_token,
         isValid: true,
-        expiresAt: user.session.expiresAt
+        expiresAt: Math.floor(expiresAt / 1000) // Convert to seconds
       }
     } catch (error) {
       console.error('[PaymentAuth] Error getting auth context:', error)
@@ -69,29 +68,28 @@ export class PaymentAuthWrapper {
    */
   static async isSessionValidForPayment(): Promise<boolean> {
     try {
-      const user = userSessionService.getCurrentUser()
+      const { data: { session }, error } = await supabase.auth.getSession()
       
       console.log('[PaymentAuth] isSessionValidForPayment check:', {
-        hasUser: !!user,
-        hasValidSession: !!user?.session?.isValid,
-        sessionData: user ? {
-          userId: user.id,
-          email: user.email,
-          expiresAt: user.session.expiresAt
+        hasSession: !!session,
+        hasError: !!error,
+        sessionData: session ? {
+          userId: session.user.id,
+          email: session.user.email,
+          expiresAt: session.expires_at
         } : null,
         timestamp: new Date().toISOString()
       })
       
-      if (!user || !user.session.isValid) {
-        console.log('[PaymentAuth] Session invalid - no user or invalid session')
+      if (error || !session) {
+        console.log('[PaymentAuth] Session invalid - no session or error')
         return false
       }
 
       // Require at least 5 minutes remaining for payment operations
-      const expiresAt = user.session.expiresAt
+      const expiresAt = session.expires_at ? new Date(session.expires_at).getTime() : 0
       const now = Date.now()
-      const expiresAtMs = expiresAt > 9999999999 ? expiresAt : expiresAt * 1000
-      const timeUntilExpiry = expiresAtMs - now
+      const timeUntilExpiry = expiresAt - now
       const minMinutesRequired = 5
       const isExpiringSoon = timeUntilExpiry <= minMinutesRequired * 60 * 1000
       
@@ -150,7 +148,8 @@ export class PaymentAuthWrapper {
     const startTime = Date.now()
     
     while (Date.now() - startTime < maxWaitMs) {
-      if (userSessionService.isAuthenticated()) {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.user) {
         return true
       }
       
