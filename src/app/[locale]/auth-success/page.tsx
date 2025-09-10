@@ -13,47 +13,84 @@ function AuthSuccessContent() {
   
   useEffect(() => {
     checkAuth()
-  }, [])
+    
+    // Also listen for auth state changes
+    const supabase = createClient()
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('[AuthSuccess] Auth state changed:', event, session?.user?.email)
+      
+      if (event === 'SIGNED_IN' && session) {
+        setUser(session.user)
+        setChecking(false)
+        
+        // Handle redirect
+        const next = searchParams.get('next')
+        if (next && next !== '/en/auth-success') {
+          router.push(next)
+        } else {
+          router.push('/en')
+        }
+      }
+    })
+    
+    return () => {
+      authListener?.subscription?.unsubscribe()
+    }
+  }, [searchParams, router])
   
   const checkAuth = async () => {
     console.log('[AuthSuccess] Checking session...')
     setChecking(true)
     
-    // Give the auth state a moment to settle
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // First check server-side session
-    try {
-      const serverResponse = await fetch('/api/check-session')
-      const serverData = await serverResponse.json()
-      console.log('[AuthSuccess] Server session check:', serverData)
-    } catch (err) {
-      console.error('[AuthSuccess] Server check error:', err)
-    }
-    
-    // Then check client-side session
     const supabase = createClient()
-    const { data: { session }, error } = await supabase.auth.getSession()
-    console.log('[AuthSuccess] Client session check:', { 
-      hasSession: !!session, 
-      user: session?.user?.email, 
-      error,
-      cookies: document.cookie
-    })
+    let retryCount = 0
+    const maxRetries = 5
     
-    if (session) {
-      setUser(session.user)
+    // Retry logic to wait for session to be established
+    while (retryCount < maxRetries) {
+      console.log(`[AuthSuccess] Session check attempt ${retryCount + 1}/${maxRetries}`)
       
-      // Check for redirect parameter
-      const next = searchParams.get('next')
-      if (next && next !== '/en/auth-success') {
-        console.log('[AuthSuccess] Redirecting to:', next)
-        setTimeout(() => {
-          router.push(next)
-        }, 1500)
+      // Give the auth state time to settle
+      if (retryCount > 0) {
+        await new Promise(resolve => setTimeout(resolve, 1500))
       }
+      
+      // Check session
+      const { data: { session }, error } = await supabase.auth.getSession()
+      
+      console.log('[AuthSuccess] Session check result:', { 
+        attempt: retryCount + 1,
+        hasSession: !!session, 
+        user: session?.user?.email, 
+        error: error?.message
+      })
+      
+      if (session) {
+        setUser(session.user)
+        
+        // Check for redirect parameter
+        const next = searchParams.get('next')
+        if (next && next !== '/en/auth-success') {
+          console.log('[AuthSuccess] Redirecting to:', next)
+          setTimeout(() => {
+            router.push(next)
+          }, 1000)
+        } else {
+          // Default redirect to home after successful auth
+          setTimeout(() => {
+            router.push('/en')
+          }, 1000)
+        }
+        
+        setChecking(false)
+        return
+      }
+      
+      retryCount++
     }
     
+    // If we get here, session was not established after retries
+    console.error('[AuthSuccess] Failed to establish session after', maxRetries, 'attempts')
     setChecking(false)
   }
   
