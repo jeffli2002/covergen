@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Mail, MessageSquare, FileQuestion, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Locale } from '@/lib/i18n/config'
+import { getClientSubscriptionConfig, getTrialPeriodFullText, isTrialEnabledClient } from '@/lib/subscription-config-client'
 
 interface SupportPageClientProps {
   locale: Locale
@@ -11,6 +12,10 @@ interface SupportPageClientProps {
 }
 
 export default function SupportPageClient({ locale, translations: t }: SupportPageClientProps) {
+  // Get configuration for dynamic values
+  const config = getClientSubscriptionConfig()
+  const trialFullText = getTrialPeriodFullText()
+  const hasTrials = isTrialEnabledClient()
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-16">
@@ -85,16 +90,18 @@ export default function SupportPageClient({ locale, translations: t }: SupportPa
         <div className="bg-white rounded-xl shadow-sm p-8">
           <h2 className="text-2xl font-semibold mb-6">Frequently Asked Questions</h2>
           <div className="space-y-6">
-            <div className="border-l-4 border-blue-500 pl-4">
-              <h4 className="font-semibold text-gray-900">How does the Pro/Pro+ trial work?</h4>
-              <p className="text-gray-600 mt-1">
-                Pro and Pro+ plans include a 7-day free trial. During the trial, Pro users get 28 covers total (4/day average) and Pro+ users get 70 covers total (10/day average). Trial usage doesn't count against your first paid month.
-              </p>
-            </div>
+            {hasTrials && (
+              <div className="border-l-4 border-blue-500 pl-4">
+                <h4 className="font-semibold text-gray-900">How does the Pro/Pro+ trial work?</h4>
+                <p className="text-gray-600 mt-1">
+                  Pro and Pro+ plans include a {trialFullText}. During the trial, Pro users get {config.limits.pro.trial_total} covers total ({config.limits.pro.trial_daily}/day average) and Pro+ users get {config.limits.pro_plus.trial_total} covers total ({config.limits.pro_plus.trial_daily}/day average). Trial usage doesn't count against your first paid month.
+                </p>
+              </div>
+            )}
             <div className="border-l-4 border-blue-500 pl-4">
               <h4 className="font-semibold text-gray-900">What happens when I reach my limit?</h4>
               <p className="text-gray-600 mt-1">
-                Free users have 3 covers per day (10/month max). Pro/Pro+ users can use their monthly quota anytime without fixed daily limits. When you reach your limit, you'll see an upgrade prompt or need to wait for the next billing cycle.
+                Free users have {config.limits.free.daily} covers per day ({config.limits.free.monthly}/month max). Pro/Pro+ users can use their monthly quota anytime without fixed daily limits. When you reach your limit, you'll see an upgrade prompt or need to wait for the next billing cycle.
               </p>
             </div>
             <div className="border-l-4 border-blue-500 pl-4">
@@ -106,7 +113,7 @@ export default function SupportPageClient({ locale, translations: t }: SupportPa
             <div className="border-l-4 border-blue-500 pl-4">
               <h4 className="font-semibold text-gray-900">Do Pro users have daily limits?</h4>
               <p className="text-gray-600 mt-1">
-                Pro ($9/month, 120 covers) and Pro+ ($19/month, 300 covers) have no fixed daily limits. You can use your remaining monthly balance anytime during the billing cycle.
+                Pro ($9/month, {config.limits.pro.monthly} covers) and Pro+ ($19/month, {config.limits.pro_plus.monthly} covers) have no fixed daily limits. You can use your remaining monthly balance anytime during the billing cycle.
               </p>
             </div>
             <div className="border-l-4 border-blue-500 pl-4">
@@ -118,7 +125,7 @@ export default function SupportPageClient({ locale, translations: t }: SupportPa
             <div className="border-l-4 border-blue-500 pl-4">
               <h4 className="font-semibold text-gray-900">What's your refund policy?</h4>
               <p className="text-gray-600 mt-1">
-                All sales are final due to the digital nature of our service. Pro/Pro+ plans include a 7-day trial so you can evaluate the service before committing.
+                All sales are final due to the digital nature of our service. {hasTrials && `Pro/Pro+ plans include a ${trialFullText} so you can evaluate the service before committing.`}
               </p>
             </div>
           </div>

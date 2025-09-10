@@ -3,6 +3,7 @@
 import { ArrowLeft, CreditCard, Clock, CheckCircle2, XCircle, AlertCircle, Mail, Shield, HelpCircle } from 'lucide-react'
 import { Locale } from '@/lib/i18n/config'
 import Link from 'next/link'
+import { getClientSubscriptionConfig, getTrialPeriodFullText, isTrialEnabledClient } from '@/lib/subscription-config-client'
 
 interface RefundPageClientProps {
   locale: Locale
@@ -10,6 +11,10 @@ interface RefundPageClientProps {
 }
 
 export default function RefundPageClient({ locale, translations: t }: RefundPageClientProps) {
+  // Get configuration for dynamic values
+  const config = getClientSubscriptionConfig()
+  const trialFullText = getTrialPeriodFullText()
+  const hasTrials = isTrialEnabledClient()
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="container mx-auto px-4 py-16 max-w-5xl">
@@ -20,7 +25,7 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
           </div>
           <h1 className="text-5xl font-bold text-gray-900 mb-4">Refund Policy</h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            All sales are final. Pro/Pro+ plans include a 7-day free trial to evaluate our service before committing.
+            All sales are final. {hasTrials && `Pro/Pro+ plans include a ${trialFullText} to evaluate our service before committing.`}
           </p>
           <div className="flex items-center justify-center gap-2 text-gray-600 mt-4">
             <CheckCircle2 className="w-5 h-5 text-green-500" />
@@ -39,9 +44,12 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
                 <Clock className="w-6 h-6 text-green-600" />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">7-Day Trial</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{hasTrials ? getTrialPeriodFullText().replace('free ', '').charAt(0).toUpperCase() + getTrialPeriodFullText().replace('free ', '').slice(1) : 'No Trial'}</h3>
               <p className="text-gray-600 text-sm">
-                Pro/Pro+ plans include a 7-day trial period to test features
+                {hasTrials 
+                  ? `Pro/Pro+ plans include a ${config.trialDays}-day trial period to test features`
+                  : 'Try our free plan to test features'
+                }
               </p>
             </div>
             <div className="bg-white rounded-lg p-6 shadow-sm">
@@ -85,15 +93,17 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
                   <ul className="space-y-2 text-gray-600">
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span>Pro and Pro+ plans include a 7-day free trial</span>
+                      {hasTrials && <span>Pro and Pro+ plans include a {trialFullText}</span>}
                     </li>
+                    {hasTrials && (
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span>You can cancel your trial anytime before it converts to paid</span>
+                      </li>
+                    )}
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span>You can cancel your trial anytime before it converts to paid</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span>Free plan available with 10 covers per month</span>
+                      <span>Free plan available with {config.limits.free.monthly} covers per month</span>
                     </li>
                   </ul>
                 </div>
@@ -196,7 +206,7 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
                 <li className="flex items-start gap-3">
                   <XCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                   <div>
-                    <strong>Failure to cancel</strong> during the 7-day trial period
+                    <strong>Failure to cancel</strong> {hasTrials && `during the ${config.trialDays}-day trial period`}
                   </div>
                 </li>
               </ul>
@@ -292,8 +302,8 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
                 <h3 className="font-semibold text-gray-900 mb-2">Free Plan</h3>
                 <p className="text-sm text-gray-600 mb-2">$0/forever</p>
                 <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• 10 covers per month</li>
-                  <li>• 3 covers per day max</li>
+                  <li>• {config.limits.free.monthly} covers per month</li>
+                  <li>• {config.limits.free.daily} covers per day max</li>
                   <li>• Personal use only</li>
                 </ul>
               </div>
@@ -302,8 +312,8 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
                 <h3 className="font-semibold text-gray-900 mb-2">Pro Plan</h3>
                 <p className="text-sm text-gray-600 mb-2">$9/month</p>
                 <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• 7-day free trial</li>
-                  <li>• 120 covers per month</li>
+                  {hasTrials && <li>• {trialFullText}</li>}
+                  <li>• {config.limits.pro.monthly} covers per month</li>
                   <li>• Commercial usage rights</li>
                 </ul>
               </div>
@@ -312,17 +322,17 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
                 <h3 className="font-semibold text-gray-900 mb-2">Pro+ Plan</h3>
                 <p className="text-sm text-gray-600 mb-2">$19/month</p>
                 <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• 7-day free trial</li>
-                  <li>• 300 covers per month</li>
+                  {hasTrials && <li>• {trialFullText}</li>}
+                  <li>• {config.limits.pro_plus.monthly} covers per month</li>
                   <li>• Full commercial license</li>
-                  <li>• 7-day cloud gallery</li>
+                  <li>• {config.trialDays}-day cloud gallery</li>
                 </ul>
               </div>
             </div>
             
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
               <p className="text-amber-800 text-sm">
-                <strong>Important:</strong> All sales are final. Pro/Pro+ plans include a 7-day trial period where you can evaluate the service with prorated limits (28 covers for Pro trial, 70 covers for Pro+ trial) before your paid subscription begins.
+                <strong>Important:</strong> All sales are final. {hasTrials && `Pro/Pro+ plans include a ${config.trialDays}-day trial period where you can evaluate the service with prorated limits (${config.limits.pro.trial_total} covers for Pro trial, ${config.limits.pro_plus.trial_total} covers for Pro+ trial) before your paid subscription begins.`}
               </p>
             </div>
           </section>
@@ -338,7 +348,10 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
                   Annual Subscriptions
                 </h3>
                 <p className="text-gray-600 text-sm">
-                  Annual plans also include a 7-day trial period. After the trial, all payments are final. Consider monthly plans if you're unsure about long-term commitment.
+                  {hasTrials 
+                    ? `Annual plans also include a ${config.trialDays}-day trial period. After the trial, all payments are final. Consider monthly plans if you're unsure about long-term commitment.`
+                    : 'Annual payments are final. Consider monthly plans if you're unsure about long-term commitment.'
+                  }
                 </p>
               </div>
               
@@ -387,7 +400,10 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
                   Can I cancel during my Pro/Pro+ trial?
                 </h3>
                 <p className="text-gray-600">
-                  Yes! You can cancel your trial anytime before it converts to a paid subscription. Simply go to your account settings and cancel. You'll continue to have access to trial features until the 7-day period ends.
+                  {hasTrials 
+                    ? `Yes! You can cancel your trial anytime before it converts to a paid subscription. Simply go to your account settings and cancel. You'll continue to have access to trial features until the ${config.trialDays}-day period ends.`
+                    : 'Pro/Pro+ subscriptions can be cancelled anytime. You'll retain access until the end of your billing period.'
+                  }
                 </p>
               </div>
               

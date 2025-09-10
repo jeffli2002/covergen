@@ -1,10 +1,20 @@
 import { Metadata } from 'next'
 import PricingSection from '@/components/pricing-section'
 import { Locale } from '@/lib/i18n/config'
+import { getStaticSubscriptionConfig, getStaticTrialPeriodText, isStaticTrialEnabled } from '@/lib/subscription-config-static'
+
+// Get configuration at build time
+const config = getStaticSubscriptionConfig()
+const trialText = getStaticTrialPeriodText()
+const hasTrials = isStaticTrialEnabled()
 
 export const metadata: Metadata = {
-  title: 'Pricing - AI Cover Generation Plans with Free Trial',
-  description: 'Start free with 10 covers/month or try Pro plans with 7-day trial. Pro at $9/month (120 covers), Pro+ at $19/month (300 covers).',
+  title: hasTrials 
+    ? 'Pricing - AI Cover Generation Plans with Free Trial'
+    : 'Pricing - AI Cover Generation Plans',
+  description: hasTrials
+    ? `Start free with ${config.limits.free.monthly} covers/month or try Pro plans with ${trialText}. Pro at $9/month (${config.limits.pro.monthly} covers), Pro+ at $19/month (${config.limits.pro_plus.monthly} covers).`
+    : `Start free with ${config.limits.free.monthly} covers/month. Pro at $9/month (${config.limits.pro.monthly} covers), Pro+ at $19/month (${config.limits.pro_plus.monthly} covers).`,
   keywords: [
     'CoverGen AI pricing',
     'cover generator pricing',
@@ -12,13 +22,17 @@ export const metadata: Metadata = {
     'thumbnail maker pricing',
     'content creator tools pricing',
     'affordable cover generator',
-    '7-day free trial',
+    hasTrials ? `${trialText}` : 'pro plans',
     'pro cover generation',
     'monthly cover quotas'
   ],
   openGraph: {
-    title: 'CoverGen AI Pricing - Free Plan + Pro with 7-Day Trial',
-    description: 'Free plan: 10 covers/month. Pro plans include 7-day trial. Upgrade for more monthly covers.',
+    title: hasTrials
+      ? `CoverGen AI Pricing - Free Plan + Pro with ${config.trialDays}-Day Trial`
+      : 'CoverGen AI Pricing - Choose Your Perfect Plan',
+    description: hasTrials
+      ? `Free plan: ${config.limits.free.monthly} covers/month. Pro plans include ${trialText}. Upgrade for more monthly covers.`
+      : `Free plan: ${config.limits.free.monthly} covers/month. Upgrade to Pro for ${config.limits.pro.monthly} or Pro+ for ${config.limits.pro_plus.monthly} covers/month.`,
     images: ['/pricing-og.jpg'],
   },
   alternates: {
@@ -46,7 +60,7 @@ export default function PricingPage({
         name: 'Free Plan',
         price: '0',
         priceCurrency: 'USD',
-        description: '10 covers per month, 3 per day max, personal use only'
+        description: `${config.limits.free.monthly} covers per month, ${config.limits.free.daily} per day max, personal use only`
       },
       {
         '@type': 'Offer',
@@ -59,9 +73,11 @@ export default function PricingPage({
           priceCurrency: 'USD',
           billingIncrement: 1,
           billingDuration: 'P1M',
-          trialDuration: 'P7D'
+          ...(hasTrials ? { trialDuration: `P${config.trialDays}D` } : {})
         },
-        description: '7-day free trial, 120 covers per month, commercial use, all features'
+        description: hasTrials 
+          ? `${trialText}, ${config.limits.pro.monthly} covers per month, commercial use, all features`
+          : `${config.limits.pro.monthly} covers per month, commercial use, all features`
       },
       {
         '@type': 'Offer',
@@ -74,9 +90,11 @@ export default function PricingPage({
           priceCurrency: 'USD',
           billingIncrement: 1,
           billingDuration: 'P1M',
-          trialDuration: 'P7D'
+          ...(hasTrials ? { trialDuration: `P${config.trialDays}D` } : {})
         },
-        description: '7-day free trial, 300 covers per month, full commercial license, API access'
+        description: hasTrials
+          ? `${trialText}, ${config.limits.pro_plus.monthly} covers per month, full commercial license, API access`
+          : `${config.limits.pro_plus.monthly} covers per month, full commercial license, API access`
       }
     ]
   }
@@ -96,7 +114,10 @@ export default function PricingPage({
                 Simple, Transparent Pricing
               </h1>
               <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto">
-                Start free with 10 covers/month or try Pro plans with a 7-day trial.
+                {hasTrials
+                  ? `Start free with ${config.limits.free.monthly} covers/month or try Pro plans with a ${trialText}.`
+                  : `Start free with ${config.limits.free.monthly} covers/month or upgrade to Pro for more.`
+                }
               </p>
             </div>
             
@@ -131,12 +152,17 @@ export default function PricingPage({
                 
                 <div className="bg-white rounded-2xl p-6 shadow-sm">
                   <h3 className="text-xl font-semibold mb-3">
-                    How does the Pro/Pro+ trial work?
+                    {hasTrials ? 'How does the Pro/Pro+ trial work?' : 'How do Pro/Pro+ plans work?'}
                   </h3>
                   <p className="text-gray-600">
-                    Pro and Pro+ plans include a 7-day free trial. During the trial, Pro users get 28 covers 
-                    (4/day) and Pro+ users get 70 covers (10/day). Trial usage doesn't count against your 
-                    first paid month - you'll get the full monthly quota when your subscription begins.
+                    {hasTrials ? (
+                      `Pro and Pro+ plans include a ${trialText}. During the trial, Pro users get ${config.limits.pro.trial_total} covers 
+                      (${config.limits.pro.trial_daily}/day) and Pro+ users get ${config.limits.pro_plus.trial_total} covers (${config.limits.pro_plus.trial_daily}/day). Trial usage doesn't count against your 
+                      first paid month - you'll get the full monthly quota when your subscription begins.`
+                    ) : (
+                      `Pro plans offer ${config.limits.pro.monthly} covers per month and Pro+ plans offer ${config.limits.pro_plus.monthly} covers per month. 
+                      You can use your monthly quota anytime without daily restrictions.`
+                    )}
                   </p>
                 </div>
                 
@@ -145,22 +171,24 @@ export default function PricingPage({
                     What happens when I reach my limit?
                   </h3>
                   <p className="text-gray-600">
-                    Free users can generate 3 covers per day (10/month max). Pro/Pro+ users have monthly quotas 
+                    Free users can generate {config.limits.free.daily} covers per day ({config.limits.free.monthly}/month max). Pro/Pro+ users have monthly quotas 
                     with no fixed daily limit - you can use your remaining monthly balance anytime. When you reach 
                     your limit, you'll see an upgrade prompt or need to wait for the next billing cycle.
                   </p>
                 </div>
                 
-                <div className="bg-white rounded-2xl p-6 shadow-sm">
+                {hasTrials && (
+                  <div className="bg-white rounded-2xl p-6 shadow-sm">
                     <h3 className="text-xl font-semibold mb-3">
                       What happens after my trial ends?
                     </h3>
                     <p className="text-gray-600">
-                      After your 7-day trial, your Pro or Pro+ subscription will automatically begin unless you 
-                      cancel. You'll receive the full monthly quota (120 for Pro, 300 for Pro+) starting fresh - 
+                      After your {trialText}, your Pro or Pro+ subscription will automatically begin unless you 
+                      cancel. You'll receive the full monthly quota ({config.limits.pro.monthly} for Pro, {config.limits.pro_plus.monthly} for Pro+) starting fresh - 
                       trial usage doesn't deduct from your paid month.
                     </p>
                   </div>
+                )}
               </div>
             </div>
           </div>

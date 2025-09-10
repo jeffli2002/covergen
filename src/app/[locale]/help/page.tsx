@@ -5,6 +5,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Search, HelpCircle, MessageCircle, BookOpen, Video, Image, Settings, Zap } from 'lucide-react'
+import { getClientSubscriptionConfig, getTrialPeriodFullText } from '@/lib/subscription-config-client'
+
+// Get configuration for use in the FAQ content
+const config = getClientSubscriptionConfig()
+const trialFullText = getTrialPeriodFullText()
 
 const faqCategories = [
   {
@@ -23,7 +28,7 @@ const faqCategories = [
       },
       {
         question: 'How many images can I generate?',
-        answer: 'Free users get 10 covers per month. Pro users get 120 per month, and Pro+ users get 300 per month.'
+        answer: `Free users get ${config.limits.free.monthly} covers per month. Pro users get ${config.limits.pro.monthly} per month, and Pro+ users get ${config.limits.pro_plus.monthly} per month.`
       }
     ]
   },
@@ -79,7 +84,9 @@ const faqCategories = [
       },
       {
         question: 'How do I upgrade to Pro?',
-        answer: 'Click the upgrade button in your dashboard or visit the pricing page to choose your plan. All plans include a 7-day free trial.'
+        answer: trialFullText 
+          ? `Click the upgrade button in your dashboard or visit the pricing page to choose your plan. All plans include a ${trialFullText}.`
+          : 'Click the upgrade button in your dashboard or visit the pricing page to choose your plan.'
       },
       {
         question: 'Can I cancel my subscription?',
@@ -87,7 +94,7 @@ const faqCategories = [
       },
       {
         question: 'What\'s included in download history and cloud gallery?',
-        answer: 'Pro users get 24-hour download history to re-download recent creations. Pro+ users get 7-day cloud gallery to store and manage all generated covers.'
+        answer: `Pro users get 24-hour download history to re-download recent creations. Pro+ users get ${config.trialDays}-day cloud gallery to store and manage all generated covers.`
       },
       {
         question: 'How do I reset my password?',

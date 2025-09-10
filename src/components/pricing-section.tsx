@@ -8,6 +8,13 @@ import { useAppStore } from '@/lib/store'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import AuthForm from '@/components/auth/AuthForm'
+import { getClientSubscriptionConfig, getTrialPeriodText, getTrialPeriodFullText, isTrialEnabledClient } from '@/lib/subscription-config-client'
+
+// Get dynamic configuration
+const config = getClientSubscriptionConfig()
+const trialText = getTrialPeriodText()
+const trialFullText = getTrialPeriodFullText()
+const hasTrials = isTrialEnabledClient()
 
 const tiers = [
   {
@@ -18,16 +25,16 @@ const tiers = [
     description: 'Perfect for trying out our AI cover generator',
     icon: Sparkles,
     features: [
-      '10 covers per month',
-      '3 covers per day max',
+      `${config.limits.free.monthly} covers per month`,
+      `${config.limits.free.daily} covers per day max`,
       'No watermark',
       'All platform sizes',
       'Email support',
       'Personal use only'
     ],
     limitations: [
-      'Daily limit: 3 covers',
-      'Monthly limit: 10 covers',
+      `Daily limit: ${config.limits.free.daily} covers`,
+      `Monthly limit: ${config.limits.free.monthly} covers`,
       'No commercial usage'
     ],
     cta: 'Get Started',
@@ -42,7 +49,7 @@ const tiers = [
     description: 'Ideal for regular content creators',
     icon: Zap,
     features: [
-      '120 covers per month',
+      `${config.limits.pro.monthly} covers per month`,
       'No watermark',
       'All platform sizes',
       'Priority support',
@@ -50,9 +57,9 @@ const tiers = [
       '24-hour download history'
     ],
     limitations: [],
-    cta: 'Start 7-Day Trial',
+    cta: hasTrials ? `Start ${trialText}` : 'Get Started',
     popular: true,
-    badge: '7-Day Free Trial'
+    badge: hasTrials ? trialFullText : null
   },
   {
     id: 'pro_plus',
@@ -62,18 +69,18 @@ const tiers = [
     description: 'For professional creators and teams',
     icon: Crown,
     features: [
-      '300 covers per month',
+      `${config.limits.pro_plus.monthly} covers per month`,
       'No watermark',
       'Full commercial license',
       'Custom brand templates',
       'API access',
       'Dedicated support',
-      '7-day cloud gallery'
+      `${config.trialDays}-day cloud gallery`
     ],
     limitations: [],
-    cta: 'Start 7-Day Trial',
+    cta: hasTrials ? `Start ${trialText}` : 'Get Started',
     popular: false,
-    badge: '7-Day Free Trial'
+    badge: hasTrials ? trialFullText : null
   }
 ]
 
@@ -152,7 +159,10 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4 text-gray-900">Choose Your Plan</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Start free or try Pro plans with a 7-day trial. All images are watermark-free.
+            {hasTrials 
+              ? `Start free or try Pro plans with a ${trialText}. All images are watermark-free.`
+              : 'Choose the plan that works best for you. All images are watermark-free.'
+            }
           </p>
         </div>
 

@@ -2,6 +2,7 @@
 
 import { FileText, CheckCircle2, AlertCircle, Globe, Shield, CreditCard, Scale, Mail, MapPin } from 'lucide-react'
 import { Locale } from '@/lib/i18n/config'
+import { getClientSubscriptionConfig, getTrialPeriodFullText, isTrialEnabledClient } from '@/lib/subscription-config-client'
 
 interface TermsPageClientProps {
   locale: Locale
@@ -9,6 +10,10 @@ interface TermsPageClientProps {
 }
 
 export default function TermsPageClient({ locale, translations: t }: TermsPageClientProps) {
+  // Get configuration for dynamic values
+  const config = getClientSubscriptionConfig()
+  const trialFullText = getTrialPeriodFullText()
+  const hasTrials = isTrialEnabledClient()
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="container mx-auto px-4 py-16 max-w-5xl">
@@ -149,8 +154,8 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                     <h4 className="font-semibold text-gray-900 mb-2">Free Plan</h4>
                     <p className="text-sm font-medium text-gray-900 mb-2">$0/forever</p>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ 10 covers per month</li>
-                      <li>✓ 3 covers per day max</li>
+                      <li>✓ {config.limits.free.monthly} covers per month</li>
+                      <li>✓ {config.limits.free.daily} covers per day max</li>
                       <li>✓ No watermark</li>
                       <li>✓ All platform sizes</li>
                       <li>✓ Email support</li>
@@ -161,8 +166,8 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                     <h4 className="font-semibold text-gray-900 mb-2">Pro Plan</h4>
                     <p className="text-sm font-medium text-gray-900 mb-2">$9/month</p>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ 7-day free trial</li>
-                      <li>✓ 120 covers per month</li>
+                      {hasTrials && <li>✓ {trialFullText}</li>}
+                      <li>✓ {config.limits.pro.monthly} covers per month</li>
                       <li>✓ No watermark</li>
                       <li>✓ All platform sizes</li>
                       <li>✓ Priority support</li>
@@ -174,14 +179,14 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                     <h4 className="font-semibold text-gray-900 mb-2">Pro+ Plan</h4>
                     <p className="text-sm font-medium text-gray-900 mb-2">$19/month</p>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ 7-day free trial</li>
-                      <li>✓ 300 covers per month</li>
+                      {hasTrials && <li>✓ {trialFullText}</li>}
+                      <li>✓ {config.limits.pro_plus.monthly} covers per month</li>
                       <li>✓ No watermark</li>
                       <li>✓ Full commercial license</li>
                       <li>✓ Custom brand templates</li>
                       <li>✓ API access</li>
                       <li>✓ Dedicated support</li>
-                      <li>✓ 7-day cloud gallery</li>
+                      <li>✓ {config.trialDays}-day cloud gallery</li>
                     </ul>
                   </div>
                 </div>
@@ -227,27 +232,29 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">4.5 No Refund Policy</h3>
                 <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                   <p className="text-gray-700">• <strong>All Sales Final:</strong> Due to the digital nature of our service, all sales are final</p>
-                  <p className="text-gray-700">• <strong>Try Before You Buy:</strong> Pro/Pro+ plans include a 7-day trial period to evaluate the service</p>
+                  {hasTrials && <p className="text-gray-700">• <strong>Try Before You Buy:</strong> Pro/Pro+ plans include a {trialFullText} to evaluate the service</p>}
                   <p className="text-gray-700">• <strong>Billing Errors:</strong> We will correct any verified billing errors or duplicate charges</p>
                   <p className="text-gray-700">• <strong>Service Credits:</strong> Extended outages may be compensated with service credits at our discretion</p>
                 </div>
               </div>
 
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">4.6 Pro/Pro+ Trial Terms</h3>
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <p className="text-gray-700 mb-2">Pro and Pro+ plans include a 7-day trial with these terms:</p>
-                  <ul className="space-y-1 text-gray-700 text-sm">
-                    <li>• <strong>Pro Trial:</strong> 28 covers total (4 per day average) during 7-day trial</li>
-                    <li>• <strong>Pro+ Trial:</strong> 70 covers total (10 per day average) during 7-day trial</li>
-                    <li>• <strong>Automatic Billing:</strong> Subscription begins after trial unless cancelled</li>
-                    <li>• <strong>Fresh Start:</strong> Trial usage doesn't count against your first paid month</li>
-                    <li>• <strong>Full Features:</strong> Access to all plan features during trial</li>
-                    <li>• <strong>Cancel Anytime:</strong> Cancel before trial ends to avoid charges</li>
-                    <li>• <strong>One Trial Per Account:</strong> Limited to one trial per payment method</li>
-                  </ul>
+              {hasTrials && (
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">4.6 Pro/Pro+ Trial Terms</h3>
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <p className="text-gray-700 mb-2">Pro and Pro+ plans include a {trialFullText} with these terms:</p>
+                    <ul className="space-y-1 text-gray-700 text-sm">
+                      <li>• <strong>Pro Trial:</strong> {config.limits.pro.trial_total} covers total ({config.limits.pro.trial_daily} per day average) during {config.trialDays}-day trial</li>
+                      <li>• <strong>Pro+ Trial:</strong> {config.limits.pro_plus.trial_total} covers total ({config.limits.pro_plus.trial_daily} per day average) during {config.trialDays}-day trial</li>
+                      <li>• <strong>Automatic Billing:</strong> Subscription begins after trial unless cancelled</li>
+                      <li>• <strong>Fresh Start:</strong> Trial usage doesn't count against your first paid month</li>
+                      <li>• <strong>Full Features:</strong> Access to all plan features during trial</li>
+                      <li>• <strong>Cancel Anytime:</strong> Cancel before trial ends to avoid charges</li>
+                      <li>• <strong>One Trial Per Account:</strong> Limited to one trial per payment method</li>
+                    </ul>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">4.7 Plan Changes</h3>
