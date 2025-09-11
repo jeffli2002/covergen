@@ -55,11 +55,12 @@ function AuthSuccessContent() {
   
   const checkAuth = async () => {
     console.log('[AuthSuccess] Checking session...')
+    console.log('[AuthSuccess] Current cookies:', document.cookie)
     setChecking(true)
     
     const supabase = createClient()
     let retryCount = 0
-    const maxRetries = 5
+    const maxRetries = 10 // Increased retries
     
     // Retry logic to wait for session to be established
     while (retryCount < maxRetries) {
@@ -67,17 +68,44 @@ function AuthSuccessContent() {
       
       // Give the auth state time to settle
       if (retryCount > 0) {
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        await new Promise(resolve => setTimeout(resolve, 500)) // Shorter delay
       }
       
-      // Check session
+      // Check for auth cookies first
+      const authCookie = document.cookie.split('; ').find(row => row.startsWith('sb-') && row.includes('-auth-token'))
+      console.log('[AuthSuccess] Auth cookie present:', !!authCookie)
+      
+      // If we have the cookie, try to get the session from it
+      if (authCookie && retryCount > 2) {
+        // Force a session refresh
+        const { data: { session }, error } = await supabase.auth.refreshSession()
+        console.log('[AuthSuccess] Session refresh result:', { hasSession: !!session, error: error?.message })
+        
+        if (session) {
+          setUser(session.user)
+          // Handle redirect
+          const next = searchParams.get('next')
+          if (next && next !== '/en/auth-success') {
+            console.log('[AuthSuccess] Redirecting to:', next)
+            router.push(next)
+          } else {
+            console.log('[AuthSuccess] Redirecting to home')
+            router.push('/en')
+          }
+          setChecking(false)
+          return
+        }
+      }
+      
+      // Check session normally
       const { data: { session }, error } = await supabase.auth.getSession()
       
       console.log('[AuthSuccess] Session check result:', { 
         attempt: retryCount + 1,
         hasSession: !!session, 
         user: session?.user?.email, 
-        error: error?.message
+        error: error?.message,
+        hasCookie: !!authCookie
       })
       
       if (session) {

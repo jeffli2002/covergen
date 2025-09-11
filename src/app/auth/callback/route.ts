@@ -36,10 +36,11 @@ export async function GET(request: Request) {
                 name, 
                 value, 
                 ...options,
-                // Ensure cookies are available to client
-                httpOnly: options.httpOnly ?? true,
+                // Supabase auth cookies must NOT be httpOnly to be accessible by client-side SDK
+                httpOnly: false,
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: options.sameSite ?? 'lax'
+                sameSite: options.sameSite ?? 'lax',
+                path: '/'
               })
             },
             remove(name: string, options: CookieOptions) {
@@ -66,6 +67,35 @@ export async function GET(request: Request) {
         user: data?.session?.user?.email,
         hasSession: !!data?.session
       })
+      
+      // Manually set auth cookies to ensure they're accessible by client
+      if (data?.session) {
+        const cookieOptions = {
+          httpOnly: false, // MUST be false for client-side access
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax' as const,
+          path: '/',
+          maxAge: 60 * 60 * 24 * 365 // 1 year
+        }
+        
+        // Set the auth token cookies manually
+        response.cookies.set({
+          name: `sb-${process.env.NEXT_PUBLIC_SUPABASE_URL!.split('//')[1].split('.')[0]}-auth-token`,
+          value: JSON.stringify({
+            access_token: data.session.access_token,
+            refresh_token: data.session.refresh_token,
+            provider_token: data.session.provider_token,
+            provider_refresh_token: data.session.provider_refresh_token,
+            token_type: 'bearer',
+            expires_at: Math.floor(Date.now() / 1000) + data.session.expires_in,
+            expires_in: data.session.expires_in,
+            user: data.session.user
+          }),
+          ...cookieOptions
+        })
+        
+        console.log('[Auth Callback] Manually set auth cookies')
+      }
       
       // The session cookies have been set via the cookie handler above
       return response
