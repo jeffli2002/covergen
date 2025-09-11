@@ -27,9 +27,9 @@ export async function GET(request: Request) {
         hasSession: !!data?.session
       })
       
-      // Redirect to success page that will handle final redirect
-      const successUrl = `${origin}/en/auth-success?next=${encodeURIComponent(next)}`
-      return NextResponse.redirect(successUrl)
+      // Redirect directly to the final destination
+      const finalUrl = next.startsWith('/') ? `${origin}${next}` : `${origin}/${next}`
+      return NextResponse.redirect(finalUrl)
     } catch (error: any) {
       console.error('[Auth Callback Official] Unexpected error:', error)
       return NextResponse.redirect(`${origin}/en/auth-error?reason=unexpected_error`)
