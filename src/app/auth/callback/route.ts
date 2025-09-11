@@ -18,7 +18,7 @@ export async function GET(request: Request) {
       const cookieStore = cookies()
       
       // Create response for the final destination
-      const finalDestination = next && next !== '/en/auth-success' ? `${origin}${next}` : `${origin}/en`
+      const finalDestination = next && next !== '/en/auth-success' ? next : '/en'
       const response = NextResponse.redirect(`${origin}/en/auth-success?next=${encodeURIComponent(finalDestination)}`)
       
       // Create Supabase client with cookie handling

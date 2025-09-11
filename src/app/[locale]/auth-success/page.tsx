@@ -28,7 +28,19 @@ function AuthSuccessContent() {
         const next = searchParams.get('next')
         if (next && next !== '/en/auth-success') {
           console.log('[AuthSuccess] Redirecting to:', next)
-          router.push(next)
+          // Handle both relative and absolute URLs
+          if (next.startsWith('http')) {
+            // Extract pathname from full URL
+            try {
+              const url = new URL(next)
+              router.push(url.pathname + url.search + url.hash)
+            } catch {
+              // Fallback to the next value if URL parsing fails
+              router.push(next)
+            }
+          } else {
+            router.push(next)
+          }
         } else {
           console.log('[AuthSuccess] Redirecting to home')
           router.push('/en')
@@ -75,7 +87,19 @@ function AuthSuccessContent() {
         const next = searchParams.get('next')
         if (next && next !== '/en/auth-success') {
           console.log('[AuthSuccess] Redirecting to:', next)
-          router.push(next)
+          // Handle both relative and absolute URLs
+          if (next.startsWith('http')) {
+            // Extract pathname from full URL
+            try {
+              const url = new URL(next)
+              router.push(url.pathname + url.search + url.hash)
+            } catch {
+              // Fallback to the next value if URL parsing fails
+              router.push(next)
+            }
+          } else {
+            router.push(next)
+          }
         } else {
           // Default redirect to home after successful auth
           console.log('[AuthSuccess] Redirecting to home')
