@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test OAuth COOP Fix</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #357ae8;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        pre {
+            background: #eee;
+            padding: 10px;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test OAuth Popup with COOP Fix</h1>
+    <p>This tests the Supabase-recommended COOP fix implementation.</p>
+    
+    <button onclick="testOAuth()">Test OAuth Popup (500x700)</button>
+    
+    <div id="status">
+        <p>Status will appear here...</p>
+    </div>
+
+    <h2>What this tests:</h2>
+    <ul>
+        <li>Opens popup to /auth/callback-popup route</li>
+        <li>Route should have Cross-Origin-Opener-Policy: same-origin-allow-popups</li>
+        <li>Popup should be able to postMessage and close itself</li>
+        <li>Parent should receive oauth_result message</li>
+    </ul>
+
+    <script>
+        function testOAuth() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '<p>Opening popup...</p>';
+            
+            // Simulate OAuth flow by opening callback directly
+            const testUrl = window.location.origin + '/auth/callback-popup?code=test_code_123&state=test_state';
+            const popup = window.open(testUrl, 'oauth-test', 'width=500,height=700');
+            
+            if (!popup) {
+                statusDiv.innerHTML = '<p class="error">Popup blocked! Please allow popups.</p>';
+                return;
+            }
+            
+            // Listen for messages
+            function handleMessage(event) {
+                console.log('Received message:', event);
+                
+                if (event.origin !== window.location.origin) {
+                    console.warn('Ignored message from different origin:', event.origin);
+                    return;
+                }
+                
+                if (event.data?.type === 'oauth_result') {
+                    window.removeEventListener('message', handleMessage);
+                    
+                    statusDiv.innerHTML = `
+                        <h3 class="success">✓ OAuth Message Received!</h3>
+                        <p>Type: ${event.data.type}</p>
+                        <p>Code: ${event.data.code || 'none'}</p>
+                        <p>Error: ${event.data.error || 'none'}</p>
+                        <p>Session Error: ${event.data.sessionError || 'none'}</p>
+                        <h4>Full Payload:</h4>
+                        <pre>${JSON.stringify(event.data, null, 2)}</pre>
+                    `;
+                    
+                    // Try to close popup if still open
+                    if (popup && !popup.closed) {
+                        popup.close();
+                    }
+                }
+            }
+            
+            window.addEventListener('message', handleMessage);
+            
+            // Check if popup closes
+            let checkCount = 0;
+            const checkInterval = setInterval(() => {
+                checkCount++;
+                if (popup.closed) {
+                    clearInterval(checkInterval);
+                    statusDiv.innerHTML += '<p class="success">✓ Popup closed successfully!</p>';
+                } else if (checkCount > 20) {
+                    clearInterval(checkInterval);
+                    statusDiv.innerHTML += '<p class="error">⚠ Popup did not close automatically after 10 seconds</p>';
+                }
+            }, 500);
+        }
+        
+        // Also check headers
+        fetch('/auth/callback-popup', { method: 'HEAD' })
+            .then(response => {
+                console.log('COOP Header:', response.headers.get('cross-origin-opener-policy'));
+                console.log('All headers:', Array.from(response.headers.entries()));
+            })
+            .catch(err => console.error('Failed to check headers:', err));
+    </script>
+</body>
+</html>

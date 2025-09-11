@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>localStorage OAuth Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            background: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 12px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>localStorage OAuth Test</h1>
+    
+    <h2>1. Simulate Popup Storing Result</h2>
+    <button class="button" onclick="simulatePopupStore()">Store OAuth Result</button>
+    
+    <h2>2. Check localStorage</h2>
+    <button class="button" onclick="checkStorage()">Check Storage</button>
+    <button class="button" onclick="clearStorage()">Clear Storage</button>
+    
+    <h2>3. Test Polling</h2>
+    <button class="button" onclick="startPolling()">Start Polling</button>
+    <button class="button" onclick="stopPolling()">Stop Polling</button>
+    
+    <h2>Log</h2>
+    <div id="log" class="log"></div>
+
+    <script>
+        let pollInterval = null;
+
+        function log(msg) {
+            const logDiv = document.getElementById('log');
+            const time = new Date().toISOString().split('T')[1].split('.')[0];
+            logDiv.innerHTML += `[${time}] ${msg}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function simulatePopupStore() {
+            const result = {
+                type: 'oauth_result',
+                code: 'test-code-' + Math.random().toString(36).substr(2, 9),
+                state: 'test-state',
+                error: null,
+                sessionData: { success: true, message: 'Code received' }
+            };
+            
+            // Try both keys
+            localStorage.setItem('oauth_result', JSON.stringify(result));
+            localStorage.setItem('oauth_popup_result', JSON.stringify(result));
+            
+            log('Stored OAuth result with both keys');
+            log('oauth_result: ' + localStorage.getItem('oauth_result'));
+            log('oauth_popup_result: ' + localStorage.getItem('oauth_popup_result'));
+        }
+
+        function checkStorage() {
+            log('Checking storage...');
+            const keys = ['oauth_result', 'oauth_popup_result', 'oauth_popup_active', 'oauth_popup_timestamp'];
+            
+            keys.forEach(key => {
+                const value = localStorage.getItem(key);
+                if (value) {
+                    log(`${key}: ${value}`);
+                } else {
+                    log(`${key}: null`);
+                }
+            });
+        }
+
+        function clearStorage() {
+            const keys = ['oauth_result', 'oauth_popup_result', 'oauth_popup_active', 'oauth_popup_timestamp'];
+            keys.forEach(key => localStorage.removeItem(key));
+            log('Cleared OAuth storage keys');
+        }
+
+        function startPolling() {
+            if (pollInterval) {
+                log('Polling already active');
+                return;
+            }
+            
+            log('Starting polling for oauth_popup_result...');
+            let attempts = 0;
+            
+            pollInterval = setInterval(() => {
+                attempts++;
+                const result = localStorage.getItem('oauth_popup_result');
+                
+                if (result) {
+                    log(`FOUND! oauth_popup_result: ${result}`);
+                    localStorage.removeItem('oauth_popup_result');
+                    stopPolling();
+                } else {
+                    log(`Poll attempt ${attempts}: No result yet`);
+                }
+                
+                if (attempts > 20) {
+                    log('Polling timeout after 20 attempts');
+                    stopPolling();
+                }
+            }, 500);
+        }
+
+        function stopPolling() {
+            if (pollInterval) {
+                clearInterval(pollInterval);
+                pollInterval = null;
+                log('Polling stopped');
+            }
+        }
+
+        // Check on load
+        window.addEventListener('load', () => {
+            log('Page loaded');
+            checkStorage();
+        });
+    </script>
+</body>
+</html>

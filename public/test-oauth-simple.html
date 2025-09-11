@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple OAuth Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            margin-top: 0;
+            color: #333;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 12px;
+            border-radius: 4px;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+        .instructions {
+            background: #f0f0f0;
+            padding: 16px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .instructions ol {
+            margin: 10px 0 0 0;
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin: 8px 0;
+        }
+        code {
+            background: #e0e0e0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        a {
+            color: #1976d2;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Simple OAuth Test</h1>
+        
+        <div class="info">
+            ℹ️ This page helps you test the OAuth flow using the actual application interface.
+        </div>
+
+        <div class="instructions">
+            <strong>Testing OAuth Popup Flow:</strong>
+            <ol>
+                <li>Open the main application: <a href="/en" target="_blank">http://localhost:3001/en</a></li>
+                <li>Look for the <strong>OAuth Debug Panel</strong> at the bottom of the page</li>
+                <li>Click the <strong>"Sign in with Google"</strong> button in the header</li>
+                <li>Watch the debug panel for real-time updates:
+                    <ul>
+                        <li><code>isInPopup</code> - Shows if you're in a popup context</li>
+                        <li><code>hasOAuthParams</code> - Shows if OAuth parameters are detected</li>
+                        <li><code>popupActive</code> - Shows if popup OAuth is active</li>
+                    </ul>
+                </li>
+                <li>Complete the Google OAuth flow</li>
+                <li>The popup should close automatically and return you to the main page</li>
+            </ol>
+        </div>
+
+        <div class="instructions">
+            <strong>Expected Flow:</strong>
+            <ol>
+                <li>Click "Sign in with Google" → Popup opens</li>
+                <li>Complete Google authentication</li>
+                <li>Google redirects to <code>/auth/callback?code=...</code></li>
+                <li>Our handler detects popup context and redirects to <code>/auth/callback-popup</code></li>
+                <li>Popup sends message to parent window with auth result</li>
+                <li>Popup closes automatically</li>
+                <li>Parent window receives auth result and completes login</li>
+            </ol>
+        </div>
+
+        <div class="instructions">
+            <strong>Debugging Tips:</strong>
+            <ul>
+                <li>Open browser DevTools Console before starting</li>
+                <li>Look for console logs starting with <code>[Auth]</code> or <code>[OAuthPopupHandler]</code></li>
+                <li>Check the Network tab to see OAuth redirects</li>
+                <li>If popup doesn't close, check for COOP/CORS errors in console</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 32px;">
+            <a href="/en" style="display: inline-block; padding: 12px 24px; background: #1976d2; color: white; border-radius: 4px; text-decoration: none;">
+                Go to Application →
+            </a>
+        </div>
+    </div>
+</body>
+</html>

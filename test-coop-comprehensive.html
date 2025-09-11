@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive COOP OAuth Test</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        button:hover {
+            background: #357ae8;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        .warning {
+            color: orange;
+        }
+        pre {
+            background: #eee;
+            padding: 10px;
+            overflow: auto;
+            font-size: 12px;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            background: white;
+            border-left: 3px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Comprehensive COOP OAuth Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Direct Debug Page</h2>
+        <p>Opens the COOP debug page directly in a popup</p>
+        <button onclick="testDebugPage()">Test Debug Page</button>
+        <div id="debug-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: OAuth Callback Page</h2>
+        <p>Opens the OAuth callback page with test code</p>
+        <button onclick="testCallbackPage()">Test Callback Page</button>
+        <div id="callback-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Real OAuth Flow</h2>
+        <p>Initiates real OAuth flow through authService</p>
+        <button onclick="testRealOAuth()">Test Real OAuth</button>
+        <div id="oauth-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Browser Information</h2>
+        <div id="browser-info"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Debug Log</h2>
+        <div id="debug-log"></div>
+    </div>
+
+    <script>
+        const log = (message, type = 'info') => {
+            const logDiv = document.getElementById('debug-log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.innerHTML = `[${new Date().toISOString()}] ${message}`;
+            logDiv.appendChild(entry);
+        };
+
+        // Show browser info
+        const browserInfo = document.getElementById('browser-info');
+        browserInfo.innerHTML = `
+            <p><strong>User Agent:</strong> ${navigator.userAgent}</p>
+            <p><strong>Origin:</strong> ${window.location.origin}</p>
+            <p><strong>Protocol:</strong> ${window.location.protocol}</p>
+            <p><strong>Host:</strong> ${window.location.host}</p>
+        `;
+
+        // Test 1: Debug Page
+        function testDebugPage() {
+            log('Opening debug page...');
+            const resultDiv = document.getElementById('debug-result');
+            resultDiv.innerHTML = '<p>Opening popup...</p>';
+            
+            const popup = window.open('/test-oauth-coop-debug', 'debug-test', 'width=600,height=700');
+            
+            if (!popup) {
+                resultDiv.innerHTML = '<p class="error">Popup blocked!</p>';
+                log('Popup blocked by browser', 'error');
+                return;
+            }
+            
+            log('Popup opened successfully');
+            
+            let messageReceived = false;
+            const messageHandler = (event) => {
+                log(`Message received from ${event.origin}: ${JSON.stringify(event.data)}`);
+                if (event.data?.test === 1) {
+                    messageReceived = true;
+                    resultDiv.innerHTML = '<p class="success">✓ Debug page can send messages!</p>';
+                    window.removeEventListener('message', messageHandler);
+                }
+            };
+            
+            window.addEventListener('message', messageHandler);
+            
+            // Check if popup closes
+            const checkInterval = setInterval(() => {
+                if (popup.closed) {
+                    clearInterval(checkInterval);
+                    log('Debug popup closed');
+                    if (!messageReceived) {
+                        resultDiv.innerHTML += '<p class="warning">Popup closed but no message received</p>';
+                    }
+                    window.removeEventListener('message', messageHandler);
+                }
+            }, 500);
+            
+            // Timeout after 10 seconds
+            setTimeout(() => {
+                if (!messageReceived) {
+                    resultDiv.innerHTML = '<p class="error">No message received after 10 seconds</p>';
+                    window.removeEventListener('message', messageHandler);
+                }
+            }, 10000);
+        }
+
+        // Test 2: Callback Page
+        function testCallbackPage() {
+            log('Testing OAuth callback page...');
+            const resultDiv = document.getElementById('callback-result');
+            resultDiv.innerHTML = '<p>Opening callback popup...</p>';
+            
+            const popup = window.open('/auth/callback-popup?code=TEST_CODE&state=TEST_STATE', 'callback-test', 'width=500,height=700');
+            
+            if (!popup) {
+                resultDiv.innerHTML = '<p class="error">Popup blocked!</p>';
+                log('Callback popup blocked', 'error');
+                return;
+            }
+            
+            log('Callback popup opened');
+            
+            let messageReceived = false;
+            const messageHandler = (event) => {
+                log(`OAuth message from ${event.origin}: ${JSON.stringify(event.data)}`);
+                
+                if (event.data?.type === 'oauth_result') {
+                    messageReceived = true;
+                    resultDiv.innerHTML = `
+                        <p class="success">✓ OAuth message received!</p>
+                        <pre>${JSON.stringify(event.data, null, 2)}</pre>
+                    `;
+                    window.removeEventListener('message', messageHandler);
+                }
+            };
+            
+            window.addEventListener('message', messageHandler);
+            
+            // Check if popup closes automatically
+            let closedAutomatically = false;
+            const startTime = Date.now();
+            const checkInterval = setInterval(() => {
+                if (popup.closed) {
+                    const elapsed = Date.now() - startTime;
+                    clearInterval(checkInterval);
+                    log(`Callback popup closed after ${elapsed}ms`);
+                    
+                    if (elapsed < 5000) {
+                        closedAutomatically = true;
+                        resultDiv.innerHTML += '<p class="success">✓ Popup closed automatically!</p>';
+                    } else {
+                        resultDiv.innerHTML += '<p class="warning">⚠ Popup closed but took longer than expected</p>';
+                    }
+                    window.removeEventListener('message', messageHandler);
+                }
+            }, 100);
+            
+            // Timeout
+            setTimeout(() => {
+                clearInterval(checkInterval);
+                if (!messageReceived) {
+                    resultDiv.innerHTML += '<p class="error">No message received after 15 seconds</p>';
+                }
+                if (!popup.closed) {
+                    resultDiv.innerHTML += '<p class="error">Popup did not close automatically</p>';
+                }
+                window.removeEventListener('message', messageHandler);
+            }, 15000);
+        }
+
+        // Test 3: Real OAuth
+        async function testRealOAuth() {
+            log('Testing real OAuth flow...');
+            const resultDiv = document.getElementById('oauth-result');
+            resultDiv.innerHTML = '<p>Loading auth service...</p>';
+            
+            try {
+                // Import auth service
+                const authModule = await import('/src/services/authService.js');
+                const authService = authModule.default;
+                
+                log('AuthService loaded, initiating Google OAuth...');
+                resultDiv.innerHTML = '<p>Initiating Google OAuth...</p>';
+                
+                const result = await authService.signInWithGoogle(true);
+                
+                if (result.success) {
+                    resultDiv.innerHTML = '<p class="success">✓ OAuth completed successfully!</p>';
+                    log('OAuth success', 'success');
+                } else {
+                    resultDiv.innerHTML = `<p class="error">OAuth failed: ${result.error}</p>`;
+                    log(`OAuth failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+                log(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Header check
+        fetch('/auth/callback-popup', { method: 'HEAD' })
+            .then(response => {
+                const coop = response.headers.get('cross-origin-opener-policy');
+                const coep = response.headers.get('cross-origin-embedder-policy');
+                log(`COOP Header: ${coop || 'not set'}`);
+                log(`COEP Header: ${coep || 'not set'}`);
+            })
+            .catch(err => log(`Failed to check headers: ${err}`, 'error'));
+    </script>
+</body>
+</html>

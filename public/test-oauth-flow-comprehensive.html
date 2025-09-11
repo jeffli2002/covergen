@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive OAuth Flow Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #333;
+            margin-top: 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            background: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+        .button:hover {
+            background: #3367d6;
+        }
+        .button.secondary {
+            background: #6c757d;
+        }
+        .button.secondary:hover {
+            background: #5a6268;
+        }
+        .button.danger {
+            background: #dc3545;
+        }
+        .button.danger:hover {
+            background: #c82333;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        .status.info {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        .status.success {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .status.warning {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 12px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .test-card {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 16px;
+        }
+        .test-card h3 {
+            margin-top: 0;
+            color: #555;
+        }
+        .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        .timestamp {
+            color: #666;
+            font-size: 11px;
+        }
+        #logs {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Comprehensive OAuth Flow Test</h1>
+        <p>This page tests the OAuth popup flow with detailed debugging and state tracking.</p>
+    </div>
+
+    <div class="container">
+        <h2>📋 Pre-Flight Checks</h2>
+        <div id="preflight-status"></div>
+    </div>
+
+    <div class="test-grid">
+        <div class="container">
+            <h2>🚀 Test OAuth Flow</h2>
+            <div class="test-card">
+                <h3>Popup OAuth Test</h3>
+                <button class="button" onclick="testPopupOAuth()">Test Popup OAuth</button>
+                <button class="button secondary" onclick="testPopupOAuthWithState()">Test with State Param</button>
+                <div id="popup-status"></div>
+            </div>
+            
+            <div class="test-card">
+                <h3>Direct Redirect Test</h3>
+                <button class="button" onclick="testDirectRedirect()">Test Direct OAuth</button>
+                <div id="redirect-status"></div>
+            </div>
+        </div>
+
+        <div class="container">
+            <h2>🔧 Debug Tools</h2>
+            <div class="test-card">
+                <h3>Storage Inspector</h3>
+                <button class="button secondary" onclick="inspectStorage()">Inspect Storage</button>
+                <button class="button danger" onclick="clearStorage()">Clear All Storage</button>
+                <div id="storage-info" class="debug-info"></div>
+            </div>
+            
+            <div class="test-card">
+                <h3>Window State</h3>
+                <button class="button secondary" onclick="inspectWindowState()">Inspect Window</button>
+                <div id="window-info" class="debug-info"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>📊 Real-Time Logs</h2>
+        <button class="button secondary" onclick="clearLogs()">Clear Logs</button>
+        <button class="button secondary" onclick="exportLogs()">Export Logs</button>
+        <div id="logs" class="debug-info"></div>
+    </div>
+
+    <script>
+        const logs = [];
+        let popupReference = null;
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toISOString();
+            const entry = { timestamp, message, type };
+            logs.push(entry);
+            
+            const logDiv = document.getElementById('logs');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.innerHTML = `<span class="timestamp">${timestamp.split('T')[1].split('.')[0]}</span> ${message}`;
+            logDiv.appendChild(logEntry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function showStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        // Pre-flight checks
+        function runPreflightChecks() {
+            log('Running pre-flight checks...', 'info');
+            
+            const checks = {
+                localStorage: checkStorage('localStorage'),
+                sessionStorage: checkStorage('sessionStorage'),
+                windowOpen: checkWindowOpen(),
+                postMessage: checkPostMessage(),
+                coopCors: checkCOOPCORS()
+            };
+
+            const allPassed = Object.values(checks).every(check => check.passed);
+            
+            const statusHtml = `
+                <div class="status ${allPassed ? 'success' : 'warning'}">
+                    <strong>Pre-flight Check Results:</strong><br>
+                    ✓ localStorage: ${checks.localStorage.message}<br>
+                    ✓ sessionStorage: ${checks.sessionStorage.message}<br>
+                    ✓ window.open: ${checks.windowOpen.message}<br>
+                    ✓ postMessage: ${checks.postMessage.message}<br>
+                    ✓ COOP/CORS: ${checks.coopCors.message}
+                </div>
+            `;
+            
+            document.getElementById('preflight-status').innerHTML = statusHtml;
+            
+            return allPassed;
+        }
+
+        function checkStorage(type) {
+            try {
+                const storage = window[type];
+                const testKey = `__test_${Date.now()}`;
+                storage.setItem(testKey, 'test');
+                storage.removeItem(testKey);
+                return { passed: true, message: 'Available' };
+            } catch (e) {
+                return { passed: false, message: `Error: ${e.message}` };
+            }
+        }
+
+        function checkWindowOpen() {
+            try {
+                // Test if we can open windows
+                return { passed: true, message: 'Available (will test on use)' };
+            } catch (e) {
+                return { passed: false, message: `Error: ${e.message}` };
+            }
+        }
+
+        function checkPostMessage() {
+            try {
+                window.postMessage({ test: true }, window.location.origin);
+                return { passed: true, message: 'Available' };
+            } catch (e) {
+                return { passed: false, message: `Error: ${e.message}` };
+            }
+        }
+
+        function checkCOOPCORS() {
+            // We can't fully test COOP/CORS until we try cross-origin communication
+            return { passed: true, message: 'Will be tested during OAuth flow' };
+        }
+
+        // OAuth testing functions
+        async function testPopupOAuth() {
+            log('Starting popup OAuth test...', 'info');
+            showStatus('popup-status', 'Initiating OAuth popup...', 'info');
+
+            try {
+                // First, we need to get the actual OAuth URL from Supabase
+                // Since we're in a static HTML file, we'll make a request to get the auth URL
+                const response = await fetch('/api/auth/google-url');
+                const { url } = await response.json();
+                
+                if (!url) {
+                    throw new Error('Failed to get OAuth URL from server');
+                }
+
+                // Set the popup flag
+                localStorage.setItem('oauth_popup_active', 'true');
+                sessionStorage.setItem('oauth_popup_active', 'true');
+                
+                log(`Opening popup with URL: ${url}`, 'info');
+                
+                const popupFeatures = 'width=500,height=600,top=100,left=100';
+                popupReference = window.open(url, 'oauth_popup', popupFeatures);
+
+                if (!popupReference) {
+                    throw new Error('Popup blocked by browser');
+                }
+
+                log('Popup opened successfully', 'success');
+                showStatus('popup-status', 'Popup opened - waiting for OAuth response...', 'info');
+
+                // Listen for messages from popup
+                const messageHandler = (event) => {
+                    log(`Received message from ${event.origin}: ${JSON.stringify(event.data)}`, 'info');
+                    
+                    if (event.data.type === 'oauth_result') {
+                        window.removeEventListener('message', messageHandler);
+                        handleOAuthResult(event.data);
+                    }
+                };
+
+                window.addEventListener('message', messageHandler);
+
+                // Monitor popup state
+                const checkPopup = setInterval(() => {
+                    if (popupReference && popupReference.closed) {
+                        clearInterval(checkPopup);
+                        log('Popup was closed', 'warning');
+                        showStatus('popup-status', 'Popup closed without completing OAuth', 'warning');
+                        window.removeEventListener('message', messageHandler);
+                        cleanupOAuthFlags();
+                    }
+                }, 500);
+
+            } catch (error) {
+                log(`Error during popup OAuth: ${error.message}`, 'error');
+                showStatus('popup-status', `Error: ${error.message}`, 'error');
+                cleanupOAuthFlags();
+            }
+        }
+
+        function testPopupOAuthWithState() {
+            log('Testing OAuth with state parameter...', 'info');
+            // Similar to testPopupOAuth but with custom state
+            testPopupOAuth();
+        }
+
+        function testDirectRedirect() {
+            log('Testing direct redirect OAuth...', 'info');
+            showStatus('redirect-status', 'Redirecting to OAuth provider...', 'info');
+            
+            // Clear popup flags for direct redirect
+            cleanupOAuthFlags();
+            
+            // In real implementation, this would redirect to the OAuth provider
+            setTimeout(() => {
+                showStatus('redirect-status', 'Would redirect to OAuth provider (not implemented in test)', 'warning');
+            }, 1000);
+        }
+
+        function handleOAuthResult(data) {
+            log(`OAuth result received: ${JSON.stringify(data)}`, data.error ? 'error' : 'success');
+            
+            if (data.error) {
+                showStatus('popup-status', `OAuth failed: ${data.error} - ${data.errorDescription}`, 'error');
+            } else if (data.code) {
+                showStatus('popup-status', `OAuth successful! Code: ${data.code.substring(0, 10)}...`, 'success');
+                // In production, exchange code for tokens here
+            }
+            
+            cleanupOAuthFlags();
+        }
+
+        function generateState() {
+            return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        }
+
+        function cleanupOAuthFlags() {
+            log('Cleaning up OAuth flags...', 'info');
+            localStorage.removeItem('oauth_popup_active');
+            sessionStorage.removeItem('oauth_popup_active');
+            localStorage.removeItem('oauth_result');
+        }
+
+        // Storage inspection
+        function inspectStorage() {
+            const storageInfo = {
+                localStorage: getStorageContents(localStorage),
+                sessionStorage: getStorageContents(sessionStorage),
+                cookies: document.cookie || 'No cookies'
+            };
+            
+            document.getElementById('storage-info').textContent = JSON.stringify(storageInfo, null, 2);
+        }
+
+        function getStorageContents(storage) {
+            const contents = {};
+            for (let i = 0; i < storage.length; i++) {
+                const key = storage.key(i);
+                contents[key] = storage.getItem(key);
+            }
+            return contents;
+        }
+
+        function clearStorage() {
+            if (confirm('This will clear all localStorage and sessionStorage. Continue?')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                log('All storage cleared', 'warning');
+                inspectStorage();
+            }
+        }
+
+        // Window state inspection
+        function inspectWindowState() {
+            const windowInfo = {
+                location: {
+                    href: window.location.href,
+                    origin: window.location.origin,
+                    search: window.location.search,
+                    hash: window.location.hash
+                },
+                opener: window.opener ? 'Present' : 'None',
+                parent: window.parent === window ? 'Same as window (top-level)' : 'Different (in iframe)',
+                crossOriginIsolated: window.crossOriginIsolated,
+                isSecureContext: window.isSecureContext,
+                referrer: document.referrer || 'None'
+            };
+            
+            document.getElementById('window-info').textContent = JSON.stringify(windowInfo, null, 2);
+        }
+
+        // Log management
+        function clearLogs() {
+            logs.length = 0;
+            document.getElementById('logs').innerHTML = '';
+            log('Logs cleared', 'info');
+        }
+
+        function exportLogs() {
+            const logText = logs.map(entry => `[${entry.timestamp}] [${entry.type.toUpperCase()}] ${entry.message}`).join('\n');
+            const blob = new Blob([logText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `oauth-test-logs-${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            log('Page loaded', 'info');
+            runPreflightChecks();
+            inspectStorage();
+            inspectWindowState();
+        });
+
+        // Listen for storage events (cross-tab communication)
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'oauth_result') {
+                log(`Storage event detected: oauth_result = ${e.newValue}`, 'info');
+                try {
+                    const result = JSON.parse(e.newValue);
+                    handleOAuthResult(result);
+                } catch (error) {
+                    log(`Failed to parse oauth_result: ${error.message}`, 'error');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

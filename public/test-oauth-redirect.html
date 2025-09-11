@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test OAuth Redirect</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+    }
+    button {
+      background: #4285f4;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin: 0.5rem;
+    }
+    button:hover {
+      background: #357ae8;
+    }
+    #output {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f5f5f5;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.9em;
+      white-space: pre-wrap;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    .url-section {
+      background: #e3f2fd;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <h1>OAuth Redirect Test</h1>
+  
+  <p>This page tests what redirect URL is being sent to Google OAuth.</p>
+  
+  <button onclick="testOAuth()">Test OAuth URL Generation</button>
+  
+  <div id="output"></div>
+  
+  <script type="module">
+    window.testOAuth = async function() {
+      const output = document.getElementById('output');
+      output.textContent = 'Testing OAuth URL generation...\n\n';
+      
+      try {
+        // Import Supabase
+        const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+        
+        const supabase = createClient(
+          'https://exungkcoaihcemcmhqdr.supabase.co',
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4dW5na2NvYWloY2VtY21ocWRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1MzQzMzMsImV4cCI6MjA3MjExMDMzM30.pU6RCNu0ugnAac8kSgCNyZDHEfU_6B_NpVgR9MwS4_Y'
+        );
+        
+        // Test different redirect URLs
+        const testUrls = [
+          `${window.location.origin}/auth/callback-popup`,
+          `${window.location.origin}/auth/callback`,
+          `${window.location.origin}`,
+          'http://localhost:3001/auth/callback-popup'
+        ];
+        
+        for (const redirectTo of testUrls) {
+          output.textContent += `\nTesting with redirectTo: ${redirectTo}\n`;
+          output.textContent += '='.repeat(80) + '\n';
+          
+          const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+              redirectTo: redirectTo,
+              skipBrowserRedirect: true
+            }
+          });
+          
+          if (error) {
+            output.textContent += `ERROR: ${error.message}\n`;
+          } else if (data?.url) {
+            const oauthUrl = new URL(data.url);
+            const actualRedirectUri = oauthUrl.searchParams.get('redirect_uri');
+            
+            output.innerHTML += `<div class="url-section">`;
+            output.innerHTML += `<strong>Requested redirectTo:</strong> ${redirectTo}<br>`;
+            output.innerHTML += `<strong>Actual redirect_uri in OAuth URL:</strong> ${actualRedirectUri}<br>`;
+            output.innerHTML += `<strong>Match:</strong> ${actualRedirectUri === redirectTo ? '✅ YES' : '❌ NO'}<br>`;
+            
+            if (actualRedirectUri !== redirectTo) {
+              output.innerHTML += `<strong>Difference:</strong> OAuth is using "${actualRedirectUri}" instead of "${redirectTo}"<br>`;
+            }
+            
+            output.innerHTML += `<br><strong>Full OAuth URL:</strong><br>${data.url}`;
+            output.innerHTML += `</div>`;
+          }
+        }
+        
+        output.textContent += '\n\nDONE! Check the results above.';
+        
+      } catch (error) {
+        output.textContent += `\nError: ${error.message}`;
+      }
+    }
+  </script>
+</body>
+</html>

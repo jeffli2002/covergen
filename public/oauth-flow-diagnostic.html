@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OAuth Flow Diagnostic</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 1.5rem;
+    }
+    .log-entry {
+      padding: 0.5rem;
+      margin: 0.25rem 0;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.85em;
+      border-left: 4px solid #ddd;
+      background: #f8f9fa;
+    }
+    .log-error {
+      border-left-color: #dc3545;
+      background: #f8d7da;
+    }
+    .log-success {
+      border-left-color: #28a745;
+      background: #d4edda;
+    }
+    .log-info {
+      border-left-color: #17a2b8;
+      background: #d1ecf1;
+    }
+    .log-warning {
+      border-left-color: #ffc107;
+      background: #fff3cd;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin: 0.5rem;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #log-container {
+      max-height: 500px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 1rem;
+      margin-top: 1rem;
+      background: #fafafa;
+    }
+    .clear-btn {
+      background: #6c757d;
+    }
+    .clear-btn:hover {
+      background: #545b62;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>OAuth Flow Diagnostic Tool</h1>
+    
+    <p>This tool helps diagnose OAuth redirect issues by logging the entire flow.</p>
+    
+    <div>
+      <button onclick="testOAuthFlow()">Test OAuth Popup Flow</button>
+      <button class="clear-btn" onclick="clearLogs()">Clear Logs</button>
+    </div>
+    
+    <h2>Flow Log:</h2>
+    <div id="log-container"></div>
+  </div>
+  
+  <script>
+    const logContainer = document.getElementById('log-container');
+    let logIndex = 0;
+    
+    function log(message, type = 'info') {
+      const entry = document.createElement('div');
+      entry.className = `log-entry log-${type}`;
+      const timestamp = new Date().toLocaleTimeString();
+      entry.textContent = `[${timestamp}] ${message}`;
+      logContainer.appendChild(entry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+      logIndex++;
+    }
+    
+    function clearLogs() {
+      logContainer.innerHTML = '';
+      logIndex = 0;
+      log('Logs cleared', 'info');
+    }
+    
+    let popup = null;
+    let checkInterval = null;
+    
+    function testOAuthFlow() {
+      log('Starting OAuth popup flow test', 'info');
+      
+      // Clean up any existing popup
+      if (popup && !popup.closed) {
+        popup.close();
+      }
+      if (checkInterval) {
+        clearInterval(checkInterval);
+      }
+      
+      // Set up message listener
+      const messageHandler = (event) => {
+        log(`Message received from: ${event.origin}`, 'info');
+        log(`Message type: ${event.data.type}`, 'info');
+        log(`Message data: ${JSON.stringify(event.data, null, 2)}`, 'info');
+        
+        if (event.data.type === 'oauth_result') {
+          if (event.data.code) {
+            log('OAuth code received! Success!', 'success');
+            log(`Code: ${event.data.code}`, 'success');
+          } else if (event.data.error) {
+            log(`OAuth error: ${event.data.error}`, 'error');
+          }
+          
+          // Clean up
+          window.removeEventListener('message', messageHandler);
+          if (checkInterval) clearInterval(checkInterval);
+        }
+      };
+      
+      window.addEventListener('message', messageHandler);
+      
+      // Open test popup
+      const testUrl = `${window.location.origin}/auth/callback-popup?code=TEST_CODE_${Date.now()}`;
+      log(`Opening popup with URL: ${testUrl}`, 'info');
+      
+      popup = window.open(
+        testUrl,
+        'oauth-popup',
+        'width=500,height=700,left=100,top=100'
+      );
+      
+      if (!popup) {
+        log('Failed to open popup - check popup blocker', 'error');
+        return;
+      }
+      
+      log('Popup opened successfully', 'success');
+      
+      // Monitor popup status
+      checkInterval = setInterval(() => {
+        try {
+          if (popup.closed) {
+            log('Popup was closed', 'warning');
+            clearInterval(checkInterval);
+            window.removeEventListener('message', messageHandler);
+          } else {
+            // Try to access popup location
+            try {
+              const popupUrl = popup.location.href;
+              log(`Popup URL: ${popupUrl}`, 'info');
+            } catch (e) {
+              // Can't access due to COOP or cross-origin
+            }
+          }
+        } catch (e) {
+          log(`Cannot check popup status: ${e.message}`, 'warning');
+        }
+      }, 1000);
+      
+      // Timeout after 30 seconds
+      setTimeout(() => {
+        if (checkInterval) {
+          clearInterval(checkInterval);
+          log('Test timed out after 30 seconds', 'warning');
+          window.removeEventListener('message', messageHandler);
+          if (popup && !popup.closed) {
+            popup.close();
+          }
+        }
+      }, 30000);
+    }
+    
+    // Initial log
+    log('OAuth Flow Diagnostic Tool ready', 'info');
+    log(`Current origin: ${window.location.origin}`, 'info');
+  </script>
+</body>
+</html>

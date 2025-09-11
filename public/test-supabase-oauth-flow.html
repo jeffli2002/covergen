@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Supabase OAuth Flow</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+    }
+    button {
+      background: #4285f4;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin: 0.5rem;
+    }
+    #output {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f5f5f5;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.9em;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>Supabase OAuth Flow Test</h1>
+  
+  <button onclick="followOAuthFlow()">Follow OAuth Redirect Chain</button>
+  
+  <div id="output"></div>
+  
+  <script>
+    async function followOAuthFlow() {
+      const output = document.getElementById('output');
+      output.textContent = 'Following OAuth redirect chain...\n\n';
+      
+      const supabaseAuthUrl = 'https://exungkcoaihcemcmhqdr.supabase.co/auth/v1/authorize?provider=google&redirect_to=http%3A%2F%2Flocalhost%3A3001%2Fauth%2Fcallback-popup';
+      
+      output.textContent += `Step 1: Supabase OAuth URL\n${supabaseAuthUrl}\n\n`;
+      
+      try {
+        // Open in popup to see where it redirects
+        const popup = window.open(supabaseAuthUrl, 'oauth-test', 'width=600,height=700');
+        
+        output.textContent += 'Step 2: Opened OAuth URL in popup\n';
+        output.textContent += 'Watch the popup URL to see where Google redirects after auth.\n\n';
+        
+        // Monitor popup URL changes
+        let checkCount = 0;
+        const checkInterval = setInterval(() => {
+          checkCount++;
+          try {
+            const popupUrl = popup.location.href;
+            output.textContent += `[${checkCount}s] Popup URL: ${popupUrl}\n`;
+          } catch (e) {
+            // Can't access cross-origin
+            output.textContent += `[${checkCount}s] Popup is on different origin (Google OAuth page)\n`;
+          }
+          
+          if (popup.closed) {
+            clearInterval(checkInterval);
+            output.textContent += '\nPopup closed.\n';
+          }
+          
+          if (checkCount > 30) {
+            clearInterval(checkInterval);
+            output.textContent += '\nStopped monitoring after 30 seconds.\n';
+          }
+        }, 1000);
+        
+      } catch (error) {
+        output.textContent += `Error: ${error.message}\n`;
+      }
+    }
+  </script>
+</body>
+</html>

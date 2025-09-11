@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Popup OAuth</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #357ae8;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            min-height: 100px;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Popup OAuth Flow</h1>
+    <p>Click the button below to test Google OAuth in a popup window (500x700)</p>
+    
+    <button onclick="testOAuth()">Sign in with Google (Popup)</button>
+    
+    <div id="result">
+        <p>Result will appear here...</p>
+    </div>
+
+    <script>
+        async function testOAuth() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Opening popup...</p>';
+            
+            // Import authService - in real app this would be imported properly
+            try {
+                // Simulate the popup OAuth flow
+                const popup = window.open(
+                    '/auth/google-login-popup-test',
+                    'oauth-popup',
+                    'width=500,height=700,left=' + ((window.screen.width - 500) / 2) + ',top=' + ((window.screen.height - 700) / 2)
+                );
+                
+                if (!popup) {
+                    resultDiv.innerHTML = '<p class="error">Popup was blocked! Please allow popups for this site.</p>';
+                    return;
+                }
+                
+                // Listen for messages from popup
+                window.addEventListener('message', function handleMessage(event) {
+                    if (event.origin !== window.location.origin) return;
+                    
+                    if (event.data.type === 'oauth-success') {
+                        resultDiv.innerHTML = '<p class="success">Success! User data:</p><pre>' + JSON.stringify(event.data.payload, null, 2) + '</pre>';
+                        window.removeEventListener('message', handleMessage);
+                    } else if (event.data.type === 'oauth-error') {
+                        resultDiv.innerHTML = '<p class="error">Error: ' + event.data.error + '</p>';
+                        window.removeEventListener('message', handleMessage);
+                    }
+                });
+                
+                // Check if popup is closed
+                const checkInterval = setInterval(() => {
+                    if (popup.closed) {
+                        clearInterval(checkInterval);
+                        if (resultDiv.innerHTML.includes('Opening popup...')) {
+                            resultDiv.innerHTML = '<p>Popup was closed without completing authentication.</p>';
+                        }
+                    }
+                }, 500);
+                
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="error">Error: ' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html>

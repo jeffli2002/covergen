@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth Debug Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            background: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+        }
+        .button:hover {
+            background: #3367d6;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 12px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>OAuth Debug Test</h1>
+        <p>This page tests the OAuth popup communication.</p>
+        
+        <button class="button" onclick="testOAuthPopup()">Test OAuth Popup Communication</button>
+        <button class="button" onclick="clearLogs()">Clear Logs</button>
+        
+        <div id="status"></div>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        let popup = null;
+        let messageReceived = false;
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
+            const logDiv = document.getElementById('log');
+            const color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'black';
+            logDiv.innerHTML += `<span style="color: ${color}">[${timestamp}] ${message}</span>\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('log').innerHTML = '';
+            document.getElementById('status').innerHTML = '';
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+        }
+
+        async function testOAuthPopup() {
+            log('Starting OAuth popup test...');
+            messageReceived = false;
+
+            // Set up message listener BEFORE opening popup
+            const messageHandler = (event) => {
+                log(`Received message from ${event.origin}: ${JSON.stringify(event.data)}`);
+                
+                if (event.origin !== window.location.origin) {
+                    log('Ignoring message from different origin', 'error');
+                    return;
+                }
+
+                if (event.data.type === 'oauth_result') {
+                    messageReceived = true;
+                    log('OAuth result received!', 'success');
+                    showStatus('✅ OAuth communication successful!', 'success');
+                    
+                    // Try to close the popup
+                    if (popup && !popup.closed) {
+                        try {
+                            popup.close();
+                            log('Popup closed successfully', 'success');
+                        } catch (e) {
+                            log(`Cannot close popup: ${e.message}`, 'error');
+                        }
+                    }
+                    
+                    window.removeEventListener('message', messageHandler);
+                }
+            };
+
+            window.addEventListener('message', messageHandler);
+            log('Message listener registered');
+
+            // Also set up localStorage polling as fallback
+            const checkLocalStorage = setInterval(() => {
+                const result = localStorage.getItem('oauth_result');
+                if (result) {
+                    log(`Found result in localStorage: ${result}`, 'success');
+                    localStorage.removeItem('oauth_result');
+                    clearInterval(checkLocalStorage);
+                    
+                    if (!messageReceived) {
+                        showStatus('✅ OAuth communication via localStorage fallback', 'success');
+                    }
+                }
+            }, 100);
+
+            // Set flags
+            localStorage.setItem('oauth_popup_active', 'true');
+            sessionStorage.setItem('oauth_popup_active', 'true');
+            localStorage.setItem('oauth_popup_timestamp', Date.now().toString());
+            log('OAuth flags set');
+
+            // Open popup with test callback
+            const popupUrl = '/auth/callback-popup?code=TEST_CODE&state=TEST_STATE';
+            log(`Opening popup: ${popupUrl}`);
+            
+            popup = window.open(
+                popupUrl,
+                'oauth-popup',
+                'width=500,height=600,left=100,top=100'
+            );
+
+            if (!popup) {
+                log('Failed to open popup - check popup blocker!', 'error');
+                showStatus('❌ Failed to open popup', 'error');
+                return;
+            }
+
+            log('Popup opened successfully');
+
+            // Check if popup is closed
+            const checkClosed = setInterval(() => {
+                try {
+                    if (popup.closed) {
+                        clearInterval(checkClosed);
+                        clearInterval(checkLocalStorage);
+                        log('Popup was closed');
+                        
+                        if (!messageReceived) {
+                            showStatus('⚠️ Popup closed without sending message', 'error');
+                        }
+                        
+                        // Clean up
+                        localStorage.removeItem('oauth_popup_active');
+                        sessionStorage.removeItem('oauth_popup_active');
+                        localStorage.removeItem('oauth_popup_timestamp');
+                    }
+                } catch (e) {
+                    log(`Cannot check popup status: ${e.message}`, 'error');
+                    clearInterval(checkClosed);
+                }
+            }, 500);
+
+            // Timeout after 30 seconds
+            setTimeout(() => {
+                clearInterval(checkClosed);
+                clearInterval(checkLocalStorage);
+                window.removeEventListener('message', messageHandler);
+                
+                if (!messageReceived) {
+                    showStatus('⏱️ Test timed out after 30 seconds', 'error');
+                }
+            }, 30000);
+        }
+
+        // Log some debug info on load
+        window.addEventListener('load', () => {
+            log('Page loaded');
+            log(`Origin: ${window.location.origin}`);
+            log(`localStorage available: ${typeof localStorage !== 'undefined'}`);
+            log(`postMessage available: ${typeof window.postMessage !== 'undefined'}`);
+        });
+    </script>
+</body>
+</html>

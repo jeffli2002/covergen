@@ -124,17 +124,12 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
     setMessage({ type: '', text: '' })
 
     try {
-      // Use popup OAuth with safe implementation
-      const result = await signInWithGoogle(true)
+      // Use standard OAuth flow (not popup) for better compatibility
+      const result = await signInWithGoogle()
       
       if (result.success) {
         setMessage({ type: 'success', text: 'Sign in successful!' })
-        // Close the auth modal if sign in was successful
-        if (onClose) {
-          setTimeout(() => {
-            onClose()
-          }, 1000)
-        }
+        // The page will redirect for OAuth flow
       } else {
         setMessage({ type: 'error', text: result.error })
       }

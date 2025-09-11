@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Real OAuth</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+    }
+    button {
+      background: #4285f4;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    button:hover {
+      background: #357ae8;
+    }
+    #log {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f5f5f5;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.9em;
+      white-space: pre-wrap;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Test Real Google OAuth</h1>
+  
+  <p>Click the button below to test the actual Google OAuth popup flow:</p>
+  
+  <button onclick="testRealOAuth()">Sign in with Google (Popup)</button>
+  
+  <div id="log"></div>
+  
+  <script>
+    const log = document.getElementById('log');
+    
+    function addLog(message) {
+      const timestamp = new Date().toLocaleTimeString();
+      log.textContent += `[${timestamp}] ${message}\n`;
+      log.scrollTop = log.scrollHeight;
+    }
+    
+    async function testRealOAuth() {
+      addLog('Fetching authService...');
+      
+      // Import authService
+      try {
+        const { authService } = await import('/src/services/authService.ts');
+        
+        addLog('Starting Google OAuth popup...');
+        
+        // Set up message listener to capture OAuth flow
+        const messageHandler = (event) => {
+          addLog(`Message from ${event.origin}: ${JSON.stringify(event.data)}`);
+        };
+        window.addEventListener('message', messageHandler);
+        
+        // Call the actual OAuth method
+        const result = await authService.signInWithGoogle(true);
+        
+        addLog(`OAuth result: ${JSON.stringify(result)}`);
+        
+        if (result.success) {
+          addLog('✅ OAuth successful!');
+        } else {
+          addLog(`❌ OAuth failed: ${result.error}`);
+        }
+        
+        // Clean up
+        window.removeEventListener('message', messageHandler);
+        
+      } catch (error) {
+        addLog(`Error: ${error.message}`);
+        console.error(error);
+      }
+    }
+    
+    addLog('Ready. Click button to test OAuth.');
+  </script>
+</body>
+</html>

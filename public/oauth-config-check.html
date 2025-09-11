@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OAuth Configuration Check</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 1.5rem;
+    }
+    h2 {
+      color: #555;
+      margin-top: 2rem;
+    }
+    .alert {
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    .alert-warning {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      color: #856404;
+    }
+    .alert-error {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
+    .alert-success {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+    code {
+      background: #f8f9fa;
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9em;
+      word-break: break-all;
+    }
+    ol, ul {
+      margin: 1rem 0;
+    }
+    li {
+      margin: 0.5rem 0;
+    }
+    .url-list {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 4px;
+      margin: 1rem 0;
+    }
+    .url-list li {
+      font-family: monospace;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>OAuth Configuration Check</h1>
+    
+    <div class="alert alert-error">
+      <h3>🚨 Issue Detected</h3>
+      <p>Google OAuth is redirecting to the base URL instead of <code>/auth/callback-popup</code>.</p>
+      <p>This happens when the redirect URI is not properly configured in Supabase.</p>
+    </div>
+    
+    <h2>✅ Fix Instructions</h2>
+    <ol>
+      <li>Go to your <strong>Supabase Dashboard</strong></li>
+      <li>Navigate to <strong>Authentication → Providers → Google</strong></li>
+      <li>In the <strong>"Redirect URLs"</strong> section, add ALL of these URLs:</li>
+    </ol>
+    
+    <div class="url-list">
+      <ul>
+        <li id="dev-popup"></li>
+        <li id="dev-callback"></li>
+        <li id="dev-official"></li>
+        <li id="prod-popup"></li>
+        <li id="prod-callback"></li>
+        <li id="prod-official"></li>
+      </ul>
+    </div>
+    
+    <ol start="4">
+      <li>Click <strong>Save</strong></li>
+      <li>Wait 1-2 minutes for changes to propagate</li>
+    </ol>
+    
+    <h2>🧪 Testing</h2>
+    <p>After updating the redirect URLs in Supabase:</p>
+    <ol>
+      <li>Clear your browser cookies for this domain</li>
+      <li>Try the Google OAuth popup flow again</li>
+      <li>The popup should now stay on <code>/auth/callback-popup</code> and close automatically</li>
+    </ol>
+    
+    <div class="alert alert-warning">
+      <h3>⚠️ Important</h3>
+      <p>Make sure to add BOTH development (localhost) and production URLs!</p>
+      <p>Your current origin: <code id="current-origin"></code></p>
+    </div>
+  </div>
+  
+  <script>
+    // Fill in the URLs dynamically
+    const origin = window.location.origin;
+    document.getElementById('current-origin').textContent = origin;
+    
+    // Development URLs
+    document.getElementById('dev-popup').textContent = 'http://localhost:3001/auth/callback-popup';
+    document.getElementById('dev-callback').textContent = 'http://localhost:3001/auth/callback';
+    document.getElementById('dev-official').textContent = 'http://localhost:3001/auth/callback-official';
+    
+    // Production URLs (replace with your domain)
+    const prodDomain = 'https://yourdomain.com';
+    document.getElementById('prod-popup').textContent = prodDomain + '/auth/callback-popup';
+    document.getElementById('prod-callback').textContent = prodDomain + '/auth/callback';
+    document.getElementById('prod-official').textContent = prodDomain + '/auth/callback-official';
+  </script>
+</body>
+</html>
