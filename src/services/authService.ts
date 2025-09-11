@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/client'
+import { supabase } from '@/lib/supabase'
 
 let authServiceInstance: AuthService | null = null
 
@@ -12,7 +12,6 @@ class AuthService {
   private sessionRefreshInterval: NodeJS.Timeout | null = null
   private sessionRefreshInProgress = false
   private lastSessionCheck: number | null = null
-  private supabase: ReturnType<typeof createClient> | null = null
 
   constructor() {
     if (authServiceInstance) {
@@ -22,10 +21,10 @@ class AuthService {
   }
 
   private getSupabase() {
-    if (!this.supabase && typeof window !== 'undefined') {
-      this.supabase = createClient()
+    if (typeof window === 'undefined') {
+      return null
     }
-    return this.supabase
+    return supabase
   }
 
   async initialize() {
