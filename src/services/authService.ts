@@ -1,5 +1,4 @@
 import { createClient } from '@/utils/supabase/client'
-import { OAuthPopupHandler } from '@/lib/oauth-popup'
 
 let authServiceInstance: AuthService | null = null
 
@@ -269,7 +268,7 @@ class AuthService {
     return { success: false, error: 'Failed to sign in' }
   }
 
-  async signInWithGoogle(usePopup: boolean = true) {
+  async signInWithGoogle() {
     try {
       const supabase = this.getSupabase()
       if (!supabase) {
@@ -279,12 +278,8 @@ class AuthService {
       // Get the current pathname to preserve locale
       const currentPath = window.location.pathname || '/en'
       
-      if (usePopup) {
-        return this.signInWithGooglePopup()
-      }
-      
       // Use PKCE flow with callback route
-      const redirectUrl = `${window.location.origin}/auth/callback-official?next=${encodeURIComponent(currentPath)}`
+      const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
 
       console.log('[Auth] Google sign in with redirect URL:', redirectUrl)
 
@@ -316,61 +311,6 @@ class AuthService {
     }
   }
 
-  async signInWithGooglePopup() {
-    return new Promise((resolve) => {
-      const supabase = this.getSupabase()
-      if (!supabase) {
-        resolve({ success: false, error: 'Supabase not configured' })
-        return
-      }
-
-      const currentPath = window.location.pathname || '/en'
-      const popupCallbackUrl = `${window.location.origin}/auth/callback-popup?next=${encodeURIComponent(currentPath)}`
-      
-      // Get OAuth URL
-      supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: popupCallbackUrl,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
-          skipBrowserRedirect: true // Important: don't redirect the main window
-        }
-      }).then(({ data, error }) => {
-        if (error) {
-          resolve({ success: false, error: error.message })
-          return
-        }
-
-        if (data?.url) {
-          // Open OAuth in popup
-          const popupHandler = new OAuthPopupHandler({
-            width: 500,
-            height: 700,
-            onSuccess: async (authData) => {
-              // Session should already be set by the exchange-code endpoint
-              await this.initialize() // Refresh auth state
-              resolve({ success: true, data: authData })
-            },
-            onError: (error) => {
-              resolve({ success: false, error: error.message })
-            },
-            onClosed: () => {
-              resolve({ success: false, error: 'Authentication cancelled' })
-            }
-          })
-
-          popupHandler.open(data.url)
-        } else {
-          resolve({ success: false, error: 'No OAuth URL returned' })
-        }
-      }).catch((error) => {
-        resolve({ success: false, error: error.message })
-      })
-    })
-  }
 
 
   async signOut() {
