@@ -61,11 +61,51 @@ export class OAuthPopupHandler {
 
     window.addEventListener('message', this.messageListener);
 
+    // Poll localStorage as fallback for COOP restrictions
+    let pollCount = 0;
+    const maxPolls = 60; // 30 seconds max
+    const pollInterval = setInterval(() => {
+      pollCount++;
+      
+      // Check localStorage for OAuth result
+      const storedResult = localStorage.getItem('oauth_popup_result');
+      if (storedResult) {
+        try {
+          const result = JSON.parse(storedResult);
+          localStorage.removeItem('oauth_popup_result');
+          clearInterval(pollInterval);
+          
+          console.log('[OAuthPopup] Received result via localStorage fallback:', result);
+          
+          if (result.error || result.sessionError) {
+            this.handleError(new Error(result.sessionError || result.error || 'OAuth failed'));
+          } else if (result.sessionData) {
+            this.handleSuccess(result.sessionData);
+          } else if (result.code) {
+            // We have an OAuth code but need to handle it
+            this.handleSuccess({ code: result.code, state: result.state });
+          }
+        } catch (e) {
+          console.error('[OAuthPopup] Failed to parse localStorage result:', e);
+        }
+      }
+      
+      if (pollCount >= maxPolls) {
+        clearInterval(pollInterval);
+        console.log('[OAuthPopup] localStorage polling timeout');
+      }
+    }, 500);
+
     // Check if popup is closed
     this.checkInterval = setInterval(() => {
       if (this.popup?.closed) {
-        this.cleanup();
-        this.options.onClosed?.();
+        // Wait a moment for localStorage fallback to work
+        setTimeout(() => {
+          clearInterval(pollInterval);
+          this.cleanup();
+          this.options.onClosed?.();
+        }, 1000);
+        clearInterval(this.checkInterval!);
       }
     }, 500);
   }

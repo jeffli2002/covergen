@@ -17,9 +17,9 @@ export async function GET(request: Request) {
     try {
       const cookieStore = cookies()
       
-      // Create response first to properly handle cookies
-      const successUrl = `${origin}/en/auth-success?next=${encodeURIComponent(next)}`
-      const response = NextResponse.redirect(successUrl)
+      // Create response for the final destination
+      const finalDestination = next && next !== '/en/auth-success' ? `${origin}${next}` : `${origin}/en`
+      const response = NextResponse.redirect(`${origin}/en/auth-success?next=${encodeURIComponent(finalDestination)}`)
       
       // Create Supabase client with cookie handling
       const supabase = createServerClient(
@@ -31,13 +31,24 @@ export async function GET(request: Request) {
               return cookieStore.get(name)?.value
             },
             set(name: string, value: string, options: CookieOptions) {
-              // Set cookies on both the request store and the response
-              cookieStore.set({ name, value, ...options })
-              response.cookies.set({ name, value, ...options })
+              // Set cookies on the response
+              response.cookies.set({ 
+                name, 
+                value, 
+                ...options,
+                // Ensure cookies are available to client
+                httpOnly: options.httpOnly ?? true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: options.sameSite ?? 'lax'
+              })
             },
             remove(name: string, options: CookieOptions) {
-              cookieStore.set({ name, value: '', ...options })
-              response.cookies.set({ name, value: '', ...options })
+              response.cookies.set({ 
+                name, 
+                value: '', 
+                ...options,
+                maxAge: 0
+              })
             },
           },
         }
@@ -57,7 +68,6 @@ export async function GET(request: Request) {
       })
       
       // The session cookies have been set via the cookie handler above
-      // Return the response with the cookies properly set
       return response
     } catch (error: any) {
       console.error('[Auth Callback] Unexpected error:', error)

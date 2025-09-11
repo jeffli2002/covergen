@@ -12,32 +12,31 @@ function AuthSuccessContent() {
   const searchParams = useSearchParams()
   
   useEffect(() => {
-    // Delay initial check to allow cookies to settle
-    const timeoutId = setTimeout(() => {
-      checkAuth()
-    }, 500)
+    // Check auth immediately on mount
+    checkAuth()
     
-    // Also listen for auth state changes
+    // Also listen for auth state changes as backup
     const supabase = createClient()
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('[AuthSuccess] Auth state changed:', event, session?.user?.email)
       
-      if (event === 'SIGNED_IN' && session) {
+      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') && session) {
         setUser(session.user)
         setChecking(false)
         
         // Handle redirect
         const next = searchParams.get('next')
         if (next && next !== '/en/auth-success') {
+          console.log('[AuthSuccess] Redirecting to:', next)
           router.push(next)
         } else {
+          console.log('[AuthSuccess] Redirecting to home')
           router.push('/en')
         }
       }
     })
     
     return () => {
-      clearTimeout(timeoutId)
       authListener?.subscription?.unsubscribe()
     }
   }, [searchParams, router])
@@ -48,7 +47,7 @@ function AuthSuccessContent() {
     
     const supabase = createClient()
     let retryCount = 0
-    const maxRetries = 3
+    const maxRetries = 5
     
     // Retry logic to wait for session to be established
     while (retryCount < maxRetries) {
@@ -56,9 +55,8 @@ function AuthSuccessContent() {
       
       // Give the auth state time to settle
       if (retryCount > 0) {
-        await new Promise(resolve => setTimeout(resolve, 1500))
+        await new Promise(resolve => setTimeout(resolve, 1000))
       }
-      
       
       // Check session
       const { data: { session }, error } = await supabase.auth.getSession()
@@ -73,18 +71,15 @@ function AuthSuccessContent() {
       if (session) {
         setUser(session.user)
         
-        // Check for redirect parameter
+        // Check for redirect parameter and redirect immediately
         const next = searchParams.get('next')
         if (next && next !== '/en/auth-success') {
           console.log('[AuthSuccess] Redirecting to:', next)
-          setTimeout(() => {
-            router.push(next)
-          }, 1000)
+          router.push(next)
         } else {
           // Default redirect to home after successful auth
-          setTimeout(() => {
-            router.push('/en')
-          }, 1000)
+          console.log('[AuthSuccess] Redirecting to home')
+          router.push('/en')
         }
         
         setChecking(false)
