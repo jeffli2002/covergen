@@ -20,13 +20,18 @@ export async function GET(request: Request) {
   const next = requestUrl.searchParams.get('next') || '/en'
   const origin = requestUrl.origin
 
+  // Log incoming Cookie header as requested by Supabase
+  const incomingCookieHeader = request.headers.get('cookie') || 'NO COOKIES'
+  console.log('[Auth Callback] Incoming Cookie header:', incomingCookieHeader)
+
   const debugData = { 
     event: 'callback_start',
     code: !!code, 
     next, 
     origin,
     env: process.env.NODE_ENV,
-    url: request.url 
+    url: request.url,
+    cookieHeader: incomingCookieHeader
   }
 
   console.log('[Auth Callback] Processing OAuth callback:', debugData)
@@ -56,6 +61,11 @@ export async function GET(request: Request) {
     }
 
     console.log('[Auth Callback] Incoming cookies:', Array.from(incomingCookies.keys()))
+    
+    // Specifically log code-verifier cookie
+    const codeVerifier = incomingCookies.get('sb-exungkcoaihcemcmhqdr-auth-token-code-verifier')
+    console.log('[Auth Callback] Code verifier cookie present:', !!codeVerifier)
+    console.log('[Auth Callback] Code verifier length:', codeVerifier?.length || 0)
 
     // Create Supabase client with custom cookie handling that captures ALL operations
     const supabase = createServerClient(
