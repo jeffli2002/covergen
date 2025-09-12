@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { supabase } from '@/lib/supabase-simple'
+import { supabase } from '@/lib/supabase'
 
 export default function OAuthProductionDebugPage() {
   const [debugInfo, setDebugInfo] = useState<any>({})
