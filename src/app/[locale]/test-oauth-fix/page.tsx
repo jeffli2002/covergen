@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { OAuthStateHandler } from '@/components/OAuthStateHandler'
+import type { Session } from '@supabase/supabase-js'
 
 export default function TestOAuthFixPage() {
   const [user, setUser] = useState<any>(null)
@@ -35,7 +36,7 @@ export default function TestOAuthFixPage() {
     checkSession()
     
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: Session | null) => {
       addLog(`Auth state change: ${event}`)
       if (session) {
         addLog(`User signed in: ${session.user.email}`)
