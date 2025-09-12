@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import AuthForm from '@/components/auth/AuthForm'
 import UserMenu from '@/components/auth/UserMenu'
 import LanguageSwitcher from '@/components/language-switcher'
+import UsageDisplay from '@/components/usage-display'
 import { Locale } from '@/lib/i18n/config'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -191,6 +192,9 @@ export default function Header({ locale, translations: t }: HeaderProps) {
 
           {/* User section */}
           <div className="flex items-center gap-3">
+            {/* Usage Display */}
+            <UsageDisplay />
+            
             <LanguageSwitcher currentLocale={locale} />
             {loading ? (
               <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />

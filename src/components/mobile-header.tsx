@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Crown, Menu, X, LogOut, Settings, Sparkles } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import AuthForm from '@/components/auth/AuthForm'
+import UsageDisplay from '@/components/usage-display'
 
 export default function MobileHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -32,15 +33,18 @@ export default function MobileHeader() {
       {/* Mobile Header */}
       <header className="lg:hidden border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex h-20 items-center justify-between px-4">
-          <h1 className="text-2xl md:text-3xl font-bold text-primary">CoverGen Pro</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-primary">CoverGen Pro</h1>
           
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsMenuOpen(true)}
-          >
-            <Menu className="w-5 h-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <UsageDisplay />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsMenuOpen(true)}
+            >
+              <Menu className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
       </header>
 
