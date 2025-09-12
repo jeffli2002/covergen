@@ -57,10 +57,7 @@ export async function POST(req: NextRequest) {
         planId: subscription.tier as 'pro' | 'pro_plus',
         successUrl,
         cancelUrl,
-        currentPlan: 'free', // Trial is treated as free for upgrade purposes
-        metadata: {
-          convertTrial: 'true'
-        }
+        currentPlan: 'free' // Trial is treated as free for upgrade purposes
       })
       
       if (!checkoutResult.success) {
