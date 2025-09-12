@@ -21,7 +21,7 @@ export default function TestOAuthPage() {
     checkDirectSession()
     
     // Subscribe to auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session: any) => {
       addLog(`Auth state changed: ${event}`)
       if (session) {
         addLog(`Session active: ${session.user.email}`)
