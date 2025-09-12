@@ -99,6 +99,9 @@ export async function checkGenerationLimit(userId: string | null): Promise<Gener
     }
 
     console.log('[checkGenerationLimit] Limit check result:', data)
+    console.log('[checkGenerationLimit] Subscription tier from DB:', data.subscription_tier)
+    console.log('[checkGenerationLimit] Is trial from DB:', data.is_trial)
+    console.log('[checkGenerationLimit] Trial ends at:', data.trial_ends_at)
     return data as GenerationLimitStatus
   } catch (error) {
     console.error('[checkGenerationLimit] Unexpected error:', error)

@@ -1,4 +1,4 @@
--- Consolidate subscription tables to avoid confusion
+-- Consolidate subscription tables to avoid confusion (Version 2 - Safer approach)
 -- This migration merges user_subscriptions and subscriptions tables into a single comprehensive table
 
 -- First, create the new consolidated subscriptions table with ALL needed columns
@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS public.subscriptions_consolidated (
   -- Plan and status
   tier VARCHAR(50) NOT NULL DEFAULT 'free', -- 'free', 'pro', 'pro_plus'
   status VARCHAR(50) NOT NULL DEFAULT 'active', -- 'active', 'trialing', 'canceled', 'expired', 'paused'
-  daily_limit INTEGER NOT NULL DEFAULT 3, -- Daily generation limit based on tier
+  daily_limit INTEGER NOT NULL DEFAULT 3, -- Daily generation limit based on tier (999 = unlimited)
   
   -- Trial tracking
   trial_started_at TIMESTAMPTZ,
@@ -71,107 +71,123 @@ CREATE POLICY "Users can view own subscription" ON public.subscriptions_consolid
 CREATE POLICY "Service role can manage all subscriptions" ON public.subscriptions_consolidated
   FOR ALL USING (auth.jwt()->>'role' = 'service_role');
 
--- Migrate data from user_subscriptions table
-INSERT INTO public.subscriptions_consolidated (
-  user_id,
-  tier,
-  status,
-  daily_limit,
-  expires_at,
-  cancel_at_period_end,
-  creem_customer_id,
-  creem_subscription_id,
-  current_period_start,
-  current_period_end,
-  metadata,
-  created_at,
-  updated_at,
-  -- Set trial dates for trialing subscriptions
-  trial_started_at,
-  trial_ended_at
-)
-SELECT 
-  user_id,
-  plan_type as tier,
-  status,
-  daily_limit,
-  expires_at,
-  COALESCE(cancel_at_period_end, false),
-  creem_customer_id,
-  creem_subscription_id,
-  current_period_start,
-  current_period_end,
-  COALESCE(metadata, '{}'::jsonb),
-  created_at,
-  updated_at,
-  -- For trialing status, assume trial started at creation
-  CASE WHEN status = 'trialing' THEN created_at ELSE NULL END,
-  CASE WHEN status = 'trialing' AND expires_at < NOW() THEN expires_at ELSE NULL END
-FROM public.user_subscriptions
-ON CONFLICT (user_id) DO UPDATE SET
-  tier = EXCLUDED.tier,
-  status = EXCLUDED.status,
-  daily_limit = EXCLUDED.daily_limit,
-  expires_at = EXCLUDED.expires_at,
-  updated_at = NOW();
+-- Check if user_subscriptions table exists and has data
+DO $$
+BEGIN
+  IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'user_subscriptions' AND table_schema = 'public') THEN
+    -- Migrate data from user_subscriptions table
+    INSERT INTO public.subscriptions_consolidated (
+      user_id,
+      tier,
+      status,
+      daily_limit,
+      expires_at,
+      cancel_at_period_end,
+      creem_customer_id,
+      creem_subscription_id,
+      current_period_start,
+      current_period_end,
+      metadata,
+      created_at,
+      updated_at,
+      -- Set trial dates for trialing subscriptions
+      trial_started_at,
+      trial_ended_at
+    )
+    SELECT 
+      user_id,
+      plan_type as tier,
+      status,
+      COALESCE(daily_limit, 3), -- Default to 3 if null
+      expires_at,
+      COALESCE(cancel_at_period_end, false),
+      creem_customer_id,
+      creem_subscription_id,
+      current_period_start,
+      current_period_end,
+      COALESCE(metadata, '{}'::jsonb),
+      created_at,
+      updated_at,
+      -- For trialing status, assume trial started at creation
+      CASE WHEN status = 'trialing' THEN created_at ELSE NULL END,
+      CASE WHEN status = 'trialing' AND expires_at < NOW() THEN expires_at ELSE NULL END
+    FROM public.user_subscriptions
+    ON CONFLICT (user_id) DO UPDATE SET
+      tier = EXCLUDED.tier,
+      status = EXCLUDED.status,
+      daily_limit = EXCLUDED.daily_limit,
+      expires_at = EXCLUDED.expires_at,
+      updated_at = NOW();
+  END IF;
+END $$;
 
--- Migrate data from subscriptions table (if any exists)
-INSERT INTO public.subscriptions_consolidated (
-  user_id,
-  tier,
-  status,
-  daily_limit,
-  current_period_start,
-  current_period_end,
-  cancel_at_period_end,
-  creem_subscription_id,
-  created_at,
-  updated_at,
-  -- Set trial dates based on status
-  trial_started_at,
-  trial_ended_at,
-  paid_started_at
-)
-SELECT 
-  user_id,
-  tier,
-  status,
-  -- Set daily limit based on tier and status
-  CASE
-    WHEN tier = 'free' THEN 3
-    WHEN tier = 'pro' AND status = 'trialing' THEN 4
-    WHEN tier = 'pro' AND status != 'trialing' THEN 999 -- Effectively unlimited
-    WHEN tier = 'pro_plus' AND status = 'trialing' THEN 6
-    WHEN tier = 'pro_plus' AND status != 'trialing' THEN 999 -- Effectively unlimited
-    ELSE 3
-  END as daily_limit,
-  current_period_start,
-  current_period_end,
-  COALESCE(cancel_at_period_end, false),
-  creem_subscription_id,
-  created_at,
-  updated_at,
-  -- For trialing status, use period start as trial start
-  CASE WHEN status = 'trialing' THEN current_period_start ELSE NULL END,
-  CASE WHEN status = 'trialing' AND current_period_end < NOW() THEN current_period_end ELSE NULL END,
-  CASE WHEN status = 'active' AND tier != 'free' THEN current_period_start ELSE NULL END
-FROM public.subscriptions
-WHERE EXISTS (SELECT 1 FROM public.subscriptions)
-ON CONFLICT (user_id) DO UPDATE SET
-  -- Only update if the record in subscriptions table is newer
-  tier = CASE 
-    WHEN public.subscriptions_consolidated.updated_at < EXCLUDED.updated_at 
-    THEN EXCLUDED.tier 
-    ELSE public.subscriptions_consolidated.tier 
-  END,
-  status = CASE 
-    WHEN public.subscriptions_consolidated.updated_at < EXCLUDED.updated_at 
-    THEN EXCLUDED.status 
-    ELSE public.subscriptions_consolidated.status 
-  END,
-  current_period_start = COALESCE(EXCLUDED.current_period_start, public.subscriptions_consolidated.current_period_start),
-  current_period_end = COALESCE(EXCLUDED.current_period_end, public.subscriptions_consolidated.current_period_end),
-  updated_at = NOW();
+-- Check if subscriptions table exists and has data
+DO $$
+BEGIN
+  IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'subscriptions' AND table_schema = 'public') THEN
+    -- Migrate data from subscriptions table
+    INSERT INTO public.subscriptions_consolidated (
+      user_id,
+      tier,
+      status,
+      daily_limit,
+      current_period_start,
+      current_period_end,
+      cancel_at_period_end,
+      creem_subscription_id,
+      created_at,
+      updated_at,
+      -- Set trial dates based on status
+      trial_started_at,
+      trial_ended_at,
+      paid_started_at
+    )
+    SELECT 
+      user_id,
+      tier,
+      status,
+      -- Set daily limit based on tier and status
+      CASE
+        WHEN tier = 'free' THEN 3
+        WHEN tier = 'pro' AND status = 'trialing' THEN 4
+        WHEN tier = 'pro' AND status != 'trialing' THEN 999 -- Effectively unlimited
+        WHEN tier = 'pro_plus' AND status = 'trialing' THEN 6
+        WHEN tier = 'pro_plus' AND status != 'trialing' THEN 999 -- Effectively unlimited
+        ELSE 3
+      END as daily_limit,
+      current_period_start,
+      current_period_end,
+      COALESCE(cancel_at_period_end, false),
+      creem_subscription_id,
+      created_at,
+      updated_at,
+      -- For trialing status, use period start as trial start
+      CASE WHEN status = 'trialing' THEN current_period_start ELSE NULL END,
+      CASE WHEN status = 'trialing' AND current_period_end < NOW() THEN current_period_end ELSE NULL END,
+      CASE WHEN status = 'active' AND tier != 'free' THEN current_period_start ELSE NULL END
+    FROM public.subscriptions
+    ON CONFLICT (user_id) DO UPDATE SET
+      -- Only update if the record in subscriptions table is newer
+      tier = CASE 
+        WHEN public.subscriptions_consolidated.updated_at < EXCLUDED.updated_at 
+        THEN EXCLUDED.tier 
+        ELSE public.subscriptions_consolidated.tier 
+      END,
+      status = CASE 
+        WHEN public.subscriptions_consolidated.updated_at < EXCLUDED.updated_at 
+        THEN EXCLUDED.status 
+        ELSE public.subscriptions_consolidated.status 
+      END,
+      daily_limit = CASE 
+        WHEN public.subscriptions_consolidated.updated_at < EXCLUDED.updated_at 
+        THEN EXCLUDED.daily_limit 
+        ELSE public.subscriptions_consolidated.daily_limit 
+      END,
+      current_period_start = COALESCE(EXCLUDED.current_period_start, public.subscriptions_consolidated.current_period_start),
+      current_period_end = COALESCE(EXCLUDED.current_period_end, public.subscriptions_consolidated.current_period_end),
+      updated_at = NOW();
+  END IF;
+END $$;
 
 -- Set correct daily limits based on tier
 UPDATE public.subscriptions_consolidated
@@ -241,27 +257,26 @@ BEGIN
     -- Set limits based on subscription
     IF v_subscription.tier = 'free' THEN
         v_monthly_limit := COALESCE((v_config->>'free_monthly')::int, 10);
-        v_daily_limit := COALESCE((v_config->>'free_daily')::int, 3);
-        v_trial_limit := NULL;
+        v_daily_limit := COALESCE(v_subscription.daily_limit, (v_config->>'free_daily')::int, 3);
     ELSIF v_is_trial THEN
         -- Trial users get daily limits and prorated trial total
         IF v_subscription.tier = 'pro' THEN
             v_trial_limit := CEIL((COALESCE((v_config->>'pro_monthly')::int, 120)::float / 30) * COALESCE((v_config->>'trial_days')::int, 3));
-            v_daily_limit := COALESCE((v_config->>'pro_trial_daily')::int, 4);
+            v_daily_limit := COALESCE(v_subscription.daily_limit, (v_config->>'pro_trial_daily')::int, 4);
             v_monthly_limit := NULL;
         ELSIF v_subscription.tier = 'pro_plus' THEN
             v_trial_limit := CEIL((COALESCE((v_config->>'pro_plus_monthly')::int, 300)::float / 30) * COALESCE((v_config->>'trial_days')::int, 3));
-            v_daily_limit := COALESCE((v_config->>'pro_plus_trial_daily')::int, 6);
+            v_daily_limit := COALESCE(v_subscription.daily_limit, (v_config->>'pro_plus_trial_daily')::int, 6);
             v_monthly_limit := NULL;
         END IF;
     ELSE
         -- Paid users get full monthly quotas, no daily limit (999 = unlimited)
         IF v_subscription.tier = 'pro' THEN
             v_monthly_limit := COALESCE((v_config->>'pro_monthly')::int, 120);
-            v_daily_limit := CASE WHEN v_subscription.daily_limit = 999 THEN NULL ELSE v_subscription.daily_limit END;
+            v_daily_limit := CASE WHEN v_subscription.daily_limit >= 999 THEN NULL ELSE v_subscription.daily_limit END;
         ELSIF v_subscription.tier = 'pro_plus' THEN
             v_monthly_limit := COALESCE((v_config->>'pro_plus_monthly')::int, 300);
-            v_daily_limit := CASE WHEN v_subscription.daily_limit = 999 THEN NULL ELSE v_subscription.daily_limit END;
+            v_daily_limit := CASE WHEN v_subscription.daily_limit >= 999 THEN NULL ELSE v_subscription.daily_limit END;
         END IF;
     END IF;
     
@@ -356,17 +371,26 @@ CREATE TRIGGER on_auth_user_created
   EXECUTE FUNCTION public.handle_new_user();
 
 -- Create updated_at trigger
-CREATE TRIGGER handle_subscriptions_consolidated_updated_at
+CREATE OR REPLACE TRIGGER handle_subscriptions_consolidated_updated_at
   BEFORE UPDATE ON public.subscriptions_consolidated
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_updated_at();
 
--- Drop old tables and rename new one (commented out for safety - run manually after verification)
--- DROP TABLE IF EXISTS public.user_subscriptions CASCADE;
--- DROP TABLE IF EXISTS public.subscriptions CASCADE;
--- ALTER TABLE public.subscriptions_consolidated RENAME TO subscriptions;
+-- Rename old tables to backup (safer than dropping)
+DO $$
+BEGIN
+  -- Backup user_subscriptions table if it exists
+  IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'user_subscriptions' AND table_schema = 'public') THEN
+    EXECUTE 'ALTER TABLE public.user_subscriptions RENAME TO user_subscriptions_old_backup';
+  END IF;
+  
+  -- Backup subscriptions table if it exists
+  IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'subscriptions' AND table_schema = 'public') THEN
+    EXECUTE 'ALTER TABLE public.subscriptions RENAME TO subscriptions_old_backup';
+  END IF;
+END $$;
 
--- For now, create views to maintain compatibility
+-- Now create views for backward compatibility
 CREATE OR REPLACE VIEW public.user_subscriptions AS
 SELECT 
   id,
@@ -402,3 +426,57 @@ FROM public.subscriptions_consolidated;
 -- Grant permissions on views
 GRANT SELECT ON public.user_subscriptions TO authenticated;
 GRANT SELECT ON public.subscriptions TO authenticated;
+
+-- Create INSTEAD OF triggers for the views to handle inserts/updates
+CREATE OR REPLACE FUNCTION handle_user_subscriptions_insert()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.subscriptions_consolidated (
+    user_id,
+    tier,
+    status,
+    daily_limit,
+    expires_at,
+    cancel_at_period_end,
+    creem_customer_id,
+    creem_subscription_id,
+    current_period_start,
+    current_period_end,
+    metadata
+  ) VALUES (
+    NEW.user_id,
+    NEW.plan_type,
+    NEW.status,
+    NEW.daily_limit,
+    NEW.expires_at,
+    NEW.cancel_at_period_end,
+    NEW.creem_customer_id,
+    NEW.creem_subscription_id,
+    NEW.current_period_start,
+    NEW.current_period_end,
+    NEW.metadata
+  )
+  ON CONFLICT (user_id) DO UPDATE SET
+    tier = EXCLUDED.tier,
+    status = EXCLUDED.status,
+    daily_limit = EXCLUDED.daily_limit,
+    expires_at = EXCLUDED.expires_at,
+    cancel_at_period_end = EXCLUDED.cancel_at_period_end,
+    creem_customer_id = EXCLUDED.creem_customer_id,
+    creem_subscription_id = EXCLUDED.creem_subscription_id,
+    current_period_start = EXCLUDED.current_period_start,
+    current_period_end = EXCLUDED.current_period_end,
+    metadata = EXCLUDED.metadata,
+    updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER user_subscriptions_instead_insert
+  INSTEAD OF INSERT ON public.user_subscriptions
+  FOR EACH ROW
+  EXECUTE FUNCTION handle_user_subscriptions_insert();
+
+-- Optional: After verifying everything works, you can drop the backup tables
+-- DROP TABLE IF EXISTS public.user_subscriptions_old_backup CASCADE;
+-- DROP TABLE IF EXISTS public.subscriptions_old_backup CASCADE;

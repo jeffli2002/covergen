@@ -82,23 +82,30 @@ export default function UsageDisplay() {
     ? 'bg-purple-100 text-purple-800 border-purple-200'
     : 'bg-gray-100 text-gray-800 border-gray-200'
 
-  // Determine what limit to show (daily for free/trial, monthly for paid)
+  // Determine what to display based on user type
   const isPaidUser = !usageStatus.is_trial && (usageStatus.subscription_tier === 'pro' || usageStatus.subscription_tier === 'pro_plus')
-  const limitType = isPaidUser ? 'monthly' : 'daily'
   
-  // For paid users, we need to fetch monthly data
-  const displayLimit = isPaidUser 
-    ? (usageStatus.monthly_limit || usageStatus.daily_limit)
-    : usageStatus.daily_limit
-    
-  const displayRemaining = isPaidUser
-    ? (usageStatus.remaining_monthly !== undefined ? usageStatus.remaining_monthly : usageStatus.remaining_daily)
-    : usageStatus.remaining_daily
+  // Calculate used and total for consistent display
+  let used: number
+  let total: number | null
+  let period: string
+  
+  if (isPaidUser) {
+    // Paid users: show monthly usage
+    used = usageStatus.monthly_usage || 0
+    total = usageStatus.monthly_limit
+    period = 'this month'
+  } else {
+    // Free and trial users: show daily usage
+    used = usageStatus.daily_usage || 0
+    total = usageStatus.daily_limit
+    period = 'today'
+  }
 
-  // Determine display color based on remaining usage
-  const remainingPercentage = displayRemaining && displayLimit > 0 
-    ? (displayRemaining / displayLimit) * 100 
-    : 0
+  // Calculate percentage for color coding
+  const remainingPercentage = total && total > 0 
+    ? ((total - used) / total) * 100 
+    : 100
     
   let colorClass = 'bg-green-100 text-green-800'
   if (remainingPercentage <= 0) {
@@ -111,11 +118,15 @@ export default function UsageDisplay() {
 
   return (
     <div className="flex items-center gap-1 md:gap-2">
-      <Badge variant="secondary" className={`${colorClass} flex items-center gap-1 px-2 md:px-3 py-1`}>
+      <Badge 
+        variant="secondary" 
+        className={`${colorClass} flex items-center gap-1 px-2 md:px-3 py-1`}
+        title={`${used} images generated ${period} out of ${total || 'unlimited'}`}
+      >
         <Sparkles className="w-3 h-3" />
         <span className="text-xs font-medium">
-          {displayRemaining}/{displayLimit}
-          <span className="hidden sm:inline"> {limitType}</span>
+          {used}/{total || '∞'}
+          <span className="hidden sm:inline ml-1">{period}</span>
         </span>
       </Badge>
       
