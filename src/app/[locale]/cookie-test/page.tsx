@@ -25,21 +25,21 @@ export default function CookieTestPage() {
   const setCookieWithDomain = () => {
     // Test setting a cookie with domain
     document.cookie = `test-domain-cookie=test-value; Domain=.covergen.pro; Path=/; SameSite=None; Secure`
-    setTestResults(prev => ({ ...prev, domainCookieSet: true }))
+    setTestResults((prev: any) => ({ ...prev, domainCookieSet: true }))
     checkCookies()
   }
 
   const setCookieWithoutDomain = () => {
     // Test setting a cookie without domain
     document.cookie = `test-no-domain-cookie=test-value; Path=/; SameSite=None; Secure`
-    setTestResults(prev => ({ ...prev, noDomainCookieSet: true }))
+    setTestResults((prev: any) => ({ ...prev, noDomainCookieSet: true }))
     checkCookies()
   }
 
   const testCallbackWithCookies = async () => {
     const response = await fetch('/api/test-oauth-flow?action=callback&code=TEST')
     const data = await response.json()
-    setTestResults(prev => ({ ...prev, callbackTest: data }))
+    setTestResults((prev: any) => ({ ...prev, callbackTest: data }))
   }
 
   return (
