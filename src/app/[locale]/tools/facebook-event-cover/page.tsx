@@ -21,5 +21,9 @@ export default async function FacebookEventCoverPage({
 }) {
   const dict = await getDictionary(params.locale)
 
-  return <FacebookEventCoverClient locale={params.locale} translations={dict} />
+  return (
+    <ClientBoundary>
+      <FacebookEventCoverClient locale={params.locale} translations={dict} />
+    </ClientBoundary>
+  )
 }

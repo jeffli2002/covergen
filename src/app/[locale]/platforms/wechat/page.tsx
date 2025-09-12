@@ -35,5 +35,9 @@ export default async function WeChatCoverMaker({
 }) {
   const dict = await getDictionary(locale)
 
-  return <WeChatCoverMakerClient locale={locale} translations={dict} />
+  return (
+    <ClientBoundary>
+      <WeChatCoverMakerClient locale={locale} translations={dict} />
+    </ClientBoundary>
+  )
 }

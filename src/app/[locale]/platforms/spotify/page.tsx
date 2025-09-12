@@ -35,5 +35,9 @@ export default async function SpotifyPlaylistCoverMaker({
 }) {
   const dict = await getDictionary(locale)
 
-  return <SpotifyPlaylistCoverMakerClient locale={locale} translations={dict} />
+  return (
+    <ClientBoundary>
+      <SpotifyPlaylistCoverMakerClient locale={locale} translations={dict} />
+    </ClientBoundary>
+  )
 }

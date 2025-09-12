@@ -18,10 +18,14 @@ interface PaymentPageProps {
 }
 
 export default function PaymentPage({ params, searchParams }: PaymentPageProps) {
-  return <PaymentPageClient 
+  return (
+    <ClientBoundary>
+      <PaymentPageClient 
     locale={params.locale} 
     initialPlan={searchParams.plan}
     isUpgrade={searchParams.upgrade === 'true'}
     redirectUrl={searchParams.redirect}
   />
+    </ClientBoundary>
+  )
 }

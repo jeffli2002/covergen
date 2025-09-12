@@ -88,5 +88,9 @@ export default async function BilibiliVideoCoverPage({
 }) {
   const dict = await getDictionary(locale)
   
-  return <BilibiliCoverClient locale={locale} translations={dict} />
+  return (
+    <ClientBoundary>
+      <BilibiliCoverClient locale={locale} translations={dict} />
+    </ClientBoundary>
+  )
 }

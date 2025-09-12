@@ -9,5 +9,9 @@ export default async function FeedbackPage({
 }) {
   const dict = await getDictionary(locale)
 
-  return <FeedbackPageClient locale={locale} translations={dict} />
+  return (
+    <ClientBoundary>
+      <FeedbackPageClient locale={locale} translations={dict} />
+    </ClientBoundary>
+  )
 }

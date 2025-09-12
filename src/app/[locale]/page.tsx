@@ -1,6 +1,7 @@
 import { Locale } from '@/lib/i18n/config'
 import { getDictionary } from '@/lib/i18n/get-dictionary'
 import HomePageClient from './page-client'
+import ClientBoundary from '@/components/client-boundary'
 
 export default async function HomePage({
   params: { locale },
@@ -9,5 +10,9 @@ export default async function HomePage({
 }) {
   const dict = await getDictionary(locale)
 
-  return <HomePageClient locale={locale} translations={dict} />
+  return (
+    <ClientBoundary>
+      <HomePageClient locale={locale} translations={dict} />
+    </ClientBoundary>
+  )
 }

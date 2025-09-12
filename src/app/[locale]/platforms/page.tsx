@@ -86,5 +86,9 @@ export default async function PlatformsHubPage({
 }) {
   const dict = await getDictionary(locale)
   
-  return <PlatformsHubClient locale={locale} translations={dict} />
+  return (
+    <ClientBoundary>
+      <PlatformsHubClient locale={locale} translations={dict} />
+    </ClientBoundary>
+  )
 }

@@ -13,5 +13,9 @@ interface PaymentCancelPageProps {
 }
 
 export default function PaymentCancelPage({ params }: PaymentCancelPageProps) {
-  return <PaymentCancelClient locale={params.locale} />
+  return (
+    <ClientBoundary>
+      <PaymentCancelClient locale={params.locale} />
+    </ClientBoundary>
+  )
 }

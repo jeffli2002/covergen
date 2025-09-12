@@ -9,5 +9,9 @@ export default async function TermsPage({
 }) {
   const dict = await getDictionary(locale)
 
-  return <TermsPageClient locale={locale} translations={dict} />
+  return (
+    <ClientBoundary>
+      <TermsPageClient locale={locale} translations={dict} />
+    </ClientBoundary>
+  )
 }

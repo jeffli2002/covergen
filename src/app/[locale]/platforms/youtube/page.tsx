@@ -4,6 +4,7 @@ import YouTubeThumbnailMakerClient from './page-client'
 import { Metadata } from 'next'
 import { getPlatformKeywords } from '@/lib/seo-utils'
 import { getHighOpportunityKeywords } from '@/lib/seo/keyword-merger'
+import ClientBoundary from '@/components/client-boundary'
 
 // Get optimized keywords from our SEO strategy
 const platformKeywords = getPlatformKeywords('youtube')
@@ -100,5 +101,9 @@ export default async function YouTubeThumbnailMaker({
 }) {
   const dict = await getDictionary(locale)
 
-  return <YouTubeThumbnailMakerClient locale={locale} translations={dict} />
+  return (
+    <ClientBoundary>
+      <YouTubeThumbnailMakerClient locale={locale} translations={dict} />
+    </ClientBoundary>
+  )
 }

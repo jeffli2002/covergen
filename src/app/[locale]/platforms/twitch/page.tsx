@@ -35,5 +35,9 @@ export default async function TwitchGraphicsMaker({
 }) {
   const dict = await getDictionary(locale)
 
-  return <TwitchGraphicsMakerClient locale={locale} translations={dict} />
+  return (
+    <ClientBoundary>
+      <TwitchGraphicsMakerClient locale={locale} translations={dict} />
+    </ClientBoundary>
+  )
 }

@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import BlogContent from './BlogContent'
+import ClientBoundary from '@/components/client-boundary'
 
 export const metadata: Metadata = {
   title: 'Blog - AI Cover Generation Tips & Content Creator Resources',
@@ -25,5 +26,9 @@ export const metadata: Metadata = {
 }
 
 export default function BlogPage() {
-  return <BlogContent />
+  return (
+    <ClientBoundary>
+      <BlogContent />
+    </ClientBoundary>
+  )
 }

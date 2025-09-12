@@ -19,5 +19,9 @@ export default async function RefundPage({
 }) {
   const dict = await getDictionary(params.locale)
 
-  return <RefundPageClient locale={params.locale} translations={dict} />
+  return (
+    <ClientBoundary>
+      <RefundPageClient locale={params.locale} translations={dict} />
+    </ClientBoundary>
+  )
 }

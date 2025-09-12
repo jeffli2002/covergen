@@ -21,5 +21,9 @@ export default async function SpotifyPlaylistCoverPage({
 }) {
   const dict = await getDictionary(params.locale)
 
-  return <SpotifyPlaylistCoverClient locale={params.locale} translations={dict} />
+  return (
+    <ClientBoundary>
+      <SpotifyPlaylistCoverClient locale={params.locale} translations={dict} />
+    </ClientBoundary>
+  )
 }

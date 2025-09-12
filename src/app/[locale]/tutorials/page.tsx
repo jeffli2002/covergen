@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import TutorialsContent from './TutorialsContent'
+import ClientBoundary from '@/components/client-boundary'
 
 export const metadata: Metadata = {
   title: 'Tutorials - Learn AI Cover Generation Best Practices',
@@ -25,5 +26,9 @@ export const metadata: Metadata = {
 }
 
 export default function TutorialsPage() {
-  return <TutorialsContent />
+  return (
+    <ClientBoundary>
+      <TutorialsContent />
+    </ClientBoundary>
+  )
 }

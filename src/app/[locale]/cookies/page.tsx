@@ -9,5 +9,9 @@ export default async function CookiesPage({
 }) {
   const dict = await getDictionary(locale)
 
-  return <CookiesPageClient locale={locale} translations={dict} />
+  return (
+    <ClientBoundary>
+      <CookiesPageClient locale={locale} translations={dict} />
+    </ClientBoundary>
+  )
 }

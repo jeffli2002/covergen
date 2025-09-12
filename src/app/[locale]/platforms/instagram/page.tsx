@@ -35,5 +35,9 @@ export default async function InstagramContentMaker({
 }) {
   const dict = await getDictionary(locale)
 
-  return <InstagramContentMakerClient locale={locale} translations={dict} />
+  return (
+    <ClientBoundary>
+      <InstagramContentMakerClient locale={locale} translations={dict} />
+    </ClientBoundary>
+  )
 }

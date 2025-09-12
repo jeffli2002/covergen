@@ -2,6 +2,7 @@ import { Locale } from '@/lib/i18n/config'
 import { getDictionary } from '@/lib/i18n/get-dictionary'
 import TikTokCoverMakerClient from './page-client'
 import { Metadata } from 'next'
+import ClientBoundary from '@/components/client-boundary'
 
 export const metadata: Metadata = {
   title: 'TikTok Cover Maker - AI Video Cover Generator',
@@ -45,5 +46,9 @@ export default async function TikTokCoverMaker({
 }) {
   const dict = await getDictionary(locale)
 
-  return <TikTokCoverMakerClient locale={locale} translations={dict} />
+  return (
+    <ClientBoundary>
+      <TikTokCoverMakerClient locale={locale} translations={dict} />
+    </ClientBoundary>
+  )
 }

@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import AccountPageClient from './page-client'
+import ClientBoundary from '@/components/client-boundary'
 
 export const metadata: Metadata = {
   title: 'My Account - CoverGen AI',
@@ -13,5 +14,9 @@ interface AccountPageProps {
 }
 
 export default function AccountPage({ params }: AccountPageProps) {
-  return <AccountPageClient locale={params.locale} />
+  return (
+    <ClientBoundary>
+      <AccountPageClient locale={params.locale} />
+    </ClientBoundary>
+  )
 }

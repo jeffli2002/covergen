@@ -35,5 +35,9 @@ export default async function LinkedInGraphicsMaker({
 }) {
   const dict = await getDictionary(locale)
 
-  return <LinkedInGraphicsMakerClient locale={locale} translations={dict} />
+  return (
+    <ClientBoundary>
+      <LinkedInGraphicsMakerClient locale={locale} translations={dict} />
+    </ClientBoundary>
+  )
 }

@@ -35,5 +35,9 @@ export default async function RednoteCoverMaker({
 }) {
   const dict = await getDictionary(locale)
 
-  return <RednoteCoverMakerClient locale={locale} translations={dict} />
+  return (
+    <ClientBoundary>
+      <RednoteCoverMakerClient locale={locale} translations={dict} />
+    </ClientBoundary>
+  )
 }

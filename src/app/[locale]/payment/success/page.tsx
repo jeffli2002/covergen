@@ -16,8 +16,12 @@ interface PaymentSuccessPageProps {
 }
 
 export default function PaymentSuccessPage({ params, searchParams }: PaymentSuccessPageProps) {
-  return <PaymentSuccessClient 
+  return (
+    <ClientBoundary>
+      <PaymentSuccessClient 
     locale={params.locale} 
     sessionId={searchParams.session_id}
   />
+    </ClientBoundary>
+  )
 }

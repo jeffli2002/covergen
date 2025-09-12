@@ -9,5 +9,9 @@ export default async function SupportPage({
 }) {
   const dict = await getDictionary(locale)
 
-  return <SupportPageClient locale={locale} translations={dict} />
+  return (
+    <ClientBoundary>
+      <SupportPageClient locale={locale} translations={dict} />
+    </ClientBoundary>
+  )
 }

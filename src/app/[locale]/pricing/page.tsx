@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import PricingSection from '@/components/pricing-section'
 import { Locale } from '@/lib/i18n/config'
 import { getStaticSubscriptionConfig, getStaticTrialPeriodText, isStaticTrialEnabled } from '@/lib/subscription-config-static'
+import ClientBoundary from '@/components/client-boundary'
 
 // Get configuration at build time
 const config = getStaticSubscriptionConfig()

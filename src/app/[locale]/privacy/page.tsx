@@ -9,5 +9,9 @@ export default async function PrivacyPage({
 }) {
   const dict = await getDictionary(locale)
 
-  return <PrivacyPageClient locale={locale} translations={dict} />
+  return (
+    <ClientBoundary>
+      <PrivacyPageClient locale={locale} translations={dict} />
+    </ClientBoundary>
+  )
 }

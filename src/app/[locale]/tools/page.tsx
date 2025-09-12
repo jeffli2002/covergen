@@ -87,5 +87,9 @@ export default async function ToolsHubPage({
 }) {
   const dict = await getDictionary(locale)
   
-  return <ToolsHubClient locale={locale} translations={dict} />
+  return (
+    <ClientBoundary>
+      <ToolsHubClient locale={locale} translations={dict} />
+    </ClientBoundary>
+  )
 }
