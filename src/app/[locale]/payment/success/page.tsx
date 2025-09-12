@@ -1,3 +1,5 @@
+import ClientBoundary from '@/components/client-boundary'
+
 import { Metadata } from 'next'
 import PaymentSuccessClient from './page-client'
 

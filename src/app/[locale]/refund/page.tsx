@@ -1,3 +1,5 @@
+import ClientBoundary from '@/components/client-boundary'
+
 import RefundPageClient from './page-client'
 import { Locale } from '@/lib/i18n/config'
 import { getDictionary } from '@/lib/i18n/get-dictionary'

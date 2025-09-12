@@ -1,3 +1,5 @@
+import ClientBoundary from '@/components/client-boundary'
+
 import { Metadata } from 'next'
 import { getDictionary } from '@/lib/i18n/get-dictionary'
 import { Locale } from '@/lib/i18n/config'
