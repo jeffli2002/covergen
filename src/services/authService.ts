@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase'
-import { supabaseAuth } from '@/lib/supabase-auth'
 
 let authServiceInstance: AuthService | null = null
 
@@ -271,8 +270,8 @@ class AuthService {
 
   async signInWithGoogle() {
     try {
-      // Use the simplified auth client for OAuth operations
-      if (!supabaseAuth) {
+      const supabase = this.getSupabase()
+      if (!supabase) {
         throw new Error('Supabase not configured')
       }
 
@@ -283,9 +282,9 @@ class AuthService {
       const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
 
       console.log('[Auth] Google sign in with redirect URL:', redirectUrl)
-      console.log('[Auth] Using simplified auth client for OAuth')
+      console.log('[Auth] Using main Supabase client for OAuth')
 
-      const { data, error } = await supabaseAuth.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: redirectUrl,
