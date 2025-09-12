@@ -82,8 +82,19 @@ class AuthService {
       try {
         console.log('[Auth] Checking for session from Supabase...')
         
-        // Simply get the session without timeout
-        const { data: { session }, error } = await supabase.auth.getSession()
+        // Get session with timeout to prevent hanging
+        const getSessionPromise = supabase.auth.getSession()
+        const timeoutPromise = new Promise((resolve) => {
+          setTimeout(() => {
+            console.warn('[Auth] getSession timeout - proceeding without session')
+            resolve({ data: { session: null }, error: new Error('Session check timeout') })
+          }, 3000) // 3 second timeout
+        })
+        
+        const { data: { session }, error } = await Promise.race([
+          getSessionPromise,
+          timeoutPromise
+        ]) as any
         
         console.log('[Auth] Session check result:', { 
           hasSession: !!session,

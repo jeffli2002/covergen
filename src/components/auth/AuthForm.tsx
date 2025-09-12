@@ -124,19 +124,30 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
     setMessage({ type: '', text: '' })
 
     try {
+      console.log('[AuthForm] Starting Google sign-in...')
+      
+      // Add timeout to prevent hanging
+      const signInPromise = signInWithGoogle()
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Google sign-in timeout. Please try again.')), 10000) // 10 second timeout
+      })
+      
       // Use standard OAuth flow (not popup) for better compatibility
-      const result = await signInWithGoogle()
+      const result = await Promise.race([signInPromise, timeoutPromise]) as any
+      
+      console.log('[AuthForm] Google sign-in result:', result)
       
       if (result.success) {
         setMessage({ type: 'info', text: 'Redirecting to Google...' })
         // The page will redirect for OAuth flow
       } else {
-        setMessage({ type: 'error', text: result.error })
+        setMessage({ type: 'error', text: result.error || 'Failed to sign in with Google' })
+        setIsLoading(false) // Reset loading on error
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Google login failed' })
-    } finally {
-      setIsLoading(false)
+      console.error('[AuthForm] Google sign-in error:', error)
+      setMessage({ type: 'error', text: error instanceof Error ? error.message : 'Google login failed' })
+      setIsLoading(false) // Reset loading on error
     }
   }
 

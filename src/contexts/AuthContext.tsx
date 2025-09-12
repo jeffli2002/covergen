@@ -34,8 +34,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(user)
         })
         
-        // Initialize auth service
-        await authService.initialize()
+        // Initialize auth service with timeout to prevent infinite loading
+        const initPromise = authService.initialize()
+        const timeoutPromise = new Promise((resolve) => {
+          setTimeout(() => {
+            console.warn('[AuthContext] Auth initialization timeout - proceeding without auth')
+            resolve(false)
+          }, 5000) // 5 second timeout
+        })
+        
+        // Race between initialization and timeout
+        await Promise.race([initPromise, timeoutPromise])
         
         // Get current user
         const currentUser = authService.getCurrentUser()
