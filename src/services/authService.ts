@@ -79,27 +79,6 @@ class AuthService {
 
       try {
         console.log('[Auth] Checking for session from Supabase...')
-        
-        // Force refresh session if we detect OAuth callback
-        const isOAuthCallback = window.location.search.includes('error=') || 
-                               document.referrer.includes('/auth/callback')
-        
-        if (isOAuthCallback) {
-          console.log('[Auth] OAuth callback detected, refreshing session...')
-          const { data: { session: refreshedSession } } = await supabase.auth.refreshSession()
-          if (refreshedSession) {
-            console.log('[Auth] Session refreshed after OAuth callback')
-            this.session = refreshedSession
-            this.user = refreshedSession.user
-            this.storeSession(refreshedSession)
-            if (this.onAuthChange) {
-              this.onAuthChange(this.user)
-            }
-            this.initialized = true
-            return true
-          }
-        }
-        
         const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any
         
         console.log('[Auth] Session check result:', { 

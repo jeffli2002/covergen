@@ -29,17 +29,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('[AuthContext] Starting initialization')
         console.log('[AuthContext] URL:', window.location.href)
         
-        // Check if we just came back from OAuth callback
-        const isOAuthCallback = window.location.search.includes('error=') || 
-                               window.location.pathname.includes('/auth/callback') ||
-                               document.referrer.includes('/auth/callback')
-        
-        if (isOAuthCallback) {
-          console.log('[AuthContext] OAuth callback detected, waiting for session...')
-          // Give the callback route more time to set cookies
-          await new Promise(resolve => setTimeout(resolve, 1000))
-        }
-        
         authService.setAuthChangeHandler((user) => {
           console.log('[AuthContext] Auth change handler called:', !!user, user?.email)
           setUser(user)
@@ -51,18 +40,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const currentUser = authService.getCurrentUser()
         console.log('[AuthContext] Current user after init:', currentUser?.email)
         setUser(currentUser)
-        
-        // If no user found but we just came from OAuth, check again
-        if (!currentUser && isOAuthCallback) {
-          console.log('[AuthContext] No user after OAuth callback, checking again...')
-          await new Promise(resolve => setTimeout(resolve, 1000))
-          await authService.checkSession()
-          const retryUser = authService.getCurrentUser()
-          if (retryUser) {
-            console.log('[AuthContext] User found on retry:', retryUser.email)
-            setUser(retryUser)
-          }
-        }
       } catch (error) {
         console.error('Auth initialization error:', error)
       } finally {

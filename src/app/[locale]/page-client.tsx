@@ -10,7 +10,6 @@ import { Card, CardContent } from '@/components/ui/card'
 import { useAppStore } from '@/lib/store'
 import { useAnalytics } from '@/lib/analytics'
 import { useAuth } from '@/contexts/AuthContext'
-import { supabase } from '@/lib/supabase'
 import { 
   Sparkles, 
   Zap, 
@@ -25,7 +24,6 @@ import {
 } from 'lucide-react'
 import { TikTokIcon, SpotifyIcon, TwitterXIcon } from '@/components/icons/brand-icons'
 import { Locale } from '@/lib/i18n/config'
-import { AuthDebugSimple } from '@/components/auth/AuthDebugSimple'
 
 interface HomePageClientProps {
   locale: Locale
@@ -104,39 +102,12 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
   const proTrialDays = parseInt(process.env.NEXT_PUBLIC_PRO_TRIAL_DAYS || '7')
   const proPlusTrialDays = parseInt(process.env.NEXT_PUBLIC_PRO_PLUS_TRIAL_DAYS || '7')
 
-  // Debug session state and check for OAuth callback
+  // Log auth state for debugging (without causing reloads)
   useEffect(() => {
-    console.log('[PageClient Debug]', {
+    console.log('[PageClient] Auth state:', {
       authUser: authUser?.email,
-      cookies: document.cookie,
-      hasAuthCookies: document.cookie.includes('sb-'),
-      url: window.location.href
+      hasAuthCookies: typeof window !== 'undefined' && document.cookie.includes('sb-')
     })
-    
-    // Direct Supabase session check for debugging
-    const checkDirectSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession()
-      console.log('[PageClient] Direct session check:', {
-        hasSession: !!session,
-        user: session?.user?.email,
-        error: error?.message
-      })
-      
-      // If we have a direct session but no authUser, there's a sync issue
-      if (session && !authUser) {
-        console.log('[PageClient] Session exists but AuthContext not synced! Forcing reload...')
-        window.location.reload()
-      }
-    }
-    
-    // Check if we just came from OAuth callback
-    const isFromOAuth = window.location.search.includes('error=') || 
-                       document.referrer.includes('/auth/callback')
-    
-    if (isFromOAuth || document.cookie.includes('sb-')) {
-      console.log('[PageClient] Checking direct session...')
-      checkDirectSession()
-    }
   }, [authUser])
 
   // Handle OAuth errors
@@ -189,15 +160,6 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Debug panel */}
-      <AuthDebugSimple />
-      
-      {/* Temporary debug text */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="fixed top-4 right-4 bg-yellow-400 text-black p-2 rounded text-sm z-50">
-          DEBUG: User = {authUser?.email || 'Not signed in'}
-        </div>
-      )}
       
       <script
         type="application/ld+json"

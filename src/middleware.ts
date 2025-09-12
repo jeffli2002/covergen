@@ -53,6 +53,7 @@ export async function middleware(request: NextRequest) {
     '/fonts',
     '/test',
     '/auth', // Skip all auth routes
+    '/debug-cookies', // Skip debug page
     '.html',
     '.png',
     '.jpg',
