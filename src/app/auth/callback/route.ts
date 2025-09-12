@@ -1,22 +1,40 @@
 import { NextResponse } from 'next/server'
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
+async function logDebug(data: any) {
+  // Only log in production for debugging
+  if (process.env.NODE_ENV === 'production') {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'https://covergen.pro'}/api/auth-debug/callback-logs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      }).catch(() => {}) // Ignore errors to not break auth flow
+    } catch {}
+  }
+}
+
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
   const next = requestUrl.searchParams.get('next') || '/en'
   const origin = requestUrl.origin
 
-  console.log('[Auth Callback] Processing OAuth callback:', { 
+  const debugData = { 
+    event: 'callback_start',
     code: !!code, 
     next, 
     origin,
     env: process.env.NODE_ENV,
     url: request.url 
-  })
+  }
+
+  console.log('[Auth Callback] Processing OAuth callback:', debugData)
+  await logDebug(debugData)
 
   if (!code) {
     console.log('[Auth Callback] No code present in callback')
+    await logDebug({ event: 'callback_error', error: 'no_code' })
     return NextResponse.redirect(`${origin}/en?error=no_code`)
   }
 
@@ -70,25 +88,37 @@ export async function GET(request: Request) {
 
     // Exchange the code for a session
     console.log('[Auth Callback] Exchanging code for session...')
+    await logDebug({ event: 'code_exchange_start', code: code.substring(0, 8) + '...' })
+    
     const { data, error } = await supabase.auth.exchangeCodeForSession(code)
     
     if (error) {
       console.error('[Auth Callback] Code exchange error:', error)
+      await logDebug({ 
+        event: 'code_exchange_error', 
+        error: error.message,
+        errorName: error.name,
+        errorStatus: error.status 
+      })
       return NextResponse.redirect(`${origin}/en?error=auth_failed&message=${encodeURIComponent(error.message)}`)
     }
 
     if (!data?.session) {
       console.error('[Auth Callback] No session returned from code exchange')
+      await logDebug({ event: 'code_exchange_no_session', hasData: !!data, hasUser: !!data?.user })
       return NextResponse.redirect(`${origin}/en?error=no_session`)
     }
 
-    console.log('[Auth Callback] Code exchange successful:', {
+    const successData = {
       user: data.user?.email,
       hasSession: !!data.session,
       hasAccessToken: !!data.session?.access_token,
       provider: data.user?.app_metadata?.provider,
       newCookiesCount: newCookies.size
-    })
+    }
+    
+    console.log('[Auth Callback] Code exchange successful:', successData)
+    await logDebug({ event: 'code_exchange_success', ...successData })
 
     // Create response with redirect
     const response = NextResponse.redirect(`${origin}${next}`)
@@ -121,6 +151,12 @@ export async function GET(request: Request) {
     })
 
     console.log(`[Auth Callback] Total auth cookies set: ${authCookiesSet}`)
+    await logDebug({ 
+      event: 'cookies_set', 
+      authCookiesSet,
+      totalCookies: newCookies.size,
+      cookieNames: Array.from(newCookies.keys())
+    })
 
     // Set a debug cookie to verify cookie setting works
     response.cookies.set({
@@ -138,11 +174,21 @@ export async function GET(request: Request) {
     
     // Also log the redirect URL
     console.log('[Auth Callback] Redirecting to:', `${origin}${next}`)
+    await logDebug({ 
+      event: 'callback_complete', 
+      redirectTo: `${origin}${next}`,
+      success: true 
+    })
     
     return response
     
   } catch (error) {
     console.error('[Auth Callback] Unexpected error:', error)
+    await logDebug({ 
+      event: 'callback_exception', 
+      error: String(error),
+      stack: error instanceof Error ? error.stack : undefined 
+    })
     return NextResponse.redirect(`${origin}/en?error=auth_failed&details=${encodeURIComponent(String(error))}`)
   }
 }
