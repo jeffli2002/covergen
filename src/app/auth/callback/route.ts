@@ -129,26 +129,11 @@ export async function GET(request: Request) {
       maxAge: 60 * 5 // 5 minutes
     })
 
-    // Also ensure we have the critical session cookies
-    if (data.session) {
-      // Manually ensure the access token is available for client-side auth
-      response.cookies.set({
-        name: `sb-${process.env.NEXT_PUBLIC_SUPABASE_URL!.split('//')[1].split('.')[0]}-auth-token`,
-        value: JSON.stringify({
-          access_token: data.session.access_token,
-          refresh_token: data.session.refresh_token,
-          expires_at: data.session.expires_at,
-          expires_in: data.session.expires_in,
-          token_type: data.session.token_type
-        }),
-        httpOnly: false, // Must be false for client-side access
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/',
-        maxAge: 60 * 60 * 24 * 365 // 1 year
-      })
-      console.log('[Auth Callback] Manually set session cookie')
-    }
+    // Log all cookies that were set
+    console.log('[Auth Callback] Cookies to be set:', Array.from(newCookies.entries()).map(([name, _]) => name))
+    
+    // Also log the redirect URL
+    console.log('[Auth Callback] Redirecting to:', `${origin}${next}`)
     
     return response
     

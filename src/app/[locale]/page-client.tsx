@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { useAppStore } from '@/lib/store'
 import { useAnalytics } from '@/lib/analytics'
 import { useAuth } from '@/contexts/AuthContext'
+import { supabase } from '@/lib/supabase'
 import { 
   Sparkles, 
   Zap, 
@@ -112,16 +113,29 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
       url: window.location.href
     })
     
+    // Direct Supabase session check for debugging
+    const checkDirectSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession()
+      console.log('[PageClient] Direct session check:', {
+        hasSession: !!session,
+        user: session?.user?.email,
+        error: error?.message
+      })
+      
+      // If we have a direct session but no authUser, there's a sync issue
+      if (session && !authUser) {
+        console.log('[PageClient] Session exists but AuthContext not synced! Forcing reload...')
+        window.location.reload()
+      }
+    }
+    
     // Check if we just came from OAuth callback
     const isFromOAuth = window.location.search.includes('error=') || 
                        document.referrer.includes('/auth/callback')
     
-    if (isFromOAuth && !authUser && document.cookie.includes('sb-')) {
-      console.log('[PageClient] Detected OAuth callback with cookies but no user, triggering session check...')
-      // Force a page reload to re-initialize auth
-      setTimeout(() => {
-        window.location.reload()
-      }, 1000)
+    if (isFromOAuth || document.cookie.includes('sb-')) {
+      console.log('[PageClient] Checking direct session...')
+      checkDirectSession()
     }
   }, [authUser])
 
