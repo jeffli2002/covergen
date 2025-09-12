@@ -24,6 +24,7 @@ class AuthService {
     if (typeof window === 'undefined') {
       return null
     }
+    // Ensure we're getting the singleton instance
     return supabase
   }
 
@@ -277,8 +278,8 @@ class AuthService {
       // Get the current pathname to preserve locale
       const currentPath = window.location.pathname || '/en'
       
-      // Use PKCE flow with callback route
-      const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
+      // Use PKCE flow with callback-v2 route for better cookie handling
+      const redirectUrl = `${window.location.origin}/auth/callback-v2?next=${encodeURIComponent(currentPath)}`
 
       console.log('[Auth] Google sign in with redirect URL:', redirectUrl)
 
