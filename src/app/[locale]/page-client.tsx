@@ -103,13 +103,26 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
   const proTrialDays = parseInt(process.env.NEXT_PUBLIC_PRO_TRIAL_DAYS || '7')
   const proPlusTrialDays = parseInt(process.env.NEXT_PUBLIC_PRO_PLUS_TRIAL_DAYS || '7')
 
-  // Debug session state
+  // Debug session state and check for OAuth callback
   useEffect(() => {
     console.log('[PageClient Debug]', {
       authUser: authUser?.email,
       cookies: document.cookie,
-      hasAuthCookies: document.cookie.includes('sb-')
+      hasAuthCookies: document.cookie.includes('sb-'),
+      url: window.location.href
     })
+    
+    // Check if we just came from OAuth callback
+    const isFromOAuth = window.location.search.includes('error=') || 
+                       document.referrer.includes('/auth/callback')
+    
+    if (isFromOAuth && !authUser && document.cookie.includes('sb-')) {
+      console.log('[PageClient] Detected OAuth callback with cookies but no user, triggering session check...')
+      // Force a page reload to re-initialize auth
+      setTimeout(() => {
+        window.location.reload()
+      }, 1000)
+    }
   }, [authUser])
 
   // Handle OAuth errors
@@ -127,7 +140,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
   
   // Handle post-OAuth redirect
   useEffect(() => {
-    if (user) {
+    if (authUser) {
       // Check for stored redirect
       const storedRedirect = sessionStorage.getItem('oauth_redirect')
       if (storedRedirect) {
@@ -136,7 +149,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         window.location.href = storedRedirect
       }
     }
-  }, [user])
+  }, [authUser])
 
   // Track page view and A/B test variants
   useEffect(() => {
