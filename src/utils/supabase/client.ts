@@ -8,7 +8,7 @@ export function createClient() {
       auth: {
         autoRefreshToken: true,
         persistSession: true,
-        detectSessionInUrl: false, // Disable to prevent COOP issues with popup handling
+        detectSessionInUrl: true, // Enable to properly handle OAuth state
         flowType: 'pkce', // Explicitly set PKCE flow for OAuth
         debug: false, // Set to true for debugging auth flow
         storage: {

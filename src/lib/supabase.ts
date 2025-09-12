@@ -24,7 +24,7 @@ function getSupabaseClient() {
     auth: {
       autoRefreshToken: true,
       persistSession: true,
-      detectSessionInUrl: false, // Disable to prevent conflicts with server-side handling
+      detectSessionInUrl: true, // Enable for proper OAuth state handling
       flowType: 'pkce',
       debug: process.env.NODE_ENV === 'development' // Enable debug logs in dev
     },

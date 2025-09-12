@@ -16,7 +16,7 @@ export function getSupabaseBrowserClient() {
       auth: {
         autoRefreshToken: true,
         persistSession: true,
-        detectSessionInUrl: false, // Disable to prevent COOP issues
+        detectSessionInUrl: true, // Enable to properly handle OAuth state
         flowType: 'pkce'
       },
       cookies: {
@@ -42,7 +42,7 @@ export function getSupabaseBrowserClient() {
           if (options?.path) {
             cookieStr += `; Path=${options.path}`
           }
-          cookieStr += '; SameSite=Lax'
+          cookieStr += '; SameSite=None; Secure'
           document.cookie = cookieStr
         },
         remove(name: string, options?: any) {

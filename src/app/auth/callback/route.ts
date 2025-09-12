@@ -20,6 +20,14 @@ export async function GET(request: Request) {
   const state = requestUrl.searchParams.get('state')
   const next = requestUrl.searchParams.get('next') || '/en'
   const origin = requestUrl.origin
+  
+  // If detectSessionInUrl is true, Supabase may handle the callback client-side
+  // In that case, just redirect to the target page
+  const isClientSideCallback = requestUrl.searchParams.get('client') === 'true'
+  if (isClientSideCallback) {
+    console.log('[Auth Callback] Client-side callback detected, redirecting to:', next)
+    return NextResponse.redirect(`${origin}${next}`)
+  }
 
   // Log incoming Cookie header as requested by Supabase
   const incomingCookieHeader = request.headers.get('cookie') || 'NO COOKIES'

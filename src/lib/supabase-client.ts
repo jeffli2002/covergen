@@ -8,7 +8,7 @@ export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false, // Let server handle OAuth callbacks
+    detectSessionInUrl: true, // Enable for proper OAuth state handling
     flowType: 'pkce',
     debug: process.env.NODE_ENV === 'development',
   },
