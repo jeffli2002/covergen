@@ -37,11 +37,15 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false })
       .limit(5)
 
-    // Test 4: Check if functions exist
-    const { data: functions, error: funcError } = await supabase
-      .rpc('pg_proc')
-      .select('proname')
-      .ilike('proname', '%check_generation_limit%')
+    // Test 4: Try to call the function to see if it exists
+    let funcError = null
+    try {
+      await supabase.rpc('check_generation_limit', {
+        p_user_id: user.id
+      })
+    } catch (error) {
+      funcError = error
+    }
 
     return NextResponse.json({
       success: true,
@@ -65,8 +69,9 @@ export async function GET(request: NextRequest) {
           data: usage
         },
         functions: {
-          error: funcError?.message,
-          message: 'Check browser console for function existence'
+          exists: !funcError,
+          error: funcError instanceof Error ? funcError.message : funcError?.toString(),
+          message: funcError ? 'Function not found or error calling it' : 'Function exists and is callable'
         }
       }
     })
