@@ -24,7 +24,7 @@ interface HeaderProps {
 }
 
 export default function Header({ locale, translations: t }: HeaderProps) {
-  const { user, signOut } = useAuth()
+  const { user, loading, signOut } = useAuth()
   const { user: storeUser } = useAppStore()
   const router = useRouter()
   const [showAuthModal, setShowAuthModal] = useState(false)
@@ -192,7 +192,9 @@ export default function Header({ locale, translations: t }: HeaderProps) {
           {/* User section */}
           <div className="flex items-center gap-3">
             <LanguageSwitcher currentLocale={locale} />
-            {user ? (
+            {loading ? (
+              <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
+            ) : user ? (
               <>
                 {/* <UserMenu /> */}
                 
