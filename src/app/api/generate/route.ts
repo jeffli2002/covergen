@@ -41,14 +41,49 @@ export async function POST(request: NextRequest) {
     
     if (user) {
       // Check current generation limit
-      const limitStatus = await checkGenerationLimit(user.id)
+      let limitStatus = await checkGenerationLimit(user.id)
       
       if (!limitStatus) {
-        console.error('Failed to check generation limit')
-        return NextResponse.json(
-          { error: 'Failed to verify generation limits' },
-          { status: 500 }
-        )
+        console.error('[Generate API] Failed to check generation limit for user:', user.id)
+        
+        // Try to get subscription info as fallback
+        try {
+          const subInfo = await getUserSubscriptionInfo(user.id)
+          console.log('[Generate API] Subscription info fallback:', subInfo)
+          
+          // If user has a trial/paid subscription, allow generation with warning
+          if (subInfo.subscription_tier !== 'free' && (subInfo.is_trial || subInfo.subscription_tier === 'pro' || subInfo.subscription_tier === 'pro_plus')) {
+            console.warn('[Generate API] Allowing generation for trial/paid user despite limit check failure')
+            // Create a temporary limit status to allow generation
+            limitStatus = {
+              monthly_usage: 0,
+              monthly_limit: 120,
+              daily_usage: 0,
+              daily_limit: 4,
+              trial_usage: 0,
+              trial_limit: 12, // 3-day trial with 4/day
+              can_generate: true,
+              is_trial: subInfo.is_trial,
+              trial_ends_at: subInfo.trial_ends_at,
+              subscription_tier: subInfo.subscription_tier,
+              remaining_monthly: 120,
+              remaining_trial: 12,
+              remaining_daily: 4
+            }
+          } else {
+            // For free users, still return error
+            return NextResponse.json(
+              { error: 'Failed to verify generation limits. Please try again later.' },
+              { status: 500 }
+            )
+          }
+        } catch (fallbackError) {
+          console.error('[Generate API] Fallback subscription check failed:', fallbackError)
+          return NextResponse.json(
+            { error: 'Failed to verify generation limits. Please try again later.' },
+            { status: 500 }
+          )
+        }
       }
       
       // If user has reached their limit, return error

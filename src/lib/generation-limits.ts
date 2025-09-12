@@ -53,7 +53,15 @@ export async function checkGenerationLimit(userId: string | null): Promise<Gener
       pro_plus_trial_daily: config.limits.pro_plus.trial_daily
     }
     
-    await supabase.rpc('set_subscription_config', { p_config: configData })
+    // Log config for debugging
+    console.log('[checkGenerationLimit] Setting config:', configData)
+    
+    const { error: configError } = await supabase.rpc('set_subscription_config', { p_config: configData })
+    
+    if (configError) {
+      console.error('[checkGenerationLimit] Error setting config:', configError)
+      // Continue anyway, function will use defaults
+    }
 
     // Get current generation limit status
     const { data, error } = await supabase
@@ -63,13 +71,31 @@ export async function checkGenerationLimit(userId: string | null): Promise<Gener
       })
 
     if (error) {
-      console.error('Error checking generation limit:', error)
+      console.error('[checkGenerationLimit] RPC error:', error)
+      console.error('[checkGenerationLimit] Error details:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+      })
+      
+      // Check if it's a missing function error
+      if (error.code === '42883' || error.message?.includes('function') || error.message?.includes('does not exist')) {
+        console.error('[checkGenerationLimit] Database function not found. Please run migrations.')
+      }
+      
       return null
     }
 
+    if (!data) {
+      console.error('[checkGenerationLimit] No data returned from RPC')
+      return null
+    }
+
+    console.log('[checkGenerationLimit] Limit check result:', data)
     return data as GenerationLimitStatus
   } catch (error) {
-    console.error('Error checking generation limit:', error)
+    console.error('[checkGenerationLimit] Unexpected error:', error)
     return null
   }
 }
