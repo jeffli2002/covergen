@@ -17,16 +17,20 @@ async function logDebug(data: any) {
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
+  const state = requestUrl.searchParams.get('state')
   const next = requestUrl.searchParams.get('next') || '/en'
   const origin = requestUrl.origin
 
   // Log incoming Cookie header as requested by Supabase
   const incomingCookieHeader = request.headers.get('cookie') || 'NO COOKIES'
   console.log('[Auth Callback] Incoming Cookie header:', incomingCookieHeader)
+  console.log('[Auth Callback] Query params:', { code: !!code, state: !!state, stateValue: state })
 
   const debugData = { 
     event: 'callback_start',
-    code: !!code, 
+    code: !!code,
+    state: !!state,
+    stateValue: state,
     next, 
     origin,
     env: process.env.NODE_ENV,
