@@ -9,7 +9,10 @@ import { getSubscriptionConfig } from '@/lib/subscription-config'
 interface UsageStatus {
   daily_usage: number
   daily_limit: number
+  monthly_usage?: number
+  monthly_limit?: number
   remaining_daily: number
+  remaining_monthly?: number
   is_trial: boolean
   subscription_tier: string
   trial_ends_at?: string | null
@@ -57,8 +60,42 @@ export default function UsageDisplay() {
     return null
   }
 
+  // Format tier display
+  const tierDisplay = usageStatus.is_trial 
+    ? `${usageStatus.subscription_tier === 'pro' ? 'Pro' : 'Pro+'} Trial`
+    : usageStatus.subscription_tier === 'free' 
+    ? 'Free' 
+    : usageStatus.subscription_tier === 'pro'
+    ? 'Pro'
+    : 'Pro+'
+
+  // Determine tier badge color
+  const tierBadgeClass = usageStatus.is_trial 
+    ? 'bg-blue-100 text-blue-800 border-blue-200'
+    : usageStatus.subscription_tier === 'pro'
+    ? 'bg-orange-100 text-orange-800 border-orange-200'
+    : usageStatus.subscription_tier === 'pro_plus'
+    ? 'bg-purple-100 text-purple-800 border-purple-200'
+    : 'bg-gray-100 text-gray-800 border-gray-200'
+
+  // Determine what limit to show (daily for free/trial, monthly for paid)
+  const isPaidUser = !usageStatus.is_trial && (usageStatus.subscription_tier === 'pro' || usageStatus.subscription_tier === 'pro_plus')
+  const limitType = isPaidUser ? 'monthly' : 'daily'
+  
+  // For paid users, we need to fetch monthly data
+  const displayLimit = isPaidUser 
+    ? (usageStatus.monthly_limit || usageStatus.daily_limit)
+    : usageStatus.daily_limit
+    
+  const displayRemaining = isPaidUser
+    ? (usageStatus.remaining_monthly !== undefined ? usageStatus.remaining_monthly : usageStatus.remaining_daily)
+    : usageStatus.remaining_daily
+
   // Determine display color based on remaining usage
-  const remainingPercentage = (usageStatus.remaining_daily / usageStatus.daily_limit) * 100
+  const remainingPercentage = displayRemaining && displayLimit > 0 
+    ? (displayRemaining / displayLimit) * 100 
+    : 0
+    
   let colorClass = 'bg-green-100 text-green-800'
   if (remainingPercentage <= 0) {
     colorClass = 'bg-red-100 text-red-800'
@@ -68,31 +105,20 @@ export default function UsageDisplay() {
     colorClass = 'bg-yellow-100 text-yellow-800'
   }
 
-  // Format tier display
-  const tierDisplay = usageStatus.is_trial 
-    ? `${usageStatus.subscription_tier} Trial`
-    : usageStatus.subscription_tier === 'free' 
-    ? 'Free' 
-    : usageStatus.subscription_tier === 'pro'
-    ? 'Pro'
-    : 'Pro+'
-
   return (
     <div className="flex items-center gap-1 md:gap-2">
       <Badge variant="secondary" className={`${colorClass} flex items-center gap-1 px-2 md:px-3 py-1`}>
         <Sparkles className="w-3 h-3" />
         <span className="text-xs font-medium">
-          {usageStatus.remaining_daily}/{usageStatus.daily_limit}
-          <span className="hidden sm:inline"> daily</span>
+          {displayRemaining}/{displayLimit}
+          <span className="hidden sm:inline"> {limitType}</span>
         </span>
       </Badge>
       
-      {/* Show tier for logged in users */}
-      {user && (
-        <Badge variant="outline" className="text-xs px-2 md:px-3">
-          {tierDisplay}
-        </Badge>
-      )}
+      {/* Always show tier badge */}
+      <Badge variant="outline" className={`text-xs px-2 md:px-3 ${tierBadgeClass}`}>
+        {tierDisplay}
+      </Badge>
     </div>
   )
 }

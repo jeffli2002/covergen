@@ -150,6 +150,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   }
 
   const currentPlan = subscription?.tier || 'free'
+  const isTrialing = subscription?.status === 'trialing'
   const planDetails = SUBSCRIPTION_PLANS[currentPlan as keyof typeof SUBSCRIPTION_PLANS]
   const usagePercentage = planDetails ? (usage / (planDetails.credits || 10)) * 100 : 0
 
@@ -189,23 +190,34 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-2xl font-bold">{planDetails?.name}</h3>
+                    <h3 className="text-2xl font-bold">
+                      {planDetails?.name}{isTrialing ? ' (Trial)' : ''}
+                    </h3>
                     <p className="text-gray-600">
-                      ${planDetails?.price ? planDetails.price / 100 : 0}/month
+                      {isTrialing ? 'Free trial period' : `$${planDetails?.price ? planDetails.price / 100 : 0}/month`}
                     </p>
                   </div>
                   <Badge variant={
                     currentPlan === 'free' ? 'secondary' : 
+                    isTrialing ? 'outline' :
                     subscription?.status === 'paused' ? 'destructive' :
                     'default'
-                  }>
-                    {subscription?.status === 'paused' ? 'Paused' : (subscription?.status || 'Active')}
+                  } className={isTrialing ? 'bg-blue-100 text-blue-800 border-blue-200' : ''}>
+                    {subscription?.status === 'paused' ? 'Paused' : 
+                     isTrialing ? 'Trial' :
+                     (subscription?.status || 'Active')}
                   </Badge>
                 </div>
 
                 {subscription && (
                   <div className="space-y-2 text-sm text-gray-600">
-                    {subscription.current_period_end && (
+                    {isTrialing && subscription.trial_ends_at && (
+                      <p>
+                        <Calendar className="inline w-4 h-4 mr-1" />
+                        Trial ends on {formatDate(new Date(subscription.trial_ends_at))}
+                      </p>
+                    )}
+                    {!isTrialing && subscription.current_period_end && (
                       <p>
                         <Calendar className="inline w-4 h-4 mr-1" />
                         {subscription.cancel_at_period_end

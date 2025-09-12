@@ -21,14 +21,17 @@ export async function GET(request: NextRequest) {
       })
     }
     
-    // Return simplified status for header display
+    // Return comprehensive status for header display
     return NextResponse.json({
       daily_usage: limitStatus.daily_usage,
       daily_limit: limitStatus.daily_limit || 
         (limitStatus.is_trial 
-          ? limitStatus.trial_limit || 0 
+          ? Math.ceil((limitStatus.trial_limit || 0) / 7) // Estimate daily from trial total
           : limitStatus.monthly_limit || 0),
+      monthly_usage: limitStatus.monthly_usage,
+      monthly_limit: limitStatus.monthly_limit,
       remaining_daily: limitStatus.remaining_daily,
+      remaining_monthly: limitStatus.remaining_monthly,
       is_trial: limitStatus.is_trial,
       subscription_tier: limitStatus.subscription_tier,
       trial_ends_at: limitStatus.trial_ends_at

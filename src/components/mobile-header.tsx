@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Crown, Menu, X, LogOut, Settings, Sparkles } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
@@ -10,6 +10,7 @@ import UsageDisplay from '@/components/usage-display'
 export default function MobileHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null)
   const { user, signOut } = useAuth()
 
   const handleLogout = async () => {
@@ -26,6 +27,64 @@ export default function MobileHeader() {
   const handleAuthSuccess = () => {
     setShowAuthModal(false)
     setIsMenuOpen(false)
+  }
+
+  // Fetch subscription info when user is logged in
+  useEffect(() => {
+    if (user) {
+      fetchSubscriptionInfo()
+    }
+  }, [user])
+
+  const fetchSubscriptionInfo = async () => {
+    try {
+      const response = await fetch('/api/usage/status')
+      if (response.ok) {
+        const data = await response.json()
+        setSubscriptionInfo(data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch subscription info:', error)
+    }
+  }
+
+  // Format tier display
+  const getTierDisplay = () => {
+    if (!subscriptionInfo) return 'Free'
+    
+    const { subscription_tier, is_trial } = subscriptionInfo
+    
+    if (is_trial) {
+      return subscription_tier === 'pro' ? 'Pro Trial' : 'Pro+ Trial'
+    }
+    
+    switch (subscription_tier) {
+      case 'pro':
+        return 'Pro'
+      case 'pro_plus':
+        return 'Pro+'
+      default:
+        return 'Free'
+    }
+  }
+
+  const getTierBadgeColor = () => {
+    if (!subscriptionInfo) return 'bg-gray-100 text-gray-800'
+    
+    const { subscription_tier, is_trial } = subscriptionInfo
+    
+    if (is_trial) {
+      return 'bg-blue-100 text-blue-800'
+    }
+    
+    switch (subscription_tier) {
+      case 'pro':
+        return 'bg-orange-100 text-orange-800'
+      case 'pro_plus':
+        return 'bg-purple-100 text-purple-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
   }
 
   return (
@@ -96,11 +155,11 @@ export default function MobileHeader() {
                     <div>
                       <div className="text-lg font-medium">{user.email}</div>
                       <div className="text-base text-muted-foreground">
-                        Free Tier
+                        {getTierDisplay()} Tier
                       </div>
                     </div>
-                    <span className="px-3 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-                      Free
+                    <span className={`px-3 py-2 rounded-full text-sm font-medium ${getTierBadgeColor()}`}>
+                      {getTierDisplay()}
                     </span>
                   </div>
 
