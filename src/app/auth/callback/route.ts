@@ -97,15 +97,19 @@ export async function GET(request: Request) {
     let authCookiesSet = 0
     newCookies.forEach(({ value, options }, name) => {
       // Ensure proper cookie settings for production
+      const isProduction = process.env.NODE_ENV === 'production'
+      const isHttps = origin.startsWith('https')
+      
       const cookieOptions = {
         name,
         value,
         httpOnly: options.httpOnly ?? true,
-        secure: process.env.NODE_ENV === 'production' || origin.startsWith('https'),
+        secure: isProduction || isHttps,
         sameSite: (options.sameSite || 'lax') as 'lax' | 'strict' | 'none',
         path: options.path || '/',
         ...(options.maxAge && { maxAge: options.maxAge }),
-        ...(options.domain && { domain: options.domain })
+        // Don't set domain explicitly - let browser use current domain
+        // This prevents cookie domain mismatch issues on Vercel deployments
       }
 
       response.cookies.set(cookieOptions)

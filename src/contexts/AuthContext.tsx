@@ -37,6 +37,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         await authService.initialize()
         
+        // Check for OAuth callback in URL
+        const hashParams = new URLSearchParams(window.location.hash.substring(1))
+        const searchParams = new URLSearchParams(window.location.search)
+        const error = searchParams.get('error') || hashParams.get('error')
+        
+        if (error) {
+          console.error('[AuthContext] OAuth error:', error)
+        }
+        
+        // Force session check after potential OAuth callback
+        if (window.location.pathname.includes('/auth/callback') || 
+            window.location.hash.includes('access_token') ||
+            searchParams.get('code')) {
+          console.log('[AuthContext] Detected potential OAuth callback, forcing session check')
+          await authService.checkSession()
+        }
+        
         const currentUser = authService.getCurrentUser()
         console.log('[AuthContext] Current user after init:', currentUser?.email)
         setUser(currentUser)
