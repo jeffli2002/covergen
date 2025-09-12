@@ -2,9 +2,21 @@ import { createBrowserClient } from '@supabase/ssr'
 
 // Create Supabase client for browser-side usage
 export function createSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('[Supabase Client] Missing required environment variables')
+    console.error('NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ? 'set' : 'missing')
+    console.error('NEXT_PUBLIC_SUPABASE_ANON_KEY:', supabaseAnonKey ? 'set' : 'missing')
+    
+    // Return a mock client that won't crash the app
+    return null as any
+  }
+  
   return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    supabaseUrl,
+    supabaseAnonKey
   )
 }
 

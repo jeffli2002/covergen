@@ -47,6 +47,13 @@ class AuthService {
       console.log('[Auth] URL:', window?.location?.href)
       console.log('[Auth] Cookies:', document?.cookie)
       
+      // Quick check for environment variables
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        console.error('[Auth] Missing Supabase environment variables')
+        this.initialized = true
+        return false
+      }
+      
       const supabase = this.getSupabase()
       if (!supabase) {
         console.warn('[Auth] Supabase not configured, auth service will be disabled')
