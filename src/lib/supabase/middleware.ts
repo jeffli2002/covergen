@@ -27,11 +27,19 @@ export async function updateSession(request: NextRequest) {
               headers: request.headers,
             },
           })
-          response.cookies.set({
+          
+          // Ensure proper cookie options for auth cookies
+          const cookieOptions = {
             name,
             value,
             ...options,
-          })
+            httpOnly: options.httpOnly ?? true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: (options.sameSite || 'lax') as 'lax' | 'strict' | 'none',
+            path: options.path || '/',
+          }
+          
+          response.cookies.set(cookieOptions)
         },
         remove(name: string, options: CookieOptions) {
           request.cookies.set({
@@ -55,7 +63,11 @@ export async function updateSession(request: NextRequest) {
   )
 
   // This will refresh the session if expired - required for Server Components
-  await supabase.auth.getUser()
+  try {
+    await supabase.auth.getUser()
+  } catch (error) {
+    console.error('[Middleware] Error updating session:', error)
+  }
 
   return response
 }

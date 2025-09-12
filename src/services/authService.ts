@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { supabaseAuth } from '@/lib/supabase-auth'
 
 let authServiceInstance: AuthService | null = null
 
@@ -270,20 +271,21 @@ class AuthService {
 
   async signInWithGoogle() {
     try {
-      const supabase = this.getSupabase()
-      if (!supabase) {
+      // Use the simplified auth client for OAuth operations
+      if (!supabaseAuth) {
         throw new Error('Supabase not configured')
       }
 
       // Get the current pathname to preserve locale
       const currentPath = window.location.pathname || '/en'
       
-      // Use PKCE flow with callback route (v1) which has proven cookie handling
+      // Use PKCE flow with callback route
       const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
 
       console.log('[Auth] Google sign in with redirect URL:', redirectUrl)
+      console.log('[Auth] Using simplified auth client for OAuth')
 
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabaseAuth.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: redirectUrl,
@@ -296,14 +298,18 @@ class AuthService {
       })
 
       if (error) {
+        console.error('[Auth] OAuth error:', error)
         throw error
       }
+
+      console.log('[Auth] OAuth initiated successfully')
 
       return {
         success: true,
         data
       }
     } catch (error: any) {
+      console.error('[Auth] Sign in with Google failed:', error)
       return {
         success: false,
         error: error.message

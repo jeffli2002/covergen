@@ -25,7 +25,8 @@ function getSupabaseClient() {
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true, // Enable to handle OAuth callbacks
-      flowType: 'pkce'
+      flowType: 'pkce',
+      debug: process.env.NODE_ENV === 'development' // Enable debug logs in dev
     },
     cookies: {
       get(name: string) {
@@ -33,9 +34,16 @@ function getSupabaseClient() {
           return undefined
         }
         const cookies = document.cookie.split(';')
-        const cookie = cookies.find(c => c.trim().startsWith(`${name}=`))
-        if (cookie) {
-          return decodeURIComponent(cookie.split('=')[1])
+        for (const cookie of cookies) {
+          const [cookieName, ...cookieValueParts] = cookie.trim().split('=')
+          if (cookieName === name) {
+            const value = cookieValueParts.join('=') // Handle values with = in them
+            try {
+              return decodeURIComponent(value)
+            } catch {
+              return value // Return raw value if decoding fails
+            }
+          }
         }
         return undefined
       },
@@ -43,28 +51,57 @@ function getSupabaseClient() {
         if (typeof document === 'undefined') {
           return
         }
-        let cookieStr = `${name}=${encodeURIComponent(value)}`
+        
+        // Build cookie string with all necessary options
+        const cookieParts = [`${name}=${encodeURIComponent(value)}`]
+        
         if (options?.maxAge) {
-          cookieStr += `; Max-Age=${options.maxAge}`
+          cookieParts.push(`Max-Age=${options.maxAge}`)
+        } else if (options?.expires) {
+          cookieParts.push(`Expires=${new Date(options.expires).toUTCString()}`)
         }
-        if (options?.path) {
-          cookieStr += `; Path=${options.path}`
+        
+        cookieParts.push(`Path=${options?.path || '/'}`)
+        
+        if (options?.domain) {
+          cookieParts.push(`Domain=${options.domain}`)
         }
-        cookieStr += '; SameSite=Lax'
-        if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
-          cookieStr += '; Secure'
+        
+        cookieParts.push(`SameSite=${options?.sameSite || 'Lax'}`)
+        
+        if (window.location.protocol === 'https:' || options?.secure) {
+          cookieParts.push('Secure')
         }
-        document.cookie = cookieStr
+        
+        if (options?.httpOnly) {
+          // Note: httpOnly cannot be set from JavaScript, but we include for completeness
+          console.warn(`[Supabase] Cannot set httpOnly cookie from browser: ${name}`)
+        }
+        
+        document.cookie = cookieParts.join('; ')
+        
+        // Log cookie operations in development
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`[Supabase] Set cookie: ${name} (length: ${value?.length || 0})`)
+        }
       },
       remove(name: string, options?: any) {
         if (typeof document === 'undefined') {
           return
         }
-        let cookieStr = `${name}=; Max-Age=0`
-        if (options?.path) {
-          cookieStr += `; Path=${options.path}`
+        const cookieParts = [`${name}=`]
+        cookieParts.push('Max-Age=0')
+        cookieParts.push(`Path=${options?.path || '/'}`)
+        
+        if (options?.domain) {
+          cookieParts.push(`Domain=${options.domain}`)
         }
-        document.cookie = cookieStr
+        
+        document.cookie = cookieParts.join('; ')
+        
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`[Supabase] Removed cookie: ${name}`)
+        }
       }
     }
   })
