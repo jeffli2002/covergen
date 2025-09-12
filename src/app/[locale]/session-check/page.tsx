@@ -107,7 +107,7 @@ export default function SessionCheckPage() {
             {Object.entries(localStorage).map(([key, value]) => (
               <div key={key}>
                 <p className="font-bold">{key}:</p>
-                <p className="text-gray-600 break-all">{value}</p>
+                <p className="text-gray-600 break-all">{String(value)}</p>
               </div>
             ))}
           </div>
