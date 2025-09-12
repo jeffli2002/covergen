@@ -38,6 +38,7 @@ next-env.d.ts
 
 # dev logs
 dev.log
+dev-output.log
 
 # uploads
 /public/uploads
@@ -57,3 +58,4 @@ Thumbs.db
 *.tmp
 *.temp
 .cache/node_modules.bak/
+test-minimal/
