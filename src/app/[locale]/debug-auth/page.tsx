@@ -35,7 +35,7 @@ export default function DebugAuthPage() {
     updateCookies()
     
     // Subscribe to auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session) => {
       addLog(`Auth state changed: ${event}`)
       if (session) {
         addLog(`Session user: ${session.user.email}`)
