@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { createSupabaseClient } from '@/lib/supabase-client'
 import { useRouter, usePathname } from 'next/navigation'
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js'
 
 export function SimpleAuthHandler() {
   const router = useRouter()
@@ -12,7 +13,7 @@ export function SimpleAuthHandler() {
     const supabase = createSupabaseClient()
     
     // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
       console.log('[SimpleAuthHandler] Auth event:', event)
       
       if (event === 'SIGNED_IN' && session) {
