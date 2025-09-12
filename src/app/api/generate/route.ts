@@ -71,11 +71,58 @@ export async function POST(request: NextRequest) {
               remaining_daily: 4
             }
           } else {
-            // For free users, still return error
-            return NextResponse.json(
-              { error: 'Failed to verify generation limits. Please try again later.' },
-              { status: 500 }
-            )
+            // For free users, check their actual usage
+            console.log('[Generate API] Checking usage for free user manually')
+            
+            try {
+              // Get current date info
+              const today = new Date()
+              const dateKey = today.toISOString().split('T')[0]
+              const monthKey = today.toISOString().substring(0, 7)
+              
+              // Try to get usage data directly
+              const { data: usageData, error: usageError } = await supabase
+                .from('user_usage')
+                .select('*')
+                .eq('user_id', user.id)
+                .eq('date_key', dateKey)
+                .single()
+              
+              if (!usageError && usageData) {
+                // Check if they've exceeded daily limit (3 for free users)
+                const dailyLimit = 3
+                if (usageData.daily_count >= dailyLimit) {
+                  return NextResponse.json(
+                    { 
+                      error: `Daily generation limit reached (${usageData.daily_count}/${dailyLimit} today)`,
+                      limit_reached: true,
+                      daily_usage: usageData.daily_count,
+                      daily_limit: dailyLimit,
+                      subscription_tier: 'free',
+                      is_trial: false,
+                      remaining_daily: 0
+                    },
+                    { status: 429 }
+                  )
+                }
+              }
+              
+              // If we can't determine usage, return a more helpful error
+              return NextResponse.json(
+                { 
+                  error: 'Unable to verify generation limits. You may have reached your daily limit of 3 images.',
+                  limit_reached: true,
+                  subscription_tier: 'free'
+                },
+                { status: 429 }
+              )
+            } catch (err) {
+              console.error('[Generate API] Error checking free user usage:', err)
+              return NextResponse.json(
+                { error: 'Failed to verify generation limits. Please try again later.' },
+                { status: 500 }
+              )
+            }
           }
         } catch (fallbackError) {
           console.error('[Generate API] Fallback subscription check failed:', fallbackError)

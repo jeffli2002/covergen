@@ -189,7 +189,9 @@ export default function ImageGenerator() {
       }
     } catch (error) {
       console.error('Generation error:', error)
-      setError('Failed to generate images. Please try again.')
+      // Use the actual error message if available
+      const errorMessage = error instanceof Error ? error.message : 'Failed to generate images. Please try again.'
+      setError(errorMessage)
     } finally {
       setIsGenerating(false)
     }
