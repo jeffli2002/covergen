@@ -52,18 +52,7 @@ export async function middleware(request: NextRequest) {
     '/images',
     '/fonts',
     '/test',
-    '/auth/callback', // Skip middleware for auth callback
-    '/auth/callback-v2', // Skip middleware for auth callback v2
     '/auth', // Skip all auth routes
-    '/test-minimal', // Skip middleware for test page
-    '/oauth-debug',
-    '/oauth-safe-debug',
-    '/oauth-test-simple',
-    '/oauth-dashboard',
-    '/simple-test',
-    '/test-env',
-    '/test-modular-oauth',
-    '/test-oauth-fix',
     '.html',
     '.png',
     '.jpg',
