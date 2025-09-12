@@ -115,6 +115,46 @@ export function SubscriptionManagement() {
     }
   }
 
+  const handleActivateSubscription = async () => {
+    if (!subscription || processing) return
+    
+    const confirmActivate = window.confirm(
+      'Are you sure you want to activate your subscription now? Your trial will end and billing will start immediately.'
+    )
+    
+    if (!confirmActivate) return
+    
+    setProcessing(true)
+    try {
+      const response = await fetch('/api/subscription/activate', {
+        method: 'POST'
+      })
+      
+      const data = await response.json()
+      
+      if (response.ok) {
+        if (data.checkoutUrl) {
+          // Redirect to checkout for manual trials
+          window.location.href = data.checkoutUrl
+        } else {
+          // Success for Stripe trials
+          toast.success('Subscription activated', {
+            description: data.message
+          })
+          await fetchSubscriptionInfo()
+        }
+      } else {
+        toast.error('Error', {
+          description: data.error || 'Failed to activate subscription'
+        })
+      }
+    } catch (error) {
+      toast.error('Failed to activate subscription')
+    } finally {
+      setProcessing(false)
+    }
+  }
+
   const handleUpgrade = async (targetTier: 'pro' | 'pro_plus') => {
     if (!subscription || processing) return
     
@@ -283,6 +323,20 @@ export function SubscriptionManagement() {
               Upgrade to Pro+
             </Button>
           </div>
+        )}
+        
+        {/* Activate button for trial users */}
+        {isTrialing && !isCancelled && (
+          <Button
+            onClick={handleActivateSubscription}
+            disabled={processing}
+            variant="default"
+            className="w-full"
+          >
+            {processing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <CreditCard className="mr-2 h-4 w-4" />
+            Activate Subscription Now
+          </Button>
         )}
         
         {/* Cancel/Resume button */}
