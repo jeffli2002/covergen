@@ -6,7 +6,7 @@ export async function GET() {
   const cookieStore = cookies()
   const allCookies = cookieStore.getAll()
   
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: { session }, error } = await supabase.auth.getSession()
   
   return NextResponse.json({

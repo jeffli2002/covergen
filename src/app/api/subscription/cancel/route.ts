@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     const { userId, userEmail } = authContext
     
     // Get the subscription from database
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: subscription, error: subError } = await supabase
       .from('subscriptions')
       .select('*')
@@ -106,7 +106,7 @@ export async function DELETE(req: NextRequest) {
     const { userId } = authContext
     
     // Get the subscription from database
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: subscription, error: subError } = await supabase
       .from('subscriptions')
       .select('*')

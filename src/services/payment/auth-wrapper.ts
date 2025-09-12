@@ -10,7 +10,7 @@ interface AuthContext {
 export class PaymentAuthWrapper {
   static async getAuthContext(): Promise<AuthContext> {
     try {
-      const supabase = createClient()
+      const supabase = await createClient()
       
       // Get the current user
       const { data: { user }, error } = await supabase.auth.getUser()

@@ -75,6 +75,7 @@ export default function DebugAuth() {
         
         <button
           onClick={async () => {
+            const supabase = createSupabaseClient()
             const { data: { session } } = await supabase.auth.getSession()
             alert(session ? 'Session found!' : 'No session found')
           }}

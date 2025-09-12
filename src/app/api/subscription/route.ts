@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get subscription from database
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: subscription, error } = await supabase
       .from('subscriptions')
       .select('*')

@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     const { userId } = authContext
     
     // Get the subscription from database
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: subscription, error: subError } = await supabase
       .from('subscriptions')
       .select('*')

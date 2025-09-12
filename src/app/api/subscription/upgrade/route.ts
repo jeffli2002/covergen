@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     }
     
     // Get current subscription
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: subscription, error: subError } = await supabase
       .from('subscriptions')
       .select('*')
