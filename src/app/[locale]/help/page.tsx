@@ -94,7 +94,7 @@ const faqCategories = [
       },
       {
         question: 'What\'s included in download history and cloud gallery?',
-        answer: `Pro users get 24-hour download history to re-download recent creations. Pro+ users get ${config.trialDays}-day cloud gallery to store and manage all generated covers.`
+        answer: 'Pro users get 24-hour download history to re-download recent creations. Pro+ users get 7-day cloud gallery to store and manage all generated covers.'
       },
       {
         question: 'How do I reset my password?',
