@@ -119,13 +119,13 @@ export default function OAuthDebugVerbosePage() {
     
     try {
       // Test if we can even import
-      const module = await import('@/lib/supabase')
-      addLog(`Import successful. Keys: ${Object.keys(module).join(', ')}`)
+      const supabaseModule = await import('@/lib/supabase')
+      addLog(`Import successful. Keys: ${Object.keys(supabaseModule).join(', ')}`)
       
-      if (module.supabase) {
+      if (supabaseModule.supabase) {
         addLog('supabase export found')
-        addLog(`Type: ${typeof module.supabase}`)
-        addLog(`Has auth property: ${!!module.supabase.auth}`)
+        addLog(`Type: ${typeof supabaseModule.supabase}`)
+        addLog(`Has auth property: ${!!supabaseModule.supabase.auth}`)
       } else {
         addLog('ERROR: No supabase export found')
       }
