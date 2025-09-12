@@ -8,8 +8,17 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
   const next = requestUrl.searchParams.get('next') || '/en'
-  // Use the request origin as fallback to ensure we always have a valid URL
-  const origin = process.env.NEXT_PUBLIC_SITE_URL || `${requestUrl.protocol}//${requestUrl.host}`
+  
+  // Ensure we have a properly formatted absolute URL
+  let origin = process.env.NEXT_PUBLIC_SITE_URL || ''
+  
+  // If no NEXT_PUBLIC_SITE_URL or it's malformed, use request origin
+  if (!origin || !origin.startsWith('http')) {
+    origin = requestUrl.origin
+  }
+  
+  // Ensure origin ends without trailing slash
+  origin = origin.replace(/\/$/, '')
   
   console.log('[Auth Callback] Request URL:', request.url)
   console.log('[Auth Callback] Origin:', origin)
@@ -18,13 +27,14 @@ export async function GET(request: Request) {
 
   if (!code) {
     console.error('[Auth Callback] No code parameter found')
-    return NextResponse.redirect(`${origin}/en?error=no_code`)
+    return NextResponse.redirect(new URL(`/en?error=no_code`, origin))
   }
 
   const cookieStore = await cookies()
   
-  // Create response object first
-  const response = NextResponse.redirect(`${origin}${next}`)
+  // Create response object first - ensure we construct a valid URL
+  const redirectUrl = new URL(next, origin)
+  const response = NextResponse.redirect(redirectUrl)
 
   try {
     // Check for required environment variables
@@ -32,7 +42,7 @@ export async function GET(request: Request) {
       console.error('[Auth Callback] Missing required environment variables')
       console.error('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'set' : 'missing')
       console.error('NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'set' : 'missing')
-      return NextResponse.redirect(`${origin}/en?error=config_error`)
+      return NextResponse.redirect(new URL(`/en?error=config_error`, origin))
     }
 
     // Create Supabase client with explicit cookie handling
@@ -63,12 +73,12 @@ export async function GET(request: Request) {
 
     if (error) {
       console.error('[Auth Callback] Code exchange error:', error)
-      return NextResponse.redirect(`${origin}/en?error=auth_failed&message=${encodeURIComponent(error.message)}`)
+      return NextResponse.redirect(new URL(`/en?error=auth_failed&message=${encodeURIComponent(error.message)}`, origin))
     }
 
     if (!data?.session) {
       console.error('[Auth Callback] No session returned from code exchange')
-      return NextResponse.redirect(`${origin}/en?error=no_session`)
+      return NextResponse.redirect(new URL(`/en?error=no_session`, origin))
     }
 
     console.log('[Auth Callback] Auth successful for user:', data.session.user.email)
@@ -78,6 +88,6 @@ export async function GET(request: Request) {
     
   } catch (error) {
     console.error('[Auth Callback] Unexpected error:', error)
-    return NextResponse.redirect(`${origin}/en?error=auth_failed`)
+    return NextResponse.redirect(new URL(`/en?error=auth_failed`, origin))
   }
 }
