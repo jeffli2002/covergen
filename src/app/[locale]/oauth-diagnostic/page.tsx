@@ -16,7 +16,7 @@ export default function OAuthDiagnosticPage() {
       const error = urlParams.get('error')
       
       if (code || error) {
-        setTestResults(prev => ({
+        setTestResults((prev: any) => ({
           ...prev,
           urlParams: {
             hasCode: !!code,
@@ -55,7 +55,7 @@ export default function OAuthDiagnosticPage() {
     const oauthUrl = `${supabaseUrl}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUrl)}`
     
     // Store test info
-    setTestResults(prev => ({
+    setTestResults((prev: any) => ({
       ...prev,
       manualTest: {
         redirectUrl,
