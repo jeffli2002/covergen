@@ -17,6 +17,8 @@ export default function OAuthProductionDebugPage() {
   }, [])
 
   const checkEnvironment = () => {
+    if (typeof window === 'undefined') return
+    
     const info = {
       environment: {
         nodeEnv: process.env.NODE_ENV,
@@ -67,6 +69,8 @@ export default function OAuthProductionDebugPage() {
   }
 
   const checkOAuthCallback = () => {
+    if (typeof window === 'undefined') return
+    
     const urlParams = new URLSearchParams(window.location.search)
     const code = urlParams.get('code')
     const error = urlParams.get('error')
@@ -86,6 +90,8 @@ export default function OAuthProductionDebugPage() {
   }
 
   const testOAuthWithDebug = async () => {
+    if (typeof window === 'undefined') return
+    
     setIsLoading(true)
     
     try {
@@ -254,7 +260,7 @@ export default function OAuthProductionDebugPage() {
           <li>Check if this page URL contains <code>?code=</code> parameter after OAuth redirect</li>
           <li>If yes, but no session, the callback route might not be processing the code</li>
           <li>If no code parameter, check Supabase dashboard redirect URLs</li>
-          <li>Expected redirect URL in Supabase: <code className="bg-white px-2 py-1 rounded">{window.location.origin}/auth/callback</code></li>
+          <li>Expected redirect URL in Supabase: <code className="bg-white px-2 py-1 rounded">{typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '{origin}/auth/callback'}</code></li>
           <li>Current page URL should be the redirect target after OAuth</li>
         </ol>
       </Card>
