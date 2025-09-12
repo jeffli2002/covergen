@@ -41,7 +41,7 @@ export default function OAuthProductionDebugPage() {
         hasAuthToken: localStorage.getItem('sb-exungkcoaihcemcmhqdr-auth-token') !== null
       }
     }
-    setDebugInfo(prev => ({ ...prev, ...info }))
+    setDebugInfo((prev: any) => ({ ...prev, ...info }))
   }
 
   const checkSession = async () => {
@@ -49,10 +49,10 @@ export default function OAuthProductionDebugPage() {
       const { data: { session }, error } = await supabase.auth.getSession()
       if (error) {
         console.error('Session check error:', error)
-        setDebugInfo(prev => ({ ...prev, sessionError: error.message }))
+        setDebugInfo((prev: any) => ({ ...prev, sessionError: error.message }))
       } else {
         setSession(session)
-        setDebugInfo(prev => ({ 
+        setDebugInfo((prev: any) => ({ 
           ...prev, 
           session: session ? {
             user: session.user.email,
@@ -62,7 +62,7 @@ export default function OAuthProductionDebugPage() {
         }))
       }
     } catch (err) {
-      setDebugInfo(prev => ({ ...prev, sessionError: String(err) }))
+      setDebugInfo((prev: any) => ({ ...prev, sessionError: String(err) }))
     }
   }
 
@@ -72,7 +72,7 @@ export default function OAuthProductionDebugPage() {
     const error = urlParams.get('error')
     const errorDescription = urlParams.get('error_description')
     
-    setDebugInfo(prev => ({ 
+    setDebugInfo((prev: any) => ({ 
       ...prev, 
       oauthCallback: {
         hasCode: !!code,
@@ -96,7 +96,7 @@ export default function OAuthProductionDebugPage() {
       console.log('[OAuth Debug] Starting OAuth with redirect URL:', redirectUrl)
       
       // Log to debug info
-      setDebugInfo(prev => ({ 
+      setDebugInfo((prev: any) => ({ 
         ...prev, 
         oauthAttempt: {
           redirectUrl,
@@ -118,7 +118,7 @@ export default function OAuthProductionDebugPage() {
 
       if (error) {
         console.error('[OAuth Debug] Error:', error)
-        setDebugInfo(prev => ({ 
+        setDebugInfo((prev: any) => ({ 
           ...prev, 
           oauthError: {
             message: error.message,
@@ -131,7 +131,7 @@ export default function OAuthProductionDebugPage() {
       }
     } catch (err) {
       console.error('[OAuth Debug] Exception:', err)
-      setDebugInfo(prev => ({ ...prev, oauthException: String(err) }))
+      setDebugInfo((prev: any) => ({ ...prev, oauthException: String(err) }))
     } finally {
       setIsLoading(false)
     }
