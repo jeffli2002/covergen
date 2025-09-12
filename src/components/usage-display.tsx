@@ -44,13 +44,17 @@ export default function UsageDisplay() {
   const fetchUsageStatus = async () => {
     try {
       setLoading(true)
+      console.log('[UsageDisplay] Fetching usage status for user:', user?.email)
       const response = await fetch('/api/usage/status')
       if (response.ok) {
         const data = await response.json()
+        console.log('[UsageDisplay] Usage status received:', data)
         setUsageStatus(data)
+      } else {
+        console.error('[UsageDisplay] Failed to fetch usage status:', response.status)
       }
     } catch (error) {
-      console.error('Failed to fetch usage status:', error)
+      console.error('[UsageDisplay] Failed to fetch usage status:', error)
     } finally {
       setLoading(false)
     }

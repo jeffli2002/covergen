@@ -155,8 +155,9 @@ export async function getUserSubscriptionInfo(userId: string): Promise<{
     // First try to get from subscriptions table (most up-to-date)
     const { data: subData, error: subError } = await supabase
       .from('subscriptions')
-      .select('tier, status, current_period_end')
+      .select('tier, status, current_period_end, trial_ends_at')
       .eq('user_id', userId)
+      .in('status', ['active', 'trialing', 'paused'])
       .single()
 
     console.log('[getUserSubscriptionInfo] Subscription query result:', {

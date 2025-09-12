@@ -7,8 +7,12 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     
+    console.log('[Usage Status] Checking for user:', user?.email, user?.id)
+    
     // Get generation limit status
     const limitStatus = await checkGenerationLimit(user?.id || null)
+    
+    console.log('[Usage Status] Limit status result:', limitStatus)
     
     if (!limitStatus) {
       // Return default free tier limits if check fails

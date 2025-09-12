@@ -44,6 +44,7 @@ export async function POST(req: NextRequest) {
         status: 'trialing',
         current_period_start: new Date().toISOString(),
         current_period_end: trialEndDate.toISOString(),
+        trial_ends_at: trialEndDate.toISOString(), // Add this field for consistency
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })

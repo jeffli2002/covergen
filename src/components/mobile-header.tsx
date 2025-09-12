@@ -33,18 +33,24 @@ export default function MobileHeader() {
   useEffect(() => {
     if (user) {
       fetchSubscriptionInfo()
+    } else {
+      setSubscriptionInfo(null)
     }
   }, [user])
 
   const fetchSubscriptionInfo = async () => {
     try {
+      console.log('[MobileHeader] Fetching subscription info for user:', user?.email)
       const response = await fetch('/api/usage/status')
       if (response.ok) {
         const data = await response.json()
+        console.log('[MobileHeader] Subscription info received:', data)
         setSubscriptionInfo(data)
+      } else {
+        console.error('[MobileHeader] Failed to fetch subscription info:', response.status)
       }
     } catch (error) {
-      console.error('Failed to fetch subscription info:', error)
+      console.error('[MobileHeader] Failed to fetch subscription info:', error)
     }
   }
 
