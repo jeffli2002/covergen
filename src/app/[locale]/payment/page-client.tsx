@@ -94,8 +94,60 @@ export default function PaymentPageClient({
       if (subscription && subscription.tier === 'pro' && initialPlan === 'pro_plus' && isUpgrade) {
         calculateProratedAmount(subscription)
       }
+      
+      // Check if this is a new user coming from trial signup
+      if (!subscription && initialPlan && initialPlan !== 'free' && authUser) {
+        console.log('[PaymentPage] No subscription found, checking for trial signup flow')
+        
+        // Check if user just signed up (came from pricing section with pending plan)
+        const urlParams = new URLSearchParams(window.location.search)
+        const isFromTrialSignup = urlParams.has('plan') && !urlParams.has('upgrade')
+        
+        if (isFromTrialSignup) {
+          console.log('[PaymentPage] User came from trial signup, creating trial subscription')
+          await createTrialSubscription(initialPlan)
+        }
+      }
     } catch (error) {
       console.error('Error loading subscription:', error)
+    }
+  }
+  
+  const createTrialSubscription = async (tier: string) => {
+    try {
+      setLoading(true)
+      console.log('[PaymentPage] Creating trial subscription for tier:', tier)
+      
+      const response = await fetch('/api/subscription/create-trial', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          tier,
+          trialDays 
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (response.ok && data.success) {
+        console.log('[PaymentPage] Trial subscription created successfully:', data)
+        toast.success(`Welcome! Your ${trialDays}-day ${tier === 'pro' ? 'Pro' : 'Pro+'} trial has started.`)
+        
+        // Redirect to the main page or the intended redirect URL
+        setTimeout(() => {
+          router.push(redirectUrl || `/${locale}`)
+        }, 2000)
+      } else {
+        console.error('[PaymentPage] Failed to create trial subscription:', data)
+        toast.error(data.error || 'Failed to start trial. Please try selecting a plan below.')
+      }
+    } catch (error) {
+      console.error('[PaymentPage] Error creating trial subscription:', error)
+      toast.error('Failed to start trial. Please try selecting a plan below.')
+    } finally {
+      setLoading(false)
     }
   }
 
