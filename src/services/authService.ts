@@ -24,7 +24,7 @@ class AuthService {
     if (typeof window === 'undefined') {
       return null
     }
-    // Use singleton instance to maintain OAuth state
+    // Always create a fresh instance to ensure latest cookies are read
     return createSupabaseClient()
   }
 
