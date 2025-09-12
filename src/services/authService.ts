@@ -431,6 +431,43 @@ class AuthService {
     return this.session
   }
 
+  async checkSession() {
+    try {
+      const supabase = this.getSupabase()
+      if (!supabase) {
+        console.warn('[Auth] Supabase not configured')
+        return false
+      }
+
+      console.log('[Auth] Manually checking session...')
+      const { data: { session }, error } = await supabase.auth.getSession()
+      
+      if (error) {
+        console.error('[Auth] Error checking session:', error)
+        return false
+      }
+
+      if (session) {
+        console.log('[Auth] Session found:', session.user.email)
+        this.session = session
+        this.user = session.user
+        this.storeSession(session)
+        
+        if (this.onAuthChange) {
+          this.onAuthChange(this.user)
+        }
+        
+        return true
+      } else {
+        console.log('[Auth] No session found')
+        return false
+      }
+    } catch (error) {
+      console.error('[Auth] Unexpected error checking session:', error)
+      return false
+    }
+  }
+
   getSupabaseClient() {
     return this.getSupabase()
   }
