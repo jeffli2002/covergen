@@ -64,6 +64,7 @@ export async function checkGenerationLimit(userId: string | null): Promise<Gener
     }
 
     // Get current generation limit status
+    console.log('[checkGenerationLimit] Calling RPC with userId:', userId)
     const { data, error } = await supabase
       .rpc('check_generation_limit', { 
         p_user_id: userId,
@@ -82,6 +83,11 @@ export async function checkGenerationLimit(userId: string | null): Promise<Gener
       // Check if it's a missing function error
       if (error.code === '42883' || error.message?.includes('function') || error.message?.includes('does not exist')) {
         console.error('[checkGenerationLimit] Database function not found. Please run migrations.')
+        console.error('[checkGenerationLimit] Looking for function: check_generation_limit')
+      } else if (error.code === '42703' || error.message?.includes('column') || error.message?.includes('does not exist')) {
+        console.error('[checkGenerationLimit] Database column missing. Check if all migrations were run.')
+      } else if (error.code === '42P01' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+        console.error('[checkGenerationLimit] Database table missing. Check if all migrations were run.')
       }
       
       return null
@@ -144,6 +150,8 @@ export async function getUserSubscriptionInfo(userId: string): Promise<{
   const supabase = await createClient()
 
   try {
+    console.log('[getUserSubscriptionInfo] Checking subscription for user:', userId)
+    
     // First try to get from subscriptions table (most up-to-date)
     const { data: subData, error: subError } = await supabase
       .from('subscriptions')
@@ -151,13 +159,23 @@ export async function getUserSubscriptionInfo(userId: string): Promise<{
       .eq('user_id', userId)
       .single()
 
+    console.log('[getUserSubscriptionInfo] Subscription query result:', {
+      hasData: !!subData,
+      hasError: !!subError,
+      errorCode: subError?.code,
+      errorMessage: subError?.message,
+      data: subData
+    })
+
     if (!subError && subData) {
       const isTrialing = subData.status === 'trialing'
-      return {
+      const result = {
         subscription_tier: subData.tier || 'free',
         is_trial: isTrialing,
         trial_ends_at: isTrialing ? subData.current_period_end : null
       }
+      console.log('[getUserSubscriptionInfo] Found subscription:', result)
+      return result
     }
 
     // Fallback to profiles table
