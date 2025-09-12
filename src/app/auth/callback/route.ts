@@ -135,11 +135,11 @@ export async function GET(request: Request) {
         value,
         httpOnly: options.httpOnly ?? true,
         secure: isProduction || isHttps,
-        sameSite: (options.sameSite || 'lax') as 'lax' | 'strict' | 'none',
+        sameSite: 'none' as 'none', // Must be None for OAuth cross-site flows
         path: options.path || '/',
         ...(options.maxAge && { maxAge: options.maxAge }),
-        // Don't set domain explicitly - let browser use current domain
-        // This prevents cookie domain mismatch issues on Vercel deployments
+        // Set domain to parent domain for production as recommended by Supabase
+        ...(origin.includes('covergen.pro') && { domain: '.covergen.pro' })
       }
 
       response.cookies.set(cookieOptions)
