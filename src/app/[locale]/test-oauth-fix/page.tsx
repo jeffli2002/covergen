@@ -35,7 +35,7 @@ export default function TestOAuthFixPage() {
     checkSession()
     
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session) => {
       addLog(`Auth state change: ${event}`)
       if (session) {
         addLog(`User signed in: ${session.user.email}`)
