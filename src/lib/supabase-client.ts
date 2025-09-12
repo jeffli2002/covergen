@@ -1,17 +1,12 @@
 import { createBrowserClient } from '@supabase/ssr'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+// Create Supabase client for browser-side usage
+export function createSupabaseClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
 
-// Create a simple browser client that works with server-set cookies
-export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true, // Enable for proper OAuth state handling
-    flowType: 'pkce',
-    debug: process.env.NODE_ENV === 'development',
-  },
-  // Use default cookie handling from @supabase/ssr
-  // which properly handles httpOnly cookies set by the server
-})
+// Legacy export for backward compatibility
+export const supabase = createSupabaseClient()

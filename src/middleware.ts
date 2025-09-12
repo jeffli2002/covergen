@@ -52,8 +52,10 @@ export async function middleware(request: NextRequest) {
     '/images',
     '/fonts',
     '/test',
-    '/auth', // Skip all auth routes
+    '/auth/callback', // Ensure auth callback is processed
     '/debug-cookies', // Skip debug page
+    '/debug-auth', // Skip debug auth page
+    '/auth-handler', // Skip auth handler page
     '.html',
     '.png',
     '.jpg',

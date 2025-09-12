@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase-client'
+import { createSupabaseClient } from '@/lib/supabase-client'
 
 export default function DebugAuth() {
   const [debugInfo, setDebugInfo] = useState<any>({})
@@ -18,6 +18,7 @@ export default function DebugAuth() {
         }, {} as Record<string, string>)
 
         // Get session from Supabase
+        const supabase = createSupabaseClient()
         const { data: { session }, error } = await supabase.auth.getSession()
 
         // Get user

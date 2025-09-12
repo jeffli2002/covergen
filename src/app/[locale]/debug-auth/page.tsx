@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { supabase } from '@/lib/supabase'
+import { createSupabaseClient } from '@/lib/supabase-client'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
@@ -35,6 +35,7 @@ export default function DebugAuthPage() {
     updateCookies()
     
     // Subscribe to auth changes
+    const supabase = createSupabaseClient()
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session: any) => {
       addLog(`Auth state changed: ${event}`)
       if (session) {
@@ -50,6 +51,7 @@ export default function DebugAuthPage() {
   const checkSession = async () => {
     try {
       addLog('Checking session...')
+      const supabase = createSupabaseClient()
       const { data: { session }, error } = await supabase.auth.getSession()
       
       if (error) {

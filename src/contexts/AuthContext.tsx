@@ -27,38 +27,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const initAuth = async () => {
       try {
         console.log('[AuthContext] Starting initialization')
-        console.log('[AuthContext] URL:', window.location.href)
         
+        // Set up auth change handler first
         authService.setAuthChangeHandler((user) => {
           console.log('[AuthContext] Auth change handler called:', !!user, user?.email)
           setUser(user)
-          setLoading(false)
         })
         
+        // Initialize auth service
         await authService.initialize()
         
-        // Check for OAuth callback in URL
-        const hashParams = new URLSearchParams(window.location.hash.substring(1))
-        const searchParams = new URLSearchParams(window.location.search)
-        const error = searchParams.get('error') || hashParams.get('error')
-        
-        if (error) {
-          console.error('[AuthContext] OAuth error:', error)
-        }
-        
-        // Force session check after potential OAuth callback
-        if (window.location.pathname.includes('/auth/callback') || 
-            window.location.hash.includes('access_token') ||
-            searchParams.get('code')) {
-          console.log('[AuthContext] Detected potential OAuth callback, forcing session check')
-          await authService.checkSession()
-        }
-        
+        // Get current user
         const currentUser = authService.getCurrentUser()
         console.log('[AuthContext] Current user after init:', currentUser?.email)
         setUser(currentUser)
       } catch (error) {
-        console.error('Auth initialization error:', error)
+        console.error('[AuthContext] Auth initialization error:', error)
       } finally {
         setLoading(false)
       }

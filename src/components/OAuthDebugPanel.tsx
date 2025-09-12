@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 
-export function OAuthDebugPanel() {
+function OAuthDebugPanelInner() {
   const searchParams = useSearchParams()
   const [debugInfo, setDebugInfo] = useState<any>({})
   
@@ -132,5 +132,13 @@ export function OAuthDebugPanel() {
         Clear OAuth Flags & Reload
       </button>
     </div>
+  )
+}
+
+export function OAuthDebugPanel() {
+  return (
+    <Suspense fallback={null}>
+      <OAuthDebugPanelInner />
+    </Suspense>
   )
 }

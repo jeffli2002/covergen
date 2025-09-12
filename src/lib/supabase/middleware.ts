@@ -1,11 +1,9 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
+  let supabaseResponse = NextResponse.next({
+    request,
   })
 
   const supabase = createServerClient(
@@ -13,61 +11,40 @@ export async function updateSession(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value
+        getAll() {
+          return request.cookies.getAll()
         },
-        set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value,
-            ...options,
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          )
+          supabaseResponse = NextResponse.next({
+            request,
           })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          
-          // Ensure proper cookie options for auth cookies
-          const cookieOptions = {
-            name,
-            value,
-            ...options,
-            httpOnly: options.httpOnly ?? true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: (options.sameSite || 'lax') as 'lax' | 'strict' | 'none',
-            path: options.path || '/',
-          }
-          
-          response.cookies.set(cookieOptions)
-        },
-        remove(name: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
         },
       },
     }
   )
 
-  // This will refresh the session if expired - required for Server Components
-  try {
-    await supabase.auth.getUser()
-  } catch (error) {
-    console.error('[Middleware] Error updating session:', error)
+  // IMPORTANT: Avoid writing any logic between createServerClient and
+  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
+  // issues with users being randomly logged out.
+
+  const { data: { user }, error } = await supabase.auth.getUser()
+  
+  if (!error) {
+    console.log('[Middleware] User session found:', user?.email)
+
+  }
+  
+  // Add protected route logic here if needed
+  if (request.nextUrl.pathname.startsWith('/en/account') && error) {
+    return NextResponse.redirect(new URL('/en', request.url))
   }
 
-  return response
+  // IMPORTANT: You *must* return the supabaseResponse object as it is.
+  return supabaseResponse
 }

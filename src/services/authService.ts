@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase-client'
+import { createSupabaseClient } from '@/lib/supabase-client'
 
 let authServiceInstance: AuthService | null = null
 
@@ -24,8 +24,8 @@ class AuthService {
     if (typeof window === 'undefined') {
       return null
     }
-    // Ensure we're getting the singleton instance
-    return supabase
+    // Always create a fresh instance to ensure latest cookies are read
+    return createSupabaseClient()
   }
 
   async initialize() {
@@ -72,44 +72,11 @@ class AuthService {
         })
       }
 
-      const sessionPromise = supabase.auth.getSession()
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Session check timeout')), 3000)
-      )
-
       try {
         console.log('[Auth] Checking for session from Supabase...')
         
-        // In production, if we detect OAuth callback, try to get session multiple times
-        const isOAuthCallback = window.location.search.includes('code=') || 
-                               window.location.search.includes('error=')
-        const isProduction = process.env.NODE_ENV === 'production'
-        
-        if (isOAuthCallback && isProduction) {
-          console.log('[Auth] OAuth callback detected in production, attempting session recovery...')
-          
-          // Try multiple times with delays to ensure cookies are properly set
-          for (let attempt = 0; attempt < 3; attempt++) {
-            if (attempt > 0) {
-              await new Promise(resolve => setTimeout(resolve, 1000 * attempt))
-            }
-            
-            const { data: { session: recoveredSession } } = await supabase.auth.getSession()
-            if (recoveredSession) {
-              console.log('[Auth] Session recovered on attempt', attempt + 1)
-              this.session = recoveredSession
-              this.user = recoveredSession.user
-              this.storeSession(recoveredSession)
-              if (this.onAuthChange) {
-                this.onAuthChange(this.user)
-              }
-              this.initialized = true
-              return true
-            }
-          }
-        }
-        
-        const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any
+        // Simply get the session without timeout
+        const { data: { session }, error } = await supabase.auth.getSession()
         
         console.log('[Auth] Session check result:', { 
           hasSession: !!session,
@@ -138,8 +105,8 @@ class AuthService {
             console.log('[Auth] No session found from Supabase')
           }
         }
-      } catch (timeoutError) {
-        console.warn('[Auth] Session check timed out, continuing with stored session if available')
+      } catch (error) {
+        console.error('[Auth] Error during initialization:', error)
       }
 
       this.initialized = true
@@ -308,9 +275,13 @@ class AuthService {
       // Get the current pathname to preserve locale
       const currentPath = window.location.pathname || '/en'
       
-      // Use PKCE flow with callback route
-      const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
+      // Force localhost redirect in development
+      const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      const redirectUrl = isLocalDev 
+        ? `http://localhost:3001/auth/callback?next=${encodeURIComponent(currentPath)}`
+        : `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
 
+      console.log('[Auth] Environment:', isLocalDev ? 'Development' : 'Production')
       console.log('[Auth] Google sign in with redirect URL:', redirectUrl)
       console.log('[Auth] Using main Supabase client for OAuth')
 

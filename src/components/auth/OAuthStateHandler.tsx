@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { supabase } from '@/lib/supabase-client'
+import { createSupabaseClient } from '@/lib/supabase-client'
 
-export function OAuthStateHandler() {
+function OAuthStateHandlerInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -51,4 +51,12 @@ export function OAuthStateHandler() {
   }, [searchParams, router])
 
   return null
+}
+
+export function OAuthStateHandler() {
+  return (
+    <Suspense fallback={null}>
+      <OAuthStateHandlerInner />
+    </Suspense>
+  )
 }
