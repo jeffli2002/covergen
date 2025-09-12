@@ -15,7 +15,8 @@ import {
   CheckCircle,
   ChevronDown,
   ChevronUp,
-  FileText
+  FileText,
+  Crown
 } from 'lucide-react'
 import { platformSizes, type Platform } from '@/lib/utils'
 import { platformIcons, platformGuidelines, platformEnhancements, generatePlatformPrompt } from '@/lib/platform-configs'
@@ -228,7 +229,20 @@ export default function PromptConfigurator({
           {/* Error Message */}
           {error && (
             <Alert className="border-red-500/50 bg-red-500/20">
-              <AlertDescription className="text-xs md:text-sm text-red-400">{error}</AlertDescription>
+              <AlertDescription className="text-xs md:text-sm text-red-400">
+                <div className="flex flex-col gap-2">
+                  <span>{error}</span>
+                  {(error.includes('upgrade to Pro plan') || error.includes('limit reached')) && (
+                    <a 
+                      href="/payment?plan=pro" 
+                      className="inline-flex items-center gap-1 text-white bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 px-3 py-1.5 rounded-md font-semibold transition-all transform hover:scale-105 shadow-lg"
+                    >
+                      <Crown className="w-4 h-4" />
+                      Upgrade to Pro
+                    </a>
+                  )}
+                </div>
+              </AlertDescription>
             </Alert>
           )}
         </div>

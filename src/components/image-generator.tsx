@@ -156,10 +156,11 @@ export default function ImageGenerator() {
 
       if (!response.ok) {
         let errorMessage = 'Failed to generate images'
+        let errorData: any = null
         
         try {
-          const error = await response.json()
-          errorMessage = error.error || errorMessage
+          errorData = await response.json()
+          errorMessage = errorData.error || errorMessage
         } catch (e) {
           // If we can't parse the error, use status-based messages
         }
@@ -168,6 +169,12 @@ export default function ImageGenerator() {
         if (response.status === 413) {
           throw new Error('Images are too large. Our compression reduced them but they\'re still too big. Please use smaller source images (under 2MB each).')
         } else if (response.status === 429) {
+          // Check if it's a daily limit error
+          if (errorData?.limit_reached) {
+            // Show upgrade modal for limit reached
+            setShowUpgradeModal(true)
+            throw new Error(errorData.error || 'Daily generation limit reached. Please try it tomorrow or upgrade to Pro plan.')
+          }
           throw new Error('Rate limit exceeded. Please wait a few minutes before trying again.')
         } else if (response.status === 401) {
           throw new Error('API authentication failed. Please contact support.')

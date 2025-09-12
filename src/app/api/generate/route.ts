@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { generateImage, GEMINI_MODEL } from '@/lib/openrouter'
 import { createClient } from '@/lib/supabase/server'
 import { checkGenerationLimit, incrementGenerationCount, getUserSubscriptionInfo } from '@/lib/generation-limits'
+import { getSubscriptionConfig } from '@/lib/subscription-config'
 
 // Image generation endpoint
 export async function POST(request: NextRequest) {
@@ -88,13 +89,16 @@ export async function POST(request: NextRequest) {
                 .eq('date_key', dateKey)
                 .single()
               
+              // Get subscription config for limits
+              const config = getSubscriptionConfig()
+              const dailyLimit = config.limits.free.daily
+              
               if (!usageError && usageData) {
-                // Check if they've exceeded daily limit (3 for free users)
-                const dailyLimit = 3
+                // Check if they've exceeded daily limit
                 if (usageData.daily_count >= dailyLimit) {
                   return NextResponse.json(
                     { 
-                      error: `Daily generation limit reached (${usageData.daily_count}/${dailyLimit} today)`,
+                      error: `Daily generation limit reached (${usageData.daily_count}/${dailyLimit} today). Please try it tomorrow or upgrade to Pro plan.`,
                       limit_reached: true,
                       daily_usage: usageData.daily_count,
                       daily_limit: dailyLimit,
@@ -105,30 +109,65 @@ export async function POST(request: NextRequest) {
                     { status: 429 }
                   )
                 }
+                
+                // If they haven't exceeded but we're here, allow generation with current usage
+                return NextResponse.json(
+                  { 
+                    error: `Generation limit check failed. You have used ${usageData.daily_count}/${dailyLimit} today.`,
+                    limit_reached: false,
+                    daily_usage: usageData.daily_count,
+                    daily_limit: dailyLimit,
+                    subscription_tier: 'free',
+                    is_trial: false,
+                    remaining_daily: Math.max(0, dailyLimit - usageData.daily_count)
+                  },
+                  { status: 200 } // Allow generation to proceed
+                )
               }
               
-              // If we can't determine usage, return a more helpful error
+              // If we can't determine usage at all, assume limit reached
               return NextResponse.json(
                 { 
-                  error: 'Unable to verify generation limits. You may have reached your daily limit of 3 images.',
+                  error: `Unable to verify generation limits. You may have reached your daily limit of ${dailyLimit} images. Please try it tomorrow or upgrade to Pro plan.`,
                   limit_reached: true,
-                  subscription_tier: 'free'
+                  daily_usage: dailyLimit,
+                  daily_limit: dailyLimit,
+                  subscription_tier: 'free',
+                  is_trial: false,
+                  remaining_daily: 0
                 },
                 { status: 429 }
               )
             } catch (err) {
               console.error('[Generate API] Error checking free user usage:', err)
+              // Get config for daily limit
+              const config = getSubscriptionConfig()
+              const dailyLimit = config.limits.free.daily
               return NextResponse.json(
-                { error: 'Failed to verify generation limits. Please try again later.' },
-                { status: 500 }
+                { 
+                  error: `Failed to verify generation limits. You may have reached your daily limit of ${dailyLimit} images. Please try it tomorrow or upgrade to Pro plan.`,
+                  limit_reached: true,
+                  daily_usage: dailyLimit,
+                  daily_limit: dailyLimit,
+                  subscription_tier: 'free',
+                  is_trial: false,
+                  remaining_daily: 0
+                },
+                { status: 429 }
               )
             }
           }
         } catch (fallbackError) {
           console.error('[Generate API] Fallback subscription check failed:', fallbackError)
+          const config = getSubscriptionConfig()
+          const dailyLimit = config.limits.free.daily
           return NextResponse.json(
-            { error: 'Failed to verify generation limits. Please try again later.' },
-            { status: 500 }
+            { 
+              error: `Failed to verify your account status. Free users get ${dailyLimit} images daily. Please try it tomorrow or upgrade to Pro plan for unlimited access.`,
+              limit_reached: true,
+              subscription_tier: 'free'
+            },
+            { status: 429 }
           )
         }
       }
@@ -136,8 +175,10 @@ export async function POST(request: NextRequest) {
       // If user has reached their limit, return error
       if (!limitStatus.can_generate) {
         const errorMessage = limitStatus.is_trial 
-          ? `Trial limit reached (${limitStatus.trial_usage}/${limitStatus.trial_limit} covers used)`
-          : `Daily generation limit reached (${limitStatus.daily_usage}/${limitStatus.daily_limit} today)`
+          ? `Trial limit reached (${limitStatus.trial_usage}/${limitStatus.trial_limit} covers used). Upgrade to Pro plan to continue creating amazing covers!`
+          : limitStatus.subscription_tier === 'free'
+          ? `Daily generation limit reached (${limitStatus.daily_usage}/${limitStatus.daily_limit} today). Please try it tomorrow or upgrade to Pro plan for more daily generations.`
+          : `Monthly generation limit reached (${limitStatus.monthly_usage}/${limitStatus.monthly_limit} this month). Upgrade to Pro+ for unlimited generations!`
           
         return NextResponse.json(
           { 
