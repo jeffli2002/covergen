@@ -160,6 +160,14 @@ export default async function LocaleLayout({
         <GoogleAnalytics measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
       )}
       
+      {/* Google AdSense */}
+      <Script
+        async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9378191378774896"
+        crossOrigin="anonymous"
+        strategy="afterInteractive"
+      />
+      
       <Script
         id="set-html-attrs"
         strategy="beforeInteractive"
