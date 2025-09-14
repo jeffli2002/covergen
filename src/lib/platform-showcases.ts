@@ -4,6 +4,7 @@ export const platformShowcases = {
       title: "Road Trip Vibes 🚗",
       originalImage: "/platform-examples/youtube/original-1.jpg",
       optimizedImage: "/platform-examples/youtube/original-1.jpg",
+      enhancedImage: "/platform-examples/youtube/enhancedImage1.png",
       targetDimensions: { width: 1280, height: 720, label: "1280×720 (16:9)" }
     }
   ],
@@ -28,6 +29,7 @@ export const platformShowcases = {
       title: "Golden Hour Aesthetic ✨",
       originalImage: "/platform-examples/instagram/original-1.jpg",
       optimizedImage: "/platform-examples/instagram/original-1.jpg",
+      enhancedImage: "/platform-examples/instagram/enhancedImage1.png",
       targetDimensions: { width: 1080, height: 1080, label: "1080×1080 (1:1)" }
     }
   ],
