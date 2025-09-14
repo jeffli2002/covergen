@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Sparkles, Zap, Shield, Check } from 'lucide-react'
+import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
 
 interface UpgradePromptProps {
   onClose?: () => void
@@ -20,8 +21,8 @@ export default function UpgradePrompt({
   dailyLimit = 3, 
   isTrial = false 
 }: UpgradePromptProps) {
-  // Get trial days from environment variable
-  const trialDays = parseInt(process.env.NEXT_PUBLIC_PRO_TRIAL_DAYS || '7')
+  // Get subscription configuration
+  const config = getClientSubscriptionConfig()
   
   const features = [
     { icon: Zap, text: 'Unlimited daily generations' },
@@ -49,7 +50,7 @@ export default function UpgradePrompt({
           </div>
           <p className="text-gray-600 text-sm mt-2">
             {isTrial 
-              ? `You've used all ${dailyLimit} generations for today during your ${trialDays}-day free trial.`
+              ? `You've used all ${dailyLimit} generations for today during your ${config.trialDays}-day free trial.`
               : `You've used all ${dailyLimit} free generations for today.`
             }
           </p>

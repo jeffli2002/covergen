@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { useAppStore } from '@/lib/store'
 import { useAnalytics } from '@/lib/analytics'
 import { useAuth } from '@/contexts/AuthContext'
+import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
 import { 
   Sparkles, 
   Zap, 
@@ -98,9 +99,9 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
   })
   const { user: authUser } = useAuth()
   
-  // Get trial days from environment variables
-  const proTrialDays = parseInt(process.env.NEXT_PUBLIC_PRO_TRIAL_DAYS || '7')
-  const proPlusTrialDays = parseInt(process.env.NEXT_PUBLIC_PRO_PLUS_TRIAL_DAYS || '7')
+  // Get subscription configuration
+  const config = getClientSubscriptionConfig()
+  const trialDays = config.trialDays
 
   // Log auth state for debugging (without causing reloads)
   useEffect(() => {
@@ -376,8 +377,8 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                   What's the difference between free and Pro plans?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Free users get 10 covers per month (3/day max) for personal use only. Pro ($9/month) includes a {proTrialDays}-day trial and 
-                  120 covers per month with commercial rights. Pro+ ($19/month) also includes a {proPlusTrialDays}-day trial and 300 covers per 
+                  Free users get {config.limits.free.monthly} covers per month ({config.limits.free.daily}/day max) for personal use only. Pro ($9/month) includes a {trialDays}-day trial and 
+                  {config.limits.pro.monthly} covers per month with commercial rights. Pro+ ($19/month) also includes a {trialDays}-day trial and {config.limits.pro_plus.monthly} covers per 
                   month with full commercial license for teams and enterprises.
                 </p>
               </div>
@@ -417,8 +418,8 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                   How does the Pro/Pro+ trial work?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Pro and Pro+ plans come with a {proTrialDays}-day free trial. During the trial, Pro users get {Math.floor(120 * proTrialDays / 30)} covers total 
-                  and Pro+ users get {Math.floor(300 * proPlusTrialDays / 30)} covers total. Trial usage doesn't count against your first paid month - you'll 
+                  Pro and Pro+ plans come with a {trialDays}-day free trial. During the trial, Pro users get {config.limits.pro.trial_total} covers total 
+                  and Pro+ users get {config.limits.pro_plus.trial_total} covers total. Trial usage doesn't count against your first paid month - you'll 
                   get the full monthly quota when your subscription begins.
                 </p>
               </div>

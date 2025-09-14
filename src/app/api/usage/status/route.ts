@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { checkGenerationLimit } from '@/lib/generation-limits'
+import { getSubscriptionConfig } from '@/lib/subscription-config'
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,6 +9,9 @@ export async function GET(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
     
     console.log('[Usage Status] Checking for user:', user?.email, user?.id)
+    
+    // Get subscription config
+    const config = getSubscriptionConfig()
     
     // Get generation limit status
     const limitStatus = await checkGenerationLimit(user?.id || null)
@@ -30,7 +34,7 @@ export async function GET(request: NextRequest) {
       daily_usage: limitStatus.daily_usage,
       daily_limit: limitStatus.daily_limit || 
         (limitStatus.is_trial 
-          ? Math.ceil((limitStatus.trial_limit || 0) / 7) // Estimate daily from trial total
+          ? Math.ceil((limitStatus.trial_limit || 0) / config.trialDays) // Estimate daily from trial total
           : limitStatus.monthly_limit || 0),
       monthly_usage: limitStatus.monthly_usage,
       monthly_limit: limitStatus.monthly_limit,

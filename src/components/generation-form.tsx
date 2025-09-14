@@ -13,6 +13,7 @@ import { useAppStore } from '@/lib/store'
 import { platformIcons, platformGuidelines, platformEnhancements, generatePlatformPrompt } from '@/lib/platform-configs'
 import UpgradePrompt from '@/components/auth/UpgradePrompt'
 import authService from '@/services/authService'
+import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
 
 interface DailyLimitStatus {
   daily_count: number
@@ -34,8 +35,8 @@ export default function GenerationForm() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [dailyLimitStatus, setDailyLimitStatus] = useState<DailyLimitStatus | null>(null)
   
-  // Get trial days from environment variable
-  const trialDays = parseInt(process.env.NEXT_PUBLIC_PRO_TRIAL_DAYS || '7')
+  // Get subscription configuration
+  const config = getClientSubscriptionConfig()
   
   const { user, addTask } = useAppStore()
 
@@ -430,7 +431,7 @@ export default function GenerationForm() {
             <div className="text-sm">
               <span className="font-medium">Daily Generations:</span> {dailyLimitStatus.daily_count}/{dailyLimitStatus.daily_limit}
               <span className="text-muted-foreground ml-1">
-                {dailyLimitStatus.is_trial ? `(${trialDays}-day free trial)` : `(${dailyLimitStatus.subscription_tier} tier)`}
+                {dailyLimitStatus.is_trial ? `(${config.trialDays}-day free trial)` : `(${dailyLimitStatus.subscription_tier} tier)`}
               </span>
             </div>
             {!dailyLimitStatus.can_generate && (
