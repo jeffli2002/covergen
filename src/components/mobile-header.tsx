@@ -194,7 +194,9 @@ export default function MobileHeader() {
                       className="flex-1 text-base"
                       onClick={() => {
                         setIsMenuOpen(false)
-                        window.location.href = '/account'
+                        // Use proper Next.js navigation with locale support
+                        const currentLocale = window.location.pathname.split('/')[1] || 'en'
+                        window.location.href = `/${currentLocale}/account`
                       }}
                     >
                       <Settings className="w-5 h-5 mr-2" />
