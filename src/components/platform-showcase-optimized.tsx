@@ -161,21 +161,26 @@ export default function PlatformShowcaseOptimized({
                   {!imagesLoaded[current.originalImage] && (
                     <div className="absolute inset-0 bg-gray-200 animate-pulse" />
                   )}
-                  {/* Dark gradient overlay for text readability */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  
-                  {/* AI-generated title overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center p-8">
-                    <h3 className={getTitleStyle()}>
-                      {current.title}
-                    </h3>
-                  </div>
+                  {/* Only add overlays if no enhanced image is provided */}
+                  {!current.enhancedImage && (
+                    <>
+                      {/* Dark gradient overlay for text readability */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                      
+                      {/* AI-generated title overlay */}
+                      <div className="absolute inset-0 flex items-center justify-center p-8">
+                        <h3 className={getTitleStyle()}>
+                          {current.title}
+                        </h3>
+                      </div>
 
-                  {/* Platform-specific decorations */}
-                  {platform === 'YouTube' && (
-                    <div className="absolute bottom-4 right-4 bg-red-600 text-white px-3 py-1 rounded text-sm font-bold">
-                      10:23
-                    </div>
+                      {/* Platform-specific decorations */}
+                      {platform === 'YouTube' && (
+                        <div className="absolute bottom-4 right-4 bg-red-600 text-white px-3 py-1 rounded text-sm font-bold">
+                          10:23
+                        </div>
+                      )}
+                    </>
                   )}
 
                   <div className="absolute top-4 left-4 flex items-center px-3 py-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full text-sm font-medium">

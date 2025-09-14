@@ -6,18 +6,6 @@ export const platformShowcases = {
       optimizedImage: "/platform-examples/youtube/original-1.webp",
       enhancedImage: "/platform-examples/youtube/enhancedImage1.png",
       targetDimensions: { width: 1280, height: 720, label: "1280×720 (16:9)" }
-    },
-    {
-      title: "I Tried This For 30 Days...",
-      originalImage: "/platform-examples/youtube/original-2.jpg",
-      optimizedImage: "/platform-examples/youtube/original-2.webp",
-      targetDimensions: { width: 1280, height: 720, label: "1280×720 (16:9)" }
-    },
-    {
-      title: "You Won't Believe What Happened!",
-      originalImage: "/platform-examples/youtube/original-3.jpg",
-      optimizedImage: "/platform-examples/youtube/original-3.webp",
-      targetDimensions: { width: 1280, height: 720, label: "1280×720 (16:9)" }
     }
   ],
   
@@ -42,12 +30,6 @@ export const platformShowcases = {
       originalImage: "/platform-examples/instagram/original-1.jpg",
       optimizedImage: "/platform-examples/instagram/original-1.webp",
       enhancedImage: "/platform-examples/instagram/enhancedImage1.png",
-      targetDimensions: { width: 1080, height: 1080, label: "1080×1080 (1:1)" }
-    },
-    {
-      title: "Monday Motivation 💪",
-      originalImage: "/platform-examples/instagram/original-2.jpg",
-      optimizedImage: "/platform-examples/instagram/original-2.webp",
       targetDimensions: { width: 1080, height: 1080, label: "1080×1080 (1:1)" }
     }
   ],
