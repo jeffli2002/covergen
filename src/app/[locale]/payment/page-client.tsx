@@ -18,6 +18,7 @@ interface PaymentPageClientProps {
   locale: string
   initialPlan?: string
   isUpgrade?: boolean
+  isActivation?: boolean
   redirectUrl?: string
 }
 
@@ -25,6 +26,7 @@ export default function PaymentPageClient({
   locale, 
   initialPlan = 'pro', 
   isUpgrade = false,
+  isActivation = false,
   redirectUrl 
 }: PaymentPageClientProps) {
   const router = useRouter()
@@ -280,11 +282,11 @@ export default function PaymentPageClient({
             <Loader2 className="w-12 h-12 animate-spin text-orange-500" />
             <div className="text-center">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Upgrading Your Trial
+                {isActivation ? 'Activating Your Plan' : 'Upgrading Your Trial'}
               </h2>
               <p className="text-gray-600">
                 {currentSubscription?.stripe_subscription_id 
-                  ? `Upgrading instantly to ${initialPlan === 'pro_plus' ? 'Pro+' : 'Pro'}...`
+                  ? `${isActivation ? 'Activating' : 'Upgrading instantly to'} ${initialPlan === 'pro_plus' ? 'Pro+' : 'Pro'}...`
                   : `Setting up ${initialPlan === 'pro_plus' ? 'Pro+' : 'Pro'} subscription...`}
               </p>
               <p className="text-sm text-gray-500 mt-2">
@@ -305,10 +307,13 @@ export default function PaymentPageClient({
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4 text-gray-900">
-            {isUpgrade ? 'Upgrade Your Plan' : 'Choose Your Plan'}
+            {isActivation ? 'Activate Your Plan' : isUpgrade ? 'Upgrade Your Plan' : 'Choose Your Plan'}
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Start creating professional covers with AI. All plans include watermark-free images.
+            {isActivation 
+              ? 'Add a payment method to convert your trial to a paid subscription and continue using all features.'
+              : 'Start creating professional covers with AI. All plans include watermark-free images.'
+            }
           </p>
           
           {isTestMode && (
@@ -449,7 +454,14 @@ export default function PaymentPageClient({
                   </ul>
                 </CardContent>
 
-                <CardFooter>
+                <CardFooter className="flex flex-col gap-2">
+                  {/* Current Plan Status for trial users */}
+                  {isCurrentPlan && isTrialUser && (
+                    <Badge variant="secondary" className="w-full py-2 text-sm">
+                      Current Plan (Trial)
+                    </Badge>
+                  )}
+                  
                   <Button
                     className={`w-full transition-all duration-300 ${
                       isSelected
@@ -479,6 +491,11 @@ export default function PaymentPageClient({
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Processing...
+                      </>
+                    ) : isCurrentPlan && isTrialUser ? (
+                      <>
+                        <Crown className="mr-2 h-4 w-4" />
+                        Activate Plan
                       </>
                     ) : isCurrentPlan && needsPaymentSetup ? (
                       <>

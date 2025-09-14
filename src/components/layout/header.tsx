@@ -242,16 +242,16 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                     )
                   }
                   
-                  // For Pro trial users who can upgrade to Pro+
-                  if (isTrialing && plan === 'pro') {
+                  // For trial users - show activate option for their current plan
+                  if (isTrialing && (plan === 'pro' || plan === 'pro_plus')) {
                     return (
                       <Button 
                         size="sm" 
                         className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-sm px-4"
-                        onClick={() => router.push(`/${locale}/payment?plan=pro_plus&upgrade=true`)}
+                        onClick={() => router.push(`/${locale}/payment?plan=${plan}&activate=true`)}
                       >
                         <Crown className="w-4 h-4 mr-2" />
-                        Upgrade to Pro+
+                        Activate {plan === 'pro' ? 'Pro' : 'Pro+'}
                       </Button>
                     )
                   }
