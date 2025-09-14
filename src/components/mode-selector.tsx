@@ -145,7 +145,19 @@ export default function ModeSelector({
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files).slice(0, 9 - referenceImages.length)
-      setReferenceImages([...referenceImages, ...newFiles])
+      
+      // Validate file sizes (5MB limit)
+      const validFiles = newFiles.filter(file => {
+        if (file.size > 5 * 1024 * 1024) {
+          alert(`File "${file.name}" is too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum size is 5MB.`)
+          return false
+        }
+        return true
+      })
+      
+      if (validFiles.length > 0) {
+        setReferenceImages([...referenceImages, ...validFiles])
+      }
     }
   }
 
@@ -315,7 +327,7 @@ export default function ModeSelector({
                     <div className="w-full h-full rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center hover:bg-gray-100 hover:border-gray-400 transition-all duration-300">
                       <Plus className="w-6 h-6 text-gray-500 mb-1" />
                       <span className="text-xs text-gray-600">Add</span>
-                      <span className="text-xs text-gray-500">Max 50MB</span>
+                      <span className="text-xs text-gray-500">Max 5MB</span>
                     </div>
                   </label>
                 )}

@@ -213,9 +213,9 @@ export async function POST(request: NextRequest) {
         const imageSize = referenceImages[i].length
         console.log(`Reference image ${i + 1} size: ${(imageSize / 1024 / 1024).toFixed(2)}MB`)
         
-        if (imageSize > 2 * 1024 * 1024) { // 2MB per image
+        if (imageSize > 5 * 1024 * 1024) { // 5MB per image
           return NextResponse.json(
-            { error: `Reference image ${i + 1} is too large (${(imageSize / 1024 / 1024).toFixed(2)}MB). Maximum size is 2MB per image.` },
+            { error: `Reference image ${i + 1} is too large (${(imageSize / 1024 / 1024).toFixed(2)}MB). Maximum size is 5MB per image.` },
             { status: 413 }
           )
         }

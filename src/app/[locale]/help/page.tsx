@@ -24,7 +24,7 @@ const faqCategories = [
       },
       {
         question: 'What image formats are supported?',
-        answer: 'We support JPEG, PNG, and WebP formats. Upload images up to 50MB for best results.'
+        answer: 'We support JPEG, PNG, and WebP formats. Upload images up to 5MB for best results.'
       },
       {
         question: 'How many images can I generate?',

@@ -167,7 +167,7 @@ export default function ImageGenerator() {
         
         // Handle specific error cases
         if (response.status === 413) {
-          throw new Error('Images are too large. Our compression reduced them but they\'re still too big. Please use smaller source images (under 2MB each).')
+          throw new Error('Images are too large. Our compression reduced them but they\'re still too big. Please use smaller source images (under 5MB each).')
         } else if (response.status === 429) {
           // Check if it's a daily limit error
           if (errorData?.limit_reached) {

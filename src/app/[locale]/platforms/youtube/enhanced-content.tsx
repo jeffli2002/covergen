@@ -91,7 +91,7 @@ export const YouTubeEnhancedContent = () => {
               <h5 className="font-semibold mb-3">YouTube Thumbnail Requirements:</h5>
               <ul className="space-y-2">
                 <li><strong>Resolution:</strong> 1280x720 pixels (16:9 aspect ratio)</li>
-                <li><strong>File size:</strong> Under 2MB</li>
+                <li><strong>File size:</strong> Under 2MB (YouTube limit) - our platform supports up to 5MB</li>
                 <li><strong>Format:</strong> JPG, GIF, or PNG</li>
                 <li><strong>Minimum width:</strong> 640 pixels</li>
               </ul>
