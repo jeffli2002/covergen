@@ -283,6 +283,17 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                   )
                 })()}
 
+                {/* Account link */}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => router.push(`/${locale}/account`)}
+                  className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  Account
+                </Button>
+
                 {/* Logout button */}
                 <Button 
                   variant="ghost" 

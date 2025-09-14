@@ -255,6 +255,14 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                     >
                       Upgrade Plan
                     </Button>
+                  ) : isTrialing && !subscription?.stripe_subscription_id ? (
+                    <Button 
+                      onClick={() => router.push(`/${locale}/payment?plan=${currentPlan}&activate=true`)}
+                      className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
+                    >
+                      <Crown className="mr-2 h-4 w-4" />
+                      Activate Plan
+                    </Button>
                   ) : (
                     <>
                       <Button

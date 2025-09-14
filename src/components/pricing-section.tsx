@@ -173,11 +173,21 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
     }
 
     // If authenticated, navigate to payment page
-    // For trial users clicking upgrade, add upgrade flag
-    const isUpgrading = subscriptionInfo?.isTrialing && tierKey !== 'free'
-    const paymentUrl = isUpgrading 
-      ? `/${locale}/payment?plan=${tierKey}&upgrade=true`
-      : `/${locale}/payment?plan=${tierKey}`
+    // For trial users clicking on their current plan (activation)
+    const isActivating = subscriptionInfo?.isTrialing && 
+                        subscriptionInfo?.requiresPaymentSetup && 
+                        subscriptionInfo.plan === tierKey
+    
+    // For trial users clicking upgrade to different plan
+    const isUpgrading = subscriptionInfo?.isTrialing && 
+                       tierKey !== 'free' && 
+                       subscriptionInfo.plan !== tierKey
+    
+    const paymentUrl = isActivating
+      ? `/${locale}/payment?plan=${tierKey}&activate=true`
+      : isUpgrading 
+        ? `/${locale}/payment?plan=${tierKey}&upgrade=true`
+        : `/${locale}/payment?plan=${tierKey}`
     router.push(paymentUrl)
   }
 
@@ -311,11 +321,21 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
                           : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'
                       }`}
                       variant={tier.popular ? "default" : "outline"}
-                      disabled={isCurrentTier || loadingSubscription}
+                      disabled={
+                        loadingSubscription || 
+                        (isCurrentTier && !(subscriptionInfo?.isTrialing && subscriptionInfo?.requiresPaymentSetup))
+                      }
                       onClick={() => handleSubscribe(tier.id)}
                     >
                       {(() => {
                         if (loadingSubscription) return 'Loading...'
+                        
+                        // For trial users on their current plan who need payment setup
+                        if (isCurrentTier && subscriptionInfo?.isTrialing && subscriptionInfo?.requiresPaymentSetup) {
+                          return 'Activate Plan'
+                        }
+                        
+                        // For paid users on their current plan
                         if (isCurrentTier) return 'Current Plan'
                         
                         // If user is on a trial
