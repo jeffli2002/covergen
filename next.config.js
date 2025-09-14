@@ -17,17 +17,8 @@ const nextConfig = {
   },
   // Enhanced experimental features for performance
   experimental: {
-    optimizePackageImports: [
-      'lucide-react', 
-      '@radix-ui/react-icons', 
-      '@/components/ui', 
-      '@/lib',
-      'next/image',
-      'react'
-    ],
     // Enable advanced optimizations
     serverComponentsExternalPackages: ['sharp'],
-    optimizeServerReact: true,
   },
   // Bundle analyzer integration
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
