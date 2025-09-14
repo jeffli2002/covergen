@@ -1,10 +1,9 @@
 export const platformShowcases = {
   youtube: [
     {
-      title: "10 MIND-BLOWING Tech Gadgets",
+      title: "Road Trip Vibes 🚗",
       originalImage: "/platform-examples/youtube/original-1.jpg",
-      optimizedImage: "/platform-examples/youtube/original-1.webp",
-      enhancedImage: "/platform-examples/youtube/enhancedImage1.png",
+      optimizedImage: "/platform-examples/youtube/original-1.jpg",
       targetDimensions: { width: 1280, height: 720, label: "1280×720 (16:9)" }
     }
   ],
@@ -26,10 +25,9 @@ export const platformShowcases = {
 
   instagram: [
     {
-      title: "Living My Best Life ✨",
+      title: "Golden Hour Aesthetic ✨",
       originalImage: "/platform-examples/instagram/original-1.jpg",
-      optimizedImage: "/platform-examples/instagram/original-1.webp",
-      enhancedImage: "/platform-examples/instagram/enhancedImage1.png",
+      optimizedImage: "/platform-examples/instagram/original-1.jpg",
       targetDimensions: { width: 1080, height: 1080, label: "1080×1080 (1:1)" }
     }
   ],
