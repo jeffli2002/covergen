@@ -16,6 +16,15 @@ declare global {
     generateTestId: (prefix: string) => string;
     wait: (ms: number) => Promise<void>;
   };
+
+  interface Window {
+    gtag: (
+      command: 'config' | 'event' | 'js' | 'set',
+      targetId: string,
+      config?: Record<string, any>
+    ) => void;
+    dataLayer: any[];
+  }
 }
 
 export {};

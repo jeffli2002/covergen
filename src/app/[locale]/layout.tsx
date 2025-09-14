@@ -10,6 +10,7 @@ import { Analytics } from '@vercel/analytics/react'
 import { Providers } from '@/components/providers'
 import { organizationSchema, websiteSchema, softwareApplicationSchema } from '@/lib/seo/schema'
 import { Suspense, lazy } from 'react'
+import GoogleAnalytics from '@/components/GoogleAnalytics'
 import '@/app/globals.css'
 
 // Lazy load performance monitor for development
@@ -154,6 +155,11 @@ export default async function LocaleLayout({
 
   return (
     <>
+      {/* Google Analytics */}
+      {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
+        <GoogleAnalytics measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
+      )}
+      
       <Script
         id="set-html-attrs"
         strategy="beforeInteractive"
