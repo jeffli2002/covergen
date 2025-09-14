@@ -10,6 +10,21 @@ import { useRouter } from 'next/navigation'
 import AuthForm from '@/components/auth/AuthForm'
 import { getClientSubscriptionConfig, getTrialPeriodText, getTrialPeriodFullText, isTrialEnabledClient } from '@/lib/subscription-config-client'
 
+interface SubscriptionInfo {
+  status: string
+  plan: string
+  isActive: boolean
+  isTrialing: boolean
+  trialDaysRemaining: number | null
+  cancelAtPeriodEnd: boolean
+  currentPeriodEnd: string | null
+  canUpgrade: boolean
+  canDowngrade: boolean
+  stripeSubscriptionId: string | null
+  requiresPaymentSetup?: boolean
+  isManualTrial?: boolean
+}
+
 // Get dynamic configuration
 const config = getClientSubscriptionConfig()
 const trialText = getTrialPeriodText()
@@ -94,6 +109,32 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
   const router = useRouter()
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [pendingPlan, setPendingPlan] = useState<string | null>(null)
+  const [subscriptionInfo, setSubscriptionInfo] = useState<SubscriptionInfo | null>(null)
+  const [loadingSubscription, setLoadingSubscription] = useState(false)
+  
+  // Fetch subscription info when component mounts or auth changes
+  useEffect(() => {
+    if (authUser) {
+      fetchSubscriptionInfo()
+    } else {
+      setSubscriptionInfo(null)
+    }
+  }, [authUser])
+  
+  const fetchSubscriptionInfo = async () => {
+    setLoadingSubscription(true)
+    try {
+      const response = await fetch('/api/subscription/status')
+      if (response.ok) {
+        const data = await response.json()
+        setSubscriptionInfo(data)
+      }
+    } catch (error) {
+      console.error('Error fetching subscription:', error)
+    } finally {
+      setLoadingSubscription(false)
+    }
+  }
   
   // Check for pending plan on mount and after auth
   useEffect(() => {
@@ -132,7 +173,12 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
     }
 
     // If authenticated, navigate to payment page
-    router.push(`/${locale}/payment?plan=${tierKey}`)
+    // For trial users clicking upgrade, add upgrade flag
+    const isUpgrading = subscriptionInfo?.isTrialing && tierKey !== 'free'
+    const paymentUrl = isUpgrading 
+      ? `/${locale}/payment?plan=${tierKey}&upgrade=true`
+      : `/${locale}/payment?plan=${tierKey}`
+    router.push(paymentUrl)
   }
 
   const handleAuthSuccess = (authenticatedUser: any) => {
@@ -167,7 +213,10 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto px-4">
           {tiers.map((tier) => {
             const Icon = tier.icon
-            const isCurrentTier = user?.tier === tier.id
+            // Check if this is the user's current tier (including trial status)
+            const isCurrentTier = subscriptionInfo?.isTrialing 
+              ? subscriptionInfo.plan === tier.id 
+              : user?.tier === tier.id
             
             return (
               <Card 
@@ -262,10 +311,26 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
                           : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'
                       }`}
                       variant={tier.popular ? "default" : "outline"}
-                      disabled={isCurrentTier}
+                      disabled={isCurrentTier || loadingSubscription}
                       onClick={() => handleSubscribe(tier.id)}
                     >
-                      {isCurrentTier ? 'Current Plan' : tier.cta}
+                      {(() => {
+                        if (loadingSubscription) return 'Loading...'
+                        if (isCurrentTier) return 'Current Plan'
+                        
+                        // If user is on a trial
+                        if (subscriptionInfo?.isTrialing) {
+                          // If trying to upgrade from free trial to a paid plan
+                          if (subscriptionInfo.plan === 'free') return 'Upgrade'
+                          // If on Pro trial looking at Pro+ 
+                          if (subscriptionInfo.plan === 'pro' && tier.id === 'pro_plus') return 'Upgrade'
+                          // For any other case during trial (like downgrade), show regular CTA
+                          return tier.cta
+                        }
+                        
+                        // Default case - show the tier's CTA
+                        return tier.cta
+                      })()}
                     </Button>
                   )}
                 </CardContent>

@@ -692,6 +692,9 @@ class CreemPaymentService {
       case 'checkout.completed':
         return this.handleCheckoutComplete(eventData)
       
+      case 'subscription.created':
+        return this.handleSubscriptionCreated(eventData)
+      
       case 'subscription.active':
       case 'subscription.update':
         return this.handleSubscriptionUpdate(eventData)
@@ -726,8 +729,47 @@ class CreemPaymentService {
     }
   }
 
+  private async handleSubscriptionCreated(subscription: any) {
+    const { id, customer, metadata, status, trial_period_days } = subscription
+    
+    console.log('[Creem Webhook] Subscription created:', {
+      subscriptionId: id,
+      customerId: customer?.id || customer,
+      status: status,
+      metadata: metadata
+    })
+    
+    const customerId = typeof customer === 'string' ? customer : customer?.id
+    const userId = metadata?.internal_customer_id || metadata?.userId || customer?.external_id
+    
+    if (!id || !customerId) {
+      console.error('[Creem Webhook] Missing subscription ID or customer ID in subscription.created')
+      return { success: true }
+    }
+    
+    return {
+      type: 'subscription_created',
+      subscriptionId: id,
+      customerId: customerId,
+      userId: userId,
+      status: status
+    }
+  }
+
   private async handleCheckoutComplete(checkout: any) {
     const { customer, subscription, metadata, order, trial_period_days } = checkout
+    
+    // Log the full checkout payload for debugging
+    console.log('[Creem Webhook] Checkout complete payload:', {
+      hasCustomer: !!customer,
+      customerId: customer?.id,
+      hasSubscription: !!subscription,
+      subscriptionId: subscription?.id,
+      subscriptionData: subscription,
+      metadata: metadata,
+      order: order,
+      trial_period_days: trial_period_days
+    })
     
     // Extract user ID from metadata or customer external ID
     const userId = metadata?.internal_customer_id || metadata?.userId || customer?.external_id
@@ -741,11 +783,21 @@ class CreemPaymentService {
       trialEnd = trialEndDate.toISOString()
     }
     
+    // IMPORTANT: Creem might send subscription ID in different fields
+    const subscriptionId = subscription?.id || 
+                          subscription?.subscription_id || 
+                          checkout.subscription_id ||
+                          order?.subscription_id
+    
+    if (!subscriptionId) {
+      console.warn('[Creem Webhook] No subscription ID found in checkout.completed webhook!')
+    }
+    
     return {
       type: 'checkout_complete',
       userId: userId,
       customerId: customer?.id,
-      subscriptionId: subscription?.id,
+      subscriptionId: subscriptionId,
       planId: planId,
       trialEnd: trialEnd
     }

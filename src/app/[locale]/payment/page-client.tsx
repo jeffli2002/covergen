@@ -35,6 +35,7 @@ export default function PaymentPageClient({
   const [isTestMode, setIsTestMode] = useState(false)
   const [currentSubscription, setCurrentSubscription] = useState<any>(null)
   const [proratedAmount, setProratedAmount] = useState<number | null>(null)
+  const [isProcessingTrialUpgrade, setIsProcessingTrialUpgrade] = useState(false)
   
   // Get trial days from environment variables
   const trialDays = parseInt(process.env.NEXT_PUBLIC_TRIAL_DAYS || '3')
@@ -95,61 +96,28 @@ export default function PaymentPageClient({
         calculateProratedAmount(subscription)
       }
       
+      // Check if this is a trial user wanting to upgrade
+      if (subscription && subscription.status === 'trialing' && isUpgrade && initialPlan) {
+        console.log('[PaymentPage] Trial user wants to upgrade, processing automatically')
+        setIsProcessingTrialUpgrade(true)
+        // Automatically start the upgrade process for trial users
+        setTimeout(() => {
+          handleSelectPlan(initialPlan as 'pro' | 'pro_plus')
+        }, 1000)
+        return
+      }
+      
       // Check if this is a new user coming from trial signup
       if (!subscription && initialPlan && initialPlan !== 'free' && authUser) {
-        console.log('[PaymentPage] No subscription found, checking for trial signup flow')
-        
-        // Check if user just signed up (came from pricing section with pending plan)
-        const urlParams = new URLSearchParams(window.location.search)
-        const isFromTrialSignup = urlParams.has('plan') && !urlParams.has('upgrade')
-        
-        if (isFromTrialSignup) {
-          console.log('[PaymentPage] User came from trial signup, creating trial subscription')
-          await createTrialSubscription(initialPlan)
-        }
+        console.log('[PaymentPage] No subscription found, user needs to select a plan')
+        // Don't create manual trial - let user go through checkout process
       }
     } catch (error) {
       console.error('Error loading subscription:', error)
     }
   }
   
-  const createTrialSubscription = async (tier: string) => {
-    try {
-      setLoading(true)
-      console.log('[PaymentPage] Creating trial subscription for tier:', tier)
-      
-      const response = await fetch('/api/subscription/create-trial', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          tier,
-          trialDays 
-        })
-      })
-      
-      const data = await response.json()
-      
-      if (response.ok && data.success) {
-        console.log('[PaymentPage] Trial subscription created successfully:', data)
-        toast.success(`Welcome! Your ${trialDays}-day ${tier === 'pro' ? 'Pro' : 'Pro+'} trial has started.`)
-        
-        // Redirect to the main page or the intended redirect URL
-        setTimeout(() => {
-          router.push(redirectUrl || `/${locale}`)
-        }, 2000)
-      } else {
-        console.error('[PaymentPage] Failed to create trial subscription:', data)
-        toast.error(data.error || 'Failed to start trial. Please try selecting a plan below.')
-      }
-    } catch (error) {
-      console.error('[PaymentPage] Error creating trial subscription:', error)
-      toast.error('Failed to start trial. Please try selecting a plan below.')
-    } finally {
-      setLoading(false)
-    }
-  }
+  // Removed createTrialSubscription - all trials must go through checkout
 
   const calculateProratedAmount = (subscription: any) => {
     if (!subscription.current_period_end) return
@@ -176,9 +144,8 @@ export default function PaymentPageClient({
   const handleSelectPlan = async (planId: 'pro' | 'pro_plus') => {
     console.log('[PaymentPage] handleSelectPlan called with planId:', planId)
     console.log('[PaymentPage] Current authUser:', authUser)
-    console.log('[PaymentPage] Authentication status:', authService.isAuthenticated())
-    console.log('[PaymentPage] Current session:', authService.getCurrentSession() ? 'Present' : 'Missing')
-    console.log('[PaymentPage] Auth loading state:', authLoading)
+    console.log('[PaymentPage] Current subscription:', currentSubscription)
+    console.log('[PaymentPage] Is trial upgrade:', isUpgrade && currentSubscription?.status === 'trialing')
     
     if (authLoading) {
       console.log('[PaymentPage] Auth is still loading')
@@ -193,32 +160,45 @@ export default function PaymentPageClient({
     }
 
     setLoading(true)
-    console.log('[PaymentPage] Creating checkout session...')
-    
-    // Debug session details
-    const session = authService.getCurrentSession()
-    console.log('[PaymentPage] Session details:', {
-      hasAccessToken: !!session?.access_token,
-      tokenLength: session?.access_token?.length,
-      tokenPrefix: session?.access_token?.substring(0, 20)
-    })
     
     try {
-      // Create checkout session
-      const result = await creemService.createCheckoutSession({
-        userId: authUser.id,
-        userEmail: authUser.email,
-        planId,
-        successUrl: `${window.location.origin}/${locale}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancelUrl: `${window.location.origin}/${locale}/payment/cancel`,
-        currentPlan: currentSubscription?.tier || 'free'
-      })
-
-      if (result.success && result.url) {
-        // Redirect to Creem checkout
-        window.location.href = result.url
+      // For trial users upgrading, use the upgrade endpoint
+      if (isUpgrade && currentSubscription?.status === 'trialing') {
+        console.log('[PaymentPage] Processing trial upgrade via upgrade endpoint')
+        
+        const response = await fetch('/api/subscription/upgrade', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ targetTier: planId })
+        })
+        
+        const data = await response.json()
+        
+        if (response.ok && data.checkoutUrl) {
+          // Redirect to checkout to complete the upgrade
+          window.location.href = data.checkoutUrl
+        } else {
+          throw new Error(data.error || 'Failed to upgrade subscription')
+        }
       } else {
-        throw new Error(result.error || 'Failed to create checkout session')
+        // For new subscriptions, create checkout session
+        console.log('[PaymentPage] Creating new checkout session...')
+        
+        const result = await creemService.createCheckoutSession({
+          userId: authUser.id,
+          userEmail: authUser.email,
+          planId,
+          successUrl: `${window.location.origin}/${locale}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancelUrl: `${window.location.origin}/${locale}/payment/cancel`,
+          currentPlan: currentSubscription?.tier || 'free'
+        })
+
+        if (result.success && result.url) {
+          // Redirect to Creem checkout
+          window.location.href = result.url
+        } else {
+          throw new Error(result.error || 'Failed to create checkout session')
+        }
       }
     } catch (error: any) {
       console.error('Payment error:', error)
@@ -275,6 +255,30 @@ export default function PaymentPageClient({
         <div className="container max-w-6xl mx-auto px-4">
           <div className="flex items-center justify-center h-64">
             <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show special loading state for trial upgrades
+  if (isProcessingTrialUpgrade) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">
+        <div className="container max-w-6xl mx-auto px-4">
+          <div className="flex flex-col items-center justify-center h-64 space-y-4">
+            <Loader2 className="w-12 h-12 animate-spin text-orange-500" />
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Upgrading Your Trial
+              </h2>
+              <p className="text-gray-600">
+                Converting your trial to a {initialPlan === 'pro_plus' ? 'Pro+' : 'Pro'} subscription...
+              </p>
+              <p className="text-sm text-gray-500 mt-2">
+                You'll be redirected to secure checkout shortly.
+              </p>
+            </div>
           </div>
         </div>
       </div>

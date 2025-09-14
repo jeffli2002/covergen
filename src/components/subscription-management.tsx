@@ -22,6 +22,8 @@ interface SubscriptionInfo {
   canUpgrade: boolean
   canDowngrade: boolean
   stripeSubscriptionId: string | null
+  requiresPaymentSetup?: boolean
+  isManualTrial?: boolean
 }
 
 export function SubscriptionManagement() {
@@ -269,19 +271,28 @@ export function SubscriptionManagement() {
         </div>
 
         {isTrialing && (
-          <Alert>
+          <Alert className={subscription.requiresPaymentSetup ? 'border-red-500' : ''}>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              {subscription.trialDaysRemaining === 1 
-                ? 'Your trial ends tomorrow. '
-                : subscription.trialDaysRemaining === 0
-                ? 'Your trial ends today. '
-                : `You have ${subscription.trialDaysRemaining} days left in your trial. `
-              }
-              {subscription.plan === 'free' 
-                ? 'Upgrade now to continue with Pro features after your trial ends.'
-                : 'Your subscription will automatically continue after the trial period unless you cancel.'
-              }
+              {subscription.requiresPaymentSetup ? (
+                <>
+                  <strong className="text-red-600">Payment method required!</strong> Your trial requires a payment method to continue. 
+                  Please add your credit card to avoid losing access when your trial ends.
+                </>
+              ) : (
+                <>
+                  {subscription.trialDaysRemaining === 1 
+                    ? 'Your trial ends tomorrow. '
+                    : subscription.trialDaysRemaining === 0
+                    ? 'Your trial ends today. '
+                    : `You have ${subscription.trialDaysRemaining} days left in your trial. `
+                  }
+                  {subscription.plan === 'free' 
+                    ? 'Upgrade now to continue with Pro features after your trial ends.'
+                    : 'Your subscription will automatically continue after the trial period unless you cancel.'
+                  }
+                </>
+              )}
             </AlertDescription>
           </Alert>
         )}
@@ -298,8 +309,22 @@ export function SubscriptionManagement() {
       </CardContent>
       
       <CardFooter className="flex flex-col gap-2">
+        {/* Payment setup button for manual trials */}
+        {subscription.requiresPaymentSetup && (
+          <Button
+            onClick={() => handleUpgrade(subscription.plan as 'pro' | 'pro_plus')}
+            disabled={processing}
+            variant="default"
+            className="w-full bg-red-500 hover:bg-red-600"
+          >
+            {processing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <CreditCard className="mr-2 h-4 w-4" />
+            Add Payment Method to Continue Trial
+          </Button>
+        )}
+        
         {/* Upgrade buttons for free/pro users */}
-        {subscription.canUpgrade && !isCancelled && (
+        {subscription.canUpgrade && !isCancelled && !subscription.requiresPaymentSetup && (
           <div className="flex gap-2 w-full">
             {subscription.plan === 'free' && (
               <Button

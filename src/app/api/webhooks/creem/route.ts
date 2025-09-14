@@ -45,6 +45,10 @@ export async function POST(req: NextRequest) {
         await handleCheckoutComplete(result)
         break
 
+      case 'subscription_created':
+        await handleSubscriptionCreated(result)
+        break
+
       case 'subscription_update':
         await handleSubscriptionUpdate(result)
         break
@@ -86,6 +90,14 @@ export async function POST(req: NextRequest) {
 
 async function handleCheckoutComplete(data: any) {
   const { userId, customerId, subscriptionId, planId, trialEnd } = data
+
+  console.log('[Webhook] Checkout complete data:', { 
+    userId, 
+    customerId, 
+    subscriptionId, 
+    planId, 
+    hasSubscriptionId: !!subscriptionId 
+  })
 
   if (!userId || !planId) {
     console.error('[Webhook] Missing required data for checkout complete')
@@ -140,18 +152,27 @@ async function handleCheckoutComplete(data: any) {
     }
 
     // Update or create subscription record
+    // NOTE: subscriptionId might be null for checkout.completed if subscription is created async
+    const subscriptionData: any = {
+      user_id: userId,
+      tier: planId,
+      status: isTrialSubscription ? 'trialing' : 'active',
+      stripe_customer_id: customerId,
+      current_period_start: new Date().toISOString(),
+      current_period_end: trialEndsAt || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date().toISOString()
+    }
+    
+    // Only set subscription ID if we have it
+    if (subscriptionId) {
+      subscriptionData.stripe_subscription_id = subscriptionId
+    } else {
+      console.warn('[Webhook] Creating subscription without stripe_subscription_id - will be updated by subscription.created webhook')
+    }
+    
     const { error: subError } = await adminSupabase
       .from('subscriptions')
-      .upsert({
-        user_id: userId,
-        tier: planId,
-        status: isTrialSubscription ? 'trialing' : 'active',
-        stripe_customer_id: customerId,
-        stripe_subscription_id: subscriptionId,
-        current_period_start: new Date().toISOString(),
-        current_period_end: trialEndsAt || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        updated_at: new Date().toISOString()
-      }, {
+      .upsert(subscriptionData, {
         onConflict: 'user_id'
       })
 
@@ -231,6 +252,54 @@ async function handleSubscriptionUpdate(data: any) {
     console.log(`[Webhook] Updated subscription status to ${status} for customer ${customerId}`)
   } catch (error) {
     console.error('[Webhook] Error in handleSubscriptionUpdate:', error)
+    throw error
+  }
+}
+
+async function handleSubscriptionCreated(data: any) {
+  const { subscriptionId, customerId, userId, status } = data
+
+  if (!subscriptionId || !customerId) {
+    console.error('[Webhook] Missing subscription ID or customer ID')
+    return
+  }
+
+  try {
+    const adminSupabase = createAdminSupabaseClient()
+
+    // Update existing subscription record with the subscription ID
+    const { error } = await adminSupabase
+      .from('subscriptions')
+      .update({
+        stripe_subscription_id: subscriptionId,
+        stripe_customer_id: customerId,
+        status: status || 'active',
+        updated_at: new Date().toISOString()
+      })
+      .eq('stripe_customer_id', customerId)
+      .is('stripe_subscription_id', null) // Only update if subscription ID is missing
+
+    if (error) {
+      // If update fails, try by user_id
+      const { error: userError } = await adminSupabase
+        .from('subscriptions')
+        .update({
+          stripe_subscription_id: subscriptionId,
+          stripe_customer_id: customerId,
+          status: status || 'active',
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId)
+        .is('stripe_subscription_id', null)
+      
+      if (userError) {
+        console.error('[Webhook] Error updating subscription with ID:', userError)
+      }
+    }
+
+    console.log(`[Webhook] Updated subscription ${subscriptionId} for customer ${customerId}`)
+  } catch (error) {
+    console.error('[Webhook] Error in handleSubscriptionCreated:', error)
     throw error
   }
 }

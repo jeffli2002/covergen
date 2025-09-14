@@ -47,18 +47,30 @@ export async function GET(req: NextRequest) {
       trialDaysRemaining = daysRemaining
     }
     
+    // Check if this is a manual trial requiring payment setup
+    const requiresPaymentSetup = subscription.status === 'trialing' && 
+                                !subscription.stripe_subscription_id &&
+                                !subscription.creem_subscription_id;
+    
+    // Determine upgrade/downgrade capabilities
+    const plan = subscription.plan_id || subscription.tier
+    const canUpgrade = plan !== 'pro-plus' && plan !== 'pro_plus'
+    const canDowngrade = plan !== 'pro'
+    
     // Return subscription status
     return NextResponse.json({
       status: subscription.status,
-      plan: subscription.plan_id,
+      plan: plan,
       isActive,
       isTrialing,
       trialDaysRemaining,
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       currentPeriodEnd: subscription.current_period_end,
-      canUpgrade: subscription.plan_id !== 'pro-plus',
-      canDowngrade: subscription.plan_id !== 'pro',
-      stripeSubscriptionId: subscription.stripe_subscription_id
+      canUpgrade,
+      canDowngrade,
+      stripeSubscriptionId: subscription.stripe_subscription_id,
+      requiresPaymentSetup,
+      isManualTrial: requiresPaymentSetup
     })
   } catch (error) {
     console.error('[Status] Error:', error)
