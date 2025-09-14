@@ -29,7 +29,22 @@ export default function Header({ locale, translations: t }: HeaderProps) {
   const { user: storeUser } = useAppStore()
   const router = useRouter()
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null)
   const currentTier = storeUser?.tier || 'free'
+  
+  // Fetch subscription info to check trial status
+  useEffect(() => {
+    if (user) {
+      fetch('/api/subscription/status')
+        .then(res => res.json())
+        .then(data => {
+          if (data && !data.error) {
+            setSubscriptionInfo(data)
+          }
+        })
+        .catch(err => console.error('Error fetching subscription:', err))
+    }
+  }, [user])
 
   const handleLogout = async () => {
     console.log('[Header] Signing out...')
@@ -208,25 +223,65 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                 </div>
                 
                 {/* Upgrade/Account button */}
-                {currentTier === 'free' ? (
-                  <Button 
-                    size="sm" 
-                    className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-sm px-4"
-                    onClick={() => router.push(`/${locale}/payment`)}
-                  >
-                    <Crown className="w-4 h-4 mr-2" />
-                    Upgrade to Pro
-                  </Button>
-                ) : (
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => router.push(`/${locale}/account`)}
-                  >
-                    <CreditCard className="w-4 h-4 mr-2" />
-                    {currentTier === 'pro' ? 'Pro' : 'Pro+'} Account
-                  </Button>
-                )}
+                {(() => {
+                  const isTrialing = subscriptionInfo?.isTrialing
+                  const requiresPayment = subscriptionInfo?.requiresPaymentSetup
+                  const plan = subscriptionInfo?.plan || currentTier
+                  
+                  // For trial users who need payment setup
+                  if (isTrialing && requiresPayment) {
+                    return (
+                      <Button 
+                        size="sm" 
+                        className="bg-red-500 hover:bg-red-600 text-white text-sm px-4"
+                        onClick={() => router.push(`/${locale}/account`)}
+                      >
+                        <CreditCard className="w-4 h-4 mr-2" />
+                        Add Payment Method
+                      </Button>
+                    )
+                  }
+                  
+                  // For Pro trial users who can upgrade to Pro+
+                  if (isTrialing && plan === 'pro') {
+                    return (
+                      <Button 
+                        size="sm" 
+                        className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-sm px-4"
+                        onClick={() => router.push(`/${locale}/payment?plan=pro_plus&upgrade=true`)}
+                      >
+                        <Crown className="w-4 h-4 mr-2" />
+                        Upgrade to Pro+
+                      </Button>
+                    )
+                  }
+                  
+                  // For free users
+                  if (plan === 'free') {
+                    return (
+                      <Button 
+                        size="sm" 
+                        className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-sm px-4"
+                        onClick={() => router.push(`/${locale}/payment`)}
+                      >
+                        <Crown className="w-4 h-4 mr-2" />
+                        Upgrade to Pro
+                      </Button>
+                    )
+                  }
+                  
+                  // For paid users (Pro or Pro+)
+                  return (
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => router.push(`/${locale}/account`)}
+                    >
+                      <CreditCard className="w-4 h-4 mr-2" />
+                      {plan === 'pro' ? 'Pro' : 'Pro+'} Account
+                    </Button>
+                  )
+                })()}
 
                 {/* Logout button */}
                 <Button 

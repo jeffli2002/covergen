@@ -174,9 +174,19 @@ export default function PaymentPageClient({
         
         const data = await response.json()
         
-        if (response.ok && data.checkoutUrl) {
-          // Redirect to checkout to complete the upgrade
-          window.location.href = data.checkoutUrl
+        if (response.ok) {
+          if (data.upgraded) {
+            // Instant upgrade successful!
+            toast.success(data.message || 'Subscription upgraded successfully!')
+            
+            // Redirect to account page after a short delay
+            setTimeout(() => {
+              router.push(`/${locale}/account?upgraded=true`)
+            }, 1500)
+          } else if (data.checkoutUrl) {
+            // Need to complete checkout (no payment method on file)
+            window.location.href = data.checkoutUrl
+          }
         } else {
           throw new Error(data.error || 'Failed to upgrade subscription')
         }
@@ -273,10 +283,14 @@ export default function PaymentPageClient({
                 Upgrading Your Trial
               </h2>
               <p className="text-gray-600">
-                Converting your trial to a {initialPlan === 'pro_plus' ? 'Pro+' : 'Pro'} subscription...
+                {currentSubscription?.stripe_subscription_id 
+                  ? `Upgrading instantly to ${initialPlan === 'pro_plus' ? 'Pro+' : 'Pro'}...`
+                  : `Setting up ${initialPlan === 'pro_plus' ? 'Pro+' : 'Pro'} subscription...`}
               </p>
               <p className="text-sm text-gray-500 mt-2">
-                You'll be redirected to secure checkout shortly.
+                {currentSubscription?.stripe_subscription_id 
+                  ? 'Your payment method will be charged immediately.'
+                  : 'You\'ll be redirected to secure checkout shortly.'}
               </p>
             </div>
           </div>
@@ -319,24 +333,34 @@ export default function PaymentPageClient({
           {plans.map((plan) => {
             const Icon = plan.icon
             const isCurrentPlan = currentSubscription?.tier === plan.id
+            const isTrialUser = currentSubscription?.status === 'trialing'
+            const needsPaymentSetup = isTrialUser && !currentSubscription?.stripe_subscription_id
             const isSelected = selectedPlan === plan.id
+            
+            // Allow trial users to click their current plan to add payment method
+            const isClickable = !loading && (!isCurrentPlan || (isCurrentPlan && needsPaymentSetup))
             
             console.log('[PaymentPage] Rendering plan:', plan.id, {
               isCurrentPlan,
+              isTrialUser,
+              needsPaymentSetup,
+              isClickable,
               currentSubscriptionTier: currentSubscription?.tier,
               loading,
-              disabled: loading || isCurrentPlan
+              disabled: !isClickable
             })
             
             return (
               <Card 
                 key={plan.id}
-                className={`relative transition-all duration-300 cursor-pointer hover:shadow-2xl hover:scale-[1.02] ${
+                className={`relative transition-all duration-300 ${
+                  isClickable ? 'cursor-pointer hover:shadow-2xl hover:scale-[1.02]' : 'cursor-not-allowed'
+                } ${
                   isSelected ? 'ring-2 ring-orange-500 scale-105 shadow-2xl' : ''
                 } ${plan.popular ? 'shadow-xl' : ''} ${
-                  isCurrentPlan ? 'opacity-75 cursor-not-allowed' : ''
+                  isCurrentPlan && !needsPaymentSetup ? 'opacity-75' : ''
                 }`}
-                onClick={() => !isCurrentPlan && !loading && setSelectedPlan(plan.id as any)}
+                onClick={() => isClickable && setSelectedPlan(plan.id as any)}
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -351,10 +375,10 @@ export default function PaymentPageClient({
                 )}
                 
                 {/* Click hint on hover */}
-                {!isCurrentPlan && !isSelected && (
+                {isClickable && !isSelected && (
                   <div className="absolute top-2 right-2 opacity-0 hover:opacity-100 transition-opacity">
                     <Badge variant="secondary" className="text-xs">
-                      Click to select
+                      {needsPaymentSetup && isCurrentPlan ? 'Add payment method' : 'Click to select'}
                     </Badge>
                   </div>
                 )}
@@ -438,13 +462,16 @@ export default function PaymentPageClient({
                     }`}
                     variant={!isSelected && !plan.popular ? 'outline' : 'default'}
                     size="lg"
-                    disabled={loading || isCurrentPlan}
+                    disabled={!isClickable}
                     onClick={(e) => {
                       e.stopPropagation()
                       console.log('[PaymentPage] Button clicked for plan:', plan.id)
-                      console.log('[PaymentPage] Button click event:', e)
-                      console.log('[PaymentPage] Button disabled state:', loading || isCurrentPlan)
-                      console.log('[PaymentPage] Loading:', loading, 'isCurrentPlan:', isCurrentPlan)
+                      console.log('[PaymentPage] Button state:', { 
+                        isClickable, 
+                        needsPaymentSetup, 
+                        isCurrentPlan,
+                        isTrialUser 
+                      })
                       handleSelectPlan(plan.id as 'pro' | 'pro_plus')
                     }}
                   >
@@ -453,15 +480,32 @@ export default function PaymentPageClient({
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Processing...
                       </>
+                    ) : isCurrentPlan && needsPaymentSetup ? (
+                      <>
+                        <CreditCard className="mr-2 h-4 w-4" />
+                        Add Payment Method
+                      </>
                     ) : isCurrentPlan ? (
                       'Current Plan'
                     ) : (
                       <>
                         <CreditCard className="mr-2 h-4 w-4" />
-                        {isUpgrade && currentSubscription?.tier === 'pro' && plan.id === 'pro_plus'
-                          ? 'Upgrade Now'
-                          : 'Get Started'
-                        }
+                        {(() => {
+                          // Trial user upgrading with payment method = instant
+                          if (isUpgrade && isTrialUser && currentSubscription?.stripe_subscription_id) {
+                            return 'Upgrade Instantly'
+                          }
+                          // Trial user upgrading without payment = checkout needed
+                          if (isUpgrade && isTrialUser && !currentSubscription?.stripe_subscription_id) {
+                            return 'Add Payment & Upgrade'
+                          }
+                          // Regular upgrade
+                          if (isUpgrade && currentSubscription?.tier === 'pro' && plan.id === 'pro_plus') {
+                            return 'Upgrade Now'
+                          }
+                          // Default
+                          return 'Get Started'
+                        })()}
                       </>
                     )}
                   </Button>
