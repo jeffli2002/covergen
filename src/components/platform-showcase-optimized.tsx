@@ -11,6 +11,7 @@ interface ShowcaseItem {
   title: string
   originalImage: string
   optimizedImage?: string // WebP version
+  enhancedImage?: string // AI enhanced version
   targetDimensions: { width: number; height: number; label: string }
 }
 
@@ -26,18 +27,15 @@ export default function PlatformShowcaseOptimized({
   primaryColor = 'purple'
 }: PlatformShowcaseProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [showTransformed, setShowTransformed] = useState(false)
   const [imagesLoaded, setImagesLoaded] = useState<Record<string, boolean>>({})
   const current = showcases[currentIndex]
 
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev - 1 + showcases.length) % showcases.length)
-    setShowTransformed(false)
   }
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev + 1) % showcases.length)
-    setShowTransformed(false)
   }
 
   const handleImageLoad = (imagePath: string) => {
@@ -111,99 +109,83 @@ export default function PlatformShowcaseOptimized({
               </div>
             </div>
 
-            {/* Image Container */}
-            <div className="relative">
-              <div className={`relative mx-auto ${getAspectRatio()} max-w-3xl bg-gray-100 rounded-xl overflow-hidden`}>
-                {!showTransformed ? (
-                  // Original Image (centered and cropped to platform size)
-                  <div className="relative w-full h-full">
-                    <Image
-                      src={getImageSrc(current)}
-                      alt={`Original photo for ${platform} - ${current.title}`}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 60vw"
-                      className="object-cover"
-                      priority={currentIndex === 0}
-                      quality={85}
-                      onLoad={() => handleImageLoad(current.originalImage)}
-                      placeholder="blur"
-                      blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
-                    />
-                    {!imagesLoaded[current.originalImage] && (
-                      <div className="absolute inset-0 bg-gray-200 animate-pulse" />
-                    )}
-                    <div className="absolute inset-0 bg-black/20" />
-                    <div className="absolute top-4 left-4 flex items-center px-3 py-1.5 bg-gray-900 text-white rounded-full text-sm font-medium">
-                      <Camera className="w-4 h-4 mr-2" />
-                      Original Photo (Resized)
-                    </div>
+            {/* Image Container - Side by Side */}
+            <div className={`grid gap-6 ${
+              current.targetDimensions.width === 1080 && current.targetDimensions.height === 1920
+                ? 'grid-cols-2 max-w-4xl mx-auto' // Vertical images (TikTok)
+                : 'grid-cols-1 lg:grid-cols-2 max-w-6xl mx-auto' // Horizontal/square images
+            }`}>
+              {/* Original Image */}
+              <div>
+                <div className={`relative ${getAspectRatio()} bg-gray-100 rounded-xl overflow-hidden`}>
+                  <Image
+                    src={getImageSrc(current)}
+                    alt={`Original photo for ${platform} - ${current.title}`}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 40vw"
+                    className="object-cover"
+                    priority={currentIndex === 0}
+                    quality={85}
+                    onLoad={() => handleImageLoad(current.originalImage)}
+                    placeholder="blur"
+                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+                  />
+                  {!imagesLoaded[current.originalImage] && (
+                    <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+                  )}
+                  <div className="absolute inset-0 bg-black/20" />
+                  <div className="absolute top-4 left-4 flex items-center px-3 py-1.5 bg-gray-900 text-white rounded-full text-sm font-medium">
+                    <Camera className="w-4 h-4 mr-2" />
+                    Original Photo (Resized)
                   </div>
-                ) : (
-                  // AI Enhanced Version with Title
-                  <div className="relative w-full h-full">
-                    <Image
-                      src={getImageSrc(current)}
-                      alt={`AI enhanced ${platform} content - ${current.title}`}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 60vw"
-                      className="object-cover brightness-110 contrast-125 saturate-150"
-                      quality={85}
-                      onLoad={() => {
-                        handleImageLoad(current.originalImage)
-                        preloadNextImage()
-                      }}
-                      placeholder="blur"
-                      blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
-                    />
-                    {!imagesLoaded[current.originalImage] && (
-                      <div className="absolute inset-0 bg-gray-200 animate-pulse" />
-                    )}
-                    {/* Dark gradient overlay for text readability */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                    
-                    {/* AI-generated title overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center p-8">
-                      <h3 className={getTitleStyle()}>
-                        {current.title}
-                      </h3>
-                    </div>
-
-                    {/* Platform-specific decorations */}
-                    {platform === 'YouTube' && (
-                      <div className="absolute bottom-4 right-4 bg-red-600 text-white px-3 py-1 rounded text-sm font-bold">
-                        10:23
-                      </div>
-                    )}
-
-                    <div className="absolute top-4 left-4 flex items-center px-3 py-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full text-sm font-medium">
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      AI Enhanced
-                    </div>
-                  </div>
-                )}
+                </div>
               </div>
 
-              {/* Transformation Toggle */}
-              <div className="flex justify-center mt-8 gap-4">
-                <Button
-                  size="lg"
-                  variant={!showTransformed ? "default" : "outline"}
-                  onClick={() => setShowTransformed(false)}
-                  className="min-w-[140px]"
-                >
-                  <Camera className="w-5 h-5 mr-2" />
-                  Original
-                </Button>
-                <Button
-                  size="lg"
-                  variant={showTransformed ? "default" : "outline"}
-                  onClick={() => setShowTransformed(true)}
-                  className="min-w-[140px]"
-                >
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  AI Enhanced
-                </Button>
+              {/* AI Enhanced Version */}
+              <div>
+                <div className={`relative ${getAspectRatio()} bg-gray-100 rounded-xl overflow-hidden`}>
+                  <Image
+                    src={current.enhancedImage || getImageSrc(current)}
+                    alt={`AI enhanced ${platform} content - ${current.title}`}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 40vw"
+                    className={`object-cover ${!current.enhancedImage ? 'brightness-110 contrast-125 saturate-150' : ''}`}
+                    quality={85}
+                    onLoad={() => {
+                      handleImageLoad(current.originalImage)
+                      preloadNextImage()
+                    }}
+                    placeholder="blur"
+                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+                  />
+                  {!imagesLoaded[current.originalImage] && (
+                    <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+                  )}
+                  {/* Dark gradient overlay for text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  
+                  {/* AI-generated title overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center p-8">
+                    <h3 className={getTitleStyle()}>
+                      {current.title}
+                    </h3>
+                  </div>
+
+                  {/* Platform-specific decorations */}
+                  {platform === 'YouTube' && (
+                    <div className="absolute bottom-4 right-4 bg-red-600 text-white px-3 py-1 rounded text-sm font-bold">
+                      10:23
+                    </div>
+                  )}
+
+                  <div className="absolute top-4 left-4 flex items-center px-3 py-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full text-sm font-medium">
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    AI Enhanced
+                  </div>
+                </div>
               </div>
+            </div>
+
             </div>
 
             {/* Navigation */}

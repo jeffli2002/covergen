@@ -4,6 +4,7 @@ export const platformShowcases = {
       title: "10 MIND-BLOWING Tech Gadgets",
       originalImage: "/platform-examples/youtube/original-1.jpg",
       optimizedImage: "/platform-examples/youtube/original-1.webp",
+      enhancedImage: "/platform-examples/youtube/enhancedImage1.png",
       targetDimensions: { width: 1280, height: 720, label: "1280×720 (16:9)" }
     },
     {
@@ -40,6 +41,7 @@ export const platformShowcases = {
       title: "Living My Best Life ✨",
       originalImage: "/platform-examples/instagram/original-1.jpg",
       optimizedImage: "/platform-examples/instagram/original-1.webp",
+      enhancedImage: "/platform-examples/instagram/enhancedImage1.png",
       targetDimensions: { width: 1080, height: 1080, label: "1080×1080 (1:1)" }
     },
     {

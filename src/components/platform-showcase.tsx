@@ -9,6 +9,7 @@ import Link from 'next/link'
 interface ShowcaseItem {
   title: string
   originalImage: string
+  enhancedImage?: string
   targetDimensions: { width: number; height: number; label: string }
 }
 
@@ -24,17 +25,14 @@ export default function PlatformShowcase({
   primaryColor = 'purple'
 }: PlatformShowcaseProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [showTransformed, setShowTransformed] = useState(false)
   const current = showcases[currentIndex]
 
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev - 1 + showcases.length) % showcases.length)
-    setShowTransformed(false)
   }
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev + 1) % showcases.length)
-    setShowTransformed(false)
   }
 
   // Simulated title styles for different platforms
@@ -89,76 +87,58 @@ export default function PlatformShowcase({
               </div>
             </div>
 
-            {/* Image Container */}
-            <div className="relative">
-              <div className={`relative mx-auto ${getAspectRatio()} max-w-3xl bg-gray-100 rounded-xl overflow-hidden`}>
-                {!showTransformed ? (
-                  // Original Image (centered and cropped to platform size)
-                  <div className="relative w-full h-full">
-                    <img
-                      src={current.originalImage}
-                      alt="Original photo"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/20" />
-                    <div className="absolute top-4 left-4 flex items-center px-3 py-1.5 bg-gray-900 text-white rounded-full text-sm font-medium">
-                      <Camera className="w-4 h-4 mr-2" />
-                      Original Photo (Resized)
-                    </div>
+            {/* Image Container - Side by Side */}
+            <div className={`grid gap-6 ${
+              current.targetDimensions.width === 1080 && current.targetDimensions.height === 1920
+                ? 'grid-cols-2 max-w-4xl mx-auto' // Vertical images (TikTok)
+                : 'grid-cols-1 lg:grid-cols-2 max-w-6xl mx-auto' // Horizontal/square images
+            }`}>
+              {/* Original Image */}
+              <div>
+                <div className={`relative ${getAspectRatio()} bg-gray-100 rounded-xl overflow-hidden`}>
+                  <img
+                    src={current.originalImage}
+                    alt="Original photo"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/20" />
+                  <div className="absolute top-4 left-4 flex items-center px-3 py-1.5 bg-gray-900 text-white rounded-full text-sm font-medium">
+                    <Camera className="w-4 h-4 mr-2" />
+                    Original Photo (Resized)
                   </div>
-                ) : (
-                  // AI Enhanced Version with Title
-                  <div className="relative w-full h-full">
-                    <img
-                      src={current.originalImage}
-                      alt="AI enhanced"
-                      className="w-full h-full object-cover brightness-110 contrast-125 saturate-150"
-                    />
-                    {/* Dark gradient overlay for text readability */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                    
-                    {/* AI-generated title overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center p-8">
-                      <h3 className={getTitleStyle()}>
-                        {current.title}
-                      </h3>
-                    </div>
-
-                    {/* Platform-specific decorations */}
-                    {platform === 'YouTube' && (
-                      <div className="absolute bottom-4 right-4 bg-red-600 text-white px-3 py-1 rounded text-sm font-bold">
-                        10:23
-                      </div>
-                    )}
-
-                    <div className="absolute top-4 left-4 flex items-center px-3 py-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full text-sm font-medium">
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      AI Enhanced
-                    </div>
-                  </div>
-                )}
+                </div>
               </div>
 
-              {/* Transformation Toggle */}
-              <div className="flex justify-center mt-8 gap-4">
-                <Button
-                  size="lg"
-                  variant={!showTransformed ? "default" : "outline"}
-                  onClick={() => setShowTransformed(false)}
-                  className="min-w-[140px]"
-                >
-                  <Camera className="w-5 h-5 mr-2" />
-                  Original
-                </Button>
-                <Button
-                  size="lg"
-                  variant={showTransformed ? "default" : "outline"}
-                  onClick={() => setShowTransformed(true)}
-                  className="min-w-[140px]"
-                >
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  AI Enhanced
-                </Button>
+              {/* AI Enhanced Version */}
+              <div>
+                <div className={`relative ${getAspectRatio()} bg-gray-100 rounded-xl overflow-hidden`}>
+                  <img
+                    src={current.enhancedImage || current.originalImage}
+                    alt="AI enhanced"
+                    className={`w-full h-full object-cover ${!current.enhancedImage ? 'brightness-110 contrast-125 saturate-150' : ''}`}
+                  />
+                  {/* Dark gradient overlay for text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  
+                  {/* AI-generated title overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center p-8">
+                    <h3 className={getTitleStyle()}>
+                      {current.title}
+                    </h3>
+                  </div>
+
+                  {/* Platform-specific decorations */}
+                  {platform === 'YouTube' && (
+                    <div className="absolute bottom-4 right-4 bg-red-600 text-white px-3 py-1 rounded text-sm font-bold">
+                      10:23
+                    </div>
+                  )}
+
+                  <div className="absolute top-4 left-4 flex items-center px-3 py-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full text-sm font-medium">
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    AI Enhanced
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -177,10 +157,7 @@ export default function PlatformShowcase({
                 {showcases.map((_, index) => (
                   <button
                     key={index}
-                    onClick={() => {
-                      setCurrentIndex(index)
-                      setShowTransformed(false)
-                    }}
+                    onClick={() => setCurrentIndex(index)}
                     className={`w-2 h-2 rounded-full transition-colors ${
                       index === currentIndex 
                         ? (primaryColor === 'red' ? 'bg-red-600' :

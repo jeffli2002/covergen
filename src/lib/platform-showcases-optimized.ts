@@ -7,6 +7,7 @@ export interface ShowcaseItem {
   optimizedImage?: string
   webpImage?: string
   placeholderImage?: string
+  enhancedImage?: string
   targetDimensions: { width: number; height: number; label: string }
 }
 
@@ -18,6 +19,7 @@ export const platformShowcasesOptimized = {
       optimizedImage: "/platform-examples/youtube/original-1-optimized.jpg",
       webpImage: "/platform-examples/youtube/original-1.webp",
       placeholderImage: "/platform-examples/youtube/original-1-placeholder.jpg",
+      enhancedImage: "/platform-examples/youtube/enhancedImage1.png",
       targetDimensions: { width: 1280, height: 720, label: "1280×720 (16:9)" }
     },
     {
@@ -64,6 +66,7 @@ export const platformShowcasesOptimized = {
       optimizedImage: "/platform-examples/instagram/original-1-optimized.jpg",
       webpImage: "/platform-examples/instagram/original-1.webp",
       placeholderImage: "/platform-examples/instagram/original-1-placeholder.jpg",
+      enhancedImage: "/platform-examples/instagram/enhancedImage1.png",
       targetDimensions: { width: 1080, height: 1080, label: "1080×1080 (1:1)" }
     },
     {
