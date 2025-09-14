@@ -186,8 +186,6 @@ export default function PlatformShowcaseOptimized({
               </div>
             </div>
 
-            </div>
-
             {/* Navigation */}
             <div className="flex items-center justify-between mt-8">
               <Button
@@ -204,10 +202,7 @@ export default function PlatformShowcaseOptimized({
                 {showcases.map((_, index) => (
                   <button
                     key={index}
-                    onClick={() => {
-                      setCurrentIndex(index)
-                      setShowTransformed(false)
-                    }}
+                    onClick={() => setCurrentIndex(index)}
                     className={`w-2 h-2 rounded-full transition-colors ${
                       index === currentIndex 
                         ? (primaryColor === 'red' ? 'bg-red-600' :
