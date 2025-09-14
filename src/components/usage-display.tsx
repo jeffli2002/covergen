@@ -93,12 +93,12 @@ export default function UsageDisplay() {
   if (isPaidUser) {
     // Paid users: show monthly usage
     used = usageStatus.monthly_usage || 0
-    total = usageStatus.monthly_limit
+    total = usageStatus.monthly_limit ?? null
     period = 'this month'
   } else {
     // Free and trial users: show daily usage
     used = usageStatus.daily_usage || 0
-    total = usageStatus.daily_limit
+    total = usageStatus.daily_limit ?? null
     period = 'today'
   }
 
