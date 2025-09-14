@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { creemService } from '@/services/payment/creem'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase-unified'
 
 export async function POST(req: NextRequest) {
   try {

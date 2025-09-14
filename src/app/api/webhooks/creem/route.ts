@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { creemService, WebhookEvent } from '@/services/payment/creem'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase-unified'
 import { getSubscriptionConfig, calculateTrialEndDate } from '@/lib/subscription-config'
 
 // Disable body parsing to get raw body for signature verification
