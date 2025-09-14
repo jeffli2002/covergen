@@ -378,7 +378,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                 <p className="text-gray-600 leading-relaxed">
                   Free users get 10 covers per month (3/day max) for personal use only. Pro ($9/month) includes a {proTrialDays}-day trial and 
                   120 covers per month with commercial rights. Pro+ ($19/month) also includes a {proPlusTrialDays}-day trial and 300 covers per 
-                  month with full commercial license and 7-day cloud gallery.
+                  month with full commercial license for teams and enterprises.
                 </p>
               </div>
 

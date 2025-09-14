@@ -103,7 +103,7 @@ export default function UpgradePrompt({
             <p>Your daily limit resets at midnight UTC</p>
             {isTrial && (
               <p className="font-medium text-purple-600">
-                You have {7 - Math.ceil((Date.now() - Date.now()) / (1000 * 60 * 60 * 24))} days left in your free trial
+                You have {3} days left in your free trial
               </p>
             )}
           </div>

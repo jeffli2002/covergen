@@ -74,8 +74,7 @@ export default function PaymentSuccessClient({ locale, sessionId }: PaymentSucce
           features: [
             'All platform sizes unlocked',
             'Priority support',
-            'Batch generation',
-            '24-hour download history'
+            'Batch generation'
           ]
         }
       case 'pro_plus':
@@ -86,8 +85,7 @@ export default function PaymentSuccessClient({ locale, sessionId }: PaymentSucce
             'Everything in Pro',
             'Commercial license',
             'Custom brand templates',
-            'API access',
-            '7-day cloud gallery'
+            'API access'
           ]
         }
       default:

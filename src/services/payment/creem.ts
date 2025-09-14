@@ -132,8 +132,7 @@ export const SUBSCRIPTION_PLANS = {
       'No watermark',
       'Commercial license',
       'All tools usage',
-      'Dedicated support',
-      '7-day cloud gallery'
+      'Dedicated support'
     ]
   }
 }

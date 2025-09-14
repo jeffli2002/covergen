@@ -53,8 +53,7 @@ const tiers = [
       'No watermark',
       'All platform sizes',
       'Priority support',
-      'Commercial usage rights',
-      '24-hour download history'
+      'Commercial usage rights'
     ],
     limitations: [],
     cta: hasTrials ? `Start ${trialText}` : 'Get Started',
@@ -74,8 +73,7 @@ const tiers = [
       'Full commercial license',
       'Custom brand templates',
       'API access',
-      'Dedicated support',
-      `${config.trialDays}-day cloud gallery`
+      'Dedicated support'
     ],
     limitations: [],
     cta: hasTrials ? `Start ${trialText}` : 'Get Started',

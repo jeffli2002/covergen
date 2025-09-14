@@ -93,8 +93,8 @@ const faqCategories = [
         answer: 'Yes, you can cancel anytime from your account settings. Your access continues until the end of your billing period.'
       },
       {
-        question: 'What\'s included in download history and cloud gallery?',
-        answer: 'Pro users get 24-hour download history to re-download recent creations. Pro+ users get 7-day cloud gallery to store and manage all generated covers.'
+        question: 'What\'s included in Pro and Pro+ plans?',
+        answer: 'Pro users get access to professional features with commercial usage rights. Pro+ users get priority generation, enhanced features, and full commercial license for teams and enterprises.'
       },
       {
         question: 'How do I reset my password?',

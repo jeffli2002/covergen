@@ -172,7 +172,6 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                       <li>✓ All platform sizes</li>
                       <li>✓ Priority support</li>
                       <li>✓ Commercial usage rights</li>
-                      <li>✓ 24-hour download history</li>
                     </ul>
                   </div>
                   <div className="border border-purple-200 bg-purple-50 rounded-lg p-4">
@@ -186,7 +185,6 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                       <li>✓ Custom brand templates</li>
                       <li>✓ API access</li>
                       <li>✓ Dedicated support</li>
-                      <li>✓ {config.trialDays}-day cloud gallery</li>
                     </ul>
                   </div>
                 </div>
