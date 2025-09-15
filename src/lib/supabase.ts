@@ -24,7 +24,7 @@ function getSupabaseClient() {
     auth: {
       autoRefreshToken: true,
       persistSession: true,
-      detectSessionInUrl: true, // Enable for proper OAuth state handling
+      detectSessionInUrl: true, // Enable to handle OAuth callbacks
       flowType: 'pkce',
       debug: process.env.NODE_ENV === 'development' // Enable debug logs in dev
     },
@@ -65,13 +65,9 @@ function getSupabaseClient() {
         
         if (options?.domain) {
           cookieParts.push(`Domain=${options.domain}`)
-        } else if (window.location.hostname.includes('covergen.pro')) {
-          // For production, use parent domain to ensure cookies work across subdomains
-          cookieParts.push('Domain=.covergen.pro')
         }
         
-        // Use SameSite=None for OAuth flows as recommended by Supabase
-        cookieParts.push(`SameSite=${options?.sameSite || 'None'}`)
+        cookieParts.push(`SameSite=${options?.sameSite || 'Lax'}`)
         
         if (window.location.protocol === 'https:' || options?.secure) {
           cookieParts.push('Secure')
@@ -99,9 +95,6 @@ function getSupabaseClient() {
         
         if (options?.domain) {
           cookieParts.push(`Domain=${options.domain}`)
-        } else if (window.location.hostname.includes('covergen.pro')) {
-          // For production, use parent domain to ensure cookies work across subdomains
-          cookieParts.push('Domain=.covergen.pro')
         }
         
         document.cookie = cookieParts.join('; ')
