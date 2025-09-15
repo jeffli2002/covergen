@@ -37,6 +37,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         await authService.initialize()
         
+        // Check for OAuth callback and wait for session if needed
+        const hasOAuthCallback = await authService.checkForOAuthCallback()
+        if (hasOAuthCallback) {
+          // Give time for auth state change to propagate
+          await new Promise(resolve => setTimeout(resolve, 500))
+        }
+        
         const currentUser = authService.getCurrentUser()
         console.log('[AuthContext] Current user after init:', currentUser?.email)
         setUser(currentUser)

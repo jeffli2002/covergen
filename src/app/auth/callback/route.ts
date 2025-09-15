@@ -97,10 +97,12 @@ export async function GET(request: Request) {
     let authCookiesSet = 0
     newCookies.forEach(({ value, options }, name) => {
       // Ensure proper cookie settings for production
+      // Auth cookies should NOT be httpOnly so client-side JS can read them
+      const isAuthCookie = name.startsWith('sb-')
       const cookieOptions = {
         name,
         value,
-        httpOnly: options.httpOnly ?? true,
+        httpOnly: isAuthCookie ? false : (options.httpOnly ?? true),
         secure: process.env.NODE_ENV === 'production' || origin.startsWith('https'),
         sameSite: (options.sameSite || 'lax') as 'lax' | 'strict' | 'none',
         path: options.path || '/',
@@ -129,26 +131,16 @@ export async function GET(request: Request) {
       maxAge: 60 * 5 // 5 minutes
     })
 
-    // Also ensure we have the critical session cookies
-    if (data.session) {
-      // Manually ensure the access token is available for client-side auth
-      response.cookies.set({
-        name: `sb-${process.env.NEXT_PUBLIC_SUPABASE_URL!.split('//')[1].split('.')[0]}-auth-token`,
-        value: JSON.stringify({
-          access_token: data.session.access_token,
-          refresh_token: data.session.refresh_token,
-          expires_at: data.session.expires_at,
-          expires_in: data.session.expires_in,
-          token_type: data.session.token_type
-        }),
-        httpOnly: false, // Must be false for client-side access
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/',
-        maxAge: 60 * 60 * 24 * 365 // 1 year
-      })
-      console.log('[Auth Callback] Manually set session cookie')
-    }
+    // Set OAuth success flag for client-side detection
+    response.cookies.set({
+      name: 'oauth-callback-success',
+      value: 'true',
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 // 1 minute - just enough for detection
+    })
     
     return response
     

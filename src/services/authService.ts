@@ -41,6 +41,45 @@ class AuthService {
     return this.initPromise
   }
 
+  async checkForOAuthCallback() {
+    try {
+      // Check if we just came from an OAuth callback
+      const cookies = document.cookie.split(';')
+      const hasOAuthSuccess = cookies.some(cookie => 
+        cookie.trim().startsWith('oauth-callback-success=true')
+      )
+      
+      if (hasOAuthSuccess) {
+        console.log('[Auth] OAuth callback detected, refreshing session...')
+        
+        // Remove the flag cookie
+        document.cookie = 'oauth-callback-success=; max-age=0; path=/'
+        
+        // Force a session refresh
+        const supabase = this.getSupabase()
+        if (supabase) {
+          const { data: { session }, error } = await supabase.auth.getSession()
+          
+          if (session && !error) {
+            console.log('[Auth] OAuth session detected:', session.user?.email)
+            this.session = session
+            this.user = session.user
+            this.storeSession(session)
+            
+            if (this.onAuthChange) {
+              this.onAuthChange(this.user)
+            }
+            
+            return true
+          }
+        }
+      }
+    } catch (error) {
+      console.error('[Auth] Error checking for OAuth callback:', error)
+    }
+    return false
+  }
+
   private async _doInitialize() {
     try {
       console.log('[Auth] Starting initialization...')
@@ -113,6 +152,11 @@ class AuthService {
       }
 
       this.initialized = true
+
+      // Check for OAuth callback after initialization
+      setTimeout(() => {
+        this.checkForOAuthCallback()
+      }, 100)
 
       if (!this.authSubscription) {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
