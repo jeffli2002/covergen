@@ -142,11 +142,16 @@ export async function GET(request: Request) {
       maxAge: 60 // 1 minute - just enough for detection
     })
 
-    // Also ensure we have the critical session cookies
+    // Also ensure we have the critical session cookies with the correct name format
     if (data.session) {
-      // Manually ensure the access token is available for client-side auth
+      // Extract the project ref from the Supabase URL (e.g., "your-project" from "https://your-project.supabase.co")
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+      const projectRef = supabaseUrl.split('//')[1].split('.')[0]
+      
+      // Set the auth token cookie with the exact format Supabase expects
+      const authTokenName = `sb-${projectRef}-auth-token`
       response.cookies.set({
-        name: `sb-${process.env.NEXT_PUBLIC_SUPABASE_URL!.split('//')[1].split('.')[0]}-auth-token`,
+        name: authTokenName,
         value: JSON.stringify({
           access_token: data.session.access_token,
           refresh_token: data.session.refresh_token,
@@ -155,12 +160,24 @@ export async function GET(request: Request) {
           token_type: data.session.token_type
         }),
         httpOnly: false, // Must be false for client-side access
-        secure: process.env.NODE_ENV === 'production',
+        secure: process.env.NODE_ENV === 'production' || origin.startsWith('https'),
         sameSite: 'lax',
         path: '/',
         maxAge: 60 * 60 * 24 * 365 // 1 year
       })
-      console.log('[Auth Callback] Manually set session cookie')
+      console.log('[Auth Callback] Manually set session cookie:', authTokenName)
+      
+      // Also set the auth-token-code-verifier cookie if it exists
+      const codeVerifierName = `sb-${projectRef}-auth-token-code-verifier`
+      response.cookies.set({
+        name: codeVerifierName,
+        value: '',
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production' || origin.startsWith('https'),
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 0 // Delete it
+      })
     }
     
     return response

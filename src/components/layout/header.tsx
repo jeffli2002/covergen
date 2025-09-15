@@ -29,6 +29,16 @@ interface HeaderProps {
 
 export default function Header({ locale, translations: t }: HeaderProps) {
   const { user, loading, signOut } = useAuth()
+  
+  // Debug logging for auth state
+  useEffect(() => {
+    console.log('[Header] Auth state:', { 
+      loading, 
+      hasUser: !!user, 
+      userEmail: user?.email,
+      timestamp: new Date().toISOString()
+    })
+  }, [loading, user])
   const { user: storeUser } = useAppStore()
   const router = useRouter()
   const [showAuthModal, setShowAuthModal] = useState(false)
@@ -36,6 +46,11 @@ export default function Header({ locale, translations: t }: HeaderProps) {
   const [activating, setActivating] = useState(false)
   const [showActivationConfirm, setShowActivationConfirm] = useState(false)
   const currentTier = storeUser?.tier || 'free'
+  
+  // Debug logging
+  useEffect(() => {
+    console.log('[Header] Auth state:', { user: user?.email, loading, storeUser: storeUser?.email })
+  }, [user, loading, storeUser])
   
   // Fetch subscription info to check trial status
   useEffect(() => {

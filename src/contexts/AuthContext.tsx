@@ -29,34 +29,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('[AuthContext] Starting initialization')
         console.log('[AuthContext] URL:', window.location.href)
         
+        // Set up auth change handler BEFORE initialization
         authService.setAuthChangeHandler((user) => {
           console.log('[AuthContext] Auth change handler called:', !!user, user?.email)
           setUser(user)
-          setLoading(false)
+          // Only set loading to false if we're not checking for OAuth callback
+          const cookies = document.cookie.split(';')
+          const hasOAuthPending = cookies.some(cookie => 
+            cookie.trim().startsWith('oauth-callback-success=true')
+          )
+          if (!hasOAuthPending) {
+            setLoading(false)
+          }
         })
         
+        // Initialize auth service
         await authService.initialize()
         
-        // Check for OAuth callback and wait for session if needed
+        // Check for OAuth callback - this might take some time
         const hasOAuthCallback = await authService.checkForOAuthCallback()
         if (hasOAuthCallback) {
-          // OAuth callback detected, user should be set by checkForOAuthCallback
-          console.log('[AuthContext] OAuth callback handled')
-          // Give time for auth state change to propagate
-          await new Promise(resolve => setTimeout(resolve, 500))
-        }
-        
-        const currentUser = authService.getCurrentUser()
-        console.log('[AuthContext] Current user after init:', currentUser?.email)
-        setUser(currentUser)
-        
-        // Ensure loading is set to false if we have a user
-        if (currentUser) {
+          console.log('[AuthContext] OAuth callback handled successfully')
+          // The auth change handler should have been called by now
+          // Force loading to false in case it wasn't
+          setLoading(false)
+        } else {
+          // No OAuth callback, use current user state
+          const currentUser = authService.getCurrentUser()
+          console.log('[AuthContext] Current user after init:', currentUser?.email)
+          setUser(currentUser)
           setLoading(false)
         }
       } catch (error) {
         console.error('Auth initialization error:', error)
-      } finally {
         setLoading(false)
       }
     }

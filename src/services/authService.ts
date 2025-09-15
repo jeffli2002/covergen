@@ -55,23 +55,36 @@ class AuthService {
         // Remove the flag cookie
         document.cookie = 'oauth-callback-success=; max-age=0; path=/'
         
-        // Force a session refresh
+        // Force a session refresh with retry logic
         const supabase = this.getSupabase()
         if (supabase) {
-          const { data: { session }, error } = await supabase.auth.getSession()
-          
-          if (session && !error) {
-            console.log('[Auth] OAuth session detected:', session.user?.email)
-            this.session = session
-            this.user = session.user
-            this.storeSession(session)
+          // Try multiple times as the session might not be immediately available
+          for (let attempt = 0; attempt < 5; attempt++) {
+            const { data: { session }, error } = await supabase.auth.getSession()
             
-            if (this.onAuthChange) {
-              this.onAuthChange(this.user)
+            if (session && !error) {
+              console.log('[Auth] OAuth session detected on attempt', attempt + 1, ':', session.user?.email)
+              this.session = session
+              this.user = session.user
+              this.storeSession(session)
+              
+              // Ensure we notify the auth change handler
+              if (this.onAuthChange) {
+                console.log('[Auth] Notifying auth change handler from OAuth callback')
+                this.onAuthChange(this.user)
+              }
+              
+              return true
             }
             
-            return true
+            // If no session yet, wait a bit and try again
+            if (attempt < 4) {
+              console.log('[Auth] No session yet, retrying in', (attempt + 1) * 200, 'ms')
+              await new Promise(resolve => setTimeout(resolve, (attempt + 1) * 200))
+            }
           }
+          
+          console.warn('[Auth] OAuth callback detected but no session found after retries')
         }
       }
     } catch (error) {
@@ -153,10 +166,12 @@ class AuthService {
 
       this.initialized = true
 
-      // Check for OAuth callback after initialization
-      setTimeout(() => {
-        this.checkForOAuthCallback()
-      }, 100)
+      // Check for OAuth callback immediately after initialization
+      // Don't wait as this might miss the session establishment
+      const oauthCallbackDetected = await this.checkForOAuthCallback()
+      if (oauthCallbackDetected) {
+        console.log('[Auth] OAuth callback processed during initialization')
+      }
 
       if (!this.authSubscription) {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
