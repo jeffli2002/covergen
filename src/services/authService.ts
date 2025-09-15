@@ -277,9 +277,10 @@ class AuthService {
       
       // Force localhost redirect in development
       const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      // Use auth-handler page which can handle both implicit and PKCE flows
       const redirectUrl = isLocalDev 
-        ? `http://localhost:3001/auth/callback?next=${encodeURIComponent(currentPath)}`
-        : `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
+        ? `http://localhost:3001/en/auth-handler?next=${encodeURIComponent(currentPath)}`
+        : `${window.location.origin}/en/auth-handler?next=${encodeURIComponent(currentPath)}`
       
       // Log the actual redirect URL being used
       console.log('[Auth] OAuth Configuration:', {
