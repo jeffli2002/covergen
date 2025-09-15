@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     // Get the subscription from database
     const supabase = await createClient()
     const { data: subscription, error: subError } = await supabase
-      .from('subscriptions')
+      .from('subscriptions_consolidated')
       .select('*')
       .eq('user_id', userId)
       .single()
@@ -30,7 +30,10 @@ export async function GET(req: NextRequest) {
         status: 'free',
         plan: 'free',
         isActive: false,
-        canUpgrade: true
+        canUpgrade: true,
+        isTrialing: false,
+        requiresPaymentSetup: false,
+        hasPaymentMethod: false
       })
     }
     
@@ -47,13 +50,12 @@ export async function GET(req: NextRequest) {
       trialDaysRemaining = daysRemaining
     }
     
-    // Check if this is a manual trial requiring payment setup
-    const requiresPaymentSetup = subscription.status === 'trialing' && 
-                                !subscription.stripe_subscription_id &&
-                                !subscription.creem_subscription_id;
+    // Check if user has payment method
+    const hasPaymentMethod = !!subscription.stripe_subscription_id && !!subscription.stripe_customer_id
+    const requiresPaymentSetup = isTrialing && !hasPaymentMethod
     
     // Determine upgrade/downgrade capabilities
-    const plan = subscription.plan_id || subscription.tier
+    const plan = subscription.tier || subscription.plan_id || 'free'
     const canUpgrade = plan !== 'pro-plus' && plan !== 'pro_plus'
     const canDowngrade = plan !== 'pro'
     
@@ -70,7 +72,9 @@ export async function GET(req: NextRequest) {
       canDowngrade,
       stripeSubscriptionId: subscription.stripe_subscription_id,
       requiresPaymentSetup,
-      isManualTrial: requiresPaymentSetup
+      hasPaymentMethod,
+      isManualTrial: requiresPaymentSetup,
+      trialEndsAt: subscription.expires_at || subscription.trial_ends_at
     })
   } catch (error) {
     console.error('[Status] Error:', error)

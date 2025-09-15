@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Crown, LogOut, Sparkles, User, ChevronDown, CreditCard } from 'lucide-react'
+import { Crown, LogOut, Sparkles, User, ChevronDown, CreditCard, Loader2 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import AuthForm from '@/components/auth/AuthForm'
 import UserMenu from '@/components/auth/UserMenu'
@@ -12,6 +12,7 @@ import { Locale } from '@/lib/i18n/config'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAppStore } from '@/lib/store'
+import { toast } from 'sonner'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +31,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
   const router = useRouter()
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null)
+  const [activating, setActivating] = useState(false)
   const currentTier = storeUser?.tier || 'free'
   
   // Fetch subscription info to check trial status
@@ -66,6 +68,55 @@ export default function Header({ locale, translations: t }: HeaderProps) {
       localStorage.removeItem('covergen_pending_plan')
       // Redirect to payment page with the plan
       router.push(`/${locale}/payment?plan=${pendingPlan}`)
+    }
+  }
+
+  const handleActivateSubscription = async () => {
+    if (!subscriptionInfo || !subscriptionInfo.isTrialing) return
+
+    setActivating(true)
+    try {
+      const response = await fetch('/api/subscription/activate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        if (data.autoActivates) {
+          // Trial will auto-activate, show informative message
+          toast.info(data.message || `Your subscription will automatically activate in ${data.daysRemaining} days.`, {
+            duration: 6000
+          })
+        } else {
+          // Immediate activation (shouldn't happen with current implementation)
+          toast.success(data.message || 'Subscription activated successfully!')
+          // Refresh subscription info
+          const statusRes = await fetch('/api/subscription/status')
+          const statusData = await statusRes.json()
+          if (statusData && !statusData.error) {
+            setSubscriptionInfo(statusData)
+          }
+        }
+      } else {
+        // Handle payment method required
+        if (data.needsPaymentMethod) {
+          toast.error('Please add a payment method to activate your subscription', {
+            duration: 4000
+          })
+          // Redirect to account page to add payment method
+          router.push(`/${locale}/account`)
+        } else {
+          throw new Error(data.error || 'Failed to activate subscription')
+        }
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to activate subscription')
+    } finally {
+      setActivating(false)
     }
   }
 
@@ -244,16 +295,36 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                   
                   // For trial users - show activate option for their current plan
                   if (isTrialing && (plan === 'pro' || plan === 'pro_plus')) {
-                    return (
-                      <Button 
-                        size="sm" 
-                        className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-sm px-4"
-                        onClick={() => router.push(`/${locale}/payment?plan=${plan}&activate=true`)}
-                      >
-                        <Crown className="w-4 h-4 mr-2" />
-                        Activate {plan === 'pro' ? 'Pro' : 'Pro+'}
-                      </Button>
-                    )
+                    // Check if they have payment method
+                    if (subscriptionInfo?.hasPaymentMethod) {
+                      return (
+                        <Button 
+                          size="sm" 
+                          className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-sm px-4"
+                          onClick={handleActivateSubscription}
+                          disabled={activating}
+                        >
+                          {activating ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <Crown className="w-4 h-4 mr-2" />
+                          )}
+                          Activate {plan === 'pro' ? 'Pro' : 'Pro+'}
+                        </Button>
+                      )
+                    } else {
+                      // No payment method, redirect to payment page
+                      return (
+                        <Button 
+                          size="sm" 
+                          className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-sm px-4"
+                          onClick={() => router.push(`/${locale}/payment?plan=${plan}&activate=true`)}
+                        >
+                          <Crown className="w-4 h-4 mr-2" />
+                          Activate {plan === 'pro' ? 'Pro' : 'Pro+'}
+                        </Button>
+                      )
+                    }
                   }
                   
                   // For free users
