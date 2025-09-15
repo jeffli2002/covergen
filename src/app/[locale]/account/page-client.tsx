@@ -303,7 +303,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   const config = getClientSubscriptionConfig()
   
   // Get plan details using client-safe configuration
-  const planDetails = {
+  const planDetailsMap = {
     free: {
       name: 'Free',
       price: 0,
@@ -341,7 +341,9 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
         `${config.trialDays}-day free trial`
       ]
     }
-  }[currentPlan] || {
+  }
+  
+  const planDetails = planDetailsMap[currentPlan as keyof typeof planDetailsMap] || {
     name: 'Free',
     price: 0,
     credits: config.limits.free.monthly,
