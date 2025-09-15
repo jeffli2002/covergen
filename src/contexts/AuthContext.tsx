@@ -27,6 +27,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const initAuth = async () => {
       try {
         console.log('[AuthContext] Starting initialization')
+        console.log('[AuthContext] Window location:', window.location.href)
+        console.log('[AuthContext] Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
         
         // Set up auth change handler first
         authService.setAuthChangeHandler((user) => {

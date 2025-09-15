@@ -12,8 +12,16 @@ export default function OAuthTestPage() {
   const [testLoading, setTestLoading] = useState(false)
   const [logs, setLogs] = useState<string[]>([])
   
+  // Log component mount
+  console.log('[OAuthTest] Component mounted', {
+    user: user?.email,
+    loading,
+    hasSignInFunction: typeof signInWithGoogle === 'function'
+  })
+  
   const addLog = (message: string) => {
     const timestamp = new Date().toLocaleTimeString()
+    console.log(`[OAuthTest] ${message}`)
     setLogs(prev => [...prev, `[${timestamp}] ${message}`])
   }
   
@@ -90,6 +98,17 @@ export default function OAuthTestPage() {
                 ) : (
                   'Test Google Sign In'
                 )}
+              </Button>
+              
+              <Button
+                onClick={() => {
+                  console.log('[OAuthTest] Direct test clicked')
+                  window.location.href = `https://exungkcoaihcemcmhqdr.supabase.co/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent('https://covergen.pro/auth/callback?next=/en/oauth-test')}`
+                }}
+                variant="outline"
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                Direct OAuth Test
               </Button>
               
               {user && (
