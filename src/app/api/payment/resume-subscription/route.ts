@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { creemService } from '@/services/payment/creem'
-import { supabase } from '@/lib/supabase'
+import { createSupabaseClient } from '@/lib/supabase-client'
+
+const supabase = createSupabaseClient()
 
 export async function POST(req: NextRequest) {
   try {
@@ -58,13 +60,17 @@ export async function POST(req: NextRequest) {
     }
 
     // Update local database
-    await supabase
+    const { error: updateError } = await (supabase as any)
       .from('subscriptions')
       .update({
         cancel_at_period_end: false,
         updated_at: new Date().toISOString()
       })
       .eq('stripe_subscription_id', subscriptionId)
+    
+    if (updateError) {
+      console.error('Failed to update subscription in database:', updateError)
+    }
 
     return NextResponse.json({
       success: true,

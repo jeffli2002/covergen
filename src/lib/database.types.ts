@@ -32,6 +32,7 @@ export interface Database {
           tier: 'free' | 'pro' | 'pro_plus'
           status: 'active' | 'trialing' | 'paused' | 'cancelled'
           stripe_subscription_id?: string | null
+          cancel_at_period_end?: boolean
           created_at: string
           updated_at: string
         }
@@ -40,6 +41,8 @@ export interface Database {
           user_id: string
           tier: 'free' | 'pro' | 'pro_plus'
           status: 'active' | 'trialing' | 'paused' | 'cancelled'
+          stripe_subscription_id?: string | null
+          cancel_at_period_end?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -48,6 +51,8 @@ export interface Database {
           user_id?: string
           tier?: 'free' | 'pro' | 'pro_plus'
           status?: 'active' | 'trialing' | 'paused' | 'cancelled'
+          stripe_subscription_id?: string | null
+          cancel_at_period_end?: boolean
           created_at?: string
           updated_at?: string
         }

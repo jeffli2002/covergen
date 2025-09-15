@@ -9,7 +9,7 @@ export default function OAuthOfficialTestPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = createClient
 
   useEffect(() => {
     checkUser()
