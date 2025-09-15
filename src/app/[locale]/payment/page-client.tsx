@@ -35,7 +35,17 @@ export default function PaymentPageClient({
   const [loading, setLoading] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<'pro' | 'pro_plus'>(initialPlan as any)
   const [isTestMode, setIsTestMode] = useState(false)
-  const [currentSubscription, setCurrentSubscription] = useState<any>(null)
+  interface Subscription {
+    id: string
+    user_id: string
+    tier: 'free' | 'pro' | 'pro_plus'
+    status: 'active' | 'trialing' | 'paused' | 'cancelled'
+    stripe_subscription_id?: string | null
+    created_at: string
+    updated_at: string
+  }
+  
+  const [currentSubscription, setCurrentSubscription] = useState<Subscription | null>(null)
   const [proratedAmount, setProratedAmount] = useState<number | null>(null)
   const [isProcessingTrialUpgrade, setIsProcessingTrialUpgrade] = useState(false)
   

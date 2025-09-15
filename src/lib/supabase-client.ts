@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
+import type { Database } from './database.types'
 
 // Singleton instance to prevent multiple client creation
-let supabaseInstance: ReturnType<typeof createClient> | null = null
+let supabaseInstance: ReturnType<typeof createClient<Database>> | null = null
 
 // Create Supabase client for browser-side usage
 export function createSupabaseClient() {
@@ -24,7 +25,7 @@ export function createSupabaseClient() {
   console.log('[supabase-client] Creating singleton Supabase client instance')
   
   // Create and store the singleton instance
-  supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
+  supabaseInstance = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
       autoRefreshToken: true,
       persistSession: true,

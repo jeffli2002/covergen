@@ -1,4 +1,7 @@
 import { supabase } from '@/lib/supabase-client'
+import type { Database } from '@/lib/database.types'
+
+type Subscription = Database['public']['Tables']['subscriptions']['Row']
 
 let authServiceInstance: AuthService | null = null
 
@@ -626,7 +629,7 @@ class AuthService {
     }
   }
 
-  async getUserSubscription() {
+  async getUserSubscription(): Promise<Subscription | null> {
     if (!this.user) return null
 
     try {

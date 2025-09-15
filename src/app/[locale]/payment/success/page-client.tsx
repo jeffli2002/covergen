@@ -18,7 +18,16 @@ export default function PaymentSuccessClient({ locale, sessionId }: PaymentSucce
   const router = useRouter()
   const { user, setUser } = useAppStore()
   const [loading, setLoading] = useState(true)
-  const [subscription, setSubscription] = useState<any>(null)
+  interface Subscription {
+    id: string
+    user_id: string
+    tier: 'free' | 'pro' | 'pro_plus'
+    status: 'active' | 'trialing' | 'paused' | 'cancelled'
+    created_at: string
+    updated_at: string
+  }
+  
+  const [subscription, setSubscription] = useState<Subscription | null>(null)
 
   useEffect(() => {
     // Trigger confetti animation

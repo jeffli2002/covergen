@@ -119,7 +119,7 @@ function AuthHandlerContent() {
       } else {
         // No code or hash, check existing session
         console.log('[AuthHandler] No code or hash, checking existing session')
-        const supabase = createSupabaseClient()
+        // Use singleton instance
         const { data: { session } } = await supabase.auth.getSession()
         
         if (session) {
