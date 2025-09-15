@@ -344,6 +344,15 @@ class AuthService {
 
   async signInWithGoogle() {
     try {
+      // Debug environment info first
+      console.log('[Auth] Environment check:', {
+        env: process.env.NODE_ENV,
+        origin: typeof window !== 'undefined' ? window.location.origin : 'SSR',
+        hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+        hasSupabaseKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+        siteUrl: process.env.NEXT_PUBLIC_SITE_URL
+      })
+
       // Use the singleton client for OAuth operations
       const supabaseClient = this.getSupabase()
       if (!supabaseClient) {
