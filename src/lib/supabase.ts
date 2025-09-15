@@ -3,14 +3,24 @@ import { createBrowserClient } from '@supabase/ssr'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
-if (!supabaseUrl || !supabaseAnonKey) {
+const hasSupabaseConfig = supabaseUrl && supabaseAnonKey
+
+if (!hasSupabaseConfig) {
   console.warn('Supabase credentials not found. Authentication features will be disabled.')
+  console.warn('Please update your .env.local file with your Supabase project credentials.')
+  console.warn('Get them from: https://supabase.com/dashboard/project/_/settings/api')
+} else {
+  console.log('[Supabase] Initialized with URL:', supabaseUrl.substring(0, 30) + '...')
 }
 
 // Create a singleton browser client with proper cookie handling
 let browserClient: ReturnType<typeof createBrowserClient> | null = null
 
 function getSupabaseClient() {
+  if (!hasSupabaseConfig) {
+    return null
+  }
+
   if (typeof window === 'undefined') {
     // Return a dummy client for SSR
     return createBrowserClient(supabaseUrl, supabaseAnonKey)
@@ -20,7 +30,8 @@ function getSupabaseClient() {
     return browserClient
   }
 
-  browserClient = createBrowserClient(supabaseUrl, supabaseAnonKey, {
+  try {
+    browserClient = createBrowserClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       autoRefreshToken: true,
       persistSession: true,
@@ -116,7 +127,11 @@ function getSupabaseClient() {
     }
   })
 
-  return browserClient
+    return browserClient
+  } catch (error) {
+    console.error('Failed to create Supabase client:', error)
+    return null
+  }
 }
 
 export const supabase = getSupabaseClient()

@@ -347,17 +347,42 @@ class AuthService {
       // Use the singleton client for OAuth operations
       const supabaseClient = this.getSupabase()
       if (!supabaseClient) {
+        console.error('[Auth] Supabase client is null')
         throw new Error('Supabase not configured')
       }
+
+      // Check if Supabase URL and anon key are configured
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      
+      console.log('[Auth] Supabase configuration check:', {
+        hasUrl: !!supabaseUrl,
+        urlPrefix: supabaseUrl?.substring(0, 20),
+        hasAnonKey: !!supabaseAnonKey,
+        keyPrefix: supabaseAnonKey?.substring(0, 10)
+      })
 
       // Get the current pathname to preserve locale
       const currentPath = window.location.pathname || '/en'
       
-      // Use PKCE flow with callback route
+      // Use PKCE flow with callback route - use current origin for flexibility
       const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
+      
+      // Log the actual redirect URL being used
+      console.log('[Auth] Using dynamic redirect URL based on current origin')
 
-      console.log('[Auth] Google sign in with redirect URL:', redirectUrl)
-      console.log('[Auth] Using singleton client for OAuth')
+      console.log('[Auth] Google sign in attempt:', {
+        redirectUrl,
+        origin: window.location.origin,
+        currentPath,
+        supabaseClient: !!supabaseClient
+      })
+
+      console.log('[Auth] Calling signInWithOAuth with options:', {
+        provider: 'google',
+        redirectTo: redirectUrl,
+        skipBrowserRedirect: false
+      })
 
       const { data, error } = await supabaseClient.auth.signInWithOAuth({
         provider: 'google',
@@ -371,22 +396,48 @@ class AuthService {
         }
       })
 
+      console.log('[Auth] OAuth response:', {
+        hasData: !!data,
+        hasError: !!error,
+        errorMessage: error?.message,
+        errorName: error?.name,
+        errorStatus: (error as any)?.status,
+        dataUrl: data?.url
+      })
+
       if (error) {
-        console.error('[Auth] OAuth error:', error)
+        console.error('[Auth] OAuth error details:', {
+          error,
+          errorString: JSON.stringify(error),
+          errorKeys: error ? Object.keys(error) : []
+        })
         throw error
       }
 
-      console.log('[Auth] OAuth initiated successfully')
+      console.log('[Auth] OAuth initiated successfully, URL:', data?.url)
+      
+      // If we have a URL, the browser should redirect automatically
+      // But let's ensure it happens
+      if (data?.url && !error) {
+        console.log('[Auth] Redirecting to OAuth provider...')
+        // The Supabase client should handle this automatically with skipBrowserRedirect: false
+      }
 
       return {
         success: true,
         data
       }
     } catch (error: any) {
-      console.error('[Auth] Sign in with Google failed:', error)
+      console.error('[Auth] Sign in with Google failed:', {
+        error,
+        message: error?.message,
+        stack: error?.stack,
+        name: error?.name,
+        errorString: JSON.stringify(error)
+      })
       return {
         success: false,
-        error: error.message
+        error: error?.message || 'Failed to initiate Google sign in'
       }
     }
   }
