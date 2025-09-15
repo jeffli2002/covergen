@@ -280,6 +280,16 @@ class AuthService {
       const redirectUrl = isLocalDev 
         ? `http://localhost:3001/auth/callback?next=${encodeURIComponent(currentPath)}`
         : `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
+      
+      // Log the actual redirect URL being used
+      console.log('[Auth] OAuth Configuration:', {
+        isLocalDev,
+        hostname: window.location.hostname,
+        origin: window.location.origin,
+        currentPath,
+        redirectUrl,
+        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL
+      })
 
       console.log('[Auth] Environment:', isLocalDev ? 'Development' : 'Production')
       console.log('[Auth] Google sign in with redirect URL:', redirectUrl)

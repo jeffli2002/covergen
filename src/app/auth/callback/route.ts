@@ -22,8 +22,13 @@ export async function GET(request: Request) {
   // Ensure we have a properly formatted absolute URL
   let origin = process.env.NEXT_PUBLIC_SITE_URL || ''
   
+  // Fix missing protocol if needed
+  if (origin && !origin.startsWith('http')) {
+    origin = `https://${origin}`
+  }
+  
   // If no NEXT_PUBLIC_SITE_URL or it's malformed, use request origin
-  if (!origin || !origin.startsWith('http')) {
+  if (!origin) {
     origin = requestUrl.origin
   }
   
