@@ -1,4 +1,4 @@
-import { createSupabaseClient } from '@/lib/supabase-simple'
+import { supabase as supabaseClient } from '@/lib/supabase'
 
 let authServiceInstance: AuthService | null = null
 
@@ -24,8 +24,8 @@ class AuthService {
     if (typeof window === 'undefined') {
       return null
     }
-    // Create a fresh client instance
-    return createSupabaseClient()
+    // Use the singleton client instance
+    return supabaseClient
   }
 
   async initialize() {
