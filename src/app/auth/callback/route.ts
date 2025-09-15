@@ -7,7 +7,17 @@ export async function GET(request: Request) {
   
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
+  const error = requestUrl.searchParams.get('error')
+  const errorDescription = requestUrl.searchParams.get('error_description')
   const next = requestUrl.searchParams.get('next') || '/en'
+  
+  // Check for OAuth errors first
+  if (error) {
+    console.error('[Auth Callback] OAuth error:', error)
+    console.error('[Auth Callback] Error description:', errorDescription)
+    const errorMessage = errorDescription || error
+    return NextResponse.redirect(new URL(`/en?error=oauth_error&message=${encodeURIComponent(errorMessage)}`, requestUrl.origin))
+  }
   
   // Ensure we have a properly formatted absolute URL
   let origin = process.env.NEXT_PUBLIC_SITE_URL || ''

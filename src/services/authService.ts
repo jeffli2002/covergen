@@ -299,6 +299,20 @@ class AuthService {
 
       if (error) {
         console.error('[Auth] OAuth error:', error)
+        console.error('[Auth] OAuth error details:', {
+          message: error.message,
+          status: error.status,
+          name: error.name,
+          cause: error.cause,
+          redirectUrl,
+          origin: window.location.origin,
+          hostname: window.location.hostname
+        })
+        // Check if this is a common configuration issue
+        if (error.message?.includes('redirect_uri_mismatch')) {
+          console.error('[Auth] OAuth redirect URI mismatch! Check Supabase dashboard configuration.')
+          console.error('[Auth] Expected redirect URL:', redirectUrl)
+        }
         throw error
       }
 
