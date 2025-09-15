@@ -94,6 +94,12 @@ export default function AuthDiagnosticPage() {
     // First, let's test if we can get the OAuth URL without redirecting
     try {
       const { supabase } = await import('@/lib/supabase-simple')
+      if (!supabase) {
+        console.error('[AuthDiagnostic] Supabase client is null')
+        alert('Supabase client not initialized - check environment variables')
+        return
+      }
+      
       const redirectUrl = `${window.location.origin}/auth/callback?next=${window.location.pathname}`
       
       console.log('[AuthDiagnostic] Getting OAuth URL with skipBrowserRedirect: true')
