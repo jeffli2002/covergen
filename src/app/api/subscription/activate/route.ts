@@ -60,46 +60,29 @@ export async function POST(req: NextRequest) {
       )
     }
     
-    console.log('[Activate] Proceeding with immediate trial activation')
+    console.log('[Activate] Trial activation requested but Creem API does not support early trial termination')
     
     // Since Creem SDK doesn't support ending trials early via API,
-    // we'll update our local database to reflect immediate activation.
-    // The actual billing will still start when Creem processes it.
-    const { error: updateError } = await supabase
-      .from('subscriptions_consolidated')
-      .update({
-        status: 'active',
-        trial_ended_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .eq('user_id', userId)
+    // we cannot actually start billing immediately. The billing will start
+    // at the original trial end date set by Creem.
     
-    if (updateError) {
-      console.error('[Activate] Error updating subscription:', updateError)
-      return NextResponse.json(
-        { error: 'Failed to activate subscription' },
-        { status: 500 }
-      )
-    }
+    // Calculate when billing will actually start
+    const trialEndDate = subscription.expires_at || subscription.trial_ends_at
+    const billingStartDate = trialEndDate ? new Date(trialEndDate) : null
+    const formattedDate = billingStartDate ? billingStartDate.toLocaleDateString() : 'your trial end date'
     
-    // Clear trial info from auth.users
-    const { error: rpcError } = await supabase.rpc('update_user_trial_status', {
-      p_user_id: userId,
-      p_trial_ends_at: null,
-      p_subscription_tier: subscription.tier
-    })
+    // We should NOT update the local database as this would create inconsistency
+    // with Creem's actual billing status. Instead, we'll wait for Creem's webhook
+    // to update our database when the trial actually ends.
     
-    if (rpcError) {
-      console.error('[Activate] Error clearing trial status:', rpcError)
-    }
-    
-    console.log('[Activate] Successfully activated subscription for user:', userId)
+    console.log('[Activate] Informing user about billing start date:', formattedDate)
     
     return NextResponse.json({
       success: true,
-      activated: true,
-      autoActivates: false,
-      message: `Your ${subscription.tier === 'pro_plus' ? 'Pro+' : 'Pro'} subscription is now active! Billing will begin shortly.`
+      activated: false, // Not actually activated yet
+      billingStartsAt: trialEndDate,
+      message: `Thank you for confirming your ${subscription.tier === 'pro_plus' ? 'Pro+' : 'Pro'} subscription! Your payment method is confirmed and billing will automatically begin on ${formattedDate}. No further action needed.`,
+      note: 'Due to payment provider limitations, we cannot end trials early. Your full trial period remains available.'
     })
   } catch (error) {
     console.error('[Activate] Error:', error)

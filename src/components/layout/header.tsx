@@ -108,8 +108,8 @@ export default function Header({ locale, translations: t }: HeaderProps) {
       const data = await response.json()
 
       if (response.ok && data.success) {
-        if (data.activated && !data.autoActivates) {
-          // Immediate activation successful
+        if (data.activated) {
+          // Immediate activation successful (when API supports it)
           toast.success(data.message || 'Subscription activated successfully!')
           // Refresh subscription info
           const statusRes = await fetch('/api/subscription/status')
@@ -117,11 +117,19 @@ export default function Header({ locale, translations: t }: HeaderProps) {
           if (statusData && !statusData.error) {
             setSubscriptionInfo(statusData)
           }
-        } else if (data.autoActivates) {
-          // Auto-activation message (shouldn't happen with new implementation)
-          toast.info(data.message || `Your subscription will automatically activate in ${data.daysRemaining} days.`, {
-            duration: 6000
+        } else if (data.billingStartsAt) {
+          // Activation confirmed but billing starts at trial end
+          toast.success(data.message, {
+            duration: 8000
           })
+          if (data.note) {
+            // Show additional note about trial period
+            setTimeout(() => {
+              toast.info(data.note, {
+                duration: 6000
+              })
+            }, 1000)
+          }
         }
       } else {
         // Handle payment method required
