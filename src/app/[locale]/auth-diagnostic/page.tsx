@@ -83,7 +83,7 @@ export default function AuthDiagnosticPage() {
     setLoading(false)
   }
 
-  const testDirectAuth = () => {
+  const testDirectAuth = async () => {
     console.log('[AuthDiagnostic] Testing direct auth...')
     
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
@@ -91,12 +91,38 @@ export default function AuthDiagnosticPage() {
       return
     }
 
-    const redirectUrl = `${window.location.origin}/auth/callback?next=${window.location.pathname}`
-    const authUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUrl)}`
-    
-    console.log('[AuthDiagnostic] Redirect URL:', redirectUrl)
-    console.log('[AuthDiagnostic] Full Auth URL:', authUrl)
-    window.location.href = authUrl
+    // First, let's test if we can get the OAuth URL without redirecting
+    try {
+      const { supabase } = await import('@/lib/supabase-simple')
+      const redirectUrl = `${window.location.origin}/auth/callback?next=${window.location.pathname}`
+      
+      console.log('[AuthDiagnostic] Getting OAuth URL with skipBrowserRedirect: true')
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectUrl,
+          skipBrowserRedirect: true // Get URL without redirecting
+        }
+      })
+      
+      if (error) {
+        console.error('[AuthDiagnostic] Error getting OAuth URL:', error)
+        alert(`Error: ${error.message}`)
+        return
+      }
+      
+      if (data?.url) {
+        console.log('[AuthDiagnostic] OAuth URL received:', data.url)
+        console.log('[AuthDiagnostic] Now redirecting manually...')
+        window.location.href = data.url
+      } else {
+        console.error('[AuthDiagnostic] No OAuth URL returned')
+        alert('No OAuth URL returned from Supabase')
+      }
+    } catch (e: any) {
+      console.error('[AuthDiagnostic] Error in testDirectAuth:', e)
+      alert(`Error: ${e.message}`)
+    }
   }
 
   const StatusIcon = ({ value }: { value: any }) => {
@@ -195,18 +221,41 @@ export default function AuthDiagnosticPage() {
                   </Button>
                   <Button
                     onClick={async () => {
+                      console.log('[AuthDiagnostic] Test Debug Info clicked')
+                      console.log('[AuthDiagnostic] Window object:', window)
+                      console.log('[AuthDiagnostic] Process env:', process.env)
+                      console.log('[AuthDiagnostic] NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
+                      console.log('[AuthDiagnostic] NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'NOT SET')
+                      
+                      // Try to access environment variables in different ways
+                      const envVarsTest = {
+                        direct_url: process.env.NEXT_PUBLIC_SUPABASE_URL,
+                        direct_key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'NOT SET',
+                        window_env: (window as any).__ENV__,
+                        all_keys: Object.keys(process.env).filter(k => k.startsWith('NEXT_PUBLIC_'))
+                      }
+                      
+                      console.log('[AuthDiagnostic] Environment variables test:', envVarsTest)
+                      alert('Check console for environment variables debug info')
+                    }}
+                    className="bg-orange-600 hover:bg-orange-700 text-white"
+                  >
+                    Debug Env Vars
+                  </Button>
+                  <Button
+                    onClick={async () => {
                       console.log('[AuthDiagnostic] Test Inline OAuth clicked at', new Date().toISOString())
                       console.log('[AuthDiagnostic] Current URL:', window.location.href)
                       
                       try {
-                        console.log('[AuthDiagnostic] Importing @supabase/ssr...')
-                        const { createBrowserClient } = await import('@supabase/ssr')
+                        console.log('[AuthDiagnostic] Importing simple Supabase client...')
+                        const { supabase } = await import('@/lib/supabase-simple')
                         console.log('[AuthDiagnostic] Import successful')
                         
                         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
                         const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
                         
-                        console.log('[AuthDiagnostic] Creating client with:', {
+                        console.log('[AuthDiagnostic] Environment check:', {
                           url: supabaseUrl,
                           keyLength: supabaseKey?.length || 0
                         })
@@ -215,8 +264,7 @@ export default function AuthDiagnosticPage() {
                           throw new Error('Missing Supabase environment variables')
                         }
                         
-                        const supabase = createBrowserClient(supabaseUrl, supabaseKey)
-                        console.log('[AuthDiagnostic] Supabase client created successfully')
+                        console.log('[AuthDiagnostic] Using simple Supabase client')
                         
                         const redirectTo = `${window.location.origin}/auth/callback?next=/en/auth-diagnostic`
                         console.log('[AuthDiagnostic] Redirect URL:', redirectTo)
