@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
   // Server-side environment check
-  const serverEnv = {
+  const serverEnv: any = {
     timestamp: new Date().toISOString(),
     runtime: 'server',
     node_version: process.version,
