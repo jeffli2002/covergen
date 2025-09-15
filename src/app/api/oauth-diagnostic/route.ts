@@ -8,7 +8,33 @@ export async function GET(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   
-  const diagnostics = {
+  const diagnostics: {
+    timestamp: string
+    environment: {
+      nodeEnv: string | undefined
+      hasSupabaseUrl: boolean
+      hasSupabaseKey: boolean
+      siteUrl: string
+      computedOrigin: string
+      headers: {
+        host: string | null
+        origin: string | null
+        referer: string | null
+        'x-forwarded-host': string | null
+        'x-forwarded-proto': string | null
+      }
+    }
+    redirectUrls: {
+      callback: string
+      callbackV2: string
+      withNext: string
+    }
+    oauthTest?: {
+      success: boolean
+      error: string | null
+      urlGenerated: boolean
+    }
+  } = {
     timestamp: new Date().toISOString(),
     environment: {
       nodeEnv: process.env.NODE_ENV,
