@@ -12,7 +12,9 @@ export default function AuthDiagnosticPage() {
 
   useEffect(() => {
     // Run diagnostics immediately
-    console.log('[AuthDiagnostic] Page loaded')
+    console.log('[AuthDiagnostic] Page loaded at', new Date().toISOString())
+    console.log('[AuthDiagnostic] Window location:', window.location.href)
+    console.log('[AuthDiagnostic] Supabase URL from env:', process.env.NEXT_PUBLIC_SUPABASE_URL)
     runDiagnostics()
   }, [])
 
@@ -171,6 +173,18 @@ export default function AuthDiagnosticPage() {
                   <Button onClick={runDiagnostics} variant="outline">
                     Re-run Diagnostics
                   </Button>
+                  <Button
+                    onClick={() => {
+                      console.log('[AuthDiagnostic] Simple redirect test')
+                      const url = 'https://accounts.google.com'
+                      console.log('[AuthDiagnostic] Redirecting to:', url)
+                      window.location.href = url
+                    }}
+                    variant="outline"
+                    className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                  >
+                    Test Simple Redirect
+                  </Button>
                   <Button 
                     onClick={testDirectAuth}
                     disabled={!process.env.NEXT_PUBLIC_SUPABASE_URL}
@@ -180,25 +194,60 @@ export default function AuthDiagnosticPage() {
                   </Button>
                   <Button
                     onClick={async () => {
-                      console.log('[AuthDiagnostic] Testing Supabase client creation...')
+                      console.log('[AuthDiagnostic] Test Inline OAuth clicked at', new Date().toISOString())
+                      console.log('[AuthDiagnostic] Current URL:', window.location.href)
+                      
                       try {
+                        console.log('[AuthDiagnostic] Importing @supabase/ssr...')
                         const { createBrowserClient } = await import('@supabase/ssr')
-                        const supabase = createBrowserClient(
-                          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-                          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-                        )
+                        console.log('[AuthDiagnostic] Import successful')
+                        
+                        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+                        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+                        
+                        console.log('[AuthDiagnostic] Creating client with:', {
+                          url: supabaseUrl,
+                          keyLength: supabaseKey?.length || 0
+                        })
+                        
+                        if (!supabaseUrl || !supabaseKey) {
+                          throw new Error('Missing Supabase environment variables')
+                        }
+                        
+                        const supabase = createBrowserClient(supabaseUrl, supabaseKey)
                         console.log('[AuthDiagnostic] Supabase client created successfully')
                         
+                        const redirectTo = `${window.location.origin}/auth/callback?next=/en/auth-diagnostic`
+                        console.log('[AuthDiagnostic] Redirect URL:', redirectTo)
+                        
+                        console.log('[AuthDiagnostic] Calling signInWithOAuth...')
                         const { data, error } = await supabase.auth.signInWithOAuth({
                           provider: 'google',
                           options: {
-                            redirectTo: `${window.location.origin}/auth/callback?next=/en/auth-diagnostic`
+                            redirectTo,
+                            skipBrowserRedirect: false
                           }
                         })
                         
-                        console.log('[AuthDiagnostic] OAuth result:', { data, error })
+                        console.log('[AuthDiagnostic] OAuth result:', { 
+                          hasData: !!data,
+                          hasError: !!error,
+                          error: error?.message,
+                          data 
+                        })
+                        
+                        if (error) {
+                          console.error('[AuthDiagnostic] OAuth error details:', error)
+                          alert(`OAuth Error: ${error.message}`)
+                        } else if (!data?.url) {
+                          console.error('[AuthDiagnostic] No redirect URL returned')
+                          alert('No redirect URL returned from OAuth')
+                        } else {
+                          console.log('[AuthDiagnostic] OAuth initiated, should redirect now...')
+                        }
                       } catch (e: any) {
-                        console.error('[AuthDiagnostic] Error:', e)
+                        console.error('[AuthDiagnostic] Caught error:', e)
+                        console.error('[AuthDiagnostic] Error stack:', e.stack)
                         alert(`Error: ${e.message}`)
                       }
                     }}
