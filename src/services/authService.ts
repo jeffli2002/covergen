@@ -301,9 +301,8 @@ class AuthService {
         console.error('[Auth] OAuth error:', error)
         console.error('[Auth] OAuth error details:', {
           message: error.message,
-          status: error.status,
+          status: (error as any).status,
           name: error.name,
-          cause: error.cause,
           redirectUrl,
           origin: window.location.origin,
           hostname: window.location.hostname
