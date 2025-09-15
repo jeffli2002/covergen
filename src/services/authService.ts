@@ -1,5 +1,4 @@
-import { supabase } from '@/lib/supabase'
-import { supabaseAuth } from '@/lib/supabase-auth'
+import { createSupabaseClient } from '@/lib/supabase-client'
 
 let authServiceInstance: AuthService | null = null
 
@@ -25,8 +24,8 @@ class AuthService {
     if (typeof window === 'undefined') {
       return null
     }
-    // Ensure we're getting the singleton instance
-    return supabase
+    // Always create a fresh instance to ensure latest cookies are read
+    return createSupabaseClient()
   }
 
   async initialize() {
@@ -73,14 +72,11 @@ class AuthService {
         })
       }
 
-      const sessionPromise = supabase.auth.getSession()
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Session check timeout')), 3000)
-      )
-
       try {
         console.log('[Auth] Checking for session from Supabase...')
-        const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any
+        
+        // Simply get the session without timeout
+        const { data: { session }, error } = await supabase.auth.getSession()
         
         console.log('[Auth] Session check result:', { 
           hasSession: !!session,
@@ -109,8 +105,8 @@ class AuthService {
             console.log('[Auth] No session found from Supabase')
           }
         }
-      } catch (timeoutError) {
-        console.warn('[Auth] Session check timed out, continuing with stored session if available')
+      } catch (error) {
+        console.error('[Auth] Error during initialization:', error)
       }
 
       this.initialized = true
@@ -271,21 +267,25 @@ class AuthService {
 
   async signInWithGoogle() {
     try {
-      // Use the simplified auth client for OAuth operations
-      if (!supabaseAuth) {
+      const supabase = this.getSupabase()
+      if (!supabase) {
         throw new Error('Supabase not configured')
       }
 
       // Get the current pathname to preserve locale
       const currentPath = window.location.pathname || '/en'
       
-      // Use PKCE flow with callback route
-      const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
+      // Force localhost redirect in development
+      const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      const redirectUrl = isLocalDev 
+        ? `http://localhost:3001/auth/callback?next=${encodeURIComponent(currentPath)}`
+        : `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
 
+      console.log('[Auth] Environment:', isLocalDev ? 'Development' : 'Production')
       console.log('[Auth] Google sign in with redirect URL:', redirectUrl)
-      console.log('[Auth] Using simplified auth client for OAuth')
+      console.log('[Auth] Using main Supabase client for OAuth')
 
-      const { data, error } = await supabaseAuth.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: redirectUrl,
@@ -430,6 +430,43 @@ class AuthService {
 
   getCurrentSession() {
     return this.session
+  }
+
+  async checkSession() {
+    try {
+      const supabase = this.getSupabase()
+      if (!supabase) {
+        console.warn('[Auth] Supabase not configured')
+        return false
+      }
+
+      console.log('[Auth] Manually checking session...')
+      const { data: { session }, error } = await supabase.auth.getSession()
+      
+      if (error) {
+        console.error('[Auth] Error checking session:', error)
+        return false
+      }
+
+      if (session) {
+        console.log('[Auth] Session found:', session.user.email)
+        this.session = session
+        this.user = session.user
+        this.storeSession(session)
+        
+        if (this.onAuthChange) {
+          this.onAuthChange(this.user)
+        }
+        
+        return true
+      } else {
+        console.log('[Auth] No session found')
+        return false
+      }
+    } catch (error) {
+      console.error('[Auth] Unexpected error checking session:', error)
+      return false
+    }
   }
 
   getSupabaseClient() {
