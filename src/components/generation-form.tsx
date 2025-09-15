@@ -51,12 +51,8 @@ export default function GenerationForm() {
     if (!user) return
 
     try {
-      const supabase = authService.getSupabaseClient()
-      if (!supabase) {
-        console.error('Supabase client not available')
-        return
-      }
-      const { data } = await supabase.rpc('get_daily_generation_count', {
+      const { supabase } = await import('@/lib/supabase-client')
+      const { data } = await (supabase as any).rpc('get_daily_generation_count', {
         p_user_id: user.id
       })
       

@@ -595,7 +595,7 @@ class AuthService {
         throw error
       }
 
-      return data?.generation_count || 0
+      return (data as any)?.generation_count || 0
     } catch (error) {
       console.error('Error getting user usage:', error)
       return 0
@@ -613,7 +613,7 @@ class AuthService {
       if (!supabaseClient) {
         throw new Error('Supabase not initialized')
       }
-      const { error } = await supabaseClient.rpc('increment_user_usage', {
+      const { error } = await (supabaseClient as any).rpc('increment_user_usage', {
         p_user_id: this.user.id,
         p_date: today.toISOString()
       })
@@ -669,7 +669,7 @@ class AuthService {
           console.error('Supabase not initialized')
           continue
         }
-        const { error: upsertError } = await supabaseClient
+        const { error: upsertError } = await (supabaseClient as any)
           .from('profiles')
           .upsert({
             id: user.id,
