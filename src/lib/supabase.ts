@@ -39,11 +39,21 @@ function getSupabaseClient() {
           if (cookieName === name) {
             const value = cookieValueParts.join('=') // Handle values with = in them
             try {
-              return decodeURIComponent(value)
+              const decoded = decodeURIComponent(value)
+              if (process.env.NODE_ENV === 'development' && name.startsWith('sb-')) {
+                console.log(`[Supabase] Cookie GET ${name}: found (length: ${decoded.length})`)
+              }
+              return decoded
             } catch {
+              if (process.env.NODE_ENV === 'development' && name.startsWith('sb-')) {
+                console.log(`[Supabase] Cookie GET ${name}: found but decode failed`)
+              }
               return value // Return raw value if decoding fails
             }
           }
+        }
+        if (process.env.NODE_ENV === 'development' && name.startsWith('sb-')) {
+          console.log(`[Supabase] Cookie GET ${name}: not found`)
         }
         return undefined
       },

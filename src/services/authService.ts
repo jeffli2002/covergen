@@ -50,7 +50,7 @@ class AuthService {
       )
       
       if (hasOAuthSuccess) {
-        console.log('[Auth] OAuth callback detected, refreshing session...')
+        console.log('[Auth] OAuth callback detected, waiting for session establishment...')
         
         // Remove the flag cookie
         document.cookie = 'oauth-callback-success=; max-age=0; path=/'
@@ -58,8 +58,22 @@ class AuthService {
         // Force a session refresh with retry logic
         const supabase = this.getSupabase()
         if (supabase) {
-          // Try multiple times as the session might not be immediately available
-          for (let attempt = 0; attempt < 5; attempt++) {
+          // First, try to refresh the session to ensure cookies are processed
+          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
+          if (refreshData?.session) {
+            console.log('[Auth] Session refreshed successfully:', refreshData.session.user?.email)
+            this.session = refreshData.session
+            this.user = refreshData.session.user
+            this.storeSession(refreshData.session)
+            
+            if (this.onAuthChange) {
+              this.onAuthChange(this.user)
+            }
+            return true
+          }
+          
+          // If refresh didn't work, try getSession with retries
+          for (let attempt = 0; attempt < 8; attempt++) {
             const { data: { session }, error } = await supabase.auth.getSession()
             
             if (session && !error) {
@@ -77,10 +91,11 @@ class AuthService {
               return true
             }
             
-            // If no session yet, wait a bit and try again
-            if (attempt < 4) {
-              console.log('[Auth] No session yet, retrying in', (attempt + 1) * 200, 'ms')
-              await new Promise(resolve => setTimeout(resolve, (attempt + 1) * 200))
+            // If no session yet, wait progressively longer
+            if (attempt < 7) {
+              const waitTime = Math.min(500 * Math.pow(1.5, attempt), 3000)
+              console.log('[Auth] No session yet, retrying in', Math.round(waitTime), 'ms')
+              await new Promise(resolve => setTimeout(resolve, waitTime))
             }
           }
           

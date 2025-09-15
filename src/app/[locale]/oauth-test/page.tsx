@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -11,6 +11,7 @@ export default function OAuthTestPage() {
   const { user, loading, signInWithGoogle, signOut } = useAuth()
   const [testLoading, setTestLoading] = useState(false)
   const [logs, setLogs] = useState<string[]>([])
+  const [cookies, setCookies] = useState<string>('')
   
   // Log component mount
   console.log('[OAuthTest] Component mounted', {
@@ -19,10 +20,40 @@ export default function OAuthTestPage() {
     hasSignInFunction: typeof signInWithGoogle === 'function'
   })
   
+  useEffect(() => {
+    checkSessionState()
+    
+    // Check if we just came back from OAuth
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.has('code') || window.location.hash.includes('access_token')) {
+      addLog('OAuth callback detected in URL, checking for session...')
+      setTimeout(() => {
+        checkSessionState()
+      }, 1000)
+    }
+  }, [])
+  
   const addLog = (message: string) => {
     const timestamp = new Date().toLocaleTimeString()
     console.log(`[OAuthTest] ${message}`)
     setLogs(prev => [...prev, `[${timestamp}] ${message}`])
+  }
+  
+  const checkSessionState = () => {
+    // Check auth state from context
+    addLog(`Auth context user: ${user ? user.email : 'No user'}`)
+    addLog(`Auth loading: ${loading}`)
+    
+    // Check cookies
+    setCookies(document.cookie)
+    const authCookies = document.cookie.split(';').filter(c => c.trim().startsWith('sb-'))
+    addLog(`Found ${authCookies.length} auth cookies`)
+    
+    // Log cookie names
+    authCookies.forEach(cookie => {
+      const name = cookie.split('=')[0].trim()
+      addLog(`Cookie: ${name}`)
+    })
   }
   
   const handleOAuthTest = async () => {
@@ -79,16 +110,18 @@ export default function OAuthTestPage() {
                   <p><strong>Auth Status:</strong> {loading ? 'Loading...' : user ? 'Signed In' : 'Not Signed In'}</p>
                   {user && <p><strong>User:</strong> {user.email}</p>}
                   <p><strong>Environment:</strong> {process.env.NODE_ENV}</p>
+                  <p><strong>Cookies Found:</strong> {cookies.split(';').filter(c => c.trim().startsWith('sb-')).length} auth cookies</p>
+                  <p><strong>Auth Cookies:</strong> {cookies.split(';').filter(c => c.trim().startsWith('sb-')).length} found</p>
                 </div>
               </AlertDescription>
             </Alert>
             
             {/* Test Button */}
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-4">
               <Button
                 onClick={handleOAuthTest}
                 disabled={testLoading || loading}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 {testLoading ? (
                   <>
@@ -102,13 +135,57 @@ export default function OAuthTestPage() {
               
               <Button
                 onClick={() => {
-                  console.log('[OAuthTest] Direct test clicked')
-                  window.location.href = `https://exungkcoaihcemcmhqdr.supabase.co/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent('https://covergen.pro/auth/callback?next=/en/oauth-test')}`
+                  addLog('Refreshing page to check for session...')
+                  window.location.reload()
                 }}
-                variant="outline"
-                className="bg-green-600 hover:bg-green-700 text-white"
+                className="bg-green-600 hover:bg-green-700 text-white border-green-600"
               >
-                Direct OAuth Test
+                🔄 Refresh Page
+              </Button>
+              
+              <Button
+                onClick={() => {
+                  addLog('Checking localStorage for auth data...')
+                  const keys = Object.keys(localStorage)
+                  const authKeys = keys.filter(key => key.startsWith('sb-') || key.includes('supabase'))
+                  authKeys.forEach(key => {
+                    addLog(`localStorage: ${key}`)
+                  })
+                  if (authKeys.length === 0) {
+                    addLog('No auth data in localStorage')
+                  }
+                  checkSessionState()
+                }}
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                🔍 Check Storage
+              </Button>
+              
+              <Button
+                onClick={async () => {
+                  addLog('Clearing all auth data...')
+                  // Clear cookies
+                  document.cookie.split(";").forEach(c => {
+                    const eqPos = c.indexOf("=")
+                    const name = eqPos > -1 ? c.substr(0, eqPos).trim() : c.trim()
+                    if (name.startsWith('sb-') || name === 'oauth-callback-success') {
+                      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`
+                    }
+                  })
+                  // Clear localStorage
+                  Object.keys(localStorage).forEach(key => {
+                    if (key.startsWith('sb-') || key.includes('supabase')) {
+                      localStorage.removeItem(key)
+                    }
+                  })
+                  // Sign out using context
+                  await signOut()
+                  addLog('All auth data cleared')
+                  checkSessionState()
+                }}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                🗑️ Clear All & Retry
               </Button>
               
               {user && (
@@ -139,6 +216,16 @@ export default function OAuthTestPage() {
               </div>
             )}
             
+            {/* Debug Info */}
+            <div className="bg-gray-100 p-4 rounded-lg space-y-2">
+              <h4 className="font-semibold text-sm">Debug Information:</h4>
+              <div className="text-xs font-mono space-y-1">
+                <div>Callback URL: {window.location.origin}/auth/callback</div>
+                <div>Current Path: {window.location.pathname}</div>
+                <div>Auth Cookies: {cookies.split(';').filter(c => c.trim().startsWith('sb-')).map(c => c.split('=')[0].trim()).join(', ') || 'None'}</div>
+              </div>
+            </div>
+            
             {/* Instructions */}
             <div className="text-sm text-gray-600 space-y-2">
               <p><strong>To debug OAuth issues:</strong></p>
@@ -146,7 +233,8 @@ export default function OAuthTestPage() {
                 <li>Open browser DevTools (F12)</li>
                 <li>Go to Console tab</li>
                 <li>Click "Test Google Sign In"</li>
-                <li>Check console for detailed error messages</li>
+                <li>After returning from Google, click "Refresh Session"</li>
+                <li>Check console and logs for detailed error messages</li>
                 <li>Check Network tab for failed requests</li>
               </ol>
             </div>
