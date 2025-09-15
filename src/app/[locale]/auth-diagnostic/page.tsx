@@ -67,7 +67,7 @@ export default function AuthDiagnosticPage() {
 
     // Try to fetch from API
     try {
-      const response = await fetch('/api/auth/debug-oauth')
+      const response = await fetch('/api/auth/env-check')
       if (response.ok) {
         results.network.apiCheck = 'SUCCESS'
         results.network.apiData = await response.json()
@@ -94,7 +94,8 @@ export default function AuthDiagnosticPage() {
     const redirectUrl = `${window.location.origin}/auth/callback?next=${window.location.pathname}`
     const authUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUrl)}`
     
-    console.log('[AuthDiagnostic] Auth URL:', authUrl)
+    console.log('[AuthDiagnostic] Redirect URL:', redirectUrl)
+    console.log('[AuthDiagnostic] Full Auth URL:', authUrl)
     window.location.href = authUrl
   }
 

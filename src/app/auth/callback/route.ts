@@ -3,13 +3,23 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
 export async function GET(request: Request) {
-  console.log('[Auth Callback] Starting auth callback handler')
+  console.log('[Auth Callback] Starting auth callback handler at', new Date().toISOString())
   
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
   const error = requestUrl.searchParams.get('error')
   const errorDescription = requestUrl.searchParams.get('error_description')
   const next = requestUrl.searchParams.get('next') || '/en'
+  
+  // Log all parameters
+  console.log('[Auth Callback] Parameters:', {
+    code: code ? `${code.substring(0, 8)}...` : 'missing',
+    error,
+    errorDescription,
+    next,
+    url: request.url,
+    headers: Object.fromEntries(request.headers.entries())
+  })
   
   // Check for OAuth errors first
   if (error) {
