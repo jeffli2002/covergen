@@ -311,6 +311,9 @@ class AuthService {
       console.log('[Auth] - redirectTo:', redirectUrl)
       console.log('[Auth] - skipBrowserRedirect: false')
 
+      // Mark that OAuth is in progress so AuthContext can detect return from callback
+      sessionStorage.setItem('oauth_in_progress', 'true')
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {

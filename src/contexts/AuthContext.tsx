@@ -52,6 +52,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const currentUser = authService.getCurrentUser()
         console.log('[AuthContext] Current user after init:', currentUser?.email)
         setUser(currentUser)
+        
+        // If we're returning from an OAuth callback, trigger a session refresh
+        // to ensure we pick up the newly set session
+        const urlParams = new URLSearchParams(window.location.search)
+        const wasOAuthCallback = window.location.pathname.includes('/auth/callback') || 
+                                document.referrer.includes('/auth/callback') ||
+                                sessionStorage.getItem('oauth_in_progress')
+                                
+        if (wasOAuthCallback) {
+          console.log('[AuthContext] Detected OAuth callback return, forcing session refresh')
+          sessionStorage.removeItem('oauth_in_progress')
+          
+          // Delay slightly to allow server-side session to be fully set
+          setTimeout(async () => {
+            console.log('[AuthContext] Refreshing session after OAuth callback...')
+            const refreshedUser = authService.getCurrentUser()
+            if (refreshedUser) {
+              console.log('[AuthContext] Found user after OAuth refresh:', refreshedUser.email)
+              setUser(refreshedUser)
+            } else {
+              // Try one more time with the Supabase client directly
+              try {
+                const { createSupabaseClient } = await import('@/lib/supabase-client')
+                const supabase = createSupabaseClient()
+                const { data: { session } } = await supabase.auth.getSession()
+                if (session?.user) {
+                  console.log('[AuthContext] Found session via direct check:', session.user.email)
+                  setUser(session.user)
+                }
+              } catch (e) {
+                console.error('[AuthContext] Error checking session after OAuth:', e)
+              }
+            }
+          }, 1000)
+        }
+        
       } catch (error) {
         console.error('[AuthContext] Auth initialization error:', error)
       } finally {

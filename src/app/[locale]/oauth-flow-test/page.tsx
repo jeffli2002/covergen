@@ -45,6 +45,11 @@ export default function OAuthFlowTestPage() {
       addLog(`Session user: ${sessionData?.session?.user?.email || 'null'}`)
       addLog(`Session error: ${sessionError?.message || 'none'}`)
       
+      if (sessionData?.session) {
+        addLog(`Session expires at: ${new Date(sessionData.session.expires_at! * 1000).toISOString()}`)
+        addLog(`Access token: ${sessionData.session.access_token.substring(0, 20)}...`)
+      }
+      
       const { data: userData, error: userError } = await supabase.auth.getUser()
       addLog(`Current user: ${userData?.user?.email || 'null'}`)
       addLog(`User error: ${userError?.message || 'none'}`)
@@ -57,6 +62,18 @@ export default function OAuthFlowTestPage() {
         const [name] = cookie.trim().split('=')
         addLog(`- Cookie: ${name}`)
       })
+      
+      // Check local storage
+      const localStorageKeys = Object.keys(localStorage).filter(k => k.includes('supabase'))
+      addLog(`LocalStorage supabase keys: ${localStorageKeys.length}`)
+      localStorageKeys.forEach(key => {
+        addLog(`- LocalStorage: ${key}`)
+      })
+      
+      // Check auth service state directly
+      const authService = await import('@/services/authService')
+      const currentUser = authService.default.getCurrentUser()
+      addLog(`AuthService current user: ${currentUser?.email || 'null'}`)
       
     } catch (error) {
       addLog(`State check error: ${error}`)
