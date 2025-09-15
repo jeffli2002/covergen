@@ -1,31 +1,29 @@
 import { createClient } from '@supabase/supabase-js'
 
+// Simple Supabase client for OAuth flows
+// This avoids the complexity of SSR client that can cause issues with OAuth
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-console.log('[supabase-simple] Initializing with:', {
-  url: supabaseUrl,
-  keyLength: supabaseAnonKey?.length || 0,
-  nodeEnv: process.env.NODE_ENV
-})
-
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('[supabase-simple] Missing environment variables:', {
-    NEXT_PUBLIC_SUPABASE_URL: supabaseUrl || 'NOT SET',
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: supabaseAnonKey ? 'SET' : 'NOT SET'
+  console.error('[supabase-simple] Missing required environment variables:', {
+    url: supabaseUrl ? 'SET' : 'MISSING',
+    key: supabaseAnonKey ? 'SET' : 'MISSING'
   })
-  throw new Error('Missing Supabase environment variables')
 }
 
-// Create a simple Supabase client without SSR complications
-// This follows the pattern recommended in CLAUDE.md for OAuth flows
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
     flowType: 'pkce' // Use PKCE flow consistently
   }
-})
+}) : null
 
-console.log('[supabase-simple] Client created successfully')
+// Log successful creation
+if (supabase) {
+  console.log('[supabase-simple] Supabase client created successfully')
+} else {
+  console.error('[supabase-simple] Failed to create Supabase client')
+}

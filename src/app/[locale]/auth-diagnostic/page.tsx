@@ -250,18 +250,16 @@ export default function AuthDiagnosticPage() {
                       try {
                         console.log('[AuthDiagnostic] Importing simple Supabase client...')
                         const { supabase } = await import('@/lib/supabase-simple')
-                        console.log('[AuthDiagnostic] Import successful')
+                        console.log('[AuthDiagnostic] Import successful, client:', supabase ? 'initialized' : 'null')
                         
-                        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-                        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-                        
-                        console.log('[AuthDiagnostic] Environment check:', {
-                          url: supabaseUrl,
-                          keyLength: supabaseKey?.length || 0
-                        })
-                        
-                        if (!supabaseUrl || !supabaseKey) {
-                          throw new Error('Missing Supabase environment variables')
+                        if (!supabase) {
+                          console.error('[AuthDiagnostic] Supabase client is null - environment variables missing')
+                          const envDebug = {
+                            url: process.env.NEXT_PUBLIC_SUPABASE_URL,
+                            key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'MISSING'
+                          }
+                          console.error('[AuthDiagnostic] Environment debug:', envDebug)
+                          throw new Error('Supabase client not initialized - check environment variables')
                         }
                         
                         console.log('[AuthDiagnostic] Using simple Supabase client')

@@ -295,6 +295,11 @@ class AuthService {
       console.log('[Auth] Google sign in with redirect URL:', redirectUrl)
       console.log('[Auth] Using simple Supabase client for OAuth')
 
+      if (!simpleSupabase) {
+        console.error('[Auth] Simple Supabase client is null - environment variables missing')
+        throw new Error('Supabase not configured - check environment variables')
+      }
+
       const { data, error } = await simpleSupabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
