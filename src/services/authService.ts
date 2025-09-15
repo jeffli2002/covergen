@@ -269,9 +269,15 @@ class AuthService {
   }
 
   async signInWithGoogle() {
+    console.log('[Auth] signInWithGoogle method called at', new Date().toISOString())
+    
     try {
-      // Use the simple Supabase client for OAuth to avoid multiple client instances
-      console.log('[Auth] Starting Google OAuth with simple Supabase client')
+      console.log('[Auth] Starting Google OAuth with singleton Supabase client')
+      
+      // Check if we're in browser environment
+      if (typeof window === 'undefined') {
+        throw new Error('OAuth can only be called in browser environment')
+      }
 
       // Get the current pathname to preserve locale
       const currentPath = window.location.pathname || '/en'
@@ -295,7 +301,15 @@ class AuthService {
 
       console.log('[Auth] Environment:', isLocalDev ? 'Development' : 'Production')
       console.log('[Auth] Google sign in with redirect URL:', redirectUrl)
-      console.log('[Auth] Using simple Supabase client for OAuth')
+      console.log('[Auth] Using singleton Supabase client for OAuth')
+      console.log('[Auth] Supabase client available:', !!supabase)
+      console.log('[Auth] Supabase auth available:', !!supabase?.auth)
+      console.log('[Auth] signInWithOAuth method available:', typeof supabase?.auth?.signInWithOAuth)
+
+      console.log('[Auth] Calling supabase.auth.signInWithOAuth with options:')
+      console.log('[Auth] - provider: google')
+      console.log('[Auth] - redirectTo:', redirectUrl)
+      console.log('[Auth] - skipBrowserRedirect: false')
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -309,30 +323,52 @@ class AuthService {
         }
       })
 
+      console.log('[Auth] OAuth call completed. Results:')
+      console.log('[Auth] - data:', data)
+      console.log('[Auth] - error:', error)
+      console.log('[Auth] - data.url:', data?.url)
+      console.log('[Auth] - data.provider:', data?.provider)
+
       if (error) {
-        console.error('[Auth] OAuth error:', error)
+        console.error('[Auth] OAuth error occurred:', error)
         console.error('[Auth] OAuth error details:', {
           message: error.message,
           status: (error as any).status,
           name: error.name,
+          code: (error as any).code,
           redirectUrl,
           origin: window.location.origin,
           hostname: window.location.hostname
         })
+        
         // Check if this is a common configuration issue
         if (error.message?.includes('redirect_uri_mismatch')) {
           console.error('[Auth] OAuth redirect URI mismatch! Check Supabase dashboard configuration.')
           console.error('[Auth] Expected redirect URL:', redirectUrl)
         }
-        throw error
+        
+        return {
+          success: false,
+          error: error.message
+        }
       }
 
-      console.log('[Auth] OAuth initiated successfully')
-      console.log('[Auth] OAuth response data:', data)
-
-      return {
-        success: true,
-        data
+      if (data?.url) {
+        console.log('[Auth] OAuth URL generated successfully, redirect should happen now')
+        console.log('[Auth] OAuth URL:', data.url)
+        
+        return {
+          success: true,
+          data
+        }
+      } else {
+        console.error('[Auth] OAuth call succeeded but no redirect URL returned')
+        console.error('[Auth] Full data object:', JSON.stringify(data, null, 2))
+        
+        return {
+          success: false,
+          error: 'No redirect URL returned from OAuth provider'
+        }
       }
     } catch (error: any) {
       console.error('[Auth] Sign in with Google failed:', error)

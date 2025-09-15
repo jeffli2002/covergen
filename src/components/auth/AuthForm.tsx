@@ -120,22 +120,34 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
   }
 
   const handleGoogleSignIn = async () => {
+    console.log('[AuthForm] Google sign in clicked at', new Date().toISOString())
     setIsLoading(true)
     setMessage({ type: '', text: '' })
 
     try {
-      // Use standard OAuth flow (not popup) for better compatibility
+      console.log('[AuthForm] Calling signInWithGoogle...')
+      
+      // Add a small delay to see if the loading state shows
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
       const result = await signInWithGoogle()
       
-      if (result.success) {
+      console.log('[AuthForm] signInWithGoogle result:', result)
+      
+      if (result && result.success) {
+        console.log('[AuthForm] OAuth successful, should redirect now')
         setMessage({ type: 'success', text: 'Sign in successful!' })
         // The page will redirect for OAuth flow
       } else {
-        setMessage({ type: 'error', text: result.error })
+        console.error('[AuthForm] OAuth failed:', result?.error || 'Unknown error')
+        setMessage({ type: 'error', text: result?.error || 'Google login failed' })
       }
-    } catch (error) {
-      setMessage({ type: 'error', text: 'Google login failed' })
+    } catch (error: any) {
+      console.error('[AuthForm] OAuth exception:', error)
+      console.error('[AuthForm] Error stack:', error.stack)
+      setMessage({ type: 'error', text: `Google login failed: ${error.message}` })
     } finally {
+      console.log('[AuthForm] OAuth process completed, setting loading to false')
       setIsLoading(false)
     }
   }
