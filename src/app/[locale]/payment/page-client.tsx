@@ -98,11 +98,11 @@ export default function PaymentPageClient({
         calculateProratedAmount(subscription)
       }
       
-      // Check if this is a trial user wanting to upgrade
-      if (subscription && subscription.status === 'trialing' && isUpgrade && initialPlan) {
-        console.log('[PaymentPage] Trial user wants to upgrade, processing automatically')
+      // Check if this is a trial user wanting to upgrade or activate
+      if (subscription && subscription.status === 'trialing' && (isUpgrade || isActivation) && initialPlan) {
+        console.log('[PaymentPage] Trial user wants to', isActivation ? 'activate' : 'upgrade', ', processing automatically')
         setIsProcessingTrialUpgrade(true)
-        // Automatically start the upgrade process for trial users
+        // Automatically start the upgrade/activation process for trial users
         setTimeout(() => {
           handleSelectPlan(initialPlan as 'pro' | 'pro_plus')
         }, 1000)
@@ -164,33 +164,56 @@ export default function PaymentPageClient({
     setLoading(true)
     
     try {
-      // For trial users upgrading, use the upgrade endpoint
-      if (isUpgrade && currentSubscription?.status === 'trialing') {
-        console.log('[PaymentPage] Processing trial upgrade via upgrade endpoint')
+      // For trial users upgrading or activating with payment method
+      if ((isUpgrade || isActivation) && currentSubscription?.status === 'trialing' && currentSubscription?.stripe_subscription_id) {
+        console.log('[PaymentPage] Processing trial', isActivation ? 'activation' : 'upgrade', 'for user with payment method')
         
-        const response = await fetch('/api/subscription/upgrade', {
+        // Use different endpoints for activation vs upgrade
+        const endpoint = isActivation ? '/api/subscription/activate' : '/api/subscription/upgrade'
+        const body = isActivation ? {} : { targetTier: planId }
+        
+        const response = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ targetTier: planId })
+          body: JSON.stringify(body)
         })
         
         const data = await response.json()
         
         if (response.ok) {
-          if (data.upgraded) {
-            // Instant upgrade successful!
-            toast.success(data.message || 'Subscription upgraded successfully!')
+          if (data.upgraded || data.activated) {
+            // Instant upgrade/activation successful!
+            toast.success(data.message || (isActivation ? 'Plan activated successfully!' : 'Subscription upgraded successfully!'))
             
             // Redirect to account page after a short delay
             setTimeout(() => {
-              router.push(`/${locale}/account?upgraded=true`)
+              router.push(`/${locale}/account?${isActivation ? 'activated' : 'upgraded'}=true`)
             }, 1500)
           } else if (data.checkoutUrl) {
             // Need to complete checkout (no payment method on file)
             window.location.href = data.checkoutUrl
           }
         } else {
-          throw new Error(data.error || 'Failed to upgrade subscription')
+          throw new Error(data.error || (isActivation ? 'Failed to activate subscription' : 'Failed to upgrade subscription'))
+        }
+      } else if ((isActivation || isUpgrade) && currentSubscription?.status === 'trialing' && !currentSubscription?.stripe_subscription_id) {
+        // Trial user without payment method needs to go through checkout
+        console.log('[PaymentPage] Trial user needs to add payment method first')
+        
+        const result = await creemService.createCheckoutSession({
+          userId: authUser.id,
+          userEmail: authUser.email,
+          planId,
+          successUrl: `${window.location.origin}/${locale}/payment/success?session_id={CHECKOUT_SESSION_ID}&${isActivation ? 'activate=true' : 'upgrade=true'}`,
+          cancelUrl: `${window.location.origin}/${locale}/payment/cancel`,
+          currentPlan: currentSubscription?.tier || 'free'
+        })
+
+        if (result.success && result.url) {
+          // Redirect to Creem checkout
+          window.location.href = result.url
+        } else {
+          throw new Error(result.error || 'Failed to create checkout session')
         }
       } else {
         // For new subscriptions, create checkout session
