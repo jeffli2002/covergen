@@ -1,0 +1,10 @@
+[33mb3ef722[m fix: Resolve OAuth authentication failures and improve error handling
+[33m8f7a2d7[m fix: Simplify OAuth test pages to avoid module import errors
+[33mb03089c[m fix: Resolve OAuth authentication and hanging sign-in badge issues
+[33mb98cdd4[m fix: Enable detectSessionInUrl for OAuth callback handling
+[33mc475291[m feat: Add comprehensive OAuth debugging test page
+[33m389b2b7[m fix: Add debug logging to track auth state in header
+[33m204396e[m fix: Revert detectSessionInUrl to true to match v1.1 OAuth behavior
+[33me9d7223[m fix: Set detectSessionInUrl to false in singleton client
+[33m3b46805[m fix: Restore critical v1.2 OAuth session cookie handling
+[33mcea813d[m fix: Improve OAuth session persistence with callback detection

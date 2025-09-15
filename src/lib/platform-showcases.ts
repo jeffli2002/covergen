@@ -13,14 +13,14 @@ export const platformShowcases = {
     {
       title: "Wait for it... 😱",
       originalImage: "/platform-examples/tiktok/original-1.jpg",
-      optimizedImage: "/platform-examples/tiktok/original-1.webp",
+      optimizedImage: "/platform-examples/tiktok/original-1.jpg",
       enhancedImage: "/platform-examples/tiktok/enhancedImage1.png",
       targetDimensions: { width: 1080, height: 1920, label: "1080×1920 (9:16)" }
     },
     {
       title: "POV: You're Gen Z",
       originalImage: "/platform-examples/tiktok/original-2.jpg",
-      optimizedImage: "/platform-examples/tiktok/original-2.webp",
+      optimizedImage: "/platform-examples/tiktok/original-2.jpg",
       enhancedImage: "/platform-examples/tiktok/enhancedImage2.png",
       targetDimensions: { width: 1080, height: 1920, label: "1080×1920 (9:16)" }
     }
