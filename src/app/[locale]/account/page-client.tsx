@@ -18,6 +18,7 @@ import authService from '@/services/authService'
 import { creemService, SUBSCRIPTION_PLANS } from '@/services/payment/creem'
 import { toast } from 'sonner'
 import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
+import ActivationConfirmDialog from '@/components/subscription/ActivationConfirmDialog'
 
 // Simple date formatter to avoid date-fns dependency
 const formatDate = (date: Date) => {
@@ -67,6 +68,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   const [resuming, setResuming] = useState(false)
   const [activating, setActivating] = useState(false)
   const [authUser, setAuthUser] = useState<any>(null)
+  const [showActivationConfirm, setShowActivationConfirm] = useState(false)
 
   useEffect(() => {
     if (!authService.isAuthenticated()) {
@@ -188,10 +190,29 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
     }
   }
 
+  const handleActivateClick = () => {
+    if (!subscription || subscription.status !== 'trialing') return
+    
+    // Check if user has payment method
+    if (!subscription.stripe_subscription_id) {
+      // No payment method, redirect to add one
+      toast.error('Please add a payment method to activate your subscription', {
+        duration: 4000
+      })
+      router.push(`/${locale}/payment?plan=${currentPlan}&activate=true`)
+      return
+    }
+    
+    // Show confirmation dialog
+    setShowActivationConfirm(true)
+  }
+
   const handleActivateSubscription = async () => {
     if (!subscription || subscription.status !== 'trialing') return
 
     setActivating(true)
+    setShowActivationConfirm(false)
+    
     try {
       const response = await fetch('/api/subscription/activate', {
         method: 'POST',
@@ -203,15 +224,16 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
       const data = await response.json()
 
       if (response.ok && data.success) {
-        if (data.autoActivates) {
-          // Trial will auto-activate, show informative message
+        if (data.activated && !data.autoActivates) {
+          // Immediate activation successful
+          toast.success(data.message || 'Subscription activated successfully!')
+          // Reload account data to show updated status
+          await loadAccountData()
+        } else if (data.autoActivates) {
+          // Auto-activation message (shouldn't happen with new implementation)
           toast.info(data.message || `Your subscription will automatically activate in ${data.daysRemaining} days.`, {
             duration: 6000
           })
-        } else {
-          // Immediate activation (shouldn't happen with current implementation)
-          toast.success(data.message || 'Subscription activated successfully!')
-          await loadAccountData()
         }
       } else {
         // Handle payment method required
@@ -222,7 +244,6 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
           
           // Try to open billing portal for adding payment method
           if (subscription?.stripe_customer_id) {
-            setActivating(false)
             const result = await creemService.createPortalSession({
               customerId: subscription.stripe_customer_id,
               returnUrl: `${window.location.origin}/${locale}/account`
@@ -432,7 +453,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                 ) : isTrialing ? (
                   <>
                     <Button 
-                      onClick={handleActivateSubscription}
+                      onClick={handleActivateClick}
                       className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
                       disabled={activating}
                     >
@@ -442,7 +463,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                         <Crown className="mr-2 h-4 w-4" />
                       )}
                       {subscription?.stripe_subscription_id ? (
-                        <>Subscription Details</>
+                        <>Activate {planDetails?.name} Now</>
                       ) : (
                         <>Add Payment Method - ${planDetails?.price ? planDetails.price / 100 : 0}/mo</>
                       )}
@@ -605,6 +626,19 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
           </Card>
         </div>
       </div>
+      
+      {/* Activation Confirmation Dialog */}
+      {isTrialing && planDetails && (
+        <ActivationConfirmDialog
+          open={showActivationConfirm}
+          onClose={() => setShowActivationConfirm(false)}
+          onConfirm={handleActivateSubscription}
+          planName={planDetails.name}
+          planPrice={planDetails.price / 100}
+          planFeatures={planDetails.features}
+          isActivating={activating}
+        />
+      )}
     </div>
   )
 }

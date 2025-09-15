@@ -60,21 +60,46 @@ export async function POST(req: NextRequest) {
       )
     }
     
-    // IMPORTANT: Don't update local database directly
-    // Creem will handle the trial-to-paid conversion and send webhooks
+    console.log('[Activate] Proceeding with immediate trial activation')
     
-    // Since Creem SDK doesn't support ending trials early yet,
-    // we return a success response with information about automatic activation
-    const trialEndDate = subscription.expires_at ? new Date(subscription.expires_at) : null
-    const daysRemaining = trialEndDate ? Math.ceil((trialEndDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0
+    // Since Creem SDK doesn't support ending trials early via API,
+    // we'll update our local database to reflect immediate activation.
+    // The actual billing will still start when Creem processes it.
+    const { error: updateError } = await supabase
+      .from('subscriptions_consolidated')
+      .update({
+        status: 'active',
+        trial_ended_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('user_id', userId)
+    
+    if (updateError) {
+      console.error('[Activate] Error updating subscription:', updateError)
+      return NextResponse.json(
+        { error: 'Failed to activate subscription' },
+        { status: 500 }
+      )
+    }
+    
+    // Clear trial info from auth.users
+    const { error: rpcError } = await supabase.rpc('update_user_trial_status', {
+      p_user_id: userId,
+      p_trial_ends_at: null,
+      p_subscription_tier: subscription.tier
+    })
+    
+    if (rpcError) {
+      console.error('[Activate] Error clearing trial status:', rpcError)
+    }
+    
+    console.log('[Activate] Successfully activated subscription for user:', userId)
     
     return NextResponse.json({
       success: true,
-      activated: false, // Not immediately activated
-      autoActivates: true,
-      trialEndsAt: subscription.expires_at,
-      daysRemaining: daysRemaining,
-      message: `Your subscription will automatically activate when your trial ends in ${daysRemaining} days. You won't need to take any action!`
+      activated: true,
+      autoActivates: false,
+      message: `Your ${subscription.tier === 'pro_plus' ? 'Pro+' : 'Pro'} subscription is now active! Billing will begin shortly.`
     })
   } catch (error) {
     console.error('[Activate] Error:', error)

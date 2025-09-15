@@ -19,6 +19,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import ActivationConfirmDialog from '@/components/subscription/ActivationConfirmDialog'
+import { SUBSCRIPTION_PLANS } from '@/services/payment/creem'
 
 interface HeaderProps {
   locale: Locale
@@ -32,6 +34,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null)
   const [activating, setActivating] = useState(false)
+  const [showActivationConfirm, setShowActivationConfirm] = useState(false)
   const currentTier = storeUser?.tier || 'free'
   
   // Fetch subscription info to check trial status
@@ -71,10 +74,29 @@ export default function Header({ locale, translations: t }: HeaderProps) {
     }
   }
 
+  const handleActivateClick = () => {
+    if (!subscriptionInfo || !subscriptionInfo.isTrialing) return
+    
+    // Check if user has payment method
+    if (!subscriptionInfo.hasPaymentMethod) {
+      // No payment method, redirect to add one
+      toast.error('Please add a payment method to activate your subscription', {
+        duration: 4000
+      })
+      router.push(`/${locale}/account`)
+      return
+    }
+    
+    // Show confirmation dialog
+    setShowActivationConfirm(true)
+  }
+
   const handleActivateSubscription = async () => {
     if (!subscriptionInfo || !subscriptionInfo.isTrialing) return
 
     setActivating(true)
+    setShowActivationConfirm(false)
+    
     try {
       const response = await fetch('/api/subscription/activate', {
         method: 'POST',
@@ -86,13 +108,8 @@ export default function Header({ locale, translations: t }: HeaderProps) {
       const data = await response.json()
 
       if (response.ok && data.success) {
-        if (data.autoActivates) {
-          // Trial will auto-activate, show informative message
-          toast.info(data.message || `Your subscription will automatically activate in ${data.daysRemaining} days.`, {
-            duration: 6000
-          })
-        } else {
-          // Immediate activation (shouldn't happen with current implementation)
+        if (data.activated && !data.autoActivates) {
+          // Immediate activation successful
           toast.success(data.message || 'Subscription activated successfully!')
           // Refresh subscription info
           const statusRes = await fetch('/api/subscription/status')
@@ -100,6 +117,11 @@ export default function Header({ locale, translations: t }: HeaderProps) {
           if (statusData && !statusData.error) {
             setSubscriptionInfo(statusData)
           }
+        } else if (data.autoActivates) {
+          // Auto-activation message (shouldn't happen with new implementation)
+          toast.info(data.message || `Your subscription will automatically activate in ${data.daysRemaining} days.`, {
+            duration: 6000
+          })
         }
       } else {
         // Handle payment method required
@@ -301,7 +323,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                         <Button 
                           size="sm" 
                           className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-sm px-4"
-                          onClick={handleActivateSubscription}
+                          onClick={handleActivateClick}
                           disabled={activating}
                         >
                           {activating ? (
@@ -412,6 +434,19 @@ export default function Header({ locale, translations: t }: HeaderProps) {
         <AuthForm 
           onClose={() => setShowAuthModal(false)}
           onAuthSuccess={handleAuthSuccess}
+        />
+      )}
+      
+      {/* Activation Confirmation Dialog */}
+      {subscriptionInfo?.isTrialing && subscriptionInfo?.plan && (
+        <ActivationConfirmDialog
+          open={showActivationConfirm}
+          onClose={() => setShowActivationConfirm(false)}
+          onConfirm={handleActivateSubscription}
+          planName={SUBSCRIPTION_PLANS[subscriptionInfo.plan as keyof typeof SUBSCRIPTION_PLANS]?.name || subscriptionInfo.plan}
+          planPrice={SUBSCRIPTION_PLANS[subscriptionInfo.plan as keyof typeof SUBSCRIPTION_PLANS]?.price ? SUBSCRIPTION_PLANS[subscriptionInfo.plan as keyof typeof SUBSCRIPTION_PLANS].price / 100 : 0}
+          planFeatures={SUBSCRIPTION_PLANS[subscriptionInfo.plan as keyof typeof SUBSCRIPTION_PLANS]?.features || []}
+          isActivating={activating}
         />
       )}
     </>
