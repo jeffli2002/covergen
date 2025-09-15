@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import MobileHeader from '@/components/mobile-header'
+import Header from '@/components/layout/header'
+import Footer from '@/components/layout/Footer'
 import ImageGenerator from '@/components/image-generator'
 import PricingSection from '@/components/pricing-section'
 import FeedbackModal from '@/components/feedback-modal'
@@ -166,6 +168,11 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
+      
+      {/* Desktop Header */}
+      <Header locale={locale} translations={t} />
+      
+      {/* Mobile Header */}
       <MobileHeader />
       
       <main>
@@ -646,6 +653,9 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
           </div>
         </section>
       </main>
+
+      {/* Footer */}
+      <Footer locale={locale} translations={t} />
 
       {/* Feedback Modal */}
       <FeedbackModal 

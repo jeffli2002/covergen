@@ -1,140 +1,44 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
+import { useState } from 'react'
 
 export default function OAuthSimplePage() {
-  const { user, loading, signInWithGoogle, signOut } = useAuth()
-  const [error, setError] = useState<string | null>(null)
-  const [message, setMessage] = useState<string>('')
+  const [message, setMessage] = useState('')
   
-  useEffect(() => {
-    // Check URL for OAuth callback
-    const urlParams = new URLSearchParams(window.location.search)
-    if (urlParams.has('code')) {
-      setMessage('OAuth callback detected, checking for session...')
-    }
-  }, [])
-  
-  const handleSignIn = async () => {
-    try {
-      setError(null)
-      setMessage('Starting OAuth flow...')
-      const result = await signInWithGoogle()
-      if (result.success) {
-        setMessage('Redirecting to Google...')
-      } else {
-        throw new Error(result.error || 'OAuth failed')
-      }
-    } catch (error: any) {
-      setError(error.message)
-      setMessage('')
-    }
-  }
-  
-  const handleSignOut = async () => {
-    try {
-      setError(null)
-      setMessage('Signing out...')
-      await signOut()
-      setMessage('Signed out successfully')
-    } catch (error: any) {
-      setError(error.message)
-    }
+  const testOAuth = () => {
+    setMessage('Starting OAuth...')
+    // Redirect to Google OAuth
+    const redirectUrl = `${window.location.origin}/auth/callback?next=${window.location.pathname}`
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const oauthUrl = `${supabaseUrl}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUrl)}`
+    window.location.href = oauthUrl
   }
   
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Simple OAuth Test</h1>
-        
-        {/* Status */}
-        <div className="bg-white p-6 rounded-lg shadow mb-6">
-          <h2 className="text-xl font-semibold mb-4">Status</h2>
-          {loading ? (
-            <p className="text-gray-600">Loading...</p>
-          ) : user ? (
-            <div className="space-y-2">
-              <p className="text-green-600">✅ Signed in</p>
-              <p><strong>Email:</strong> {user.email}</p>
-              <p><strong>ID:</strong> {user.id?.substring(0, 8)}...</p>
-            </div>
-          ) : (
-            <p className="text-gray-600">Not signed in</p>
-          )}
-          
-          {message && (
-            <div className="mt-4 p-4 bg-blue-50 text-blue-700 rounded">
-              {message}
-            </div>
-          )}
-          
-          {error && (
-            <div className="mt-4 p-4 bg-red-50 text-red-700 rounded">
-              Error: {error}
-            </div>
-          )}
+    <div className="p-8 max-w-2xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Simple OAuth Test</h1>
+      
+      <div className="mb-4 p-4 bg-gray-100 rounded">
+        <p>Status: Check if you're signed in by looking for auth cookies</p>
+        <p>Auth cookies: {typeof document !== 'undefined' ? document.cookie.split(';').filter(c => c.trim().startsWith('sb-')).length : 0}</p>
+      </div>
+      
+      <button
+        onClick={testOAuth}
+        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+      >
+        Sign in with Google
+      </button>
+      
+      {message && (
+        <div className="mt-4 p-4 bg-blue-50 text-blue-900 rounded">
+          {message}
         </div>
-        
-        {/* Actions */}
-        <div className="bg-white p-6 rounded-lg shadow mb-6">
-          <h2 className="text-xl font-semibold mb-4">Actions</h2>
-          <div className="space-y-3">
-            {!user ? (
-              <button
-                onClick={handleSignIn}
-                disabled={loading}
-                className="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-              >
-                Sign in with Google
-              </button>
-            ) : (
-              <button
-                onClick={handleSignOut}
-                disabled={loading}
-                className="w-full bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50"
-              >
-                Sign Out
-              </button>
-            )}
-            
-            <button
-              onClick={() => window.location.reload()}
-              className="w-full bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
-            >
-              Refresh Page
-            </button>
-          </div>
-        </div>
-        
-        {/* Debug Info */}
-        <div className="bg-gray-100 p-6 rounded-lg mb-6">
-          <h3 className="font-semibold mb-2">Debug Info:</h3>
-          <div className="text-sm font-mono space-y-1">
-            <p>Auth cookies: {typeof document !== 'undefined' ? document.cookie.split(';').filter(c => c.trim().startsWith('sb-')).length : 0}</p>
-            <p>Loading state: {loading ? 'true' : 'false'}</p>
-            <p>User present: {user ? 'true' : 'false'}</p>
-          </div>
-        </div>
-        
-        {/* Info */}
-        <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
-          <h3 className="font-semibold text-blue-900 mb-2">Callback URL:</h3>
-          <code className="bg-white px-3 py-1 rounded text-sm">
-            {typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback
-          </code>
-          <p className="mt-2 text-sm text-blue-800">
-            Make sure this URL is added to your Supabase project's redirect URLs.
-          </p>
-          
-          <h3 className="font-semibold text-blue-900 mb-2 mt-4">If sign-in fails:</h3>
-          <ol className="text-sm text-blue-800 list-decimal list-inside">
-            <li>Complete Google sign-in</li>
-            <li>Wait for redirect back to this page</li>
-            <li>Click "Refresh Page" if not signed in</li>
-            <li>Check browser console for errors</li>
-          </ol>
-        </div>
+      )}
+      
+      <div className="mt-8 text-sm text-gray-600">
+        <p>After signing in, refresh the page to see if cookies are set.</p>
+        <p>Callback URL: {typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback</p>
       </div>
     </div>
   )
