@@ -1,7 +1,5 @@
-import { supabase } from '@/lib/supabase-client'
-import type { Database } from '@/lib/database.types'
-
-type Subscription = Database['public']['Tables']['subscriptions']['Row']
+import { supabase } from '@/lib/supabase'
+import { supabaseAuth } from '@/lib/supabase-auth'
 
 let authServiceInstance: AuthService | null = null
 
@@ -27,7 +25,7 @@ class AuthService {
     if (typeof window === 'undefined') {
       return null
     }
-    // Return singleton instance
+    // Ensure we're getting the singleton instance
     return supabase
   }
 
@@ -75,11 +73,14 @@ class AuthService {
         })
       }
 
+      const sessionPromise = supabase.auth.getSession()
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Session check timeout')), 3000)
+      )
+
       try {
         console.log('[Auth] Checking for session from Supabase...')
-        
-        // Simply get the session without timeout
-        const { data: { session }, error } = await supabase.auth.getSession()
+        const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any
         
         console.log('[Auth] Session check result:', { 
           hasSession: !!session,
@@ -108,8 +109,8 @@ class AuthService {
             console.log('[Auth] No session found from Supabase')
           }
         }
-      } catch (error) {
-        console.error('[Auth] Error during initialization:', error)
+      } catch (timeoutError) {
+        console.warn('[Auth] Session check timed out, continuing with stored session if available')
       }
 
       this.initialized = true
@@ -269,52 +270,22 @@ class AuthService {
   }
 
   async signInWithGoogle() {
-    console.log('[Auth] signInWithGoogle method called at', new Date().toISOString())
-    
     try {
-      console.log('[Auth] Starting Google OAuth with singleton Supabase client')
-      
-      // Check if we're in browser environment
-      if (typeof window === 'undefined') {
-        throw new Error('OAuth can only be called in browser environment')
+      // Use the simplified auth client for OAuth operations
+      if (!supabaseAuth) {
+        throw new Error('Supabase not configured')
       }
 
       // Get the current pathname to preserve locale
       const currentPath = window.location.pathname || '/en'
       
-      // Force localhost redirect in development
-      const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-      // Use server-side auth callback for PKCE flow
-      const redirectUrl = isLocalDev 
-        ? `http://localhost:3001/auth/callback?next=${encodeURIComponent(currentPath)}`
-        : `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
-      
-      // Log the actual redirect URL being used
-      console.log('[Auth] OAuth Configuration:', {
-        isLocalDev,
-        hostname: window.location.hostname,
-        origin: window.location.origin,
-        currentPath,
-        redirectUrl,
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL
-      })
+      // Use PKCE flow with callback route
+      const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
 
-      console.log('[Auth] Environment:', isLocalDev ? 'Development' : 'Production')
       console.log('[Auth] Google sign in with redirect URL:', redirectUrl)
-      console.log('[Auth] Using singleton Supabase client for OAuth')
-      console.log('[Auth] Supabase client available:', !!supabase)
-      console.log('[Auth] Supabase auth available:', !!supabase?.auth)
-      console.log('[Auth] signInWithOAuth method available:', typeof supabase?.auth?.signInWithOAuth)
+      console.log('[Auth] Using simplified auth client for OAuth')
 
-      console.log('[Auth] Calling supabase.auth.signInWithOAuth with options:')
-      console.log('[Auth] - provider: google')
-      console.log('[Auth] - redirectTo:', redirectUrl)
-      console.log('[Auth] - skipBrowserRedirect: false')
-
-      // Mark that OAuth is in progress so AuthContext can detect return from callback
-      sessionStorage.setItem('oauth_in_progress', 'true')
-
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabaseAuth.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: redirectUrl,
@@ -326,52 +297,16 @@ class AuthService {
         }
       })
 
-      console.log('[Auth] OAuth call completed. Results:')
-      console.log('[Auth] - data:', data)
-      console.log('[Auth] - error:', error)
-      console.log('[Auth] - data.url:', data?.url)
-      console.log('[Auth] - data.provider:', data?.provider)
-
       if (error) {
-        console.error('[Auth] OAuth error occurred:', error)
-        console.error('[Auth] OAuth error details:', {
-          message: error.message,
-          status: (error as any).status,
-          name: error.name,
-          code: (error as any).code,
-          redirectUrl,
-          origin: window.location.origin,
-          hostname: window.location.hostname
-        })
-        
-        // Check if this is a common configuration issue
-        if (error.message?.includes('redirect_uri_mismatch')) {
-          console.error('[Auth] OAuth redirect URI mismatch! Check Supabase dashboard configuration.')
-          console.error('[Auth] Expected redirect URL:', redirectUrl)
-        }
-        
-        return {
-          success: false,
-          error: error.message
-        }
+        console.error('[Auth] OAuth error:', error)
+        throw error
       }
 
-      if (data?.url) {
-        console.log('[Auth] OAuth URL generated successfully, redirect should happen now')
-        console.log('[Auth] OAuth URL:', data.url)
-        
-        return {
-          success: true,
-          data
-        }
-      } else {
-        console.error('[Auth] OAuth call succeeded but no redirect URL returned')
-        console.error('[Auth] Full data object:', JSON.stringify(data, null, 2))
-        
-        return {
-          success: false,
-          error: 'No redirect URL returned from OAuth provider'
-        }
+      console.log('[Auth] OAuth initiated successfully')
+
+      return {
+        success: true,
+        data
       }
     } catch (error: any) {
       console.error('[Auth] Sign in with Google failed:', error)
@@ -497,43 +432,6 @@ class AuthService {
     return this.session
   }
 
-  async checkSession() {
-    try {
-      const supabase = this.getSupabase()
-      if (!supabase) {
-        console.warn('[Auth] Supabase not configured')
-        return false
-      }
-
-      console.log('[Auth] Manually checking session...')
-      const { data: { session }, error } = await supabase.auth.getSession()
-      
-      if (error) {
-        console.error('[Auth] Error checking session:', error)
-        return false
-      }
-
-      if (session) {
-        console.log('[Auth] Session found:', session.user.email)
-        this.session = session
-        this.user = session.user
-        this.storeSession(session)
-        
-        if (this.onAuthChange) {
-          this.onAuthChange(this.user)
-        }
-        
-        return true
-      } else {
-        console.log('[Auth] No session found')
-        return false
-      }
-    } catch (error) {
-      console.error('[Auth] Unexpected error checking session:', error)
-      return false
-    }
-  }
-
   getSupabaseClient() {
     return this.getSupabase()
   }
@@ -634,7 +532,7 @@ class AuthService {
         throw error
       }
 
-      return (data as any)?.generation_count || 0
+      return data?.generation_count || 0
     } catch (error) {
       console.error('Error getting user usage:', error)
       return 0
@@ -652,7 +550,7 @@ class AuthService {
       if (!supabaseClient) {
         throw new Error('Supabase not initialized')
       }
-      const { error } = await (supabaseClient as any).rpc('increment_user_usage', {
+      const { error } = await supabaseClient.rpc('increment_user_usage', {
         p_user_id: this.user.id,
         p_date: today.toISOString()
       })
@@ -668,7 +566,7 @@ class AuthService {
     }
   }
 
-  async getUserSubscription(): Promise<Subscription | null> {
+  async getUserSubscription() {
     if (!this.user) return null
 
     try {
@@ -680,7 +578,7 @@ class AuthService {
         .from('subscriptions')
         .select('*')
         .eq('user_id', this.user.id)
-        .in('status', ['active', 'trialing', 'paused'])
+        .eq('status', 'active')
         .single()
 
       if (error && error.code !== 'PGRST116') {
@@ -708,7 +606,7 @@ class AuthService {
           console.error('Supabase not initialized')
           continue
         }
-        const { error: upsertError } = await (supabaseClient as any)
+        const { error: upsertError } = await supabaseClient
           .from('profiles')
           .upsert({
             id: user.id,
