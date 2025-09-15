@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { creemService } from '@/services/payment/creem'
-import { createSupabaseClient } from '@/lib/supabase-client'
-
-const supabase = createSupabaseClient()
+import { supabase } from '@/lib/supabase'
 
 export async function POST(req: NextRequest) {
   try {

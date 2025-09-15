@@ -9,12 +9,12 @@ export default function OAuthOfficialTestPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-  const supabase = createClient
+  const supabase = createClient()
 
   useEffect(() => {
     checkUser()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null)
     })
 
