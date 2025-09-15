@@ -70,7 +70,7 @@ export default function OAuthCompleteTest() {
     addLog(`OAuth callback flag present: ${hasOAuthFlag}`)
     
     // 6. Subscribe to auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session: any) => {
       addLog(`Auth state change: ${event}, user: ${session?.user?.email || 'null'}`)
     })
     
