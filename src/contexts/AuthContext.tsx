@@ -40,6 +40,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Check for OAuth callback and wait for session if needed
         const hasOAuthCallback = await authService.checkForOAuthCallback()
         if (hasOAuthCallback) {
+          // OAuth callback detected, user should be set by checkForOAuthCallback
+          console.log('[AuthContext] OAuth callback handled')
           // Give time for auth state change to propagate
           await new Promise(resolve => setTimeout(resolve, 500))
         }
@@ -47,6 +49,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const currentUser = authService.getCurrentUser()
         console.log('[AuthContext] Current user after init:', currentUser?.email)
         setUser(currentUser)
+        
+        // Ensure loading is set to false if we have a user
+        if (currentUser) {
+          setLoading(false)
+        }
       } catch (error) {
         console.error('Auth initialization error:', error)
       } finally {
