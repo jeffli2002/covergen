@@ -33,7 +33,6 @@ export default function OAuthDebugPage() {
       
       // 2. Check if Supabase client can be created
       try {
-        const { createClient } = await import('@supabase/supabase-js')
         const url = process.env.NEXT_PUBLIC_SUPABASE_URL
         const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
         
@@ -41,11 +40,11 @@ export default function OAuthDebugPage() {
           results.supabase.error = 'Missing environment variables'
           results.errors.push('Supabase credentials not found in environment')
         } else {
-          const client = createClient(url, key)
+          // Use our singleton client instead of creating a new one
           results.supabase.clientCreated = true
           
-          // Test auth functionality
-          const { data, error } = await client.auth.getSession()
+          // Test auth functionality using singleton
+          const { data, error } = await supabase.auth.getSession()
           results.supabase.authTest = {
             success: !error,
             error: error?.message,
