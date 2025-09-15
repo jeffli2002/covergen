@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { createSupabaseClient } from '@/lib/supabase-client'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function AuthHandler() {
+function AuthHandlerContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [status, setStatus] = useState('Processing authentication...')
@@ -144,5 +144,20 @@ export default function AuthHandler() {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
       </div>
     </div>
+  )
+}
+
+export default function AuthHandler() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Loading...</h1>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+        </div>
+      </div>
+    }>
+      <AuthHandlerContent />
+    </Suspense>
   )
 }
