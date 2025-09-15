@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
 import authService from '@/services/authService'
-import { creemService, SUBSCRIPTION_PLANS } from '@/services/payment/creem'
+import { creemService } from '@/services/payment/creem'
 import { toast } from 'sonner'
 import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
 import ActivationConfirmDialog from '@/components/subscription/ActivationConfirmDialog'
@@ -97,12 +97,15 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
       // Update user in store if we have subscription data
       const config = getClientSubscriptionConfig()
       if (currentUser && sub) {
+        const quotaLimit = sub.tier === 'pro' ? config.limits.pro.monthly : 
+                          sub.tier === 'pro_plus' ? config.limits.pro_plus.monthly : 
+                          config.limits.free.daily
         setUser({
           id: currentUser.id,
           email: currentUser.email,
           tier: sub.tier || 'free',
           quotaUsed: todayUsage,
-          quotaLimit: SUBSCRIPTION_PLANS[sub.tier as keyof typeof SUBSCRIPTION_PLANS]?.credits || config.limits.free.daily
+          quotaLimit: quotaLimit
         })
       } else if (currentUser) {
         setUser({
@@ -297,10 +300,56 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
 
   const currentPlan = subscription?.tier || 'free'
   const isTrialing = subscription?.status === 'trialing'
-  const planDetails = SUBSCRIPTION_PLANS[currentPlan as keyof typeof SUBSCRIPTION_PLANS]
+  const config = getClientSubscriptionConfig()
+  
+  // Get plan details using client-safe configuration
+  const planDetails = {
+    free: {
+      name: 'Free',
+      price: 0,
+      credits: config.limits.free.monthly,
+      features: [
+        `${config.limits.free.monthly} covers per month`,
+        'No watermark',
+        'Basic platform sizes',
+        'Email support'
+      ]
+    },
+    pro: {
+      name: 'Pro',
+      price: 900,
+      credits: config.limits.pro.monthly,
+      features: [
+        `${config.limits.pro.monthly} covers per month`,
+        'No watermark',
+        'All platform sizes',
+        'Priority support',
+        `${config.trialDays}-day free trial`
+      ]
+    },
+    pro_plus: {
+      name: 'Pro+',
+      price: 1900,
+      credits: config.limits.pro_plus.monthly,
+      features: [
+        `${config.limits.pro_plus.monthly} covers per month`,
+        'No watermark',
+        'All platform sizes',
+        'Advanced customization',
+        'Commercial usage license',
+        'Dedicated support',
+        `${config.trialDays}-day free trial`
+      ]
+    }
+  }[currentPlan] || {
+    name: 'Free',
+    price: 0,
+    credits: config.limits.free.monthly,
+    features: []
+  }
+  
   const TRIAL_LIMITS = getTrialLimits()
   const trialLimits = isTrialing ? TRIAL_LIMITS[currentPlan as keyof typeof TRIAL_LIMITS] : null
-  const config = getClientSubscriptionConfig()
   
   // Calculate usage based on whether it's a trial
   const dailyLimit = isTrialing && trialLimits ? trialLimits.daily : (planDetails?.credits || config.limits.free.daily)

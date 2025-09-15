@@ -20,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import ActivationConfirmDialog from '@/components/subscription/ActivationConfirmDialog'
-import { SUBSCRIPTION_PLANS } from '@/services/payment/creem'
+import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
 
 interface HeaderProps {
   locale: Locale
@@ -427,17 +427,36 @@ export default function Header({ locale, translations: t }: HeaderProps) {
       )}
       
       {/* Activation Confirmation Dialog */}
-      {subscriptionInfo?.isTrialing && subscriptionInfo?.plan && (
-        <ActivationConfirmDialog
-          open={showActivationConfirm}
-          onClose={() => setShowActivationConfirm(false)}
-          onConfirm={handleActivateSubscription}
-          planName={SUBSCRIPTION_PLANS[subscriptionInfo.plan as keyof typeof SUBSCRIPTION_PLANS]?.name || subscriptionInfo.plan}
-          planPrice={SUBSCRIPTION_PLANS[subscriptionInfo.plan as keyof typeof SUBSCRIPTION_PLANS]?.price ? SUBSCRIPTION_PLANS[subscriptionInfo.plan as keyof typeof SUBSCRIPTION_PLANS].price / 100 : 0}
-          planFeatures={SUBSCRIPTION_PLANS[subscriptionInfo.plan as keyof typeof SUBSCRIPTION_PLANS]?.features || []}
-          isActivating={activating}
-        />
-      )}
+      {subscriptionInfo?.isTrialing && subscriptionInfo?.plan && (() => {
+        const config = getClientSubscriptionConfig()
+        const planName = subscriptionInfo.plan === 'pro' ? 'Pro' : subscriptionInfo.plan === 'pro_plus' ? 'Pro+' : 'Free'
+        const planPrice = subscriptionInfo.plan === 'pro' ? 9 : subscriptionInfo.plan === 'pro_plus' ? 19 : 0
+        const planFeatures = subscriptionInfo.plan === 'pro' ? [
+          `${config.limits.pro.monthly} covers per month`,
+          'No watermark',
+          'All platform sizes',
+          'Priority support'
+        ] : subscriptionInfo.plan === 'pro_plus' ? [
+          `${config.limits.pro_plus.monthly} covers per month`,
+          'No watermark',
+          'All platform sizes',
+          'Advanced customization',
+          'Commercial usage license',
+          'Dedicated support'
+        ] : []
+        
+        return (
+          <ActivationConfirmDialog
+            open={showActivationConfirm}
+            onClose={() => setShowActivationConfirm(false)}
+            onConfirm={handleActivateSubscription}
+            planName={planName}
+            planPrice={planPrice}
+            planFeatures={planFeatures}
+            isActivating={activating}
+          />
+        )
+      })()}
     </>
   )
 }
