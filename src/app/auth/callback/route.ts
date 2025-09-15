@@ -70,11 +70,17 @@ export async function GET(request: Request) {
       return NextResponse.redirect(new URL(`/en?error=config_error`, origin))
     }
 
-    // Create Supabase client with explicit cookie handling
+    // Create Supabase client with PKCE flow configuration matching browser client
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
       {
+        auth: {
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: true,
+          flowType: 'pkce' // Match browser client configuration
+        },
         cookies: {
           getAll() {
             return cookieStore.getAll()
