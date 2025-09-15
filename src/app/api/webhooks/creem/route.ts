@@ -118,23 +118,18 @@ async function handleCheckoutComplete(data: any) {
     }
 
     // Check if this is a trial subscription
-    // If trial days is 0, no trials are offered
+    // Trust the webhook data - if trialEnd is provided and in the future, it's a trial
     let isTrialSubscription = false
     let trialEndsAt: string | null = null
     
-    if (config.trialDays > 0) {
-      // If trialEnd is provided in webhook, use it
-      if (trialEnd && new Date(trialEnd) > new Date()) {
-        isTrialSubscription = true
-        trialEndsAt = new Date(trialEnd).toISOString()
-      } else if (!trialEnd) {
-        // If no trialEnd provided but trials are enabled, calculate it
-        const calculatedTrialEnd = calculateTrialEndDate()
-        if (calculatedTrialEnd) {
-          isTrialSubscription = true
-          trialEndsAt = calculatedTrialEnd.toISOString()
-        }
-      }
+    if (trialEnd && new Date(trialEnd) > new Date()) {
+      isTrialSubscription = true
+      trialEndsAt = new Date(trialEnd).toISOString()
+      console.log('[Webhook] Checkout complete with trial ending at:', trialEndsAt)
+    } else if (subscriptionId) {
+      // If we have a subscription ID but no trial info, the subscription.created webhook
+      // will provide the actual trial dates from Stripe
+      console.log('[Webhook] Checkout complete without trial info, waiting for subscription.created webhook')
     }
 
     // Update auth.users table with Creem trial info using raw SQL
@@ -163,6 +158,12 @@ async function handleCheckoutComplete(data: any) {
       updated_at: new Date().toISOString()
     }
     
+    // If this is a trial subscription, set trial dates
+    if (isTrialSubscription && trialEndsAt) {
+      subscriptionData.trial_started_at = new Date().toISOString()
+      subscriptionData.expires_at = trialEndsAt
+    }
+    
     // Only set subscription ID if we have it
     if (subscriptionId) {
       subscriptionData.stripe_subscription_id = subscriptionId
@@ -171,7 +172,7 @@ async function handleCheckoutComplete(data: any) {
     }
     
     const { error: subError } = await adminSupabase
-      .from('subscriptions')
+      .from('subscriptions_consolidated')
       .upsert(subscriptionData, {
         onConflict: 'user_id'
       })
@@ -213,14 +214,21 @@ async function handleSubscriptionUpdate(data: any) {
     const adminSupabase = createAdminSupabaseClient()
 
     // Update subscription status
+    const updateData: any = {
+      status: status,
+      current_period_end: currentPeriodEnd?.toISOString(),
+      cancel_at_period_end: cancelAtPeriodEnd,
+      updated_at: new Date().toISOString()
+    }
+    
+    // If subscription is being cancelled, set expires_at
+    if (cancelAtPeriodEnd && currentPeriodEnd) {
+      updateData.expires_at = currentPeriodEnd.toISOString()
+    }
+    
     const { error } = await adminSupabase
-      .from('subscriptions')
-      .update({
-        status: status,
-        current_period_end: currentPeriodEnd?.toISOString(),
-        cancel_at_period_end: cancelAtPeriodEnd,
-        updated_at: new Date().toISOString()
-      })
+      .from('subscriptions_consolidated')
+      .update(updateData)
       .eq('stripe_customer_id', customerId)
 
     if (error) {
@@ -257,7 +265,7 @@ async function handleSubscriptionUpdate(data: any) {
 }
 
 async function handleSubscriptionCreated(data: any) {
-  const { subscriptionId, customerId, userId, status } = data
+  const { subscriptionId, customerId, userId, status, planId, trialStart, trialEnd, currentPeriodStart, currentPeriodEnd } = data
 
   if (!subscriptionId || !customerId) {
     console.error('[Webhook] Missing subscription ID or customer ID')
@@ -267,37 +275,96 @@ async function handleSubscriptionCreated(data: any) {
   try {
     const adminSupabase = createAdminSupabaseClient()
 
-    // Update existing subscription record with the subscription ID
-    const { error } = await adminSupabase
-      .from('subscriptions')
-      .update({
-        stripe_subscription_id: subscriptionId,
-        stripe_customer_id: customerId,
-        status: status || 'active',
-        updated_at: new Date().toISOString()
-      })
+    // Build update data
+    const updateData: any = {
+      stripe_subscription_id: subscriptionId,
+      stripe_customer_id: customerId,
+      status: status || 'active',
+      updated_at: new Date().toISOString()
+    }
+
+    // Add tier/planId if available
+    if (planId) {
+      updateData.tier = planId
+    }
+
+    // Add trial dates if this is a trial subscription
+    if (status === 'trialing' && trialStart && trialEnd) {
+      updateData.trial_started_at = trialStart.toISOString()
+      updateData.expires_at = trialEnd.toISOString()
+    }
+
+    // Add period dates
+    if (currentPeriodStart) {
+      updateData.current_period_start = currentPeriodStart.toISOString()
+    }
+    if (currentPeriodEnd) {
+      updateData.current_period_end = currentPeriodEnd.toISOString()
+    }
+
+    // Update existing subscription record with the subscription ID and trial dates
+    // First try to update in subscriptions_consolidated table
+    const { data: updatedSubs, error } = await adminSupabase
+      .from('subscriptions_consolidated')
+      .update(updateData)
       .eq('stripe_customer_id', customerId)
       .is('stripe_subscription_id', null) // Only update if subscription ID is missing
+      .select()
 
-    if (error) {
+    if (error || !updatedSubs || updatedSubs.length === 0) {
       // If update fails, try by user_id
-      const { error: userError } = await adminSupabase
-        .from('subscriptions')
-        .update({
-          stripe_subscription_id: subscriptionId,
-          stripe_customer_id: customerId,
-          status: status || 'active',
-          updated_at: new Date().toISOString()
-        })
+      const { data: userUpdatedSubs, error: userError } = await adminSupabase
+        .from('subscriptions_consolidated')
+        .update(updateData)
         .eq('user_id', userId)
         .is('stripe_subscription_id', null)
+        .select()
       
-      if (userError) {
-        console.error('[Webhook] Error updating subscription with ID:', userError)
+      if (userError || !userUpdatedSubs || userUpdatedSubs.length === 0) {
+        console.error('[Webhook] No subscription found to update or error:', userError)
+        
+        // If no existing subscription found, this might be a race condition
+        // Create a new subscription record
+        if (userId) {
+          const createData = {
+            ...updateData,
+            user_id: userId
+          }
+          
+          const { error: createError } = await adminSupabase
+            .from('subscriptions_consolidated')
+            .insert(createData)
+          
+          if (createError) {
+            console.error('[Webhook] Error creating subscription:', createError)
+          } else {
+            console.log('[Webhook] Created new subscription record for user:', userId)
+          }
+        }
+      } else {
+        console.log('[Webhook] Updated subscription by user_id:', userId)
+      }
+    } else {
+      console.log('[Webhook] Updated subscription by customer_id:', customerId)
+    }
+
+    // Also update trial dates in auth.users if this is a trial
+    if (status === 'trialing' && trialEnd && userId) {
+      const { error: rpcError } = await adminSupabase.rpc('update_user_trial_status', {
+        p_user_id: userId,
+        p_trial_ends_at: trialEnd.toISOString(),
+        p_subscription_tier: planId || 'pro'
+      })
+      
+      if (rpcError) {
+        console.error('[Webhook] Error updating user trial status:', rpcError)
       }
     }
 
     console.log(`[Webhook] Updated subscription ${subscriptionId} for customer ${customerId}`)
+    if (status === 'trialing') {
+      console.log(`[Webhook] Trial period: ${trialStart?.toISOString()} to ${trialEnd?.toISOString()}`)
+    }
   } catch (error) {
     console.error('[Webhook] Error in handleSubscriptionCreated:', error)
     throw error
@@ -361,7 +428,7 @@ async function handleSubscriptionPaused(data: any) {
 
     // Update subscription status to paused
     const { error } = await adminSupabase
-      .from('subscriptions')
+      .from('subscriptions_consolidated')
       .update({
         status: 'paused',
         updated_at: new Date().toISOString()
@@ -390,7 +457,7 @@ async function downgradeUserToFree(userIdOrCustomerId: string) {
     // If it's a customer ID, find the user
     if (userIdOrCustomerId.startsWith('cus_')) {
       const { data: subscription } = await adminSupabase
-        .from('subscriptions')
+        .from('subscriptions_consolidated')
         .select('user_id')
         .eq('stripe_customer_id', userIdOrCustomerId)
         .single()
@@ -402,7 +469,7 @@ async function downgradeUserToFree(userIdOrCustomerId: string) {
 
     // Update subscription to free/cancelled
     const { error: subError } = await adminSupabase
-      .from('subscriptions')
+      .from('subscriptions_consolidated')
       .update({
         tier: 'free',
         status: 'cancelled',
@@ -468,9 +535,10 @@ async function handleSubscriptionTrialEnded(data: any) {
     
     // Update subscription status from trialing to active
     const { error: subError } = await adminSupabase
-      .from('subscriptions')
+      .from('subscriptions_consolidated')
       .update({
         status: 'active',
+        trial_ended_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
       .eq('user_id', userId)

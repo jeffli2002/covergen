@@ -730,13 +730,16 @@ class CreemPaymentService {
   }
 
   private async handleSubscriptionCreated(subscription: any) {
-    const { id, customer, metadata, status, trial_period_days } = subscription
+    const { id, customer, metadata, status, trial_period_days, trial_start_date, trial_end_date, current_period_start_date, current_period_end_date } = subscription
     
     console.log('[Creem Webhook] Subscription created:', {
       subscriptionId: id,
       customerId: customer?.id || customer,
       status: status,
-      metadata: metadata
+      metadata: metadata,
+      trial_period_days: trial_period_days,
+      trial_start: trial_start_date,
+      trial_end: trial_end_date
     })
     
     const customerId = typeof customer === 'string' ? customer : customer?.id
@@ -747,12 +750,20 @@ class CreemPaymentService {
       return { success: true }
     }
     
+    const planId = metadata?.planId || this.getPlanFromProduct(subscription.product?.id)
+    
     return {
       type: 'subscription_created',
       subscriptionId: id,
       customerId: customerId,
       userId: userId,
-      status: status
+      status: status,
+      planId: planId,
+      trialPeriodDays: trial_period_days,
+      trialStart: trial_start_date ? new Date(trial_start_date) : undefined,
+      trialEnd: trial_end_date ? new Date(trial_end_date) : undefined,
+      currentPeriodStart: current_period_start_date ? new Date(current_period_start_date) : undefined,
+      currentPeriodEnd: current_period_end_date ? new Date(current_period_end_date) : undefined
     }
   }
 

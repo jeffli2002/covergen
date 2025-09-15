@@ -615,7 +615,7 @@ class AuthService {
         .from('subscriptions')
         .select('*')
         .eq('user_id', this.user.id)
-        .eq('status', 'active')
+        .in('status', ['active', 'trialing', 'paused'])
         .single()
 
       if (error && error.code !== 'PGRST116') {

@@ -5,6 +5,10 @@ ALTER TABLE user_usage
 ADD COLUMN IF NOT EXISTS daily_generation_count INTEGER NOT NULL DEFAULT 0,
 ADD COLUMN IF NOT EXISTS trial_usage_count INTEGER NOT NULL DEFAULT 0;
 
+-- 1.5 Ensure subscriptions_consolidated has correct columns (they should already exist)
+-- Note: The table uses expires_at for both trial expiration and subscription cancellation expiration
+-- trial_ended_at is only set AFTER a trial has actually ended (past tense)
+
 -- 2. Ensure Jeff has a proper trial subscription
 DO $$
 DECLARE
@@ -89,7 +93,8 @@ SELECT
   cancel_at_period_end,
   created_at,
   updated_at,
-  expires_at as trial_ends_at,
+  expires_at as trial_ends_at,  -- For backward compatibility with views
+  expires_at,
   CASE 
     WHEN tier = 'pro' THEN 'pro'
     WHEN tier = 'pro_plus' THEN 'pro-plus'
@@ -98,7 +103,8 @@ SELECT
   trial_started_at as trial_start,
   trial_ended_at as trial_end,
   stripe_subscription_id,
-  stripe_customer_id
+  stripe_customer_id,
+  trial_started_at
 FROM public.subscriptions_consolidated;
 
 -- 5. Create user_subscriptions view
@@ -135,6 +141,7 @@ BEGIN
     stripe_subscription_id,
     stripe_customer_id,
     trial_started_at,
+    trial_ended_at,
     expires_at,
     daily_limit
   ) VALUES (
@@ -147,8 +154,9 @@ BEGIN
     NEW.creem_subscription_id,
     NEW.stripe_subscription_id,
     NEW.stripe_customer_id,
-    CASE WHEN NEW.status = 'trialing' THEN COALESCE(NEW.trial_start, NOW()) ELSE NULL END,
-    CASE WHEN NEW.status = 'trialing' THEN COALESCE(NEW.trial_ends_at, NOW() + INTERVAL '3 days') ELSE NULL END,
+    CASE WHEN NEW.status = 'trialing' THEN COALESCE(NEW.trial_start, NEW.trial_started_at, NOW()) ELSE NULL END,
+    CASE WHEN NEW.status = 'trialing' THEN COALESCE(NEW.expires_at, NEW.trial_ends_at, NOW() + INTERVAL '7 days') ELSE NEW.expires_at END,
+    CASE WHEN NEW.status != 'trialing' THEN NEW.expires_at ELSE NULL END,
     CASE
       WHEN NEW.tier = 'free' THEN 3
       WHEN NEW.tier = 'pro' AND NEW.status = 'trialing' THEN 4
@@ -227,6 +235,64 @@ CREATE TRIGGER user_subscriptions_instead_insert
   FOR EACH ROW
   EXECUTE FUNCTION handle_user_subscriptions_insert();
 
+-- Create UPDATE triggers for subscriptions view
+CREATE OR REPLACE FUNCTION handle_subscriptions_update()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE public.subscriptions_consolidated
+  SET 
+    tier = COALESCE(NEW.tier, tier),
+    status = COALESCE(NEW.status, status),
+    current_period_start = COALESCE(NEW.current_period_start, current_period_start),
+    current_period_end = COALESCE(NEW.current_period_end, current_period_end),
+    cancel_at_period_end = COALESCE(NEW.cancel_at_period_end, cancel_at_period_end),
+    stripe_subscription_id = COALESCE(NEW.stripe_subscription_id, stripe_subscription_id),
+    stripe_customer_id = COALESCE(NEW.stripe_customer_id, stripe_customer_id),
+    trial_started_at = COALESCE(NEW.trial_start, NEW.trial_started_at, trial_started_at),
+    trial_ended_at = COALESCE(NEW.trial_ended_at, trial_ended_at),
+    expires_at = COALESCE(NEW.expires_at, expires_at),
+    updated_at = NOW()
+  WHERE id = NEW.id;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS subscriptions_instead_update ON public.subscriptions;
+CREATE TRIGGER subscriptions_instead_update
+  INSTEAD OF UPDATE ON public.subscriptions
+  FOR EACH ROW
+  EXECUTE FUNCTION handle_subscriptions_update();
+
+-- Create UPDATE triggers for user_subscriptions view
+CREATE OR REPLACE FUNCTION handle_user_subscriptions_update()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE public.subscriptions_consolidated
+  SET 
+    tier = COALESCE(NEW.plan_type, tier),
+    status = COALESCE(NEW.status, status),
+    daily_limit = COALESCE(NEW.daily_limit, daily_limit),
+    expires_at = COALESCE(NEW.expires_at, expires_at),
+    cancel_at_period_end = COALESCE(NEW.cancel_at_period_end, cancel_at_period_end),
+    creem_customer_id = COALESCE(NEW.creem_customer_id, creem_customer_id),
+    creem_subscription_id = COALESCE(NEW.creem_subscription_id, creem_subscription_id),
+    current_period_start = COALESCE(NEW.current_period_start, current_period_start),
+    current_period_end = COALESCE(NEW.current_period_end, current_period_end),
+    metadata = COALESCE(NEW.metadata, metadata),
+    updated_at = NOW()
+  WHERE id = NEW.id;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS user_subscriptions_instead_update ON public.user_subscriptions;
+CREATE TRIGGER user_subscriptions_instead_update
+  INSTEAD OF UPDATE ON public.user_subscriptions
+  FOR EACH ROW
+  EXECUTE FUNCTION handle_user_subscriptions_update();
+
 -- 7. Grant permissions
 GRANT SELECT ON public.subscriptions TO authenticated;
 GRANT SELECT ON public.user_subscriptions TO authenticated;
@@ -259,7 +325,7 @@ SELECT
     s.tier,
     s.status,
     s.plan_id,
-    s.trial_ends_at
+    s.expires_at as trial_ends_at
 FROM subscriptions s
 JOIN auth.users u ON u.id = s.user_id
 WHERE u.email = 'jefflee2002@gmail.com';
