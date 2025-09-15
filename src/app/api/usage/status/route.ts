@@ -20,10 +20,11 @@ export async function GET(request: NextRequest) {
     
     if (!limitStatus) {
       // Return default free tier limits if check fails
+      const config = getSubscriptionConfig()
       return NextResponse.json({
         daily_usage: 0,
-        daily_limit: 3,
-        remaining_daily: 3,
+        daily_limit: config.limits.free.daily,
+        remaining_daily: config.limits.free.daily,
         is_trial: false,
         subscription_tier: 'free'
       })
@@ -48,10 +49,11 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('[Usage Status] Error:', error)
     // Return default free tier on error
+    const config = getSubscriptionConfig()
     return NextResponse.json({
       daily_usage: 0,
-      daily_limit: 3,
-      remaining_daily: 3,
+      daily_limit: config.limits.free.daily,
+      remaining_daily: config.limits.free.daily,
       is_trial: false,
       subscription_tier: 'free'
     })

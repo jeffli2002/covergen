@@ -187,7 +187,7 @@ async function handleCheckoutComplete(data: any) {
       .from('profiles')
       .update({
         subscription_tier: planId,
-        quota_limit: planLimits[planId as keyof typeof planLimits] || 10,
+        quota_limit: planLimits[planId as keyof typeof planLimits] || config.limits.free.monthly,
         updated_at: new Date().toISOString()
       })
       .eq('id', userId)

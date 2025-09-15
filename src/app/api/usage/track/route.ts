@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { getClientIP, getCurrentMonthKey } from '@/lib/rate-limit'
+import { getSubscriptionConfig } from '@/lib/subscription-config'
 
 export async function POST(request: NextRequest) {
   try {
@@ -163,15 +164,16 @@ export async function GET(request: NextRequest) {
         .single()
         
       const tier = subscription?.tier || 'free'
+      const config = getSubscriptionConfig()
       const quotaLimits = {
-        free: 10,
-        pro: 120,
-        pro_plus: 300
+        free: config.limits.free.monthly,
+        pro: config.limits.pro.monthly,
+        pro_plus: config.limits.pro_plus.monthly
       }
       
       return NextResponse.json({
         usage_count: usageData || 0,
-        quota_limit: quotaLimits[tier as keyof typeof quotaLimits] || 10,
+        quota_limit: quotaLimits[tier as keyof typeof quotaLimits] || config.limits.free.monthly,
         tier,
         user_id: user.id
       })
@@ -184,9 +186,10 @@ export async function GET(request: NextRequest) {
           p_month_key: monthKey
         })
       
+      const config = getSubscriptionConfig()
       return NextResponse.json({
         usage_count: usageData || 0,
-        quota_limit: 10,
+        quota_limit: config.limits.free.monthly,
         anonymous: true
       })
       

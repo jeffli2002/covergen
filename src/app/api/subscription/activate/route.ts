@@ -40,55 +40,46 @@ export async function POST(req: NextRequest) {
       )
     }
     
-    // Check if user has payment method on file
-    if (!subscription.stripe_subscription_id) {
+    console.log('[Activate] Checking trial activation for user:', userId)
+    console.log('[Activate] Subscription details:', {
+      hasStripeCustomerId: !!subscription.stripe_customer_id,
+      hasStripeSubscriptionId: !!subscription.stripe_subscription_id,
+      trialEndsAt: subscription.expires_at
+    })
+    
+    // Check if user has both customer ID and subscription ID (indicates valid payment method)
+    if (!subscription.stripe_customer_id || !subscription.stripe_subscription_id) {
+      console.log('[Activate] No payment method on file, need to redirect to add payment')
       return NextResponse.json(
-        { error: 'No payment method on file. Please add a payment method first.' },
+        { 
+          success: false,
+          needsPaymentMethod: true,
+          error: 'No payment method on file. Please add a payment method to activate your subscription.' 
+        },
         { status: 400 }
       )
     }
     
-    console.log('[Activate] Activating trial subscription for user:', userId)
+    // IMPORTANT: Don't update local database directly
+    // Creem will handle the trial-to-paid conversion and send webhooks
     
-    // For trial activation, we simply convert the trial to active status
-    // The subscription is already set up with Stripe, we just need to mark it as active
-    const { error: updateError } = await supabase
-      .from('subscriptions_consolidated')
-      .update({
-        status: 'active',
-        trial_ended_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .eq('user_id', userId)
-    
-    if (updateError) {
-      console.error('[Activate] Error updating subscription:', updateError)
-      return NextResponse.json(
-        { error: 'Failed to activate subscription' },
-        { status: 500 }
-      )
-    }
-    
-    // Clear trial info from auth.users
-    const { error: rpcError } = await supabase.rpc('update_user_trial_status', {
-      p_user_id: userId,
-      p_trial_ends_at: null,
-      p_subscription_tier: subscription.tier
-    })
-    
-    if (rpcError) {
-      console.error('[Activate] Error clearing trial status:', rpcError)
-    }
+    // Since Creem SDK doesn't support ending trials early yet,
+    // we return a success response with information about automatic activation
+    const trialEndDate = subscription.expires_at ? new Date(subscription.expires_at) : null
+    const daysRemaining = trialEndDate ? Math.ceil((trialEndDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0
     
     return NextResponse.json({
       success: true,
-      activated: true,
-      message: `Successfully activated ${subscription.tier === 'pro_plus' ? 'Pro+' : 'Pro'} subscription!`
+      activated: false, // Not immediately activated
+      autoActivates: true,
+      trialEndsAt: subscription.expires_at,
+      daysRemaining: daysRemaining,
+      message: `Your subscription will automatically activate when your trial ends in ${daysRemaining} days. You won't need to take any action!`
     })
   } catch (error) {
     console.error('[Activate] Error:', error)
     return NextResponse.json(
-      { error: 'Failed to activate subscription' },
+      { error: 'Failed to process activation request' },
       { status: 500 }
     )
   }

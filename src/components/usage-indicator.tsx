@@ -12,6 +12,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
 
 interface UsageIndicatorProps {
   usedCovers: number
@@ -49,7 +50,7 @@ export function UsageIndicator({
               <TooltipContent>
                 <p className="max-w-xs">
                   {isAnonymous 
-                    ? 'Anonymous users get 10 free covers per month. Sign in to track usage across devices!'
+                    ? `Anonymous users get ${getClientSubscriptionConfig().limits.free.monthly} free covers per month. Sign in to track usage across devices!`
                     : 'Your monthly usage resets at the beginning of each calendar month.'
                   }
                 </p>

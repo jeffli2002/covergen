@@ -92,57 +92,66 @@ export const CREEM_TEST_CARDS = {
   threeDSecure: '4000000000003220', // 3D Secure required
 }
 
-// Subscription Plans
-export const SUBSCRIPTION_PLANS = {
-  free: {
-    id: 'free',
-    name: 'Free',
-    price: 0,
-    priceId: '', // No Creem price ID for free tier
-    credits: 0,
-    features: [
-      '10 covers per month',
-      'No watermark',
-      'Basic platform sizes',
-      'Email support'
-    ]
-  },
-  pro: {
-    id: 'pro', 
-    name: 'Pro',
-    price: 900, // $9.00 in cents
-    priceId: getCreemTestMode() ? 'price_test_pro_900' : 'price_pro_900',
-    credits: 120,
-    features: [
-      '120 covers per month',
-      'No watermark',
-      'All platform sizes',
-      'Priority support',
-      'Basic tool usage'
-    ]
-  },
-  pro_plus: {
-    id: 'pro_plus',
-    name: 'Pro+', 
-    price: 1900, // $19.00 in cents
-    priceId: getCreemTestMode() ? 'price_test_proplus_1900' : 'price_proplus_1900',
-    credits: 300,
-    features: [
-      '300 covers per month',
-      'No watermark',
-      'Commercial license',
-      'All tools usage',
-      'Dedicated support'
-    ]
-  }
-}
-
 // Product IDs for subscription tiers (from Creem dashboard)
 // Same product IDs are used for both test and production modes
 export const CREEM_PRODUCTS = {
   pro: process.env.CREEM_PRO_PLAN_ID || '',
   pro_plus: process.env.CREEM_PRO_PLUS_PLAN_ID || ''
 }
+
+// Subscription Plans
+// Note: To avoid circular dependencies, we'll use a getter function for dynamic values
+const getSubscriptionPlansWithConfig = () => {
+  const config = getSubscriptionConfig()
+  return {
+    free: {
+      id: 'free',
+      name: 'Free',
+      price: 0,
+      priceId: '', // No Creem price ID for free tier
+      credits: config.limits.free.monthly,
+      features: [
+        `${config.limits.free.monthly} covers per month`,
+        'No watermark',
+        'Basic platform sizes',
+        'Email support'
+      ]
+    },
+    pro: {
+      id: 'pro',
+      name: 'Pro',
+      price: 900, // $9.00 in cents
+      priceId: CREEM_PRODUCTS.pro,
+      credits: config.limits.pro.monthly,
+      features: [
+        `${config.limits.pro.monthly} covers per month`,
+        'No watermark',
+        'All platform sizes',
+        'Priority support',
+        `${config.trialDays}-day free trial`
+      ]
+    },
+    pro_plus: {
+      id: 'pro_plus',
+      name: 'Pro+',
+      price: 1900, // $19.00 in cents
+      priceId: CREEM_PRODUCTS.pro_plus,
+      credits: config.limits.pro_plus.monthly,
+      features: [
+        `${config.limits.pro_plus.monthly} covers per month`,
+        'No watermark',
+        'All platform sizes',
+        'Advanced customization',
+        'Commercial usage license',
+        'Dedicated support',
+        `${config.trialDays}-day free trial`
+      ]
+    }
+  }
+}
+
+// Export the dynamic version as the main export
+export const SUBSCRIPTION_PLANS = getSubscriptionPlansWithConfig()
 
 // Price IDs for subscription tiers (to be created in Creem dashboard)
 export const CREEM_PRICES = {

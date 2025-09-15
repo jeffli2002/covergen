@@ -17,6 +17,7 @@ import { useAppStore } from '@/lib/store'
 import authService from '@/services/authService'
 import { creemService, SUBSCRIPTION_PLANS } from '@/services/payment/creem'
 import { toast } from 'sonner'
+import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
 
 // Simple date formatter to avoid date-fns dependency
 const formatDate = (date: Date) => {
@@ -39,17 +40,20 @@ interface AccountPageClientProps {
   locale: string
 }
 
-// Trial limits configuration
-const TRIAL_LIMITS = {
-  pro: {
-    daily: 10,
-    total: 50,
-    days: 7
-  },
-  pro_plus: {
-    daily: 20,
-    total: 100,
-    days: 7
+// Get trial limits configuration from environment variables
+const getTrialLimits = () => {
+  const config = getClientSubscriptionConfig()
+  return {
+    pro: {
+      daily: config.limits.pro.trial_daily,
+      total: config.limits.pro.trial_total,
+      days: config.trialDays
+    },
+    pro_plus: {
+      daily: config.limits.pro_plus.trial_daily,
+      total: config.limits.pro_plus.trial_total,
+      days: config.trialDays
+    }
   }
 }
 
@@ -61,6 +65,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   const [usage, setUsage] = useState(0)
   const [cancelling, setCancelling] = useState(false)
   const [resuming, setResuming] = useState(false)
+  const [activating, setActivating] = useState(false)
   const [authUser, setAuthUser] = useState<any>(null)
 
   useEffect(() => {
@@ -88,13 +93,14 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
       setUsage(todayUsage)
       
       // Update user in store if we have subscription data
+      const config = getClientSubscriptionConfig()
       if (currentUser && sub) {
         setUser({
           id: currentUser.id,
           email: currentUser.email,
           tier: sub.tier || 'free',
           quotaUsed: todayUsage,
-          quotaLimit: SUBSCRIPTION_PLANS[sub.tier as keyof typeof SUBSCRIPTION_PLANS]?.credits || 10
+          quotaLimit: SUBSCRIPTION_PLANS[sub.tier as keyof typeof SUBSCRIPTION_PLANS]?.credits || config.limits.free.daily
         })
       } else if (currentUser) {
         setUser({
@@ -102,7 +108,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
           email: currentUser.email,
           tier: 'free',
           quotaUsed: todayUsage,
-          quotaLimit: 10
+          quotaLimit: config.limits.free.daily
         })
       }
     } catch (error) {
@@ -182,6 +188,67 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
     }
   }
 
+  const handleActivateSubscription = async () => {
+    if (!subscription || subscription.status !== 'trialing') return
+
+    setActivating(true)
+    try {
+      const response = await fetch('/api/subscription/activate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        if (data.autoActivates) {
+          // Trial will auto-activate, show informative message
+          toast.info(data.message || `Your subscription will automatically activate in ${data.daysRemaining} days.`, {
+            duration: 6000
+          })
+        } else {
+          // Immediate activation (shouldn't happen with current implementation)
+          toast.success(data.message || 'Subscription activated successfully!')
+          await loadAccountData()
+        }
+      } else {
+        // Handle payment method required
+        if (data.needsPaymentMethod) {
+          toast.error('Please add a payment method to activate your subscription', {
+            duration: 4000
+          })
+          
+          // Try to open billing portal for adding payment method
+          if (subscription?.stripe_customer_id) {
+            setActivating(false)
+            const result = await creemService.createPortalSession({
+              customerId: subscription.stripe_customer_id,
+              returnUrl: `${window.location.origin}/${locale}/account`
+            })
+            
+            if (result.success && result.url) {
+              window.location.href = result.url
+            } else {
+              // Fallback to payment page
+              router.push(`/${locale}/payment?plan=${currentPlan}&activate=true`)
+            }
+          } else {
+            // No customer ID, go to payment page for new checkout
+            router.push(`/${locale}/payment?plan=${currentPlan}&activate=true`)
+          }
+        } else {
+          throw new Error(data.error || 'Failed to activate subscription')
+        }
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to activate subscription')
+    } finally {
+      setActivating(false)
+    }
+  }
+
   const handleSignOut = async () => {
     await authService.signOut()
     setUser(null)
@@ -202,10 +269,12 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   const currentPlan = subscription?.tier || 'free'
   const isTrialing = subscription?.status === 'trialing'
   const planDetails = SUBSCRIPTION_PLANS[currentPlan as keyof typeof SUBSCRIPTION_PLANS]
+  const TRIAL_LIMITS = getTrialLimits()
   const trialLimits = isTrialing ? TRIAL_LIMITS[currentPlan as keyof typeof TRIAL_LIMITS] : null
+  const config = getClientSubscriptionConfig()
   
   // Calculate usage based on whether it's a trial
-  const dailyLimit = isTrialing && trialLimits ? trialLimits.daily : (planDetails?.credits || 10)
+  const dailyLimit = isTrialing && trialLimits ? trialLimits.daily : (planDetails?.credits || config.limits.free.daily)
   const usagePercentage = (usage / dailyLimit) * 100
 
   if (loading) {
@@ -270,7 +339,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                   </h3>
                   <p className="text-gray-600 mt-1">
                     {isTrialing ? (
-                      <>Free {trialLimits?.days}-day trial</>
+                      <>Free {trialLimits?.days || 7}-day trial</>
                     ) : currentPlan === 'free' ? (
                       'Free forever'
                     ) : (
@@ -304,6 +373,11 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                         <p className="text-sm mt-2">
                           <Clock className="inline w-4 h-4 mr-1" />
                           Trial ends on {formatDateTime(new Date(subscription.trial_ends_at))}
+                        </p>
+                      )}
+                      {subscription.stripe_subscription_id && (
+                        <p className="text-sm mt-2 font-medium text-blue-900">
+                          ✓ Your subscription will automatically activate when the trial ends
                         </p>
                       )}
                     </div>
@@ -358,11 +432,20 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                 ) : isTrialing ? (
                   <>
                     <Button 
-                      onClick={() => router.push(`/${locale}/payment?plan=${currentPlan}&activate=true`)}
+                      onClick={handleActivateSubscription}
                       className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
+                      disabled={activating}
                     >
-                      <Crown className="mr-2 h-4 w-4" />
-                      Activate {planDetails?.name} - ${planDetails?.price ? planDetails.price / 100 : 0}/mo
+                      {activating ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Crown className="mr-2 h-4 w-4" />
+                      )}
+                      {subscription?.stripe_subscription_id ? (
+                        <>Subscription Details</>
+                      ) : (
+                        <>Add Payment Method - ${planDetails?.price ? planDetails.price / 100 : 0}/mo</>
+                      )}
                       <ChevronRight className="ml-1 h-4 w-4" />
                     </Button>
                     <Button
