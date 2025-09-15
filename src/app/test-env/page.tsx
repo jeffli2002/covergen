@@ -30,16 +30,10 @@ export default function TestEnvPage() {
   
   const handleTestSupabase = async () => {
     try {
-      const { createClient } = await import('@supabase/supabase-js')
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-      const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      const { createSupabaseClient } = await import('@/lib/supabase-client')
       
-      if (!url || !key) {
-        alert('Missing Supabase credentials!')
-        return
-      }
-      
-      const supabase = createClient(url, key)
+      // Use singleton client
+      const supabase = createSupabaseClient()
       const { data, error } = await supabase.auth.getSession()
       
       if (error) {

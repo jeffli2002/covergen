@@ -24,19 +24,11 @@ export default function OAuthSafeDebugPage() {
   const testSupabaseImport = async () => {
     try {
       setStatus('Testing Supabase import...')
-      const { createClient } = await import('@supabase/supabase-js')
+      const { createSupabaseClient } = await import('@/lib/supabase-client')
       setStatus('Supabase import successful!')
       
-      // Try to create client
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-      const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-      
-      if (!url || !key) {
-        setStatus('Missing Supabase credentials!')
-        return
-      }
-      
-      const client = createClient(url, key)
+      // Use singleton client
+      const client = createSupabaseClient()
       const { error } = await client.auth.getSession()
       
       if (error) {
