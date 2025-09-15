@@ -323,38 +323,19 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                     )
                   }
                   
-                  // For trial users - show activate option for their current plan
+                  // For trial users - show trial badge instead of activate button
                   if (isTrialing && (plan === 'pro' || plan === 'pro_plus')) {
-                    // Check if they have payment method
-                    if (subscriptionInfo?.hasPaymentMethod) {
-                      return (
-                        <Button 
-                          size="sm" 
-                          className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-sm px-4"
-                          onClick={handleActivateClick}
-                          disabled={activating}
-                        >
-                          {activating ? (
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          ) : (
-                            <Crown className="w-4 h-4 mr-2" />
-                          )}
-                          Activate {plan === 'pro' ? 'Pro' : 'Pro+'}
-                        </Button>
-                      )
-                    } else {
-                      // No payment method, redirect to payment page
-                      return (
-                        <Button 
-                          size="sm" 
-                          className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-sm px-4"
-                          onClick={() => router.push(`/${locale}/payment?plan=${plan}&activate=true`)}
-                        >
-                          <Crown className="w-4 h-4 mr-2" />
-                          Activate {plan === 'pro' ? 'Pro' : 'Pro+'}
-                        </Button>
-                      )
-                    }
+                    return (
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        className="border-blue-200 text-blue-700 hover:bg-blue-50"
+                        onClick={() => router.push(`/${locale}/account`)}
+                      >
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        {plan === 'pro' ? 'Pro' : 'Pro+'} Trial
+                      </Button>
+                    )
                   }
                   
                   // For free users

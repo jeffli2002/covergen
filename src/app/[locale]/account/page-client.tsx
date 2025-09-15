@@ -404,9 +404,13 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                           Trial ends on {formatDateTime(new Date(subscription.trial_ends_at))}
                         </p>
                       )}
-                      {subscription.stripe_subscription_id && (
+                      {subscription.stripe_subscription_id ? (
                         <p className="text-sm mt-2 font-medium text-blue-900">
                           ✓ Your subscription will automatically activate when the trial ends
+                        </p>
+                      ) : (
+                        <p className="text-sm mt-2 text-blue-800">
+                          ⚠️ Please add a payment method to continue after trial
                         </p>
                       )}
                     </div>
@@ -460,29 +464,23 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                   </Button>
                 ) : isTrialing ? (
                   <>
-                    <Button 
-                      onClick={handleActivateClick}
-                      className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
-                      disabled={activating}
-                    >
-                      {activating ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Crown className="mr-2 h-4 w-4" />
+                    {/* Show trial info instead of activation button */}
+                    <div className="flex items-center gap-3">
+                      <Badge className="bg-blue-100 text-blue-800 border-blue-200 px-4 py-2">
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        {planDetails?.name} Trial Active
+                      </Badge>
+                      {!subscription?.stripe_subscription_id && (
+                        <Button 
+                          variant="outline"
+                          onClick={() => router.push(`/${locale}/payment?plan=${currentPlan}&activate=true`)}
+                          className="text-sm"
+                        >
+                          <CreditCard className="mr-2 h-4 w-4" />
+                          Add Payment Method
+                        </Button>
                       )}
-                      {subscription?.stripe_subscription_id ? (
-                        <>Activate {planDetails?.name} Now</>
-                      ) : (
-                        <>Add Payment Method - ${planDetails?.price ? planDetails.price / 100 : 0}/mo</>
-                      )}
-                      <ChevronRight className="ml-1 h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => router.push(`/${locale}/payment`)}
-                    >
-                      View All Plans
-                    </Button>
+                    </div>
                   </>
                 ) : (
                   <>

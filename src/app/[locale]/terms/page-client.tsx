@@ -244,7 +244,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                     <ul className="space-y-1 text-gray-700 text-sm">
                       <li>• <strong>Pro Trial:</strong> {config.limits.pro.trial_total} covers total ({config.limits.pro.trial_daily} per day average) during {config.trialDays}-day trial</li>
                       <li>• <strong>Pro+ Trial:</strong> {config.limits.pro_plus.trial_total} covers total ({config.limits.pro_plus.trial_daily} per day average) during {config.trialDays}-day trial</li>
-                      <li>• <strong>Automatic Billing:</strong> Subscription begins after trial unless cancelled</li>
+                      <li>• <strong>Automatic Billing:</strong> Subscription begins automatically after trial ends unless cancelled (cannot be activated early)</li>
                       <li>• <strong>Fresh Start:</strong> Trial usage doesn't count against your first paid month</li>
                       <li>• <strong>Full Features:</strong> Access to all plan features during trial</li>
                       <li>• <strong>Cancel Anytime:</strong> Cancel before trial ends to avoid charges</li>
