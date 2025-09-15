@@ -73,7 +73,7 @@ export async function resetPassword(email: string) {
   const supabase = await createSupabaseClient()
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001'}/auth/reset-password`,
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://covergen.pro'}/auth/reset-password`,
   })
 
   if (error) {

@@ -31,7 +31,7 @@ export async function signInWithGoogleAction() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001'}/auth/callback`,
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://covergen.pro'}/auth/callback`,
       queryParams: {
         access_type: 'offline',
         prompt: 'consent',
