@@ -33,14 +33,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         authService.setAuthChangeHandler((user) => {
           console.log('[AuthContext] Auth change handler called:', !!user, user?.email)
           setUser(user)
-          // Only set loading to false if we're not checking for OAuth callback
-          const cookies = document.cookie.split(';')
-          const hasOAuthPending = cookies.some(cookie => 
-            cookie.trim().startsWith('oauth-callback-success=true')
-          )
-          if (!hasOAuthPending) {
-            setLoading(false)
-          }
+          // Always set loading to false when auth state changes
+          setLoading(false)
         })
         
         // Initialize auth service
