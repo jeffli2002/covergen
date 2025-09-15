@@ -29,12 +29,11 @@ export default function OAuthDebugTest() {
         return
       }
       
-      // Import and create client
-      addLog('Importing @supabase/ssr...')
-      const { createBrowserClient } = await import('@supabase/ssr')
+      // Import singleton client
+      addLog('Importing Supabase singleton client...')
+      const { supabase } = await import('@/lib/supabase-client')
       
-      addLog('Creating Supabase client...')
-      const supabase = createBrowserClient(supabaseUrl, supabaseKey)
+      addLog('Using singleton Supabase client')
       
       // Prepare redirect URL
       const redirectTo = `${window.location.origin}/auth/callback?next=/oauth-debug-test`

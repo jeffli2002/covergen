@@ -1,5 +1,4 @@
-import { createSupabaseClient } from '@/lib/supabase-client'
-import { supabase as simpleSupabase } from '@/lib/supabase-simple'
+import { supabase } from '@/lib/supabase-client'
 
 let authServiceInstance: AuthService | null = null
 
@@ -25,8 +24,8 @@ class AuthService {
     if (typeof window === 'undefined') {
       return null
     }
-    // Always create a fresh instance to ensure latest cookies are read
-    return createSupabaseClient()
+    // Return singleton instance
+    return supabase
   }
 
   async initialize() {
@@ -295,12 +294,7 @@ class AuthService {
       console.log('[Auth] Google sign in with redirect URL:', redirectUrl)
       console.log('[Auth] Using simple Supabase client for OAuth')
 
-      if (!simpleSupabase) {
-        console.error('[Auth] Simple Supabase client is null - environment variables missing')
-        throw new Error('Supabase not configured - check environment variables')
-      }
-
-      const { data, error } = await simpleSupabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: redirectUrl,

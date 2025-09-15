@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, Suspense } from 'react'
-import { createSupabaseClient } from '@/lib/supabase-client'
+import { supabase } from '@/lib/supabase-client'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 function AuthHandlerContent() {
@@ -35,7 +35,7 @@ function AuthHandlerContent() {
         
         if (accessToken) {
           console.log('[AuthHandler] Found access token, setting session')
-          const supabase = createSupabaseClient()
+          // Use singleton instance
           
           try {
             // Set the session with the tokens
@@ -88,7 +88,7 @@ function AuthHandlerContent() {
         
         // Wait for server-side auth to complete
         setTimeout(async () => {
-          const supabase = createSupabaseClient()
+          // Use singleton instance
           const { data: { session } } = await supabase.auth.getSession()
           
           if (session) {

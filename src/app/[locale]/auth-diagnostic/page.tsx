@@ -93,12 +93,8 @@ export default function AuthDiagnosticPage() {
 
     // First, let's test if we can get the OAuth URL without redirecting
     try {
-      const { supabase } = await import('@/lib/supabase-simple')
-      if (!supabase) {
-        console.error('[AuthDiagnostic] Supabase client is null')
-        alert('Supabase client not initialized - check environment variables')
-        return
-      }
+      const { supabase } = await import('@/lib/supabase-client')
+      console.log('[AuthDiagnostic] Using singleton Supabase client')
       
       const redirectUrl = `${window.location.origin}/auth/callback?next=${window.location.pathname}`
       
@@ -254,21 +250,9 @@ export default function AuthDiagnosticPage() {
                       console.log('[AuthDiagnostic] Current URL:', window.location.href)
                       
                       try {
-                        console.log('[AuthDiagnostic] Importing simple Supabase client...')
-                        const { supabase } = await import('@/lib/supabase-simple')
-                        console.log('[AuthDiagnostic] Import successful, client:', supabase ? 'initialized' : 'null')
-                        
-                        if (!supabase) {
-                          console.error('[AuthDiagnostic] Supabase client is null - environment variables missing')
-                          const envDebug = {
-                            url: process.env.NEXT_PUBLIC_SUPABASE_URL,
-                            key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'MISSING'
-                          }
-                          console.error('[AuthDiagnostic] Environment debug:', envDebug)
-                          throw new Error('Supabase client not initialized - check environment variables')
-                        }
-                        
-                        console.log('[AuthDiagnostic] Using simple Supabase client')
+                        console.log('[AuthDiagnostic] Importing Supabase client...')
+                        const { supabase } = await import('@/lib/supabase-client')
+                        console.log('[AuthDiagnostic] Import successful, using singleton client')
                         
                         const redirectTo = `${window.location.origin}/auth/callback?next=/en/auth-diagnostic`
                         console.log('[AuthDiagnostic] Redirect URL:', redirectTo)
