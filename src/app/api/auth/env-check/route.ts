@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 export async function GET() {
   console.log('[Env Check] Checking environment variables...')
   
-  const envCheck = {
+  const envCheck: any = {
     timestamp: new Date().toISOString(),
     supabase: {
       url: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'MISSING',
