@@ -1,10 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 
 export default function TestSupabaseRedirect() {
   const [results, setResults] = useState<any[]>([])
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const addResult = (test: string, result: any) => {
     setResults(prev => [...prev, { test, result, timestamp: new Date().toISOString() }])
@@ -32,7 +37,7 @@ export default function TestSupabaseRedirect() {
       const { data: data1, error: error1 } = await client1.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: mounted ? `${window.location.origin}/auth/callback` : '',
           skipBrowserRedirect: true
         }
       })
@@ -68,7 +73,7 @@ export default function TestSupabaseRedirect() {
       const { data: data2, error: error2 } = await client2.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/en`,
+          redirectTo: mounted ? `${window.location.origin}/auth/callback?next=/en` : '',
           skipBrowserRedirect: true,
           queryParams: {
             access_type: 'offline',
@@ -143,7 +148,7 @@ export default function TestSupabaseRedirect() {
       const { data: data4, error: error4 } = await client4.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: mounted ? `${window.location.origin}/auth/callback` : '',
           skipBrowserRedirect: true,
           queryParams: {
             response_type: 'code'
@@ -170,6 +175,7 @@ export default function TestSupabaseRedirect() {
   }
 
   const analyzeSupabaseRedirect = async () => {
+    if (!mounted) return
     // This will actually redirect to see what happens
     const confirmRedirect = window.confirm(
       'This will redirect you to Google OAuth. After authentication, note where you land. Continue?'
@@ -190,13 +196,25 @@ export default function TestSupabaseRedirect() {
     const { data, error } = await client.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?debug=true`
+        redirectTo: mounted ? `${window.location.origin}/auth/callback?debug=true` : ''
       }
     })
 
     if (error) {
       console.error('OAuth error:', error)
     }
+  }
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-lg shadow p-4">
+            <p>Loading...</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
