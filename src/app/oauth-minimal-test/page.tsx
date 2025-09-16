@@ -1,6 +1,13 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+
 export default function OAuthMinimalTest() {
+  const [mounted, setMounted] = useState(false)
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
   const testOAuth = () => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     if (!supabaseUrl) {
@@ -24,8 +31,12 @@ export default function OAuthMinimalTest() {
       
       <div className="mb-4">
         <p><strong>Supabase URL:</strong> {process.env.NEXT_PUBLIC_SUPABASE_URL || 'Not set'}</p>
-        <p><strong>Current Origin:</strong> {typeof window !== 'undefined' ? window.location.origin : 'Loading...'}</p>
-        <p><strong>Redirect URL:</strong> {typeof window !== 'undefined' ? `${window.location.origin}/auth/callback-production` : 'Loading...'}</p>
+        {mounted && (
+          <>
+            <p><strong>Current Origin:</strong> {window.location.origin}</p>
+            <p><strong>Redirect URL:</strong> {`${window.location.origin}/auth/callback-production`}</p>
+          </>
+        )}
       </div>
       
       <button
