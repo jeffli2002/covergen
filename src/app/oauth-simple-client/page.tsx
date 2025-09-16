@@ -26,6 +26,9 @@ export default function OAuthSimpleClient() {
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback-production`,
+          queryParams: {
+            response_type: 'code' // ADD THIS TO FORCE PKCE
+          } as any,
           skipBrowserRedirect: true
         }
       })
@@ -70,7 +73,10 @@ export default function OAuthSimpleClient() {
       const { data, error } = await simpleClient.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback-production`
+          redirectTo: `${window.location.origin}/auth/callback-production`,
+          queryParams: {
+            response_type: 'code' // ADD THIS TO FORCE PKCE
+          } as any
         }
       })
       
