@@ -414,6 +414,17 @@ class AuthService {
         errorStatus: (error as any)?.status,
         dataUrl: data?.url
       })
+      
+      // Debug: Check if PKCE verifier was stored
+      if (data?.url && typeof window !== 'undefined') {
+        const verifierKeys = Object.keys(sessionStorage).filter(k => 
+          k.includes('verifier') || k.includes('pkce')
+        )
+        console.log('[Auth] PKCE verifier storage check:', {
+          verifierKeys,
+          hasVerifier: verifierKeys.length > 0
+        })
+      }
 
       if (error) {
         console.error('[Auth] OAuth error details:', {
