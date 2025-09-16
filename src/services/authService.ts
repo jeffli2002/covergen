@@ -400,7 +400,8 @@ class AuthService {
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
-          },
+            response_type: 'code' // Force PKCE flow with response_type=code
+          } as any, // Type assertion needed as response_type isn't in the official types
           skipBrowserRedirect: false
         }
       })
