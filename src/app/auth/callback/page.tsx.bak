@@ -2,7 +2,10 @@
 
 import { useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 function AuthCallbackContent() {
   const router = useRouter()
@@ -10,6 +13,15 @@ function AuthCallbackContent() {
 
   useEffect(() => {
     const handleCallback = async () => {
+      // Create client instance inside useEffect to ensure it runs on client
+      const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: true,
+          flowType: 'pkce'
+        }
+      })
       const code = searchParams.get('code')
       const next = searchParams.get('next') || '/en'
       const error = searchParams.get('error')
@@ -67,6 +79,52 @@ function AuthCallbackContent() {
           return
         }
         
+        // Debug: List all sessionStorage keys
+        const sessionKeys = Object.keys(sessionStorage)
+        console.log('[Client Callback] SessionStorage keys:', sessionKeys)
+        
+        // Look for PKCE verifier more broadly
+        const verifierKeys = sessionKeys.filter(key => 
+          key.includes('verifier') || key.includes('pkce') || key.includes('code-verifier')
+        )
+        console.log('[Client Callback] Verifier-related keys:', verifierKeys)
+        
+        // Also check for Supabase auth storage
+        const supabaseAuthKey = sessionKeys.find(key => key.startsWith('sb-') && key.includes('auth-token'))
+        if (supabaseAuthKey) {
+          try {
+            const authData = JSON.parse(sessionStorage.getItem(supabaseAuthKey) || '{}')
+            console.log('[Client Callback] Supabase auth storage:', {
+              hasCodeVerifier: !!authData.code_verifier,
+              keys: Object.keys(authData)
+            })
+          } catch (e) {
+            console.error('[Client Callback] Error parsing auth storage:', e)
+          }
+        }
+        
+        // Check if Supabase can detect and handle the session from URL automatically
+        console.log('[Client Callback] Checking for session with detectSessionInUrl enabled...')
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        
+        if (session) {
+          console.log('[Client Callback] Session detected automatically:', {
+            hasSession: !!session,
+            user: session.user?.email
+          })
+          
+          // Clear the PKCE verifier after successful auth
+          if (verifierKey) {
+            sessionStorage.removeItem(verifierKey)
+          }
+          
+          // Redirect to the original page
+          router.push(next)
+          return
+        }
+        
+        // If no session detected automatically, try manual exchange
+        console.log('[Client Callback] No auto-detected session, trying manual exchange...')
         console.log('[Client Callback] About to call exchangeCodeForSession with code:', code?.substring(0, 8) + '...')
         const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
         console.log('[Client Callback] Exchange complete, error:', exchangeError)
