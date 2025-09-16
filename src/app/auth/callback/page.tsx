@@ -2,7 +2,7 @@
 
 import { useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { supabasePKCE } from '@/lib/supabase-pkce-fixed'
+import { supabase } from '@/lib/supabase'
 
 function AuthCallbackContent() {
   const router = useRouter()
@@ -15,12 +15,24 @@ function AuthCallbackContent() {
       const error = searchParams.get('error')
       const errorDescription = searchParams.get('error_description')
 
+      // Also log to localStorage for debugging
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('oauth-callback-debug', JSON.stringify({
+          timestamp: new Date().toISOString(),
+          url: window.location.href,
+          code: !!code,
+          error: error,
+          errorDescription: errorDescription
+        }))
+      }
+
       console.log('[Client Callback] Processing OAuth callback:', {
         hasCode: !!code,
         hasError: !!error,
         error,
         errorDescription,
-        next
+        next,
+        url: window.location.href
       })
 
       // Check sessionStorage for PKCE verifier
@@ -47,7 +59,13 @@ function AuthCallbackContent() {
       try {
         // Exchange code for session - this will use the PKCE verifier from sessionStorage
         console.log('[Client Callback] Exchanging code for session...')
-        const { data, error: exchangeError } = await supabasePKCE.auth.exchangeCodeForSession(code)
+        if (!supabase) {
+          console.error('[Client Callback] Supabase client is null!')
+          router.push('/en/login?error=no_client')
+          return
+        }
+        
+        const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
         
         if (exchangeError) {
           console.error('[Client Callback] Exchange failed:', exchangeError)
