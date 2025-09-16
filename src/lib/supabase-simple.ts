@@ -36,5 +36,5 @@ export function createSupabaseClient() {
   return browserClient
 }
 
-// For backward compatibility - use the singleton
-export const supabase = createSupabaseClient()
+// For backward compatibility - create a getter that returns the client
+export const getSupabase = () => createSupabaseClient()

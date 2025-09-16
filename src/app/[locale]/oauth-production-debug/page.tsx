@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase-simple'
+import { getSupabase } from '@/lib/supabase-simple'
 
 interface DebugInfo {
   environment: {
@@ -87,12 +87,12 @@ export default function OAuthProductionDebugPage() {
     try {
       // Test 1: Check Supabase client
       const clientTest = {
-        hasClient: !!supabase,
-        clientType: typeof supabase
+        hasClient: !!getSupabase,
+        clientType: typeof getSupabase
       }
 
       // Test 2: Try to get current session
-      const { data: session, error: sessionError } = await supabase.auth.getSession()
+      const { data: session, error: sessionError } = await getSupabase().auth.getSession()
       const sessionTest = {
         hasSession: !!session?.session,
         sessionError: sessionError?.message || null,
@@ -101,7 +101,7 @@ export default function OAuthProductionDebugPage() {
 
       // Test 3: Generate OAuth URL
       const redirectTo = `${window.location.origin}/auth/callback`
-      const { data: oauthData, error: oauthError } = await supabase.auth.signInWithOAuth({
+      const { data: oauthData, error: oauthError } = await getSupabase().auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo,
@@ -118,8 +118,8 @@ export default function OAuthProductionDebugPage() {
 
       // Test 4: Check auth settings
       const authSettings = {
-        detectSessionInUrl: supabase.auth.detectSessionInUrl,
-        flowType: supabase.auth.flowType || 'unknown'
+        detectSessionInUrl: getSupabase().auth.detectSessionInUrl,
+        flowType: getSupabase().auth.flowType || 'unknown'
       }
 
       const results = {
