@@ -353,16 +353,26 @@ class AuthService {
         siteUrl: process.env.NEXT_PUBLIC_SITE_URL
       })
 
-      // Use the singleton client for OAuth operations
-      const supabaseClient = this.getSupabase()
-      if (!supabaseClient) {
-        console.error('[Auth] Supabase client is null')
-        throw new Error('Supabase not configured')
+      // Create a simple client for OAuth to ensure consistency with callback
+      const { createClient } = await import('@supabase/supabase-js')
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      
+      const oauthClient = createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: true,
+          flowType: 'pkce'
+        }
+      })
+      
+      if (!oauthClient) {
+        console.error('[Auth] Failed to create OAuth client')
+        throw new Error('Failed to create OAuth client')
       }
 
       // Check if Supabase URL and anon key are configured
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
       
       console.log('[Auth] Supabase configuration check:', {
         hasUrl: !!supabaseUrl,
@@ -393,15 +403,14 @@ class AuthService {
         skipBrowserRedirect: false
       })
 
-      const { data, error } = await supabaseClient.auth.signInWithOAuth({
+      const { data, error } = await oauthClient.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: redirectUrl,
           queryParams: {
             access_type: 'offline',
-            prompt: 'consent',
-            response_type: 'code' // Force PKCE flow with response_type=code
-          } as any, // Type assertion needed as response_type isn't in the official types
+            prompt: 'consent'
+          },
           skipBrowserRedirect: false
         }
       })
