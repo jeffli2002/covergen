@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
   
   console.log('[Callback Production] Request received:', {
     hasCode: !!code,
+    codeLength: code?.length,
     hasError: !!error,
     error,
     errorDescription,
@@ -20,8 +21,11 @@ export async function GET(request: NextRequest) {
     isSecure: requestUrl.protocol === 'https:',
     headers: {
       host: request.headers.get('host'),
-      cookie: request.headers.get('cookie')?.includes('sb-') ? 'has sb- cookies' : 'no sb- cookies'
-    }
+      cookie: request.headers.get('cookie')?.includes('sb-') ? 'has sb- cookies' : 'no sb- cookies',
+      referer: request.headers.get('referer'),
+      userAgent: request.headers.get('user-agent')
+    },
+    fullUrl: requestUrl.toString()
   })
   
   if (error) {
