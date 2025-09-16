@@ -21,8 +21,11 @@ export default function OAuthUltimateDebug() {
       supabaseClients: {},
       oauthTests: {},
       serverCallback: {},
-      recommendations: []
+      recommendations: [],
+      errors: []
     }
+    
+    try {
     
     // 1. Environment Analysis
     debug.environment = {
@@ -187,6 +190,15 @@ export default function OAuthUltimateDebug() {
       debug.recommendations.push('✅ Using PKCE flow - server-side callback should work')
     }
     
+    } catch (error) {
+      console.error('[OAuth Debug] Error:', error)
+      debug.errors.push({
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      })
+      debug.recommendations.push('🔴 Debug script encountered an error - check console')
+    }
+    
     setResults(debug)
     setLoading(false)
   }
@@ -318,6 +330,22 @@ export default function OAuthUltimateDebug() {
           </pre>
         </section>
       </div>
+      
+      {results.errors?.length > 0 && (
+        <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded">
+          <h3 className="font-bold text-red-800 mb-2">Errors Encountered:</h3>
+          {results.errors.map((err: any, i: number) => (
+            <div key={i} className="text-sm mb-2">
+              <p className="text-red-700 font-semibold">{err.message}</p>
+              {err.stack && (
+                <pre className="text-xs text-red-600 mt-1 overflow-auto">
+                  {err.stack}
+                </pre>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
       
       <div className="mt-8 p-4 bg-blue-50 rounded">
         <h3 className="font-bold mb-2">Why Dev Works but Production Doesn't:</h3>
