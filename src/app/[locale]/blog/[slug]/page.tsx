@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useParams, notFound } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { Calendar, Clock, Eye, Heart, Share2, ArrowLeft, User } from 'lucide-react';
 import { getPostBySlug, getRelatedPosts } from '@/data/blogPosts';
 import { Button } from '@/components/ui/button';
@@ -71,11 +70,7 @@ export default function BlogPostPage() {
         </Link>
 
         <article className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden"
-          >
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
             {/* Header Image */}
             <div className="h-64 md:h-96 bg-gradient-to-br from-purple-500 to-pink-500 relative">
               <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
@@ -182,16 +177,11 @@ export default function BlogPostPage() {
                 ))}
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Related Posts */}
           {relatedPosts.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="mt-12"
-            >
+            <div className="mt-12">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                 Related Posts
               </h2>
@@ -224,7 +214,7 @@ export default function BlogPostPage() {
                   </Link>
                 ))}
               </div>
-            </motion.div>
+            </div>
           )}
         </article>
       </div>
