@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { supabase } from '@/lib/supabase-pkce-fixed'
+import { supabasePKCE } from '@/lib/supabase-pkce-fixed'
 
 export default function AuthCallbackPage() {
   const router = useRouter()
@@ -47,7 +47,7 @@ export default function AuthCallbackPage() {
       try {
         // Exchange code for session - this will use the PKCE verifier from sessionStorage
         console.log('[Client Callback] Exchanging code for session...')
-        const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+        const { data, error: exchangeError } = await supabasePKCE.auth.exchangeCodeForSession(code)
         
         if (exchangeError) {
           console.error('[Client Callback] Exchange failed:', exchangeError)
