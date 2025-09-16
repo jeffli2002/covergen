@@ -65,8 +65,7 @@ export default function OAuthTestFinalFix() {
         method: 'Testing updated authService.signInWithGoogle()',
         success: result.success,
         error: result.error,
-        note: 'This will redirect to Google if successful',
-        data: result.data
+        note: 'This will redirect to Google if successful'
       })
     } catch (err) {
       setResults({ error: err instanceof Error ? err.message : 'Unknown error' })
