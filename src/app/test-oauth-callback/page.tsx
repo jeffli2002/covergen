@@ -5,7 +5,7 @@ import { supabasePKCE } from '@/lib/supabase-pkce-fixed'
 
 export default function TestOAuthCallback() {
   const [status, setStatus] = useState('')
-  const [details, setDetails] = useState<any>({})
+  const [details, setDetails] = useState<Record<string, any>>({})
 
   const testOAuth = async () => {
     setStatus('Starting OAuth flow...')
@@ -17,7 +17,7 @@ export default function TestOAuthCallback() {
       // Check what redirect URL will be used
       const redirectTo = `${window.location.origin}/auth/callback?next=/test-oauth-callback`
       
-      setDetails(prev => ({
+      setDetails((prev: Record<string, any>) => ({
         ...prev,
         expectedRedirect: redirectTo,
         origin: window.location.origin
@@ -37,13 +37,13 @@ export default function TestOAuthCallback() {
       
       if (error) {
         setStatus(`Error: ${error.message}`)
-        setDetails(prev => ({ ...prev, error }))
+        setDetails((prev: Record<string, any>) => ({ ...prev, error }))
         return
       }
       
       if (data?.url) {
         setStatus('Redirecting to Google...')
-        setDetails(prev => ({ 
+        setDetails((prev: Record<string, any>) => ({ 
           ...prev, 
           oauthUrl: data.url,
           redirectUri: new URL(data.url).searchParams.get('redirect_uri')
@@ -53,7 +53,7 @@ export default function TestOAuthCallback() {
         const verifierKeys = Object.keys(sessionStorage).filter(k => 
           k.includes('verifier') || k.includes('pkce')
         )
-        setDetails(prev => ({ 
+        setDetails((prev: Record<string, any>) => ({ 
           ...prev, 
           verifierKeys,
           hasVerifier: verifierKeys.length > 0
@@ -61,7 +61,7 @@ export default function TestOAuthCallback() {
       }
     } catch (err) {
       setStatus(`Exception: ${err instanceof Error ? err.message : 'Unknown'}`)
-      setDetails(prev => ({ ...prev, exception: err }))
+      setDetails((prev: Record<string, any>) => ({ ...prev, exception: err }))
     }
   }
 
