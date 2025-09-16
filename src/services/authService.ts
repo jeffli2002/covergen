@@ -374,8 +374,8 @@ class AuthService {
       // Get the current pathname to preserve locale
       const currentPath = window.location.pathname || '/en'
       
-      // Use server-side callback for PKCE flow
-      const redirectUrl = `${window.location.origin}/auth/callback-production?next=${encodeURIComponent(currentPath)}`
+      // Use client-side callback for PKCE flow to access sessionStorage
+      const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
       
       // Log the actual redirect URL being used
       console.log('[Auth] Using dynamic redirect URL based on current origin')
