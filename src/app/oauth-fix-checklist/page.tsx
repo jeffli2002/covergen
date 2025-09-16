@@ -15,13 +15,13 @@ export default function OAuthFixChecklist() {
     }
     
     // 1. Check production URL
-    const isProduction = window.location.hostname === 'covergen.app'
+    const isProduction = window.location.hostname === 'covergen.pro'
     const currentUrl = window.location.origin
     checks.items.push({
       name: 'Production URL Check',
       status: isProduction ? 'pass' : 'warning',
       current: currentUrl,
-      expected: 'https://covergen.app',
+      expected: 'https://covergen.pro',
       action: isProduction ? null : 'Test on production URL'
     })
     
@@ -203,7 +203,7 @@ export default function OAuthFixChecklist() {
             <ol className="list-decimal list-inside space-y-2 text-sm">
               <li>Go to Supabase Dashboard → Authentication → URL Configuration</li>
               <li>Add ALL callback routes listed above to "Redirect URLs"</li>
-              <li>Ensure "Site URL" is set to: https://covergen.app</li>
+              <li>Ensure "Site URL" is set to: https://covergen.pro</li>
               <li>In your code, use consistent PKCE flow (not implicit)</li>
               <li>Deploy and test on production URL (not localhost)</li>
               <li>Check browser console for any cookie warnings</li>

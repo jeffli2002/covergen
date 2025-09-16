@@ -34,7 +34,7 @@ The issue isn't actually about PKCE vs Implicit flow. The real problem is likely
 
 2. **Redirect URL Mismatch**
    - Dev: `http://localhost:3001/auth/callback`
-   - Production: `https://covergen.app/auth/callback`
+   - Production: `https://covergen.pro/auth/callback`
    - Even slight mismatches cause OAuth to fail
 
 3. **Session Detection Timing**

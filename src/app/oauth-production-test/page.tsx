@@ -40,8 +40,8 @@ export default function OAuthProductionTest() {
     results.urls = {
       currentOrigin: origin,
       callbackUrl: `${origin}/auth/callback`,
-      expectedProdUrl: 'https://covergen.app/auth/callback',
-      isCorrectProdUrl: origin === 'https://covergen.app',
+      expectedProdUrl: 'https://covergen.pro/auth/callback',
+      isCorrectProdUrl: origin === 'https://covergen.pro',
       allPossibleCallbacks: [
         `${origin}/auth/callback`,
         `${origin}/auth/callback-v2`,
