@@ -120,7 +120,7 @@ export default function OAuthTestFixed() {
       </div>
       
       <div className="mt-4 text-sm text-gray-600">
-        <p>Callback URL being used: <code className="bg-gray-100 px-2 py-1 rounded">{window.location.origin}/auth/callback</code></p>
+        <p>Callback URL being used: <code className="bg-gray-100 px-2 py-1 rounded">{typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback</code></p>
       </div>
     </div>
   )
