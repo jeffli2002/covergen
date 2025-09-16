@@ -62,7 +62,7 @@ export default function BlogPostPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-black">
       <div className="container mx-auto px-4 py-8">
-        <Link href="/blog">
+        <Link href="/en/blog">
           <Button variant="ghost" className="mb-8">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Blog
@@ -189,7 +189,7 @@ export default function BlogPostPage() {
                 {relatedPosts.map((relatedPost) => (
                   <Link
                     key={relatedPost.id}
-                    href={`/blog/${relatedPost.slug}`}
+                    href={`/en/blog/${relatedPost.slug}`}
                     className="group"
                   >
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">

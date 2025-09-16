@@ -161,11 +161,11 @@ export default function BlogPage() {
                     </div>
                   </div>
                   
-                  <Link href={`/blog/${post.slug}`} className="ml-auto">
+                  <Link href={`/en/blog/${post.slug}`} className="ml-auto">
                     <Button 
-                      variant="ghost" 
+                      variant="default" 
                       size="sm"
-                      className="group"
+                      className="group bg-purple-600 hover:bg-purple-700 text-white"
                     >
                       Read More 
                       <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
