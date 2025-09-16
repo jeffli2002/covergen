@@ -1,12 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createSupabaseClient } from '@/lib/supabase-simple'
 
 export default function OAuthTestFixed() {
   const [loading, setLoading] = useState(false)
   const [user, setUser] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+  
+  useEffect(() => {
+    setMounted(true)
+    checkSession()
+  }, [])
   
   const checkSession = async () => {
     const supabase = createSupabaseClient()
@@ -119,9 +125,11 @@ export default function OAuthTestFixed() {
         </ol>
       </div>
       
-      <div className="mt-4 text-sm text-gray-600">
-        <p>Callback URL being used: <code className="bg-gray-100 px-2 py-1 rounded">{typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback</code></p>
-      </div>
+      {mounted && (
+        <div className="mt-4 text-sm text-gray-600">
+          <p>Callback URL being used: <code className="bg-gray-100 px-2 py-1 rounded">{window.location.origin}/auth/callback-production</code></p>
+        </div>
+      )}
     </div>
   )
 }
