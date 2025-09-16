@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { supabasePKCE } from '@/lib/supabase-pkce-fixed'
+import dynamic from 'next/dynamic'
 
-export default function OAuthRedirectDebug() {
+function OAuthRedirectDebugContent() {
   const [redirectUrl, setRedirectUrl] = useState('')
   const [authUrl, setAuthUrl] = useState('')
   
@@ -48,7 +49,7 @@ export default function OAuthRedirectDebug() {
       <div className="space-y-4">
         <div className="p-4 bg-gray-100 rounded">
           <h3 className="font-semibold mb-2">Expected Redirect URL:</h3>
-          <p className="font-mono text-sm break-all">{window.location.origin}/auth/callback</p>
+          <p className="font-mono text-sm break-all">{typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback</p>
         </div>
         
         <div className="p-4 bg-blue-100 rounded">
@@ -82,3 +83,9 @@ export default function OAuthRedirectDebug() {
     </div>
   )
 }
+
+const OAuthRedirectDebug = dynamic(() => Promise.resolve(OAuthRedirectDebugContent), {
+  ssr: false
+})
+
+export default OAuthRedirectDebug

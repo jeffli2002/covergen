@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { supabasePKCE } from '@/lib/supabase-pkce-fixed'
+import dynamic from 'next/dynamic'
 
-export default function TestOAuthCallback() {
+function TestOAuthCallbackContent() {
   const [status, setStatus] = useState('')
   const [details, setDetails] = useState<Record<string, any>>({})
 
@@ -74,7 +75,7 @@ export default function TestOAuthCallback() {
           This test verifies the OAuth flow is using the correct callback URL.
         </p>
         <p className="text-sm">
-          Expected: {window.location.origin}/auth/callback
+          Expected: {typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback
         </p>
       </div>
       
@@ -112,3 +113,9 @@ export default function TestOAuthCallback() {
     </div>
   )
 }
+
+const TestOAuthCallback = dynamic(() => Promise.resolve(TestOAuthCallbackContent), {
+  ssr: false
+})
+
+export default TestOAuthCallback
