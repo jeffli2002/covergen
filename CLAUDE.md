@@ -183,55 +183,111 @@ Generation/editing tasks are queued for async processing:
 - Frontend load time: < 2 seconds (P75)
 - Availability: 99.9% uptime SLA
 
-## Google OAuth Implementation Learning
+## Google OAuth Implementation Solution (Updated)
 
-### Problem: Multiple GoTrueClient Instances Warning
-When implementing Google OAuth with Supabase in Next.js, you may encounter the warning "Multiple GoTrueClient instances detected in the same browser context". This happens when:
+### Problem: OAuth Callback Hanging
+When implementing Google OAuth with Supabase in Next.js, the OAuth callback was hanging with "Exchanging code for session..." due to:
 
-1. **Mixing OAuth flows**: Using both implicit flow (tokens in URL hash) and PKCE flow (server-side code exchange)
-2. **Multiple client instances**: Creating Supabase clients in different ways across the codebase
-3. **SSR complications**: Complex SSR client setup conflicting with OAuth callbacks
+1. **PKCE verifier storage**: PKCE flow stores verifier in browser sessionStorage
+2. **Server-side callback limitation**: Server-side routes can't access browser storage
+3. **Client mismatch**: Different Supabase client instances between OAuth initiation and callback
 
-### Solution: Use a Single, Simple Supabase Client with PKCE Flow
+### Solution: Server-Side OAuth with Implicit Flow (Same as next-supabase-stripe-starter)
 
-1. **Create a simple Supabase client** (`/src/lib/supabase-simple.ts`):
+After analyzing the working next-supabase-stripe-starter project, we implemented their exact approach:
+
+1. **Remove PKCE Configuration** (`/src/lib/supabase.ts`):
    ```typescript
-   export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-     auth: {
-       autoRefreshToken: true,
-       persistSession: true,
-       detectSessionInUrl: true,
-       flowType: 'pkce' // Use PKCE flow consistently
+   auth: {
+     autoRefreshToken: true,
+     persistSession: true,
+     detectSessionInUrl: true
+     // No flowType: 'pkce' - uses implicit flow by default
+   }
+   ```
+
+2. **Use Server Actions for OAuth** (`/src/app/actions/auth.ts`):
+   ```typescript
+   export async function signInWithGoogleAction(currentPath: string) {
+     const supabase = await createSupabaseServerClient()
+     const { data, error } = await supabase.auth.signInWithOAuth({
+       provider: 'google',
+       options: {
+         redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=${currentPath}`
+       }
+     })
+     if (data.url) redirect(data.url)
+   }
+   ```
+
+3. **Server-Side OAuth Callback** (`/src/app/auth/callback/route.ts`):
+   ```typescript
+   export async function GET(request: Request) {
+     const { searchParams, origin } = new URL(request.url)
+     const code = searchParams.get('code')
+     const next = searchParams.get('next') ?? '/'
+
+     if (code) {
+       const cookieStore = await cookies()
+       const supabase = createServerClient(
+         process.env.NEXT_PUBLIC_SUPABASE_URL!,
+         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+         {
+           cookies: {
+             get(name: string) { return cookieStore.get(name)?.value },
+             set(name: string, value: string, options: CookieOptions) {
+               cookieStore.set({ name, value, ...options })
+             },
+             remove(name: string) { cookieStore.delete(name) }
+           }
+         }
+       )
+       
+       const { error } = await supabase.auth.exchangeCodeForSession(code)
+       if (!error) return NextResponse.redirect(`${origin}${next}`)
      }
-   })
+     
+     return NextResponse.redirect(`${origin}/auth/error`)
+   }
    ```
 
-2. **Use PKCE OAuth callback route** (`/src/app/auth/callback/route.ts`):
-   - Server-side route to exchange OAuth code for session
-   - Handles secure cookie management
-   - Redirects to original page after authentication
-
-3. **Update authService redirect URL**:
+4. **Update AuthService**:
    ```typescript
-   const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
+   async signInWithGoogle() {
+     const currentPath = window.location.pathname || '/'
+     const { signInWithGoogleAction } = await import('@/app/actions/auth')
+     const result = await signInWithGoogleAction(currentPath)
+     // Server action handles redirect
+   }
    ```
 
-4. **Remove conflicting components**:
-   - Remove OAuthHashHandler (for implicit flow)
-   - Remove complex SSR client usage in OAuth-related code
+### Key Differences from PKCE Approach
 
-### Key Takeaways
+| Aspect | PKCE Flow (Previous) | Implicit Flow (Current) |
+|--------|---------------------|------------------------|
+| Verifier Storage | Browser sessionStorage | Not needed |
+| Callback Handler | Must be client-side | Can be server-side |
+| Security | More secure | Standard security |
+| Implementation | More complex | Simpler |
 
-1. **Consistency is crucial**: Pick ONE OAuth flow (PKCE recommended) and stick to it
-2. **Simplify client creation**: Use a single, simple Supabase client for OAuth flows
-3. **Debug systematically**: Use debugging tools to identify mixed flows before making changes
-4. **Type safety**: Always add TypeScript annotations for Supabase callbacks to catch errors early
+### Why This Works
 
-### Common Pitfalls to Avoid
+1. **No PKCE verifier needed**: Implicit flow doesn't require browser storage access
+2. **Server-side handling**: All OAuth operations happen server-side
+3. **Consistent with starter**: Matches proven implementation from next-supabase-stripe-starter
+4. **Simpler architecture**: No client/server mismatch issues
 
-- Don't mix `@supabase/supabase-js` and `@supabase/ssr` clients for OAuth
-- Don't use implicit flow components with PKCE configuration
-- Don't create multiple Supabase client instances in different files
-- Always match redirect URLs exactly in Supabase dashboard
+### Testing
 
-This approach ensures a clean, working Google OAuth implementation that can be adapted for other OAuth providers supported by Supabase.
+1. Clear all cookies and storage
+2. Navigate to login page
+3. Click "Sign in with Google"
+4. OAuth flow completes server-side
+5. User is authenticated and redirected
+
+### Important Notes
+
+- Always ensure redirect URLs are configured in Supabase dashboard
+- The implicit flow is less secure than PKCE but works with server-side callbacks
+- This approach matches successful production implementations
+- All OAuth test pages have been updated to use server actions
