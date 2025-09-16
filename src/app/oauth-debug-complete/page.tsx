@@ -106,12 +106,12 @@ export default function OAuthDebugComplete() {
       })
       
       if (error) {
-        setInfo(prev => ({ ...prev, oauthError: error.message }))
+        setInfo((prev: any) => ({ ...prev, oauthError: error.message }))
       } else {
-        setInfo(prev => ({ ...prev, oauthInitiated: true, oauthData: data }))
+        setInfo((prev: any) => ({ ...prev, oauthInitiated: true, oauthData: data }))
       }
     } catch (err) {
-      setInfo(prev => ({ ...prev, error: err instanceof Error ? err.message : 'Unknown error' }))
+      setInfo((prev: any) => ({ ...prev, error: err instanceof Error ? err.message : 'Unknown error' }))
     }
   }
   
@@ -136,7 +136,7 @@ export default function OAuthDebugComplete() {
         }
       }
       
-      setInfo(prev => ({
+      setInfo((prev: any) => ({
         ...prev,
         supabaseInternals: {
           hasAuth: !!auth,
@@ -147,7 +147,7 @@ export default function OAuthDebugComplete() {
         }
       }))
     } catch (err) {
-      setInfo(prev => ({ ...prev, internalsError: err instanceof Error ? err.message : 'Error accessing internals' }))
+      setInfo((prev: any) => ({ ...prev, internalsError: err instanceof Error ? err.message : 'Error accessing internals' }))
     }
   }
   
