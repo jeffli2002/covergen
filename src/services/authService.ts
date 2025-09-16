@@ -41,70 +41,9 @@ class AuthService {
     return this.initPromise
   }
 
+  // OAuth callbacks are now handled server-side
   async checkForOAuthCallback() {
-    try {
-      // Check if we just came from an OAuth callback
-      const cookies = document.cookie.split(';')
-      const hasOAuthSuccess = cookies.some(cookie => 
-        cookie.trim().startsWith('oauth-callback-success=true')
-      )
-      
-      if (hasOAuthSuccess) {
-        console.log('[Auth] OAuth callback detected, waiting for session establishment...')
-        
-        // Remove the flag cookie
-        document.cookie = 'oauth-callback-success=; max-age=0; path=/'
-        
-        // Force a session refresh with retry logic
-        const supabase = this.getSupabase()
-        if (supabase) {
-          // First, try to refresh the session to ensure cookies are processed
-          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
-          if (refreshData?.session) {
-            console.log('[Auth] Session refreshed successfully:', refreshData.session.user?.email)
-            this.session = refreshData.session
-            this.user = refreshData.session.user
-            this.storeSession(refreshData.session)
-            
-            if (this.onAuthChange) {
-              this.onAuthChange(this.user)
-            }
-            return true
-          }
-          
-          // If refresh didn't work, try getSession with retries
-          for (let attempt = 0; attempt < 8; attempt++) {
-            const { data: { session }, error } = await supabase.auth.getSession()
-            
-            if (session && !error) {
-              console.log('[Auth] OAuth session detected on attempt', attempt + 1, ':', session.user?.email)
-              this.session = session
-              this.user = session.user
-              this.storeSession(session)
-              
-              // Ensure we notify the auth change handler
-              if (this.onAuthChange) {
-                console.log('[Auth] Notifying auth change handler from OAuth callback')
-                this.onAuthChange(this.user)
-              }
-              
-              return true
-            }
-            
-            // If no session yet, wait progressively longer
-            if (attempt < 7) {
-              const waitTime = Math.min(500 * Math.pow(1.5, attempt), 3000)
-              console.log('[Auth] No session yet, retrying in', Math.round(waitTime), 'ms')
-              await new Promise(resolve => setTimeout(resolve, waitTime))
-            }
-          }
-          
-          console.warn('[Auth] OAuth callback detected but no session found after retries')
-        }
-      }
-    } catch (error) {
-      console.error('[Auth] Error checking for OAuth callback:', error)
-    }
+    // No longer needed - OAuth is handled server-side
     return false
   }
 
@@ -181,12 +120,7 @@ class AuthService {
 
       this.initialized = true
 
-      // Check for OAuth callback immediately after initialization
-      // Don't wait as this might miss the session establishment
-      const oauthCallbackDetected = await this.checkForOAuthCallback()
-      if (oauthCallbackDetected) {
-        console.log('[Auth] OAuth callback processed during initialization')
-      }
+      // OAuth callbacks are now handled server-side, no need to check here
 
       if (!this.authSubscription) {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
@@ -343,128 +277,31 @@ class AuthService {
   }
 
   async signInWithGoogle() {
+    // This method is now just a wrapper that calls the server action
     try {
-      // Debug environment info first
-      console.log('[Auth] Environment check:', {
-        env: process.env.NODE_ENV,
-        origin: typeof window !== 'undefined' ? window.location.origin : 'SSR',
-        hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-        hasSupabaseKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-        siteUrl: process.env.NEXT_PUBLIC_SITE_URL
-      })
-
-      // Create a simple client for OAuth to ensure consistency with callback
-      const { createClient } = await import('@supabase/supabase-js')
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      console.log('[Auth] Initiating Google sign in via server action')
       
-      const oauthClient = createClient(supabaseUrl, supabaseAnonKey, {
-        auth: {
-          autoRefreshToken: true,
-          persistSession: true,
-          detectSessionInUrl: true,
-          flowType: 'pkce'
-        }
-      })
-      
-      if (!oauthClient) {
-        console.error('[Auth] Failed to create OAuth client')
-        throw new Error('Failed to create OAuth client')
-      }
-
-      // Check if Supabase URL and anon key are configured
-      
-      console.log('[Auth] Supabase configuration check:', {
-        hasUrl: !!supabaseUrl,
-        urlPrefix: supabaseUrl?.substring(0, 20),
-        hasAnonKey: !!supabaseAnonKey,
-        keyPrefix: supabaseAnonKey?.substring(0, 10)
-      })
-
       // Get the current pathname to preserve locale
-      const currentPath = window.location.pathname || '/en'
+      const currentPath = window.location.pathname || '/'
       
-      // Use client-side callback for PKCE flow to access sessionStorage
-      const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
+      // Import and call the server action
+      const { signInWithGoogleAction } = await import('@/app/actions/auth')
+      const result = await signInWithGoogleAction(currentPath)
       
-      // Log the actual redirect URL being used
-      console.log('[Auth] Using dynamic redirect URL based on current origin')
-
-      console.log('[Auth] Google sign in attempt:', {
-        redirectUrl,
-        origin: window.location.origin,
-        currentPath,
-        supabaseClient: !!supabaseClient
-      })
-
-      console.log('[Auth] Calling signInWithOAuth with options:', {
-        provider: 'google',
-        redirectTo: redirectUrl,
-        skipBrowserRedirect: false
-      })
-
-      const { data, error } = await oauthClient.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: redirectUrl,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent'
-          },
-          skipBrowserRedirect: false
+      if (result?.error) {
+        console.error('[Auth] Server action returned error:', result.error)
+        return {
+          success: false,
+          error: result.error
         }
-      })
-
-      console.log('[Auth] OAuth response:', {
-        hasData: !!data,
-        hasError: !!error,
-        errorMessage: error?.message,
-        errorName: error?.name,
-        errorStatus: (error as any)?.status,
-        dataUrl: data?.url
-      })
+      }
       
-      // Debug: Check if PKCE verifier was stored
-      if (data?.url && typeof window !== 'undefined') {
-        const verifierKeys = Object.keys(sessionStorage).filter(k => 
-          k.includes('verifier') || k.includes('pkce')
-        )
-        console.log('[Auth] PKCE verifier storage check:', {
-          verifierKeys,
-          hasVerifier: verifierKeys.length > 0
-        })
-      }
-
-      if (error) {
-        console.error('[Auth] OAuth error details:', {
-          error,
-          errorString: JSON.stringify(error),
-          errorKeys: error ? Object.keys(error) : []
-        })
-        throw error
-      }
-
-      console.log('[Auth] OAuth initiated successfully, URL:', data?.url)
-      
-      // If we have a URL, the browser should redirect automatically
-      // But let's ensure it happens
-      if (data?.url && !error) {
-        console.log('[Auth] Redirecting to OAuth provider...')
-        // The Supabase client should handle this automatically with skipBrowserRedirect: false
-      }
-
+      // Server action will handle the redirect, so this shouldn't be reached
       return {
-        success: true,
-        data
+        success: true
       }
     } catch (error: any) {
-      console.error('[Auth] Sign in with Google failed:', {
-        error,
-        message: error?.message,
-        stack: error?.stack,
-        name: error?.name,
-        errorString: JSON.stringify(error)
-      })
+      console.error('[Auth] Sign in with Google failed:', error)
       return {
         success: false,
         error: error?.message || 'Failed to initiate Google sign in'
@@ -613,36 +450,16 @@ class AuthService {
     }
   }
 
-  // Deprecated - PKCE flow doesn't use this method
+  // Deprecated - OAuth is now handled server-side
   async setOAuthSession(accessToken: string, refreshToken: string) {
-    console.warn('[AuthService] setOAuthSession is deprecated for PKCE flow')
-    return { success: false, error: 'This method is not used in PKCE flow' }
+    console.warn('[AuthService] setOAuthSession is deprecated - OAuth is handled server-side')
+    return { success: false, error: 'This method is not used with server-side OAuth' }
   }
 
+  // Deprecated - OAuth code exchange is now handled server-side
   async exchangeCodeForSession(code: string) {
-    try {
-      const supabaseClient = this.getSupabase()
-      if (!supabaseClient) {
-        throw new Error('Supabase not configured')
-      }
-
-      console.log('[AuthService] Exchanging OAuth code for session...')
-      
-      const { data, error } = await supabaseClient.auth.exchangeCodeForSession(code)
-      
-      if (error) {
-        console.error('[AuthService] Error exchanging code:', error)
-        return { success: false, error: error.message }
-      }
-      
-      console.log('[AuthService] Code exchange successful')
-      
-      // Session will be handled by onAuthStateChange listener
-      return { success: true, data }
-    } catch (error: any) {
-      console.error('[AuthService] Failed to exchange code:', error)
-      return { success: false, error: error.message }
-    }
+    console.warn('[AuthService] exchangeCodeForSession is deprecated - OAuth is handled server-side')
+    return { success: false, error: 'OAuth code exchange is handled server-side' }
   }
 
   async waitForAuth() {

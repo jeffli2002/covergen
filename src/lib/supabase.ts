@@ -36,7 +36,6 @@ function getSupabaseClient() {
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true, // Enable to handle OAuth callbacks
-      flowType: 'pkce',
       debug: process.env.NODE_ENV === 'development' // Enable debug logs in dev
     },
     cookies: {

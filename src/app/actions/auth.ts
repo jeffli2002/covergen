@@ -1,6 +1,7 @@
 'use server'
 
 import { createSupabaseClient } from '@/lib/supabase/server'
+import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 export async function checkAuthSession() {
@@ -25,13 +26,21 @@ export async function checkAuthSession() {
   return { session: null }
 }
 
-export async function signInWithGoogleAction() {
+export async function signInWithGoogleAction(currentPath?: string) {
   const supabase = await createSupabaseClient()
+  const headersList = await headers()
+  const origin = headersList.get('origin') || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  
+  // Use the current path or default to the homepage
+  const nextPath = currentPath || '/'
+  const redirectTo = `${origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
+  
+  console.log('[Server Action] OAuth redirect URL:', redirectTo)
   
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://covergen.pro'}/auth/callback`,
+      redirectTo,
       queryParams: {
         access_type: 'offline',
         prompt: 'consent',
