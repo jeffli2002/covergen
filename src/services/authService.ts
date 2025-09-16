@@ -375,7 +375,7 @@ class AuthService {
       const currentPath = window.location.pathname || '/en'
       
       // Use server-side callback for PKCE flow
-      const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
+      const redirectUrl = `${window.location.origin}/auth/callback-production?next=${encodeURIComponent(currentPath)}`
       
       // Log the actual redirect URL being used
       console.log('[Auth] Using dynamic redirect URL based on current origin')
