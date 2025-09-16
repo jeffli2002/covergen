@@ -36,6 +36,10 @@ export default function AuthCallbackPage() {
           return
         }
         
+        // For implicit flow, the getSession might not work immediately
+        // We need to let Supabase detect the session from URL
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
         // Parse the URL to get session
         // This is crucial - it reads the hash fragment and establishes the session
         const { data, error: sessionError } = await supabase.auth.getSession()

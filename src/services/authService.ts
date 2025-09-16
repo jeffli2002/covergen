@@ -374,7 +374,7 @@ class AuthService {
       // Get the current pathname to preserve locale
       const currentPath = window.location.pathname || '/en'
       
-      // Use PKCE flow with production-optimized callback route
+      // Use server-side callback for PKCE flow
       const redirectUrl = `${window.location.origin}/auth/callback-production?next=${encodeURIComponent(currentPath)}`
       
       // Log the actual redirect URL being used
