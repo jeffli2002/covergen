@@ -75,7 +75,7 @@ export default function DebugPKCEVerifier() {
       })
       
       if (error) {
-        setInfo(prev => ({ ...prev, error: error.message }))
+        setInfo((prev: any) => ({ ...prev, error: error.message }))
         return
       }
       
@@ -89,7 +89,7 @@ export default function DebugPKCEVerifier() {
         }
       })
       
-      setInfo(prev => ({
+      setInfo((prev: any) => ({
         ...prev,
         afterOAuth: {
           sessionStorageKeys: newKeys,
@@ -99,7 +99,7 @@ export default function DebugPKCEVerifier() {
       }))
       
     } catch (err) {
-      setInfo(prev => ({ ...prev, error: err instanceof Error ? err.message : 'Unknown error' }))
+      setInfo((prev: any) => ({ ...prev, error: err instanceof Error ? err.message : 'Unknown error' }))
     }
   }
   

@@ -41,8 +41,8 @@ export default function OAuthPKCEFinalTest() {
         }
       })
       
-      let fixedParams = {}
-      let brokenParams = {}
+      let fixedParams: any = {}
+      let brokenParams: any = {}
       
       if (fixedData?.url) {
         const url = new URL(fixedData.url)
@@ -56,16 +56,16 @@ export default function OAuthPKCEFinalTest() {
       
       setResults({
         withFix: {
-          responseType: fixedParams['response_type'] || 'MISSING',
-          hasPKCE: fixedParams['response_type'] === 'code',
+          responseType: fixedParams.response_type || 'MISSING',
+          hasPKCE: fixedParams.response_type === 'code',
           params: fixedParams
         },
         withoutFix: {
-          responseType: brokenParams['response_type'] || 'MISSING',
-          hasPKCE: brokenParams['response_type'] === 'code',
+          responseType: brokenParams.response_type || 'MISSING',
+          hasPKCE: brokenParams.response_type === 'code',
           params: brokenParams
         },
-        conclusion: fixedParams['response_type'] === 'code' ? 
+        conclusion: fixedParams.response_type === 'code' ? 
           '✅ Fix is working! PKCE flow is active' : 
           '❌ Fix not working, still using implicit flow'
       })
