@@ -2,6 +2,20 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { type NextRequest, NextResponse } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  // Check if this is an OAuth callback that went to the wrong URL
+  const { searchParams, pathname } = new URL(request.url)
+  const code = searchParams.get('code')
+  
+  // If we detect an OAuth code but we're not on the callback route, redirect
+  if (code && !pathname.includes('/auth/callback')) {
+    console.log('[Middleware] OAuth code detected on wrong route, redirecting to callback')
+    const callbackUrl = new URL('/auth/callback', request.url)
+    searchParams.forEach((value, key) => {
+      callbackUrl.searchParams.set(key, value)
+    })
+    return NextResponse.redirect(callbackUrl)
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,

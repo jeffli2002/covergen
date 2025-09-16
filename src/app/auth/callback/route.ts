@@ -9,11 +9,18 @@ export async function GET(request: NextRequest) {
   const error = searchParams.get('error')
   const errorDescription = searchParams.get('error_description')
 
-  console.log('[OAuth Callback Route] Processing:', {
+  // Log the full request details
+  console.log('[OAuth Callback Route] Request received:', {
+    url: request.url,
     hasCode: !!code,
+    codePrefix: code?.substring(0, 8),
     next,
     error,
-    errorDescription
+    errorDescription,
+    headers: {
+      host: request.headers.get('host'),
+      userAgent: request.headers.get('user-agent')?.includes('Chrome') ? 'Chrome' : 'Other'
+    }
   })
 
   // Handle OAuth provider errors
