@@ -43,8 +43,8 @@ export default function OAuthProductionTest() {
     const origin = window.location.origin
     results.urls = {
       currentOrigin: origin,
-      callbackUrl: `${origin}/auth/callback`,
-      expectedProdUrl: 'https://covergen.pro/auth/callback',
+      callbackUrl: `${origin}/auth/callback-production`,
+      expectedProdUrl: 'https://covergen.pro/auth/callback-production',
       isCorrectProdUrl: origin === 'https://covergen.pro',
       allPossibleCallbacks: [
         `${origin}/auth/callback`,
@@ -107,7 +107,7 @@ export default function OAuthProductionTest() {
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: `${origin}/auth/callback`,
+            redirectTo: `${origin}/auth/callback-production`,
             skipBrowserRedirect: true,
             queryParams: {
               prompt: 'consent'
@@ -182,7 +182,7 @@ export default function OAuthProductionTest() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`
+        redirectTo: `${window.location.origin}/auth/callback-production`
       }
     })
     
