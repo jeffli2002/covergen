@@ -31,7 +31,7 @@ class AuthServiceV2 {
       // Clear any existing session first (helps with stuck states)
       await this.clearSession()
 
-      // Initiate OAuth flow
+      // Initiate OAuth flow with explicit PKCE parameters
       const { data, error } = await this.supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -39,7 +39,9 @@ class AuthServiceV2 {
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
-          },
+            // Force PKCE flow with response_type
+            response_type: 'code'
+          } as any,
           // Add scopes if needed
           scopes: 'email profile',
         }

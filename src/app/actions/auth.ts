@@ -44,7 +44,8 @@ export async function signInWithGoogleAction(currentPath?: string) {
       queryParams: {
         access_type: 'offline',
         prompt: 'consent',
-      }
+        response_type: 'code' // Force PKCE flow to respect redirectTo
+      } as any
     }
   })
   

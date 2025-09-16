@@ -5,14 +5,38 @@ export async function middleware(request: NextRequest) {
   // Check if this is an OAuth callback that went to the wrong URL
   const { searchParams, pathname } = new URL(request.url)
   const code = searchParams.get('code')
+  const error = searchParams.get('error')
+  const errorDescription = searchParams.get('error_description')
+  
+  // Log OAuth callbacks for debugging
+  if (code || error) {
+    console.log('[Middleware] OAuth callback detected:', {
+      pathname,
+      hasCode: !!code,
+      hasError: !!error,
+      errorDescription,
+      userAgent: request.headers.get('user-agent')?.includes('Chrome') ? 'Chrome' : 'Other'
+    })
+  }
   
   // If we detect an OAuth code but we're not on the callback route, redirect
   if (code && !pathname.includes('/auth/callback')) {
     console.log('[Middleware] OAuth code detected on wrong route, redirecting to callback')
+    
+    // Preserve the intended next path from the original OAuth request
+    const nextPath = pathname === '/' ? '/en' : pathname
+    
     const callbackUrl = new URL('/auth/callback', request.url)
+    // Copy all search params
     searchParams.forEach((value, key) => {
       callbackUrl.searchParams.set(key, value)
     })
+    
+    // Add or update the next parameter to preserve the intended destination
+    if (!callbackUrl.searchParams.has('next')) {
+      callbackUrl.searchParams.set('next', nextPath)
+    }
+    
     return NextResponse.redirect(callbackUrl)
   }
 
