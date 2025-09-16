@@ -34,24 +34,11 @@ export default function OAuthCallback() {
         // Ensure auth service is initialized first
         await authService.initialize()
 
-        // Exchange the code for a session using authService
-        const result = await authService.exchangeCodeForSession(code)
-
-        if (!result.success) {
-          console.error('[OAuthCallback] Code exchange error:', result.error)
-          setError(result.error)
-          setStatus('error')
-          return
-        }
-
-        if (!result.data?.session) {
-          setError('No session returned from code exchange')
-          setStatus('error')
-          return
-        }
-
-        console.log('[OAuthCallback] Session established:', result.data.session.user?.email)
-        setStatus('success')
+        // OAuth is now handled server-side, this component is deprecated
+        console.error('[OAuthCallback] This component is deprecated - OAuth is handled server-side')
+        setError('OAuth should be handled by server-side callback')
+        setStatus('error')
+        return
 
         // Get the stored locale or default to 'en'
         const currentPath = window.location.pathname
