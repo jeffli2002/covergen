@@ -1,51 +1,70 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { type NextRequest, NextResponse } from 'next/server'
 
+// List of paths that should NOT have locale prefixes
+const PUBLIC_PATHS = [
+  '/auth',
+  '/api',
+  '/debug',
+  '/oauth',
+  '/test',
+  '/_next',
+  '/favicon.ico',
+  '/robots.txt',
+  '/sitemap.xml',
+]
+
+// List of paths that require authentication
+const PROTECTED_PATHS = [
+  '/account',
+  '/dashboard',
+  '/settings',
+]
+
 export async function middleware(request: NextRequest) {
-  // Check if this is an OAuth callback that went to the wrong URL
-  const { searchParams, pathname } = new URL(request.url)
-  const code = searchParams.get('code')
-  const error = searchParams.get('error')
-  const errorDescription = searchParams.get('error_description')
+  const { pathname, searchParams } = request.nextUrl
   
-  // Log OAuth callbacks for debugging
-  if (code || error) {
-    console.log('[Middleware] OAuth callback detected:', {
-      pathname,
-      hasCode: !!code,
-      hasError: !!error,
-      errorDescription,
-      userAgent: request.headers.get('user-agent')?.includes('Chrome') ? 'Chrome' : 'Other'
-    })
-  }
+  // Log all requests for debugging
+  console.log('[Middleware] Processing request:', {
+    pathname,
+    hasCode: searchParams.has('code'),
+    hasError: searchParams.has('error'),
+    host: request.headers.get('host'),
+  })
+
+  // Check if this is a public path that should bypass locale routing
+  const isPublicPath = PUBLIC_PATHS.some(path => pathname.startsWith(path))
   
-  // If we detect an OAuth code but we're not on the callback route, redirect
-  if (code && !pathname.includes('/auth/callback')) {
-    console.log('[Middleware] OAuth code detected on wrong route, redirecting to callback')
+  // Handle OAuth callback
+  if (searchParams.get('code') || searchParams.get('error')) {
+    console.log('[Middleware] OAuth callback detected')
     
-    // Preserve the intended next path from the original OAuth request
-    const nextPath = pathname === '/' ? '/en' : pathname
-    
-    const callbackUrl = new URL('/auth/callback', request.url)
-    // Copy all search params
-    searchParams.forEach((value, key) => {
-      callbackUrl.searchParams.set(key, value)
-    })
-    
-    // Add or update the next parameter to preserve the intended destination
-    if (!callbackUrl.searchParams.has('next')) {
-      callbackUrl.searchParams.set('next', nextPath)
+    // If we're not already on the callback route, redirect there
+    if (!pathname.includes('/auth/callback')) {
+      const callbackUrl = new URL('/auth/callback', request.url)
+      searchParams.forEach((value, key) => {
+        callbackUrl.searchParams.set(key, value)
+      })
+      
+      // Preserve the intended destination
+      if (!callbackUrl.searchParams.has('next')) {
+        const next = pathname === '/' ? '/en' : pathname
+        callbackUrl.searchParams.set('next', next)
+      }
+      
+      console.log('[Middleware] Redirecting to callback:', callbackUrl.toString())
+      return NextResponse.redirect(callbackUrl)
     }
-    
-    return NextResponse.redirect(callbackUrl)
   }
 
+  // Create response that will be modified
   let response = NextResponse.next({
     request: {
       headers: request.headers,
     },
   })
 
+  // Set up Supabase client with proper cookie handling
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -55,15 +74,11 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value
         },
         set(name: string, value: string, options: CookieOptions) {
+          // Set cookie on both request and response
           request.cookies.set({
             name,
             value,
             ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
           })
           response.cookies.set({
             name,
@@ -72,15 +87,11 @@ export async function middleware(request: NextRequest) {
           })
         },
         remove(name: string, options: CookieOptions) {
+          // Remove cookie from both request and response
           request.cookies.set({
             name,
             value: '',
             ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
           })
           response.cookies.set({
             name,
@@ -90,9 +101,40 @@ export async function middleware(request: NextRequest) {
         },
       },
     }
-    )
+  )
 
-  await supabase.auth.getUser()
+  // Always refresh the user session
+  const { data: { user }, error } = await supabase.auth.getUser()
+  
+  if (error) {
+    console.log('[Middleware] Auth error:', error.message)
+  } else if (user) {
+    console.log('[Middleware] User authenticated:', user.email)
+  }
+
+  // Handle locale routing (but skip for public paths)
+  if (!isPublicPath && !pathname.startsWith('/en')) {
+    // Special handling for specific test pages
+    if (pathname === '/oauth-test-complete' || pathname === '/auth-debug') {
+      console.log('[Middleware] Allowing test page without locale:', pathname)
+      return response
+    }
+    
+    // Only redirect to /en if we're on the root path
+    if (pathname === '/') {
+      return NextResponse.redirect(new URL('/en', request.url))
+    }
+  }
+
+  // Check protected routes
+  if (PROTECTED_PATHS.some(path => pathname.includes(path))) {
+    if (!user) {
+      console.log('[Middleware] Redirecting to login - protected route')
+      const redirectUrl = new URL('/en', request.url)
+      redirectUrl.searchParams.set('redirect', pathname)
+      return NextResponse.redirect(redirectUrl)
+    }
+  }
 
   return response
 }
@@ -100,12 +142,11 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
+     * Match all request paths except:
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - *.svg, *.png, *.jpg, *.jpeg, *.gif, *.webp (image files)
-     * Feel free to modify this pattern to include more paths.
+     * - public folder
      */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
