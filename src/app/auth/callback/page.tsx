@@ -58,14 +58,18 @@ function AuthCallbackContent() {
 
       try {
         // Exchange code for session - this will use the PKCE verifier from sessionStorage
-        console.log('[Client Callback] Exchanging code for session...')
+        console.log('[Client Callback] Starting exchange process...')
+        console.log('[Client Callback] Supabase client:', !!supabase)
+        
         if (!supabase) {
           console.error('[Client Callback] Supabase client is null!')
           router.push('/en/login?error=no_client')
           return
         }
         
+        console.log('[Client Callback] About to call exchangeCodeForSession with code:', code?.substring(0, 8) + '...')
         const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+        console.log('[Client Callback] Exchange complete, error:', exchangeError)
         
         if (exchangeError) {
           console.error('[Client Callback] Exchange failed:', exchangeError)
@@ -87,6 +91,16 @@ function AuthCallbackContent() {
         router.push(next)
       } catch (err) {
         console.error('[Client Callback] Unexpected error:', err)
+        // Also save error to localStorage for debugging
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem('oauth-callback-error', JSON.stringify({
+            timestamp: new Date().toISOString(),
+            error: err instanceof Error ? err.message : 'Unknown error',
+            stack: err instanceof Error ? err.stack : undefined,
+            code: code,
+            url: window.location.href
+          }))
+        }
         router.push(`/en/login?error=unexpected&message=${encodeURIComponent(
           err instanceof Error ? err.message : 'An unexpected error occurred'
         )}`)
