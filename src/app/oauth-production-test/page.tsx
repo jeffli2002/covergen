@@ -19,8 +19,12 @@ export default function OAuthProductionTest() {
       cookies: {},
       oauth: {},
       session: {},
-      client: {}
+      client: {},
+      errors: []
     }
+    
+    try {
+      console.log('[OAuth Production Test] Starting diagnostics...')
     
     // 1. Check environment
     results.environment = {
@@ -146,6 +150,15 @@ export default function OAuthProductionTest() {
       )
     }
     
+    } catch (error) {
+      console.error('[OAuth Production Test] Error during diagnostics:', error)
+      results.errors.push({
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      })
+    }
+    
+    console.log('[OAuth Production Test] Diagnostics complete:', results)
     setDiagnostics(results)
     setLoading(false)
   }
@@ -220,6 +233,18 @@ export default function OAuthProductionTest() {
               <li key={i}>{issue}</li>
             ))}
           </ul>
+        </div>
+      )}
+      
+      {diagnostics.errors?.length > 0 && (
+        <div className="mb-6 p-4 border-2 border-yellow-500 bg-yellow-50 rounded">
+          <h2 className="font-bold text-yellow-800 mb-2">Diagnostic Errors:</h2>
+          {diagnostics.errors.map((error: any, i: number) => (
+            <div key={i} className="text-sm mb-2">
+              <p className="text-yellow-700">{error.message}</p>
+              <p className="text-xs text-gray-600">Check browser console for details</p>
+            </div>
+          ))}
         </div>
       )}
       
