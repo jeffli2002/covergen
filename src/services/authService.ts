@@ -188,7 +188,8 @@ class AuthService {
               full_name: metadata.fullName || '',
               role: metadata.role || 'user',
               avatar_url: metadata.avatarUrl || ''
-            }
+            },
+            emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}/auth/confirm` : undefined
           }
         })
 
@@ -206,11 +207,29 @@ class AuthService {
           throw error
         }
 
+        // Check if email confirmation is required
+        if (data.user && !data.session) {
+          return {
+            success: true,
+            user: data.user,
+            session: null,
+            needsEmailConfirmation: true,
+            message: 'Account created! Please check your email to verify your account before signing in.'
+          }
+        }
+
+        // If there's a session, email confirmation is not required
+        if (data.session) {
+          this.storeSession(data.session)
+          this.startSessionRefreshTimer()
+        }
+
         return {
           success: true,
           user: data.user,
           session: data.session,
-          message: 'Account created successfully! Please check your email to verify your account.'
+          needsEmailConfirmation: false,
+          message: 'Account created successfully!'
         }
       } catch (error: any) {
         if (attempt === maxRetries) {

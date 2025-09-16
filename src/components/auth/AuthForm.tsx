@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Alert } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Input } from '@/components/ui/input'
-import { User, Mail, Lock, Eye, EyeOff, Chrome, Wand2 } from 'lucide-react'
+import { User, Mail, Lock, Eye, EyeOff, Chrome, Wand2, AlertCircle, CheckCircle } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 
 interface AuthFormProps {
@@ -24,6 +24,7 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
     password: '',
     confirmPassword: ''
   })
+  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false)
 
   const { signIn, signUp, signInWithGoogle, resetPassword } = useAuth()
 
@@ -90,16 +91,38 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
       }
 
       if (result.success) {
+        // Handle signup with email confirmation
+        if (!isLogin && result.needsEmailConfirmation) {
+          setShowEmailConfirmation(true)
+          setMessage({ 
+            type: 'info', 
+            text: result.message || 'Please check your email to verify your account.'
+          })
+          // Don't close the form, let user see the message
+          return
+        }
+        
         setMessage({ 
           type: 'success', 
           text: result.message || (isLogin ? 'Login successful!' : 'Account created!') 
         })
         
-        setTimeout(() => {
-          onAuthSuccess?.(result.user)
-        }, 1000)
+        // Only redirect if we have a session
+        if (result.session) {
+          setTimeout(() => {
+            onAuthSuccess?.(result.user)
+          }, 1000)
+        }
       } else {
-        setMessage({ type: 'error', text: result.error })
+        // Special handling for email not confirmed error
+        if (isLogin && result.error?.toLowerCase().includes('email not confirmed')) {
+          setMessage({ 
+            type: 'warning', 
+            text: 'Please confirm your email before signing in. Check your inbox for the verification link.'
+          })
+        } else {
+          setMessage({ type: 'error', text: result.error })
+        }
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'Operation failed, please try again' })
@@ -117,6 +140,7 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
       confirmPassword: ''
     })
     setMessage({ type: '', text: '' })
+    setShowEmailConfirmation(false)
   }
 
   const handleGoogleSignIn = async () => {
@@ -367,6 +391,18 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
                   Free users can create up to 3 images per day.
                 </p>
               </div>
+            )}
+
+            {/* Email confirmation message */}
+            {showEmailConfirmation && (
+              <Alert className="mt-4">
+                <CheckCircle className="h-4 w-4" />
+                <AlertTitle>Check your email!</AlertTitle>
+                <AlertDescription>
+                  We've sent a verification link to <strong>{formData.email}</strong>. 
+                  Please click the link in your email to verify your account before signing in.
+                </AlertDescription>
+              </Alert>
             )}
           </CardContent>
         </Card>
