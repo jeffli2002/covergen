@@ -204,13 +204,32 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
 
     setCancelling(true)
     try {
-      const result = await creemService.cancelSubscription(subscription.stripe_subscription_id)
-      
-      if (result.success) {
+      // Get auth token
+      const session = authService.getCurrentSession()
+      if (!session?.access_token) {
+        throw new Error('Authentication required')
+      }
+
+      // Call API endpoint instead of service directly
+      const response = await fetch('/api/payment/cancel-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          subscriptionId: subscription.stripe_subscription_id,
+          cancelAtPeriodEnd: true
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
         toast.success('Subscription cancelled. You will keep access until the end of your billing period.')
         await loadAccountData()
       } else {
-        throw new Error(result.error || 'Failed to cancel subscription')
+        throw new Error(data.error || 'Failed to cancel subscription')
       }
     } catch (error: any) {
       toast.error(error.message || 'Failed to cancel subscription')
@@ -224,13 +243,31 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
 
     setResuming(true)
     try {
-      const result = await creemService.resumeSubscription(subscription.stripe_subscription_id)
-      
-      if (result.success) {
+      // Get auth token
+      const session = authService.getCurrentSession()
+      if (!session?.access_token) {
+        throw new Error('Authentication required')
+      }
+
+      // Call API endpoint instead of service directly
+      const response = await fetch('/api/payment/resume-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          subscriptionId: subscription.stripe_subscription_id
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
         toast.success('Subscription resumed successfully!')
         await loadAccountData()
       } else {
-        throw new Error(result.error || 'Failed to resume subscription')
+        throw new Error(data.error || 'Failed to resume subscription')
       }
     } catch (error: any) {
       toast.error(error.message || 'Failed to resume subscription')
