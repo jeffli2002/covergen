@@ -40,13 +40,8 @@ export const platformShowcases = {
     {
       title: "Chill Vibes Only",
       originalImage: "/platform-examples/spotify/original-1.jpg",
-      optimizedImage: "/platform-examples/spotify/original-1.webp",
-      targetDimensions: { width: 640, height: 640, label: "640×640 (1:1)" }
-    },
-    {
-      title: "Workout Beast Mode",
-      originalImage: "/platform-examples/spotify/original-2.jpg",
-      optimizedImage: "/platform-examples/spotify/original-2.webp",
+      optimizedImage: "/platform-examples/spotify/original-1.jpg",
+      enhancedImage: "/platform-examples/spotify/imageEnhanced1.png",
       targetDimensions: { width: 640, height: 640, label: "640×640 (1:1)" }
     }
   ],
