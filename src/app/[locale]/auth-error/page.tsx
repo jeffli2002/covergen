@@ -63,10 +63,10 @@ export default function AuthErrorPage({
             </svg>
           </div>
           <h2 className="mt-4 text-xl font-semibold text-gray-900">
-            Authentication Error
+            {error.title}
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            {errorMessages[reason]}
+            {error.message}
           </p>
           <div className="mt-6 space-y-3">
             <Link
