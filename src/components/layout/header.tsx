@@ -374,8 +374,8 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                       variant="outline"
                       onClick={() => router.push(`/${locale}/account`)}
                     >
-                      <CreditCard className="w-4 h-4 mr-2" />
-                      {plan === 'pro' ? 'Pro' : 'Pro+'} Account
+                      <Crown className="w-4 h-4 mr-2" />
+                      {plan === 'pro' ? 'Pro' : 'Pro+'}
                     </Button>
                   )
                 })()}
