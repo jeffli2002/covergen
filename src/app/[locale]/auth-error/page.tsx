@@ -1,16 +1,47 @@
 import Link from 'next/link'
+import { AlertCircle, Home } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function AuthErrorPage({
+  params,
   searchParams,
 }: {
-  searchParams: { reason?: string }
+  params: { locale: string }
+  searchParams: { reason?: string; description?: string }
 }) {
+  const { locale } = params
   const reason = searchParams.reason || 'unknown'
+  const description = searchParams.description
   
-  const errorMessages: Record<string, string> = {
-    invalid_code: 'The authentication code was invalid or expired. Please try signing in again.',
-    unknown: 'An unknown error occurred during authentication. Please try again.',
+  const errorMessages: Record<string, { title: string; message: string }> = {
+    no_code: {
+      title: 'Authentication Failed',
+      message: 'No authorization code was received. This might be due to a configuration issue or cancelled authentication.'
+    },
+    code_exchange_failed: {
+      title: 'Session Creation Failed', 
+      message: 'We were unable to create a session. Please try again.'
+    },
+    access_denied: {
+      title: 'Access Denied',
+      message: 'You denied access to your account. Please try again if this was a mistake.'
+    },
+    invalid_code: {
+      title: 'Invalid Code',
+      message: 'The authentication code was invalid or expired. Please try signing in again.'
+    },
+    unknown: {
+      title: 'Authentication Error',
+      message: 'An unknown error occurred during authentication. Please try again.'
+    },
+    unexpected_error: {
+      title: 'Unexpected Error',
+      message: 'An unexpected error occurred. Please try again.'
+    }
   }
+  
+  const error = errorMessages[reason] || errorMessages.unknown
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">

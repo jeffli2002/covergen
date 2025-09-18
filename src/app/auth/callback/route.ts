@@ -6,11 +6,16 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/en'
+  const error = searchParams.get('error')
+  const errorDescription = searchParams.get('error_description')
 
   console.log('[Auth Callback] Processing OAuth callback:', {
     hasCode: !!code,
     next,
-    origin
+    origin,
+    error,
+    errorDescription,
+    allParams: Object.fromEntries(searchParams.entries())
   })
 
   if (code) {
@@ -63,6 +68,12 @@ export async function GET(request: Request) {
       console.error('[Auth Callback] Unexpected error:', error)
       return NextResponse.redirect(`${origin}/en/auth-error?reason=unexpected_error`)
     }
+  }
+
+  // Check for OAuth errors
+  if (error) {
+    console.error('[Auth Callback] OAuth error:', error, errorDescription)
+    return NextResponse.redirect(`${origin}/en/auth-error?reason=${encodeURIComponent(error)}&description=${encodeURIComponent(errorDescription || '')}`)
   }
 
   // No code in URL
