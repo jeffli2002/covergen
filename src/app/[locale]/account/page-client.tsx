@@ -72,20 +72,26 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
 
   useEffect(() => {
     const checkAuthAndLoad = async () => {
-      // Wait for auth service to initialize
-      await authService.initialize()
-      
-      // Check if user is authenticated after initialization
-      if (!authService.isAuthenticated()) {
-        router.push(`/${locale}?auth=signin&redirect=${encodeURIComponent(`/${locale}/account`)}`)
-        return
-      }
+      try {
+        // Wait for auth service to initialize
+        await authService.initialize()
+        
+        // Check if user is authenticated after initialization
+        if (!authService.isAuthenticated()) {
+          // Use replace instead of push to avoid history issues
+          router.replace(`/${locale}?auth=signin&redirect=${encodeURIComponent(`/${locale}/account`)}`)
+          return
+        }
 
-      loadAccountData()
+        await loadAccountData()
+      } catch (error) {
+        console.error('Error in auth check:', error)
+        setLoading(false)
+      }
     }
     
     checkAuthAndLoad()
-  }, [])
+  }, [locale, router])
 
   const loadAccountData = async () => {
     try {

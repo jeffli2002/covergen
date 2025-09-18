@@ -367,17 +367,9 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                     )
                   }
                   
-                  // For paid users (Pro or Pro+)
-                  return (
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => router.push(`/${locale}/account`)}
-                    >
-                      <Crown className="w-4 h-4 mr-2" />
-                      {plan === 'pro' ? 'Pro' : 'Pro+'}
-                    </Button>
-                  )
+                  // For paid users (Pro or Pro+) - no additional badge needed
+                  // as UsageDisplay already shows the tier
+                  return null
                 })()}
 
                 {/* Account link */}
