@@ -1,9 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import MobileHeader from '@/components/mobile-header'
-import Header from '@/components/layout/header'
-import Footer from '@/components/layout/Footer'
 import ImageGenerator from '@/components/image-generator'
 import PricingSection from '@/components/pricing-section'
 import FeedbackModal from '@/components/feedback-modal'
@@ -162,20 +159,13 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
   const ctaText = ctaTexts[ctaVariant as keyof typeof ctaTexts] || 'Start Free - No Login Required'
 
   return (
-    <div className="min-h-screen bg-background">
-      
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       
-      {/* Desktop Header */}
-      <Header locale={locale} translations={t} />
-      
-      {/* Mobile Header */}
-      <MobileHeader />
-      
-      <main>
+      <div>
         {/* Hero Section */}
         <section className="py-16 md:py-24 lg:py-32 bg-white relative overflow-hidden">
           <div className="container mx-auto px-4 relative">
@@ -652,10 +642,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
             </div>
           </div>
         </section>
-      </main>
-
-      {/* Footer */}
-      <Footer locale={locale} translations={t} />
+      </div>
 
       {/* Feedback Modal */}
       <FeedbackModal 
@@ -663,6 +650,6 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         onClose={() => setFeedbackModal({ ...feedbackModal, isOpen: false })}
         context={feedbackModal.context}
       />
-    </div>
+    </>
   )
 }
