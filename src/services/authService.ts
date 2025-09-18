@@ -55,11 +55,15 @@ class AuthService {
         return false
       }
 
+      // Try to get cached session first for faster initialization
       const storedSession = this.getStoredSession()
       if (storedSession && this.isSessionValid(storedSession)) {
+        console.log('[Auth] Using cached session for fast initialization')
         this.session = storedSession
         this.user = storedSession.user
-
+        this.initialized = true
+        
+        // Validate session in background (don't wait for it)
         supabase.auth.setSession({
           access_token: storedSession.access_token,
           refresh_token: storedSession.refresh_token
@@ -71,8 +75,12 @@ class AuthService {
             this.user = null
           }
         })
+        
+        // If we have a valid cached session, return early for faster loading
+        return true
       }
 
+      // Only check with Supabase if no cached session
       const sessionPromise = supabase.auth.getSession()
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Session check timeout')), 3000)
@@ -515,19 +523,36 @@ class AuthService {
       if (!supabaseClient) {
         return 0
       }
-      const { data, error } = await supabaseClient
-        .from('user_usage')
-        .select('generation_count')
-        .eq('user_id', this.user.id)
-        .gte('date', today.toISOString())
-        .single()
+      
+      // Add timeout to prevent hanging
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 3000) // 3 second timeout
+      
+      try {
+        const { data, error } = await supabaseClient
+          .from('user_usage')
+          .select('generation_count')
+          .eq('user_id', this.user.id)
+          .gte('date', today.toISOString())
+          .single()
 
-      if (error && error.code !== 'PGRST116' && error.code !== '42703') {
-        // PGRST116: no rows found, 42703: column does not exist
-        throw error
+        clearTimeout(timeout)
+
+        if (error && error.code !== 'PGRST116' && error.code !== '42703') {
+          // PGRST116: no rows found, 42703: column does not exist
+          console.error('Usage query error:', error)
+          throw error
+        }
+
+        return data?.generation_count || 0
+      } catch (err: any) {
+        clearTimeout(timeout)
+        if (err.name === 'AbortError') {
+          console.error('Usage query timeout')
+          return 0
+        }
+        throw err
       }
-
-      return data?.generation_count || 0
     } catch (error) {
       console.error('Error getting user usage:', error)
       return 0
@@ -569,18 +594,35 @@ class AuthService {
       if (!supabaseClient) {
         return null
       }
-      const { data, error } = await supabaseClient
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', this.user.id)
-        .eq('status', 'active')
-        .single()
+      
+      // Add timeout to prevent hanging
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+      
+      try {
+        const { data, error } = await supabaseClient
+          .from('subscriptions_consolidated')
+          .select('*')
+          .eq('user_id', this.user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single()
 
-      if (error && error.code !== 'PGRST116') {
-        throw error
+        clearTimeout(timeout)
+
+        if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+          console.error('Subscription query error:', error)
+          throw error
+        }
+
+        return data
+      } catch (err: any) {
+        clearTimeout(timeout)
+        if (err.name === 'AbortError') {
+          console.error('Subscription query timeout')
+        }
+        throw err
       }
-
-      return data
     } catch (error) {
       console.error('Error getting subscription:', error)
       return null

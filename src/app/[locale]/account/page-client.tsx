@@ -62,6 +62,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   const router = useRouter()
   const { user, setUser } = useAppStore()
   const [loading, setLoading] = useState(true)
+  const [loadingMessage, setLoadingMessage] = useState('Checking authentication...')
   const [subscription, setSubscription] = useState<any>(null)
   const [usage, setUsage] = useState(0)
   const [cancelling, setCancelling] = useState(false)
@@ -74,6 +75,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
     const checkAuthAndLoad = async () => {
       try {
         // Wait for auth service to initialize
+        setLoadingMessage('Initializing authentication...')
         await authService.initialize()
         
         // Check if user is authenticated after initialization
@@ -83,6 +85,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
           return
         }
 
+        setLoadingMessage('Loading account data...')
         await loadAccountData()
       } catch (error) {
         console.error('Error in auth check:', error)
@@ -99,36 +102,65 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
       const currentUser = authService.getCurrentUser()
       setAuthUser(currentUser)
       
-      // Load subscription and usage data
-      const [sub, todayUsage] = await Promise.all([
-        authService.getUserSubscription(),
-        authService.getUserUsageToday()
-      ])
+      if (!currentUser) {
+        console.error('No current user found')
+        toast.error('Please sign in to view account details')
+        router.replace(`/${locale}?auth=signin&redirect=${encodeURIComponent(`/${locale}/account`)}`)
+        return
+      }
       
-      setSubscription(sub)
-      setUsage(todayUsage)
+      // Set a timeout for the API calls
+      const loadTimeout = setTimeout(() => {
+        console.warn('Account data loading timeout')
+        toast.error('Loading is taking longer than expected. Please refresh the page.')
+      }, 10000) // 10 second warning
       
-      // Update user in store if we have subscription data
-      const config = getClientSubscriptionConfig()
-      if (currentUser && sub) {
-        const quotaLimit = sub.tier === 'pro' ? config.limits.pro.monthly : 
-                          sub.tier === 'pro_plus' ? config.limits.pro_plus.monthly : 
-                          config.limits.free.daily
-        setUser({
-          id: currentUser.id,
-          email: currentUser.email,
-          tier: sub.tier || 'free',
-          quotaUsed: todayUsage,
-          quotaLimit: quotaLimit
-        })
-      } else if (currentUser) {
-        setUser({
-          id: currentUser.id,
-          email: currentUser.email,
-          tier: 'free',
-          quotaUsed: todayUsage,
-          quotaLimit: config.limits.free.daily
-        })
+      try {
+        // Load subscription and usage data in parallel with individual error handling
+        const [subResult, usageResult] = await Promise.allSettled([
+          authService.getUserSubscription().catch(err => {
+            console.error('Subscription load error:', err)
+            return null
+          }),
+          authService.getUserUsageToday().catch(err => {
+            console.error('Usage load error:', err)
+            return 0
+          })
+        ])
+        
+        clearTimeout(loadTimeout)
+        
+        const sub = subResult.status === 'fulfilled' ? subResult.value : null
+        const todayUsage = usageResult.status === 'fulfilled' ? usageResult.value : 0
+        
+        setSubscription(sub)
+        setUsage(todayUsage)
+        
+        // Update user in store if we have subscription data
+        const config = getClientSubscriptionConfig()
+        if (currentUser && sub) {
+          const quotaLimit = sub.tier === 'pro' ? config.limits.pro.monthly : 
+                            sub.tier === 'pro_plus' ? config.limits.pro_plus.monthly : 
+                            config.limits.free.daily
+          setUser({
+            id: currentUser.id,
+            email: currentUser.email,
+            tier: sub.tier || 'free',
+            quotaUsed: todayUsage,
+            quotaLimit: quotaLimit
+          })
+        } else if (currentUser) {
+          setUser({
+            id: currentUser.id,
+            email: currentUser.email,
+            tier: 'free',
+            quotaUsed: todayUsage,
+            quotaLimit: config.limits.free.daily
+          })
+        }
+      } catch (timeoutError) {
+        console.error('Timeout or critical error:', timeoutError)
+        clearTimeout(loadTimeout)
       }
     } catch (error) {
       console.error('Error loading account data:', error)
@@ -374,7 +406,11 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-600">{loadingMessage}</p>
+          <p className="text-sm text-gray-500 mt-2">This should only take a moment...</p>
+        </div>
       </div>
     )
   }
