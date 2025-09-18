@@ -45,12 +45,22 @@ export default function Header({ locale, translations: t }: HeaderProps) {
   const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null)
   const [activating, setActivating] = useState(false)
   const [showActivationConfirm, setShowActivationConfirm] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false)
   const currentTier = storeUser?.tier || 'free'
   
   // Debug logging
   useEffect(() => {
     console.log('[Header] Auth state:', { user: user?.email, loading, storeUser: storeUser?.email })
   }, [user, loading, storeUser])
+  
+  // Initialize header state
+  useEffect(() => {
+    // Small delay to prevent flash of incorrect content
+    const timer = setTimeout(() => {
+      setIsInitialized(true)
+    }, 50)
+    return () => clearTimeout(timer)
+  }, [])
   
   // Fetch subscription info to check trial status
   useEffect(() => {

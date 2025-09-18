@@ -17,8 +17,8 @@ export default function RootLayout({
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
   
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" className="h-full">
+      <body className="h-full">
         {gaId && (
           <>
             <GoogleAnalytics measurementId={gaId} />

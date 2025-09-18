@@ -56,6 +56,26 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Prevent layout shift on page load */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Ensure minimum heights for key sections */
+  main {
+    min-height: calc(100vh - 4rem - 20rem);
+  }
+  
+  /* Prevent FOUC (Flash of Unstyled Content) */
+  .layout-stable {
+    opacity: 0;
+    transition: opacity 300ms ease-in-out;
+  }
+  
+  .layout-ready {
+    opacity: 1;
+  }
 }
 
 /* Custom animations and effects */
@@ -82,6 +102,26 @@
     background: linear-gradient(110deg, #e2e8f0 45%, #f1f5f9 55%, #e2e8f0);
     background-size: 200% 100%;
     animation: shimmer 2s linear infinite;
+  }
+  
+  /* Prevent layout shift animations */
+  .animate-in {
+    animation-duration: 300ms;
+    animation-fill-mode: both;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .fade-in {
+    animation-name: fadeIn;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 }
 

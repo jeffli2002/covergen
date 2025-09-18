@@ -16,20 +16,28 @@ export default async function LocaleLayout({
   
   return (
     <Providers>
-      <div className="min-h-screen bg-background">
-        {/* Desktop Header */}
-        <Header locale={params.locale} translations={dict} />
+      <div className="min-h-screen bg-background flex flex-col">
+        {/* Header Container with fixed height to prevent jumping */}
+        <div className="h-16 lg:h-16">
+          {/* Desktop Header */}
+          <Header locale={params.locale} translations={dict} />
+          
+          {/* Mobile Header */}
+          <MobileHeader />
+        </div>
         
-        {/* Mobile Header */}
-        <MobileHeader />
-        
-        {/* Main Content */}
-        <main className="flex-1">
-          {children}
+        {/* Main Content with flex-grow to fill remaining space */}
+        <main className="flex-1 flex flex-col">
+          {/* Content wrapper with minimum height */}
+          <div className="flex-1 min-h-[calc(100vh-4rem-20rem)]">
+            {children}
+          </div>
         </main>
         
-        {/* Footer */}
-        <Footer locale={params.locale} translations={dict} />
+        {/* Footer Container - estimated height to prevent jump */}
+        <div className="min-h-[20rem]">
+          <Footer locale={params.locale} translations={dict} />
+        </div>
       </div>
     </Providers>
   )

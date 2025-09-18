@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
+import dynamic from 'next/dynamic'
 import ImageGenerator from '@/components/image-generator'
 import PricingSection from '@/components/pricing-section'
 import FeedbackModal from '@/components/feedback-modal'
@@ -10,6 +11,7 @@ import { useAppStore } from '@/lib/store'
 import { useAnalytics } from '@/lib/analytics'
 import { useAuth } from '@/contexts/AuthContext'
 import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
+import PageSkeleton from '@/components/ui/page-skeleton'
 import { 
   Sparkles, 
   Zap, 
@@ -63,6 +65,13 @@ const features = [
 ]
 
 export default function HomePageClient({ locale, translations: t }: HomePageClientProps) {
+  const [isPageReady, setIsPageReady] = useState(false)
+  
+  // Initialize page after mount to prevent hydration mismatch
+  useEffect(() => {
+    setIsPageReady(true)
+  }, [])
+  
   // Structured data for SEO
   const structuredData = {
     '@context': 'https://schema.org',
@@ -158,6 +167,11 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
   }
   const ctaText = ctaTexts[ctaVariant as keyof typeof ctaTexts] || 'Start Free - No Login Required'
 
+  // Show skeleton while page is initializing
+  if (!isPageReady) {
+    return <PageSkeleton />
+  }
+
   return (
     <>
       <script
@@ -165,7 +179,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       
-      <div>
+      <div className="animate-in fade-in duration-300">
         {/* Hero Section */}
         <section className="py-16 md:py-24 lg:py-32 bg-white relative overflow-hidden">
           <div className="container mx-auto px-4 relative">
