@@ -53,7 +53,7 @@ export default function TestAuthDebug() {
         }
         
         // 5. 检查auth状态订阅
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session: any) => {
           console.log('[Auth State Change]', event, session?.user?.email)
         })
         
