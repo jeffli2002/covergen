@@ -95,7 +95,7 @@ export default function InstagramContentMakerClient({ locale, translations }: { 
                   </Button>
                 </Link>
                 <Link href={`/${locale}#pricing`}>
-                  <Button size="lg" variant="outline" className="text-white border-white hover:bg-white/20 px-8 py-6 text-lg">
+                  <Button size="lg" variant="outline" className="text-white border-2 border-white hover:bg-white hover:text-pink-600 px-8 py-6 text-lg">
                     View Pricing
                   </Button>
                 </Link>

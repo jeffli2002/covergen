@@ -126,7 +126,7 @@ function YouTubeThumbnailMakerContent({ locale, translations, onGenerate, isGene
                 YouTube Thumbnail Maker
               </h1>
               
-              <p className="text-xl md:text-2xl text-gray-700 mb-8 leading-relaxed">
+              <p className="text-xl md:text-2xl text-gray-800 mb-8 leading-relaxed">
                 Create thumbnails that <span className="text-red-600 font-semibold">stop the scroll</span> and 
                 boost your views. AI-powered generation optimized for YouTube's algorithm.
               </p>
@@ -148,13 +148,13 @@ function YouTubeThumbnailMakerContent({ locale, translations, onGenerate, isGene
                   {isGenerating ? 'Checking...' : 'Start Creating Thumbnails'}
                 </Button>
                 <Link href={`/${locale}#pricing`}>
-                  <Button size="lg" variant="outline" className="px-8 py-6 text-lg">
+                  <Button size="lg" variant="outline" className="px-8 py-6 text-lg border-2 border-gray-800 text-gray-800 hover:bg-gray-800 hover:text-white">
                     View Pricing
                   </Button>
                 </Link>
               </div>
               
-              <p className="text-gray-600">
+              <p className="text-gray-700">
                 No credit card required • Start creating now
               </p>
             </div>
@@ -178,7 +178,7 @@ function YouTubeThumbnailMakerContent({ locale, translations, onGenerate, isGene
                       </div>
                     </div>
                     <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-gray-600">{feature.description}</p>
+                    <p className="text-gray-700">{feature.description}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -204,13 +204,13 @@ function YouTubeThumbnailMakerContent({ locale, translations, onGenerate, isGene
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {templates.map((template) => (
                   <div key={template} className="bg-gray-50 rounded-2xl p-4 text-center hover:shadow-lg transition-shadow">
-                    <span className="text-gray-700 font-medium">{template}</span>
+                    <span className="text-gray-800 font-medium">{template}</span>
                   </div>
                 ))}
               </div>
               
               <div className="text-center mt-12">
-                <p className="text-lg text-gray-600 mb-6">
+                <p className="text-lg text-gray-700 mb-6">
                   Plus hundreds more styles tailored to your content
                 </p>
                 <Link href={`/${locale}#generator`}>
@@ -234,7 +234,7 @@ function YouTubeThumbnailMakerContent({ locale, translations, onGenerate, isGene
               <div className="space-y-6">
                 <div className="bg-gray-50 rounded-2xl p-6">
                   <h3 className="text-xl font-semibold mb-3">1. Use High Contrast Colors</h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-700">
                     Thumbnails need to stand out in YouTube's busy interface. Our AI automatically 
                     applies high contrast to ensure maximum visibility.
                   </p>
@@ -242,7 +242,7 @@ function YouTubeThumbnailMakerContent({ locale, translations, onGenerate, isGene
                 
                 <div className="bg-gray-50 rounded-2xl p-6">
                   <h3 className="text-xl font-semibold mb-3">2. Keep Text Large and Readable</h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-700">
                     Remember that most viewers see thumbnails on mobile devices. CoverGen AI ensures 
                     text remains readable even at small sizes.
                   </p>
@@ -250,7 +250,7 @@ function YouTubeThumbnailMakerContent({ locale, translations, onGenerate, isGene
                 
                 <div className="bg-gray-50 rounded-2xl p-6">
                   <h3 className="text-xl font-semibold mb-3">3. Avoid the Bottom-Right Corner</h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-700">
                     YouTube displays the video duration in the bottom-right. Our templates automatically 
                     keep important elements away from this area.
                   </p>
@@ -258,7 +258,7 @@ function YouTubeThumbnailMakerContent({ locale, translations, onGenerate, isGene
                 
                 <div className="bg-gray-50 rounded-2xl p-6">
                   <h3 className="text-xl font-semibold mb-3">4. Test Multiple Variations</h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-700">
                     Generate multiple thumbnail options and A/B test them. Pro users can create 
                     unlimited variations to find the perfect thumbnail.
                   </p>

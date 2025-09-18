@@ -95,7 +95,7 @@ export default function TikTokCoverMakerClient({ locale, translations }: { local
                   </Button>
                 </Link>
                 <Link href={`/${locale}#pricing`}>
-                  <Button size="lg" variant="outline" className="px-8 py-6 text-lg">
+                  <Button size="lg" variant="outline" className="px-8 py-6 text-lg border-2 border-gray-800 text-gray-800 hover:bg-gray-800 hover:text-white">
                     View Pricing
                   </Button>
                 </Link>

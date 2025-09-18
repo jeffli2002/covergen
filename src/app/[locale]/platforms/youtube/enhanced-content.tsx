@@ -13,7 +13,7 @@ export const YouTubeEnhancedContent = () => {
             </h2>
             
             <div className="bg-blue-50 rounded-2xl p-6 mb-8">
-              <p className="text-lg font-medium text-blue-900 mb-0">
+              <p className="text-lg font-medium text-blue-800 mb-0">
                 <strong>Key Insight:</strong> YouTube thumbnails can increase your click-through rate by up to 154% 
                 when properly optimized. This comprehensive guide reveals the psychology, design principles, and 
                 technical requirements that top creators use to maximize their views.
@@ -23,13 +23,13 @@ export const YouTubeEnhancedContent = () => {
             <h3 className="text-2xl font-bold mt-8 mb-4">Table of Contents</h3>
             <nav className="bg-gray-50 rounded-xl p-6 mb-8">
               <ol className="space-y-2">
-                <li><a href="#psychology" className="text-blue-600 hover:underline">The Psychology Behind Click-Worthy Thumbnails</a></li>
-                <li><a href="#technical" className="text-blue-600 hover:underline">Technical Requirements and Best Practices</a></li>
-                <li><a href="#design" className="text-blue-600 hover:underline">Design Principles That Drive Engagement</a></li>
-                <li><a href="#mistakes" className="text-blue-600 hover:underline">Common Mistakes That Kill Your CTR</a></li>
-                <li><a href="#optimization" className="text-blue-600 hover:underline">A/B Testing and Optimization Strategies</a></li>
-                <li><a href="#tools" className="text-blue-600 hover:underline">Essential Tools and Resources</a></li>
-                <li><a href="#case-studies" className="text-blue-600 hover:underline">Case Studies: Before and After</a></li>
+                <li><a href="#psychology" className="text-blue-700 hover:text-blue-800 hover:underline">The Psychology Behind Click-Worthy Thumbnails</a></li>
+                <li><a href="#technical" className="text-blue-700 hover:text-blue-800 hover:underline">Technical Requirements and Best Practices</a></li>
+                <li><a href="#design" className="text-blue-700 hover:text-blue-800 hover:underline">Design Principles That Drive Engagement</a></li>
+                <li><a href="#mistakes" className="text-blue-700 hover:text-blue-800 hover:underline">Common Mistakes That Kill Your CTR</a></li>
+                <li><a href="#optimization" className="text-blue-700 hover:text-blue-800 hover:underline">A/B Testing and Optimization Strategies</a></li>
+                <li><a href="#tools" className="text-blue-700 hover:text-blue-800 hover:underline">Essential Tools and Resources</a></li>
+                <li><a href="#case-studies" className="text-blue-700 hover:text-blue-800 hover:underline">Case Studies: Before and After</a></li>
               </ol>
             </nav>
 
@@ -159,19 +159,19 @@ export const YouTubeEnhancedContent = () => {
             <div className="grid md:grid-cols-2 gap-4 my-6">
               <div className="bg-red-50 rounded-xl p-4">
                 <h5 className="font-semibold text-red-800 mb-2">Red/Orange</h5>
-                <p className="text-sm">Energy, urgency, excitement. Great for gaming, challenges, breaking news.</p>
+                <p className="text-sm text-gray-800">Energy, urgency, excitement. Great for gaming, challenges, breaking news.</p>
               </div>
               <div className="bg-blue-50 rounded-xl p-4">
                 <h5 className="font-semibold text-blue-800 mb-2">Blue</h5>
-                <p className="text-sm">Trust, calm, professional. Ideal for tutorials, tech, business content.</p>
+                <p className="text-sm text-gray-800">Trust, calm, professional. Ideal for tutorials, tech, business content.</p>
               </div>
               <div className="bg-green-50 rounded-xl p-4">
                 <h5 className="font-semibold text-green-800 mb-2">Green</h5>
-                <p className="text-sm">Growth, health, money. Perfect for fitness, finance, nature content.</p>
+                <p className="text-sm text-gray-800">Growth, health, money. Perfect for fitness, finance, nature content.</p>
               </div>
               <div className="bg-purple-50 rounded-xl p-4">
                 <h5 className="font-semibold text-purple-800 mb-2">Purple</h5>
-                <p className="text-sm">Luxury, creativity, mystery. Works for beauty, art, premium content.</p>
+                <p className="text-sm text-gray-800">Luxury, creativity, mystery. Works for beauty, art, premium content.</p>
               </div>
             </div>
 
@@ -215,7 +215,7 @@ export const YouTubeEnhancedContent = () => {
 
             <div className="bg-yellow-50 rounded-xl p-6 my-6">
               <h5 className="font-semibold text-yellow-900 mb-3">Signs of Information Overload:</h5>
-              <ul className="space-y-2 text-yellow-800">
+              <ul className="space-y-2 text-yellow-900">
                 <li>More than one focal point competing for attention</li>
                 <li>Text covering more than 30% of the thumbnail</li>
                 <li>Multiple unrelated visual elements</li>
@@ -286,21 +286,21 @@ export const YouTubeEnhancedContent = () => {
             <div className="space-y-4 mb-6">
               <div className="border rounded-xl p-4">
                 <h5 className="font-semibold mb-2">CoverGen Pro (AI-Powered)</h5>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-700">
                   Uses advanced AI to generate thumbnails optimized for YouTube's algorithm. Perfect for 
                   creators who want professional results without design skills.
                 </p>
               </div>
               <div className="border rounded-xl p-4">
                 <h5 className="font-semibold mb-2">Adobe Photoshop</h5>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-700">
                   Industry standard for advanced editing. Best for creators who need complete control over 
                   every pixel.
                 </p>
               </div>
               <div className="border rounded-xl p-4">
                 <h5 className="font-semibold mb-2">Canva</h5>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-700">
                   Template-based design tool with YouTube thumbnail templates. Good for beginners but limited 
                   customization.
                 </p>
@@ -328,26 +328,26 @@ export const YouTubeEnhancedContent = () => {
 
             <div className="bg-green-50 rounded-xl p-6 my-6">
               <h4 className="font-semibold text-green-900 mb-3">Case Study 1: Gaming Channel</h4>
-              <p className="text-green-800 mb-2">
+              <p className="text-green-900 mb-2">
                 <strong>Before:</strong> Generic gameplay screenshots with small text
               </p>
-              <p className="text-green-800 mb-2">
+              <p className="text-green-900 mb-2">
                 <strong>After:</strong> Creator's face with emotional reaction + bold text highlighting key moment
               </p>
-              <p className="text-green-800">
+              <p className="text-green-900">
                 <strong>Result:</strong> 312% increase in CTR, 45% increase in average view duration
               </p>
             </div>
 
             <div className="bg-blue-50 rounded-xl p-6 my-6">
               <h4 className="font-semibold text-blue-900 mb-3">Case Study 2: Educational Channel</h4>
-              <p className="text-blue-800 mb-2">
+              <p className="text-blue-900 mb-2">
                 <strong>Before:</strong> Text-heavy slides from the video
               </p>
-              <p className="text-blue-800 mb-2">
+              <p className="text-blue-900 mb-2">
                 <strong>After:</strong> Clean diagram with curiosity-inducing question
               </p>
-              <p className="text-blue-800">
+              <p className="text-blue-900">
                 <strong>Result:</strong> 189% increase in CTR, 67% increase in session duration
               </p>
             </div>
@@ -450,7 +450,7 @@ export const YouTubeEnhancedContent = () => {
                 <summary className="text-xl font-semibold">
                   How often should I change my thumbnail after uploading?
                 </summary>
-                <p className="mt-4 text-gray-700">
+                <p className="mt-4 text-gray-800">
                   If your video is underperforming (CTR below 2%), consider changing the thumbnail after 
                   48-72 hours. However, if the video is gaining traction, avoid changes as they can reset 
                   momentum. Always save your original thumbnail before making changes.
@@ -461,7 +461,7 @@ export const YouTubeEnhancedContent = () => {
                 <summary className="text-xl font-semibold">
                   Should I use my face in every thumbnail?
                 </summary>
-                <p className="mt-4 text-gray-700">
+                <p className="mt-4 text-gray-800">
                   Human faces increase CTR by an average of 38%, but they're not mandatory for every video. 
                   Use faces for personal stories, reactions, or tutorials. For product reviews, comparisons, 
                   or data-driven content, the subject matter might be more compelling than a face.
@@ -472,7 +472,7 @@ export const YouTubeEnhancedContent = () => {
                 <summary className="text-xl font-semibold">
                   What's the ideal text-to-image ratio for thumbnails?
                 </summary>
-                <p className="mt-4 text-gray-700">
+                <p className="mt-4 text-gray-800">
                   Text should occupy no more than 30% of your thumbnail. The sweet spot is 15-25%, allowing 
                   the visual elements to tell most of the story. Remember, viewers can read your video title, 
                   so thumbnail text should complement, not repeat it.
@@ -483,7 +483,7 @@ export const YouTubeEnhancedContent = () => {
                 <summary className="text-xl font-semibold">
                   How do I make thumbnails for YouTube Shorts?
                 </summary>
-                <p className="mt-4 text-gray-700">
+                <p className="mt-4 text-gray-800">
                   YouTube Shorts use vertical thumbnails (9:16 ratio) taken from the video itself. While you 
                   can't upload custom thumbnails for Shorts, you can select which frame to use. Choose a 
                   frame with high visual impact and ensure any text is centered and large enough for mobile viewing.
@@ -494,7 +494,7 @@ export const YouTubeEnhancedContent = () => {
                 <summary className="text-xl font-semibold">
                   Do thumbnails affect YouTube SEO?
                 </summary>
-                <p className="mt-4 text-gray-700">
+                <p className="mt-4 text-gray-800">
                   While thumbnails don't directly impact search rankings, they significantly affect CTR, which 
                   is a major ranking factor. Videos with higher CTRs get promoted more in search results and 
                   recommendations. Additionally, YouTube's AI can now "read" text in thumbnails, potentially 
@@ -506,7 +506,7 @@ export const YouTubeEnhancedContent = () => {
                 <summary className="text-xl font-semibold">
                   What's the best time to upload for maximum thumbnail visibility?
                 </summary>
-                <p className="mt-4 text-gray-700">
+                <p className="mt-4 text-gray-800">
                   Upload timing affects initial impression velocity. For most channels, Tuesday-Thursday 
                   between 2-4 PM (in your audience's primary timezone) yields the highest engagement. However, 
                   consistency matters more than perfect timing - YouTube rewards regular upload schedules.
@@ -517,7 +517,7 @@ export const YouTubeEnhancedContent = () => {
                 <summary className="text-xl font-semibold">
                   Should I create different thumbnails for different platforms?
                 </summary>
-                <p className="mt-4 text-gray-700">
+                <p className="mt-4 text-gray-800">
                   If you share your YouTube videos on other platforms, consider creating platform-specific 
                   thumbnails. Twitter, Facebook, and LinkedIn all display thumbnails differently. A thumbnail 
                   optimized for YouTube's 16:9 format might appear cropped or unclear on other platforms.
@@ -528,7 +528,7 @@ export const YouTubeEnhancedContent = () => {
                 <summary className="text-xl font-semibold">
                   How do I know if my thumbnail is working?
                 </summary>
-                <p className="mt-4 text-gray-700">
+                <p className="mt-4 text-gray-800">
                   Check YouTube Analytics &gt; Reach &gt; Impressions click-through rate. Good CTR varies by niche, 
                   but generally: Below 2% needs immediate improvement, 2-5% is average, 5-10% is good, and 
                   above 10% is excellent. Also monitor average view duration - high CTR with low retention 
@@ -551,7 +551,7 @@ export const YouTubeEnhancedContent = () => {
             <div className="grid md:grid-cols-3 gap-8">
               <div className="bg-white rounded-xl p-6 shadow-sm">
                 <h3 className="text-xl font-semibold mb-4">Free Resources</h3>
-                <ul className="space-y-3 text-gray-700">
+                <ul className="space-y-3 text-gray-800">
                   <li>• YouTube Creator Academy thumbnail course</li>
                   <li>• Google Fonts for thumbnail typography</li>
                   <li>• Unsplash/Pexels for background images</li>
@@ -562,7 +562,7 @@ export const YouTubeEnhancedContent = () => {
               
               <div className="bg-white rounded-xl p-6 shadow-sm">
                 <h3 className="text-xl font-semibold mb-4">Premium Tools</h3>
-                <ul className="space-y-3 text-gray-700">
+                <ul className="space-y-3 text-gray-800">
                   <li>• CoverGen Pro - AI thumbnail generation</li>
                   <li>• Adobe Creative Suite</li>
                   <li>• TubeBuddy thumbnail A/B testing</li>
@@ -573,7 +573,7 @@ export const YouTubeEnhancedContent = () => {
               
               <div className="bg-white rounded-xl p-6 shadow-sm">
                 <h3 className="text-xl font-semibold mb-4">Learning Resources</h3>
-                <ul className="space-y-3 text-gray-700">
+                <ul className="space-y-3 text-gray-800">
                   <li>• Roberto Blake's thumbnail tutorials</li>
                   <li>• Think Media optimization guides</li>
                   <li>• Derral Eves algorithm insights</li>
