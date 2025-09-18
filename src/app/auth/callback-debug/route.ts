@@ -24,7 +24,8 @@ export async function GET(request: NextRequest) {
   
   try {
     // Create response first
-    const redirectUrl = `${origin}/en/auth-success?next=${encodeURIComponent(next)}`
+    // Redirect directly to the next page instead of auth-success
+    const redirectUrl = `${origin}${next}`
     debugLog('Will redirect to:', redirectUrl)
     const response = NextResponse.redirect(redirectUrl)
     
