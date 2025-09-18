@@ -227,6 +227,16 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
 
       if (response.ok && data.success) {
         toast.success('Subscription cancelled. You will keep access until the end of your billing period.')
+        
+        // Update local state immediately to reflect cancellation
+        if (subscription) {
+          setSubscription({
+            ...subscription,
+            cancel_at_period_end: true
+          })
+        }
+        
+        // Then reload data from server (might have slight delay)
         await loadAccountData()
       } else {
         throw new Error(data.error || 'Failed to cancel subscription')
@@ -265,6 +275,16 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
 
       if (response.ok && data.success) {
         toast.success('Subscription resumed successfully!')
+        
+        // Update local state immediately to reflect resumption
+        if (subscription) {
+          setSubscription({
+            ...subscription,
+            cancel_at_period_end: false
+          })
+        }
+        
+        // Then reload data from server (might have slight delay)
         await loadAccountData()
       } else {
         throw new Error(data.error || 'Failed to resume subscription')
