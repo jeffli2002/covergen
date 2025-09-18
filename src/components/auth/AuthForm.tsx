@@ -136,7 +136,7 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
       const result = await signInWithGoogle()
       
       if (result.success) {
-        setMessage({ type: 'success', text: 'Sign in successful!' })
+        setMessage({ type: 'success', text: 'Redirecting to Google...' })
         // Track Google sign-in (will track after OAuth redirect)
         // The page will redirect for OAuth flow
       } else {
@@ -188,7 +188,7 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle className="text-center">
-                {isLogin ? 'Welcome Back!' : 'Join CoverGen Pro'}
+                {isLogin ? 'Sign In' : 'Create Account'}
               </CardTitle>
               {onClose && (
                 <Button
