@@ -13,6 +13,7 @@ import authService from '@/services/authService'
 import { creemService, SUBSCRIPTION_PLANS, CREEM_TEST_CARDS } from '@/services/payment/creem'
 import { toast } from 'sonner'
 import CreemDebug from '@/components/debug/CreemDebug'
+import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
 
 interface PaymentPageClientProps {
   locale: string
@@ -587,18 +588,34 @@ export default function PaymentPageClient({
             Subscriptions automatically renew unless cancelled.
           </p>
 
-          {/* Free Tier Info */}
+          {/* Current Plan Info */}
           <Card className="max-w-2xl mx-auto bg-gray-50 border-gray-200">
             <CardContent className="p-6">
-              <h3 className="font-semibold mb-2">Not ready to upgrade?</h3>
+              <h3 className="font-semibold mb-2">
+                {currentSubscription && currentSubscription.tier !== 'free' 
+                  ? 'Already have a plan?' 
+                  : 'Not ready to upgrade?'}
+              </h3>
               <p className="text-sm text-gray-600 mb-4">
-                Continue using the free plan with 10 covers per month.
+                {(() => {
+                  const config = getClientSubscriptionConfig();
+                  if (currentSubscription) {
+                    if (currentSubscription.tier === 'pro') {
+                      return `You're on the Pro plan with ${config.limits.pro.monthly} covers per month.`;
+                    } else if (currentSubscription.tier === 'pro_plus') {
+                      return `You're on the Pro+ plan with ${config.limits.pro_plus.monthly} covers per month.`;
+                    }
+                  }
+                  return `Continue using the free plan with ${config.limits.free.monthly} covers per month.`;
+                })()}
               </p>
               <Button 
                 variant="ghost" 
                 onClick={() => router.push(`/${locale}`)}
               >
-                Continue with Free Plan
+                {currentSubscription && currentSubscription.tier !== 'free' 
+                  ? 'Go to Dashboard' 
+                  : 'Continue with Free Plan'}
               </Button>
             </CardContent>
           </Card>
