@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/client'
+import * as gtag from '@/lib/gtag'
 
 let authServiceInstance: AuthService | null = null
 
@@ -591,6 +592,18 @@ class AuthService {
   }
 
   private async onSignIn(user: any) {
+    // Track sign-in event
+    const isGoogleAuth = user.app_metadata?.provider === 'google' || 
+                        user.app_metadata?.providers?.includes('google')
+    const isNewUser = user.created_at && 
+                      new Date(user.created_at).getTime() > Date.now() - 60000 // Created in last minute
+    
+    if (isNewUser) {
+      gtag.trackSignUp(isGoogleAuth ? 'google' : 'email', user.id)
+    } else {
+      gtag.trackSignIn(isGoogleAuth ? 'google' : 'email', user.id)
+    }
+    
     const maxRetries = 3
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {

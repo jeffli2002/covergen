@@ -7,6 +7,7 @@ import { Alert } from '@/components/ui/alert'
 import { Input } from '@/components/ui/input'
 import { User, Mail, Lock, Eye, EyeOff, Chrome, Wand2 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import * as gtag from '@/lib/gtag'
 
 interface AuthFormProps {
   onAuthSuccess?: (user: any) => void
@@ -95,6 +96,13 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
           text: result.message || (isLogin ? 'Login successful!' : 'Account created!') 
         })
         
+        // Track analytics event
+        if (isLogin) {
+          gtag.trackSignIn('email', result.user?.id)
+        } else {
+          gtag.trackSignUp('email', result.user?.id)
+        }
+        
         setTimeout(() => {
           onAuthSuccess?.(result.user)
         }, 1000)
@@ -129,6 +137,7 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
       
       if (result.success) {
         setMessage({ type: 'success', text: 'Sign in successful!' })
+        // Track Google sign-in (will track after OAuth redirect)
         // The page will redirect for OAuth flow
       } else {
         setMessage({ type: 'error', text: result.error })
