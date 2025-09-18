@@ -52,13 +52,13 @@ export default function BlogPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-black">
+    <div className="min-h-screen bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
             Our Blog
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Discover the latest insights, tips, and strategies for content creation across all platforms
           </p>
         </div>
@@ -67,7 +67,7 @@ export default function BlogPage() {
           {blogPosts.map((post, index) => (
             <article
               key={post.id}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
+              className="bg-white dark:bg-gray-700/50 backdrop-blur rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-200 dark:border-gray-600"
             >
               <div className="h-48 bg-gradient-to-br from-purple-500 to-pink-500 relative">
                 {/* Placeholder for blog post image */}
@@ -79,8 +79,8 @@ export default function BlogPage() {
               </div>
 
               <div className="p-6">
-                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-3">
-                  <span className="bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 px-2 py-1 rounded-full text-xs">
+                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-300 mb-3">
+                  <span className="bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 px-2 py-1 rounded-full text-xs">
                     {post.category}
                   </span>
                   <span className="flex items-center gap-1">
@@ -93,12 +93,12 @@ export default function BlogPage() {
                   {post.title}
                 </h2>
 
-                <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
+                <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
                   {post.excerpt}
                 </p>
 
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-300">
                     <span className="flex items-center gap-1">
                       <Clock className="w-4 h-4" />
                       {post.readingTime}
@@ -115,7 +115,7 @@ export default function BlogPage() {
                       className={`flex items-center gap-1 text-sm transition-colors ${
                         likedPosts.has(post.id)
                           ? 'text-red-500'
-                          : 'text-gray-500 hover:text-red-500 dark:text-gray-400'
+                          : 'text-gray-500 hover:text-red-500 dark:text-gray-300 dark:hover:text-red-400'
                       }`}
                     >
                       <Heart
@@ -126,7 +126,7 @@ export default function BlogPage() {
                     
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <button className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                        <button className="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100">
                           <Share2 className="w-4 h-4" />
                         </button>
                       </DropdownMenuTrigger>
@@ -155,7 +155,7 @@ export default function BlogPage() {
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
                         {post.author.name}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-gray-500 dark:text-gray-300">
                         {post.author.title}
                       </p>
                     </div>

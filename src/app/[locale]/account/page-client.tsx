@@ -71,12 +71,20 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   const [showActivationConfirm, setShowActivationConfirm] = useState(false)
 
   useEffect(() => {
-    if (!authService.isAuthenticated()) {
-      router.push(`/${locale}?auth=signin&redirect=${encodeURIComponent(`/${locale}/account`)}`)
-      return
-    }
+    const checkAuthAndLoad = async () => {
+      // Wait for auth service to initialize
+      await authService.initialize()
+      
+      // Check if user is authenticated after initialization
+      if (!authService.isAuthenticated()) {
+        router.push(`/${locale}?auth=signin&redirect=${encodeURIComponent(`/${locale}/account`)}`)
+        return
+      }
 
-    loadAccountData()
+      loadAccountData()
+    }
+    
+    checkAuthAndLoad()
   }, [])
 
   const loadAccountData = async () => {

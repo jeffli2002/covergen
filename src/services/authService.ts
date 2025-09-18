@@ -1,4 +1,4 @@
-import { supabase as supabaseClient } from '@/lib/supabase'
+import { createClient } from '@/utils/supabase/client'
 
 let authServiceInstance: AuthService | null = null
 
@@ -12,6 +12,7 @@ class AuthService {
   private sessionRefreshInterval: NodeJS.Timeout | null = null
   private sessionRefreshInProgress = false
   private lastSessionCheck: number | null = null
+  private supabase: ReturnType<typeof createClient> | null = null
 
   constructor() {
     if (authServiceInstance) {
@@ -21,11 +22,10 @@ class AuthService {
   }
 
   private getSupabase() {
-    if (typeof window === 'undefined') {
-      return null
+    if (!this.supabase && typeof window !== 'undefined') {
+      this.supabase = createClient()
     }
-    // Use the singleton client instance
-    return supabaseClient
+    return this.supabase
   }
 
   async initialize() {
@@ -39,12 +39,6 @@ class AuthService {
 
     this.initPromise = this._doInitialize()
     return this.initPromise
-  }
-
-  // OAuth callbacks are now handled server-side
-  async checkForOAuthCallback() {
-    // No longer needed - OAuth is handled server-side
-    return false
   }
 
   private async _doInitialize() {
@@ -120,8 +114,6 @@ class AuthService {
 
       this.initialized = true
 
-      // OAuth callbacks are now handled server-side, no need to check here
-
       if (!this.authSubscription) {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
           this.session = session
@@ -188,8 +180,7 @@ class AuthService {
               full_name: metadata.fullName || '',
               role: metadata.role || 'user',
               avatar_url: metadata.avatarUrl || ''
-            },
-            emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}/auth/confirm` : undefined
+            }
           }
         })
 
@@ -207,29 +198,11 @@ class AuthService {
           throw error
         }
 
-        // Check if email confirmation is required
-        if (data.user && !data.session) {
-          return {
-            success: true,
-            user: data.user,
-            session: null,
-            needsEmailConfirmation: true,
-            message: 'Account created! Please check your email to verify your account before signing in.'
-          }
-        }
-
-        // If there's a session, email confirmation is not required
-        if (data.session) {
-          this.storeSession(data.session)
-          this.startSessionRefreshTimer()
-        }
-
         return {
           success: true,
           user: data.user,
           session: data.session,
-          needsEmailConfirmation: false,
-          message: 'Account created successfully!'
+          message: 'Account created successfully! Please check your email to verify your account.'
         }
       } catch (error: any) {
         if (attempt === maxRetries) {
@@ -296,34 +269,44 @@ class AuthService {
   }
 
   async signInWithGoogle() {
-    // This method is now just a wrapper that calls the server action
     try {
-      console.log('[Auth] Initiating Google sign in via server action')
-      
-      // Get the current pathname to preserve locale
-      const currentPath = window.location.pathname || '/'
-      
-      // Import and call the server action
-      const { signInWithGoogleAction } = await import('@/app/actions/auth')
-      const result = await signInWithGoogleAction(currentPath)
-      
-      if (result?.error) {
-        console.error('[Auth] Server action returned error:', result.error)
-        return {
-          success: false,
-          error: result.error
-        }
+      const supabase = this.getSupabase()
+      if (!supabase) {
+        throw new Error('Supabase not configured')
       }
+
+      // Get the current pathname to preserve locale
+      const currentPath = window.location.pathname || '/en'
       
-      // Server action will handle the redirect, so this shouldn't be reached
+      // Use PKCE flow with callback route
+      const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
+
+      console.log('[Auth] Google sign in with redirect URL:', redirectUrl)
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectUrl,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+          skipBrowserRedirect: false
+        }
+      })
+
+      if (error) {
+        throw error
+      }
+
       return {
-        success: true
+        success: true,
+        data
       }
     } catch (error: any) {
-      console.error('[Auth] Sign in with Google failed:', error)
       return {
         success: false,
-        error: error?.message || 'Failed to initiate Google sign in'
+        error: error.message
       }
     }
   }
@@ -469,16 +452,36 @@ class AuthService {
     }
   }
 
-  // Deprecated - OAuth is now handled server-side
+  // Deprecated - PKCE flow doesn't use this method
   async setOAuthSession(accessToken: string, refreshToken: string) {
-    console.warn('[AuthService] setOAuthSession is deprecated - OAuth is handled server-side')
-    return { success: false, error: 'This method is not used with server-side OAuth' }
+    console.warn('[AuthService] setOAuthSession is deprecated for PKCE flow')
+    return { success: false, error: 'This method is not used in PKCE flow' }
   }
 
-  // Deprecated - OAuth code exchange is now handled server-side
   async exchangeCodeForSession(code: string) {
-    console.warn('[AuthService] exchangeCodeForSession is deprecated - OAuth is handled server-side')
-    return { success: false, error: 'OAuth code exchange is handled server-side' }
+    try {
+      const supabaseClient = this.getSupabase()
+      if (!supabaseClient) {
+        throw new Error('Supabase not configured')
+      }
+
+      console.log('[AuthService] Exchanging OAuth code for session...')
+      
+      const { data, error } = await supabaseClient.auth.exchangeCodeForSession(code)
+      
+      if (error) {
+        console.error('[AuthService] Error exchanging code:', error)
+        return { success: false, error: error.message }
+      }
+      
+      console.log('[AuthService] Code exchange successful')
+      
+      // Session will be handled by onAuthStateChange listener
+      return { success: true, data }
+    } catch (error: any) {
+      console.error('[AuthService] Failed to exchange code:', error)
+      return { success: false, error: error.message }
+    }
   }
 
   async waitForAuth() {

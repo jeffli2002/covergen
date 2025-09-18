@@ -27,25 +27,25 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --background: 220 13% 18%;
+    --foreground: 210 20% 98%;
+    --card: 220 13% 20%;
+    --card-foreground: 210 20% 98%;
+    --popover: 220 13% 22%;
+    --popover-foreground: 210 20% 98%;
     --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 84% 4.9%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 217.2 19% 27%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 217.2 19% 27%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 217.2 19% 27%;
+    --accent-foreground: 210 20% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 94.1%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 217.2 19% 35%;
+    --input: 217.2 19% 27%;
+    --ring: 224.3 76.3% 84%;
   }
 }
 
@@ -112,13 +112,42 @@
   }
 }
 
+/* Prose content styling for blog posts */
+.prose {
+  @apply text-gray-700 dark:text-gray-300;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  @apply text-gray-900 dark:text-gray-100 font-bold;
+}
+
+.prose strong {
+  @apply text-gray-900 dark:text-gray-100;
+}
+
+.prose a {
+  @apply text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300;
+}
+
+.prose code {
+  @apply bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-1 py-0.5 rounded;
+}
+
+.prose pre {
+  @apply bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700;
+}
+
+.prose blockquote {
+  @apply border-l-4 border-purple-500 dark:border-purple-400 bg-gray-50 dark:bg-gray-800/50;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-100 dark:bg-gray-800;
+  @apply bg-gray-100 dark:bg-gray-700;
 }
 
 ::-webkit-scrollbar-thumb {

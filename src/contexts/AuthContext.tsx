@@ -1,7 +1,6 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import authService from '@/services/authService'
 
 interface AuthContextType {
@@ -16,7 +15,6 @@ interface AuthContextType {
   getUserUsageToday: () => Promise<number>
   incrementUsage: () => Promise<any>
   getUserSubscription: () => Promise<any>
-  refreshUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -24,97 +22,50 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const router = useRouter()
 
   useEffect(() => {
-    // Initialize auth service and set up listener
     const initAuth = async () => {
       try {
-        await authService.initialize()
+        console.log('[AuthContext] Starting initialization')
+        console.log('[AuthContext] URL:', window.location.href)
         
-        // Set up auth change handler
-        authService.setAuthChangeHandler((newUser) => {
-          setUser(newUser)
+        authService.setAuthChangeHandler((user) => {
+          console.log('[AuthContext] Auth change handler called:', !!user, user?.email)
+          setUser(user)
+          setLoading(false)
         })
         
-        // Get current user
+        await authService.initialize()
+        
         const currentUser = authService.getCurrentUser()
+        console.log('[AuthContext] Current user after init:', currentUser?.email)
         setUser(currentUser)
       } catch (error) {
-        console.error('[AuthContext] Error initializing auth:', error)
+        console.error('Auth initialization error:', error)
       } finally {
         setLoading(false)
       }
     }
-    
+
     initAuth()
+
+    return () => {
+      authService.destroy()
+    }
   }, [])
-
-  const refreshUser = async () => {
-    try {
-      await authService.initialize()
-      const currentUser = authService.getCurrentUser()
-      setUser(currentUser)
-    } catch (error) {
-      console.error('[AuthContext] Error fetching user:', error)
-      setUser(null)
-    }
-  }
-
-  const signIn = async (email: string, password: string) => {
-    return await authService.signIn(email, password)
-  }
-
-  const signUp = async (email: string, password: string, metadata?: any) => {
-    return await authService.signUp(email, password, metadata)
-  }
-
-  const signInWithGoogle = async () => {
-    return await authService.signInWithGoogle()
-  }
-
-  const signOut = async () => {
-    const result = await authService.signOut()
-    if (result.success) {
-      router.push('/en')
-      router.refresh()
-    }
-    return result
-  }
-
-  const resetPassword = async (email: string) => {
-    return await authService.resetPassword(email)
-  }
-
-  const updatePassword = async (newPassword: string) => {
-    return await authService.updatePassword(newPassword)
-  }
-
-  const getUserUsageToday = async () => {
-    return await authService.getUserUsageToday()
-  }
-
-  const incrementUsage = async () => {
-    return await authService.incrementUsage()
-  }
-
-  const getUserSubscription = async () => {
-    return await authService.getUserSubscription()
-  }
 
   const authContextValue: AuthContextType = {
     user,
     loading,
-    signUp,
-    signIn,
-    signInWithGoogle,
-    signOut,
-    resetPassword,
-    updatePassword,
-    getUserUsageToday,
-    incrementUsage,
-    getUserSubscription,
-    refreshUser,
+    signUp: authService.signUp.bind(authService),
+    signIn: authService.signIn.bind(authService),
+    signInWithGoogle: authService.signInWithGoogle.bind(authService),
+    signOut: authService.signOut.bind(authService),
+    resetPassword: authService.resetPassword.bind(authService),
+    updatePassword: authService.updatePassword.bind(authService),
+    getUserUsageToday: authService.getUserUsageToday.bind(authService),
+    incrementUsage: authService.incrementUsage.bind(authService),
+    getUserSubscription: authService.getUserSubscription.bind(authService),
   }
 
   return (
