@@ -261,14 +261,14 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
-            <h2 className="text-3xl font-bold mb-6 text-center">Professional Event Poster Design That Drives Attendance</h2>
+            <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">Professional Event Poster Design That Drives Attendance</h2>
             <p>
               Creating compelling event posters is crucial for successful event promotion in today's competitive landscape. 
               Our AI-powered event poster designer helps event organizers, promoters, and marketers create professional 
               promotional materials that capture attention and convert viewers into attendees.
             </p>
             
-            <h3 className="font-semibold">Perfect for Every Type of Event</h3>
+            <h3 className="font-semibold text-gray-900">Perfect for Every Type of Event</h3>
             <p>
               Whether you're organizing a music festival, business conference, birthday party, or community workshop, 
               our event poster designer provides tailored templates and AI-generated designs that match your event's 
@@ -276,7 +276,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
               massive sporting events, we've got the perfect design aesthetic for your needs.
             </p>
             
-            <h3 className="font-semibold">Multi-Channel Marketing Ready</h3>
+            <h3 className="font-semibold text-gray-900">Multi-Channel Marketing Ready</h3>
             <p>
               Modern event promotion requires a multi-channel approach. Our poster designer creates materials optimized 
               for every platform: Instagram stories and posts, Facebook event covers, Twitter headers, printed flyers, 
@@ -284,7 +284,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
               sized for its intended platform.
             </p>
             
-            <h3 className="font-semibold">Essential Event Information Integration</h3>
+            <h3 className="font-semibold text-gray-900">Essential Event Information Integration</h3>
             <p>
               A great event poster does more than look good – it communicates clearly. Our AI ensures all critical 
               information is prominently displayed: event name, date and time, venue location, ticket prices, and 
@@ -292,7 +292,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
               maintaining visual appeal.
             </p>
             
-            <h3 className="font-semibold">Drive Ticket Sales with Professional Design</h3>
+            <h3 className="font-semibold text-gray-900">Drive Ticket Sales with Professional Design</h3>
             <p>
               Professional event posters can significantly impact ticket sales and attendance. Our designs incorporate 
               proven marketing psychology principles: urgency creation, social proof elements, clear value propositions, 

@@ -261,7 +261,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
-            <h2 className="text-3xl font-bold mb-6 text-center">Professional Webinar Graphics That Drive Registrations</h2>
+            <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">Professional Webinar Graphics That Drive Registrations</h2>
             <p>
               In the competitive world of online events, professional webinar graphics are essential for standing out 
               and driving registrations. Our AI-powered webinar poster maker helps businesses, educators, trainers, 
@@ -269,7 +269,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
               potential attendees to register for their online events.
             </p>
             
-            <h3 className="font-semibold">Optimized for Maximum Conversions</h3>
+            <h3 className="font-semibold text-gray-900">Optimized for Maximum Conversions</h3>
             <p>
               Successful webinar graphics do more than look professional – they drive specific actions. Our tool creates 
               designs optimized for conversion, incorporating proven marketing principles: clear value propositions, 
@@ -278,7 +278,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
               to move viewers from interest to registration.
             </p>
             
-            <h3 className="font-semibold">Multi-Platform Marketing Integration</h3>
+            <h3 className="font-semibold text-gray-900">Multi-Platform Marketing Integration</h3>
             <p>
               Webinar promotion requires a multi-channel approach. Our graphics are perfectly sized and formatted for 
               email marketing campaigns, social media promotion across LinkedIn, Facebook, and Twitter, website landing 
@@ -286,7 +286,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
               consistency while being optimized for its specific platform and context.
             </p>
             
-            <h3 className="font-semibold">Professional Credibility and Trust Building</h3>
+            <h3 className="font-semibold text-gray-900">Professional Credibility and Trust Building</h3>
             <p>
               Online events require higher levels of trust than in-person gatherings. Our webinar graphics incorporate 
               design elements that build credibility: professional photography integration, clear speaker credentials 
@@ -295,7 +295,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
               impacts registration rates.
             </p>
             
-            <h3 className="font-semibold">Global Accessibility and Compliance</h3>
+            <h3 className="font-semibold text-gray-900">Global Accessibility and Compliance</h3>
             <p>
               Modern webinars often serve global audiences with diverse needs. Our tool creates graphics that work 
               across different cultures and languages, support multiple time zones with clear scheduling information, 

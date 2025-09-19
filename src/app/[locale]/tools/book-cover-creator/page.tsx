@@ -261,14 +261,14 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
-            <h2 className="text-3xl font-bold mb-6 text-center">Professional Book Cover Design Made Simple</h2>
+            <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">Professional Book Cover Design Made Simple</h2>
             <p>
               Creating a compelling book cover is one of the most critical aspects of successful book publishing. 
               Our AI-powered book cover creator helps authors, self-publishers, and indie writers design professional 
               covers that capture their story's essence and appeal to their target readers.
             </p>
             
-            <h3 className="font-semibold">Perfect for Every Publishing Platform</h3>
+            <h3 className="font-semibold text-gray-900">Perfect for Every Publishing Platform</h3>
             <p>
               Whether you're publishing on Amazon KDP, IngramSpark, Draft2Digital, or selling directly to readers, 
               our book cover creator provides the exact specifications you need. Generate covers optimized for print 
@@ -276,7 +276,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
               thumbnails. Every design is export-ready at 300 DPI for professional printing.
             </p>
             
-            <h3 className="font-semibold">Genre-Specific Design Intelligence</h3>
+            <h3 className="font-semibold text-gray-900">Genre-Specific Design Intelligence</h3>
             <p>
               Our AI understands the visual language of different book genres. Romance novels get elegant scripts 
               and warm colors, thrillers receive bold typography and dark atmospheres, while children's books 
@@ -284,7 +284,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
               book fits market expectations while standing out on the shelf.
             </p>
             
-            <h3 className="font-semibold">Complete Creative Control</h3>
+            <h3 className="font-semibold text-gray-900">Complete Creative Control</h3>
             <p>
               Start with AI-generated concepts based on your book title, author name, and genre, then customize 
               every element. Adjust fonts, colors, and layouts to match your vision. Add subtitles, series 
@@ -292,7 +292,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
               special characters for international titles and pen names.
             </p>
             
-            <h3 className="font-semibold">Save Time and Money on Book Design</h3>
+            <h3 className="font-semibold text-gray-900">Save Time and Money on Book Design</h3>
             <p>
               Professional book cover design typically costs $300-800 per cover. With our book cover creator, 
               generate unlimited designs for free. Perfect for authors testing different concepts, series with 

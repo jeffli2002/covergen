@@ -261,7 +261,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
-            <h2 className="text-3xl font-bold mb-6 text-center">Professional Social Media Design That Gets Results</h2>
+            <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">Professional Social Media Design That Gets Results</h2>
             <p>
               In today's crowded social media landscape, standing out requires more than just good content – it requires 
               visually compelling posts that capture attention in milliseconds. Our AI-powered social media poster maker 
@@ -269,7 +269,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
               engagement, increase followers, and build brand awareness across all major platforms.
             </p>
             
-            <h3 className="font-semibold">Optimized for Every Platform's Algorithm</h3>
+            <h3 className="font-semibold text-gray-900">Optimized for Every Platform's Algorithm</h3>
             <p>
               Each social media platform has unique requirements, audience behaviors, and algorithm preferences. Our tool 
               creates content specifically optimized for Instagram's visual-first feed, Facebook's engagement-focused 
@@ -277,7 +277,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
               From aspect ratios to color psychology, every element is designed to perform well on its target platform.
             </p>
             
-            <h3 className="font-semibold">Psychology-Driven Visual Design</h3>
+            <h3 className="font-semibold text-gray-900">Psychology-Driven Visual Design</h3>
             <p>
               Great social media posts leverage proven psychological triggers to capture and hold attention. Our AI 
               incorporates design principles that work: bold colors that stand out in feeds, strategic text placement 
@@ -286,7 +286,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
               and followers into customers.
             </p>
             
-            <h3 className="font-semibold">Brand Consistency Across All Platforms</h3>
+            <h3 className="font-semibold text-gray-900">Brand Consistency Across All Platforms</h3>
             <p>
               Successful social media presence requires consistent branding that makes your content instantly recognizable. 
               Our tool helps maintain visual consistency across all platforms while adapting to each platform's unique 
@@ -294,7 +294,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
               your brand's distinctive look, colors, fonts, and overall aesthetic.
             </p>
             
-            <h3 className="font-semibold">Content That Drives Business Results</h3>
+            <h3 className="font-semibold text-gray-900">Content That Drives Business Results</h3>
             <p>
               Social media posts should do more than look good – they should drive measurable business results. Whether 
               you're promoting products, building brand awareness, driving website traffic, or growing your community, 

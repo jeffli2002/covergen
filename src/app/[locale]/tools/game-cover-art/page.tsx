@@ -261,7 +261,7 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
-            <h2 className="text-3xl font-bold mb-6 text-center">Professional Game Cover Art That Sells</h2>
+            <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">Professional Game Cover Art That Sells</h2>
             <p>
               In the competitive gaming industry, your cover art is often the first and most important interaction 
               potential players have with your game. Whether you're an indie developer launching on Steam, a mobile 
@@ -269,7 +269,7 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               helps you design compelling visuals that capture your game's essence and attract your target audience.
             </p>
             
-            <h3 className="font-semibold">Optimized for Every Gaming Platform</h3>
+            <h3 className="font-semibold text-gray-900">Optimized for Every Gaming Platform</h3>
             <p>
               Different platforms have different requirements and audiences. Our game cover art creator understands 
               these nuances, generating Steam-optimized covers that work well as small thumbnails, mobile game icons 
@@ -278,7 +278,7 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               platform-specific technical requirements.
             </p>
             
-            <h3 className="font-semibold">Genre-Specific Visual Language</h3>
+            <h3 className="font-semibold text-gray-900">Genre-Specific Visual Language</h3>
             <p>
               Gaming audiences have specific expectations for different genres. Our AI has been trained on thousands 
               of successful game covers across all genres. Fantasy RPGs get epic, magical aesthetics with rich 
@@ -287,7 +287,7 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               chilling designs that promise thrills.
             </p>
             
-            <h3 className="font-semibold">Psychology-Driven Design Elements</h3>
+            <h3 className="font-semibold text-gray-900">Psychology-Driven Design Elements</h3>
             <p>
               Successful game covers use specific psychological triggers to attract players. Our AI incorporates 
               proven design principles: character positioning that draws the eye, color schemes that evoke the right 
@@ -295,7 +295,7 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               is cover art that not only looks professional but also performs well in converting browsers into buyers.
             </p>
             
-            <h3 className="font-semibold">From Concept to Market-Ready</h3>
+            <h3 className="font-semibold text-gray-900">From Concept to Market-Ready</h3>
             <p>
               Game development is time-intensive, and marketing materials often come as an afterthought. Our tool 
               bridges this gap by creating market-ready cover art in minutes, not weeks. Generate multiple concepts 
