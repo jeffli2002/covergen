@@ -201,51 +201,51 @@ export default function SocialMediaPosterContent({ locale }: Props) {
               </div>
               
               <div className="space-y-6">
-                <h3 className="text-2xl font-semibold text-gray-400 mb-6">Other Tools Limitations</h3>
+                <h3 className="text-2xl font-semibold text-gray-700 mb-6">Other Tools Limitations</h3>
                 <div className="space-y-4">
                   <div className="flex items-start gap-4 opacity-75">
                     <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-xl text-gray-400">×</span>
+                      <span className="text-xl text-red-500">×</span>
                     </div>
                     <div>
                       <h4 className="font-semibold mb-1 text-gray-900">Watermarked Designs</h4>
-                      <p className="text-gray-500">Free versions include watermarks</p>
+                      <p className="text-gray-700">Free versions include watermarks</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4 opacity-75">
                     <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-xl text-gray-400">×</span>
+                      <span className="text-xl text-red-500">×</span>
                     </div>
                     <div>
                       <h4 className="font-semibold mb-1 text-gray-900">Limited Features</h4>
-                      <p className="text-gray-500">Basic templates without platform optimization</p>
+                      <p className="text-gray-700">Basic templates without platform optimization</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4 opacity-75">
                     <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-xl text-gray-400">×</span>
+                      <span className="text-xl text-red-500">×</span>
                     </div>
                     <div>
                       <h4 className="font-semibold mb-1 text-gray-900">Manual Resizing</h4>
-                      <p className="text-gray-500">Resize designs manually for each platform</p>
+                      <p className="text-gray-700">Resize designs manually for each platform</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4 opacity-75">
                     <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-xl text-gray-400">×</span>
+                      <span className="text-xl text-red-500">×</span>
                     </div>
                     <div>
                       <h4 className="font-semibold mb-1 text-gray-900">Generic Templates</h4>
-                      <p className="text-gray-500">One-size-fits-all approach</p>
+                      <p className="text-gray-700">One-size-fits-all approach</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4 opacity-75">
                     <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-xl text-gray-400">×</span>
+                      <span className="text-xl text-red-500">×</span>
                     </div>
                     <div>
                       <h4 className="font-semibold mb-1 text-gray-900">Signup Walls</h4>
-                      <p className="text-gray-500">Account required for basic features</p>
+                      <p className="text-gray-700">Account required for basic features</p>
                     </div>
                   </div>
                 </div>

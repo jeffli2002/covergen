@@ -259,25 +259,25 @@ export default function WebinarPosterContent({ locale }: Props) {
               
               <div className="bg-gray-100 p-6 rounded-xl">
                 <h3 className="text-xl font-semibold mb-4 text-gray-900">Generic Tools</h3>
-                <ul className="space-y-3 text-gray-500">
+                <ul className="space-y-3 text-gray-700">
                   <li className="flex items-start gap-2">
-                    <span className="text-gray-400 mt-1">×</span>
+                    <span className="text-red-500 mt-1">×</span>
                     <span>Generic templates only</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-gray-400 mt-1">×</span>
+                    <span className="text-red-500 mt-1">×</span>
                     <span>QR code needs external tool</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-gray-400 mt-1">×</span>
+                    <span className="text-red-500 mt-1">×</span>
                     <span>Manual resizing required</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-gray-400 mt-1">×</span>
+                    <span className="text-red-500 mt-1">×</span>
                     <span>Basic text only</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-gray-400 mt-1">×</span>
+                    <span className="text-red-500 mt-1">×</span>
                     <span>Watermarks on free tier</span>
                   </li>
                 </ul>
@@ -285,25 +285,25 @@ export default function WebinarPosterContent({ locale }: Props) {
               
               <div className="bg-gray-100 p-6 rounded-xl">
                 <h3 className="text-xl font-semibold mb-4 text-gray-900">Design Agencies</h3>
-                <ul className="space-y-3 text-gray-500">
+                <ul className="space-y-3 text-gray-700">
                   <li className="flex items-start gap-2">
-                    <span className="text-gray-400 mt-1">×</span>
+                    <span className="text-red-500 mt-1">×</span>
                     <span>Expensive custom design</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-gray-400 mt-1">×</span>
+                    <span className="text-red-500 mt-1">×</span>
                     <span>Days to deliver</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-gray-400 mt-1">×</span>
+                    <span className="text-red-500 mt-1">×</span>
                     <span>Limited revisions</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-gray-400 mt-1">×</span>
+                    <span className="text-red-500 mt-1">×</span>
                     <span>No self-service option</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-gray-400 mt-1">×</span>
+                    <span className="text-red-500 mt-1">×</span>
                     <span>Minimum order requirements</span>
                   </li>
                 </ul>
