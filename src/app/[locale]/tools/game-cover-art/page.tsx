@@ -262,15 +262,15 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
             <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Professional Game Cover Art That Sells</h2>
-            <p>
+            <p className="text-gray-900">
               In the competitive gaming industry, your cover art is often the first and most important interaction 
               potential players have with your game. Whether you're an indie developer launching on Steam, a mobile 
               game studio targeting app stores, or creating physical box art, our AI-powered game cover art creator 
               helps you design compelling visuals that capture your game's essence and attract your target audience.
             </p>
             
-            <h3>Optimized for Every Gaming Platform</h3>
-            <p>
+            <h3 className="text-gray-900 font-semibold">Optimized for Every Gaming Platform</h3>
+            <p className="text-gray-900">
               Different platforms have different requirements and audiences. Our game cover art creator understands 
               these nuances, generating Steam-optimized covers that work well as small thumbnails, mobile game icons 
               that pop on app stores, console box art that stands out on retail shelves, and promotional materials 
@@ -278,8 +278,8 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               platform-specific technical requirements.
             </p>
             
-            <h3>Genre-Specific Visual Language</h3>
-            <p>
+            <h3 className="text-gray-900 font-semibold">Genre-Specific Visual Language</h3>
+            <p className="text-gray-900">
               Gaming audiences have specific expectations for different genres. Our AI has been trained on thousands 
               of successful game covers across all genres. Fantasy RPGs get epic, magical aesthetics with rich 
               fantasy elements. FPS games receive bold, action-packed designs with military themes. Indie games get 
@@ -287,16 +287,16 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               chilling designs that promise thrills.
             </p>
             
-            <h3>Psychology-Driven Design Elements</h3>
-            <p>
+            <h3 className="text-gray-900 font-semibold">Psychology-Driven Design Elements</h3>
+            <p className="text-gray-900">
               Successful game covers use specific psychological triggers to attract players. Our AI incorporates 
               proven design principles: character positioning that draws the eye, color schemes that evoke the right 
               emotions, typography that matches the game's tone, and composition that works at any size. The result 
               is cover art that not only looks professional but also performs well in converting browsers into buyers.
             </p>
             
-            <h3>From Concept to Market-Ready</h3>
-            <p>
+            <h3 className="text-gray-900 font-semibold">From Concept to Market-Ready</h3>
+            <p className="text-gray-900">
               Game development is time-intensive, and marketing materials often come as an afterthought. Our tool 
               bridges this gap by creating market-ready cover art in minutes, not weeks. Generate multiple concepts 
               for A/B testing, create variations for different regions or platforms, and maintain consistent branding 

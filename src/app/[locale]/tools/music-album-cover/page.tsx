@@ -262,39 +262,39 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
             <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Professional Album Cover Design for Every Artist</h2>
-            <p>
+            <p className="text-gray-900">
               In today's music landscape, your album cover is more than just artwork – it's your music's first impression, 
               a visual representation of your sound, and often the deciding factor in whether someone clicks play. Our 
               AI-powered music album cover maker helps independent artists, bands, producers, and record labels create 
               professional album artwork that captures their unique sound and attracts listeners across all platforms.
             </p>
             
-            <h3>Optimized for All Music Platforms</h3>
-            <p>
+            <h3 className="text-gray-900 font-semibold">Optimized for All Music Platforms</h3>
+            <p className="text-gray-900">
               Different streaming platforms and music stores have specific requirements for album artwork. Our tool creates 
               covers that look perfect on Spotify, Apple Music, Amazon Music, SoundCloud, Bandcamp, and YouTube Music. 
               From the 3000x3000 pixel requirement for streaming platforms to the specific aspect ratios needed for 
               physical releases, every cover is generated with technical specifications in mind.
             </p>
             
-            <h3>Genre-Specific Visual Language</h3>
-            <p>
+            <h3 className="text-gray-900 font-semibold">Genre-Specific Visual Language</h3>
+            <p className="text-gray-900">
               Music fans have visual expectations for different genres. Hip-hop albums often feature bold typography 
               and urban aesthetics, while electronic music embraces futuristic, neon-soaked visuals. Jazz covers tend 
               toward sophisticated, artistic designs, and country music often incorporates natural, vintage elements. 
               Our AI understands these genre conventions while helping you create something uniquely yours.
             </p>
             
-            <h3>Perfect for Independent Artists</h3>
-            <p>
+            <h3 className="text-gray-900 font-semibold">Perfect for Independent Artists</h3>
+            <p className="text-gray-900">
               Professional album cover design can cost hundreds of dollars and take weeks to complete. Our tool democratizes 
               music design, allowing independent artists to create professional-quality artwork in minutes. Whether you're 
               releasing a single, EP, or full album, generate multiple concepts, test different styles, and find the 
               perfect visual representation of your music without breaking the bank.
             </p>
             
-            <h3>From Digital to Physical</h3>
-            <p>
+            <h3 className="text-gray-900 font-semibold">From Digital to Physical</h3>
+            <p className="text-gray-900">
               While streaming dominates music consumption, physical releases are experiencing a renaissance. Vinyl sales 
               are at their highest point in decades, and fans love collecting physical music. Our album covers are designed 
               to work beautifully at any size, from tiny streaming thumbnails to large vinyl gatefolds. Create cohesive 

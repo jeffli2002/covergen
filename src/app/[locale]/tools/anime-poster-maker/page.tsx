@@ -263,38 +263,38 @@ export default function AnimePosterMakerPage({ params: { locale } }: { params: {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
             <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">The Ultimate Anime Poster Maker</h2>
-            <p>
+            <p className="text-gray-900">
               Creating professional anime posters has never been easier with our AI-powered anime poster maker. 
               Whether you're designing for anime conventions, creating fan art, or producing promotional materials 
               for your manga, our tool delivers authentic anime aesthetics that capture the essence of Japanese animation.
             </p>
             
-            <h3>Authentic Anime Art Styles</h3>
-            <p>
+            <h3 className="text-gray-900 font-semibold">Authentic Anime Art Styles</h3>
+            <p className="text-gray-900">
               Our AI understands the nuanced differences between various anime and manga styles. From the dynamic 
               action lines of shonen manga to the delicate expressions of shojo romance, from the cute chibi 
               characters to the detailed mecha designs, our anime poster generator captures it all. Each style 
               is carefully trained to maintain authenticity while allowing for creative customization.
             </p>
             
-            <h3>Japanese Typography Support</h3>
-            <p>
+            <h3 className="text-gray-900 font-semibold">Japanese Typography Support</h3>
+            <p className="text-gray-900">
               What sets our anime poster maker apart is full support for Japanese text. Add authentic hiragana, 
               katakana, and kanji characters to your posters. Our system includes proper Japanese fonts and 
               typography rules, ensuring your text looks professional whether you're creating titles, character 
               names, or stylized logos common in anime branding.
             </p>
             
-            <h3>Perfect for Every Anime Fan</h3>
-            <p>
+            <h3 className="text-gray-900 font-semibold">Perfect for Every Anime Fan</h3>
+            <p className="text-gray-900">
               Whether you're a content creator making YouTube thumbnails, an event organizer promoting anime 
               conventions, an artist showcasing original characters, or a business targeting the otaku market, 
               our tool provides everything you need. Create posters for cosplay events, anime club meetings, 
               manga reviews, or fan merchandise - all with professional quality that rivals official anime artwork.
             </p>
             
-            <h3>Free Anime Poster Creation</h3>
-            <p>
+            <h3 className="text-gray-900 font-semibold">Free Anime Poster Creation</h3>
+            <p className="text-gray-900">
               We believe creativity shouldn't be limited by budget. Our anime poster maker is completely free 
               with no watermarks on your creations. Generate unlimited anime posters for personal projects, 
               social media, or non-commercial use. Pro users gain access to premium styles, higher resolutions, 
