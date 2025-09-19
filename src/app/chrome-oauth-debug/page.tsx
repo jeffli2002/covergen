@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { signInWithGoogleAction } from '@/app/actions/auth'
+import { OAuthSignInButton } from '@/components/oauth-signin-button'
 
 export default function ChromeOAuthDebugPage() {
   const [cookies, setCookies] = useState<Record<string, string>>({})
@@ -55,14 +55,7 @@ export default function ChromeOAuthDebugPage() {
     }
   }
 
-  const testGoogleOAuth = async () => {
-    try {
-      const currentPath = window.location.pathname
-      await signInWithGoogleAction(currentPath)
-    } catch (err: any) {
-      setError(err.message)
-    }
-  }
+  // Remove the server action version as we'll use the client component
 
   const refreshSession = async () => {
     setLoading(true)
@@ -173,9 +166,13 @@ export default function ChromeOAuthDebugPage() {
         <h2 className="text-xl font-semibold mb-4">Actions</h2>
         
         <div className="flex gap-4">
-          <Button onClick={testGoogleOAuth} disabled={!!session}>
-            Test Google OAuth
-          </Button>
+          <OAuthSignInButton 
+            provider="google" 
+            redirectTo="/chrome-oauth-debug"
+            className="bg-blue-500 hover:bg-blue-600 text-white"
+          >
+            Test Google OAuth (Client-Side)
+          </OAuthSignInButton>
           
           <Button onClick={refreshSession} variant="outline">
             Refresh Session

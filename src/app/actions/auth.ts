@@ -33,19 +33,15 @@ export async function signInWithGoogleAction(currentPath?: string) {
   
   // Use the current path or default to the homepage
   const nextPath = currentPath || '/'
-  const redirectTo = `${origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
+  const redirectTo = `${origin}/auth/callback-simple?next=${encodeURIComponent(nextPath)}`
   
   console.log('[Server Action] OAuth redirect URL:', redirectTo)
   
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo,
-      queryParams: {
-        access_type: 'offline',
-        prompt: 'consent',
-        response_type: 'code' // Force PKCE flow to respect redirectTo
-      } as any
+      redirectTo
+      // Don't specify queryParams - use default implicit flow
     }
   })
   
