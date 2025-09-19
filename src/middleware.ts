@@ -36,26 +36,77 @@ export async function middleware(request: NextRequest) {
   // Check if this is a public path that should bypass locale routing
   const isPublicPath = PUBLIC_PATHS.some(path => pathname.startsWith(path))
   
-  // Handle OAuth callback
-  if (searchParams.get('code') || searchParams.get('error')) {
-    console.log('[Middleware] OAuth callback detected')
+  // Handle OAuth callback directly in middleware for Chrome compatibility
+  const code = searchParams.get('code')
+  if (code && pathname === '/auth/callback-middleware') {
+    console.log('[Middleware] Processing OAuth callback with code')
     
-    // If we're not already on the callback route, redirect there
-    if (!pathname.includes('/auth/callback')) {
-      const callbackUrl = new URL('/auth/callback', request.url)
-      searchParams.forEach((value, key) => {
-        callbackUrl.searchParams.set(key, value)
-      })
+    try {
+      // Create response for the redirect
+      const next = searchParams.get('next') || '/en'
+      const response = NextResponse.redirect(new URL(next, request.url))
       
-      // Preserve the intended destination
-      if (!callbackUrl.searchParams.has('next')) {
-        const next = pathname === '/' ? '/en' : pathname
-        callbackUrl.searchParams.set('next', next)
+      // Create Supabase client and exchange code for session
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            get(name: string) {
+              return request.cookies.get(name)?.value
+            },
+            set(name: string, value: string, options: CookieOptions) {
+              // Use enhanced cookie options
+              const enhancedOptions = getEnhancedCookieOptions(name, options)
+              
+              // Set cookie on response with proper Chrome settings
+              response.cookies.set({
+                name,
+                value,
+                ...enhancedOptions,
+              })
+            },
+            remove(name: string, options: CookieOptions) {
+              response.cookies.set({
+                name,
+                value: '',
+                ...options,
+              })
+            },
+          },
+        }
+      )
+      
+      // Exchange code for session
+      const { error } = await supabase.auth.exchangeCodeForSession(code)
+      
+      if (error) {
+        console.error('[Middleware] OAuth error:', error)
+        return NextResponse.redirect(new URL('/en/auth-error', request.url))
       }
       
-      console.log('[Middleware] Redirecting to callback:', callbackUrl.toString())
-      return NextResponse.redirect(callbackUrl)
+      console.log('[Middleware] OAuth successful, redirecting with cookies set')
+      return response
+    } catch (err) {
+      console.error('[Middleware] OAuth processing error:', err)
+      return NextResponse.redirect(new URL('/en/auth-error', request.url))
     }
+  }
+  
+  // Legacy callback handling - redirect to middleware-based callback
+  if (searchParams.get('code') && !pathname.includes('/auth/callback')) {
+    console.log('[Middleware] Redirecting to middleware-based callback')
+    const callbackUrl = new URL('/auth/callback-middleware', request.url)
+    searchParams.forEach((value, key) => {
+      callbackUrl.searchParams.set(key, value)
+    })
+    
+    if (!callbackUrl.searchParams.has('next')) {
+      const next = pathname === '/' ? '/en' : pathname
+      callbackUrl.searchParams.set('next', next)
+    }
+    
+    return NextResponse.redirect(callbackUrl)
   }
 
   // Create response that will be modified

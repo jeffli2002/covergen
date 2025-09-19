@@ -1,0 +1,5 @@
+[33m7e674fb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m 修复数据库列名不匹配问题 (PostgreSQL 42703错误)
+[33m9361c88[m 更新CLAUDE.md记录Chrome OAuth SameSite Cookie修复
+[33mba5dec0[m 修复Chrome浏览器Google OAuth SameSite Cookie问题
+[33mb7282fa[m feat: Update Spotify platform showcase to use actual example images
+[33m324990b[m fix: Update subscription UI immediately after cancel/resume actions

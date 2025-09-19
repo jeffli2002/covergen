@@ -33,7 +33,7 @@ export async function signInWithGoogleAction(currentPath?: string) {
   
   // Use the current path or default to the homepage
   const nextPath = currentPath || '/'
-  const redirectTo = `${origin}/auth/callback-simple?next=${encodeURIComponent(nextPath)}`
+  const redirectTo = `${origin}/auth/callback-middleware?next=${encodeURIComponent(nextPath)}`
   
   console.log('[Server Action] OAuth redirect URL:', redirectTo)
   
