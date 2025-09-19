@@ -291,3 +291,97 @@ After analyzing the working next-supabase-stripe-starter project, we implemented
 - The implicit flow is less secure than PKCE but works with server-side callbacks
 - This approach matches successful production implementations
 - All OAuth test pages have been updated to use server actions
+
+## Chrome OAuth SameSite Cookie Fix (2025-01-27)
+
+### Problem: Chrome OAuth Failure with Edge Success
+Chrome browser was silently dropping authentication cookies during OAuth redirect, causing OAuth to fail while Edge browser worked normally. This was due to Chrome's stricter SameSite cookie requirements for cross-site OAuth flows.
+
+### Root Cause
+Chrome browser requires `SameSite=None; Secure` cookies for cross-site OAuth flows, but the application was using `SameSite=Lax` which Chrome silently drops during OAuth redirects.
+
+### Solution: SameSite=None; Secure Cookie Configuration
+
+#### 1. Updated Supabase Client Cookie Configuration (`src/lib/supabase.ts`)
+```typescript
+// For OAuth flows, we need SameSite=None; Secure for Chrome compatibility
+const isOAuthFlow = name.startsWith('sb-') && (name.includes('auth') || name.includes('session'))
+const sameSiteValue = isOAuthFlow ? 'None' : (options?.sameSite || 'Lax')
+cookieParts.push(`SameSite=${sameSiteValue}`)
+
+// Always set Secure for SameSite=None cookies (required by Chrome)
+if (sameSiteValue === 'None' || window.location.protocol === 'https:' || options?.secure) {
+  cookieParts.push('Secure')
+}
+```
+
+#### 2. Updated Alternative Client Configuration (`src/utils/supabase/client.ts`)
+```typescript
+// For OAuth flows, we need SameSite=None; Secure for Chrome compatibility
+const isOAuthFlow = name.startsWith('sb-') && (name.includes('auth') || name.includes('session'))
+const sameSiteValue = isOAuthFlow ? 'None' : (options?.sameSite || 'lax')
+cookieString += `; samesite=${sameSiteValue}`
+
+// Always set Secure for SameSite=None cookies (required by Chrome)
+if (sameSiteValue === 'None' || options?.secure) {
+  cookieString += `; secure`
+}
+```
+
+#### 3. Updated OAuth Configuration (`src/lib/supabase-oauth-config.ts`)
+```typescript
+// Cookie options for production vs development
+// For OAuth flows, we need SameSite=None; Secure for Chrome compatibility
+const cookieOptions = {
+  domain: isProduction && typeof window !== 'undefined' 
+    ? `.${window.location.hostname.replace('www.', '')}` // .covergen.pro
+    : undefined, // Let browser handle it in dev
+  sameSite: 'none' as const, // Required for cross-site OAuth flows in Chrome
+  secure: true, // Always required for SameSite=None
+  maxAge: 60 * 60 * 24 * 30, // 30 days
+}
+```
+
+### Current Production Architecture
+
+#### Server-Side OAuth Flow (Confirmed Working)
+- **Framework**: Next.js 14+ App Router with SSR
+- **OAuth Flow**: PKCE with server-side code exchange
+- **Authentication**: Supabase SSR with server-side cookie handling
+- **Callback Handler**: Server-side route (`/auth/callback/route.ts`)
+
+#### OAuth Flow Process
+1. User clicks Google login → Redirects to Google OAuth
+2. Google callback to `/auth/callback` (server-side route)
+3. Server exchanges authorization code for session using `exchangeCodeForSession()`
+4. Server sets authentication cookies with `SameSite=None; Secure`
+5. Redirect to target page with authenticated session
+
+#### Browser Compatibility
+- ✅ **Chrome**: Now works with `SameSite=None; Secure` cookies
+- ✅ **Edge**: Continues to work (more lenient SameSite handling)
+- ✅ **Safari**: Compatible with SameSite=None configuration
+- ✅ **Firefox**: Compatible with SameSite=None configuration
+
+### Key Requirements for Production
+1. **HTTPS Required**: `SameSite=None; Secure` only works over HTTPS
+2. **Proper Domain Configuration**: Ensure Supabase redirect URLs match exactly
+3. **Cookie Security**: All OAuth-related cookies must use `SameSite=None; Secure`
+
+### Testing Verification
+- Chrome OAuth flow now completes successfully
+- Edge OAuth flow continues to work normally
+- Authentication state persists across page refreshes
+- Cross-site cookie handling works correctly
+
+### Files Modified
+- `src/lib/supabase.ts` - Main Supabase client cookie configuration
+- `src/utils/supabase/client.ts` - Alternative client cookie configuration  
+- `src/lib/supabase-oauth-config.ts` - OAuth-specific configuration
+- `CHROME_OAUTH_SAMESITE_FIX.md` - Detailed fix documentation
+
+### Important Notes
+- This fix maintains backward compatibility with Edge and other browsers
+- Production environment must use HTTPS for `SameSite=None; Secure` to work
+- Local development may still have issues due to HTTP limitations
+- All OAuth-related cookies now properly configured for Chrome compatibility
