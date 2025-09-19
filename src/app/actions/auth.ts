@@ -33,15 +33,16 @@ export async function signInWithGoogleAction(currentPath?: string) {
   
   // Use the current path or default to the homepage
   const nextPath = currentPath || '/'
-  const redirectTo = `${origin}/auth/callback-middleware?next=${encodeURIComponent(nextPath)}`
+  const redirectTo = `${origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
   
   console.log('[Server Action] OAuth redirect URL:', redirectTo)
   
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo
-      // Don't specify queryParams - use default implicit flow
+      redirectTo,
+      // Skip PKCE for broader browser compatibility
+      skipBrowserRedirect: false
     }
   })
   

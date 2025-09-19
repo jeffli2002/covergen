@@ -34,22 +34,44 @@ export async function GET(request: Request) {
         {
           cookies: {
             get(name: string) {
-              return cookieStore.get(name)?.value
+              const value = cookieStore.get(name)?.value
+              if (value && name.startsWith('sb-')) {
+                console.log(`[Callback] Getting cookie ${name}: ${value.substring(0, 20)}...`)
+              }
+              return value
             },
             set(name: string, value: string, options: CookieOptions) {
               // Use enhanced cookie options for Chrome compatibility
               const enhancedOptions = getEnhancedCookieOptions(name, options)
               
+              // Force SameSite=None for OAuth cookies in production
+              if (name.startsWith('sb-') && process.env.NODE_ENV === 'production') {
+                enhancedOptions.sameSite = 'none'
+                enhancedOptions.secure = true
+              }
+              
               // Log cookie operation for debugging
               logCookieOperation('set', name, value, enhancedOptions)
               
-              // Set cookies on both the request store and the response
-              cookieStore.set({ name, value, ...enhancedOptions })
-              response.cookies.set({ name, value, ...enhancedOptions })
+              // Set cookies on the response with Chrome-compatible options
+              response.cookies.set({
+                name,
+                value,
+                ...enhancedOptions,
+                // Ensure these are explicitly set for Chrome
+                sameSite: enhancedOptions.sameSite as any,
+                secure: enhancedOptions.secure,
+                httpOnly: enhancedOptions.httpOnly ?? true,
+                path: enhancedOptions.path ?? '/'
+              })
             },
             remove(name: string, options: CookieOptions) {
-              cookieStore.set({ name, value: '', ...options })
-              response.cookies.set({ name, value: '', ...options })
+              response.cookies.set({ 
+                name, 
+                value: '', 
+                ...options,
+                maxAge: 0 
+              })
             },
           },
         }

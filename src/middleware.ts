@@ -36,61 +36,10 @@ export async function middleware(request: NextRequest) {
   // Check if this is a public path that should bypass locale routing
   const isPublicPath = PUBLIC_PATHS.some(path => pathname.startsWith(path))
   
-  // Handle OAuth callback directly in middleware for Chrome compatibility
-  const code = searchParams.get('code')
-  if (code && pathname === '/auth/callback-middleware') {
-    console.log('[Middleware] Processing OAuth callback with code')
-    
-    try {
-      // Create response for the redirect
-      const next = searchParams.get('next') || '/en'
-      const response = NextResponse.redirect(new URL(next, request.url))
-      
-      // Create Supabase client and exchange code for session
-      const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-          cookies: {
-            get(name: string) {
-              return request.cookies.get(name)?.value
-            },
-            set(name: string, value: string, options: CookieOptions) {
-              // Use enhanced cookie options
-              const enhancedOptions = getEnhancedCookieOptions(name, options)
-              
-              // Set cookie on response with proper Chrome settings
-              response.cookies.set({
-                name,
-                value,
-                ...enhancedOptions,
-              })
-            },
-            remove(name: string, options: CookieOptions) {
-              response.cookies.set({
-                name,
-                value: '',
-                ...options,
-              })
-            },
-          },
-        }
-      )
-      
-      // Exchange code for session
-      const { error } = await supabase.auth.exchangeCodeForSession(code)
-      
-      if (error) {
-        console.error('[Middleware] OAuth error:', error)
-        return NextResponse.redirect(new URL('/en/auth-error', request.url))
-      }
-      
-      console.log('[Middleware] OAuth successful, redirecting with cookies set')
-      return response
-    } catch (err) {
-      console.error('[Middleware] OAuth processing error:', err)
-      return NextResponse.redirect(new URL('/en/auth-error', request.url))
-    }
+  // Skip middleware OAuth handling - let the callback route handle it
+  if (pathname === '/auth/callback' || pathname === '/auth/callback-middleware') {
+    console.log('[Middleware] Skipping OAuth callback - handled by route')
+    return NextResponse.next()
   }
   
   // Legacy callback handling - redirect to middleware-based callback
