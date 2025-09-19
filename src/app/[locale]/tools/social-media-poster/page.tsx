@@ -104,7 +104,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Platform Optimized
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Perfect dimensions for every social network
               </p>
             </div>
@@ -116,7 +116,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Engagement Driven
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Designs that get likes, shares, and comments
               </p>
             </div>
@@ -128,7 +128,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Brand Consistent
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Maintain your unique visual identity
               </p>
             </div>
@@ -140,7 +140,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 All Platforms Ready
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Instagram, Facebook, Twitter, LinkedIn
               </p>
             </div>
@@ -152,7 +152,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Lightning Fast
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Create professional posts in seconds
               </p>
             </div>
@@ -164,7 +164,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Audience Focused
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Designed to resonate with your followers
               </p>
             </div>
@@ -261,24 +261,24 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Professional Social Media Design That Gets Results</h2>
-            <p className="text-gray-900">
+            <h2 className="text-3xl font-bold mb-6 text-center">Professional Social Media Design That Gets Results</h2>
+            <p>
               In today's crowded social media landscape, standing out requires more than just good content – it requires 
               visually compelling posts that capture attention in milliseconds. Our AI-powered social media poster maker 
               helps content creators, businesses, influencers, and marketers design scroll-stopping visuals that drive 
               engagement, increase followers, and build brand awareness across all major platforms.
             </p>
             
-            <h3 className="text-gray-900 font-semibold">Optimized for Every Platform's Algorithm</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Optimized for Every Platform's Algorithm</h3>
+            <p>
               Each social media platform has unique requirements, audience behaviors, and algorithm preferences. Our tool 
               creates content specifically optimized for Instagram's visual-first feed, Facebook's engagement-focused 
               algorithm, Twitter's fast-paced timeline, LinkedIn's professional network, and TikTok's discovery engine. 
               From aspect ratios to color psychology, every element is designed to perform well on its target platform.
             </p>
             
-            <h3 className="text-gray-900 font-semibold">Psychology-Driven Visual Design</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Psychology-Driven Visual Design</h3>
+            <p>
               Great social media posts leverage proven psychological triggers to capture and hold attention. Our AI 
               incorporates design principles that work: bold colors that stand out in feeds, strategic text placement 
               that guides the eye, emotional imagery that creates connection, and clear calls-to-action that drive 
@@ -286,16 +286,16 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
               and followers into customers.
             </p>
             
-            <h3 className="text-gray-900 font-semibold">Brand Consistency Across All Platforms</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Brand Consistency Across All Platforms</h3>
+            <p>
               Successful social media presence requires consistent branding that makes your content instantly recognizable. 
               Our tool helps maintain visual consistency across all platforms while adapting to each platform's unique 
               format requirements. Create templates that can be easily customized for different campaigns while maintaining 
               your brand's distinctive look, colors, fonts, and overall aesthetic.
             </p>
             
-            <h3 className="text-gray-900 font-semibold">Content That Drives Business Results</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Content That Drives Business Results</h3>
+            <p>
               Social media posts should do more than look good – they should drive measurable business results. Whether 
               you're promoting products, building brand awareness, driving website traffic, or growing your community, 
               our designs incorporate elements that encourage specific actions. From compelling headlines to strategic 
@@ -318,7 +318,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   What social media platforms are supported?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   We support all major platforms with optimized templates: Instagram (posts, stories, reels), Facebook 
                   (posts, covers, ads), Twitter (posts, headers), LinkedIn (posts, articles), YouTube (thumbnails, 
                   channel art), Pinterest (pins, boards), TikTok (covers), and Snapchat (stories, geofilters).
@@ -329,7 +329,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Can I maintain consistent branding across platforms?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Absolutely! Upload your brand colors, fonts, and logos to create consistent templates. Save your 
                   brand kit and apply it across all platforms while automatically adjusting for each platform's 
                   specific requirements. This ensures brand recognition no matter where your content appears.
@@ -340,7 +340,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   How do I create content that gets high engagement?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Our AI creates designs using proven engagement principles: high contrast for visibility, strategic 
                   text placement for readability, emotional color psychology, clear calls-to-action, and platform-specific 
                   optimization. We also provide trending style options based on current social media design trends.
@@ -351,7 +351,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Can I create content for different campaign types?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Yes! Whether you're running product launches, seasonal campaigns, educational content, promotional 
                   offers, or community building initiatives, our tool provides templates and AI generation options 
                   tailored to each campaign type and objective.
@@ -362,7 +362,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   How quickly can I create social media content?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Most users create professional social media posts in under 30 seconds. Simply describe your content, 
                   select your platform and style preferences, and our AI generates multiple options instantly. Perfect 
                   for content creators who need to maintain consistent posting schedules.

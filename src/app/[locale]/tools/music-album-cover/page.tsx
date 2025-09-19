@@ -104,7 +104,7 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 All Genres
               </h3>
-              <p className="text-gray-900">
+              <p>
                 From hip-hop to classical, we've got you covered
               </p>
             </div>
@@ -116,7 +116,7 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Streaming Ready
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Optimized for Spotify, Apple Music, and more
               </p>
             </div>
@@ -128,7 +128,7 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Artist Focused
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Designs that represent your unique sound
               </p>
             </div>
@@ -140,7 +140,7 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Custom Artwork
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Unique designs that match your aesthetic
               </p>
             </div>
@@ -152,7 +152,7 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Vinyl & CD Ready
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Perfect for physical releases too
               </p>
             </div>
@@ -164,7 +164,7 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Trend Aware
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Styles that resonate with today's listeners
               </p>
             </div>
@@ -261,40 +261,40 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Professional Album Cover Design for Every Artist</h2>
-            <p className="text-gray-900">
+            <h2 className="text-3xl font-bold mb-6 text-center">Professional Album Cover Design for Every Artist</h2>
+            <p>
               In today's music landscape, your album cover is more than just artwork – it's your music's first impression, 
               a visual representation of your sound, and often the deciding factor in whether someone clicks play. Our 
               AI-powered music album cover maker helps independent artists, bands, producers, and record labels create 
               professional album artwork that captures their unique sound and attracts listeners across all platforms.
             </p>
             
-            <h3 className="text-gray-900 font-semibold">Optimized for All Music Platforms</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Optimized for All Music Platforms</h3>
+            <p>
               Different streaming platforms and music stores have specific requirements for album artwork. Our tool creates 
               covers that look perfect on Spotify, Apple Music, Amazon Music, SoundCloud, Bandcamp, and YouTube Music. 
               From the 3000x3000 pixel requirement for streaming platforms to the specific aspect ratios needed for 
               physical releases, every cover is generated with technical specifications in mind.
             </p>
             
-            <h3 className="text-gray-900 font-semibold">Genre-Specific Visual Language</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Genre-Specific Visual Language</h3>
+            <p>
               Music fans have visual expectations for different genres. Hip-hop albums often feature bold typography 
               and urban aesthetics, while electronic music embraces futuristic, neon-soaked visuals. Jazz covers tend 
               toward sophisticated, artistic designs, and country music often incorporates natural, vintage elements. 
               Our AI understands these genre conventions while helping you create something uniquely yours.
             </p>
             
-            <h3 className="text-gray-900 font-semibold">Perfect for Independent Artists</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Perfect for Independent Artists</h3>
+            <p>
               Professional album cover design can cost hundreds of dollars and take weeks to complete. Our tool democratizes 
               music design, allowing independent artists to create professional-quality artwork in minutes. Whether you're 
               releasing a single, EP, or full album, generate multiple concepts, test different styles, and find the 
               perfect visual representation of your music without breaking the bank.
             </p>
             
-            <h3 className="text-gray-900 font-semibold">From Digital to Physical</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">From Digital to Physical</h3>
+            <p>
               While streaming dominates music consumption, physical releases are experiencing a renaissance. Vinyl sales 
               are at their highest point in decades, and fans love collecting physical music. Our album covers are designed 
               to work beautifully at any size, from tiny streaming thumbnails to large vinyl gatefolds. Create cohesive 
@@ -317,7 +317,7 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   What size should my album cover be?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Most streaming platforms require 3000x3000 pixels at minimum, though we recommend this size as it 
                   works well everywhere. Our tool automatically generates covers at this optimal resolution. For vinyl 
                   or CD releases, we can also provide higher resolutions and print-ready formats with proper color profiles.
@@ -328,7 +328,7 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Can I include my band photo or artist image?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Absolutely! Upload your photos, and our AI will incorporate them into professional album cover designs. 
                   Whether you want a prominent artist photo, subtle band imagery, or abstract representations, the tool 
                   can work with your existing visuals or generate completely new artwork based on your music's vibe.
@@ -339,7 +339,7 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Do the covers work for singles, EPs, and albums?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Yes! Our tool creates artwork suitable for any type of release. Whether you're dropping a single, 
                   releasing an EP, or launching a full album, the designs work perfectly. You can also create consistent 
                   artwork for series releases or maintain visual branding across your entire discography.
@@ -350,7 +350,7 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Can I use the covers for commercial releases?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Free users can create covers for personal projects and independent releases. For major label releases, 
                   commercial distribution, or merchandise, you'll need a Pro subscription which includes full commercial 
                   licensing rights. This ensures you can use your artwork anywhere without legal concerns.
@@ -361,7 +361,7 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   How do I make my album stand out on streaming platforms?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Great album covers work at thumbnail size and grab attention in crowded feeds. Our AI creates designs 
                   with strong contrast, readable text even when small, and eye-catching visuals that stop scrollers. 
                   We also recommend testing your cover at different sizes to ensure it's effective across all contexts.

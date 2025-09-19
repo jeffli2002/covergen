@@ -104,7 +104,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Eye-Catching Designs
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Templates that grab attention and drive ticket sales
               </p>
             </div>
@@ -116,7 +116,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Multi-Platform Ready
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Perfect for social media, print, and digital displays
               </p>
             </div>
@@ -128,7 +128,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Quick Turnaround
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Create professional posters in minutes, not hours
               </p>
             </div>
@@ -140,7 +140,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Event Details Included
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Date, time, venue, and ticketing information
               </p>
             </div>
@@ -152,7 +152,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Social Media Optimized
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Perfect sizes for Instagram, Facebook, Twitter
               </p>
             </div>
@@ -164,7 +164,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Premium Quality
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Professional designs that elevate your brand
               </p>
             </div>
@@ -261,39 +261,39 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Professional Event Poster Design That Drives Attendance</h2>
-            <p className="text-gray-900">
+            <h2 className="text-3xl font-bold mb-6 text-center">Professional Event Poster Design That Drives Attendance</h2>
+            <p>
               Creating compelling event posters is crucial for successful event promotion in today's competitive landscape. 
               Our AI-powered event poster designer helps event organizers, promoters, and marketers create professional 
               promotional materials that capture attention and convert viewers into attendees.
             </p>
             
-            <h3 className="text-gray-900 font-semibold">Perfect for Every Type of Event</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Perfect for Every Type of Event</h3>
+            <p>
               Whether you're organizing a music festival, business conference, birthday party, or community workshop, 
               our event poster designer provides tailored templates and AI-generated designs that match your event's 
               vibe. From elegant corporate conferences to vibrant music festivals, from intimate art exhibitions to 
               massive sporting events, we've got the perfect design aesthetic for your needs.
             </p>
             
-            <h3 className="text-gray-900 font-semibold">Multi-Channel Marketing Ready</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Multi-Channel Marketing Ready</h3>
+            <p>
               Modern event promotion requires a multi-channel approach. Our poster designer creates materials optimized 
               for every platform: Instagram stories and posts, Facebook event covers, Twitter headers, printed flyers, 
               large-format posters, and digital displays. Each design maintains consistency while being perfectly 
               sized for its intended platform.
             </p>
             
-            <h3 className="text-gray-900 font-semibold">Essential Event Information Integration</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Essential Event Information Integration</h3>
+            <p>
               A great event poster does more than look good – it communicates clearly. Our AI ensures all critical 
               information is prominently displayed: event name, date and time, venue location, ticket prices, and 
               call-to-action. The smart layout system prevents important details from being overlooked while 
               maintaining visual appeal.
             </p>
             
-            <h3 className="text-gray-900 font-semibold">Drive Ticket Sales with Professional Design</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Drive Ticket Sales with Professional Design</h3>
+            <p>
               Professional event posters can significantly impact ticket sales and attendance. Our designs incorporate 
               proven marketing psychology principles: urgency creation, social proof elements, clear value propositions, 
               and compelling calls-to-action. Whether you're selling tickets online or promoting a free community 
@@ -316,7 +316,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   What types of events can I create posters for?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Our event poster designer supports all event types: concerts, conferences, parties, workshops, 
                   festivals, sports events, theater performances, art exhibitions, and more. Each category has 
                   specialized templates and AI training to match the appropriate style and information hierarchy.
@@ -327,7 +327,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Can I add sponsor logos and partner information?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Yes! Our tool supports adding sponsor logos, partner brands, and venue information. You can upload 
                   multiple logos and arrange them professionally. The AI ensures sponsor visibility while maintaining 
                   the overall design aesthetic. Pro users get advanced layout options for complex sponsor arrangements.
@@ -338,7 +338,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   What sizes are available for different platforms?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   We provide optimized sizes for all major platforms: Instagram (1080x1080, 1080x1920), Facebook 
                   (1200x628, 1920x1080), Twitter (1500x500), printed flyers (8.5"x11", A4), posters (18"x24", 
                   24"x36"), and custom dimensions. Each design can be exported in multiple formats.
@@ -349,7 +349,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Can I create a series of posters for recurring events?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Absolutely! Save your designs as templates and reuse them for weekly, monthly, or annual events. 
                   Maintain brand consistency while easily updating dates, performers, or topics. Perfect for event 
                   series, recurring workshops, or seasonal festivals.
@@ -360,7 +360,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   How quickly can I create an event poster?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Most users create professional event posters in under 5 minutes. Simply enter your event details, 
                   select a style or let AI generate options, customize colors and fonts if needed, then export. 
                   Perfect for last-minute event announcements or rapid marketing campaigns.

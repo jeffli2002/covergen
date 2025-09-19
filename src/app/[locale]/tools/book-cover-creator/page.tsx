@@ -104,7 +104,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Genre-Specific Styles
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Tailored designs for every book genre
               </p>
             </div>
@@ -116,7 +116,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Print & Digital Ready
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Export for KDP, print, and eBook formats
               </p>
             </div>
@@ -128,7 +128,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Bestseller Quality
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Professional covers that attract readers
               </p>
             </div>
@@ -140,7 +140,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Custom Typography
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Professional fonts and title treatments
               </p>
             </div>
@@ -152,7 +152,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Instant Generation
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Multiple cover options in seconds
               </p>
             </div>
@@ -164,7 +164,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Copyright Safe
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Original artwork with commercial rights
               </p>
             </div>
@@ -261,39 +261,39 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Professional Book Cover Design Made Simple</h2>
-            <p className="text-gray-900">
+            <h2 className="text-3xl font-bold mb-6 text-center">Professional Book Cover Design Made Simple</h2>
+            <p>
               Creating a compelling book cover is one of the most critical aspects of successful book publishing. 
               Our AI-powered book cover creator helps authors, self-publishers, and indie writers design professional 
               covers that capture their story's essence and appeal to their target readers.
             </p>
             
-            <h3 className="text-gray-900 font-semibold">Perfect for Every Publishing Platform</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Perfect for Every Publishing Platform</h3>
+            <p>
               Whether you're publishing on Amazon KDP, IngramSpark, Draft2Digital, or selling directly to readers, 
               our book cover creator provides the exact specifications you need. Generate covers optimized for print 
               books with full bleed and spine calculations, or create stunning eBook covers that look great as 
               thumbnails. Every design is export-ready at 300 DPI for professional printing.
             </p>
             
-            <h3 className="text-gray-900 font-semibold">Genre-Specific Design Intelligence</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Genre-Specific Design Intelligence</h3>
+            <p>
               Our AI understands the visual language of different book genres. Romance novels get elegant scripts 
               and warm colors, thrillers receive bold typography and dark atmospheres, while children's books 
               feature playful illustrations. The system analyzes bestselling covers in your genre to ensure your 
               book fits market expectations while standing out on the shelf.
             </p>
             
-            <h3 className="text-gray-900 font-semibold">Complete Creative Control</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Complete Creative Control</h3>
+            <p>
               Start with AI-generated concepts based on your book title, author name, and genre, then customize 
               every element. Adjust fonts, colors, and layouts to match your vision. Add subtitles, series 
               information, endorsements, or awards. Our tool handles complex typography requirements including 
               special characters for international titles and pen names.
             </p>
             
-            <h3 className="text-gray-900 font-semibold">Save Time and Money on Book Design</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Save Time and Money on Book Design</h3>
+            <p>
               Professional book cover design typically costs $300-800 per cover. With our book cover creator, 
               generate unlimited designs for free. Perfect for authors testing different concepts, series with 
               multiple books, or publishers managing large catalogs. Pro users get access to premium templates, 
@@ -316,7 +316,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   What book formats does the cover creator support?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Our tool supports all major formats including paperback, hardcover, and eBook. We provide templates 
                   for Amazon KDP (including KDP Select), IngramSpark, Barnes & Noble Press, and standard print sizes 
                   from 5"x8" to 8.5"x11". Covers include proper bleed, spine width calculations, and trim marks.
@@ -327,7 +327,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Can I use these covers for commercial books?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Yes! All covers created with our tool come with full commercial rights. You own the final design 
                   and can use it for books you sell, whether traditionally published, self-published, or distributed 
                   through any platform. Pro users also get extended licensing for merchandise and marketing materials.
@@ -338,7 +338,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   How do I add my book's spine and back cover?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   For print books, simply enter your page count and we'll calculate the exact spine width. Our tool 
                   generates a complete wraparound cover including front, spine, and back cover areas. Add your book 
                   description, author bio, ISBN, and barcode placement - everything you need for professional printing.
@@ -349,7 +349,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Can I create a series with consistent branding?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Absolutely! Save your design as a template and use it across your entire series. Maintain consistent 
                   fonts, layouts, and styling while changing specific elements like titles and imagery. Perfect for 
                   multi-book series, box sets, or maintaining author brand consistency.
@@ -360,7 +360,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   What resolution are the exported covers?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Free users can export covers at web resolution (150 DPI) suitable for eBooks and online promotion. 
                   Pro users get print-ready exports at 300 DPI with CMYK color profiles, meeting all professional 
                   printing requirements. All exports include proper bleeds and trim marks for commercial printing.

@@ -104,7 +104,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Professional Layouts
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Clean, corporate designs that build trust
               </p>
             </div>
@@ -116,7 +116,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Boost Registrations
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Graphics optimized for maximum sign-ups
               </p>
             </div>
@@ -128,7 +128,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Multi-Platform
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Perfect for email, social, and landing pages
               </p>
             </div>
@@ -140,7 +140,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Time Zone Friendly
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Global scheduling and time displays
               </p>
             </div>
@@ -152,7 +152,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Platform Integrated
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Zoom, Teams, GoToWebinar ready
               </p>
             </div>
@@ -164,7 +164,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Engaging Visuals
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Designs that communicate value clearly
               </p>
             </div>
@@ -261,16 +261,16 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Professional Webinar Graphics That Drive Registrations</h2>
-            <p className="text-gray-900">
+            <h2 className="text-3xl font-bold mb-6 text-center">Professional Webinar Graphics That Drive Registrations</h2>
+            <p>
               In the competitive world of online events, professional webinar graphics are essential for standing out 
               and driving registrations. Our AI-powered webinar poster maker helps businesses, educators, trainers, 
               and thought leaders create compelling visual materials that communicate value, build trust, and motivate 
               potential attendees to register for their online events.
             </p>
             
-            <h3 className="text-gray-900 font-semibold">Optimized for Maximum Conversions</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Optimized for Maximum Conversions</h3>
+            <p>
               Successful webinar graphics do more than look professional – they drive specific actions. Our tool creates 
               designs optimized for conversion, incorporating proven marketing principles: clear value propositions, 
               compelling headlines, professional speaker credibility, urgency creation through limited seating or 
@@ -278,16 +278,16 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
               to move viewers from interest to registration.
             </p>
             
-            <h3 className="text-gray-900 font-semibold">Multi-Platform Marketing Integration</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Multi-Platform Marketing Integration</h3>
+            <p>
               Webinar promotion requires a multi-channel approach. Our graphics are perfectly sized and formatted for 
               email marketing campaigns, social media promotion across LinkedIn, Facebook, and Twitter, website landing 
               pages, blog post headers, and even printed materials for hybrid events. Each design maintains visual 
               consistency while being optimized for its specific platform and context.
             </p>
             
-            <h3 className="text-gray-900 font-semibold">Professional Credibility and Trust Building</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Professional Credibility and Trust Building</h3>
+            <p>
               Online events require higher levels of trust than in-person gatherings. Our webinar graphics incorporate 
               design elements that build credibility: professional photography integration, clear speaker credentials 
               and company logos, testimonials and social proof, industry-appropriate color schemes and typography, 
@@ -295,8 +295,8 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
               impacts registration rates.
             </p>
             
-            <h3 className="text-gray-900 font-semibold">Global Accessibility and Compliance</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Global Accessibility and Compliance</h3>
+            <p>
               Modern webinars often serve global audiences with diverse needs. Our tool creates graphics that work 
               across different cultures and languages, support multiple time zones with clear scheduling information, 
               include accessibility considerations for screen readers and visual impairments, and comply with various 
@@ -320,7 +320,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   What webinar platforms do the graphics work with?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Our graphics work with all major webinar platforms including Zoom, Microsoft Teams, GoToWebinar, 
                   WebEx, BigMarker, Demio, and custom streaming solutions. We provide templates optimized for each 
                   platform's specific requirements and branding guidelines.
@@ -331,7 +331,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Can I include speaker photos and company logos?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Absolutely! Upload speaker headshots, company logos, sponsor brands, and event photos. Our AI 
                   integrates these elements professionally, ensuring proper sizing, placement, and visual hierarchy. 
                   This helps build credibility and trust with potential attendees.
@@ -342,7 +342,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   How do I handle different time zones for global webinars?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Our tool can create graphics showing multiple time zones simultaneously, or generate separate 
                   versions for different regions. We also support "starts in X hours" countdown formats and can 
                   integrate with calendar link generators for automatic time zone conversion.
@@ -353,7 +353,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   What formats work best for email marketing campaigns?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   For email campaigns, we recommend horizontal banners (600px wide) that fit most email clients, 
                   plus mobile-optimized versions. We also create matching graphics for landing pages, social media 
                   promotion, and thank you pages to maintain consistent branding throughout your marketing funnel.
@@ -364,7 +364,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Can I create graphics for webinar series or recurring events?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Yes! Create template designs for your webinar series that maintain visual consistency while allowing 
                   easy customization for individual sessions. Perfect for monthly training series, educational programs, 
                   or regular industry updates. Save templates for quick updates with new dates and topics.
