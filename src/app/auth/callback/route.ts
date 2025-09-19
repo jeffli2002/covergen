@@ -36,9 +36,17 @@ export async function GET(request: Request) {
               return cookieStore.get(name)?.value
             },
             set(name: string, value: string, options: CookieOptions) {
+              // Apply SameSite=None for OAuth-related cookies in Chrome
+              const isOAuthCookie = name.startsWith('sb-') && (name.includes('auth') || name.includes('session'))
+              const enhancedOptions = {
+                ...options,
+                sameSite: isOAuthCookie ? 'none' as const : (options.sameSite || 'lax' as const),
+                secure: isOAuthCookie ? true : (options.secure ?? true) // Always secure for OAuth cookies
+              }
+              
               // Set cookies on both the request store and the response
-              cookieStore.set({ name, value, ...options })
-              response.cookies.set({ name, value, ...options })
+              cookieStore.set({ name, value, ...enhancedOptions })
+              response.cookies.set({ name, value, ...enhancedOptions })
             },
             remove(name: string, options: CookieOptions) {
               cookieStore.set({ name, value: '', ...options })
