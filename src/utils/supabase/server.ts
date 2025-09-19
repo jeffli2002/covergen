@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { getEnhancedCookieOptions, logCookieOperation } from './cookie-config'
 
 export function createClient() {
   const cookieStore = cookies()
@@ -15,7 +16,10 @@ export function createClient() {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set({ name, value, ...options })
+              // Use enhanced cookie options for Chrome compatibility
+              const enhancedOptions = getEnhancedCookieOptions(name, options || {})
+              logCookieOperation('set', name, value, enhancedOptions)
+              cookieStore.set({ name, value, ...enhancedOptions })
             })
           } catch (error) {
             // The `setAll` method was called from a Server Component.

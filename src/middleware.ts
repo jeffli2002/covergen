@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { type NextRequest, NextResponse } from 'next/server'
+import { getEnhancedCookieOptions, logCookieOperation } from '@/utils/supabase/cookie-config'
 
 // List of paths that should NOT have locale prefixes
 const PUBLIC_PATHS = [
@@ -74,16 +75,22 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value
         },
         set(name: string, value: string, options: CookieOptions) {
+          // Use enhanced cookie options for Chrome compatibility
+          const enhancedOptions = getEnhancedCookieOptions(name, options)
+          
+          // Log cookie operation for debugging
+          logCookieOperation('set', name, value, enhancedOptions)
+          
           // Set cookie on both request and response
           request.cookies.set({
             name,
             value,
-            ...options,
+            ...enhancedOptions,
           })
           response.cookies.set({
             name,
             value,
-            ...options,
+            ...enhancedOptions,
           })
         },
         remove(name: string, options: CookieOptions) {

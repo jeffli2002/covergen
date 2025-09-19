@@ -1,6 +1,7 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import { getEnhancedCookieOptions, logCookieOperation } from '@/utils/supabase/cookie-config'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -36,13 +37,11 @@ export async function GET(request: Request) {
               return cookieStore.get(name)?.value
             },
             set(name: string, value: string, options: CookieOptions) {
-              // Apply SameSite=None for OAuth-related cookies in Chrome
-              const isOAuthCookie = name.startsWith('sb-') && (name.includes('auth') || name.includes('session'))
-              const enhancedOptions = {
-                ...options,
-                sameSite: isOAuthCookie ? 'none' as const : (options.sameSite || 'lax' as const),
-                secure: isOAuthCookie ? true : (options.secure ?? true) // Always secure for OAuth cookies
-              }
+              // Use enhanced cookie options for Chrome compatibility
+              const enhancedOptions = getEnhancedCookieOptions(name, options)
+              
+              // Log cookie operation for debugging
+              logCookieOperation('set', name, value, enhancedOptions)
               
               // Set cookies on both the request store and the response
               cookieStore.set({ name, value, ...enhancedOptions })
