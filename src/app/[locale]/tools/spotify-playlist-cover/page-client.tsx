@@ -311,16 +311,16 @@ export default function SpotifyPlaylistCoverClient({ locale, translations: t }: 
         {/* SEO Content Section */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
+            <div className="max-w-4xl mx-auto prose prose-lg prose-seo prose-p:text-gray-900">
               <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">The Ultimate Spotify Playlist Cover Maker</h2>
-              <p>
+              <p className="text-gray-900">
                 Creating the perfect Spotify playlist cover is essential for attracting listeners and expressing 
                 your musical taste. Our AI-powered Spotify playlist cover maker helps you design professional, 
                 eye-catching covers that make your playlists stand out in the crowded Spotify ecosystem.
               </p>
               
               <h3>Why Playlist Covers Matter on Spotify</h3>
-              <p>
+              <p className="text-gray-900">
                 A compelling playlist cover is often the first thing potential listeners see. It can be the 
                 difference between someone clicking play or scrolling past. Great playlist covers:
               </p>
@@ -332,21 +332,21 @@ export default function SpotifyPlaylistCoverClient({ locale, translations: t }: 
               </ul>
               
               <h3>Perfect Spotify Playlist Dimensions</h3>
-              <p>
+              <p className="text-gray-900">
                 Spotify requires playlist covers to be exactly 300x300 pixels in a 1:1 square ratio. Our tool 
                 automatically generates covers in this precise dimension, ensuring your artwork looks crisp on 
                 all devices - from desktop to mobile, from standard to retina displays.
               </p>
               
               <h3>AI-Powered Design Intelligence</h3>
-              <p>
+              <p className="text-gray-900">
                 Our AI analyzes millions of successful Spotify playlists to understand what makes covers engaging. 
                 It considers color psychology, typography trends, and visual hierarchy to create designs that not 
                 only look professional but also psychologically appeal to your target audience.
               </p>
               
               <h3>Genre-Specific Design Adaptation</h3>
-              <p>
+              <p className="text-gray-900">
                 Different music genres have distinct visual languages. Our AI understands these nuances:
               </p>
               <ul>
@@ -358,7 +358,7 @@ export default function SpotifyPlaylistCoverClient({ locale, translations: t }: 
               </ul>
               
               <h3>Free Spotify Playlist Cover Creation</h3>
-              <p>
+              <p className="text-gray-900">
                 Unlike other design tools that require subscriptions or leave watermarks, our Spotify playlist 
                 cover maker is completely free. Create unlimited playlist covers without any hidden costs or 
                 branding on your final designs. Your creativity shouldn't be limited by paywalls.

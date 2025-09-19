@@ -261,7 +261,7 @@ export default function AnimePosterMakerPage({ params: { locale } }: { params: {
       {/* SEO Content Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
+          <div className="max-w-4xl mx-auto prose prose-lg prose-seo prose-p:text-gray-900">
             <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">The Ultimate Anime Poster Maker</h2>
             <p className="text-gray-900">
               Creating professional anime posters has never been easier with our AI-powered anime poster maker. 

@@ -260,7 +260,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
       {/* SEO Content Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
+          <div className="max-w-4xl mx-auto prose prose-lg prose-seo prose-p:text-gray-900">
             <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">Professional Social Media Design That Gets Results</h2>
             <p className="text-gray-900">
               In today's crowded social media landscape, standing out requires more than just good content – it requires 

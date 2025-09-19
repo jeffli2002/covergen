@@ -321,7 +321,7 @@ export default function ToolsHubClient({ locale, translations: t }: ToolsHubClie
         {/* SEO Content Section */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
+            <div className="max-w-4xl mx-auto prose prose-lg prose-seo prose-p:text-gray-900">
               <h2>Free AI Design Tools for Content Creators</h2>
               <p>
                 In the digital age, visual content is essential for capturing attention and conveying messages 

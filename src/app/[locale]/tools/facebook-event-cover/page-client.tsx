@@ -311,7 +311,7 @@ export default function FacebookEventCoverClient({ locale, translations: t }: Fa
         {/* SEO Content Section */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
+            <div className="max-w-4xl mx-auto prose prose-lg prose-seo prose-p:text-gray-900">
               <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">The Ultimate Facebook Event Cover Maker</h2>
               <p>
                 Creating the perfect Facebook event cover is crucial for event success. Your event cover is 
