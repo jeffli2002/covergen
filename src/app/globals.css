@@ -181,33 +181,46 @@
   @apply border-l-4 border-purple-500 dark:border-purple-400 bg-gray-50 dark:bg-gray-800/50;
 }
 
-/* SEO Content Sections - Enhanced visibility */
-.prose-seo {
-  @apply text-gray-900 dark:text-gray-100;
+/* SEO Content Sections - Enhanced visibility with higher specificity */
+.prose-seo,
+.prose.prose-seo {
+  @apply text-gray-900 dark:text-gray-100 !important;
 }
 
-.prose-seo p {
-  @apply text-gray-900 dark:text-gray-200 leading-relaxed;
+.prose-seo p,
+.prose.prose-seo p {
+  @apply text-gray-900 dark:text-gray-200 leading-relaxed !important;
 }
 
-.prose-seo h2 {
-  @apply text-gray-900 dark:text-white font-bold text-3xl;
+.prose-seo h2,
+.prose.prose-seo h2 {
+  @apply text-gray-900 dark:text-white font-bold text-3xl !important;
 }
 
-.prose-seo h3 {
-  @apply text-gray-900 dark:text-gray-100 font-semibold text-xl mt-8 mb-4;
+.prose-seo h3,
+.prose.prose-seo h3 {
+  @apply text-gray-900 dark:text-gray-100 font-semibold text-xl mt-8 mb-4 !important;
 }
 
-.prose-seo ul, .prose-seo ol {
-  @apply text-gray-900 dark:text-gray-200;
+.prose-seo ul, .prose-seo ol,
+.prose.prose-seo ul, .prose.prose-seo ol {
+  @apply text-gray-900 dark:text-gray-200 !important;
 }
 
-.prose-seo li {
-  @apply mb-2;
+.prose-seo li,
+.prose.prose-seo li {
+  @apply mb-2 text-gray-900 dark:text-gray-200 !important;
 }
 
-.prose-seo strong {
-  @apply text-gray-900 dark:text-white font-semibold;
+.prose-seo strong,
+.prose.prose-seo strong {
+  @apply text-gray-900 dark:text-white font-semibold !important;
+}
+
+/* Override any inherited gray text colors */
+.prose-seo *:not(code),
+.prose.prose-seo *:not(code) {
+  color: inherit;
 }
 
 /* Scrollbar styling */
