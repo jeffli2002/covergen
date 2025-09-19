@@ -13,6 +13,7 @@ const PUBLIC_PATHS = [
   '/favicon.ico',
   '/robots.txt',
   '/sitemap.xml',
+  '/ads.txt',
 ]
 
 // List of paths that require authentication
@@ -154,7 +155,8 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
+     * - ads.txt, robots.txt, sitemap.xml (SEO files)
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|ads.txt|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
