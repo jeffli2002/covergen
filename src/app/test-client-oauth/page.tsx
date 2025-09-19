@@ -14,7 +14,7 @@ export default function TestClientOAuthPage() {
     checkSession()
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase?.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase?.auth.onAuthStateChange((_event: any, session: any) => {
       console.log('Auth state changed:', _event, session?.user?.email)
       setSession(session)
     }) || { data: { subscription: null } }
