@@ -260,7 +260,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
       {/* SEO Content Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto prose prose-lg">
+          <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
             <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Professional Webinar Graphics That Drive Registrations</h2>
             <p>
               In the competitive world of online events, professional webinar graphics are essential for standing out 

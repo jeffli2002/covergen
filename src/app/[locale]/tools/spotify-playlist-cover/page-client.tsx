@@ -311,7 +311,7 @@ export default function SpotifyPlaylistCoverClient({ locale, translations: t }: 
         {/* SEO Content Section */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto prose prose-lg">
+            <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
               <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">The Ultimate Spotify Playlist Cover Maker</h2>
               <p>
                 Creating the perfect Spotify playlist cover is essential for attracting listeners and expressing 
