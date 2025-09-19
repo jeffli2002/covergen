@@ -28,7 +28,7 @@ export function getEnhancedCookieOptions(
   // For non-OAuth cookies, use default or provided options
   return {
     ...options,
-    sameSite: (options.sameSite || 'lax') as const,
+    sameSite: options.sameSite || ('lax' as const),
     secure: options.secure ?? true,
     httpOnly: options.httpOnly ?? true,
     path: options.path || '/',
