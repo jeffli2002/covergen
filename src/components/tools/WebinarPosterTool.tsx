@@ -94,7 +94,7 @@ export default function WebinarPosterTool() {
         <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
           Webinar Poster Maker
         </h1>
-        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+        <p className="text-lg text-gray-900 max-w-3xl mx-auto">
           Create professional webinar posters and registration banners for Zoom, Teams, and online events. 
           AI-powered design with engaging templates.
         </p>

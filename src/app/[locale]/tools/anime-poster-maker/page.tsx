@@ -92,7 +92,7 @@ export default function AnimePosterMakerPage({ params: { locale } }: { params: {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Anime Design Features
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-900">
               Everything you need to create authentic anime posters
             </p>
           </div>
@@ -105,7 +105,7 @@ export default function AnimePosterMakerPage({ params: { locale } }: { params: {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 100+ Anime Styles
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 From classic manga to modern anime styles
               </p>
             </div>
@@ -117,7 +117,7 @@ export default function AnimePosterMakerPage({ params: { locale } }: { params: {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Japanese Typography
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Authentic Japanese text and fonts
               </p>
             </div>
@@ -129,7 +129,7 @@ export default function AnimePosterMakerPage({ params: { locale } }: { params: {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 HD Export
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 High resolution for print and digital use
               </p>
             </div>
@@ -141,7 +141,7 @@ export default function AnimePosterMakerPage({ params: { locale } }: { params: {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Instant Generation
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 AI creates multiple designs in seconds
               </p>
             </div>
@@ -153,7 +153,7 @@ export default function AnimePosterMakerPage({ params: { locale } }: { params: {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Multi-Format Export
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Perfect for social media, print, or web
               </p>
             </div>
@@ -165,7 +165,7 @@ export default function AnimePosterMakerPage({ params: { locale } }: { params: {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Original Artwork
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Unique designs with no copyright issues
               </p>
             </div>
@@ -180,7 +180,7 @@ export default function AnimePosterMakerPage({ params: { locale } }: { params: {
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
               Popular Anime Poster Styles
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-900">
               Get inspired by these trending anime art styles
             </p>
           </div>
@@ -189,49 +189,49 @@ export default function AnimePosterMakerPage({ params: { locale } }: { params: {
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🌸</div>
               <h3 className="font-semibold text-gray-900 mb-2">Shojo Romance</h3>
-              <p className="text-sm text-gray-600">Soft pastels, floral elements, dreamy</p>
+              <p className="text-sm text-gray-900">Soft pastels, floral elements, dreamy</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">⚔️</div>
               <h3 className="font-semibold text-gray-900 mb-2">Shonen Action</h3>
-              <p className="text-sm text-gray-600">Dynamic poses, speed lines, impact</p>
+              <p className="text-sm text-gray-900">Dynamic poses, speed lines, impact</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🎌</div>
               <h3 className="font-semibold text-gray-900 mb-2">Traditional Manga</h3>
-              <p className="text-sm text-gray-600">Black & white, screentones, classic</p>
+              <p className="text-sm text-gray-900">Black & white, screentones, classic</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">✨</div>
               <h3 className="font-semibold text-gray-900 mb-2">Kawaii Cute</h3>
-              <p className="text-sm text-gray-600">Chibi style, bright colors, sparkles</p>
+              <p className="text-sm text-gray-900">Chibi style, bright colors, sparkles</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🤖</div>
               <h3 className="font-semibold text-gray-900 mb-2">Mecha Sci-Fi</h3>
-              <p className="text-sm text-gray-600">Metallic textures, tech elements</p>
+              <p className="text-sm text-gray-900">Metallic textures, tech elements</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🌙</div>
               <h3 className="font-semibold text-gray-900 mb-2">Dark Fantasy</h3>
-              <p className="text-sm text-gray-600">Gothic themes, mysterious atmosphere</p>
+              <p className="text-sm text-gray-900">Gothic themes, mysterious atmosphere</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🎮</div>
               <h3 className="font-semibold text-gray-900 mb-2">Isekai Adventure</h3>
-              <p className="text-sm text-gray-600">RPG elements, fantasy worlds</p>
+              <p className="text-sm text-gray-900">RPG elements, fantasy worlds</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🍜</div>
               <h3 className="font-semibold text-gray-900 mb-2">Slice of Life</h3>
-              <p className="text-sm text-gray-600">Everyday scenes, warm colors</p>
+              <p className="text-sm text-gray-900">Everyday scenes, warm colors</p>
             </div>
           </div>
         </div>
@@ -317,7 +317,7 @@ export default function AnimePosterMakerPage({ params: { locale } }: { params: {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   What anime styles does the poster maker support?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Our AI anime poster maker supports all popular anime and manga styles including shonen (action), 
                   shojo (romance), seinen (mature), kawaii (cute), mecha, isekai, and more. You can also create 
                   custom styles by describing your vision.
@@ -328,7 +328,7 @@ export default function AnimePosterMakerPage({ params: { locale } }: { params: {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Can I add Japanese text to my anime posters?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Yes! Our tool fully supports Japanese text including hiragana, katakana, and kanji. You can add 
                   titles, character names, and stylized Japanese typography. We also provide romanization options 
                   for international audiences.
@@ -339,7 +339,7 @@ export default function AnimePosterMakerPage({ params: { locale } }: { params: {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Is this suitable for anime event posters?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Absolutely! Create professional posters for anime conventions, cosplay events, anime club meetings, 
                   screening parties, and more. Our templates are optimized for both print and digital promotion.
                 </p>
@@ -349,7 +349,7 @@ export default function AnimePosterMakerPage({ params: { locale } }: { params: {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Can I use the generated posters commercially?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Free users can create unlimited posters for personal use. For commercial use, including selling 
                   merchandise or using in paid promotions, you'll need a Pro subscription which includes commercial 
                   licensing rights.
@@ -360,7 +360,7 @@ export default function AnimePosterMakerPage({ params: { locale } }: { params: {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   What resolution are the exported posters?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Free users can export posters in HD quality (1920x1080). Pro users get access to 4K resolution 
                   (3840x2160) and print-ready formats with 300 DPI for professional printing needs.
                 </p>

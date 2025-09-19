@@ -80,7 +80,7 @@ export default function SocialMediaPosterContent({ locale }: Props) {
       <section id="features" className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4">All-In-One Social Media Design Tool</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-900 max-w-3xl mx-auto">
             From Instagram grid maker to Discord banner maker, create stunning visuals for every platform
           </p>
         </div>
@@ -95,7 +95,7 @@ export default function SocialMediaPosterContent({ locale }: Props) {
                 {feature.icon}
               </div>
               <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-              <p className="text-gray-600">{feature.description}</p>
+              <p className="text-gray-900">{feature.description}</p>
             </div>
           ))}
         </div>
@@ -114,7 +114,7 @@ export default function SocialMediaPosterContent({ locale }: Props) {
                 <h3 className="text-xl font-semibold mb-3 text-purple-600">{platform.name}</h3>
                 <ul className="space-y-2">
                   {platform.formats.map((format) => (
-                    <li key={format} className="flex items-center gap-2 text-gray-600">
+                    <li key={format} className="flex items-center gap-2 text-gray-900">
                       <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
                       <span className="text-sm">{format}</span>
                     </li>
@@ -134,7 +134,7 @@ export default function SocialMediaPosterContent({ locale }: Props) {
           {useCases.map((useCase, index) => (
             <div key={index} className="text-center">
               <h3 className="text-xl font-semibold mb-2">{useCase.title}</h3>
-              <p className="text-gray-600">{useCase.description}</p>
+              <p className="text-gray-900">{useCase.description}</p>
             </div>
           ))}
         </div>
@@ -158,7 +158,7 @@ export default function SocialMediaPosterContent({ locale }: Props) {
                     </div>
                     <div>
                       <h4 className="font-semibold mb-1">Free Instagram Grid Maker</h4>
-                      <p className="text-gray-600">Create stunning grid layouts with no watermarks</p>
+                      <p className="text-gray-900">Create stunning grid layouts with no watermarks</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
@@ -167,7 +167,7 @@ export default function SocialMediaPosterContent({ locale }: Props) {
                     </div>
                     <div>
                       <h4 className="font-semibold mb-1">AI-Powered Design</h4>
-                      <p className="text-gray-600">Smart Pinterest pin maker with trending suggestions</p>
+                      <p className="text-gray-900">Smart Pinterest pin maker with trending suggestions</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
@@ -176,7 +176,7 @@ export default function SocialMediaPosterContent({ locale }: Props) {
                     </div>
                     <div>
                       <h4 className="font-semibold mb-1">Multi-Platform Export</h4>
-                      <p className="text-gray-600">One-click resize for all social networks</p>
+                      <p className="text-gray-900">One-click resize for all social networks</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
@@ -185,7 +185,7 @@ export default function SocialMediaPosterContent({ locale }: Props) {
                     </div>
                     <div>
                       <h4 className="font-semibold mb-1">Platform-Specific Tools</h4>
-                      <p className="text-gray-600">Discord banner maker with gaming themes</p>
+                      <p className="text-gray-900">Discord banner maker with gaming themes</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
@@ -194,7 +194,7 @@ export default function SocialMediaPosterContent({ locale }: Props) {
                     </div>
                     <div>
                       <h4 className="font-semibold mb-1">No Signup Required</h4>
-                      <p className="text-gray-600">Start creating immediately with basic features</p>
+                      <p className="text-gray-900">Start creating immediately with basic features</p>
                     </div>
                   </div>
                 </div>
@@ -208,7 +208,7 @@ export default function SocialMediaPosterContent({ locale }: Props) {
                       <span className="text-xl text-gray-400">×</span>
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-1 text-gray-600">Watermarked Designs</h4>
+                      <h4 className="font-semibold mb-1 text-gray-900">Watermarked Designs</h4>
                       <p className="text-gray-500">Free versions include watermarks</p>
                     </div>
                   </div>
@@ -217,7 +217,7 @@ export default function SocialMediaPosterContent({ locale }: Props) {
                       <span className="text-xl text-gray-400">×</span>
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-1 text-gray-600">Limited Features</h4>
+                      <h4 className="font-semibold mb-1 text-gray-900">Limited Features</h4>
                       <p className="text-gray-500">Basic templates without platform optimization</p>
                     </div>
                   </div>
@@ -226,7 +226,7 @@ export default function SocialMediaPosterContent({ locale }: Props) {
                       <span className="text-xl text-gray-400">×</span>
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-1 text-gray-600">Manual Resizing</h4>
+                      <h4 className="font-semibold mb-1 text-gray-900">Manual Resizing</h4>
                       <p className="text-gray-500">Resize designs manually for each platform</p>
                     </div>
                   </div>
@@ -235,7 +235,7 @@ export default function SocialMediaPosterContent({ locale }: Props) {
                       <span className="text-xl text-gray-400">×</span>
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-1 text-gray-600">Generic Templates</h4>
+                      <h4 className="font-semibold mb-1 text-gray-900">Generic Templates</h4>
                       <p className="text-gray-500">One-size-fits-all approach</p>
                     </div>
                   </div>
@@ -244,7 +244,7 @@ export default function SocialMediaPosterContent({ locale }: Props) {
                       <span className="text-xl text-gray-400">×</span>
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-1 text-gray-600">Signup Walls</h4>
+                      <h4 className="font-semibold mb-1 text-gray-900">Signup Walls</h4>
                       <p className="text-gray-500">Account required for basic features</p>
                     </div>
                   </div>
@@ -269,7 +269,7 @@ export default function SocialMediaPosterContent({ locale }: Props) {
               </div>
               <div>
                 <h3 className="text-xl font-semibold mb-2">Choose Your Platform</h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Select from Instagram, Facebook, LinkedIn, Twitter, Discord, Pinterest, or create for multiple platforms at once.
                   Our Instagram grid maker and Pinterest pin maker features help you create platform-specific designs.
                 </p>
@@ -282,7 +282,7 @@ export default function SocialMediaPosterContent({ locale }: Props) {
               </div>
               <div>
                 <h3 className="text-xl font-semibold mb-2">Customize Your Design</h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Use our AI-powered design suggestions or choose from trending templates. Add text, images, and brand elements.
                   Perfect for creating Twitter headers, Discord banners, or cohesive Instagram grids.
                 </p>
@@ -295,7 +295,7 @@ export default function SocialMediaPosterContent({ locale }: Props) {
               </div>
               <div>
                 <h3 className="text-xl font-semibold mb-2">Export and Share</h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Download your designs in perfect quality for each platform. Auto-resize for multiple platforms with one click.
                   No watermarks, ready to post immediately.
                 </p>

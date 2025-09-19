@@ -119,7 +119,7 @@ export default function SpotifyPlaylistCoverTool() {
         <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
           Spotify Playlist Cover Generator
         </h1>
-        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+        <p className="text-lg text-gray-900 max-w-3xl mx-auto">
           Create perfect 300x300 pixel covers for your Spotify playlists with AI
         </p>
       </div>
@@ -129,7 +129,7 @@ export default function SpotifyPlaylistCoverTool() {
           <div className="space-y-6">
             <div>
               <h2 className="text-2xl font-bold mb-2">Design Your Playlist Cover</h2>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Tell us about your playlist and we'll create the perfect cover
               </p>
             </div>

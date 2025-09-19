@@ -193,7 +193,7 @@ export default function SocialMediaPosterTool() {
         <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
           Social Media Poster Maker
         </h1>
-        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+        <p className="text-lg text-gray-900 max-w-3xl mx-auto">
           Create viral social media posts, banners, and graphics for Instagram, Facebook, LinkedIn, Twitter/X, Reddit, and Pinterest. 
           AI-powered design with trending templates - no watermark, no signup required.
         </p>
@@ -342,19 +342,19 @@ export default function SocialMediaPosterTool() {
 
           {/* Features */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-sm text-gray-900">
               <ImageIcon className="w-4 h-4 text-blue-500" />
               <span>HD Quality Export</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-sm text-gray-900">
               <Hash className="w-4 h-4 text-purple-500" />
               <span>Trending Hashtags</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-sm text-gray-900">
               <Share2 className="w-4 h-4 text-green-500" />
               <span>Direct Share</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-sm text-gray-900">
               <Heart className="w-4 h-4 text-red-500" />
               <span>Viral Templates</span>
             </div>

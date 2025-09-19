@@ -146,7 +146,7 @@ export default function ToolsHubClient({ locale, translations: t }: ToolsHubClie
                 Professional Design Tools for Every Need
               </h1>
               
-              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+              <p className="text-xl text-gray-900 mb-8 leading-relaxed">
                 From anime posters to event banners, create stunning designs with our specialized AI tools. 
                 All tools are free to use with no watermarks on your final designs.
               </p>
@@ -171,15 +171,15 @@ export default function ToolsHubClient({ locale, translations: t }: ToolsHubClie
               <div className="mt-12 grid grid-cols-3 gap-6 max-w-2xl mx-auto">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-gray-900">10+</div>
-                  <div className="text-sm text-gray-600">Design Tools</div>
+                  <div className="text-sm text-gray-900">Design Tools</div>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold text-gray-900">100%</div>
-                  <div className="text-sm text-gray-600">Free to Use</div>
+                  <div className="text-sm text-gray-900">Free to Use</div>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold text-gray-900">HD</div>
-                  <div className="text-sm text-gray-600">Quality Export</div>
+                  <div className="text-sm text-gray-900">Quality Export</div>
                 </div>
               </div>
             </div>
@@ -226,7 +226,7 @@ export default function ToolsHubClient({ locale, translations: t }: ToolsHubClie
                             {tool.name}
                           </h3>
                           
-                          <p className="text-gray-600 mb-4">
+                          <p className="text-gray-900 mb-4">
                             {tool.description}
                           </p>
                           
@@ -255,7 +255,7 @@ export default function ToolsHubClient({ locale, translations: t }: ToolsHubClie
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
                 Why Use Our Design Tools?
               </h2>
-              <p className="text-lg text-gray-600">
+              <p className="text-lg text-gray-900">
                 Professional features that make design accessible to everyone
               </p>
             </div>
@@ -266,7 +266,7 @@ export default function ToolsHubClient({ locale, translations: t }: ToolsHubClie
                   <Sparkles className="w-6 h-6 text-purple-600" />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">AI-Powered</h3>
-                <p className="text-sm text-gray-600">Smart design suggestions and instant generation</p>
+                <p className="text-sm text-gray-900">Smart design suggestions and instant generation</p>
               </div>
               
               <div className="text-center">
@@ -274,7 +274,7 @@ export default function ToolsHubClient({ locale, translations: t }: ToolsHubClie
                   <Shield className="w-6 h-6 text-green-600" />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">No Watermarks</h3>
-                <p className="text-sm text-gray-600">Clean exports for professional use</p>
+                <p className="text-sm text-gray-900">Clean exports for professional use</p>
               </div>
               
               <div className="text-center">
@@ -282,7 +282,7 @@ export default function ToolsHubClient({ locale, translations: t }: ToolsHubClie
                   <Image className="w-6 h-6 text-blue-600" aria-label="HD Quality" />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">HD Quality</h3>
-                <p className="text-sm text-gray-600">High-resolution exports for all purposes</p>
+                <p className="text-sm text-gray-900">High-resolution exports for all purposes</p>
               </div>
               
               <div className="text-center">
@@ -290,7 +290,7 @@ export default function ToolsHubClient({ locale, translations: t }: ToolsHubClie
                   <Zap className="w-6 h-6 text-orange-600" />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">Instant Results</h3>
-                <p className="text-sm text-gray-600">Generate designs in seconds, not hours</p>
+                <p className="text-sm text-gray-900">Generate designs in seconds, not hours</p>
               </div>
             </div>
           </div>

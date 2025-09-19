@@ -180,7 +180,7 @@ export default function GameCoverArtTool() {
         <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
           Game Cover Art Generator
         </h1>
-        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+        <p className="text-lg text-gray-900 max-w-3xl mx-auto">
           Create epic gaming thumbnails and covers for YouTube, Twitch, Steam, and more. 
           AI-powered gaming art generator for Minecraft, Fortnite, Roblox, and all game genres.
         </p>

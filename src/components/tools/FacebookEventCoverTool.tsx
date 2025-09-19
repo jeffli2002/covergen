@@ -122,7 +122,7 @@ export default function FacebookEventCoverTool() {
         <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
           Facebook Event Cover Generator
         </h1>
-        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+        <p className="text-lg text-gray-900 max-w-3xl mx-auto">
           Create perfect 1200x628 pixel covers for your Facebook events
         </p>
       </div>
@@ -132,7 +132,7 @@ export default function FacebookEventCoverTool() {
           <div className="space-y-6">
             <div>
               <h2 className="text-2xl font-bold mb-2">Design Your Event Cover</h2>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Enter your event details to generate a professional cover
               </p>
             </div>

@@ -107,7 +107,7 @@ export default function EventPosterTool() {
         <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
           Event Poster Designer
         </h1>
-        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+        <p className="text-lg text-gray-900 max-w-3xl mx-auto">
           Create stunning posters for birthdays, weddings, parties, and all special occasions. 
           AI-powered event poster maker with beautiful templates.
         </p>

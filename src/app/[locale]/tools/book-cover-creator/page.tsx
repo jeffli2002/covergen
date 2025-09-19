@@ -91,7 +91,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Book Design Features
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-900">
               Everything authors need for professional book covers
             </p>
           </div>
@@ -104,7 +104,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Genre-Specific Styles
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Tailored designs for every book genre
               </p>
             </div>
@@ -116,7 +116,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Print & Digital Ready
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Export for KDP, print, and eBook formats
               </p>
             </div>
@@ -128,7 +128,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Bestseller Quality
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Professional covers that attract readers
               </p>
             </div>
@@ -140,7 +140,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Custom Typography
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Professional fonts and title treatments
               </p>
             </div>
@@ -152,7 +152,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Instant Generation
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Multiple cover options in seconds
               </p>
             </div>
@@ -164,7 +164,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Copyright Safe
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Original artwork with commercial rights
               </p>
             </div>
@@ -179,7 +179,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
               Popular Book Cover Styles
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-900">
               Choose from genre-specific designs that readers love
             </p>
           </div>
@@ -188,49 +188,49 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🏰</div>
               <h3 className="font-semibold text-gray-900 mb-2">Fantasy & Sci-Fi</h3>
-              <p className="text-sm text-gray-600">Epic landscapes, mystical elements</p>
+              <p className="text-sm text-gray-900">Epic landscapes, mystical elements</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">💕</div>
               <h3 className="font-semibold text-gray-900 mb-2">Romance</h3>
-              <p className="text-sm text-gray-600">Elegant typography, romantic imagery</p>
+              <p className="text-sm text-gray-900">Elegant typography, romantic imagery</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🔍</div>
               <h3 className="font-semibold text-gray-900 mb-2">Mystery & Thriller</h3>
-              <p className="text-sm text-gray-600">Dark atmospheres, suspenseful design</p>
+              <p className="text-sm text-gray-900">Dark atmospheres, suspenseful design</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">📚</div>
               <h3 className="font-semibold text-gray-900 mb-2">Non-Fiction</h3>
-              <p className="text-sm text-gray-600">Clean, professional, authoritative</p>
+              <p className="text-sm text-gray-900">Clean, professional, authoritative</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">👶</div>
               <h3 className="font-semibold text-gray-900 mb-2">Children's Books</h3>
-              <p className="text-sm text-gray-600">Colorful, playful illustrations</p>
+              <p className="text-sm text-gray-900">Colorful, playful illustrations</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">💼</div>
               <h3 className="font-semibold text-gray-900 mb-2">Business & Self-Help</h3>
-              <p className="text-sm text-gray-600">Modern, motivational designs</p>
+              <p className="text-sm text-gray-900">Modern, motivational designs</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">📖</div>
               <h3 className="font-semibold text-gray-900 mb-2">Literary Fiction</h3>
-              <p className="text-sm text-gray-600">Artistic, thoughtful aesthetics</p>
+              <p className="text-sm text-gray-900">Artistic, thoughtful aesthetics</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">👻</div>
               <h3 className="font-semibold text-gray-900 mb-2">Horror</h3>
-              <p className="text-sm text-gray-600">Dark, atmospheric, chilling</p>
+              <p className="text-sm text-gray-900">Dark, atmospheric, chilling</p>
             </div>
           </div>
         </div>
@@ -316,7 +316,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   What book formats does the cover creator support?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Our tool supports all major formats including paperback, hardcover, and eBook. We provide templates 
                   for Amazon KDP (including KDP Select), IngramSpark, Barnes & Noble Press, and standard print sizes 
                   from 5"x8" to 8.5"x11". Covers include proper bleed, spine width calculations, and trim marks.
@@ -327,7 +327,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Can I use these covers for commercial books?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Yes! All covers created with our tool come with full commercial rights. You own the final design 
                   and can use it for books you sell, whether traditionally published, self-published, or distributed 
                   through any platform. Pro users also get extended licensing for merchandise and marketing materials.
@@ -338,7 +338,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   How do I add my book's spine and back cover?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   For print books, simply enter your page count and we'll calculate the exact spine width. Our tool 
                   generates a complete wraparound cover including front, spine, and back cover areas. Add your book 
                   description, author bio, ISBN, and barcode placement - everything you need for professional printing.
@@ -349,7 +349,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Can I create a series with consistent branding?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Absolutely! Save your design as a template and use it across your entire series. Maintain consistent 
                   fonts, layouts, and styling while changing specific elements like titles and imagery. Perfect for 
                   multi-book series, box sets, or maintaining author brand consistency.
@@ -360,7 +360,7 @@ export default function BookCoverCreatorPage({ params: { locale } }: { params: {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   What resolution are the exported covers?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Free users can export covers at web resolution (150 DPI) suitable for eBooks and online promotion. 
                   Pro users get print-ready exports at 300 DPI with CMYK color profiles, meeting all professional 
                   printing requirements. All exports include proper bleeds and trim marks for commercial printing.

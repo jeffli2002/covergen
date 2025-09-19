@@ -91,7 +91,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Event Marketing Features
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-900">
               Tools to make your events stand out
             </p>
           </div>
@@ -104,7 +104,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Eye-Catching Designs
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Templates that grab attention and drive ticket sales
               </p>
             </div>
@@ -116,7 +116,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Multi-Platform Ready
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Perfect for social media, print, and digital displays
               </p>
             </div>
@@ -128,7 +128,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Quick Turnaround
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Create professional posters in minutes, not hours
               </p>
             </div>
@@ -140,7 +140,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Event Details Included
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Date, time, venue, and ticketing information
               </p>
             </div>
@@ -152,7 +152,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Social Media Optimized
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Perfect sizes for Instagram, Facebook, Twitter
               </p>
             </div>
@@ -164,7 +164,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Premium Quality
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Professional designs that elevate your brand
               </p>
             </div>
@@ -179,7 +179,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
               Popular Event Poster Styles
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-900">
               Choose templates designed for your specific event type
             </p>
           </div>
@@ -188,49 +188,49 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🎵</div>
               <h3 className="font-semibold text-gray-900 mb-2">Music Concerts</h3>
-              <p className="text-sm text-gray-600">Rock, pop, EDM, jazz festivals</p>
+              <p className="text-sm text-gray-900">Rock, pop, EDM, jazz festivals</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🎓</div>
               <h3 className="font-semibold text-gray-900 mb-2">Conferences</h3>
-              <p className="text-sm text-gray-600">Business, tech, academic events</p>
+              <p className="text-sm text-gray-900">Business, tech, academic events</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🎉</div>
               <h3 className="font-semibold text-gray-900 mb-2">Parties & Celebrations</h3>
-              <p className="text-sm text-gray-600">Birthday, wedding, holiday parties</p>
+              <p className="text-sm text-gray-900">Birthday, wedding, holiday parties</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🎭</div>
               <h3 className="font-semibold text-gray-900 mb-2">Theater & Arts</h3>
-              <p className="text-sm text-gray-600">Plays, dance, art exhibitions</p>
+              <p className="text-sm text-gray-900">Plays, dance, art exhibitions</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">💼</div>
               <h3 className="font-semibold text-gray-900 mb-2">Workshops</h3>
-              <p className="text-sm text-gray-600">Training, seminars, masterclasses</p>
+              <p className="text-sm text-gray-900">Training, seminars, masterclasses</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🏃</div>
               <h3 className="font-semibold text-gray-900 mb-2">Sports Events</h3>
-              <p className="text-sm text-gray-600">Marathons, tournaments, matches</p>
+              <p className="text-sm text-gray-900">Marathons, tournaments, matches</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🎪</div>
               <h3 className="font-semibold text-gray-900 mb-2">Festivals</h3>
-              <p className="text-sm text-gray-600">Food, culture, music festivals</p>
+              <p className="text-sm text-gray-900">Food, culture, music festivals</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🎤</div>
               <h3 className="font-semibold text-gray-900 mb-2">Comedy Shows</h3>
-              <p className="text-sm text-gray-600">Stand-up, improv, open mics</p>
+              <p className="text-sm text-gray-900">Stand-up, improv, open mics</p>
             </div>
           </div>
         </div>
@@ -316,7 +316,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   What types of events can I create posters for?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Our event poster designer supports all event types: concerts, conferences, parties, workshops, 
                   festivals, sports events, theater performances, art exhibitions, and more. Each category has 
                   specialized templates and AI training to match the appropriate style and information hierarchy.
@@ -327,7 +327,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Can I add sponsor logos and partner information?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Yes! Our tool supports adding sponsor logos, partner brands, and venue information. You can upload 
                   multiple logos and arrange them professionally. The AI ensures sponsor visibility while maintaining 
                   the overall design aesthetic. Pro users get advanced layout options for complex sponsor arrangements.
@@ -338,7 +338,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   What sizes are available for different platforms?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   We provide optimized sizes for all major platforms: Instagram (1080x1080, 1080x1920), Facebook 
                   (1200x628, 1920x1080), Twitter (1500x500), printed flyers (8.5"x11", A4), posters (18"x24", 
                   24"x36"), and custom dimensions. Each design can be exported in multiple formats.
@@ -349,7 +349,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Can I create a series of posters for recurring events?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Absolutely! Save your designs as templates and reuse them for weekly, monthly, or annual events. 
                   Maintain brand consistency while easily updating dates, performers, or topics. Perfect for event 
                   series, recurring workshops, or seasonal festivals.
@@ -360,7 +360,7 @@ export default function EventPosterDesignerPage({ params: { locale } }: { params
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   How quickly can I create an event poster?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Most users create professional event posters in under 5 minutes. Simply enter your event details, 
                   select a style or let AI generate options, customize colors and fonts if needed, then export. 
                   Perfect for last-minute event announcements or rapid marketing campaigns.

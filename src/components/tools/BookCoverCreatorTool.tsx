@@ -163,7 +163,7 @@ export default function BookCoverCreatorTool() {
         <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
           Book Cover Creator
         </h1>
-        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+        <p className="text-lg text-gray-900 max-w-3xl mx-auto">
           Design professional book covers for Kindle, Wattpad, novels, and ebooks. 
           AI-powered book cover generator with templates for all genres - fantasy, romance, thriller, and more.
         </p>

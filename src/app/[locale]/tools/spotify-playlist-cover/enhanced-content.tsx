@@ -82,7 +82,7 @@ export default function SpotifyPlaylistCoverContent({ locale }: Props) {
       <section id="features" className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4">The Ultimate Spotify Playlist Cover Maker</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-900 max-w-3xl mx-auto">
             Create stunning playlist artwork that matches your music vibe. Also works as a Spotify Canvas maker for dynamic visuals.
           </p>
         </div>
@@ -97,7 +97,7 @@ export default function SpotifyPlaylistCoverContent({ locale }: Props) {
                 {feature.icon}
               </div>
               <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-              <p className="text-gray-600">{feature.description}</p>
+              <p className="text-gray-900">{feature.description}</p>
             </div>
           ))}
         </div>
@@ -114,7 +114,7 @@ export default function SpotifyPlaylistCoverContent({ locale }: Props) {
             {genres.map((genre) => (
               <div key={genre.name} className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
                 <h3 className="text-xl font-semibold mb-2 text-green-600">{genre.name}</h3>
-                <p className="text-sm text-gray-600">{genre.style}</p>
+                <p className="text-sm text-gray-900">{genre.style}</p>
               </div>
             ))}
           </div>
@@ -132,7 +132,7 @@ export default function SpotifyPlaylistCoverContent({ locale }: Props) {
                 {useCase.icon}
               </div>
               <h3 className="text-xl font-semibold mb-2">{useCase.title}</h3>
-              <p className="text-gray-600">{useCase.description}</p>
+              <p className="text-gray-900">{useCase.description}</p>
             </div>
           ))}
         </div>
@@ -154,7 +154,7 @@ export default function SpotifyPlaylistCoverContent({ locale }: Props) {
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold mb-2">Choose Your Style</h3>
-                    <p className="text-gray-600">
+                    <p className="text-gray-900">
                       Select from genre-specific templates or let AI suggest based on your playlist name and mood.
                       Our Spotify Canvas maker option creates dynamic visuals.
                     </p>
@@ -167,7 +167,7 @@ export default function SpotifyPlaylistCoverContent({ locale }: Props) {
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold mb-2">Customize Your Design</h3>
-                    <p className="text-gray-600">
+                    <p className="text-gray-900">
                       Add your playlist title, adjust colors, and fine-tune the mood. Perfect 300x300 sizing is automatic.
                     </p>
                   </div>
@@ -179,7 +179,7 @@ export default function SpotifyPlaylistCoverContent({ locale }: Props) {
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold mb-2">Download & Upload</h3>
-                    <p className="text-gray-600">
+                    <p className="text-gray-900">
                       Download your cover in perfect Spotify dimensions. Upload directly to Spotify desktop app or use for Apple Music.
                     </p>
                   </div>
@@ -229,7 +229,7 @@ export default function SpotifyPlaylistCoverContent({ locale }: Props) {
                 </li>
               </ul>
             </div>
-            <p className="mt-6 text-gray-600 text-center">
+            <p className="mt-6 text-gray-900 text-center">
               Unlike traditional design tools that require subscriptions and design expertise, 
               CoverGen Pro makes professional Spotify cover creation accessible to everyone.
             </p>

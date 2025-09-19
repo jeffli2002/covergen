@@ -91,7 +91,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Webinar Marketing Features
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-900">
               Professional tools for online events
             </p>
           </div>
@@ -104,7 +104,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Professional Layouts
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Clean, corporate designs that build trust
               </p>
             </div>
@@ -116,7 +116,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Boost Registrations
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Graphics optimized for maximum sign-ups
               </p>
             </div>
@@ -128,7 +128,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Multi-Platform
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Perfect for email, social, and landing pages
               </p>
             </div>
@@ -140,7 +140,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Time Zone Friendly
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Global scheduling and time displays
               </p>
             </div>
@@ -152,7 +152,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Platform Integrated
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Zoom, Teams, GoToWebinar ready
               </p>
             </div>
@@ -164,7 +164,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Engaging Visuals
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Designs that communicate value clearly
               </p>
             </div>
@@ -179,7 +179,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
               Popular Webinar Types
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-900">
               Templates designed for every type of online event
             </p>
           </div>
@@ -188,49 +188,49 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">💼</div>
               <h3 className="font-semibold text-gray-900 mb-2">Business Training</h3>
-              <p className="text-sm text-gray-600">Professional development, skills</p>
+              <p className="text-sm text-gray-900">Professional development, skills</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">📊</div>
               <h3 className="font-semibold text-gray-900 mb-2">Product Demos</h3>
-              <p className="text-sm text-gray-600">Software demos, launches</p>
+              <p className="text-sm text-gray-900">Software demos, launches</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🎓</div>
               <h3 className="font-semibold text-gray-900 mb-2">Educational Sessions</h3>
-              <p className="text-sm text-gray-600">Online courses, tutorials</p>
+              <p className="text-sm text-gray-900">Online courses, tutorials</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">💰</div>
               <h3 className="font-semibold text-gray-900 mb-2">Sales Presentations</h3>
-              <p className="text-sm text-gray-600">Lead generation, pitches</p>
+              <p className="text-sm text-gray-900">Lead generation, pitches</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🧐</div>
               <h3 className="font-semibold text-gray-900 mb-2">Expert Interviews</h3>
-              <p className="text-sm text-gray-600">Industry leaders, Q&As</p>
+              <p className="text-sm text-gray-900">Industry leaders, Q&As</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🛠️</div>
               <h3 className="font-semibold text-gray-900 mb-2">Technical Workshops</h3>
-              <p className="text-sm text-gray-600">Hands-on learning, coding</p>
+              <p className="text-sm text-gray-900">Hands-on learning, coding</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🎯</div>
               <h3 className="font-semibold text-gray-900 mb-2">Marketing Seminars</h3>
-              <p className="text-sm text-gray-600">Strategy sessions, insights</p>
+              <p className="text-sm text-gray-900">Strategy sessions, insights</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🌍</div>
               <h3 className="font-semibold text-gray-900 mb-2">Global Conferences</h3>
-              <p className="text-sm text-gray-600">Multi-day events, summits</p>
+              <p className="text-sm text-gray-900">Multi-day events, summits</p>
             </div>
           </div>
         </div>
@@ -320,7 +320,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   What webinar platforms do the graphics work with?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Our graphics work with all major webinar platforms including Zoom, Microsoft Teams, GoToWebinar, 
                   WebEx, BigMarker, Demio, and custom streaming solutions. We provide templates optimized for each 
                   platform's specific requirements and branding guidelines.
@@ -331,7 +331,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Can I include speaker photos and company logos?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Absolutely! Upload speaker headshots, company logos, sponsor brands, and event photos. Our AI 
                   integrates these elements professionally, ensuring proper sizing, placement, and visual hierarchy. 
                   This helps build credibility and trust with potential attendees.
@@ -342,7 +342,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   How do I handle different time zones for global webinars?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Our tool can create graphics showing multiple time zones simultaneously, or generate separate 
                   versions for different regions. We also support "starts in X hours" countdown formats and can 
                   integrate with calendar link generators for automatic time zone conversion.
@@ -353,7 +353,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   What formats work best for email marketing campaigns?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   For email campaigns, we recommend horizontal banners (600px wide) that fit most email clients, 
                   plus mobile-optimized versions. We also create matching graphics for landing pages, social media 
                   promotion, and thank you pages to maintain consistent branding throughout your marketing funnel.
@@ -364,7 +364,7 @@ export default function WebinarPosterMakerPage({ params: { locale } }: { params:
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Can I create graphics for webinar series or recurring events?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Yes! Create template designs for your webinar series that maintain visual consistency while allowing 
                   easy customization for individual sessions. Perfect for monthly training series, educational programs, 
                   or regular industry updates. Save templates for quick updates with new dates and topics.

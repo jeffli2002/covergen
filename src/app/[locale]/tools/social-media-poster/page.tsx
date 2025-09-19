@@ -91,7 +91,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Social Media Features
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-900">
               Tools to maximize your social impact
             </p>
           </div>
@@ -104,7 +104,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Platform Optimized
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Perfect dimensions for every social network
               </p>
             </div>
@@ -116,7 +116,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Engagement Driven
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Designs that get likes, shares, and comments
               </p>
             </div>
@@ -128,7 +128,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Brand Consistent
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Maintain your unique visual identity
               </p>
             </div>
@@ -140,7 +140,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 All Platforms Ready
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Instagram, Facebook, Twitter, LinkedIn
               </p>
             </div>
@@ -152,7 +152,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Lightning Fast
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Create professional posts in seconds
               </p>
             </div>
@@ -164,7 +164,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Audience Focused
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Designed to resonate with your followers
               </p>
             </div>
@@ -179,7 +179,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
               Popular Social Media Formats
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-900">
               Templates optimized for every platform and content type
             </p>
           </div>
@@ -188,49 +188,49 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">📷</div>
               <h3 className="font-semibold text-gray-900 mb-2">Instagram Posts</h3>
-              <p className="text-sm text-gray-600">Square 1:1, stories, reels</p>
+              <p className="text-sm text-gray-900">Square 1:1, stories, reels</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">👤</div>
               <h3 className="font-semibold text-gray-900 mb-2">Facebook Content</h3>
-              <p className="text-sm text-gray-600">News feed, cover photos, ads</p>
+              <p className="text-sm text-gray-900">News feed, cover photos, ads</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🐦</div>
               <h3 className="font-semibold text-gray-900 mb-2">Twitter Graphics</h3>
-              <p className="text-sm text-gray-600">Headers, in-feed images</p>
+              <p className="text-sm text-gray-900">Headers, in-feed images</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">💼</div>
               <h3 className="font-semibold text-gray-900 mb-2">LinkedIn Posts</h3>
-              <p className="text-sm text-gray-600">Professional content, articles</p>
+              <p className="text-sm text-gray-900">Professional content, articles</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🎥</div>
               <h3 className="font-semibold text-gray-900 mb-2">YouTube Thumbnails</h3>
-              <p className="text-sm text-gray-600">Video previews, channel art</p>
+              <p className="text-sm text-gray-900">Video previews, channel art</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">📌</div>
               <h3 className="font-semibold text-gray-900 mb-2">Pinterest Pins</h3>
-              <p className="text-sm text-gray-600">Vertical designs, boards</p>
+              <p className="text-sm text-gray-900">Vertical designs, boards</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🕺</div>
               <h3 className="font-semibold text-gray-900 mb-2">TikTok Content</h3>
-              <p className="text-sm text-gray-600">Vertical videos, covers</p>
+              <p className="text-sm text-gray-900">Vertical videos, covers</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">👻</div>
               <h3 className="font-semibold text-gray-900 mb-2">Snapchat Stories</h3>
-              <p className="text-sm text-gray-600">Vertical stories, geofilters</p>
+              <p className="text-sm text-gray-900">Vertical stories, geofilters</p>
             </div>
           </div>
         </div>
@@ -318,7 +318,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   What social media platforms are supported?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   We support all major platforms with optimized templates: Instagram (posts, stories, reels), Facebook 
                   (posts, covers, ads), Twitter (posts, headers), LinkedIn (posts, articles), YouTube (thumbnails, 
                   channel art), Pinterest (pins, boards), TikTok (covers), and Snapchat (stories, geofilters).
@@ -329,7 +329,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Can I maintain consistent branding across platforms?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Absolutely! Upload your brand colors, fonts, and logos to create consistent templates. Save your 
                   brand kit and apply it across all platforms while automatically adjusting for each platform's 
                   specific requirements. This ensures brand recognition no matter where your content appears.
@@ -340,7 +340,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   How do I create content that gets high engagement?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Our AI creates designs using proven engagement principles: high contrast for visibility, strategic 
                   text placement for readability, emotional color psychology, clear calls-to-action, and platform-specific 
                   optimization. We also provide trending style options based on current social media design trends.
@@ -351,7 +351,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Can I create content for different campaign types?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Yes! Whether you're running product launches, seasonal campaigns, educational content, promotional 
                   offers, or community building initiatives, our tool provides templates and AI generation options 
                   tailored to each campaign type and objective.
@@ -362,7 +362,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   How quickly can I create social media content?
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-900">
                   Most users create professional social media posts in under 30 seconds. Simply describe your content, 
                   select your platform and style preferences, and our AI generates multiple options instantly. Perfect 
                   for content creators who need to maintain consistent posting schedules.

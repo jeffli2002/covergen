@@ -115,7 +115,7 @@ export default function MusicAlbumCoverTool() {
         <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
           Music Album Cover Maker
         </h1>
-        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+        <p className="text-lg text-gray-900 max-w-3xl mx-auto">
           Create professional album covers for Spotify, Apple Music, SoundCloud, and all streaming platforms. 
           AI-powered album art generator for musicians and podcasters.
         </p>

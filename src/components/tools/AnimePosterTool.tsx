@@ -136,7 +136,7 @@ export default function AnimePosterTool() {
         <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
           Anime Poster Maker
         </h1>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        <p className="text-lg text-gray-900 max-w-2xl mx-auto">
           Create stunning anime-style posters with AI. Perfect for manga covers, anime fan art, and Japanese-style designs.
         </p>
       </div>

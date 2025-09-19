@@ -187,7 +187,7 @@
 }
 
 .prose-seo p {
-  @apply text-gray-700 dark:text-gray-200 leading-relaxed;
+  @apply text-gray-900 dark:text-gray-200 leading-relaxed;
 }
 
 .prose-seo h2 {
@@ -199,7 +199,7 @@
 }
 
 .prose-seo ul, .prose-seo ol {
-  @apply text-gray-700 dark:text-gray-200;
+  @apply text-gray-900 dark:text-gray-200;
 }
 
 .prose-seo li {

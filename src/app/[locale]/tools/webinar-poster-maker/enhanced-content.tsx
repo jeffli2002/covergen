@@ -68,7 +68,7 @@ export default function WebinarPosterContent({ locale }: Props) {
       <section id="features" className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4">Professional Webinar Poster Features</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-900 max-w-3xl mx-auto">
             Everything you need to create compelling webinar promotional materials that drive registrations
           </p>
         </div>
@@ -83,7 +83,7 @@ export default function WebinarPosterContent({ locale }: Props) {
                 {feature.icon}
               </div>
               <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-              <p className="text-gray-600">{feature.description}</p>
+              <p className="text-gray-900">{feature.description}</p>
             </div>
           ))}
         </div>
@@ -102,7 +102,7 @@ export default function WebinarPosterContent({ locale }: Props) {
                 <h3 className="text-xl font-semibold mb-3 text-blue-600">{platform.name}</h3>
                 <ul className="space-y-2">
                   {platform.formats.map((format) => (
-                    <li key={format} className="flex items-center gap-2 text-gray-600">
+                    <li key={format} className="flex items-center gap-2 text-gray-900">
                       <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
                       <span className="text-sm">{format}</span>
                     </li>
@@ -122,7 +122,7 @@ export default function WebinarPosterContent({ locale }: Props) {
           {webinarTypes.map((item) => (
             <div key={item.type} className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl">
               <h3 className="text-lg font-semibold mb-2 text-indigo-700">{item.type}</h3>
-              <p className="text-sm text-gray-600">{item.style}</p>
+              <p className="text-sm text-gray-900">{item.style}</p>
             </div>
           ))}
         </div>
@@ -143,7 +143,7 @@ export default function WebinarPosterContent({ locale }: Props) {
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold mb-2">Enter Webinar Details</h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-900">
                     Add your webinar title, date, time, speakers, and topic. Our AI understands context to suggest appropriate designs.
                   </p>
                 </div>
@@ -155,7 +155,7 @@ export default function WebinarPosterContent({ locale }: Props) {
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold mb-2">Choose Your Style</h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-900">
                     Select from professional templates or let AI generate a unique design based on your webinar topic and audience.
                   </p>
                 </div>
@@ -167,7 +167,7 @@ export default function WebinarPosterContent({ locale }: Props) {
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold mb-2">Customize & Brand</h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-900">
                     Add your logo, adjust colors to match your brand, include speaker photos, and add registration CTAs.
                   </p>
                 </div>
@@ -179,7 +179,7 @@ export default function WebinarPosterContent({ locale }: Props) {
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold mb-2">Export for All Platforms</h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-900">
                     Download your poster in all required sizes for Zoom, social media, email campaigns, and more - all in one click.
                   </p>
                 </div>
@@ -199,7 +199,7 @@ export default function WebinarPosterContent({ locale }: Props) {
           <div className="bg-white p-6 rounded-xl shadow-lg">
             <Megaphone className="w-10 h-10 text-blue-600 mb-4" />
             <h3 className="text-xl font-semibold mb-3">Content Tips</h3>
-            <ul className="space-y-2 text-gray-600">
+            <ul className="space-y-2 text-gray-900">
               <li>• Include clear value proposition</li>
               <li>• Show speaker credentials prominently</li>
               <li>• Add "Limited Seats" for urgency</li>
@@ -211,7 +211,7 @@ export default function WebinarPosterContent({ locale }: Props) {
           <div className="bg-white p-6 rounded-xl shadow-lg">
             <Award className="w-10 h-10 text-blue-600 mb-4" />
             <h3 className="text-xl font-semibold mb-3">Design Tips</h3>
-            <ul className="space-y-2 text-gray-600">
+            <ul className="space-y-2 text-gray-900">
               <li>• Use high-contrast text for readability</li>
               <li>• Keep important info in top third</li>
               <li>• Use professional speaker photos</li>
@@ -258,7 +258,7 @@ export default function WebinarPosterContent({ locale }: Props) {
               </div>
               
               <div className="bg-gray-100 p-6 rounded-xl">
-                <h3 className="text-xl font-semibold mb-4 text-gray-600">Generic Tools</h3>
+                <h3 className="text-xl font-semibold mb-4 text-gray-900">Generic Tools</h3>
                 <ul className="space-y-3 text-gray-500">
                   <li className="flex items-start gap-2">
                     <span className="text-gray-400 mt-1">×</span>
@@ -284,7 +284,7 @@ export default function WebinarPosterContent({ locale }: Props) {
               </div>
               
               <div className="bg-gray-100 p-6 rounded-xl">
-                <h3 className="text-xl font-semibold mb-4 text-gray-600">Design Agencies</h3>
+                <h3 className="text-xl font-semibold mb-4 text-gray-900">Design Agencies</h3>
                 <ul className="space-y-3 text-gray-500">
                   <li className="flex items-start gap-2">
                     <span className="text-gray-400 mt-1">×</span>
