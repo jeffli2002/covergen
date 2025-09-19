@@ -59,12 +59,13 @@ export function createClient() {
           if (options?.domain) {
             cookieString += `; domain=${options.domain}`
           }
-          if (options?.sameSite) {
-            cookieString += `; samesite=${options.sameSite}`
-          } else {
-            cookieString += `; samesite=lax`
-          }
-          if (options?.secure) {
+          // For OAuth flows, we need SameSite=None; Secure for Chrome compatibility
+          const isOAuthFlow = name.startsWith('sb-') && (name.includes('auth') || name.includes('session'))
+          const sameSiteValue = isOAuthFlow ? 'None' : (options?.sameSite || 'lax')
+          cookieString += `; samesite=${sameSiteValue}`
+          
+          // Always set Secure for SameSite=None cookies (required by Chrome)
+          if (sameSiteValue === 'None' || options?.secure) {
             cookieString += `; secure`
           }
           document.cookie = cookieString

@@ -87,9 +87,13 @@ function getSupabaseClient() {
           cookieParts.push(`Domain=${options.domain}`)
         }
         
-        cookieParts.push(`SameSite=${options?.sameSite || 'Lax'}`)
+        // For OAuth flows, we need SameSite=None; Secure for Chrome compatibility
+        const isOAuthFlow = name.startsWith('sb-') && (name.includes('auth') || name.includes('session'))
+        const sameSiteValue = isOAuthFlow ? 'None' : (options?.sameSite || 'Lax')
+        cookieParts.push(`SameSite=${sameSiteValue}`)
         
-        if (window.location.protocol === 'https:' || options?.secure) {
+        // Always set Secure for SameSite=None cookies (required by Chrome)
+        if (sameSiteValue === 'None' || window.location.protocol === 'https:' || options?.secure) {
           cookieParts.push('Secure')
         }
         

@@ -11,12 +11,13 @@ export function getOAuthConfig() {
      isProduction ? 'https://covergen.pro' : 'http://localhost:3001')
 
   // Cookie options for production vs development
+  // For OAuth flows, we need SameSite=None; Secure for Chrome compatibility
   const cookieOptions = {
     domain: isProduction && typeof window !== 'undefined' 
       ? `.${window.location.hostname.replace('www.', '')}` // .covergen.pro
       : undefined, // Let browser handle it in dev
-    sameSite: isProduction ? 'lax' as const : 'lax' as const,
-    secure: isProduction, // HTTPS only in production
+    sameSite: 'none' as const, // Required for cross-site OAuth flows in Chrome
+    secure: true, // Always required for SameSite=None
     maxAge: 60 * 60 * 24 * 30, // 30 days
   }
 
