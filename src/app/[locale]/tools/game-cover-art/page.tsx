@@ -104,7 +104,7 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Genre-Specific Styles
               </h3>
-              <p>
+              <p className="text-gray-900">
                 From RPG to FPS, perfect for any game genre
               </p>
             </div>
@@ -116,7 +116,7 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 AAA Quality
               </h3>
-              <p>
+              <p className="text-gray-900">
                 Professional artwork that rivals big studios
               </p>
             </div>
@@ -128,7 +128,7 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Platform Ready
               </h3>
-              <p>
+              <p className="text-gray-900">
                 Optimized for Steam, Epic, mobile stores
               </p>
             </div>
@@ -140,7 +140,7 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Custom Artwork
               </h3>
-              <p>
+              <p className="text-gray-900">
                 Unique visuals that represent your game
               </p>
             </div>
@@ -152,7 +152,7 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Player-Focused Design
               </h3>
-              <p>
+              <p className="text-gray-900">
                 Covers that attract your target audience
               </p>
             </div>
@@ -164,7 +164,7 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Multi-Format Export
               </h3>
-              <p>
+              <p className="text-gray-900">
                 Ready for all platforms and marketing
               </p>
             </div>
@@ -262,7 +262,7 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
             <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">Professional Game Cover Art That Sells</h2>
-            <p>
+            <p className="text-gray-900">
               In the competitive gaming industry, your cover art is often the first and most important interaction 
               potential players have with your game. Whether you're an indie developer launching on Steam, a mobile 
               game studio targeting app stores, or creating physical box art, our AI-powered game cover art creator 
@@ -270,7 +270,7 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
             </p>
             
             <h3 className="font-semibold text-gray-900">Optimized for Every Gaming Platform</h3>
-            <p>
+            <p className="text-gray-900">
               Different platforms have different requirements and audiences. Our game cover art creator understands 
               these nuances, generating Steam-optimized covers that work well as small thumbnails, mobile game icons 
               that pop on app stores, console box art that stands out on retail shelves, and promotional materials 
@@ -279,7 +279,7 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
             </p>
             
             <h3 className="font-semibold text-gray-900">Genre-Specific Visual Language</h3>
-            <p>
+            <p className="text-gray-900">
               Gaming audiences have specific expectations for different genres. Our AI has been trained on thousands 
               of successful game covers across all genres. Fantasy RPGs get epic, magical aesthetics with rich 
               fantasy elements. FPS games receive bold, action-packed designs with military themes. Indie games get 
@@ -288,7 +288,7 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
             </p>
             
             <h3 className="font-semibold text-gray-900">Psychology-Driven Design Elements</h3>
-            <p>
+            <p className="text-gray-900">
               Successful game covers use specific psychological triggers to attract players. Our AI incorporates 
               proven design principles: character positioning that draws the eye, color schemes that evoke the right 
               emotions, typography that matches the game's tone, and composition that works at any size. The result 
@@ -296,7 +296,7 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
             </p>
             
             <h3 className="font-semibold text-gray-900">From Concept to Market-Ready</h3>
-            <p>
+            <p className="text-gray-900">
               Game development is time-intensive, and marketing materials often come as an afterthought. Our tool 
               bridges this gap by creating market-ready cover art in minutes, not weeks. Generate multiple concepts 
               for A/B testing, create variations for different regions or platforms, and maintain consistent branding 
@@ -320,7 +320,7 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   What platforms are the covers optimized for?
                 </h3>
-                <p>
+                <p className="text-gray-900">
                   Our game covers work perfectly for Steam (460x215, 616x353), Epic Games Store, mobile app stores 
                   (iOS App Store, Google Play), console platforms (PlayStation, Xbox, Nintendo), and physical box art. 
                   We also provide social media sizes for marketing campaigns.
@@ -331,7 +331,7 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Can I include my game's characters and logo?
                 </h3>
-                <p>
+                <p className="text-gray-900">
                   Yes! Upload your game's logo, character artwork, screenshots, or concept art. Our AI will integrate 
                   these elements seamlessly into professional cover designs. You can also describe your characters 
                   or game world, and the AI will generate appropriate artwork.
@@ -342,7 +342,7 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   What game genres does the tool support?
                 </h3>
-                <p>
+                <p className="text-gray-900">
                   All major genres are supported: Action, Adventure, RPG, FPS, Strategy, Puzzle, Horror, Sci-Fi, 
                   Fantasy, Sports, Racing, Simulation, Indie, Mobile, and more. Each genre has specialized templates 
                   and AI training to ensure authentic visual styling that appeals to genre fans.
@@ -353,7 +353,7 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Can I create covers for game series or DLC?
                 </h3>
-                <p>
+                <p className="text-gray-900">
                   Absolutely! Create consistent branding across your entire game franchise. Design main game covers, 
                   DLC/expansion covers, sequel covers, and special edition artwork that maintains visual cohesion. 
                   Perfect for building recognizable game series branding.
@@ -364,7 +364,7 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   What resolution and formats are available?
                 </h3>
-                <p>
+                <p className="text-gray-900">
                   Free users get HD quality suitable for most digital platforms. Pro users get 4K resolution (3840x2160) 
                   and print-ready formats with CMYK color profiles for physical distribution. All major formats are 
                   supported: PNG, JPG, PDF, and vector formats for scalability.

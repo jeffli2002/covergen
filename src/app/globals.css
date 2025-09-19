@@ -154,7 +154,7 @@
 
 /* Prose content styling for blog posts */
 .prose {
-  @apply text-gray-800 dark:text-gray-300;
+  @apply text-gray-900 dark:text-gray-300;
 }
 
 .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
