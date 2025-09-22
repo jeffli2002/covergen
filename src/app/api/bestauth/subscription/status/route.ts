@@ -38,6 +38,21 @@ export async function GET(request: NextRequest) {
       })
     }
     
+    if (debug === 'auth') {
+      // Debug session validation
+      const { extractBearerToken } = await import('@/lib/bestauth/request-utils')
+      const token = extractBearerToken(request)
+      
+      return NextResponse.json({
+        debug: 'auth_test',
+        hasAuthHeader: !!request.headers.get('authorization'),
+        authHeader: request.headers.get('authorization')?.substring(0, 20) + '...',
+        hasToken: !!token,
+        tokenLength: token?.length || 0,
+        cookies: request.cookies.getAll().map(c => ({ name: c.name, hasValue: !!c.value }))
+      })
+    }
+    
     // Validate session
     const session = await validateSessionFromRequest(request)
     
