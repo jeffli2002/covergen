@@ -25,7 +25,7 @@ export async function authMiddleware(request: NextRequest): Promise<NextResponse
   const isAuthRoute = AUTH_ROUTES.some(route => pathname.startsWith(route))
   
   // Get session token from cookie
-  const sessionToken = request.cookies.get('bestauth-session')?.value
+  const sessionToken = request.cookies.get('bestauth.session')?.value
   
   if (isProtectedRoute && !sessionToken) {
     // Redirect to signin if accessing protected route without session
