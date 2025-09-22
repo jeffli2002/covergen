@@ -9,7 +9,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Check, CreditCard, Crown, Info, Loader2, Shield, Sparkles, Zap } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
 import { useAuth } from '@/contexts/AuthContext'
-import authService from '@/services/authService'
 import { creemService, SUBSCRIPTION_PLANS, CREEM_TEST_CARDS } from '@/services/payment/creem'
 import { toast } from 'sonner'
 import CreemDebug from '@/components/debug/CreemDebug'
@@ -32,7 +31,7 @@ export default function PaymentPageClient({
 }: PaymentPageClientProps) {
   const router = useRouter()
   const { user } = useAppStore()
-  const { user: authUser, loading: authLoading } = useAuth()
+  const { user: authUser, loading: authLoading, getUserSubscription } = useAuth()
   const [loading, setLoading] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<'pro' | 'pro_plus'>(initialPlan as any)
   const [isTestMode, setIsTestMode] = useState(false)
@@ -63,7 +62,7 @@ export default function PaymentPageClient({
       authLoading: authLoading,
       storeUser: !!user,
       storeUserEmail: user?.email,
-      session: authService.getCurrentSession() ? 'Present' : 'Missing'
+      session: authUser ? 'Present' : 'Missing'
     })
 
     // Wait for auth to load
@@ -80,28 +79,15 @@ export default function PaymentPageClient({
       return
     }
 
-    // Check if session is expiring soon and refresh it proactively
-    if (authService.isSessionExpiringSoon(10)) { // 10 minute buffer
-      console.log('[PaymentPage] Session expiring soon, refreshing...')
-      authService.refreshSession().then((result) => {
-        if (!result.session) {
-          console.error('[PaymentPage] Failed to refresh session')
-          toast.error('Session expired. Please sign in again.')
-          const returnUrl = `/${locale}/payment?plan=${selectedPlan}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
-          router.push(`/${locale}?auth=signin&redirect=${encodeURIComponent(returnUrl)}`)
-        } else {
-          console.log('[PaymentPage] Session refreshed successfully')
-        }
-      })
-    }
+    // BestAuth handles session management internally via cookies
 
     // Load current subscription
     loadCurrentSubscription()
-  }, [authUser, authLoading, locale, router, selectedPlan, redirectUrl])
+  }, [authUser, authLoading, locale, router, selectedPlan, redirectUrl, getUserSubscription])
 
   const loadCurrentSubscription = async () => {
     try {
-      const subscription = await authService.getUserSubscription()
+      const subscription = await getUserSubscription()
       setCurrentSubscription(subscription)
       
       // Calculate prorated amount if upgrading
