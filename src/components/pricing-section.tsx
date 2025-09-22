@@ -137,6 +137,13 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
       })
       if (response.ok) {
         const data = await response.json()
+        console.log('[PricingSection] Subscription data received:', {
+          plan: data.plan,
+          tier: data.tier,
+          status: data.status,
+          isTrialing: data.isTrialing,
+          user: authUser?.email
+        })
         setSubscriptionInfo(data)
       } else {
         console.error('[PricingSection] Subscription API error:', response.status)
@@ -235,10 +242,23 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto px-4">
           {tiers.map((tier) => {
             const Icon = tier.icon
-            // Check if this is the user's current tier (including trial status)
-            const isCurrentTier = subscriptionInfo?.isTrialing 
-              ? subscriptionInfo.plan === tier.id 
-              : user?.tier === tier.id
+            // Check if this is the user's current tier
+            // Always use subscription info from API when available, fall back to app store
+            const isCurrentTier = subscriptionInfo?.plan === tier.id || 
+                                 (subscriptionInfo?.tier === tier.id) ||
+                                 (!subscriptionInfo && user?.tier === tier.id)
+            
+            // Debug logging for tier comparison
+            if (tier.id === 'pro' && authUser?.email?.includes('jefflee2002')) {
+              console.log(`[PricingSection] Pro tier check for ${authUser.email}:`, {
+                tierId: tier.id,
+                subscriptionPlan: subscriptionInfo?.plan,
+                subscriptionTier: subscriptionInfo?.tier,
+                userTier: user?.tier,
+                isCurrentTier,
+                hasSubscriptionInfo: !!subscriptionInfo
+              })
+            }
             
             return (
               <Card 
