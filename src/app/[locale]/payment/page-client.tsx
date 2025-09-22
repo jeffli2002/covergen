@@ -83,7 +83,19 @@ export default function PaymentPageClient({
     try {
       const subscription = await getUserSubscription()
       console.log('[PaymentPage] Loaded subscription:', subscription)
-      setCurrentSubscription(subscription)
+      
+      // Normalize the subscription data to ensure tier field exists
+      if (subscription) {
+        const normalizedSubscription = {
+          ...subscription,
+          tier: subscription.tier || subscription.plan || 'free',
+          status: subscription.status || 'active'
+        }
+        console.log('[PaymentPage] Normalized subscription:', normalizedSubscription)
+        setCurrentSubscription(normalizedSubscription)
+      } else {
+        setCurrentSubscription(null)
+      }
       
       // Calculate prorated amount if upgrading
       if (subscription && subscription.tier === 'pro' && initialPlan === 'pro_plus' && isUpgrade) {
@@ -358,6 +370,8 @@ export default function PaymentPageClient({
             const isSelected = selectedPlan === plan.id
             
             // Allow trial users to click their current plan to add payment method
+            // Also prevent paid users from selecting their current plan
+            const isPaidUser = currentSubscription && !isTrialUser && currentSubscription.tier !== 'free'
             const isClickable = !loading && (!isCurrentPlan || (isCurrentPlan && needsPaymentSetup))
             
             console.log('[PaymentPage] Rendering plan:', plan.id, {
@@ -473,10 +487,17 @@ export default function PaymentPageClient({
                 </CardContent>
 
                 <CardFooter className="flex flex-col gap-2">
-                  {/* Current Plan Status for trial users */}
+                  {/* Current Plan Status for all users */}
                   {isCurrentPlan && isTrialUser && (
                     <Badge variant="secondary" className="w-full py-2 text-sm">
                       Current Plan (Trial)
+                    </Badge>
+                  )}
+                  
+                  {/* Current Plan Status for paid users */}
+                  {isCurrentPlan && isPaidUser && (
+                    <Badge className="w-full py-2 text-sm bg-green-100 text-green-800 border-green-200">
+                      Current Plan
                     </Badge>
                   )}
                   
@@ -519,6 +540,11 @@ export default function PaymentPageClient({
                       <>
                         <CreditCard className="mr-2 h-4 w-4" />
                         Add Payment Method
+                      </>
+                    ) : isCurrentPlan && isPaidUser ? (
+                      <>
+                        <Check className="mr-2 h-4 w-4" />
+                        Current Plan
                       </>
                     ) : isCurrentPlan ? (
                       'Current Plan'

@@ -128,6 +128,7 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
     try {
       if (!session?.token) {
         console.log('[PricingSection] No session token available')
+        setLoadingSubscription(false)
         return
       }
       
@@ -144,11 +145,20 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
           tier: data.tier,
           status: data.status,
           isTrialing: data.isTrialing,
-          user: authUser?.email
+          user: authUser?.email,
+          fullData: data
         })
-        setSubscriptionInfo(data)
+        // Ensure we have both plan and tier fields for compatibility
+        const normalizedData = {
+          ...data,
+          plan: data.plan || data.tier, // Ensure plan field exists
+          tier: data.tier || data.plan  // Ensure tier field exists
+        }
+        setSubscriptionInfo(normalizedData)
       } else {
         console.error('[PricingSection] Subscription API error:', response.status)
+        const errorText = await response.text()
+        console.error('[PricingSection] Error details:', errorText)
       }
     } catch (error) {
       console.error('Error fetching subscription:', error)
