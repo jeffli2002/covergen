@@ -41,6 +41,7 @@ export default function PaymentPageClient({
   const [currentSubscription, setCurrentSubscription] = useState<Subscription | null>(null)
   const [proratedAmount, setProratedAmount] = useState<number | null>(null)
   const [isProcessingTrialUpgrade, setIsProcessingTrialUpgrade] = useState(false)
+  const [isLoadingSubscription, setIsLoadingSubscription] = useState(true)
   
   // Get trial days from environment variables
   const trialDays = parseInt(process.env.NEXT_PUBLIC_TRIAL_DAYS || '3')
@@ -80,6 +81,7 @@ export default function PaymentPageClient({
   }, [authUser, authLoading, locale, router, selectedPlan, redirectUrl, getUserSubscription])
 
   const loadCurrentSubscription = async () => {
+    setIsLoadingSubscription(true)
     try {
       const subscription = await getUserSubscription()
       console.log('[PaymentPage] Loaded subscription:', subscription)
@@ -94,7 +96,13 @@ export default function PaymentPageClient({
         console.log('[PaymentPage] Normalized subscription:', normalizedSubscription)
         setCurrentSubscription(normalizedSubscription)
       } else {
-        setCurrentSubscription(null)
+        // Set a default free subscription if none exists
+        console.log('[PaymentPage] No subscription found, setting default free subscription')
+        setCurrentSubscription({
+          tier: 'free',
+          status: 'active',
+          plan: 'free'
+        })
       }
       
       // Calculate prorated amount if upgrading
@@ -120,6 +128,14 @@ export default function PaymentPageClient({
       }
     } catch (error) {
       console.error('Error loading subscription:', error)
+      // Set default free subscription on error
+      setCurrentSubscription({
+        tier: 'free',
+        status: 'active',
+        plan: 'free'
+      })
+    } finally {
+      setIsLoadingSubscription(false)
     }
   }
   
@@ -607,20 +623,20 @@ export default function PaymentPageClient({
             <CardContent className="p-6">
               <h3 className="font-semibold mb-2 flex items-center gap-2">
                 {(() => {
-                  if (!currentSubscription) return <><Loader2 className="w-4 h-4 animate-spin" /> Loading subscription info...</>;
-                  if (currentSubscription.tier === 'pro') return <><Zap className="w-5 h-5 text-orange-500" /> You have the Pro plan</>;
-                  if (currentSubscription.tier === 'pro_plus') return <><Crown className="w-5 h-5 text-purple-500" /> You have the Pro+ plan</>;
+                  if (isLoadingSubscription) return <><Loader2 className="w-4 h-4 animate-spin" /> Loading subscription info...</>;
+                  if (currentSubscription?.tier === 'pro') return <><Zap className="w-5 h-5 text-orange-500" /> You have the Pro plan</>;
+                  if (currentSubscription?.tier === 'pro_plus') return <><Crown className="w-5 h-5 text-purple-500" /> You have the Pro+ plan</>;
                   return <><Sparkles className="w-5 h-5 text-gray-500" /> Not ready to upgrade?</>;
                 })()}
               </h3>
               <p className="text-sm text-gray-600 mb-4">
                 {(() => {
                   const config = getClientSubscriptionConfig();
-                  if (!currentSubscription) {
+                  if (isLoadingSubscription) {
                     return 'Checking your subscription status...';
                   }
                   
-                  switch (currentSubscription.tier) {
+                  switch (currentSubscription?.tier) {
                     case 'pro':
                       return `You're currently on the Pro plan with ${config.limits.pro.monthly} covers per month.`;
                     case 'pro_plus':
@@ -637,8 +653,8 @@ export default function PaymentPageClient({
                 onClick={() => router.push(`/${locale}`)}
               >
                 {(() => {
-                  if (!currentSubscription) return 'Loading...';
-                  if (currentSubscription.tier === 'pro' || currentSubscription.tier === 'pro_plus') {
+                  if (isLoadingSubscription) return 'Loading...';
+                  if (currentSubscription?.tier === 'pro' || currentSubscription?.tier === 'pro_plus') {
                     return 'Go to Dashboard';
                   }
                   return 'Continue with Free Plan';
