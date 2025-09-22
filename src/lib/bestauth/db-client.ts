@@ -15,6 +15,7 @@ export function getBestAuthSupabaseClient(): SupabaseClient | null {
 
   // Check required environment variables
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  // Prefer service role key for BestAuth database operations
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   
   if (!supabaseUrl || !supabaseKey) {
