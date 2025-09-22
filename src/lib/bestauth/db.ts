@@ -544,10 +544,26 @@ export const db = {
         
         if (error || !data) return null
         
-        // Temporarily disable usage tracking to prevent hanging
-        // TODO: Fix RLS permissions for bestauth_usage_tracking table
+        // Get usage data safely - RLS permissions now fixed
         let usageToday = 0
-        console.log('[BestAuth] Usage tracking temporarily disabled due to permissions issue')
+        try {
+          const { data: usageData, error: usageError } = await getDb()
+            .from('bestauth_usage_tracking')
+            .select('generation_count')
+            .eq('user_id', userId)
+            .eq('date', new Date().toISOString().split('T')[0])
+            .single()
+          
+          if (!usageError && usageData) {
+            usageToday = usageData.generation_count || 0
+          } else if (usageError && usageError.code !== 'PGRST116') {
+            console.error('Usage tracking error:', usageError)
+          }
+          // If no record found, usageToday remains 0
+        } catch (error) {
+          console.warn('Usage tracking unavailable:', error)
+          usageToday = 0
+        }
         
         // Return data in the expected format
         return {
@@ -601,15 +617,79 @@ export const db = {
   // Usage tracking operations
   usage: {
     async getToday(userId: string): Promise<number> {
-      // Temporarily return 0 to prevent hanging due to RLS permissions
-      console.log('[BestAuth] getToday: Usage tracking temporarily disabled')
-      return 0
+      try {
+        const { data, error } = await getDb()
+          .from('bestauth_usage_tracking')
+          .select('generation_count')
+          .eq('user_id', userId)
+          .eq('date', new Date().toISOString().split('T')[0])
+          .single()
+        
+        if (error) {
+          // No record found is normal, return 0
+          if (error.code === 'PGRST116' || error.message?.includes('No rows found')) {
+            return 0
+          }
+          console.error('Error getting usage today:', error)
+          return 0
+        }
+        
+        return data?.generation_count || 0
+      } catch (err) {
+        console.error('Error getting usage today:', err)
+        return 0
+      }
     },
 
     async increment(userId: string, amount: number = 1): Promise<number> {
-      // Temporarily return amount to prevent hanging due to RLS permissions
-      console.log('[BestAuth] increment: Usage tracking temporarily disabled')
-      return amount
+      try {
+        const today = new Date().toISOString().split('T')[0]
+        
+        // Check if record exists for today
+        const { data: existing, error: selectError } = await getDb()
+          .from('bestauth_usage_tracking')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('date', today)
+          .single()
+        
+        let newCount: number
+        
+        if (existing && !selectError) {
+          // Update existing record
+          const { data, error } = await getDb()
+            .from('bestauth_usage_tracking')
+            .update({ generation_count: (existing.generation_count || 0) + amount })
+            .eq('user_id', userId)
+            .eq('date', today)
+            .select('generation_count')
+            .single()
+          
+          if (error) {
+            console.error('Error updating usage:', error)
+            return (existing.generation_count || 0) + amount
+          }
+          newCount = data?.generation_count || 0
+        } else {
+          // Insert new record (no existing record found)
+          const { data, error } = await getDb()
+            .from('bestauth_usage_tracking')
+            .insert({ user_id: userId, date: today, generation_count: amount })
+            .select('generation_count')
+            .single()
+          
+          if (error) {
+            console.error('Error inserting usage:', error)
+            return amount
+          }
+          newCount = data?.generation_count || 0
+        }
+        
+        return newCount
+      } catch (err) {
+        console.error('Error incrementing usage:', err)
+        return amount
+      }
     },
 
     async checkLimit(userId: string): Promise<boolean> {
@@ -658,9 +738,29 @@ export const db = {
     },
 
     async getMonthlyUsage(userId: string): Promise<number> {
-      // Temporarily return 0 to prevent hanging due to RLS permissions
-      console.log('[BestAuth] getMonthlyUsage: Usage tracking temporarily disabled')
-      return 0
+      try {
+        const startOfMonth = new Date()
+        startOfMonth.setDate(1)
+        startOfMonth.setHours(0, 0, 0, 0)
+        
+        const { data, error } = await getDb()
+          .from('bestauth_usage_tracking')
+          .select('generation_count')
+          .eq('user_id', userId)
+          .gte('date', startOfMonth.toISOString().split('T')[0])
+        
+        if (error) {
+          console.error('Error getting monthly usage:', error)
+          return 0
+        }
+        
+        if (!data || data.length === 0) return 0
+        
+        return data.reduce((sum, record) => sum + (record.generation_count || 0), 0)
+      } catch (err) {
+        console.error('Error getting monthly usage:', err)
+        return 0
+      }
     },
   },
 
