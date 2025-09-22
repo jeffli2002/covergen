@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Loader2, CheckCircle, AlertCircle, CreditCard } from 'lucide-react'
-import { useAuth } from '@/contexts/AuthContext'
+import { useBestAuth } from '@/hooks/useBestAuth'
 import { getClientSubscriptionConfig, getTrialPeriodText } from '@/lib/subscription-config-client'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
@@ -27,7 +27,7 @@ interface SubscriptionInfo {
 }
 
 export function SubscriptionManagement() {
-  const { user } = useAuth()
+  const { user, session } = useBestAuth()
   const [loading, setLoading] = useState(true)
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null)
   const [processing, setProcessing] = useState(false)
@@ -35,13 +35,18 @@ export function SubscriptionManagement() {
 
   useEffect(() => {
     fetchSubscriptionInfo()
-  }, [user])
+  }, [user, session])
 
   const fetchSubscriptionInfo = async () => {
-    if (!user) return
+    if (!user || !session?.token) return
     
     try {
-      const response = await fetch('/api/subscription/status')
+      const response = await fetch('/api/bestauth/subscription/status', {
+        headers: {
+          'Authorization': `Bearer ${session.token}`,
+          'Content-Type': 'application/json'
+        }
+      })
       if (response.ok) {
         const data = await response.json()
         setSubscription(data)
@@ -66,8 +71,12 @@ export function SubscriptionManagement() {
     
     setProcessing(true)
     try {
-      const response = await fetch('/api/subscription/cancel', {
-        method: 'POST'
+      const response = await fetch('/api/bestauth/subscription/cancel', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session?.token}`,
+          'Content-Type': 'application/json'
+        }
       })
       
       const data = await response.json()
@@ -94,8 +103,12 @@ export function SubscriptionManagement() {
     
     setProcessing(true)
     try {
-      const response = await fetch('/api/subscription/cancel', {
-        method: 'DELETE'
+      const response = await fetch('/api/bestauth/subscription/cancel', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session?.token}`,
+          'Content-Type': 'application/json'
+        }
       })
       
       const data = await response.json()
@@ -128,8 +141,12 @@ export function SubscriptionManagement() {
     
     setProcessing(true)
     try {
-      const response = await fetch('/api/subscription/activate', {
-        method: 'POST'
+      const response = await fetch('/api/bestauth/subscription/activate', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session?.token}`,
+          'Content-Type': 'application/json'
+        }
       })
       
       const data = await response.json()
@@ -162,9 +179,12 @@ export function SubscriptionManagement() {
     
     setProcessing(true)
     try {
-      const response = await fetch('/api/subscription/upgrade', {
+      const response = await fetch('/api/bestauth/subscription/upgrade', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.token}`
+        },
         body: JSON.stringify({ targetTier })
       })
       

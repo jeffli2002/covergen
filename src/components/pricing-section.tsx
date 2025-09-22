@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Check, Crown, Sparkles, Zap } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
-import { useAuth } from '@/contexts/AuthContext'
+import { useBestAuth } from '@/hooks/useBestAuth'
 import { useRouter } from 'next/navigation'
 import AuthForm from '@/components/auth/AuthForm'
 import { getClientSubscriptionConfig, getTrialPeriodText, getTrialPeriodFullText, isTrialEnabledClient } from '@/lib/subscription-config-client'
@@ -105,7 +105,7 @@ const PENDING_PLAN_KEY = 'covergen_pending_plan'
 
 export default function PricingSection({ locale = 'en' }: PricingSectionProps = {}) {
   const { user } = useAppStore()
-  const { user: authUser } = useAuth()
+  const { user: authUser, session } = useBestAuth()
   const router = useRouter()
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [pendingPlan, setPendingPlan] = useState<string | null>(null)
@@ -114,20 +114,32 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
   
   // Fetch subscription info when component mounts or auth changes
   useEffect(() => {
-    if (authUser) {
+    if (authUser && session) {
       fetchSubscriptionInfo()
     } else {
       setSubscriptionInfo(null)
     }
-  }, [authUser])
+  }, [authUser, session])
   
   const fetchSubscriptionInfo = async () => {
     setLoadingSubscription(true)
     try {
-      const response = await fetch('/api/subscription/status')
+      if (!session?.token) {
+        console.log('[PricingSection] No session token available')
+        return
+      }
+      
+      const response = await fetch('/api/bestauth/subscription/status', {
+        headers: {
+          'Authorization': `Bearer ${session.token}`,
+          'Content-Type': 'application/json'
+        }
+      })
       if (response.ok) {
         const data = await response.json()
         setSubscriptionInfo(data)
+      } else {
+        console.error('[PricingSection] Subscription API error:', response.status)
       }
     } catch (error) {
       console.error('Error fetching subscription:', error)

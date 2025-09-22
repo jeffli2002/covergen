@@ -166,7 +166,7 @@ export default function PaymentPageClient({
         console.log('[PaymentPage] Processing trial', isActivation ? 'activation' : 'upgrade', 'for user with payment method')
         
         // Use different endpoints for activation vs upgrade
-        const endpoint = isActivation ? '/api/subscription/activate' : '/api/subscription/upgrade'
+        const endpoint = isActivation ? '/api/bestauth/subscription/activate' : '/api/bestauth/subscription/upgrade'
         const body = isActivation ? {} : { targetTier: planId }
         
         const response = await fetch(endpoint, {

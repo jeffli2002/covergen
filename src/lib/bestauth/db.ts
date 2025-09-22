@@ -533,13 +533,37 @@ export const db = {
     },
 
     async getStatus(userId: string): Promise<any | null> {
-      const { data, error } = await getDb()
-        .rpc('get_subscription_status', { p_user_id: userId })
-        .single()
-      
-      if (error || !data) return null
-      
-      return data
+      try {
+        // Get subscription data directly from table instead of RPC
+        const { data, error } = await getDb()
+          .from('bestauth_subscriptions')
+          .select('*')
+          .eq('user_id', userId)
+          .single()
+        
+        if (error || !data) return null
+        
+        // Return data in the expected format
+        return {
+          subscription_id: data.id,
+          user_id: data.user_id,
+          tier: data.tier || 'free',
+          status: data.status || 'active',
+          is_trialing: data.status === 'trialing',
+          trial_days_remaining: data.trial_ends_at ? 
+            Math.max(0, Math.ceil((new Date(data.trial_ends_at).getTime() - Date.now()) / (24 * 60 * 60 * 1000))) : 0,
+          can_generate: true, // TODO: Implement proper limit checking
+          usage_today: 0, // TODO: Get from usage table
+          daily_limit: data.tier === 'pro' ? 10 : data.tier === 'pro_plus' ? 20 : 3, // TODO: Get from config
+          monthly_limit: data.tier === 'pro' ? 120 : data.tier === 'pro_plus' ? 300 : 3, // TODO: Get from config
+          has_payment_method: !!data.stripe_subscription_id,
+          requires_payment_setup: data.status === 'trialing' && !data.stripe_subscription_id,
+          next_billing_date: data.current_period_end || null
+        }
+      } catch (error) {
+        console.error('Error getting subscription status:', error)
+        return null
+      }
     },
   },
 
