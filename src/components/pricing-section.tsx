@@ -203,22 +203,26 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
       return
     }
 
-    // If authenticated, navigate to payment page
-    // For trial users clicking on their current plan (activation)
-    const isActivating = subscriptionInfo?.isTrialing && 
-                        subscriptionInfo?.requiresPaymentSetup && 
-                        subscriptionInfo.plan === tierKey
+    // If authenticated, navigate to payment page with appropriate params
+    let paymentUrl = `/${locale}/payment?plan=${tierKey}`
     
-    // For trial users clicking upgrade to different plan
-    const isUpgrading = subscriptionInfo?.isTrialing && 
-                       tierKey !== 'free' && 
-                       subscriptionInfo.plan !== tierKey
+    if (subscriptionInfo) {
+      // For trial users clicking on their current plan (activation)
+      const isActivating = subscriptionInfo.isTrialing && 
+                          subscriptionInfo.requiresPaymentSetup && 
+                          subscriptionInfo.plan === tierKey
+      
+      // For any user upgrading to a higher tier
+      const isUpgrading = (subscriptionInfo.plan === 'free' && (tierKey === 'pro' || tierKey === 'pro_plus')) ||
+                         (subscriptionInfo.plan === 'pro' && tierKey === 'pro_plus')
+      
+      if (isActivating) {
+        paymentUrl = `/${locale}/payment?plan=${tierKey}&activate=true`
+      } else if (isUpgrading) {
+        paymentUrl = `/${locale}/payment?plan=${tierKey}&upgrade=true`
+      }
+    }
     
-    const paymentUrl = isActivating
-      ? `/${locale}/payment?plan=${tierKey}&activate=true`
-      : isUpgrading 
-        ? `/${locale}/payment?plan=${tierKey}&upgrade=true`
-        : `/${locale}/payment?plan=${tierKey}`
     router.push(paymentUrl)
   }
 
@@ -366,7 +370,13 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
                       variant={tier.popular ? "default" : "outline"}
                       disabled={
                         loadingSubscription || 
-                        (isCurrentTier && !(subscriptionInfo?.isTrialing && subscriptionInfo?.requiresPaymentSetup))
+                        (isCurrentTier && !(subscriptionInfo?.isTrialing && subscriptionInfo?.requiresPaymentSetup)) ||
+                        // Disable for Pro+ users on paid plans (they're at highest tier)
+                        (subscriptionInfo?.plan === 'pro_plus' && !subscriptionInfo?.isTrialing && tier.id !== 'free') ||
+                        // Disable downgrade options for paid users
+                        (subscriptionInfo && !subscriptionInfo.isTrialing && subscriptionInfo.plan !== 'free' && 
+                          ((subscriptionInfo.plan === 'pro_plus' && tier.id === 'pro') || 
+                           (subscriptionInfo.plan === 'pro' && tier.id === 'free')))
                       }
                       onClick={() => handleSubscribe(tier.id)}
                     >
@@ -389,6 +399,19 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
                           if (subscriptionInfo.plan === 'pro' && tier.id === 'pro_plus') return 'Upgrade'
                           // For any other case during trial (like downgrade), show regular CTA
                           return tier.cta
+                        }
+                        
+                        // For paid users (not on trial)
+                        if (subscriptionInfo && !subscriptionInfo.isTrialing && subscriptionInfo.plan !== 'free') {
+                          // Pro users can only upgrade to Pro+
+                          if (subscriptionInfo.plan === 'pro' && tier.id === 'pro_plus') return 'Upgrade'
+                          // Pro+ users can't upgrade further (they're at highest tier)
+                          if (subscriptionInfo.plan === 'pro_plus' && tier.id !== 'free') return 'Highest Tier'
+                          // Don't show downgrade options for paid users
+                          if ((subscriptionInfo.plan === 'pro_plus' && tier.id === 'pro') || 
+                              (subscriptionInfo.plan === 'pro' && tier.id === 'free')) {
+                            return 'Downgrade'
+                          }
                         }
                         
                         // Default case - show the tier's CTA
