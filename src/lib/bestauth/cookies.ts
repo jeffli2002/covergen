@@ -57,10 +57,14 @@ export function deleteCookie(response: NextResponse, name: string): void {
 
 // Set session cookie
 export function setSessionCookie(response: NextResponse, token: string): void {
+  // For OAuth callbacks, we need to use sameSite: 'none' with secure: true
+  // to ensure cookies work across the OAuth redirect flow
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL_URL !== undefined
+  
   setCookie(response, COOKIE_NAMES.session, token, {
     httpOnly: true,
-    secure: authConfig.session.secure,
-    sameSite: authConfig.session.sameSite,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax', // 'none' for cross-site OAuth, but requires secure
     maxAge: authConfig.session.maxAge,
     path: authConfig.session.path,
   })
