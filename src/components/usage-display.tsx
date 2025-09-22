@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
+import { useBestAuth } from '@/hooks/useBestAuth'
 import { Badge } from '@/components/ui/badge'
 import { Sparkles } from 'lucide-react'
 import { getSubscriptionConfig } from '@/lib/subscription-config'
@@ -18,8 +18,13 @@ interface UsageStatus {
   trial_ends_at?: string | null
 }
 
-export default function UsageDisplay() {
-  const { user } = useAuth()
+interface UsageDisplayProps {
+  session?: { token: string; expires_at: string } | null
+}
+
+export default function UsageDisplay({ session: parentSession }: UsageDisplayProps = {}) {
+  const { user, session: hookSession } = useBestAuth()
+  const session = parentSession || hookSession
   const [usageStatus, setUsageStatus] = useState<UsageStatus | null>(null)
   const [loading, setLoading] = useState(false)
   const config = getSubscriptionConfig()
@@ -39,13 +44,19 @@ export default function UsageDisplay() {
 
     // For logged in users, fetch their actual usage
     fetchUsageStatus()
-  }, [user])
+  }, [user, session])
 
   const fetchUsageStatus = async () => {
     try {
       setLoading(true)
       console.log('[UsageDisplay] Fetching usage status for user:', user?.email)
-      const response = await fetch('/api/usage/status')
+      
+      const headers: HeadersInit = {}
+      if (session?.token) {
+        headers['Authorization'] = `Bearer ${session.token}`
+      }
+      
+      const response = await fetch('/api/usage/status', { headers })
       if (response.ok) {
         const data = await response.json()
         console.log('[UsageDisplay] Usage status received:', data)

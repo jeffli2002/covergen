@@ -2,19 +2,53 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { checkGenerationLimit } from '@/lib/generation-limits'
 import { getSubscriptionConfig } from '@/lib/subscription-config'
+import { authConfig } from '@/config/auth.config'
+import { validateSession } from '@/lib/bestauth'
+import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    
-    console.log('[Usage Status] Checking for user:', user?.email, user?.id)
-    
     // Get subscription config
     const config = getSubscriptionConfig()
     
+    let userId: string | null = null
+    
+    // Use BestAuth if enabled
+    if (authConfig.USE_BESTAUTH) {
+      const session = await validateSession(request)
+      
+      if (session.success && session.data) {
+        userId = session.data.userId
+        console.log('[Usage Status] BestAuth user:', session.data.user?.email, userId)
+        
+        // Get comprehensive usage data from BestAuth
+        const subscription = await bestAuthSubscriptionService.getUserSubscription(userId)
+        const usageToday = await bestAuthSubscriptionService.getUserUsageToday(userId)
+        const usageThisMonth = await bestAuthSubscriptionService.getUserUsageThisMonth(userId)
+        const limits = await bestAuthSubscriptionService.getSubscriptionLimits(userId)
+        
+        return NextResponse.json({
+          daily_usage: usageToday,
+          daily_limit: limits.daily,
+          monthly_usage: usageThisMonth,
+          monthly_limit: limits.monthly,
+          remaining_daily: Math.max(0, limits.daily - usageToday),
+          remaining_monthly: Math.max(0, limits.monthly - usageThisMonth),
+          is_trial: subscription?.is_trialing || false,
+          subscription_tier: subscription?.tier || 'free',
+          trial_ends_at: subscription?.trial_ends_at
+        })
+      }
+    } else {
+      // Fallback to Supabase auth
+      const supabase = await createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      userId = user?.id || null
+      console.log('[Usage Status] Supabase user:', user?.email, userId)
+    }
+    
     // Get generation limit status
-    const limitStatus = await checkGenerationLimit(user?.id || null)
+    const limitStatus = await checkGenerationLimit(userId)
     
     console.log('[Usage Status] Limit status result:', limitStatus)
     

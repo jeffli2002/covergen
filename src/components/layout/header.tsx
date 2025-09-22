@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Crown, LogOut, Sparkles, User, ChevronDown, CreditCard, Loader2 } from 'lucide-react'
-import { useAuth } from '@/contexts/AuthContext'
+import { useBestAuth } from '@/hooks/useBestAuth'
 import AuthForm from '@/components/auth/AuthForm'
 import UserMenu from '@/components/auth/UserMenu'
 import LanguageSwitcher from '@/components/language-switcher'
@@ -28,7 +28,7 @@ interface HeaderProps {
 }
 
 export default function Header({ locale, translations: t }: HeaderProps) {
-  const { user, loading, signOut } = useAuth()
+  const { user, loading, signOut, session } = useBestAuth()
   
   // Debug logging for auth state
   useEffect(() => {
@@ -64,8 +64,12 @@ export default function Header({ locale, translations: t }: HeaderProps) {
   
   // Fetch subscription info to check trial status
   useEffect(() => {
-    if (user) {
-      fetch('/api/subscription/status')
+    if (user && session) {
+      fetch('/api/subscription/status', {
+        headers: {
+          'Authorization': `Bearer ${session.token}`
+        }
+      })
         .then(res => res.json())
         .then(data => {
           if (data && !data.error) {
@@ -74,7 +78,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
         })
         .catch(err => console.error('Error fetching subscription:', err))
     }
-  }, [user])
+  }, [user, session])
 
   const handleLogout = async () => {
     console.log('[Header] Signing out...')
@@ -117,7 +121,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
   }
 
   const handleActivateSubscription = async () => {
-    if (!subscriptionInfo || !subscriptionInfo.isTrialing) return
+    if (!subscriptionInfo || !subscriptionInfo.isTrialing || !session) return
 
     setActivating(true)
     setShowActivationConfirm(false)
@@ -126,7 +130,8 @@ export default function Header({ locale, translations: t }: HeaderProps) {
       const response = await fetch('/api/subscription/activate', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.token}`
         }
       })
 
@@ -137,7 +142,11 @@ export default function Header({ locale, translations: t }: HeaderProps) {
           // Immediate activation successful (when API supports it)
           toast.success(data.message || 'Subscription activated successfully!')
           // Refresh subscription info
-          const statusRes = await fetch('/api/subscription/status')
+          const statusRes = await fetch('/api/subscription/status', {
+            headers: {
+              'Authorization': `Bearer ${session.token}`
+            }
+          })
           const statusData = await statusRes.json()
           if (statusData && !statusData.error) {
             setSubscriptionInfo(statusData)
@@ -314,7 +323,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
           {/* User section */}
           <div className="flex items-center gap-3">
             {/* Usage Display */}
-            <UsageDisplay />
+            <UsageDisplay session={session} />
             
             <LanguageSwitcher currentLocale={locale} />
             {loading ? (
