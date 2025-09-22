@@ -72,8 +72,17 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   const [resuming, setResuming] = useState(false)
   const [activating, setActivating] = useState(false)
   const [showActivationConfirm, setShowActivationConfirm] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
+
+  // Track if we've already loaded data to prevent re-fetching
+  const [hasLoadedData, setHasLoadedData] = useState(false)
 
   useEffect(() => {
+    // Only run auth check if we haven't loaded data yet
+    if (hasLoadedData) {
+      return
+    }
+
     const checkAuthAndLoad = async () => {
       try {
         // Wait for BestAuth to load
@@ -101,15 +110,19 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
 
         console.log('[Account] User authenticated:', authUser.email)
         setLoadingMessage('Loading account data...')
+        
+        // Mark that we're loading data to prevent re-runs
+        setHasLoadedData(true)
         await loadAccountData()
       } catch (error) {
         console.error('Error in auth check:', error)
         setLoading(false)
+        setHasLoadedData(true) // Prevent retry on error
       }
     }
     
     checkAuthAndLoad()
-  }, [locale, router, authUser, session, authLoading])
+  }, [locale, router, authUser, session, authLoading, hasLoadedData])
 
   const loadAccountData = async () => {
     try {
@@ -150,6 +163,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
         console.log('[Account] Response status:', response.status)
         
         if (!response.ok) {
+          clearTimeout(loadTimeout) // Clear timeout before throwing
           const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
           console.error('[Account] API error:', errorData)
           throw new Error(errorData.error || `Failed to load account data (${response.status})`)
@@ -157,6 +171,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
         
         const data = await response.json()
         clearTimeout(loadTimeout)
+        console.log('[Account] Data loaded successfully')
         
         setAccountData(data)
         setSubscription(data.subscription)
@@ -193,16 +208,21 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
     } catch (error) {
       console.error('[Account] Error loading account data:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to load account data'
+      
+      // Set error state instead of just showing toast
+      setLoadError(errorMessage)
       toast.error(errorMessage)
       
-      // If it's an auth error, redirect to sign in
+      // Don't redirect on error - just show the error message
+      // This prevents infinite loops
       if (error instanceof Error && error.message.includes('401')) {
-        setTimeout(() => {
-          router.replace(`/${locale}?auth=signin&redirect=${encodeURIComponent(`/${locale}/account`)}`)
-        }, 1500)
+        console.error('[Account] Authentication error - user may need to re-login')
+        setLoadError('Authentication error. Please sign in again.')
+        // Don't auto-redirect, let user click sign in manually
       }
     } finally {
       setLoading(false)
+      setLoadingMessage('')
     }
   }
 
@@ -529,6 +549,41 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
           <Loader2 className="w-8 h-8 animate-spin text-gray-400 mx-auto mb-4" />
           <p className="text-gray-600">{loadingMessage}</p>
           <p className="text-sm text-gray-500 mt-2">This should only take a moment...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state if loading failed
+  if (loadError && !accountData) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="container max-w-4xl mx-auto px-4">
+          <Card>
+            <CardContent className="p-8 text-center">
+              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold mb-2">Unable to Load Account Data</h2>
+              <p className="text-gray-600 mb-4">{loadError}</p>
+              <div className="flex gap-2 justify-center">
+                <Button 
+                  onClick={() => {
+                    setLoadError(null)
+                    setLoading(true)
+                    loadAccountData()
+                  }}
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Try Again
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => router.push(`/${locale}`)}
+                >
+                  Go Home
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     )
