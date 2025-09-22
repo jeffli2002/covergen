@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import { db } from '@/lib/bestauth/db'
 import { cookies } from 'next/headers'
 import { createHash } from 'crypto'
@@ -38,7 +38,10 @@ export interface BestAuthSession {
 }
 
 export class SessionBridgeService {
-  private supabase = createClient()
+  private supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
   /**
    * Validate session from either BestAuth or Supabase

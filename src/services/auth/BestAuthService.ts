@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import { db } from '@/lib/bestauth/db'
 import * as bcrypt from 'bcryptjs'
 import { v4 as uuidv4 } from 'uuid'
@@ -60,7 +60,10 @@ export interface UpdateUserData {
 }
 
 export class BestAuthService {
-  private supabase = createClient()
+  private supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
   /**
    * Sign up a new user with email and password

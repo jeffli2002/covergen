@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import { db } from '@/lib/bestauth/db'
 import { SupabaseClient } from '@supabase/supabase-js'
 
