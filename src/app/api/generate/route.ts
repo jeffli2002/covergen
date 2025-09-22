@@ -127,50 +127,69 @@ async function handler(request: AuthenticatedRequest) {
                 )
               }
               
-              // If we can't determine usage at all, assume limit reached
-              return NextResponse.json(
-                { 
-                  error: `Unable to verify generation limits. You may have reached your daily limit of ${dailyLimit} images. Please try it tomorrow or upgrade to Pro plan.`,
-                  limit_reached: true,
-                  daily_usage: dailyLimit,
-                  daily_limit: dailyLimit,
-                  subscription_tier: 'free',
-                  is_trial: false,
-                  remaining_daily: 0
-                },
-                { status: 429 }
-              )
+              // If we can't determine usage at all, allow generation but warn
+              console.warn('[Generate API] Could not determine usage, allowing generation as fallback for free user')
+              // Create a temporary limit status to allow generation
+              limitStatus = {
+                monthly_usage: 0,
+                monthly_limit: config.limits.free.monthly,
+                daily_usage: 0,
+                daily_limit: dailyLimit,
+                trial_usage: 0,
+                trial_limit: null,
+                can_generate: true,
+                is_trial: false,
+                trial_ends_at: null,
+                subscription_tier: 'free',
+                remaining_monthly: config.limits.free.monthly,
+                remaining_trial: null,
+                remaining_daily: dailyLimit
+              }
             } catch (err) {
               console.error('[Generate API] Error checking free user usage:', err)
               // Get config for daily limit
               const config = getSubscriptionConfig()
               const dailyLimit = config.limits.free.daily
-              return NextResponse.json(
-                { 
-                  error: `Failed to verify generation limits. You may have reached your daily limit of ${dailyLimit} images. Please try it tomorrow or upgrade to Pro plan.`,
-                  limit_reached: true,
-                  daily_usage: dailyLimit,
-                  daily_limit: dailyLimit,
-                  subscription_tier: 'free',
-                  is_trial: false,
-                  remaining_daily: 0
-                },
-                { status: 429 }
-              )
+              // Allow generation but log the error for debugging
+              console.warn('[Generate API] Usage check failed, allowing generation as fallback for free user')
+              limitStatus = {
+                monthly_usage: 0,
+                monthly_limit: config.limits.free.monthly,
+                daily_usage: 0,
+                daily_limit: dailyLimit,
+                trial_usage: 0,
+                trial_limit: null,
+                can_generate: true,
+                is_trial: false,
+                trial_ends_at: null,
+                subscription_tier: 'free',
+                remaining_monthly: config.limits.free.monthly,
+                remaining_trial: null,
+                remaining_daily: dailyLimit
+              }
             }
           }
         } catch (fallbackError) {
           console.error('[Generate API] Fallback subscription check failed:', fallbackError)
           const config = getSubscriptionConfig()
           const dailyLimit = config.limits.free.daily
-          return NextResponse.json(
-            { 
-              error: `Failed to verify your account status. Free users get ${dailyLimit} images daily. Please try it tomorrow or upgrade to Pro plan for unlimited access.`,
-              limit_reached: true,
-              subscription_tier: 'free'
-            },
-            { status: 429 }
-          )
+          // Allow generation as ultimate fallback
+          console.warn('[Generate API] All checks failed, allowing generation as ultimate fallback')
+          limitStatus = {
+            monthly_usage: 0,
+            monthly_limit: config.limits.free.monthly,
+            daily_usage: 0,
+            daily_limit: dailyLimit,
+            trial_usage: 0,
+            trial_limit: null,
+            can_generate: true,
+            is_trial: false,
+            trial_ends_at: null,
+            subscription_tier: 'free',
+            remaining_monthly: config.limits.free.monthly,
+            remaining_trial: null,
+            remaining_daily: dailyLimit
+          }
         }
       }
       
