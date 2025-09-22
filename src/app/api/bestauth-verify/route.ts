@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
         results.test_operations.delete = deleteError ? `failed: ${deleteError.message}` : 'success'
       }
     } catch (error) {
-      results.test_operations.error = error.message
+      results.test_operations.error = error instanceof Error ? error.message : 'Unknown error'
     }
 
     // Check if JWT secret is configured
