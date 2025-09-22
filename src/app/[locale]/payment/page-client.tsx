@@ -35,15 +35,8 @@ export default function PaymentPageClient({
   const [loading, setLoading] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<'pro' | 'pro_plus'>(initialPlan as any)
   const [isTestMode, setIsTestMode] = useState(false)
-  interface Subscription {
-    id: string
-    user_id: string
-    tier: 'free' | 'pro' | 'pro_plus'
-    status: 'active' | 'trialing' | 'paused' | 'cancelled'
-    stripe_subscription_id?: string | null
-    created_at: string
-    updated_at: string
-  }
+  // Remove the local interface - use the actual subscription data structure
+  type Subscription = any
   
   const [currentSubscription, setCurrentSubscription] = useState<Subscription | null>(null)
   const [proratedAmount, setProratedAmount] = useState<number | null>(null)
@@ -62,7 +55,8 @@ export default function PaymentPageClient({
       authLoading: authLoading,
       storeUser: !!user,
       storeUserEmail: user?.email,
-      session: authUser ? 'Present' : 'Missing'
+      session: authUser ? 'Present' : 'Missing',
+      getUserSubscription: typeof getUserSubscription
     })
 
     // Wait for auth to load
@@ -88,6 +82,7 @@ export default function PaymentPageClient({
   const loadCurrentSubscription = async () => {
     try {
       const subscription = await getUserSubscription()
+      console.log('[PaymentPage] Loaded subscription:', subscription)
       setCurrentSubscription(subscription)
       
       // Calculate prorated amount if upgrading
@@ -371,6 +366,9 @@ export default function PaymentPageClient({
               needsPaymentSetup,
               isClickable,
               currentSubscriptionTier: currentSubscription?.tier,
+              planId: plan.id,
+              tierMatch: currentSubscription?.tier === plan.id,
+              subscriptionData: currentSubscription,
               loading,
               disabled: !isClickable
             })
