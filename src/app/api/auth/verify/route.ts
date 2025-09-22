@@ -5,10 +5,11 @@ import { setSessionCookie } from '@/lib/bestauth/cookies'
 import { authConfig } from '@/lib/bestauth/config'
 
 export async function GET(request: NextRequest) {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || request.nextUrl.origin
+  
   try {
     const searchParams = request.nextUrl.searchParams
     const token = searchParams.get('token')
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || request.nextUrl.origin
     
     if (!token) {
       return NextResponse.redirect(`${baseUrl}${authConfig.urls.error}?error=missing_token`)
