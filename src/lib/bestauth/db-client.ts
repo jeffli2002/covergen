@@ -8,50 +8,39 @@ let supabaseClient: SupabaseClient | null = null
  * Handles both server and client-side initialization
  */
 export function getBestAuthSupabaseClient(): SupabaseClient | null {
-  // Return cached client if available
-  if (supabaseClient) {
-    return supabaseClient
-  }
-
-  // Check required environment variables
+  // For server-side operations, always use service role key and create fresh client
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  // Prefer service role key for BestAuth database operations
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   
-  if (!supabaseUrl || !supabaseKey) {
+  if (!supabaseUrl || !serviceKey) {
     console.error('[BestAuth] Missing required environment variables:', {
       hasUrl: !!supabaseUrl,
-      hasKey: !!supabaseKey
+      hasServiceKey: !!serviceKey
     })
     return null
   }
-
+  
+  // Always create fresh client with service role key
   try {
-    // Create client with appropriate configuration
-    supabaseClient = createClient(
-      supabaseUrl,
-      supabaseKey,
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
-        global: {
-          headers: {
-            'x-client-info': 'bestauth/1.0.0'
-          }
+    const client = createClient(supabaseUrl, serviceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+      global: {
+        headers: {
+          'x-client-info': 'bestauth/1.0.0'
         }
       }
-    )
+    })
     
-    console.log('[BestAuth] Database client created with key type:', 
-      supabaseKey.includes('service_role') ? 'service_role' : 'anon')
-    
-    return supabaseClient
+    console.log('[BestAuth] Database client created with service_role key')
+    return client
   } catch (error) {
     console.error('[BestAuth] Failed to create Supabase client:', error)
     return null
   }
+  
 }
 
 /**

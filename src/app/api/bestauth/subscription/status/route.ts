@@ -5,6 +5,39 @@ import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscri
 
 export async function GET(request: NextRequest) {
   try {
+    // Check if this is a debug request
+    const url = new URL(request.url)
+    const debug = url.searchParams.get('debug')
+    
+    if (debug === 'usage') {
+      // Debug usage tracking table access
+      const { createClient } = await import('@supabase/supabase-js')
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+      
+      const supabase = createClient(supabaseUrl, serviceKey, {
+        auth: { autoRefreshToken: false, persistSession: false }
+      })
+      
+      const { data, error, count } = await supabase
+        .from('bestauth_usage_tracking')
+        .select('*', { count: 'exact' })
+        .limit(3)
+      
+      return NextResponse.json({
+        debug: 'usage_table_test',
+        success: !error,
+        data,
+        count,
+        error: error ? {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        } : null
+      })
+    }
+    
     // Validate session
     const session = await validateSessionFromRequest(request)
     

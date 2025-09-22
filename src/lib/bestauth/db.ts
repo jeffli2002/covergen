@@ -544,22 +544,29 @@ export const db = {
         
         if (error || !data) return null
         
-        // Get usage data safely - RLS permissions now fixed
+        // Get usage data safely - check if user exists first
         let usageToday = 0
         try {
-          const { data: usageData, error: usageError } = await getDb()
-            .from('bestauth_usage_tracking')
-            .select('generation_count')
-            .eq('user_id', userId)
-            .eq('date', new Date().toISOString().split('T')[0])
-            .single()
-          
-          if (!usageError && usageData) {
-            usageToday = usageData.generation_count || 0
-          } else if (usageError && usageError.code !== 'PGRST116') {
-            console.error('Usage tracking error:', usageError)
+          // First, ensure the user exists in bestauth_users table
+          const userExists = await db.users.findById(userId)
+          if (!userExists) {
+            console.warn(`User ${userId} not found in bestauth_users, usage tracking disabled`)
+            usageToday = 0
+          } else {
+            const { data: usageData, error: usageError } = await getDb()
+              .from('bestauth_usage_tracking')
+              .select('generation_count')
+              .eq('user_id', userId)
+              .eq('date', new Date().toISOString().split('T')[0])
+              .single()
+            
+            if (!usageError && usageData) {
+              usageToday = usageData.generation_count || 0
+            } else if (usageError && usageError.code !== 'PGRST116') {
+              console.error('Usage tracking error:', usageError)
+            }
+            // If no record found, usageToday remains 0
           }
-          // If no record found, usageToday remains 0
         } catch (error) {
           console.warn('Usage tracking unavailable:', error)
           usageToday = 0
@@ -650,6 +657,13 @@ export const db = {
 
     async increment(userId: string, amount: number = 1): Promise<number> {
       try {
+        // First, ensure the user exists in bestauth_users table
+        const userExists = await db.users.findById(userId)
+        if (!userExists) {
+          console.warn(`User ${userId} not found in bestauth_users, cannot increment usage`)
+          return amount // Return as if incremented
+        }
+        
         const today = new Date().toISOString().split('T')[0]
         
         // Check if record exists for today
@@ -673,6 +687,11 @@ export const db = {
             .single()
           
           if (error) {
+            // Handle foreign key constraint errors gracefully
+            if (error.code === '23503') {
+              console.warn('Foreign key constraint error, user may not exist in bestauth_users')
+              return (existing.generation_count || 0) + amount
+            }
             console.error('Error updating usage:', error)
             return (existing.generation_count || 0) + amount
           }
@@ -686,6 +705,11 @@ export const db = {
             .single()
           
           if (error) {
+            // Handle foreign key constraint errors gracefully
+            if (error.code === '23503') {
+              console.warn('Foreign key constraint error, user may not exist in bestauth_users')
+              return amount
+            }
             console.error('Error inserting usage:', error)
             return amount
           }
@@ -746,6 +770,13 @@ export const db = {
 
     async getMonthlyUsage(userId: string): Promise<number> {
       try {
+        // First, ensure the user exists in bestauth_users table
+        const userExists = await db.users.findById(userId)
+        if (!userExists) {
+          console.warn(`User ${userId} not found in bestauth_users, monthly usage = 0`)
+          return 0
+        }
+        
         const startOfMonth = new Date()
         startOfMonth.setDate(1)
         startOfMonth.setHours(0, 0, 0, 0)
