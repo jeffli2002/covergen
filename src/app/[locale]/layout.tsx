@@ -4,6 +4,7 @@ import { i18n, Locale } from '@/lib/i18n/config'
 import Header from '@/components/layout/header'
 import Footer from '@/components/layout/Footer'
 import MobileHeader from '@/components/mobile-header'
+import AuthModalHandler from '@/components/auth/AuthModalHandler'
 
 export async function generateStaticParams() {
   return i18n.locales.map((locale) => ({ locale: locale.code }))
@@ -21,6 +22,9 @@ export default async function LocaleLayout({
   return (
     <Providers>
       <div className="min-h-screen bg-background flex flex-col">
+        {/* Auth Modal Handler */}
+        <AuthModalHandler />
+        
         {/* Header Container with fixed height to prevent jumping */}
         <div className="h-16 lg:h-16">
           {/* Desktop Header */}
