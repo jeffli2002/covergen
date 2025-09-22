@@ -24,7 +24,7 @@ export default function DebugBestAuth() {
       setSessionData(data)
     } catch (error) {
       console.error('Session check failed:', error)
-      setSessionData({ error: error.message })
+      setSessionData({ error: error instanceof Error ? error.message : String(error) })
     } finally {
       setLoading(false)
     }
