@@ -83,6 +83,7 @@ async function handler(request: AuthenticatedRequest) {
               const monthKey = today.toISOString().substring(0, 7)
               
               // Try to get usage data directly
+              const supabase = await createClient()
               const { data: usageData, error: usageError } = await supabase
                 .from('user_usage')
                 .select('*')

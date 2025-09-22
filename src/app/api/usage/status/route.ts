@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { checkGenerationLimit } from '@/lib/generation-limits'
 import { getSubscriptionConfig } from '@/lib/subscription-config'
 import { authConfig } from '@/config/auth.config'
-import { validateSession } from '@/lib/bestauth'
+import { validateSessionFromRequest } from '@/lib/bestauth/request-utils'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 
 export async function GET(request: NextRequest) {
@@ -15,17 +15,21 @@ export async function GET(request: NextRequest) {
     
     // Use BestAuth if enabled
     if (authConfig.USE_BESTAUTH) {
-      const session = await validateSession(request)
+      const session = await validateSessionFromRequest(request)
       
       if (session.success && session.data) {
-        userId = session.data.userId
+        userId = session.data.user.id
         console.log('[Usage Status] BestAuth user:', session.data.user?.email, userId)
         
         // Get comprehensive usage data from BestAuth
-        const subscription = await bestAuthSubscriptionService.getUserSubscription(userId)
-        const usageToday = await bestAuthSubscriptionService.getUserUsageToday(userId)
-        const usageThisMonth = await bestAuthSubscriptionService.getUserUsageThisMonth(userId)
-        const limits = await bestAuthSubscriptionService.getSubscriptionLimits(userId)
+        const subscription = await bestAuthSubscriptionService.getUserSubscription(userId!)
+        const usageToday = await bestAuthSubscriptionService.getUserUsageToday(userId!)
+        const usageThisMonth = await bestAuthSubscriptionService.getUserUsageThisMonth(userId!)
+        
+        // Get limits based on subscription tier
+        const tier = (subscription?.tier || 'free') as 'free' | 'pro' | 'pro_plus'
+        const isTrialing = subscription?.is_trialing || false
+        const limits = bestAuthSubscriptionService.getSubscriptionLimits(tier, isTrialing)
         
         return NextResponse.json({
           daily_usage: usageToday,
@@ -36,7 +40,7 @@ export async function GET(request: NextRequest) {
           remaining_monthly: Math.max(0, limits.monthly - usageThisMonth),
           is_trial: subscription?.is_trialing || false,
           subscription_tier: subscription?.tier || 'free',
-          trial_ends_at: subscription?.trial_ends_at
+          trial_ends_at: (subscription as any)?.trial_ends_at
         })
       }
     } else {

@@ -4,6 +4,7 @@ export * from './core'
 export * from './oauth'
 export * from './cookies'
 export * from './middleware'
+export * from './request-utils'
 export { authConfig } from './config'
 export { db as authDb } from './db'
 

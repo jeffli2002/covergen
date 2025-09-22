@@ -1,4 +1,4 @@
-import { SUBSCRIPTION_PLANS, type PlanId } from '@/config/subscriptions'
+import { SUBSCRIPTION_PLANS, type PlanId } from '@/lib/subscription-config'
 
 interface CreateCheckoutSessionParams {
   userId: string

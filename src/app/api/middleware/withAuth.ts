@@ -7,7 +7,7 @@ export interface AuthenticatedRequest extends NextRequest {
     email: string
     name?: string | null
     avatar_url?: string | null
-  }
+  } | null
 }
 
 /**
