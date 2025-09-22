@@ -374,7 +374,7 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
                         // Disable for Pro+ users on paid plans (they're at highest tier)
                         (subscriptionInfo?.plan === 'pro_plus' && !subscriptionInfo?.isTrialing && tier.id !== 'free') ||
                         // Disable downgrade options for paid users
-                        (subscriptionInfo && !subscriptionInfo.isTrialing && subscriptionInfo.plan !== 'free' && 
+                        (subscriptionInfo !== null && !subscriptionInfo.isTrialing && subscriptionInfo.plan !== 'free' && 
                           ((subscriptionInfo.plan === 'pro_plus' && tier.id === 'pro') || 
                            (subscriptionInfo.plan === 'pro' && tier.id === 'free')))
                       }
