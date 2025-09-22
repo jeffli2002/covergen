@@ -1,6 +1,6 @@
 // BestAuth Core Functions
-import jwt from 'jsonwebtoken'
-import bcrypt from 'bcryptjs'
+import * as jwt from 'jsonwebtoken'
+import * as bcrypt from 'bcryptjs'
 import { randomBytes } from 'crypto'
 import { authConfig } from './config'
 import { db } from './db'
@@ -37,7 +37,7 @@ export async function hashToken(token: string): Promise<string> {
 export function createJWT(payload: TokenPayload): string {
   return jwt.sign(payload, authConfig.jwt.secret, {
     expiresIn: authConfig.jwt.expiresIn,
-  })
+  } as jwt.SignOptions)
 }
 
 // Verify a JWT

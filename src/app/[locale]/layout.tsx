@@ -1,9 +1,13 @@
 import { Providers } from '@/components/providers'
 import { getDictionary } from '@/lib/i18n/get-dictionary'
-import { Locale } from '@/lib/i18n/config'
+import { i18n, Locale } from '@/lib/i18n/config'
 import Header from '@/components/layout/header'
 import Footer from '@/components/layout/Footer'
 import MobileHeader from '@/components/mobile-header'
+
+export async function generateStaticParams() {
+  return i18n.locales.map((locale) => ({ locale: locale.code }))
+}
 
 export default async function LocaleLayout({
   children,

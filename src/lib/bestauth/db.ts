@@ -282,6 +282,27 @@ export const db = {
       if (error) throw error
     },
 
+    async findById(id: string): Promise<Session | null> {
+      const { data, error } = await supabase
+        .from('bestauth_sessions')
+        .select('*')
+        .eq('id', id)
+        .single()
+      
+      if (error || !data) return null
+      
+      return {
+        id: data.id,
+        userId: data.user_id,
+        tokenHash: data.token_hash,
+        expiresAt: new Date(data.expires_at),
+        ipAddress: data.ip_address,
+        userAgent: data.user_agent,
+        createdAt: new Date(data.created_at),
+        lastAccessed: new Date(data.last_accessed),
+      }
+    },
+
     async delete(id: string): Promise<void> {
       const { error } = await supabase
         .from('bestauth_sessions')
@@ -315,17 +336,17 @@ export const db = {
       if (error) throw error
     },
 
-    async findByTokenHash(tokenHash: string): Promise<{ email: string; used: boolean } | null> {
+    async findByTokenHash(tokenHash: string): Promise<{ email: string; used: boolean; expiresAt: Date } | null> {
       const { data, error } = await supabase
         .from('bestauth_magic_links')
-        .select('email, used')
+        .select('email, used, expires_at')
         .eq('token_hash', tokenHash)
         .gt('expires_at', new Date().toISOString())
         .single()
       
       if (error || !data) return null
       
-      return { email: data.email, used: data.used }
+      return { email: data.email, used: data.used, expiresAt: new Date(data.expires_at) }
     },
 
     async markAsUsed(tokenHash: string): Promise<void> {
@@ -352,17 +373,17 @@ export const db = {
       if (error) throw error
     },
 
-    async findByTokenHash(tokenHash: string): Promise<{ userId: string; used: boolean } | null> {
+    async findByTokenHash(tokenHash: string): Promise<{ userId: string; used: boolean; expiresAt: Date } | null> {
       const { data, error } = await supabase
         .from('bestauth_password_resets')
-        .select('user_id, used')
+        .select('user_id, used, expires_at')
         .eq('token_hash', tokenHash)
         .gt('expires_at', new Date().toISOString())
         .single()
       
       if (error || !data) return null
       
-      return { userId: data.user_id, used: data.used }
+      return { userId: data.user_id, used: data.used, expiresAt: new Date(data.expires_at) }
     },
 
     async markAsUsed(tokenHash: string): Promise<void> {

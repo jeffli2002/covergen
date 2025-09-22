@@ -100,11 +100,11 @@ export class SessionBridgeService {
 
       let bestAuthSessionId: string | undefined
       let supabaseSessionId: string | undefined
+      let bestAuthUserId: string = user.id
 
       if (source === 'bestauth') {
         // Create BestAuth session
         const session = await db.sessions.create({
-          id: sessionId,
           userId: user.id,
           tokenHash: this.hashToken(sessionId),
           expiresAt
@@ -117,8 +117,8 @@ export class SessionBridgeService {
         // Source is Supabase, ensure BestAuth user exists
         const mapping = await userSyncService.getUserMapping(user.id)
         if (mapping) {
+          bestAuthUserId = mapping
           const session = await db.sessions.create({
-            id: sessionId,
             userId: mapping,
             tokenHash: this.hashToken(sessionId),
             expiresAt
@@ -135,7 +135,7 @@ export class SessionBridgeService {
           id: sessionId,
           bestauth_session_id: bestAuthSessionId,
           supabase_session_id: supabaseSessionId,
-          user_id: source === 'bestauth' ? user.id : mapping,
+          user_id: bestAuthUserId,
           expires_at: expiresAt.toISOString()
         })
         .select()
@@ -184,7 +184,6 @@ export class SessionBridgeService {
       )
 
       const session = await db.sessions.create({
-        id: sessionId,
         userId: syncResult.userId,
         tokenHash: this.hashToken(token),
         expiresAt

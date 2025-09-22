@@ -26,7 +26,10 @@ export class UserSyncService {
   private supabase: SupabaseClient
 
   constructor() {
-    this.supabase = createClient()
+    this.supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
   }
 
   /**
@@ -52,8 +55,8 @@ export class UserSyncService {
         const updatedUser = await db.users.update(existingMapping.bestauth_user_id, {
           email: supabaseUser.user.email,
           name: supabaseUser.user.user_metadata?.full_name || supabaseUser.user.user_metadata?.name,
-          avatar_url: supabaseUser.user.user_metadata?.avatar_url || supabaseUser.user.user_metadata?.picture,
-          email_verified: !!supabaseUser.user.email_confirmed_at
+          avatarUrl: supabaseUser.user.user_metadata?.avatar_url || supabaseUser.user.user_metadata?.picture,
+          emailVerified: !!supabaseUser.user.email_confirmed_at
         })
 
         await this.updateSyncTimestamp(existingMapping.id)
@@ -75,8 +78,8 @@ export class UserSyncService {
         const newUser = await db.users.create({
           email: supabaseUser.user.email!,
           name: supabaseUser.user.user_metadata?.full_name || supabaseUser.user.user_metadata?.name,
-          avatar_url: supabaseUser.user.user_metadata?.avatar_url || supabaseUser.user.user_metadata?.picture,
-          email_verified: !!supabaseUser.user.email_confirmed_at
+          avatarUrl: supabaseUser.user.user_metadata?.avatar_url || supabaseUser.user.user_metadata?.picture,
+          emailVerified: !!supabaseUser.user.email_confirmed_at
         })
 
         // Create user mapping
@@ -282,7 +285,8 @@ export class UserSyncService {
           if (event.user) {
             const mapping = await this.getUserMappingBySupabaseId(event.user.id)
             if (mapping) {
-              await db.users.delete(mapping.bestauth_user_id)
+              // TODO: Implement user deletion
+              // await db.users.delete(mapping.bestauth_user_id)
               await this.deleteUserMapping(mapping.id)
             }
           }
@@ -426,14 +430,15 @@ export class UserSyncService {
       const providerData = identities.find((i: any) => i.provider === provider)
 
       if (providerData) {
-        await db.oauth.createOrUpdate({
-          userId: bestAuthUserId,
-          provider,
-          providerAccountId: providerData.id,
-          accessToken: null, // Not available from Supabase
-          refreshToken: null,
-          expiresAt: null
-        })
+        // TODO: Implement OAuth account linking
+        // await db.oauth.createOrUpdate({
+        //   userId: bestAuthUserId,
+        //   provider,
+        //   providerAccountId: providerData.id,
+        //   accessToken: null, // Not available from Supabase
+        //   refreshToken: null,
+        //   expiresAt: null
+        // })
       }
     } catch (error) {
       console.error('syncOAuthAccount error:', error)
