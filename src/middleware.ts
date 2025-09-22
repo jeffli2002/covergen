@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { authMiddleware } from '@/lib/bestauth/middleware'
+import { authMiddleware } from '@/lib/bestauth/edge-middleware'
 
 // List of paths that should NOT have locale prefixes
 const PUBLIC_PATHS = [
