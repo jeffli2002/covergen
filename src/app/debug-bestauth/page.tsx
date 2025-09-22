@@ -52,6 +52,25 @@ export default function DebugBestAuth() {
     }
   }
 
+  const testSimpleCookie = async () => {
+    try {
+      const response = await fetch('/api/debug/simple-cookie-test')
+      const data = await response.json()
+      console.log('Simple cookie test response:', data)
+      
+      // Check response headers
+      const cookieHeader = response.headers.get('set-cookie')
+      console.log('Set-Cookie header:', cookieHeader)
+      
+      // Refresh cookies display
+      setTimeout(() => {
+        setCookies(document.cookie)
+      }, 100)
+    } catch (error) {
+      console.error('Simple cookie test error:', error)
+    }
+  }
+
   return (
     <div className="container mx-auto p-8">
       <h1 className="text-2xl font-bold mb-6">BestAuth Debug Page</h1>
@@ -113,6 +132,12 @@ export default function DebugBestAuth() {
           className="bg-purple-500 text-white px-4 py-2 rounded"
         >
           Test Set Cookie
+        </button>
+        <button
+          onClick={testSimpleCookie}
+          className="bg-yellow-500 text-white px-4 py-2 rounded"
+        >
+          Simple Cookie Test
         </button>
       </div>
     </div>

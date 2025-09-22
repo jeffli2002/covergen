@@ -25,7 +25,7 @@ export function setCookie(
     domain?: string
   }
 ): void {
-  const serialized = serialize(name, value, {
+  const cookieOptions = {
     httpOnly: options?.httpOnly ?? authConfig.session.httpOnly,
     secure: options?.secure ?? authConfig.session.secure,
     sameSite: options?.sameSite ?? authConfig.session.sameSite,
@@ -33,6 +33,15 @@ export function setCookie(
     maxAge: options?.maxAge ?? authConfig.session.maxAge,
     expires: options?.expires,
     domain: options?.domain,
+  }
+  
+  const serialized = serialize(name, value, cookieOptions)
+  
+  console.log('[setCookie] Setting cookie:', {
+    name,
+    valueLength: value.length,
+    options: cookieOptions,
+    serialized: serialized.substring(0, 100) + '...',
   })
 
   response.headers.append('Set-Cookie', serialized)
@@ -60,6 +69,16 @@ export function setSessionCookie(response: NextResponse, token: string): void {
   // For OAuth callbacks, we need to use sameSite: 'none' with secure: true
   // to ensure cookies work across the OAuth redirect flow
   const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL_URL !== undefined
+  
+  console.log('[setSessionCookie] Environment check:', {
+    NODE_ENV: process.env.NODE_ENV,
+    VERCEL_URL: process.env.VERCEL_URL,
+    isProduction,
+    cookieName: COOKIE_NAMES.session,
+    tokenLength: token.length,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+  })
   
   setCookie(response, COOKIE_NAMES.session, token, {
     httpOnly: true,
