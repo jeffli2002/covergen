@@ -599,33 +599,50 @@ export default function PaymentPageClient({
           </p>
 
           {/* Current Plan Info */}
-          <Card className="max-w-2xl mx-auto bg-gray-50 border-gray-200">
+          <Card className={`max-w-2xl mx-auto border-gray-200 ${
+            currentSubscription && currentSubscription.tier !== 'free' 
+              ? 'bg-green-50 border-green-200' 
+              : 'bg-gray-50'
+          }`}>
             <CardContent className="p-6">
-              <h3 className="font-semibold mb-2">
-                {currentSubscription && currentSubscription.tier !== 'free' 
-                  ? 'Already have a plan?' 
-                  : 'Not ready to upgrade?'}
+              <h3 className="font-semibold mb-2 flex items-center gap-2">
+                {(() => {
+                  if (!currentSubscription) return <><Loader2 className="w-4 h-4 animate-spin" /> Loading subscription info...</>;
+                  if (currentSubscription.tier === 'pro') return <><Zap className="w-5 h-5 text-orange-500" /> You have the Pro plan</>;
+                  if (currentSubscription.tier === 'pro_plus') return <><Crown className="w-5 h-5 text-purple-500" /> You have the Pro+ plan</>;
+                  return <><Sparkles className="w-5 h-5 text-gray-500" /> Not ready to upgrade?</>;
+                })()}
               </h3>
               <p className="text-sm text-gray-600 mb-4">
                 {(() => {
                   const config = getClientSubscriptionConfig();
-                  if (currentSubscription) {
-                    if (currentSubscription.tier === 'pro') {
-                      return `You're on the Pro plan with ${config.limits.pro.monthly} covers per month.`;
-                    } else if (currentSubscription.tier === 'pro_plus') {
-                      return `You're on the Pro+ plan with ${config.limits.pro_plus.monthly} covers per month.`;
-                    }
+                  if (!currentSubscription) {
+                    return 'Checking your subscription status...';
                   }
-                  return `Continue using the free plan with ${config.limits.free.monthly} covers per month.`;
+                  
+                  switch (currentSubscription.tier) {
+                    case 'pro':
+                      return `You're currently on the Pro plan with ${config.limits.pro.monthly} covers per month.`;
+                    case 'pro_plus':
+                      return `You're currently on the Pro+ plan with ${config.limits.pro_plus.monthly} covers per month.`;
+                    case 'free':
+                    default:
+                      return `Continue using the free plan with ${config.limits.free.monthly} covers per month (${config.limits.free.daily} per day).`;
+                  }
                 })()}
               </p>
               <Button 
-                variant="ghost" 
+                variant={currentSubscription && currentSubscription.tier !== 'free' ? 'default' : 'ghost'}
+                className={currentSubscription && currentSubscription.tier !== 'free' ? 'bg-green-600 hover:bg-green-700' : ''}
                 onClick={() => router.push(`/${locale}`)}
               >
-                {currentSubscription && currentSubscription.tier !== 'free' 
-                  ? 'Go to Dashboard' 
-                  : 'Continue with Free Plan'}
+                {(() => {
+                  if (!currentSubscription) return 'Loading...';
+                  if (currentSubscription.tier === 'pro' || currentSubscription.tier === 'pro_plus') {
+                    return 'Go to Dashboard';
+                  }
+                  return 'Continue with Free Plan';
+                })()}
               </Button>
             </CardContent>
           </Card>
