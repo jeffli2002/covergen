@@ -17,27 +17,6 @@ export function useBestAuth() {
     error: null,
   })
 
-  // Check session on mount and when page becomes visible
-  useEffect(() => {
-    checkSession()
-    
-    // Re-check session when page becomes visible (e.g., after OAuth redirect)
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        console.log('[useBestAuth] Page became visible, checking session')
-        checkSession()
-      }
-    }
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    window.addEventListener('focus', checkSession)
-    
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-      window.removeEventListener('focus', checkSession)
-    }
-  }, [checkSession])
-
   // Check current session
   const checkSession = useCallback(async () => {
     try {
@@ -72,6 +51,27 @@ export function useBestAuth() {
       })
     }
   }, [])
+
+  // Check session on mount and when page becomes visible
+  useEffect(() => {
+    checkSession()
+    
+    // Re-check session when page becomes visible (e.g., after OAuth redirect)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('[useBestAuth] Page became visible, checking session')
+        checkSession()
+      }
+    }
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('focus', checkSession)
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', checkSession)
+    }
+  }, [checkSession])
 
   // Sign up
   const signUp = useCallback(async (data: SignUpData) => {
