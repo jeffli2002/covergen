@@ -2,6 +2,8 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { getEnhancedCookieOptions, logCookieOperation } from '@/utils/supabase/cookie-config'
+import { userSyncService } from '@/services/sync/UserSyncService'
+import { sessionBridgeService } from '@/services/bridge/SessionBridgeService'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -89,6 +91,41 @@ export async function GET(request: Request) {
         user: data?.session?.user?.email,
         hasSession: !!data?.session
       })
+      
+      // Sync user to BestAuth using the new sync service
+      if (data?.session?.user) {
+        const user = data.session.user
+        
+        try {
+          console.log('[Auth Callback] Syncing user to BestAuth:', user.email)
+          
+          // Use the UserSyncService to sync the user
+          const syncResult = await userSyncService.syncUser(user.id)
+          
+          if (syncResult.success) {
+            console.log('[Auth Callback] User successfully synced to BestAuth:', {
+              email: user.email,
+              bestAuthUserId: syncResult.userId
+            })
+            
+            // Create unified session using SessionBridgeService
+            if (syncResult.userId && data.session) {
+              const bridgeSession = await sessionBridgeService.convertSupabaseSessionToBestAuth({
+                access_token: data.session.access_token,
+                refresh_token: data.session.refresh_token,
+                user: data.session.user,
+                expires_at: data.session.expires_at
+              })
+              
+              console.log('[Auth Callback] Created BestAuth session:', bridgeSession.id)
+            }
+          } else {
+            console.error('[Auth Callback] Failed to sync user:', syncResult.error)
+          }
+        } catch (syncError) {
+          console.error('[Auth Callback] Error during sync process:', syncError)
+        }
+      }
       
       // The session cookies have been set via the cookie handler above
       // Return the response with the cookies properly set
