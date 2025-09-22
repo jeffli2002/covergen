@@ -6,22 +6,43 @@ import { db } from '@/lib/bestauth/db'
 
 // GET /api/bestauth/account - Get account information
 export async function GET(request: NextRequest) {
+  console.log('[BestAuth Account API] Request received')
+  
   try {
     const session = await validateSessionFromRequest(request)
+    console.log('[BestAuth Account API] Session validation:', session.success)
     
     if (!session.success || !session.data) {
+      console.error('[BestAuth Account API] Unauthorized - no valid session')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
     const userId = session.data.user.id
+    console.log('[BestAuth Account API] User ID:', userId)
     
     // Get user, profile, subscription, and payment history
-    const [user, profile, subscription, payments] = await Promise.all([
-      db.users.findById(userId),
-      bestAuthSubscriptionService.getUserProfile(userId),
-      bestAuthSubscriptionService.getUserSubscription(userId),
-      bestAuthSubscriptionService.getPaymentHistory(userId, 5)
-    ])
+    console.log('[BestAuth Account API] Fetching user data...')
+    
+    // Fetch data with individual error handling
+    const user = await db.users.findById(userId).catch(err => {
+      console.error('[BestAuth Account API] Error fetching user:', err)
+      return null
+    })
+    
+    const profile = await bestAuthSubscriptionService.getUserProfile(userId).catch(err => {
+      console.error('[BestAuth Account API] Error fetching profile:', err)
+      return null
+    })
+    
+    const subscription = await bestAuthSubscriptionService.getUserSubscription(userId).catch(err => {
+      console.error('[BestAuth Account API] Error fetching subscription:', err)
+      return null
+    })
+    
+    const payments = await bestAuthSubscriptionService.getPaymentHistory(userId, 5).catch(err => {
+      console.error('[BestAuth Account API] Error fetching payments:', err)
+      return []
+    })
     
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })

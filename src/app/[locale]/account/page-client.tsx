@@ -122,21 +122,37 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
       
       // Set a timeout for the API calls
       const loadTimeout = setTimeout(() => {
-        console.warn('Account data loading timeout')
-        toast.error('Loading is taking longer than expected. Please refresh the page.')
-      }, 10000) // 10 second warning
+        console.error('[Account] Loading timeout reached')
+        toast.error('Failed to load account data. Please try refreshing the page.')
+        setLoading(false)
+        // Optionally redirect to home after timeout
+        setTimeout(() => {
+          router.push(`/${locale}`)
+        }, 2000)
+      }, 15000) // 15 second timeout
       
       try {
         // Load account data from BestAuth API
+        console.log('[Account] Fetching account data with token:', session.token ? 'Present' : 'Missing')
+        
         const response = await fetch('/api/bestauth/account', {
           headers: {
             'Authorization': `Bearer ${session.token}`,
             'Content-Type': 'application/json'
-          }
+          },
+          // Add timeout to fetch
+          signal: AbortSignal.timeout(10000)
+        }).catch(err => {
+          console.error('[Account] Fetch error:', err)
+          throw new Error('Network error: Unable to reach server')
         })
         
+        console.log('[Account] Response status:', response.status)
+        
         if (!response.ok) {
-          throw new Error('Failed to load account data')
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+          console.error('[Account] API error:', errorData)
+          throw new Error(errorData.error || `Failed to load account data (${response.status})`)
         }
         
         const data = await response.json()
@@ -169,13 +185,22 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
             quotaLimit: config.limits.free.daily
           })
         }
-      } catch (timeoutError) {
-        console.error('Timeout or critical error:', timeoutError)
+      } catch (innerError) {
         clearTimeout(loadTimeout)
+        console.error('[Account] Inner error:', innerError)
+        throw innerError
       }
     } catch (error) {
-      console.error('Error loading account data:', error)
-      toast.error('Failed to load account data')
+      console.error('[Account] Error loading account data:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load account data'
+      toast.error(errorMessage)
+      
+      // If it's an auth error, redirect to sign in
+      if (error instanceof Error && error.message.includes('401')) {
+        setTimeout(() => {
+          router.replace(`/${locale}?auth=signin&redirect=${encodeURIComponent(`/${locale}/account`)}`)
+        }, 1500)
+      }
     } finally {
       setLoading(false)
     }
