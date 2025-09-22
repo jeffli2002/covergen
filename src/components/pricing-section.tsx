@@ -245,7 +245,6 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
             // Check if this is the user's current tier
             // Always use subscription info from API when available, fall back to app store
             const isCurrentTier = subscriptionInfo?.plan === tier.id || 
-                                 (subscriptionInfo?.tier === tier.id) ||
                                  (!subscriptionInfo && user?.tier === tier.id)
             
             // Debug logging for tier comparison
@@ -253,7 +252,6 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
               console.log(`[PricingSection] Pro tier check for ${authUser.email}:`, {
                 tierId: tier.id,
                 subscriptionPlan: subscriptionInfo?.plan,
-                subscriptionTier: subscriptionInfo?.tier,
                 userTier: user?.tier,
                 isCurrentTier,
                 hasSubscriptionInfo: !!subscriptionInfo
