@@ -41,6 +41,17 @@ export default function DebugBestAuth() {
     window.location.reload()
   }
 
+  const testSetCookie = async () => {
+    try {
+      const response = await fetch('/api/debug/set-test-cookie')
+      const data = await response.json()
+      console.log('Test cookie response:', data)
+      alert('Check console and refresh to see if cookies were set')
+    } catch (error) {
+      console.error('Test cookie error:', error)
+    }
+  }
+
   return (
     <div className="container mx-auto p-8">
       <h1 className="text-2xl font-bold mb-6">BestAuth Debug Page</h1>
@@ -96,6 +107,12 @@ export default function DebugBestAuth() {
           className="bg-red-500 text-white px-4 py-2 rounded"
         >
           Clear All Cookies
+        </button>
+        <button
+          onClick={testSetCookie}
+          className="bg-purple-500 text-white px-4 py-2 rounded"
+        >
+          Test Set Cookie
         </button>
       </div>
     </div>

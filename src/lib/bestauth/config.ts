@@ -47,7 +47,9 @@ export const authConfig = {
     name: 'bestauth.session',
     maxAge: 30 * 24 * 60 * 60, // 30 days in seconds
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    // For Vercel preview deployments, always use secure cookies since they're HTTPS
+    // For local development, don't use secure cookies
+    secure: process.env.NODE_ENV === 'production' || process.env.VERCEL_URL !== undefined,
     sameSite: 'lax' as const, // Use 'none' for OAuth if needed
     path: '/',
   },

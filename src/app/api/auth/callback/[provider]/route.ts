@@ -76,7 +76,9 @@ export async function GET(
     console.log('OAuth callback result:', {
       success: result.success,
       error: result.error,
-      code: result.code
+      code: result.code,
+      hasData: !!result.data,
+      hasAccessToken: !!(result.data?.accessToken)
     })
     
     if (!result.success) {
@@ -86,11 +88,32 @@ export async function GET(
       )
     }
     
+    if (!result.data?.accessToken) {
+      console.error('OAuth callback succeeded but no access token received')
+      return NextResponse.redirect(
+        `${origin}${authConfig.urls.error}?error=no_access_token`
+      )
+    }
+    
     // Create response with redirect to dashboard
     const response = NextResponse.redirect(`${origin}${authConfig.urls.afterSignIn}`)
     
+    console.log('Setting session cookie:', {
+      cookieName: authConfig.session.name,
+      tokenLength: result.data.accessToken.length,
+      redirectTo: `${origin}${authConfig.urls.afterSignIn}`
+    })
+    
     // Set session cookie
-    setSessionCookie(response, result.data!.accessToken)
+    setSessionCookie(response, result.data.accessToken)
+    
+    // Log response headers to verify cookie is set
+    console.log('Response headers after setting cookie:')
+    response.headers.forEach((value, key) => {
+      if (key.toLowerCase() === 'set-cookie') {
+        console.log(`  ${key}: ${value}`)
+      }
+    })
     
     // Delete OAuth state cookie
     deleteOAuthStateCookie(response)
