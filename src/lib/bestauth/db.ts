@@ -547,15 +547,26 @@ export const db = {
         // Get usage data safely - avoid circular reference by calling directly
         let usageToday = 0
         try {
-          const { data: usageData } = await getDb()
+          const { data: usageData, error: usageError } = await getDb()
             .from('bestauth_usage_tracking')
             .select('generation_count')
             .eq('user_id', userId)
             .eq('date', new Date().toISOString().split('T')[0])
             .single()
-          usageToday = usageData?.generation_count || 0
-        } catch (usageError) {
+          
+          // Check if error is table not found
+          if (usageError && (usageError.code === 'PGRST116' || usageError.message?.includes('relation'))) {
+            console.warn('Usage tracking table not found, usage tracking disabled')
+            usageToday = 0
+          } else if (!usageError) {
+            usageToday = usageData?.generation_count || 0
+          } else {
+            console.error('Usage tracking error:', usageError)
+            usageToday = 0
+          }
+        } catch (error) {
           // Silently handle usage table not existing
+          console.warn('Usage tracking unavailable:', error)
           usageToday = 0
         }
         
