@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Alert } from '@/components/ui/alert'
 import { Input } from '@/components/ui/input'
 import { User, Mail, Lock, Eye, EyeOff, Chrome, Wand2 } from 'lucide-react'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/BestAuthContext'
 import * as gtag from '@/lib/gtag'
 
 interface AuthFormProps {
