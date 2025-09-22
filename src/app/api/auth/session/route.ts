@@ -3,8 +3,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getUserFromRequest } from '@/lib/bestauth/middleware'
 
 export async function GET(request: NextRequest) {
+  console.log('[Session API] Checking session')
+  
   try {
     const user = await getUserFromRequest(request)
+    
+    console.log('[Session API] User from request:', user ? 'Found' : 'Not found', user?.email || 'N/A')
     
     if (!user) {
       return NextResponse.json(

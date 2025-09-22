@@ -17,16 +17,38 @@ export function useBestAuth() {
     error: null,
   })
 
-  // Check session on mount
+  // Check session on mount and when page becomes visible
   useEffect(() => {
     checkSession()
-  }, [])
+    
+    // Re-check session when page becomes visible (e.g., after OAuth redirect)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('[useBestAuth] Page became visible, checking session')
+        checkSession()
+      }
+    }
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('focus', checkSession)
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', checkSession)
+    }
+  }, [checkSession])
 
   // Check current session
   const checkSession = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/session')
       const data = await response.json()
+      
+      console.log('[useBestAuth] Session check response:', {
+        status: response.status,
+        authenticated: data.authenticated,
+        user: data.user,
+      })
       
       if (data.authenticated) {
         setAuthState({
