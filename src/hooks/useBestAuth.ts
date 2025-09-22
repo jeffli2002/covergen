@@ -5,6 +5,7 @@ import type { User, SignUpData, SignInData } from '@/lib/bestauth/types'
 
 interface AuthState {
   user: User | null
+  session: { token: string; expires_at: string } | null
   loading: boolean
   error: string | null
 }
@@ -13,6 +14,7 @@ export function useBestAuth() {
   const router = useRouter()
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
+    session: null,
     loading: true,
     error: null,
   })
@@ -32,12 +34,14 @@ export function useBestAuth() {
       if (data.authenticated) {
         setAuthState({
           user: data.user,
+          session: data.session,
           loading: false,
           error: null,
         })
       } else {
         setAuthState({
           user: null,
+          session: null,
           loading: false,
           error: null,
         })
@@ -46,6 +50,7 @@ export function useBestAuth() {
       console.error('Session check error:', error)
       setAuthState({
         user: null,
+        session: null,
         loading: false,
         error: 'Failed to check session',
       })
@@ -92,6 +97,7 @@ export function useBestAuth() {
       
       setAuthState({
         user: result.user,
+        session: result.session,
         loading: false,
         error: null,
       })
@@ -123,6 +129,7 @@ export function useBestAuth() {
       
       setAuthState({
         user: result.user,
+        session: result.session,
         loading: false,
         error: null,
       })
@@ -150,6 +157,7 @@ export function useBestAuth() {
       
       setAuthState({
         user: null,
+        session: null,
         loading: false,
         error: null,
       })
@@ -249,6 +257,7 @@ export function useBestAuth() {
 
   return {
     user: authState.user,
+    session: authState.session,
     loading: authState.loading,
     error: authState.error,
     signUp,

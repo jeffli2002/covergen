@@ -14,11 +14,11 @@ import {
   ChevronRight
 } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
-import authService from '@/services/authService'
 import { creemService } from '@/services/payment/creem'
 import { toast } from 'sonner'
 import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
 import ActivationConfirmDialog from '@/components/subscription/ActivationConfirmDialog'
+import { useBestAuth } from '@/hooks/useBestAuth'
 
 // Simple date formatter to avoid date-fns dependency
 const formatDate = (date: Date) => {
@@ -60,26 +60,31 @@ const getTrialLimits = () => {
 
 export default function AccountPageClient({ locale }: AccountPageClientProps) {
   const router = useRouter()
-  const { user, setUser } = useAppStore()
+  const { user: appStoreUser, setUser } = useAppStore()
+  const { user: authUser, session, loading: authLoading } = useBestAuth()
   const [loading, setLoading] = useState(true)
   const [loadingMessage, setLoadingMessage] = useState('Checking authentication...')
+  const [accountData, setAccountData] = useState<any>(null)
   const [subscription, setSubscription] = useState<any>(null)
-  const [usage, setUsage] = useState(0)
+  const [usage, setUsage] = useState<any>(null)
   const [cancelling, setCancelling] = useState(false)
   const [resuming, setResuming] = useState(false)
   const [activating, setActivating] = useState(false)
-  const [authUser, setAuthUser] = useState<any>(null)
   const [showActivationConfirm, setShowActivationConfirm] = useState(false)
 
   useEffect(() => {
     const checkAuthAndLoad = async () => {
       try {
-        // Wait for auth service to initialize
-        setLoadingMessage('Initializing authentication...')
-        await authService.initialize()
+        // Wait for BestAuth to load
+        setLoadingMessage('Checking authentication...')
         
-        // Check if user is authenticated after initialization
-        if (!authService.isAuthenticated()) {
+        // If auth is still loading, wait
+        if (authLoading) {
+          return
+        }
+        
+        // Check if user is authenticated
+        if (!authUser || !session) {
           // Use replace instead of push to avoid history issues
           router.replace(`/${locale}?auth=signin&redirect=${encodeURIComponent(`/${locale}/account`)}`)
           return
@@ -94,16 +99,12 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
     }
     
     checkAuthAndLoad()
-  }, [locale, router])
+  }, [locale, router, authUser, session, authLoading])
 
   const loadAccountData = async () => {
     try {
-      // Get current user from auth service
-      const currentUser = authService.getCurrentUser()
-      setAuthUser(currentUser)
-      
-      if (!currentUser) {
-        console.error('No current user found')
+      if (!authUser || !session) {
+        console.error('No authenticated user found')
         toast.error('Please sign in to view account details')
         router.replace(`/${locale}?auth=signin&redirect=${encodeURIComponent(`/${locale}/account`)}`)
         return
@@ -116,45 +117,45 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
       }, 10000) // 10 second warning
       
       try {
-        // Load subscription and usage data in parallel with individual error handling
-        const [subResult, usageResult] = await Promise.allSettled([
-          authService.getUserSubscription().catch(err => {
-            console.error('Subscription load error:', err)
-            return null
-          }),
-          authService.getUserUsageToday().catch(err => {
-            console.error('Usage load error:', err)
-            return 0
-          })
-        ])
+        // Load account data from BestAuth API
+        const response = await fetch('/api/bestauth/account', {
+          headers: {
+            'Authorization': `Bearer ${session.token}`,
+            'Content-Type': 'application/json'
+          }
+        })
         
+        if (!response.ok) {
+          throw new Error('Failed to load account data')
+        }
+        
+        const data = await response.json()
         clearTimeout(loadTimeout)
         
-        const sub = subResult.status === 'fulfilled' ? subResult.value : null
-        const todayUsage = usageResult.status === 'fulfilled' ? usageResult.value : 0
-        
-        setSubscription(sub)
-        setUsage(todayUsage)
+        setAccountData(data)
+        setSubscription(data.subscription)
+        setUsage(data.usage)
         
         // Update user in store if we have subscription data
         const config = getClientSubscriptionConfig()
-        if (currentUser && sub) {
-          const quotaLimit = sub.tier === 'pro' ? config.limits.pro.monthly : 
-                            sub.tier === 'pro_plus' ? config.limits.pro_plus.monthly : 
+        if (data.subscription) {
+          const tier = data.subscription.tier || 'free'
+          const quotaLimit = tier === 'pro' ? config.limits.pro.monthly : 
+                            tier === 'pro_plus' ? config.limits.pro_plus.monthly : 
                             config.limits.free.daily
           setUser({
-            id: currentUser.id,
-            email: currentUser.email,
-            tier: sub.tier || 'free',
-            quotaUsed: todayUsage,
+            id: data.user.id,
+            email: data.user.email,
+            tier: tier,
+            quotaUsed: data.usage?.today || 0,
             quotaLimit: quotaLimit
           })
-        } else if (currentUser) {
+        } else {
           setUser({
-            id: currentUser.id,
-            email: currentUser.email,
+            id: data.user.id,
+            email: data.user.email,
             tier: 'free',
-            quotaUsed: todayUsage,
+            quotaUsed: data.usage?.today || 0,
             quotaLimit: config.limits.free.daily
           })
         }
@@ -204,21 +205,19 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
 
     setCancelling(true)
     try {
-      // Get auth token
-      const session = authService.getCurrentSession()
-      if (!session?.access_token) {
+      // Check auth token
+      if (!session?.token) {
         throw new Error('Authentication required')
       }
 
-      // Call API endpoint instead of service directly
-      const response = await fetch('/api/payment/cancel-subscription', {
+      // Call BestAuth API endpoint
+      const response = await fetch('/api/bestauth/subscription/cancel', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
+          'Authorization': `Bearer ${session.token}`
         },
         body: JSON.stringify({
-          subscriptionId: subscription.stripe_subscription_id,
           cancelAtPeriodEnd: true
         })
       })
@@ -253,22 +252,18 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
 
     setResuming(true)
     try {
-      // Get auth token
-      const session = authService.getCurrentSession()
-      if (!session?.access_token) {
+      // Check auth token
+      if (!session?.token) {
         throw new Error('Authentication required')
       }
 
-      // Call API endpoint instead of service directly
-      const response = await fetch('/api/payment/resume-subscription', {
-        method: 'POST',
+      // Call BestAuth API endpoint - DELETE method removes the cancellation
+      const response = await fetch('/api/bestauth/subscription/cancel', {
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        },
-        body: JSON.stringify({
-          subscriptionId: subscription.stripe_subscription_id
-        })
+          'Authorization': `Bearer ${session.token}`
+        }
       })
 
       const data = await response.json()
@@ -320,10 +315,16 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
     setShowActivationConfirm(false)
     
     try {
-      const response = await fetch('/api/subscription/activate', {
+      // Check auth token
+      if (!session?.token) {
+        throw new Error('Authentication required')
+      }
+
+      const response = await fetch('/api/bestauth/subscription/activate', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.token}`
         }
       })
 
@@ -385,9 +386,33 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   }
 
   const handleSignOut = async () => {
-    await authService.signOut()
-    setUser(null)
-    router.push(`/${locale}`)
+    try {
+      // Clear local state first
+      setUser(null)
+      
+      // Call BestAuth signout API
+      if (session?.token) {
+        const response = await fetch('/api/auth/signout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.token}`,
+            'Content-Type': 'application/json'
+          }
+        })
+        
+        if (!response.ok) {
+          console.error('Sign out API call failed')
+        }
+      }
+      
+      // Clear any stored auth data and redirect
+      localStorage.removeItem('bestauth-session')
+      router.push(`/${locale}`)
+    } catch (error) {
+      console.error('Error signing out:', error)
+      // Still redirect even if API call fails
+      router.push(`/${locale}`)
+    }
   }
 
   const getPlanIcon = (tier: string) => {
@@ -458,9 +483,10 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   
   // Calculate usage based on whether it's a trial
   const dailyLimit = isTrialing && trialLimits ? trialLimits.daily : (planDetails?.credits || config.limits.free.daily)
-  const usagePercentage = (usage / dailyLimit) * 100
+  const currentUsage = usage?.today || 0
+  const usagePercentage = (currentUsage / dailyLimit) * 100
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -493,11 +519,11 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-700">Email</label>
-                  <p className="text-gray-900 mt-1">{authUser?.email || 'Not available'}</p>
+                  <p className="text-gray-900 mt-1">{accountData?.user?.email || authUser?.email || 'Not available'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">User ID</label>
-                  <p className="text-gray-500 text-sm font-mono mt-1">{authUser?.id || 'Not available'}</p>
+                  <p className="text-gray-500 text-sm font-mono mt-1">{accountData?.user?.id || authUser?.id || 'Not available'}</p>
                 </div>
               </div>
             </CardContent>
@@ -708,14 +734,14 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                 <div className="flex justify-between mb-2">
                   <span className="text-sm text-gray-600">Covers Generated</span>
                   <span className="text-sm font-medium">
-                    {usage} / {dailyLimit}
+                    {currentUsage} / {dailyLimit}
                   </span>
                 </div>
                 <Progress value={usagePercentage} className="h-2" />
               </div>
 
               <p className="text-sm text-gray-600">
-                {dailyLimit - usage} credits remaining {isTrialing ? 'today' : 'this month'}
+                {dailyLimit - currentUsage} credits remaining {isTrialing ? 'today' : 'this month'}
               </p>
 
               {usagePercentage >= 80 && currentPlan !== 'pro_plus' && (
