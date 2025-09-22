@@ -37,7 +37,7 @@ export function SignUpForm() {
     setLoading(true)
 
     try {
-      const result = await signUp({ email, password, name })
+      const result = await signUp(email, password, { name })
       if (result.success) {
         router.push('/dashboard')
       } else {

@@ -26,7 +26,7 @@ export function SignInForm() {
     setLoading(true)
 
     try {
-      const result = await signIn({ email, password })
+      const result = await signIn(email, password)
       if (result.success) {
         router.push('/dashboard')
       } else {

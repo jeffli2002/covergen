@@ -107,7 +107,7 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
           onAuthSuccess?.(result.user)
         }, 1000)
       } else {
-        setMessage({ type: 'error', text: result.error })
+        setMessage({ type: 'error', text: result.error || 'Operation failed' })
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'Operation failed, please try again' })
@@ -140,7 +140,7 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
         // Track Google sign-in (will track after OAuth redirect)
         // The page will redirect for OAuth flow
       } else {
-        setMessage({ type: 'error', text: result.error })
+        setMessage({ type: 'error', text: result.error || 'Operation failed' })
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'Google login failed' })
@@ -162,9 +162,9 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
       const result = await resetPassword(formData.email)
       
       if (result.success) {
-        setMessage({ type: 'success', text: result.message })
+        setMessage({ type: 'success', text: result.message || 'Password reset email sent' })
       } else {
-        setMessage({ type: 'error', text: result.error })
+        setMessage({ type: 'error', text: result.error || 'Operation failed' })
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'Password reset failed' })

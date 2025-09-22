@@ -42,15 +42,14 @@ export function BestAuthProvider({ children }: { children: ReactNode }) {
       const result = await auth.signUp({
         email,
         password,
-        name: metadata?.fullName || metadata?.name,
-        metadata
+        name: metadata?.fullName || metadata?.name || ''
       })
       
       if (result.success) {
         return {
           success: true,
           message: 'Account created successfully!',
-          user: auth.user
+          user: auth.user || undefined
         }
       } else {
         return {
@@ -67,7 +66,7 @@ export function BestAuthProvider({ children }: { children: ReactNode }) {
         return {
           success: true,
           message: 'Sign in successful!',
-          user: auth.user
+          user: auth.user || undefined
         }
       } else {
         return {
