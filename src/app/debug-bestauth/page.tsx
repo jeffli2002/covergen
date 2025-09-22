@@ -98,12 +98,23 @@ export default function DebugBestAuth() {
       </div>
 
       <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-2">BestAuth Session Cookie</h2>
+        <h2 className="text-xl font-semibold mb-2">BestAuth Session Status</h2>
         <div className="bg-gray-100 p-4 rounded">
-          {cookies.includes('bestauth.session') ? (
-            <p className="text-green-600">✓ bestauth.session cookie found</p>
+          {sessionData?.authenticated ? (
+            <div>
+              <p className="text-green-600 mb-2">✓ Authenticated on server</p>
+              <p className="text-gray-600 text-sm">
+                Note: The session cookie is httpOnly (secure) and cannot be read by JavaScript.
+                This is expected behavior for security.
+              </p>
+            </div>
           ) : (
-            <p className="text-red-600">✗ bestauth.session cookie NOT found</p>
+            <p className="text-red-600">✗ Not authenticated</p>
+          )}
+          {cookies.includes('bestauth.session') && (
+            <p className="text-yellow-600 mt-2">
+              ⚠️ A non-httpOnly session cookie was found - this might be from testing
+            </p>
           )}
         </div>
       </div>
