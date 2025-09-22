@@ -1,6 +1,7 @@
 // BestAuth Database Client
 import { getBestAuthSupabaseClient } from './db-client'
 import type { User, Session, OAuthAccount } from './types'
+import { getSubscriptionConfig } from '@/lib/subscription-config'
 
 // Helper to get database client with error handling
 function getDb() {
@@ -569,8 +570,33 @@ export const db = {
             Math.max(0, Math.ceil((new Date(data.trial_ends_at).getTime() - Date.now()) / (24 * 60 * 60 * 1000))) : 0,
           can_generate: true, // TODO: Implement proper limit checking
           usage_today: usageToday,
-          daily_limit: data.tier === 'pro' ? 10 : data.tier === 'pro_plus' ? 20 : 3, // TODO: Get from config
-          monthly_limit: data.tier === 'pro' ? 120 : data.tier === 'pro_plus' ? 300 : 3, // TODO: Get from config
+          daily_limit: (() => {
+            const config = getSubscriptionConfig()
+            const tier = data.tier || 'free'
+            const isTrialing = data.status === 'trialing'
+            
+            if (tier === 'free') {
+              return config.limits.free.daily
+            } else if (tier === 'pro') {
+              return isTrialing ? config.limits.pro.trial_daily : config.limits.pro.monthly
+            } else if (tier === 'pro_plus') {
+              return isTrialing ? config.limits.pro_plus.trial_daily : config.limits.pro_plus.monthly
+            }
+            return config.limits.free.daily
+          })(),
+          monthly_limit: (() => {
+            const config = getSubscriptionConfig()
+            const tier = data.tier || 'free'
+            
+            if (tier === 'free') {
+              return config.limits.free.monthly
+            } else if (tier === 'pro') {
+              return config.limits.pro.monthly
+            } else if (tier === 'pro_plus') {
+              return config.limits.pro_plus.monthly
+            }
+            return config.limits.free.monthly
+          })(),
           has_payment_method: !!data.stripe_subscription_id,
           requires_payment_setup: data.status === 'trialing' && !data.stripe_subscription_id,
           next_billing_date: data.current_period_end || null
@@ -679,23 +705,43 @@ export const db = {
 
     async checkLimit(userId: string): Promise<boolean> {
       try {
-        // For now, just check if user exists
-        // TODO: Implement proper limit checking
+        const config = getSubscriptionConfig()
         const todayUsage = await this.getToday(userId)
         const subscription = await db.subscriptions.findByUserId(userId)
         
         if (!subscription) {
-          // Free tier: 3 per day
-          return todayUsage < 3
+          // Free tier: use config limit
+          return todayUsage < config.limits.free.daily
         }
         
-        // Check based on subscription tier
-        if (subscription.tier === 'free') {
-          return todayUsage < 3
+        // Check based on subscription tier and status
+        const tier = subscription.tier || 'free'
+        const isTrialing = subscription.status === 'trialing'
+        
+        if (tier === 'free') {
+          return todayUsage < config.limits.free.daily
+        } else if (tier === 'pro') {
+          if (isTrialing) {
+            // Pro trial: daily limit
+            return todayUsage < config.limits.pro.trial_daily
+          } else {
+            // Pro paid: check monthly limit (simplified to daily equivalent)
+            const monthlyUsage = await this.getMonthlyUsage(userId)
+            return monthlyUsage < config.limits.pro.monthly
+          }
+        } else if (tier === 'pro_plus') {
+          if (isTrialing) {
+            // Pro+ trial: daily limit
+            return todayUsage < config.limits.pro_plus.trial_daily
+          } else {
+            // Pro+ paid: check monthly limit (simplified to daily equivalent)
+            const monthlyUsage = await this.getMonthlyUsage(userId)
+            return monthlyUsage < config.limits.pro_plus.monthly
+          }
         }
         
-        // Pro and Pro+ have monthly limits, not daily
-        return true
+        // Default to free tier limits
+        return todayUsage < config.limits.free.daily
       } catch (err) {
         console.error('Error checking limit:', err)
         return true // Allow on error

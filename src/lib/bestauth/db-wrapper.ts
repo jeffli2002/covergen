@@ -1,5 +1,6 @@
 // BestAuth Database Wrapper with Connection Error Handling
 import { db as bestAuthDb } from './db'
+import { getSubscriptionConfig } from '@/lib/subscription-config'
 
 /**
  * Wrapper for BestAuth database operations with connection error handling
@@ -27,7 +28,6 @@ export const db = {
       } catch (error) {
         console.error('BestAuth: Failed to get subscription status:', error)
         // Return default free subscription status with config values
-        const { getSubscriptionConfig } = require('@/lib/subscription-config')
         const config = getSubscriptionConfig()
         
         return {
