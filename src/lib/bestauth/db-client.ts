@@ -44,6 +44,9 @@ export function getBestAuthSupabaseClient(): SupabaseClient | null {
       }
     )
     
+    console.log('[BestAuth] Database client created with key type:', 
+      supabaseKey.includes('service_role') ? 'service_role' : 'anon')
+    
     return supabaseClient
   } catch (error) {
     console.error('[BestAuth] Failed to create Supabase client:', error)

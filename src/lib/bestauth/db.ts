@@ -626,11 +626,18 @@ export const db = {
           .single()
         
         if (error) {
+          // Log detailed error information for debugging
+          console.error('Detailed usage error:', {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+            hint: error.hint
+          })
+          
           // No record found is normal, return 0
           if (error.code === 'PGRST116' || error.message?.includes('No rows found')) {
             return 0
           }
-          console.error('Error getting usage today:', error)
           return 0
         }
         
