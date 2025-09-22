@@ -35,8 +35,8 @@ export async function authMiddleware(request: NextRequest): Promise<NextResponse
   }
   
   if (isAuthRoute && sessionToken) {
-    // Redirect to dashboard if accessing auth routes while authenticated
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    // Redirect to homepage if accessing auth routes while authenticated
+    return NextResponse.redirect(new URL('/en', request.url))
   }
   
   return NextResponse.next()

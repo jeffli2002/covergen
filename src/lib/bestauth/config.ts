@@ -102,7 +102,7 @@ export const authConfig = {
     verifyEmail: '/auth/verify',
     resetPassword: '/auth/reset-password',
     callback: '/auth/callback',
-    afterSignIn: '/auth/signin-simple',
+    afterSignIn: '/en',
     afterSignOut: '/',
   },
 }
