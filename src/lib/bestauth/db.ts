@@ -546,30 +546,90 @@ export const db = {
   // Usage tracking operations
   usage: {
     async getToday(userId: string): Promise<number> {
-      const { data, error } = await getDb()
-        .rpc('get_user_usage_today', { p_user_id: userId })
-      
-      if (error || data === null) return 0
-      
-      return data
+      try {
+        const { data, error } = await getDb()
+          .from('bestauth_usage_tracking')
+          .select('generation_count')
+          .eq('user_id', userId)
+          .eq('date', new Date().toISOString().split('T')[0])
+          .single()
+        
+        if (error || !data) return 0
+        return data.generation_count || 0
+      } catch (err) {
+        console.error('Error getting usage today:', err)
+        return 0
+      }
     },
 
     async increment(userId: string, amount: number = 1): Promise<number> {
-      const { data, error } = await getDb()
-        .rpc('increment_usage', { p_user_id: userId, p_amount: amount })
-      
-      if (error || data === null) throw error || new Error('Failed to increment usage')
-      
-      return data
+      try {
+        const today = new Date().toISOString().split('T')[0]
+        
+        // Check if record exists for today
+        const { data: existing } = await getDb()
+          .from('bestauth_usage_tracking')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('date', today)
+          .single()
+        
+        let newCount: number
+        
+        if (existing) {
+          // Update existing record
+          const { data, error } = await getDb()
+            .from('bestauth_usage_tracking')
+            .update({ generation_count: (existing.generation_count || 0) + amount })
+            .eq('user_id', userId)
+            .eq('date', today)
+            .select('generation_count')
+            .single()
+          
+          if (error) throw error
+          newCount = data?.generation_count || 0
+        } else {
+          // Insert new record
+          const { data, error } = await getDb()
+            .from('bestauth_usage_tracking')
+            .insert({ user_id: userId, date: today, generation_count: amount })
+            .select('generation_count')
+            .single()
+          
+          if (error) throw error
+          newCount = data?.generation_count || 0
+        }
+        
+        return newCount
+      } catch (err) {
+        console.error('Error incrementing usage:', err)
+        throw err
+      }
     },
 
     async checkLimit(userId: string): Promise<boolean> {
-      const { data, error } = await getDb()
-        .rpc('check_generation_limit', { p_user_id: userId })
-      
-      if (error || data === null) return false
-      
-      return data
+      try {
+        // For now, just check if user exists
+        // TODO: Implement proper limit checking
+        const todayUsage = await this.getToday(userId)
+        const subscription = await db.subscriptions.findByUserId(userId)
+        
+        if (!subscription) {
+          // Free tier: 3 per day
+          return todayUsage < 3
+        }
+        
+        // Check based on subscription tier
+        if (subscription.tier === 'free') {
+          return todayUsage < 3
+        }
+        
+        // Pro and Pro+ have monthly limits, not daily
+        return true
+      } catch (err) {
+        console.error('Error checking limit:', err)
+        return true // Allow on error
+      }
     },
 
     async getMonthlyUsage(userId: string): Promise<number> {

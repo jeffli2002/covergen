@@ -65,7 +65,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
   // Fetch subscription info to check trial status
   useEffect(() => {
     if (user && session) {
-      fetch('/api/subscription/status', {
+      fetch('/api/bestauth/subscription/status', {
         headers: {
           'Authorization': `Bearer ${session.token}`
         }
@@ -127,7 +127,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
     setShowActivationConfirm(false)
     
     try {
-      const response = await fetch('/api/subscription/activate', {
+      const response = await fetch('/api/bestauth/subscription/activate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -142,7 +142,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
           // Immediate activation successful (when API supports it)
           toast.success(data.message || 'Subscription activated successfully!')
           // Refresh subscription info
-          const statusRes = await fetch('/api/subscription/status', {
+          const statusRes = await fetch('/api/bestauth/subscription/status', {
             headers: {
               'Authorization': `Bearer ${session.token}`
             }
