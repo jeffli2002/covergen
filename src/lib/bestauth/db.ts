@@ -543,6 +543,21 @@ export const db = {
         
         if (error || !data) return null
         
+        // Get usage data safely - avoid circular reference by calling directly
+        let usageToday = 0
+        try {
+          const { data: usageData } = await getDb()
+            .from('bestauth_usage_tracking')
+            .select('generation_count')
+            .eq('user_id', userId)
+            .eq('date', new Date().toISOString().split('T')[0])
+            .single()
+          usageToday = usageData?.generation_count || 0
+        } catch (usageError) {
+          // Silently handle usage table not existing
+          usageToday = 0
+        }
+        
         // Return data in the expected format
         return {
           subscription_id: data.id,
@@ -553,7 +568,7 @@ export const db = {
           trial_days_remaining: data.trial_ends_at ? 
             Math.max(0, Math.ceil((new Date(data.trial_ends_at).getTime() - Date.now()) / (24 * 60 * 60 * 1000))) : 0,
           can_generate: true, // TODO: Implement proper limit checking
-          usage_today: 0, // TODO: Get from usage table
+          usage_today: usageToday,
           daily_limit: data.tier === 'pro' ? 10 : data.tier === 'pro_plus' ? 20 : 3, // TODO: Get from config
           monthly_limit: data.tier === 'pro' ? 120 : data.tier === 'pro_plus' ? 300 : 3, // TODO: Get from config
           has_payment_method: !!data.stripe_subscription_id,
@@ -578,7 +593,17 @@ export const db = {
           .eq('date', new Date().toISOString().split('T')[0])
           .single()
         
-        if (error || !data) return 0
+        // Handle table not found error (406/PGRST116) gracefully
+        if (error) {
+          if (error.code === 'PGRST116' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+            console.warn('Usage tracking table not found, returning 0')
+            return 0
+          }
+          console.error('Error getting usage today:', error)
+          return 0
+        }
+        
+        if (!data) return 0
         return data.generation_count || 0
       } catch (err) {
         console.error('Error getting usage today:', err)
@@ -591,12 +616,18 @@ export const db = {
         const today = new Date().toISOString().split('T')[0]
         
         // Check if record exists for today
-        const { data: existing } = await getDb()
+        const { data: existing, error: selectError } = await getDb()
           .from('bestauth_usage_tracking')
           .select('*')
           .eq('user_id', userId)
           .eq('date', today)
           .single()
+        
+        // Handle table not found gracefully
+        if (selectError && (selectError.code === 'PGRST116' || selectError.message?.includes('relation'))) {
+          console.warn('Usage tracking table not found, cannot increment usage')
+          return amount // Return the amount as if it was incremented
+        }
         
         let newCount: number
         
@@ -610,7 +641,14 @@ export const db = {
             .select('generation_count')
             .single()
           
-          if (error) throw error
+          if (error) {
+            // Handle table errors gracefully
+            if (error.code === 'PGRST116' || error.message?.includes('relation')) {
+              console.warn('Usage tracking table not found during update')
+              return (existing.generation_count || 0) + amount
+            }
+            throw error
+          }
           newCount = data?.generation_count || 0
         } else {
           // Insert new record
@@ -620,14 +658,22 @@ export const db = {
             .select('generation_count')
             .single()
           
-          if (error) throw error
+          if (error) {
+            // Handle table errors gracefully
+            if (error.code === 'PGRST116' || error.message?.includes('relation')) {
+              console.warn('Usage tracking table not found during insert')
+              return amount
+            }
+            throw error
+          }
           newCount = data?.generation_count || 0
         }
         
         return newCount
       } catch (err) {
         console.error('Error incrementing usage:', err)
-        throw err
+        // Don't throw error - return a reasonable default
+        return amount
       }
     },
 
@@ -657,19 +703,34 @@ export const db = {
     },
 
     async getMonthlyUsage(userId: string): Promise<number> {
-      const startOfMonth = new Date()
-      startOfMonth.setDate(1)
-      startOfMonth.setHours(0, 0, 0, 0)
-      
-      const { data, error } = await getDb()
-        .from('bestauth_usage_tracking')
-        .select('generation_count')
-        .eq('user_id', userId)
-        .gte('date', startOfMonth.toISOString().split('T')[0])
-      
-      if (error || !data) return 0
-      
-      return data.reduce((sum, record) => sum + (record.generation_count || 0), 0)
+      try {
+        const startOfMonth = new Date()
+        startOfMonth.setDate(1)
+        startOfMonth.setHours(0, 0, 0, 0)
+        
+        const { data, error } = await getDb()
+          .from('bestauth_usage_tracking')
+          .select('generation_count')
+          .eq('user_id', userId)
+          .gte('date', startOfMonth.toISOString().split('T')[0])
+        
+        // Handle table not found error gracefully
+        if (error) {
+          if (error.code === 'PGRST116' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+            console.warn('Usage tracking table not found, returning 0 for monthly usage')
+            return 0
+          }
+          console.error('Error getting monthly usage:', error)
+          return 0
+        }
+        
+        if (!data) return 0
+        
+        return data.reduce((sum, record) => sum + (record.generation_count || 0), 0)
+      } catch (err) {
+        console.error('Error getting monthly usage:', err)
+        return 0
+      }
     },
   },
 

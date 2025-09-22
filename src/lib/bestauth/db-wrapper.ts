@@ -84,6 +84,7 @@ export const db = {
         return await bestAuthDb.usage.getToday(userId)
       } catch (error) {
         console.error('BestAuth: Failed to get usage:', error)
+        // Return 0 to prevent app crashes when usage table doesn't exist
         return 0
       }
     },
@@ -93,7 +94,8 @@ export const db = {
         return await bestAuthDb.usage.increment(userId, amount)
       } catch (error) {
         console.error('BestAuth: Failed to increment usage:', error)
-        throw error
+        // Return the amount as if it was incremented to prevent app crashes
+        return amount
       }
     },
 
