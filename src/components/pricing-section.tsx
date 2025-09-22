@@ -115,8 +115,10 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
   // Fetch subscription info when component mounts or auth changes
   useEffect(() => {
     if (authUser && session) {
+      console.log('[PricingSection] User authenticated, fetching subscription info for:', authUser.email)
       fetchSubscriptionInfo()
     } else {
+      console.log('[PricingSection] No authenticated user, clearing subscription info')
       setSubscriptionInfo(null)
     }
   }, [authUser, session])
@@ -247,14 +249,15 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
             const isCurrentTier = subscriptionInfo?.plan === tier.id || 
                                  (!subscriptionInfo && user?.tier === tier.id)
             
-            // Debug logging for tier comparison
-            if (tier.id === 'pro' && authUser?.email?.includes('jefflee2002')) {
-              console.log(`[PricingSection] Pro tier check for ${authUser.email}:`, {
+            // Debug logging for all tiers when user is logged in
+            if (authUser?.email) {
+              console.log(`[PricingSection] Tier comparison for ${tier.id}:`, {
                 tierId: tier.id,
                 subscriptionPlan: subscriptionInfo?.plan,
                 userTier: user?.tier,
                 isCurrentTier,
-                hasSubscriptionInfo: !!subscriptionInfo
+                hasSubscriptionInfo: !!subscriptionInfo,
+                subscriptionData: subscriptionInfo
               })
             }
             
