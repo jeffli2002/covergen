@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { creemService } from '@/services/payment/creem'
 import { createClient } from '@supabase/supabase-js'
 import { TrialUpgradeService } from '@/services/payment/trial-upgrade'
+import { withAuth, AuthenticatedRequest } from '@/app/api/middleware/withAuth'
 
-// Create service role Supabase client
+// Create service role Supabase client for database operations
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -15,18 +16,13 @@ const supabaseAdmin = createClient(
   }
 )
 
-export async function POST(req: NextRequest) {
+async function handler(req: AuthenticatedRequest) {
   try {
     console.log('Create checkout API called')
     
-    // Verify environment variables
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('Missing Supabase environment variables')
-      return NextResponse.json(
-        { error: 'Server configuration error' },
-        { status: 500 }
-      )
-    }
+    // Get user from BestAuth middleware
+    const user = req.user
+    console.log('Authenticated user:', user.email)
     
     // Get the request body
     const body = await req.json()
@@ -38,33 +34,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'Missing required parameters' },
         { status: 400 }
-      )
-    }
-
-    // Verify user is authenticated
-    const authHeader = req.headers.get('authorization')
-    console.log('Auth header present:', !!authHeader)
-    
-    if (!authHeader?.startsWith('Bearer ')) {
-      console.error('Missing or invalid auth header')
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      )
-    }
-
-    const token = authHeader.substring(7)
-    console.log('Token extracted:', token.substring(0, 20) + '...')
-    
-    // Verify the token and get user
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
-    
-    if (authError || !user) {
-      console.error('Auth verification failed:', authError)
-      console.error('User data:', user)
-      return NextResponse.json(
-        { error: authError?.message || 'Invalid authentication' },
-        { status: 401 }
       )
     }
 
@@ -173,6 +142,9 @@ export async function POST(req: NextRequest) {
     )
   }
 }
+
+// Export with auth middleware
+export const POST = withAuth(handler)
 
 // Handle preflight requests
 export async function OPTIONS(req: NextRequest) {

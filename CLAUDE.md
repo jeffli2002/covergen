@@ -385,3 +385,144 @@ const cookieOptions = {
 - Production environment must use HTTPS for `SameSite=None; Secure` to work
 - Local development may still have issues due to HTTP limitations
 - All OAuth-related cookies now properly configured for Chrome compatibility
+
+## BestAuth Integration (2025-01-28)
+
+### Overview
+We are migrating from Supabase Auth to BestAuth as the primary authentication system. BestAuth is a custom authentication solution with JWT-based sessions, OAuth support, and comprehensive subscription management. Supabase Auth remains as a backup fallback option.
+
+### Migration Status
+- ✅ **Database Migration**: Complete - all user data migrated to BestAuth tables
+- ✅ **Core BestAuth Library**: Implemented with full auth functionality
+- ✅ **React Hooks**: `useBestAuth` hook available for client-side auth
+- ✅ **API Routes**: BestAuth endpoints created for auth operations
+- ⚠️ **UI Integration**: Partial - account page updated, other components pending
+- ❌ **Payment Integration**: Pending - needs webhook updates
+- ❌ **Generation Service**: Pending - needs session validation updates
+
+### BestAuth Architecture
+
+#### Core Components
+```
+src/lib/bestauth/
+  ├── auth.ts              # Core auth functions (signin, signup, OAuth)
+  ├── db.ts                # Database client with connection handling
+  ├── middleware.ts        # Route protection middleware
+  ├── session.ts           # JWT session management
+  ├── config.ts            # Configuration and types
+  └── schema/              # Migration scripts (completed)
+```
+
+#### Client Integration
+```typescript
+// Use the BestAuth hook
+import { useBestAuth } from '@/lib/bestauth/react'
+
+function Component() {
+  const { user, signIn, signOut, loading } = useBestAuth()
+  
+  // All auth operations available
+  await signIn(email, password)
+  await signOut()
+}
+```
+
+### Unified Auth Strategy (Dual-System Support)
+
+#### Auth Adapter Pattern
+We use an adapter pattern to support both BestAuth (primary) and Supabase (fallback):
+
+```typescript
+// Unified auth service handles both systems
+const authService = new UnifiedAuthService()
+await authService.signIn(email, password) // Tries BestAuth first, falls back to Supabase
+```
+
+#### Session Management
+Sessions are unified across both systems:
+- BestAuth sessions use JWT tokens in httpOnly cookies
+- Supabase sessions maintained for backward compatibility
+- Unified session type for API routes and middleware
+
+#### API Protection
+All API routes use unified authentication:
+```typescript
+// Protected API route
+export const GET = withAuth(async (req, session) => {
+  // session.provider tells you which auth system
+  // session.userId works for both systems
+})
+```
+
+### Integration Checklist
+
+#### Phase 1: Core Integration ✅
+- [x] BestAuth library implementation
+- [x] Database migration and schema
+- [x] React hooks for client-side auth
+- [x] Basic API routes
+
+#### Phase 2: UI Components 🚧
+- [ ] SignIn/SignUp forms with BestAuth
+- [ ] Main navigation auth state
+- [ ] Protected route wrapper
+- [ ] OAuth provider buttons
+
+#### Phase 3: Service Integration 📋
+- [ ] Generation service auth validation
+- [ ] Payment webhook user lookup
+- [ ] Subscription management
+- [ ] Usage tracking and limits
+
+#### Phase 4: Full Migration 📋
+- [ ] Email templates for BestAuth
+- [ ] Password reset flow
+- [ ] Magic link implementation
+- [ ] User migration scripts
+
+### Key Files to Update
+
+1. **Navigation Components**
+   - Update to use `useBestAuth` hook
+   - Replace Supabase session checks
+
+2. **API Routes**
+   - Add unified auth middleware
+   - Update user ID references
+
+3. **Payment Integration**
+   - Update Stripe webhooks
+   - Map BestAuth users to customers
+
+4. **Generation Service**
+   - Validate BestAuth sessions
+   - Track usage with BestAuth user IDs
+
+### Development Commands
+
+```bash
+# Run BestAuth tests
+npm run test:bestauth
+
+# Check BestAuth database connection
+npm run bestauth:db:check
+
+# Run migration status check
+npm run bestauth:migration:status
+```
+
+### Environment Variables
+Ensure these are set for BestAuth:
+```
+BESTAUTH_DATABASE_URL=postgresql://...
+BESTAUTH_JWT_SECRET=your-secret-key
+BESTAUTH_GOOGLE_CLIENT_ID=...
+BESTAUTH_GOOGLE_CLIENT_SECRET=...
+```
+
+### Important Notes
+- BestAuth is the primary auth system going forward
+- Supabase Auth remains only as a fallback
+- All new features should use BestAuth
+- User IDs may differ between systems - use mapping table
+- Test both auth flows during development

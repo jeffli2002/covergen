@@ -206,67 +206,82 @@ class CreemPaymentService {
         const baseUrl = window.location.origin
         const apiUrl = `${baseUrl}/api/payment/create-checkout`
         
-        // Get auth token with error handling
-        const authService = (await import('@/services/authService')).default
+        // Check auth configuration
+        const { authConfig } = await import('@/config/auth.config')
         
-        // Ensure auth is initialized
-        if (!authService.isAuthenticated()) {
-          console.log('[CreemService] User not authenticated, waiting for auth...')
-          await authService.waitForAuth()
+        let headers: HeadersInit = {
+          'Content-Type': 'application/json',
         }
         
-        // Force refresh session to ensure we have a fresh token
-        console.log('[CreemService] Refreshing session to ensure fresh token...')
-        const refreshResult = await authService.refreshSession()
+        let credentials: RequestCredentials = 'same-origin'
         
-        if (!refreshResult.session) {
-          console.error('[CreemService] Failed to refresh session:', refreshResult.error)
+        if (authConfig.USE_BESTAUTH) {
+          // BestAuth uses session cookies
+          console.log('[CreemService] Using BestAuth - including credentials')
+          credentials = 'include'
+        } else {
+          // Supabase uses Bearer tokens
+          const authService = (await import('@/services/authService')).default
           
-          // Try to get current session as fallback
-          const sessionResult = await authService.ensureValidSession()
-          if (!sessionResult.success || !sessionResult.session) {
-            throw new Error(sessionResult.error || 'Authentication required - unable to get valid session')
+          // Ensure auth is initialized
+          if (!authService.isAuthenticated()) {
+            console.log('[CreemService] User not authenticated, waiting for auth...')
+            await authService.waitForAuth()
           }
-        }
-        
-        // Get the current session (should be fresh now)
-        const session = authService.getCurrentSession()
-        
-        if (!session || !session.access_token) {
-          console.error('[CreemService] No valid session after refresh')
-          throw new Error('Authentication required - please sign in again')
-        }
-        
-        const authToken = session.access_token
-        
-        console.log('[CreemService] Session refreshed:', {
-          hasSession: !!session,
-          hasToken: !!authToken,
-          tokenPrefix: authToken?.substring(0, 20),
-          expiresAt: session.expires_at,
-          expiresIn: session.expires_in
-        })
-        
-        // Check if token will expire soon (within 1 minute)
-        if (session.expires_at) {
-          const expiresAt = new Date(session.expires_at * 1000)
-          const now = new Date()
-          const timeUntilExpiry = expiresAt.getTime() - now.getTime()
-          console.log('[CreemService] Token expires in:', Math.floor(timeUntilExpiry / 1000), 'seconds')
           
-          if (timeUntilExpiry < 60000) { // Less than 1 minute
-            console.error('[CreemService] Token is about to expire, cannot proceed')
-            throw new Error('Session expired - please sign in again')
+          // Force refresh session to ensure we have a fresh token
+          console.log('[CreemService] Refreshing session to ensure fresh token...')
+          const refreshResult = await authService.refreshSession()
+          
+          if (!refreshResult.session) {
+            console.error('[CreemService] Failed to refresh session:', refreshResult.error)
+            
+            // Try to get current session as fallback
+            const sessionResult = await authService.ensureValidSession()
+            if (!sessionResult.success || !sessionResult.session) {
+              throw new Error(sessionResult.error || 'Authentication required - unable to get valid session')
+            }
           }
+          
+          // Get the current session (should be fresh now)
+          const session = authService.getCurrentSession()
+          
+          if (!session || !session.access_token) {
+            console.error('[CreemService] No valid session after refresh')
+            throw new Error('Authentication required - please sign in again')
+          }
+          
+          const authToken = session.access_token
+          
+          console.log('[CreemService] Session refreshed:', {
+            hasSession: !!session,
+            hasToken: !!authToken,
+            tokenPrefix: authToken?.substring(0, 20),
+            expiresAt: session.expires_at,
+            expiresIn: session.expires_in
+          })
+          
+          // Check if token will expire soon (within 1 minute)
+          if (session.expires_at) {
+            const expiresAt = new Date(session.expires_at * 1000)
+            const now = new Date()
+            const timeUntilExpiry = expiresAt.getTime() - now.getTime()
+            console.log('[CreemService] Token expires in:', Math.floor(timeUntilExpiry / 1000), 'seconds')
+            
+            if (timeUntilExpiry < 60000) { // Less than 1 minute
+              console.error('[CreemService] Token is about to expire, cannot proceed')
+              throw new Error('Session expired - please sign in again')
+            }
+          }
+          
+          headers.Authorization = `Bearer ${authToken}`
         }
         
         console.log('[CreemService] Making API request to:', apiUrl)
         const response = await fetch(apiUrl, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken}`
-          },
+          headers,
+          credentials,
           body: JSON.stringify({
             planId,
             successUrl,

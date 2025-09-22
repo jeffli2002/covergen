@@ -146,9 +146,16 @@ export class BestAuthSubscriptionService {
   /**
    * Start a trial for a user
    */
-  async startTrial(userId: string, tier: 'pro' | 'pro_plus', trialDays: number = 7): Promise<any> {
+  async startTrial(userId: string, tier: 'pro' | 'pro_plus', trialDays?: number): Promise<any> {
+    const config = getSubscriptionConfig()
+    const actualTrialDays = trialDays ?? config.trialDays
+    
+    // Calculate trial end date
     const trialEndsAt = new Date()
-    trialEndsAt.setDate(trialEndsAt.getDate() + trialDays)
+    trialEndsAt.setDate(trialEndsAt.getDate() + actualTrialDays)
+    
+    // Get trial limits from configuration
+    const trialLimits = this.getSubscriptionLimits(tier, true)
     
     return await this.createOrUpdateSubscription({
       userId,
@@ -156,7 +163,12 @@ export class BestAuthSubscriptionService {
       status: 'trialing',
       trialEndsAt,
       currentPeriodStart: new Date(),
-      currentPeriodEnd: trialEndsAt
+      currentPeriodEnd: trialEndsAt,
+      metadata: {
+        trial_daily_limit: trialLimits.daily,
+        trial_total_limit: trialLimits.monthly,
+        trial_days: actualTrialDays
+      }
     })
   }
 
@@ -290,15 +302,38 @@ export class BestAuthSubscriptionService {
     const config = getSubscriptionConfig()
     
     if (isTrialing) {
-      return {
-        daily: tier === 'pro' ? 10 : tier === 'pro_plus' ? 20 : 3,
-        monthly: tier === 'pro' ? 300 : tier === 'pro_plus' ? 600 : 90
+      // Use configured trial limits from environment variables
+      if (tier === 'pro') {
+        return {
+          daily: config.limits.pro.trial_daily,
+          monthly: config.limits.pro.trial_total || 0
+        }
+      } else if (tier === 'pro_plus') {
+        return {
+          daily: config.limits.pro_plus.trial_daily,
+          monthly: config.limits.pro_plus.trial_total || 0
+        }
+      } else {
+        // Free tier doesn't have trials, use regular limits
+        return {
+          daily: config.limits.free.daily,
+          monthly: config.limits.free.monthly
+        }
       }
     }
     
-    return {
-      daily: config.limits[tier].daily,
-      monthly: config.limits[tier].monthly
+    // Regular (non-trial) limits
+    if (tier === 'free') {
+      return {
+        daily: config.limits.free.daily,
+        monthly: config.limits.free.monthly
+      }
+    } else {
+      // Pro and Pro+ use monthly limits only when not in trial
+      return {
+        daily: config.limits[tier].monthly, // No daily limit for paid plans
+        monthly: config.limits[tier].monthly
+      }
     }
   }
 }

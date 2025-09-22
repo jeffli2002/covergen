@@ -26,7 +26,10 @@ export const db = {
         return await bestAuthDb.subscriptions.getStatus(userId)
       } catch (error) {
         console.error('BestAuth: Failed to get subscription status:', error)
-        // Return default free subscription status
+        // Return default free subscription status with config values
+        const { getSubscriptionConfig } = require('@/lib/subscription-config')
+        const config = getSubscriptionConfig()
+        
         return {
           subscription_id: null,
           user_id: userId,
@@ -36,8 +39,8 @@ export const db = {
           trial_days_remaining: 0,
           can_generate: true,
           usage_today: 0,
-          daily_limit: 3,
-          monthly_limit: 90,
+          daily_limit: config.limits.free.daily,
+          monthly_limit: config.limits.free.monthly,
           has_payment_method: false,
           requires_payment_setup: false,
           next_billing_date: null

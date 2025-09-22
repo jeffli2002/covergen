@@ -22,16 +22,20 @@ export const db = {
           .eq('email', email)
           .single()
       
-      if (error || !data) return null
-      
-      return {
-        id: data.id,
-        email: data.email,
-        emailVerified: data.email_verified,
-        name: data.name,
-        avatarUrl: data.avatar_url,
-        createdAt: new Date(data.created_at),
-        updatedAt: new Date(data.updated_at),
+        if (error || !data) return null
+        
+        return {
+          id: data.id,
+          email: data.email,
+          emailVerified: data.email_verified,
+          name: data.name,
+          avatarUrl: data.avatar_url,
+          createdAt: new Date(data.created_at),
+          updatedAt: new Date(data.updated_at),
+        }
+      } catch (error) {
+        console.error('Error finding user by email:', error)
+        return null
       }
     },
 

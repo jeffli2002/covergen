@@ -23,7 +23,19 @@ ON CONFLICT (id) DO UPDATE SET
   updated_at = EXCLUDED.updated_at
 WHERE EXCLUDED.updated_at > bestauth_users.updated_at;
 
--- 2. Migrate user profiles
+-- 2. Create profiles table if it doesn't exist
+CREATE TABLE IF NOT EXISTS public.profiles (
+    id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+    email TEXT,
+    full_name TEXT,
+    avatar_url TEXT,
+    phone TEXT,
+    metadata JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 3. Migrate user profiles
 INSERT INTO bestauth_user_profiles (user_id, full_name, avatar_url, phone, metadata, created_at, updated_at)
 SELECT 
   u.id as user_id,
@@ -50,15 +62,13 @@ ON CONFLICT (user_id) DO UPDATE SET
   metadata = COALESCE(EXCLUDED.metadata, bestauth_user_profiles.metadata),
   updated_at = GREATEST(EXCLUDED.updated_at, bestauth_user_profiles.updated_at);
 
--- 3. Migrate subscriptions (CRITICAL - preserves all trial and billing data)
+-- 4. Migrate subscriptions (CRITICAL - preserves all trial and billing data)
 INSERT INTO bestauth_subscriptions (
   user_id,
   tier,
   status,
   stripe_customer_id,
   stripe_subscription_id,
-  stripe_price_id,
-  stripe_payment_method_id,
   trial_started_at,
   trial_ended_at,
   trial_ends_at,
@@ -80,20 +90,14 @@ SELECT
   COALESCE(sc.status::text, 'active')::bestauth.subscription_status,
   sc.stripe_customer_id,
   sc.stripe_subscription_id,
-  sc.stripe_price_id,
-  -- Get payment method from stripe_customers if available
-  COALESCE(
-    cust.default_payment_method,
-    sc.stripe_payment_method_id
-  ) as stripe_payment_method_id,
   sc.trial_started_at,
   sc.trial_ended_at,
-  COALESCE(sc.trial_ends_at, sc.expires_at) as trial_ends_at, -- Handle both fields
+  sc.expires_at as trial_ends_at, -- Use expires_at as trial_ends_at
   sc.current_period_start,
   sc.current_period_end,
   COALESCE(sc.cancel_at_period_end, false),
-  sc.cancel_at,
-  sc.cancelled_at,
+  sc.canceled_at as cancel_at,
+  sc.canceled_at as cancelled_at,
   sc.expires_at,
   -- Set generation limits based on tier
   CASE 
@@ -115,15 +119,12 @@ SELECT
   sc.created_at,
   sc.updated_at
 FROM public.subscriptions_consolidated sc
-LEFT JOIN public.stripe_customers cust ON sc.stripe_customer_id = cust.id
 WHERE sc.user_id IS NOT NULL
 ON CONFLICT (user_id) DO UPDATE SET
   tier = EXCLUDED.tier,
   status = EXCLUDED.status,
   stripe_customer_id = COALESCE(EXCLUDED.stripe_customer_id, bestauth_subscriptions.stripe_customer_id),
   stripe_subscription_id = COALESCE(EXCLUDED.stripe_subscription_id, bestauth_subscriptions.stripe_subscription_id),
-  stripe_price_id = COALESCE(EXCLUDED.stripe_price_id, bestauth_subscriptions.stripe_price_id),
-  stripe_payment_method_id = COALESCE(EXCLUDED.stripe_payment_method_id, bestauth_subscriptions.stripe_payment_method_id),
   trial_started_at = COALESCE(EXCLUDED.trial_started_at, bestauth_subscriptions.trial_started_at),
   trial_ended_at = COALESCE(EXCLUDED.trial_ended_at, bestauth_subscriptions.trial_ended_at),
   trial_ends_at = COALESCE(EXCLUDED.trial_ends_at, bestauth_subscriptions.trial_ends_at),
@@ -136,62 +137,167 @@ ON CONFLICT (user_id) DO UPDATE SET
   metadata = bestauth_subscriptions.metadata || EXCLUDED.metadata,
   updated_at = GREATEST(EXCLUDED.updated_at, bestauth_subscriptions.updated_at);
 
--- 4. Migrate usage data
--- First aggregate daily usage from user_usage table
-INSERT INTO bestauth_usage_tracking (user_id, date, generation_count, created_at, updated_at)
-SELECT 
-  user_id,
-  DATE(date) as date,
-  SUM(generation_count) as generation_count,
-  MIN(created_at) as created_at,
-  MAX(updated_at) as updated_at
-FROM public.user_usage
-WHERE user_id IN (SELECT id FROM bestauth_users)
-GROUP BY user_id, DATE(date)
-ON CONFLICT (user_id, date) DO UPDATE SET
-  generation_count = GREATEST(
-    bestauth_usage_tracking.generation_count,
-    EXCLUDED.generation_count
-  ),
-  updated_at = GREATEST(
-    bestauth_usage_tracking.updated_at,
-    EXCLUDED.updated_at
-  );
+-- 5. Migrate usage data (if user_usage table exists)
+DO $$
+DECLARE
+  has_date_column BOOLEAN;
+  has_usage_date_column BOOLEAN;
+  has_month_key_column BOOLEAN;
+  has_generation_count_column BOOLEAN;
+  has_generations_count_column BOOLEAN;
+  has_usage_count_column BOOLEAN;
+BEGIN
+  IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'user_usage') THEN
+    -- Check which columns exist
+    SELECT EXISTS(
+      SELECT 1 FROM information_schema.columns 
+      WHERE table_schema = 'public' AND table_name = 'user_usage' AND column_name = 'date'
+    ) INTO has_date_column;
+    
+    SELECT EXISTS(
+      SELECT 1 FROM information_schema.columns 
+      WHERE table_schema = 'public' AND table_name = 'user_usage' AND column_name = 'usage_date'
+    ) INTO has_usage_date_column;
+    
+    SELECT EXISTS(
+      SELECT 1 FROM information_schema.columns 
+      WHERE table_schema = 'public' AND table_name = 'user_usage' AND column_name = 'month_key'
+    ) INTO has_month_key_column;
+    
+    SELECT EXISTS(
+      SELECT 1 FROM information_schema.columns 
+      WHERE table_schema = 'public' AND table_name = 'user_usage' AND column_name = 'generation_count'
+    ) INTO has_generation_count_column;
+    
+    SELECT EXISTS(
+      SELECT 1 FROM information_schema.columns 
+      WHERE table_schema = 'public' AND table_name = 'user_usage' AND column_name = 'generations_count'
+    ) INTO has_generations_count_column;
+    
+    SELECT EXISTS(
+      SELECT 1 FROM information_schema.columns 
+      WHERE table_schema = 'public' AND table_name = 'user_usage' AND column_name = 'usage_count'
+    ) INTO has_usage_count_column;
+    
+    -- Migrate based on which columns exist
+    IF has_date_column AND has_generation_count_column THEN
+      -- Schema with date and generation_count columns
+      INSERT INTO bestauth_usage_tracking (user_id, date, generation_count, created_at, updated_at)
+      SELECT 
+        user_id,
+        date::date,
+        generation_count,
+        created_at,
+        updated_at
+      FROM public.user_usage
+      WHERE user_id IN (SELECT id FROM bestauth_users)
+      ON CONFLICT (user_id, date) DO UPDATE SET
+        generation_count = GREATEST(
+          bestauth_usage_tracking.generation_count,
+          EXCLUDED.generation_count
+        ),
+        updated_at = GREATEST(
+          bestauth_usage_tracking.updated_at,
+          EXCLUDED.updated_at
+        );
+      RAISE NOTICE 'Migrated usage data from user_usage table (date/generation_count schema)';
+    
+    ELSIF has_usage_date_column AND has_generations_count_column THEN
+      -- Schema with usage_date and generations_count columns
+      INSERT INTO bestauth_usage_tracking (user_id, date, generation_count, created_at, updated_at)
+      SELECT 
+        user_id,
+        usage_date::date,
+        generations_count,
+        created_at,
+        updated_at
+      FROM public.user_usage
+      WHERE user_id IN (SELECT id FROM bestauth_users)
+      ON CONFLICT (user_id, date) DO UPDATE SET
+        generation_count = GREATEST(
+          bestauth_usage_tracking.generation_count,
+          EXCLUDED.generation_count
+        ),
+        updated_at = GREATEST(
+          bestauth_usage_tracking.updated_at,
+          EXCLUDED.updated_at
+        );
+      RAISE NOTICE 'Migrated usage data from user_usage table (usage_date/generations_count schema)';
+    
+    ELSIF has_month_key_column AND has_usage_count_column THEN
+      -- Schema with month_key and usage_count columns (aggregate by month)
+      INSERT INTO bestauth_usage_tracking (user_id, date, generation_count, created_at, updated_at)
+      SELECT 
+        user_id,
+        -- Convert month_key to first day of month
+        (month_key || '-01')::date as date,
+        usage_count,
+        created_at,
+        updated_at
+      FROM public.user_usage
+      WHERE user_id IN (SELECT id FROM bestauth_users)
+      ON CONFLICT (user_id, date) DO UPDATE SET
+        generation_count = GREATEST(
+          bestauth_usage_tracking.generation_count,
+          EXCLUDED.generation_count
+        ),
+        updated_at = GREATEST(
+          bestauth_usage_tracking.updated_at,
+          EXCLUDED.updated_at
+        );
+      RAISE NOTICE 'Migrated usage data from user_usage table (month_key/usage_count schema)';
+      
+    ELSE
+      RAISE NOTICE 'user_usage table has unexpected schema, skipping usage data migration';
+    END IF;
+  ELSE
+    RAISE NOTICE 'user_usage table not found, skipping usage data migration';
+  END IF;
+END $$;
 
--- 5. Migrate payment history from Stripe webhooks/events
-INSERT INTO bestauth_payment_history (
-  user_id,
-  stripe_payment_intent_id,
-  stripe_invoice_id,
-  amount,
-  currency,
-  status,
-  description,
-  metadata,
-  created_at
-)
-SELECT DISTINCT
-  sc.user_id,
-  inv.payment_intent as stripe_payment_intent_id,
-  inv.id as stripe_invoice_id,
-  inv.amount_paid as amount,
-  UPPER(inv.currency) as currency,
-  inv.status,
-  COALESCE(inv.description, 'Subscription payment') as description,
-  jsonb_build_object(
-    'stripe_invoice_number', inv.number,
-    'billing_reason', inv.billing_reason,
-    'migrated_from', 'stripe_invoices'
-  ) as metadata,
-  to_timestamp(inv.created) as created_at
-FROM public.stripe_invoices inv
-JOIN public.subscriptions_consolidated sc ON sc.stripe_customer_id = inv.customer
-WHERE inv.status = 'paid'
-  AND sc.user_id IS NOT NULL
-  AND sc.user_id IN (SELECT id FROM bestauth_users)
-ON CONFLICT DO NOTHING; -- Avoid duplicates
+-- 6. Migrate payment history from Stripe webhooks/events (if stripe_invoices table exists)
+DO $$
+BEGIN
+  IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'stripe_invoices') THEN
+    INSERT INTO bestauth_payment_history (
+      user_id,
+      stripe_payment_intent_id,
+      stripe_invoice_id,
+      amount,
+      currency,
+      status,
+      description,
+      metadata,
+      created_at
+    )
+    SELECT DISTINCT
+      sc.user_id,
+      inv.payment_intent as stripe_payment_intent_id,
+      inv.id as stripe_invoice_id,
+      inv.amount_paid as amount,
+      UPPER(inv.currency) as currency,
+      inv.status,
+      COALESCE(inv.description, 'Subscription payment') as description,
+      jsonb_build_object(
+        'stripe_invoice_number', inv.number,
+        'billing_reason', inv.billing_reason,
+        'migrated_from', 'stripe_invoices'
+      ) as metadata,
+      to_timestamp(inv.created) as created_at
+    FROM public.stripe_invoices inv
+    JOIN public.subscriptions_consolidated sc ON sc.stripe_customer_id = inv.customer
+    WHERE inv.status = 'paid'
+      AND sc.user_id IS NOT NULL
+      AND sc.user_id IN (SELECT id FROM bestauth_users)
+    ON CONFLICT DO NOTHING; -- Avoid duplicates
+    
+    RAISE NOTICE 'Migrated payment history from stripe_invoices table';
+  ELSE
+    RAISE NOTICE 'stripe_invoices table not found, skipping payment history migration';
+  END IF;
+END $$;
 
--- 6. Create default free subscriptions for users without subscriptions
+-- 7. Create default free subscriptions for users without subscriptions
 INSERT INTO bestauth_subscriptions (user_id, tier, status, created_at)
 SELECT 
   u.id,
@@ -202,7 +308,7 @@ FROM bestauth_users u
 LEFT JOIN bestauth_subscriptions s ON u.id = s.user_id
 WHERE s.user_id IS NULL;
 
--- 7. Fix any OAuth account mappings
+-- 8. Fix any OAuth account mappings
 INSERT INTO bestauth_oauth_accounts (
   user_id,
   provider,
@@ -235,7 +341,7 @@ WHERE u.id IN (SELECT id FROM bestauth_users)
 ON CONFLICT (provider, provider_account_id) DO UPDATE SET
   user_id = EXCLUDED.user_id;
 
--- 8. Verify migration
+-- 9. Verify migration
 DO $$
 DECLARE
   supabase_count INTEGER;

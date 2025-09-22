@@ -3,9 +3,11 @@ import { generateImage, GEMINI_MODEL } from '@/lib/openrouter'
 import { createClient } from '@/lib/supabase/server'
 import { checkGenerationLimit, incrementGenerationCount, getUserSubscriptionInfo } from '@/lib/generation-limits'
 import { getSubscriptionConfig } from '@/lib/subscription-config'
+import { withAuth, AuthenticatedRequest, getAuthenticatedUser } from '@/app/api/middleware/withAuth'
+import { authConfig } from '@/config/auth.config'
 
-// Image generation endpoint
-export async function POST(request: NextRequest) {
+// Image generation endpoint handler
+async function handler(request: AuthenticatedRequest) {
   try {
     // Check request size before parsing
     const contentLength = request.headers.get('content-length')
@@ -36,9 +38,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check generation limits for authenticated users
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    // Get authenticated user from request (BestAuth middleware adds it)
+    const user = request.user
     
     if (user) {
       // Check current generation limit
@@ -386,4 +387,25 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
+}
+
+// Export POST handler
+export async function POST(request: NextRequest) {
+  // Check if BestAuth is enabled
+  if (authConfig.USE_BESTAUTH) {
+    // Try to get authenticated user
+    const user = await getAuthenticatedUser(request)
+    if (user) {
+      // User is authenticated, add user to request and call handler
+      const authenticatedRequest = request as AuthenticatedRequest
+      authenticatedRequest.user = user
+      return handler(authenticatedRequest)
+    }
+  }
+  
+  // For unauthenticated requests or when BestAuth is disabled
+  // Create a dummy request with no user
+  const unauthenticatedRequest = request as AuthenticatedRequest
+  unauthenticatedRequest.user = null
+  return handler(unauthenticatedRequest)
 }

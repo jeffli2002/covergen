@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { creemService } from '@/services/payment/creem'
 import { createClient } from '@supabase/supabase-js'
+import { withAuth, AuthenticatedRequest } from '@/app/api/middleware/withAuth'
 
-// Create service role Supabase client
+// Create service role Supabase client for database operations
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -14,8 +15,11 @@ const supabaseAdmin = createClient(
   }
 )
 
-export async function POST(req: NextRequest) {
+async function handler(req: AuthenticatedRequest) {
   try {
+    // Get user from BestAuth middleware
+    const user = req.user
+    
     // Get the request body
     const { subscriptionId, cancelAtPeriodEnd = true } = await req.json()
 
@@ -23,27 +27,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'Missing subscription ID' },
         { status: 400 }
-      )
-    }
-
-    // Verify user is authenticated
-    const authHeader = req.headers.get('authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    const token = authHeader.substring(7)
-    
-    // Verify the token and get user
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
-    
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Invalid authentication' },
-        { status: 401 }
       )
     }
 
@@ -92,6 +75,9 @@ export async function POST(req: NextRequest) {
 }
 
 // Handle preflight requests
+// Export with auth middleware
+export const POST = withAuth(handler)
+
 export async function OPTIONS(req: NextRequest) {
   return new NextResponse(null, {
     status: 200,
