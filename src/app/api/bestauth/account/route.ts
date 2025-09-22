@@ -9,8 +9,13 @@ export async function GET(request: NextRequest) {
   console.log('[BestAuth Account API] Request received')
   
   try {
+    console.log('[BestAuth Account API] Starting session validation...')
     const session = await validateSessionFromRequest(request)
-    console.log('[BestAuth Account API] Session validation:', session.success)
+    console.log('[BestAuth Account API] Session validation result:', { 
+      success: session.success, 
+      hasData: !!session.data,
+      hasUser: !!session.data?.user 
+    })
     
     if (!session.success || !session.data) {
       console.error('[BestAuth Account API] Unauthorized - no valid session')
@@ -23,31 +28,67 @@ export async function GET(request: NextRequest) {
     // Get user, profile, subscription, and payment history
     console.log('[BestAuth Account API] Fetching user data...')
     
-    // Fetch data with individual error handling
-    const user = await db.users.findById(userId).catch(err => {
+    // Helper function to add timeout to promises
+    const withTimeout = <T>(promise: Promise<T>, seconds: number, operation: string): Promise<T> => {
+      return Promise.race([
+        promise,
+        new Promise<T>((_, reject) => 
+          setTimeout(() => reject(new Error(`${operation} timed out after ${seconds}s`)), seconds * 1000)
+        )
+      ])
+    }
+    
+    // Fetch data with individual error handling, timeouts, and detailed logging
+    console.log('[BestAuth Account API] Step 1: Fetching user...')
+    const user = await withTimeout(
+      db.users.findById(userId), 
+      5, 
+      'User fetch'
+    ).catch(err => {
       console.error('[BestAuth Account API] Error fetching user:', err)
       return null
     })
+    console.log('[BestAuth Account API] User fetch complete:', !!user)
     
-    const profile = await bestAuthSubscriptionService.getUserProfile(userId).catch(err => {
+    console.log('[BestAuth Account API] Step 2: Fetching profile...')
+    const profile = await withTimeout(
+      bestAuthSubscriptionService.getUserProfile(userId), 
+      5, 
+      'Profile fetch'
+    ).catch(err => {
       console.error('[BestAuth Account API] Error fetching profile:', err)
       return null
     })
+    console.log('[BestAuth Account API] Profile fetch complete:', !!profile)
     
-    const subscription = await bestAuthSubscriptionService.getUserSubscription(userId).catch(err => {
+    console.log('[BestAuth Account API] Step 3: Fetching subscription...')
+    const subscription = await withTimeout(
+      bestAuthSubscriptionService.getUserSubscription(userId), 
+      10, 
+      'Subscription fetch'
+    ).catch(err => {
       console.error('[BestAuth Account API] Error fetching subscription:', err)
       return null
     })
+    console.log('[BestAuth Account API] Subscription fetch complete:', !!subscription)
     
-    const payments = await bestAuthSubscriptionService.getPaymentHistory(userId, 5).catch(err => {
+    console.log('[BestAuth Account API] Step 4: Fetching payments...')
+    const payments = await withTimeout(
+      bestAuthSubscriptionService.getPaymentHistory(userId, 5), 
+      5, 
+      'Payments fetch'
+    ).catch(err => {
       console.error('[BestAuth Account API] Error fetching payments:', err)
       return []
     })
+    console.log('[BestAuth Account API] Payments fetch complete:', payments?.length || 0)
     
     if (!user) {
+      console.log('[BestAuth Account API] User not found, returning 404')
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
     
+    console.log('[BestAuth Account API] Formatting response...')
     // Format response for compatibility
     const response = {
       user: {
@@ -86,6 +127,7 @@ export async function GET(request: NextRequest) {
       }
     }
     
+    console.log('[BestAuth Account API] Returning response successfully')
     return NextResponse.json(response)
   } catch (error) {
     console.error('Account API error:', error)
