@@ -21,7 +21,7 @@ async function handler(req: AuthenticatedRequest) {
     console.log('Create checkout API called')
     
     // Get user from BestAuth middleware
-    const user = req.user
+    const user = req.user!  // withAuth middleware ensures user is not null
     console.log('Authenticated user:', user.email)
     
     // Get the request body

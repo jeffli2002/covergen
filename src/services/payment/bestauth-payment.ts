@@ -1,4 +1,6 @@
-import { SUBSCRIPTION_PLANS, type PlanId } from '@/lib/subscription-config'
+import { SUBSCRIPTION_PLANS } from '@/services/payment/creem'
+
+type PlanId = 'free' | 'pro' | 'pro_plus'
 
 interface CreateCheckoutSessionParams {
   userId: string

@@ -18,7 +18,7 @@ const supabaseAdmin = createClient(
 async function handler(req: AuthenticatedRequest) {
   try {
     // Get user from BestAuth middleware
-    const user = req.user
+    const user = req.user!  // withAuth middleware ensures user is not null
     
     // Get the request body
     const { subscriptionId, cancelAtPeriodEnd = true } = await req.json()

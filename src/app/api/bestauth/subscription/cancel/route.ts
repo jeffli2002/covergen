@@ -34,8 +34,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Check if already cancelled
-    if (subscription.status === 'cancelled' || 
-        (subscription.status === 'active' && subscription.cancel_at_period_end)) {
+    if (subscription.status === 'cancelled') {
       return NextResponse.json({
         success: false,
         message: 'Subscription is already cancelled',
