@@ -1,5 +1,5 @@
 // BestAuth Subscription Service
-import { db } from '@/lib/bestauth/db'
+import { db } from '@/lib/bestauth/db-wrapper'
 import { getSubscriptionConfig } from '@/lib/subscription-config'
 
 export interface SubscriptionStatus {

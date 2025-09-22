@@ -1,28 +1,26 @@
 // BestAuth Database Client
-import { createClient } from '@supabase/supabase-js'
+import { getBestAuthSupabaseClient } from './db-client'
 import type { User, Session, OAuthAccount } from './types'
 
-// Initialize Supabase client with service role for auth operations
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
+// Helper to get database client with error handling
+function getDb() {
+  const client = getBestAuthSupabaseClient()
+  if (!client) {
+    throw new Error('BestAuth: Database connection not available. Check environment variables.')
   }
-)
+  return client
+}
 
 export const db = {
   // User operations
   users: {
     async findByEmail(email: string): Promise<User | null> {
-      const { data, error } = await supabase
-        .from('bestauth_users')
-        .select('*')
-        .eq('email', email)
-        .single()
+      try {
+        const { data, error } = await getDb()
+          .from('bestauth_users')
+          .select('*')
+          .eq('email', email)
+          .single()
       
       if (error || !data) return null
       
@@ -38,7 +36,7 @@ export const db = {
     },
 
     async findById(id: string): Promise<User | null> {
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .from('bestauth_users')
         .select('*')
         .eq('id', id)
@@ -63,7 +61,7 @@ export const db = {
       avatarUrl?: string
       emailVerified?: boolean
     }): Promise<User> {
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .from('bestauth_users')
         .insert({
           email: userData.email,
@@ -88,7 +86,7 @@ export const db = {
     },
 
     async update(id: string, updates: Partial<User>): Promise<User> {
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .from('bestauth_users')
         .update({
           name: updates.name,
@@ -116,7 +114,7 @@ export const db = {
   // Credentials operations
   credentials: {
     async findByUserId(userId: string): Promise<{ passwordHash: string } | null> {
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .from('bestauth_credentials')
         .select('password_hash')
         .eq('user_id', userId)
@@ -128,7 +126,7 @@ export const db = {
     },
 
     async create(userId: string, passwordHash: string): Promise<void> {
-      const { error } = await supabase
+      const { error } = await getDb()
         .from('bestauth_credentials')
         .insert({
           user_id: userId,
@@ -139,7 +137,7 @@ export const db = {
     },
 
     async update(userId: string, passwordHash: string): Promise<void> {
-      const { error } = await supabase
+      const { error } = await getDb()
         .from('bestauth_credentials')
         .update({ password_hash: passwordHash })
         .eq('user_id', userId)
@@ -154,7 +152,7 @@ export const db = {
       provider: string,
       providerAccountId: string
     ): Promise<OAuthAccount | null> {
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .from('bestauth_oauth_accounts')
         .select('*')
         .eq('provider', provider)
@@ -182,7 +180,7 @@ export const db = {
       refreshToken?: string
       expiresAt?: Date
     }): Promise<void> {
-      const { error } = await supabase
+      const { error } = await getDb()
         .from('bestauth_oauth_accounts')
         .insert({
           user_id: accountData.userId,
@@ -204,7 +202,7 @@ export const db = {
         expiresAt?: Date
       }
     ): Promise<void> {
-      const { error } = await supabase
+      const { error } = await getDb()
         .from('bestauth_oauth_accounts')
         .update({
           access_token: updates.accessToken,
@@ -226,7 +224,7 @@ export const db = {
       ipAddress?: string
       userAgent?: string
     }): Promise<Session> {
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .from('bestauth_sessions')
         .insert({
           user_id: sessionData.userId,
@@ -253,7 +251,7 @@ export const db = {
     },
 
     async findByTokenHash(tokenHash: string): Promise<Session | null> {
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .from('bestauth_sessions')
         .select('*')
         .eq('token_hash', tokenHash)
@@ -274,7 +272,7 @@ export const db = {
     },
 
     async updateLastAccessed(id: string): Promise<void> {
-      const { error } = await supabase
+      const { error } = await getDb()
         .from('bestauth_sessions')
         .update({ last_accessed: new Date().toISOString() })
         .eq('id', id)
@@ -283,7 +281,7 @@ export const db = {
     },
 
     async findById(id: string): Promise<Session | null> {
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .from('bestauth_sessions')
         .select('*')
         .eq('id', id)
@@ -304,7 +302,7 @@ export const db = {
     },
 
     async delete(id: string): Promise<void> {
-      const { error } = await supabase
+      const { error } = await getDb()
         .from('bestauth_sessions')
         .delete()
         .eq('id', id)
@@ -313,7 +311,7 @@ export const db = {
     },
 
     async deleteByUserId(userId: string): Promise<void> {
-      const { error } = await supabase
+      const { error } = await getDb()
         .from('bestauth_sessions')
         .delete()
         .eq('user_id', userId)
@@ -325,7 +323,7 @@ export const db = {
   // Magic links operations
   magicLinks: {
     async create(email: string, tokenHash: string, expiresAt: Date): Promise<void> {
-      const { error } = await supabase
+      const { error } = await getDb()
         .from('bestauth_magic_links')
         .insert({
           email,
@@ -337,7 +335,7 @@ export const db = {
     },
 
     async findByTokenHash(tokenHash: string): Promise<{ email: string; used: boolean; expiresAt: Date } | null> {
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .from('bestauth_magic_links')
         .select('email, used, expires_at')
         .eq('token_hash', tokenHash)
@@ -350,7 +348,7 @@ export const db = {
     },
 
     async markAsUsed(tokenHash: string): Promise<void> {
-      const { error } = await supabase
+      const { error } = await getDb()
         .from('bestauth_magic_links')
         .update({ used: true })
         .eq('token_hash', tokenHash)
@@ -362,7 +360,7 @@ export const db = {
   // Password reset operations
   passwordResets: {
     async create(userId: string, tokenHash: string, expiresAt: Date): Promise<void> {
-      const { error } = await supabase
+      const { error } = await getDb()
         .from('bestauth_password_resets')
         .insert({
           user_id: userId,
@@ -374,7 +372,7 @@ export const db = {
     },
 
     async findByTokenHash(tokenHash: string): Promise<{ userId: string; used: boolean; expiresAt: Date } | null> {
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .from('bestauth_password_resets')
         .select('user_id, used, expires_at')
         .eq('token_hash', tokenHash)
@@ -387,7 +385,7 @@ export const db = {
     },
 
     async markAsUsed(tokenHash: string): Promise<void> {
-      const { error } = await supabase
+      const { error } = await getDb()
         .from('bestauth_password_resets')
         .update({ used: true })
         .eq('token_hash', tokenHash)
@@ -405,7 +403,7 @@ export const db = {
       userAgent?: string
       metadata?: any
     }): Promise<void> {
-      const { error } = await supabase
+      const { error } = await getDb()
         .from('bestauth_activity_logs')
         .insert({
           user_id: logData.userId,
@@ -422,7 +420,7 @@ export const db = {
   // Subscription operations
   subscriptions: {
     async findByUserId(userId: string): Promise<any | null> {
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .from('bestauth_subscriptions')
         .select('*')
         .eq('user_id', userId)
@@ -446,7 +444,7 @@ export const db = {
       currentPeriodEnd?: Date
       metadata?: any
     }): Promise<any> {
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .from('bestauth_subscriptions')
         .insert({
           user_id: subscriptionData.userId,
@@ -504,7 +502,7 @@ export const db = {
       if (updates.expiresAt !== undefined) updateData.expires_at = updates.expiresAt?.toISOString()
       if (updates.metadata !== undefined) updateData.metadata = updates.metadata
       
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .from('bestauth_subscriptions')
         .update(updateData)
         .eq('user_id', userId)
@@ -517,7 +515,7 @@ export const db = {
     },
 
     async upsert(subscriptionData: any): Promise<any> {
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .from('bestauth_subscriptions')
         .upsert(subscriptionData, {
           onConflict: 'user_id'
@@ -531,7 +529,7 @@ export const db = {
     },
 
     async getStatus(userId: string): Promise<any | null> {
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .rpc('get_subscription_status', { p_user_id: userId })
         .single()
       
@@ -544,7 +542,7 @@ export const db = {
   // Usage tracking operations
   usage: {
     async getToday(userId: string): Promise<number> {
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .rpc('get_user_usage_today', { p_user_id: userId })
       
       if (error || data === null) return 0
@@ -553,7 +551,7 @@ export const db = {
     },
 
     async increment(userId: string, amount: number = 1): Promise<number> {
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .rpc('increment_usage', { p_user_id: userId, p_amount: amount })
       
       if (error || data === null) throw error || new Error('Failed to increment usage')
@@ -562,7 +560,7 @@ export const db = {
     },
 
     async checkLimit(userId: string): Promise<boolean> {
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .rpc('check_generation_limit', { p_user_id: userId })
       
       if (error || data === null) return false
@@ -575,7 +573,7 @@ export const db = {
       startOfMonth.setDate(1)
       startOfMonth.setHours(0, 0, 0, 0)
       
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .from('bestauth_usage_tracking')
         .select('generation_count')
         .eq('user_id', userId)
@@ -590,7 +588,7 @@ export const db = {
   // User profile operations
   profiles: {
     async findByUserId(userId: string): Promise<any | null> {
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .from('bestauth_user_profiles')
         .select('*')
         .eq('user_id', userId)
@@ -609,7 +607,7 @@ export const db = {
       address?: any
       metadata?: any
     }): Promise<any> {
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .from('bestauth_user_profiles')
         .upsert({
           user_id: profileData.userId,
@@ -642,7 +640,7 @@ export const db = {
       description?: string
       metadata?: any
     }): Promise<any> {
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .from('bestauth_payment_history')
         .insert({
           user_id: paymentData.userId,
@@ -663,7 +661,7 @@ export const db = {
     },
 
     async findByUserId(userId: string, limit: number = 10): Promise<any[]> {
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .from('bestauth_payment_history')
         .select('*')
         .eq('user_id', userId)
@@ -676,7 +674,7 @@ export const db = {
     },
 
     async findByInvoiceId(invoiceId: string): Promise<any | null> {
-      const { data, error } = await supabase
+      const { data, error } = await getDb()
         .from('bestauth_payment_history')
         .select('*')
         .eq('stripe_invoice_id', invoiceId)
