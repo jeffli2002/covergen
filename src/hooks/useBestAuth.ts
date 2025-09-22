@@ -164,7 +164,8 @@ export function useBestAuth() {
   }, [router])
 
   // Sign in with OAuth
-  const signInWithOAuth = useCallback((provider: 'google' | 'github') => {
+  const signInWithOAuth = useCallback(async (provider: 'google' | 'github') => {
+    // Use BestAuth OAuth implementation
     window.location.href = `/api/auth/oauth/${provider}`
   }, [])
 

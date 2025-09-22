@@ -20,7 +20,7 @@ export async function GET(
     // Generate state for CSRF protection
     const state = generateOAuthState()
     
-    // Get redirect URI
+    // Get redirect URI - use the BestAuth callback route
     const { origin } = new URL(request.url)
     const redirectUri = `${origin}/api/auth/callback/${provider}`
     

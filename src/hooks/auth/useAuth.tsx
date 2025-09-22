@@ -188,10 +188,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [router])
 
-  const signInWithOAuth = useCallback((provider: 'google' | 'github') => {
-    // Redirect to OAuth initiation endpoint
-    const currentPath = window.location.pathname
-    window.location.href = `/api/auth/oauth/${provider}?redirect=${encodeURIComponent(currentPath)}`
+  const signInWithOAuth = useCallback(async (provider: 'google' | 'github') => {
+    // Use the working Supabase OAuth implementation directly
+    const authService = (await import('@/services/authService')).default
+    if (provider === 'google') {
+      await authService.signInWithGoogle()
+    } else {
+      // For now, only Google is implemented
+      console.error('GitHub OAuth not yet implemented')
+    }
   }, [])
 
   const sendMagicLink = useCallback(async (email: string) => {

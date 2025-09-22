@@ -558,7 +558,7 @@ export class BestAuthService {
     }
 
     const config = providers[provider]
-    const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/oauth/callback`
+    const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`
 
     const params = new URLSearchParams({
       client_id: config.clientId,
@@ -590,7 +590,7 @@ export class BestAuthService {
     }
 
     const config = providers[provider as keyof typeof providers]
-    const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/oauth/callback`
+    const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`
 
     const response = await fetch(config.tokenUrl, {
       method: 'POST',
