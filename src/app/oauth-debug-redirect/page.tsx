@@ -54,7 +54,7 @@ export default function OAuthDebugRedirect() {
             This page will show the actual OAuth URL being generated, including the redirect_uri parameter.
           </p>
           <p className="text-sm text-gray-600">
-            The redirect_uri should be: <code className="bg-gray-200 px-1">{window.location.origin}/auth/callback</code>
+            The redirect_uri should be: <code className="bg-gray-200 px-1">{typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback</code>
           </p>
         </div>
 
@@ -83,7 +83,7 @@ export default function OAuthDebugRedirect() {
             </li>
             <li>
               Add this URL to "Redirect URLs": 
-              <code className="bg-yellow-100 px-1 ml-1">{window.location.origin}/auth/callback</code>
+              <code className="bg-yellow-100 px-1 ml-1">{typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback</code>
             </li>
             <li>
               Also add for production:
