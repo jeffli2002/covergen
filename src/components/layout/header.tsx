@@ -386,8 +386,21 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                     )
                   }
                   
-                  // For paid users (Pro or Pro+) - no additional badge needed
-                  // as UsageDisplay already shows the tier
+                  // For Pro users - show upgrade to Pro+ button
+                  if (plan === 'pro') {
+                    return (
+                      <Button 
+                        size="sm" 
+                        className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white text-sm px-4"
+                        onClick={() => router.push(`/${locale}/payment?plan=pro_plus&upgrade=true`)}
+                      >
+                        <Crown className="w-4 h-4 mr-2" />
+                        Upgrade to Pro+
+                      </Button>
+                    )
+                  }
+                  
+                  // For Pro+ users - no upgrade available (highest tier)
                   return null
                 })()}
 

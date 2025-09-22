@@ -169,23 +169,34 @@ export default function MobileHeader() {
                     </span>
                   </div>
 
-                  {/* Upgrade Button */}
-                  <Button 
-                    className="w-full text-lg" 
-                    size="lg"
-                    onClick={() => {
-                      setIsMenuOpen(false)
-                      const pricingSection = document.getElementById('pricing')
-                      if (pricingSection) {
-                        pricingSection.scrollIntoView({ behavior: 'smooth' })
-                      } else if (window.location.pathname !== '/') {
-                        window.location.href = '/#pricing'
-                      }
-                    }}
-                  >
-                    <Crown className="w-5 h-5 mr-3" />
-                    Upgrade to Pro
-                  </Button>
+                  {/* Upgrade Button - only show for free and pro users */}
+                  {(subscriptionInfo?.subscription_tier === 'free' || subscriptionInfo?.subscription_tier === 'pro' || 
+                    subscriptionInfo?.plan === 'free' || subscriptionInfo?.plan === 'pro') && (
+                    <Button 
+                      className="w-full text-lg" 
+                      size="lg"
+                      onClick={() => {
+                        setIsMenuOpen(false)
+                        const currentLocale = window.location.pathname.split('/')[1] || 'en'
+                        const userTier = subscriptionInfo?.subscription_tier || subscriptionInfo?.plan
+                        if (userTier === 'pro') {
+                          // Pro users go directly to payment page for Pro+
+                          window.location.href = `/${currentLocale}/payment?plan=pro_plus&upgrade=true`
+                        } else {
+                          // Free users go to pricing section
+                          const pricingSection = document.getElementById('pricing')
+                          if (pricingSection) {
+                            pricingSection.scrollIntoView({ behavior: 'smooth' })
+                          } else if (window.location.pathname !== '/') {
+                            window.location.href = '/#pricing'
+                          }
+                        }
+                      }}
+                    >
+                      <Crown className="w-5 h-5 mr-3" />
+                      {(subscriptionInfo?.subscription_tier === 'pro' || subscriptionInfo?.plan === 'pro') ? 'Upgrade to Pro+' : 'Upgrade to Pro'}
+                    </Button>
+                  )}
 
                   {/* Action Buttons */}
                   <div className="flex gap-2">
