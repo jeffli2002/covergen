@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import AuthForm from './AuthForm'
 import { X } from 'lucide-react'
+import { useBestAuth } from '@/hooks/useBestAuth'
 
 export default function AuthModalHandler() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { user, loading: authLoading } = useBestAuth()
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [redirectPath, setRedirectPath] = useState<string | null>(null)
 
@@ -15,11 +17,26 @@ export default function AuthModalHandler() {
     const authParam = searchParams.get('auth')
     const redirectParam = searchParams.get('redirect')
     
-    if (authParam === 'signin' || authParam === 'signup') {
+    // Only show auth modal if user is not already authenticated
+    // This prevents the modal from showing when navigating between pages
+    if ((authParam === 'signin' || authParam === 'signup') && !user && !authLoading) {
+      console.log('[AuthModalHandler] Showing auth modal for unauthenticated user')
       setShowAuthModal(true)
       setRedirectPath(redirectParam)
+    } else if (user && authParam) {
+      // User is already authenticated, remove auth params and redirect if needed
+      console.log('[AuthModalHandler] User already authenticated, cleaning up URL')
+      const newUrl = new URL(window.location.href)
+      newUrl.searchParams.delete('auth')
+      newUrl.searchParams.delete('redirect')
+      
+      if (redirectParam) {
+        router.replace(redirectParam)
+      } else {
+        router.replace(newUrl.pathname + newUrl.search)
+      }
     }
-  }, [searchParams])
+  }, [searchParams, user, authLoading, router])
 
   const handleClose = () => {
     setShowAuthModal(false)

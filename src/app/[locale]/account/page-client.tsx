@@ -63,6 +63,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   const { user: appStoreUser, setUser } = useAppStore()
   const { user: authUser, session, loading: authLoading } = useBestAuth()
   const [loading, setLoading] = useState(true)
+  const [initialAuthCheck, setInitialAuthCheck] = useState(true)
   const [loadingMessage, setLoadingMessage] = useState('Checking authentication...')
   const [accountData, setAccountData] = useState<any>(null)
   const [subscription, setSubscription] = useState<any>(null)
@@ -83,13 +84,22 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
           return
         }
         
-        // Check if user is authenticated
+        // Mark initial auth check as complete
+        setInitialAuthCheck(false)
+        
+        // Give a small delay to ensure auth state is fully populated
+        // This prevents race conditions where authLoading is false but user/session aren't set yet
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
+        // Check if user is authenticated after auth has finished loading
         if (!authUser || !session) {
-          // Use replace instead of push to avoid history issues
+          console.log('[Account] No auth found after loading:', { authUser, session, authLoading })
+          // Only redirect if we're certain auth has finished loading and no user exists
           router.replace(`/${locale}?auth=signin&redirect=${encodeURIComponent(`/${locale}/account`)}`)
           return
         }
 
+        console.log('[Account] User authenticated:', authUser.email)
         setLoadingMessage('Loading account data...')
         await loadAccountData()
       } catch (error) {
@@ -486,7 +496,8 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   const currentUsage = usage?.today || 0
   const usagePercentage = (currentUsage / dailyLimit) * 100
 
-  if (loading || authLoading) {
+  // Show loading state while checking auth or loading data
+  if (loading || authLoading || initialAuthCheck) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
