@@ -33,6 +33,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 // BestAuth implementation
 function BestAuthProvider({ children }: { children: React.ReactNode }) {
   const bestAuth = useBestAuth()
+  const [subscriptionService, setSubscriptionService] = useState<any>(null)
+
+  // Load subscription service
+  useEffect(() => {
+    import('@/services/bestauth/BestAuthSubscriptionService').then(({ bestAuthSubscriptionService }) => {
+      setSubscriptionService(bestAuthSubscriptionService)
+    })
+  }, [])
 
   // Map BestAuth methods to AuthContext interface
   const authContextValue: AuthContextType = {
@@ -40,6 +48,16 @@ function BestAuthProvider({ children }: { children: React.ReactNode }) {
     loading: bestAuth.loading,
     signUp: async (email: string, password: string, metadata?: any) => {
       const result = await bestAuth.signUp({ email, password, ...metadata })
+      
+      // Create default subscription for new users
+      if (result.success && result.data && subscriptionService) {
+        await subscriptionService.createOrUpdateSubscription({
+          userId: result.data.id,
+          tier: 'free',
+          status: 'active'
+        })
+      }
+      
       return result
     },
     signIn: async (email: string, password: string) => {
@@ -57,21 +75,39 @@ function BestAuthProvider({ children }: { children: React.ReactNode }) {
       return result
     },
     updatePassword: async (newPassword: string) => {
-      // BestAuth doesn't have direct updatePassword, needs to be implemented
-      return { success: false, error: 'Not implemented in BestAuth' }
+      if (!bestAuth.user || !subscriptionService) {
+        return { success: false, error: 'Not authenticated' }
+      }
+      
+      try {
+        // Hash password
+        const bcrypt = await import('bcryptjs')
+        const passwordHash = await bcrypt.hash(newPassword, 10)
+        
+        // Update password
+        await subscriptionService.updatePassword(bestAuth.user.id, passwordHash)
+        
+        return { success: true, message: 'Password updated successfully' }
+      } catch (error) {
+        console.error('Error updating password:', error)
+        return { success: false, error: 'Failed to update password' }
+      }
     },
     getUserUsageToday: async () => {
-      // This would need to be implemented in BestAuth
-      // For now, return 0
-      return 0
+      if (!bestAuth.user || !subscriptionService) return 0
+      return await subscriptionService.getUserUsageToday(bestAuth.user.id)
     },
     incrementUsage: async () => {
-      // This would need to be implemented in BestAuth
-      return { success: false, error: 'Not implemented in BestAuth' }
+      if (!bestAuth.user || !subscriptionService) {
+        return { success: false, error: 'Not authenticated' }
+      }
+      
+      const result = await subscriptionService.incrementUsage(bestAuth.user.id)
+      return result
     },
     getUserSubscription: async () => {
-      // This would need to be implemented in BestAuth
-      return null
+      if (!bestAuth.user || !subscriptionService) return null
+      return await subscriptionService.getUserSubscription(bestAuth.user.id)
     }
   }
 

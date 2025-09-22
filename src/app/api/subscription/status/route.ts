@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { PaymentAuthWrapper } from '@/services/payment/auth-wrapper'
+import { authConfig } from '@/config/auth.config'
 
 export async function GET(req: NextRequest) {
+  // Route to BestAuth if enabled
+  if (authConfig.USE_BESTAUTH) {
+    const bestAuthModule = await import('@/app/api/bestauth/subscription/status/route')
+    return bestAuthModule.GET(req)
+  }
+  
+  // Otherwise use Supabase implementation
   try {
     // Get auth context using PaymentAuthWrapper
     const authContext = await PaymentAuthWrapper.getAuthContext()

@@ -418,4 +418,273 @@ export const db = {
       if (error) throw error
     },
   },
+
+  // Subscription operations
+  subscriptions: {
+    async findByUserId(userId: string): Promise<any | null> {
+      const { data, error } = await supabase
+        .from('bestauth_subscriptions')
+        .select('*')
+        .eq('user_id', userId)
+        .single()
+      
+      if (error || !data) return null
+      
+      return data
+    },
+
+    async create(subscriptionData: {
+      userId: string
+      tier?: string
+      status?: string
+      stripeCustomerId?: string
+      stripeSubscriptionId?: string
+      stripePriceId?: string
+      trialStartedAt?: Date
+      trialEndsAt?: Date
+      currentPeriodStart?: Date
+      currentPeriodEnd?: Date
+      metadata?: any
+    }): Promise<any> {
+      const { data, error } = await supabase
+        .from('bestauth_subscriptions')
+        .insert({
+          user_id: subscriptionData.userId,
+          tier: subscriptionData.tier || 'free',
+          status: subscriptionData.status || 'active',
+          stripe_customer_id: subscriptionData.stripeCustomerId,
+          stripe_subscription_id: subscriptionData.stripeSubscriptionId,
+          stripe_price_id: subscriptionData.stripePriceId,
+          trial_started_at: subscriptionData.trialStartedAt?.toISOString(),
+          trial_ends_at: subscriptionData.trialEndsAt?.toISOString(),
+          current_period_start: subscriptionData.currentPeriodStart?.toISOString(),
+          current_period_end: subscriptionData.currentPeriodEnd?.toISOString(),
+          metadata: subscriptionData.metadata,
+        })
+        .select()
+        .single()
+      
+      if (error) throw error
+      
+      return data
+    },
+
+    async update(userId: string, updates: {
+      tier?: string
+      status?: string
+      stripeCustomerId?: string
+      stripeSubscriptionId?: string
+      stripePriceId?: string
+      stripePaymentMethodId?: string
+      trialEndedAt?: Date
+      trialEndsAt?: Date
+      currentPeriodStart?: Date
+      currentPeriodEnd?: Date
+      cancelAtPeriodEnd?: boolean
+      cancelAt?: Date
+      cancelledAt?: Date
+      expiresAt?: Date
+      metadata?: any
+    }): Promise<any> {
+      const updateData: any = {}
+      
+      if (updates.tier !== undefined) updateData.tier = updates.tier
+      if (updates.status !== undefined) updateData.status = updates.status
+      if (updates.stripeCustomerId !== undefined) updateData.stripe_customer_id = updates.stripeCustomerId
+      if (updates.stripeSubscriptionId !== undefined) updateData.stripe_subscription_id = updates.stripeSubscriptionId
+      if (updates.stripePriceId !== undefined) updateData.stripe_price_id = updates.stripePriceId
+      if (updates.stripePaymentMethodId !== undefined) updateData.stripe_payment_method_id = updates.stripePaymentMethodId
+      if (updates.trialEndedAt !== undefined) updateData.trial_ended_at = updates.trialEndedAt?.toISOString()
+      if (updates.trialEndsAt !== undefined) updateData.trial_ends_at = updates.trialEndsAt?.toISOString()
+      if (updates.currentPeriodStart !== undefined) updateData.current_period_start = updates.currentPeriodStart?.toISOString()
+      if (updates.currentPeriodEnd !== undefined) updateData.current_period_end = updates.currentPeriodEnd?.toISOString()
+      if (updates.cancelAtPeriodEnd !== undefined) updateData.cancel_at_period_end = updates.cancelAtPeriodEnd
+      if (updates.cancelAt !== undefined) updateData.cancel_at = updates.cancelAt?.toISOString()
+      if (updates.cancelledAt !== undefined) updateData.cancelled_at = updates.cancelledAt?.toISOString()
+      if (updates.expiresAt !== undefined) updateData.expires_at = updates.expiresAt?.toISOString()
+      if (updates.metadata !== undefined) updateData.metadata = updates.metadata
+      
+      const { data, error } = await supabase
+        .from('bestauth_subscriptions')
+        .update(updateData)
+        .eq('user_id', userId)
+        .select()
+        .single()
+      
+      if (error) throw error
+      
+      return data
+    },
+
+    async upsert(subscriptionData: any): Promise<any> {
+      const { data, error } = await supabase
+        .from('bestauth_subscriptions')
+        .upsert(subscriptionData, {
+          onConflict: 'user_id'
+        })
+        .select()
+        .single()
+      
+      if (error) throw error
+      
+      return data
+    },
+
+    async getStatus(userId: string): Promise<any | null> {
+      const { data, error } = await supabase
+        .rpc('get_subscription_status', { p_user_id: userId })
+        .single()
+      
+      if (error || !data) return null
+      
+      return data
+    },
+  },
+
+  // Usage tracking operations
+  usage: {
+    async getToday(userId: string): Promise<number> {
+      const { data, error } = await supabase
+        .rpc('get_user_usage_today', { p_user_id: userId })
+      
+      if (error || data === null) return 0
+      
+      return data
+    },
+
+    async increment(userId: string, amount: number = 1): Promise<number> {
+      const { data, error } = await supabase
+        .rpc('increment_usage', { p_user_id: userId, p_amount: amount })
+      
+      if (error || data === null) throw error || new Error('Failed to increment usage')
+      
+      return data
+    },
+
+    async checkLimit(userId: string): Promise<boolean> {
+      const { data, error } = await supabase
+        .rpc('check_generation_limit', { p_user_id: userId })
+      
+      if (error || data === null) return false
+      
+      return data
+    },
+
+    async getMonthlyUsage(userId: string): Promise<number> {
+      const startOfMonth = new Date()
+      startOfMonth.setDate(1)
+      startOfMonth.setHours(0, 0, 0, 0)
+      
+      const { data, error } = await supabase
+        .from('bestauth_usage_tracking')
+        .select('generation_count')
+        .eq('user_id', userId)
+        .gte('date', startOfMonth.toISOString().split('T')[0])
+      
+      if (error || !data) return 0
+      
+      return data.reduce((sum, record) => sum + (record.generation_count || 0), 0)
+    },
+  },
+
+  // User profile operations
+  profiles: {
+    async findByUserId(userId: string): Promise<any | null> {
+      const { data, error } = await supabase
+        .from('bestauth_user_profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single()
+      
+      if (error || !data) return null
+      
+      return data
+    },
+
+    async upsert(profileData: {
+      userId: string
+      fullName?: string
+      avatarUrl?: string
+      phone?: string
+      address?: any
+      metadata?: any
+    }): Promise<any> {
+      const { data, error } = await supabase
+        .from('bestauth_user_profiles')
+        .upsert({
+          user_id: profileData.userId,
+          full_name: profileData.fullName,
+          avatar_url: profileData.avatarUrl,
+          phone: profileData.phone,
+          address: profileData.address,
+          metadata: profileData.metadata,
+        }, {
+          onConflict: 'user_id'
+        })
+        .select()
+        .single()
+      
+      if (error) throw error
+      
+      return data
+    },
+  },
+
+  // Payment history operations
+  payments: {
+    async create(paymentData: {
+      userId: string
+      stripePaymentIntentId?: string
+      stripeInvoiceId?: string
+      amount: number
+      currency?: string
+      status: string
+      description?: string
+      metadata?: any
+    }): Promise<any> {
+      const { data, error } = await supabase
+        .from('bestauth_payment_history')
+        .insert({
+          user_id: paymentData.userId,
+          stripe_payment_intent_id: paymentData.stripePaymentIntentId,
+          stripe_invoice_id: paymentData.stripeInvoiceId,
+          amount: paymentData.amount,
+          currency: paymentData.currency || 'USD',
+          status: paymentData.status,
+          description: paymentData.description,
+          metadata: paymentData.metadata,
+        })
+        .select()
+        .single()
+      
+      if (error) throw error
+      
+      return data
+    },
+
+    async findByUserId(userId: string, limit: number = 10): Promise<any[]> {
+      const { data, error } = await supabase
+        .from('bestauth_payment_history')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(limit)
+      
+      if (error) throw error
+      
+      return data || []
+    },
+
+    async findByInvoiceId(invoiceId: string): Promise<any | null> {
+      const { data, error } = await supabase
+        .from('bestauth_payment_history')
+        .select('*')
+        .eq('stripe_invoice_id', invoiceId)
+        .single()
+      
+      if (error || !data) return null
+      
+      return data
+    },
+  },
 }
