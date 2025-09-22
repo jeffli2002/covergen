@@ -30,6 +30,10 @@ export async function POST(request: NextRequest) {
     // Create response
     const response = NextResponse.json({
       user: result.data!.user,
+      session: {
+        token: result.data!.accessToken,
+        expires_at: result.data!.expiresAt,
+      },
       expiresAt: result.data!.expiresAt,
     })
     
