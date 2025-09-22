@@ -1,18 +1,18 @@
 // BestAuth Subscription Activation API
 import { NextRequest, NextResponse } from 'next/server'
-import { validateSession } from '@/lib/bestauth'
+import { validateSessionFromRequest } from '@/lib/bestauth'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 
 // POST /api/bestauth/subscription/activate - Activate a trial subscription
 export async function POST(request: NextRequest) {
   try {
-    const session = await validateSession(request)
+    const session = await validateSessionFromRequest(request)
     
     if (!session.success || !session.data) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    const userId = session.data.userId
+    const userId = session.data.user.id
     
     // Get current subscription
     const currentSubscription = await bestAuthSubscriptionService.getUserSubscription(userId)
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       const updated = await bestAuthSubscriptionService.createOrUpdateSubscription({
         userId,
         status: 'active',
-        trialEndedAt: new Date()
+        trialEndsAt: new Date()
       })
       
       return NextResponse.json({

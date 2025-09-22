@@ -1,18 +1,18 @@
 // BestAuth Usage Tracking API
 import { NextRequest, NextResponse } from 'next/server'
-import { validateSession } from '@/lib/bestauth'
+import { validateSessionFromRequest } from '@/lib/bestauth'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 
 // GET /api/bestauth/subscription/usage - Get usage data
 export async function GET(request: NextRequest) {
   try {
-    const session = await validateSession(request)
+    const session = await validateSessionFromRequest(request)
     
     if (!session.success || !session.data) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    const userId = session.data.userId
+    const userId = session.data.user.id
     
     // Get usage data
     const [usageToday, usageThisMonth, subscription] = await Promise.all([
@@ -54,13 +54,13 @@ export async function GET(request: NextRequest) {
 // POST /api/bestauth/subscription/usage - Increment usage
 export async function POST(request: NextRequest) {
   try {
-    const session = await validateSession(request)
+    const session = await validateSessionFromRequest(request)
     
     if (!session.success || !session.data) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    const userId = session.data.userId
+    const userId = session.data.user.id
     const { amount = 1 } = await request.json()
     
     // Check if user can generate first

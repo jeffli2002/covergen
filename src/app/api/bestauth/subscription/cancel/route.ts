@@ -1,18 +1,18 @@
 // BestAuth Subscription Cancel API
 import { NextRequest, NextResponse } from 'next/server'
-import { validateSession } from '@/lib/bestauth'
+import { validateSessionFromRequest } from '@/lib/bestauth'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 
 // POST /api/bestauth/subscription/cancel - Cancel subscription
 export async function POST(request: NextRequest) {
   try {
-    const session = await validateSession(request)
+    const session = await validateSessionFromRequest(request)
     
     if (!session.success || !session.data) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    const userId = session.data.userId
+    const userId = session.data.user.id
     const { cancelAtPeriodEnd = true } = await request.json()
     
     // Get current subscription
@@ -65,13 +65,13 @@ export async function POST(request: NextRequest) {
 // DELETE /api/bestauth/subscription/cancel - Resume cancelled subscription
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await validateSession(request)
+    const session = await validateSessionFromRequest(request)
     
     if (!session.success || !session.data) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    const userId = session.data.userId
+    const userId = session.data.user.id
     
     // Get current subscription
     const subscription = await bestAuthSubscriptionService.getUserSubscription(userId)
@@ -84,7 +84,7 @@ export async function DELETE(request: NextRequest) {
     }
     
     // Check if subscription is scheduled for cancellation
-    if (!subscription.cancel_at_period_end) {
+    if (subscription.status !== 'cancelled') {
       return NextResponse.json({
         success: false,
         message: 'Subscription is not scheduled for cancellation',

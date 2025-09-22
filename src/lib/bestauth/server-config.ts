@@ -15,17 +15,10 @@ export async function createBestAuthServerClient() {
     throw new Error('BestAuth configuration error: Missing database credentials')
   }
 
-  const cookieStore = await cookies()
-
   return createClient(supabaseUrl, supabaseServiceKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false
-    },
-    cookies: {
-      get(name: string) {
-        return cookieStore.get(name)?.value
-      }
     }
   })
 }

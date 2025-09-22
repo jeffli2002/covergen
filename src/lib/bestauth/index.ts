@@ -32,3 +32,8 @@ export {
   getUserFromRequest,
   withAuth,
 } from './middleware'
+
+export {
+  validateSessionFromRequest,
+  extractBearerToken,
+} from './request-utils'

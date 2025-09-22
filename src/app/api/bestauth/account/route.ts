@@ -1,19 +1,19 @@
 // BestAuth Account API
 import { NextRequest, NextResponse } from 'next/server'
-import { validateSession } from '@/lib/bestauth'
+import { validateSessionFromRequest } from '@/lib/bestauth'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 import { db } from '@/lib/bestauth/db'
 
 // GET /api/bestauth/account - Get account information
 export async function GET(request: NextRequest) {
   try {
-    const session = await validateSession(request)
+    const session = await validateSessionFromRequest(request)
     
     if (!session.success || !session.data) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    const userId = session.data.userId
+    const userId = session.data.user.id
     
     // Get user, profile, subscription, and payment history
     const [user, profile, subscription, payments] = await Promise.all([
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
         isTrialing: subscription.is_trialing,
         trialDaysRemaining: subscription.trial_days_remaining,
         hasPaymentMethod: subscription.has_payment_method,
-        stripeCustomerId: subscription.stripe_customer_id
+        stripeCustomerId: null // TODO: Get from subscription record if needed
       } : null,
       payments: payments.map(p => ({
         id: p.id,
@@ -78,13 +78,13 @@ export async function GET(request: NextRequest) {
 // PATCH /api/bestauth/account - Update account information
 export async function PATCH(request: NextRequest) {
   try {
-    const session = await validateSession(request)
+    const session = await validateSessionFromRequest(request)
     
     if (!session.success || !session.data) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    const userId = session.data.userId
+    const userId = session.data.user.id
     const updates = await request.json()
     
     // Update user data if provided

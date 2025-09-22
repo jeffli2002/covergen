@@ -50,9 +50,9 @@ function BestAuthProvider({ children }: { children: React.ReactNode }) {
       const result = await bestAuth.signUp({ email, password, ...metadata })
       
       // Create default subscription for new users
-      if (result.success && result.data && subscriptionService) {
+      if (result.success && bestAuth.user && subscriptionService) {
         await subscriptionService.createOrUpdateSubscription({
-          userId: result.data.id,
+          userId: bestAuth.user.id,
           tier: 'free',
           status: 'active'
         })

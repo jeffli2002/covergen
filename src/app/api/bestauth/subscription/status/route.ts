@@ -1,12 +1,12 @@
 // BestAuth Subscription Status API
 import { NextRequest, NextResponse } from 'next/server'
-import { validateSession } from '@/lib/bestauth'
+import { validateSessionFromRequest } from '@/lib/bestauth'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 
 export async function GET(request: NextRequest) {
   try {
     // Validate session
-    const session = await validateSession(request)
+    const session = await validateSessionFromRequest(request)
     
     if (!session.success || !session.data) {
       return NextResponse.json(
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
       )
     }
     
-    const userId = session.data.userId
+    const userId = session.data.user.id
     
     // Get subscription status
     const subscription = await bestAuthSubscriptionService.getUserSubscription(userId)

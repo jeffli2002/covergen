@@ -30,7 +30,10 @@ export async function validateSessionFromRequest(request: NextRequest): Promise<
   const result = await validateSessionCore(token)
   
   if (!result.success) {
-    return result
+    return {
+      success: false,
+      error: result.error
+    }
   }
   
   // Transform the result to match the expected structure
