@@ -117,6 +117,7 @@ export default function PaymentPageClient({
       } else {
         // Set a default free subscription if none exists or no tier/plan found
         console.log('[PaymentPage] No valid subscription found, setting default free subscription')
+        console.log('[PaymentPage] Subscription object was:', subscription)
         setCurrentSubscription({
           tier: 'free',
           status: 'active',

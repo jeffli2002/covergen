@@ -33,10 +33,20 @@ export class BestAuthSubscriptionService {
    */
   async getUserSubscription(userId: string): Promise<SubscriptionStatus | null> {
     try {
+      console.log('[BestAuthSubscriptionService.getUserSubscription] Getting subscription for user:', userId)
+      
       // Get subscription status from database function
       const status = await db.subscriptions.getStatus(userId)
       
+      console.log('[BestAuthSubscriptionService.getUserSubscription] Status from db:', {
+        hasStatus: !!status,
+        tier: status?.tier,
+        status: status?.status,
+        stripe_subscription_id: status?.stripe_subscription_id
+      })
+      
       if (!status) {
+        console.log('[BestAuthSubscriptionService.getUserSubscription] No subscription found, creating default free subscription')
         // Create default free subscription if none exists
         await db.subscriptions.create({
           userId,
@@ -45,13 +55,29 @@ export class BestAuthSubscriptionService {
         })
         
         // Try again
-        return await db.subscriptions.getStatus(userId)
+        const newStatus = await db.subscriptions.getStatus(userId)
+        console.log('[BestAuthSubscriptionService.getUserSubscription] Created new subscription:', {
+          tier: newStatus?.tier,
+          status: newStatus?.status
+        })
+        return newStatus ? {
+          ...newStatus,
+          next_billing_date: newStatus.next_billing_date ? new Date(newStatus.next_billing_date) : undefined
+        } : null
       }
       
-      return {
+      const result = {
         ...status,
         next_billing_date: status.next_billing_date ? new Date(status.next_billing_date) : undefined
       }
+      
+      console.log('[BestAuthSubscriptionService.getUserSubscription] Returning subscription:', {
+        tier: result.tier,
+        status: result.status,
+        plan: result.plan
+      })
+      
+      return result
     } catch (error) {
       console.error('Error getting subscription:', error)
       return null

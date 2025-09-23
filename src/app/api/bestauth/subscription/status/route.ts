@@ -81,6 +81,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(newSubscription)
     }
     
+    console.log('[subscription/status] Subscription data:', {
+      userId,
+      tier: subscription.tier,
+      status: subscription.status,
+      stripe_subscription_id: subscription.stripe_subscription_id
+    })
+    
     // Add additional computed fields for compatibility with existing code
     const response = {
       ...subscription,
@@ -97,6 +104,12 @@ export async function GET(request: NextRequest) {
         monthly: subscription.monthly_limit
       }
     }
+    
+    console.log('[subscription/status] Returning response:', {
+      tier: response.tier,
+      plan: response.plan,
+      status: response.status
+    })
     
     return NextResponse.json(response)
   } catch (error) {

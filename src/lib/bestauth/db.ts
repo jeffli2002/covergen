@@ -554,7 +554,18 @@ export const db = {
           .eq('user_id', userId)
           .single()
         
-        if (error || !data) return null
+        console.log('[db.getStatus] Raw subscription data:', {
+          userId,
+          data,
+          error,
+          tier: data?.tier,
+          status: data?.status
+        })
+        
+        if (error || !data) {
+          console.log('[db.getStatus] No subscription found or error occurred')
+          return null
+        }
         
         // Get usage data safely - check if user exists first
         let usageToday = 0
@@ -585,7 +596,7 @@ export const db = {
         }
         
         // Return data in the expected format
-        return {
+        const result = {
           subscription_id: data.id,
           user_id: data.user_id,
           tier: data.tier || 'free',
@@ -624,8 +635,24 @@ export const db = {
           })(),
           has_payment_method: !!data.stripe_payment_method_id,
           requires_payment_setup: data.status === 'trialing' && !data.stripe_subscription_id,
-          next_billing_date: data.current_period_end || null
+          next_billing_date: data.current_period_end || null,
+          // Include stripe fields for debugging
+          stripe_subscription_id: data.stripe_subscription_id,
+          stripe_customer_id: data.stripe_customer_id,
+          stripe_payment_method_id: data.stripe_payment_method_id,
+          cancel_at_period_end: data.cancel_at_period_end,
+          cancelled_at: data.cancelled_at,
+          current_period_end: data.current_period_end
         }
+        
+        console.log('[db.getStatus] Returning subscription status:', {
+          userId,
+          tier: result.tier,
+          status: result.status,
+          has_payment_method: result.has_payment_method
+        })
+        
+        return result
       } catch (error) {
         console.error('Error getting subscription status:', error)
         return null

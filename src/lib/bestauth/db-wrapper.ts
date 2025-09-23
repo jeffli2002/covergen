@@ -22,11 +22,39 @@ export const db = {
       }
     },
 
+    async get(userId: string): Promise<any | null> {
+      try {
+        console.log('[db-wrapper.get] Getting subscription for user:', userId)
+        const result = await bestAuthDb.subscriptions.findByUserId(userId)
+        console.log('[db-wrapper.get] Subscription found:', {
+          hasResult: !!result,
+          tier: result?.tier,
+          status: result?.status
+        })
+        return result
+      } catch (error) {
+        console.error('BestAuth: Failed to get subscription:', error)
+        return null
+      }
+    },
+
     async getStatus(userId: string): Promise<any | null> {
       try {
-        return await bestAuthDb.subscriptions.getStatus(userId)
+        console.log('[db-wrapper.getStatus] Getting subscription status for user:', userId)
+        const result = await bestAuthDb.subscriptions.getStatus(userId)
+        console.log('[db-wrapper.getStatus] Raw result from database:', result)
+        console.log('[db-wrapper.getStatus] Result details:', {
+          hasResult: !!result,
+          tier: result?.tier,
+          status: result?.status,
+          stripe_subscription_id: result?.stripe_subscription_id,
+          fullResult: JSON.stringify(result)
+        })
+        return result
       } catch (error) {
         console.error('BestAuth: Failed to get subscription status:', error)
+        console.log('[db-wrapper.getStatus] Error details:', error)
+        console.log('[db-wrapper.getStatus] Returning fallback free subscription due to error')
         // Return default free subscription status with config values
         const config = getSubscriptionConfig()
         
