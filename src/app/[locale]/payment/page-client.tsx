@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Check, CreditCard, Crown, Info, Loader2, Shield, Sparkles, Zap } from 'lucide-react'
+import { Check, CreditCard, Crown, Home, Info, Loader2, Shield, Sparkles, UserCircle, Zap } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
 import { useAuth } from '@/contexts/AuthContext'
 import { creemService, SUBSCRIPTION_PLANS, CREEM_TEST_CARDS } from '@/services/payment/creem'
