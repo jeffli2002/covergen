@@ -65,10 +65,51 @@ export async function GET(request: NextRequest) {
     
     const userId = session.data.user.id
     
+    // Check if this is a debug request for raw data
+    if (url.searchParams.get('debug') === 'raw') {
+      const { db } = await import('@/lib/bestauth/db-wrapper')
+      const rawSubscription = await db.subscriptions.get(userId)
+      const status = await db.subscriptions.getStatus(userId)
+      
+      return NextResponse.json({
+        debug: true,
+        userId,
+        userEmail: session.data.user.email,
+        rawSubscription,
+        computedStatus: status,
+        analysis: {
+          hasRawSubscription: !!rawSubscription,
+          rawTier: rawSubscription?.tier,
+          rawStatus: rawSubscription?.status,
+          computedTier: status?.tier,
+          computedStatus: status?.status
+        }
+      })
+    }
+    
+    // Check if this is a fix request
+    if (url.searchParams.get('fix') === 'true' && url.searchParams.get('tier')) {
+      const targetTier = url.searchParams.get('tier')
+      if (['free', 'pro', 'pro_plus'].includes(targetTier!)) {
+        const { db } = await import('@/lib/bestauth/db-wrapper')
+        await db.subscriptions.update(userId, {
+          tier: targetTier,
+          status: 'active'
+        })
+        
+        return NextResponse.json({
+          fixed: true,
+          message: `Subscription tier updated to ${targetTier}`,
+          userId
+        })
+      }
+    }
+    
     // Get subscription status
     const subscription = await bestAuthSubscriptionService.getUserSubscription(userId)
     
     if (!subscription) {
+      console.log('[subscription/status] No subscription found, creating default free subscription')
       // Create default free subscription if none exists
       await bestAuthSubscriptionService.createOrUpdateSubscription({
         userId,
@@ -78,6 +119,7 @@ export async function GET(request: NextRequest) {
       
       // Try again
       const newSubscription = await bestAuthSubscriptionService.getUserSubscription(userId)
+      console.log('[subscription/status] Created new subscription:', newSubscription)
       return NextResponse.json(newSubscription)
     }
     
