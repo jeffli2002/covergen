@@ -1,4 +1,4 @@
-import SimpleHomePage from './page-simple'
+import HomePageClient from './page-client'
 import { getDictionary } from '@/lib/i18n/get-dictionary'
 import { Locale } from '@/lib/i18n/config'
 
@@ -10,7 +10,7 @@ export default async function HomePage({
   const dict = await getDictionary(params.locale)
   
   return (
-    <SimpleHomePage 
+    <HomePageClient 
       locale={params.locale} 
       translations={dict}
     />
