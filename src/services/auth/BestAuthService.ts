@@ -687,7 +687,11 @@ export class BestAuthService {
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
       
       // Store token in database
-      const stored = await db.verificationTokens.create(user.id, token, expiresAt)
+      const stored = await db.verificationTokens.create({
+        email: user.email,
+        token: token,
+        expires_at: expiresAt
+      })
       if (!stored) {
         throw new Error('Failed to store verification token')
       }

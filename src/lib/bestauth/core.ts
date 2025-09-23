@@ -93,7 +93,22 @@ export async function signUp({
       
       // Send email
       const verificationUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/auth/verify-email?token=${verificationToken}`
-      await emailService.sendVerificationEmail(user.email, verificationUrl)
+      
+      // Get email template
+      const { getVerificationEmailTemplate } = await import('@/lib/email/templates/verification')
+      const { html, text } = getVerificationEmailTemplate({
+        email: user.email,
+        verificationUrl,
+        name: user.name
+      })
+      
+      // Send verification email
+      await emailService.send({
+        to: user.email,
+        subject: 'Verify your email - CoverGen Pro',
+        html,
+        text
+      })
       
       console.log('[BestAuth] Verification email sent to:', user.email)
     } catch (emailError) {

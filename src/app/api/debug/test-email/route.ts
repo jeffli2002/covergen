@@ -40,15 +40,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Get email service configuration
-    const config = emailService.getConfig()
+    const { getEmailConfig } = await import('@/lib/email/config')
+    const config = getEmailConfig()
     
     console.log('[Test Email] Email config:', {
-      host: config.server?.host,
-      port: config.server?.port,
-      secure: config.server?.secure,
-      user: config.server?.auth?.user,
+      provider: config.provider,
       from: config.from,
-      hasPassword: !!config.server?.auth?.pass
+      replyTo: config.replyTo
     })
 
     // Send test email
@@ -57,7 +55,21 @@ export async function POST(request: NextRequest) {
     
     console.log('[Test Email] Sending test email with URL:', verificationUrl)
     
-    const result = await emailService.sendVerificationEmail(email, verificationUrl)
+    // Get email template
+    const { getVerificationEmailTemplate } = await import('@/lib/email/templates/verification')
+    const { html, text } = getVerificationEmailTemplate({
+      email,
+      verificationUrl,
+      name: email.split('@')[0]
+    })
+    
+    // Send email
+    const result = await emailService.send({
+      to: email,
+      subject: 'Verify your email - CoverGen Pro',
+      html,
+      text
+    })
     
     if (result.success) {
       console.log('[Test Email] Email sent successfully:', result)
@@ -66,8 +78,7 @@ export async function POST(request: NextRequest) {
         message: 'Test email sent successfully',
         messageId: result.messageId,
         config: {
-          host: config.server?.host,
-          port: config.server?.port,
+          provider: config.provider,
           from: config.from,
           to: email
         }
@@ -79,8 +90,7 @@ export async function POST(request: NextRequest) {
         error: 'Failed to send email',
         details: result.error,
         config: {
-          host: config.server?.host,
-          port: config.server?.port,
+          provider: config.provider,
           from: config.from,
           to: email
         }

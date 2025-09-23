@@ -135,7 +135,7 @@ class EmailService {
     
     try {
       // Create transporter with Zoho Mail settings
-      const transporter: Transporter = nodemailer.createTransporter({
+      const transporter: Transporter = nodemailer.createTransport({
         host,
         port,
         secure, // true for 465, false for other ports
