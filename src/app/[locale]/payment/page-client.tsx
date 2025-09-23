@@ -655,69 +655,25 @@ export default function PaymentPageClient({
             Subscriptions automatically renew unless cancelled.
           </p>
 
-          {/* Current Plan Info */}
-          {!isLoadingSubscription && currentSubscription && (
-            <Card className={`max-w-2xl mx-auto border-gray-200 ${
-              currentSubscription.tier !== 'free' 
-                ? 'bg-green-50 border-green-200' 
-                : 'bg-gray-50'
-            }`}>
-              <CardContent className="p-6">
-                <h3 className="font-semibold mb-2 flex items-center gap-2">
-                  {(() => {
-                    if (currentSubscription.tier === 'pro') return <><Zap className="w-5 h-5 text-orange-500" /> You're on the Pro plan</>;
-                    if (currentSubscription.tier === 'pro_plus') return <><Crown className="w-5 h-5 text-purple-500" /> You're on the Pro+ plan</>;
-                    if (currentSubscription.tier === 'free') return <><Sparkles className="w-5 h-5 text-gray-500" /> You're on the Free plan</>;
-                    return null;
-                  })()}
-                </h3>
-                {currentSubscription.tier && (
-                  <>
-                    <p className="text-sm text-gray-600 mb-4">
-                      {(() => {
-                        const config = getClientSubscriptionConfig();
-                        
-                        switch (currentSubscription.tier) {
-                          case 'pro':
-                            if (isTrialUser) {
-                              return `You're on a ${trialDays}-day trial with ${config.limits.pro.monthly} covers per month. ${currentSubscription.trial_days_remaining ? `${currentSubscription.trial_days_remaining} days remaining.` : ''}`;
-                            }
-                            return `You have ${config.limits.pro.monthly} covers per month. Consider upgrading to Pro+ for ${config.limits.pro_plus.monthly} covers and additional features.`;
-                          case 'pro_plus':
-                            if (isTrialUser) {
-                              return `You're on a ${trialDays}-day trial with ${config.limits.pro_plus.monthly} covers per month. ${currentSubscription.trial_days_remaining ? `${currentSubscription.trial_days_remaining} days remaining.` : ''}`;
-                            }
-                            return `You're on our highest tier with ${config.limits.pro_plus.monthly} covers per month and all premium features.`;
-                          case 'free':
-                          default:
-                            return `You have ${config.limits.free.monthly} covers per month (${config.limits.free.daily} per day). Upgrade to Pro for more covers and features.`;
-                        }
-                      })()}
-                    </p>
-                    <div className="flex gap-2">
-                      <Button 
-                        variant={currentSubscription.tier !== 'free' ? 'default' : 'ghost'}
-                        className={currentSubscription.tier !== 'free' ? 'bg-green-600 hover:bg-green-700' : ''}
-                        onClick={() => router.push(`/${locale}/account`)}
-                      >
-                        {currentSubscription.tier !== 'free' ? 'Manage Subscription' : 'View Account'}
-                      </Button>
-                      {currentSubscription.tier === 'pro' && (
-                        <Button 
-                          variant="outline"
-                          onClick={() => handleSelectPlan('pro_plus')}
-                          disabled={loading}
-                        >
-                          <Crown className="w-4 h-4 mr-2" />
-                          Upgrade to Pro+
-                        </Button>
-                      )}
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          )}
+          {/* Simple Navigation Buttons */}
+          <div className="flex justify-center gap-4 mt-8">
+            <Button 
+              variant="outline"
+              size="lg"
+              onClick={() => router.push(`/${locale}`)}
+            >
+              <Home className="w-5 h-5 mr-2" />
+              Back to Homepage
+            </Button>
+            
+            <Button 
+              size="lg"
+              onClick={() => router.push(`/${locale}/account`)}
+            >
+              <UserCircle className="w-5 h-5 mr-2" />
+              Go to Account
+            </Button>
+          </div>
         </div>
       </div>
     </div>
