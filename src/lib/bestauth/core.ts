@@ -75,8 +75,7 @@ export async function signUp({
 
     // Send verification email
     try {
-      const { EmailService } = await import('@/lib/email/service')
-      const emailService = EmailService.getInstance()
+      const { emailService } = await import('@/lib/email/service')
       
       // Generate verification token
       const verificationToken = generateToken()

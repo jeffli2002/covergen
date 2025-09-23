@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { EmailService } from '@/lib/email/service'
+import { emailService } from '@/lib/email/service'
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,7 +40,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Get email service configuration
-    const emailService = EmailService.getInstance()
     const config = emailService.getConfig()
     
     console.log('[Test Email] Email config:', {
