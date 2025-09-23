@@ -71,7 +71,7 @@ export default function SpotifyPlaylistCoverClient({ locale, translations: t }: 
                 that makes your Spotify playlists stand out and attract more listeners.
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex justify-center">
                 <Button 
                   size="lg" 
                   className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8"
@@ -86,16 +86,6 @@ export default function SpotifyPlaylistCoverClient({ locale, translations: t }: 
                 >
                   <Sparkles className="w-5 h-5 mr-2" />
                   Create Playlist Cover
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  className="border-gray-300"
-                  asChild
-                >
-                  <Link href={`/${locale}/platforms/spotify`}>
-                    Spotify Album Covers
-                  </Link>
                 </Button>
               </div>
               
@@ -133,7 +123,7 @@ export default function SpotifyPlaylistCoverClient({ locale, translations: t }: 
         <section className="py-20">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              <h2 className="text-3xl font-bold mb-4">
                 Features for Music Lovers
               </h2>
               <p className="text-lg text-gray-600">
@@ -146,7 +136,7 @@ export default function SpotifyPlaylistCoverClient({ locale, translations: t }: 
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                   <Music className="w-6 h-6 text-green-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold mb-2">
                   Genre-Based Styles
                 </h3>
                 <p className="text-gray-600">
@@ -158,7 +148,7 @@ export default function SpotifyPlaylistCoverClient({ locale, translations: t }: 
                 <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
                   <Palette className="w-6 h-6 text-purple-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold mb-2">
                   Mood Matching
                 </h3>
                 <p className="text-gray-600">
@@ -170,7 +160,7 @@ export default function SpotifyPlaylistCoverClient({ locale, translations: t }: 
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
                   <Zap className="w-6 h-6 text-blue-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold mb-2">
                   Instant Generation
                 </h3>
                 <p className="text-gray-600">
@@ -182,7 +172,7 @@ export default function SpotifyPlaylistCoverClient({ locale, translations: t }: 
                 <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
                   <Download className="w-6 h-6 text-orange-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold mb-2">
                   Perfect Resolution
                 </h3>
                 <p className="text-gray-600">
@@ -194,7 +184,7 @@ export default function SpotifyPlaylistCoverClient({ locale, translations: t }: 
                 <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
                   <Sparkles className="w-6 h-6 text-red-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold mb-2">
                   Trending Aesthetics
                 </h3>
                 <p className="text-gray-600">
@@ -206,7 +196,7 @@ export default function SpotifyPlaylistCoverClient({ locale, translations: t }: 
                 <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
                   <Shield className="w-6 h-6 text-indigo-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold mb-2">
                   Original Artwork
                 </h3>
                 <p className="text-gray-600">
@@ -221,7 +211,7 @@ export default function SpotifyPlaylistCoverClient({ locale, translations: t }: 
         <section className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              <h2 className="text-3xl font-bold mb-4">
                 Popular Playlist Cover Styles
               </h2>
               <p className="text-lg text-gray-600">
@@ -232,49 +222,49 @@ export default function SpotifyPlaylistCoverClient({ locale, translations: t }: 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
               <div className="bg-white p-6 rounded-lg shadow-sm text-center">
                 <div className="text-4xl mb-3">🎵</div>
-                <h3 className="font-semibold text-gray-900 mb-2">Chill Vibes</h3>
+                <h3 className="font-semibold mb-2">Chill Vibes</h3>
                 <p className="text-sm text-gray-600">Soft gradients, minimalist designs</p>
               </div>
               
               <div className="bg-white p-6 rounded-lg shadow-sm text-center">
                 <div className="text-4xl mb-3">🏃‍♂️</div>
-                <h3 className="font-semibold text-gray-900 mb-2">Workout Mix</h3>
+                <h3 className="font-semibold mb-2">Workout Mix</h3>
                 <p className="text-sm text-gray-600">Bold colors, energetic patterns</p>
               </div>
               
               <div className="bg-white p-6 rounded-lg shadow-sm text-center">
                 <div className="text-4xl mb-3">📚</div>
-                <h3 className="font-semibold text-gray-900 mb-2">Study Focus</h3>
+                <h3 className="font-semibold mb-2">Study Focus</h3>
                 <p className="text-sm text-gray-600">Clean, organized, calming tones</p>
               </div>
               
               <div className="bg-white p-6 rounded-lg shadow-sm text-center">
                 <div className="text-4xl mb-3">🌅</div>
-                <h3 className="font-semibold text-gray-900 mb-2">Morning Mood</h3>
+                <h3 className="font-semibold mb-2">Morning Mood</h3>
                 <p className="text-sm text-gray-600">Bright, uplifting, fresh designs</p>
               </div>
               
               <div className="bg-white p-6 rounded-lg shadow-sm text-center">
                 <div className="text-4xl mb-3">🎉</div>
-                <h3 className="font-semibold text-gray-900 mb-2">Party Hits</h3>
+                <h3 className="font-semibold mb-2">Party Hits</h3>
                 <p className="text-sm text-gray-600">Vibrant, dynamic, fun visuals</p>
               </div>
               
               <div className="bg-white p-6 rounded-lg shadow-sm text-center">
                 <div className="text-4xl mb-3">💔</div>
-                <h3 className="font-semibold text-gray-900 mb-2">Sad Songs</h3>
+                <h3 className="font-semibold mb-2">Sad Songs</h3>
                 <p className="text-sm text-gray-600">Moody, artistic, emotional depth</p>
               </div>
               
               <div className="bg-white p-6 rounded-lg shadow-sm text-center">
                 <div className="text-4xl mb-3">🎸</div>
-                <h3 className="font-semibold text-gray-900 mb-2">Rock Classics</h3>
+                <h3 className="font-semibold mb-2">Rock Classics</h3>
                 <p className="text-sm text-gray-600">Edgy, vintage, bold typography</p>
               </div>
               
               <div className="bg-white p-6 rounded-lg shadow-sm text-center">
                 <div className="text-4xl mb-3">☕</div>
-                <h3 className="font-semibold text-gray-900 mb-2">Coffee Shop</h3>
+                <h3 className="font-semibold mb-2">Coffee Shop</h3>
                 <p className="text-sm text-gray-600">Warm, cozy, acoustic vibes</p>
               </div>
             </div>
@@ -311,16 +301,16 @@ export default function SpotifyPlaylistCoverClient({ locale, translations: t }: 
         {/* SEO Content Section */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto prose prose-lg prose-seo prose-p:text-gray-900">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">The Ultimate Spotify Playlist Cover Maker</h2>
-              <p className="text-gray-900">
+            <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
+              <h2 className="text-3xl font-bold mb-6 text-center">The Ultimate Spotify Playlist Cover Maker</h2>
+              <p>
                 Creating the perfect Spotify playlist cover is essential for attracting listeners and expressing 
                 your musical taste. Our AI-powered Spotify playlist cover maker helps you design professional, 
                 eye-catching covers that make your playlists stand out in the crowded Spotify ecosystem.
               </p>
               
               <h3>Why Playlist Covers Matter on Spotify</h3>
-              <p className="text-gray-900">
+              <p>
                 A compelling playlist cover is often the first thing potential listeners see. It can be the 
                 difference between someone clicking play or scrolling past. Great playlist covers:
               </p>
@@ -332,21 +322,21 @@ export default function SpotifyPlaylistCoverClient({ locale, translations: t }: 
               </ul>
               
               <h3>Perfect Spotify Playlist Dimensions</h3>
-              <p className="text-gray-900">
+              <p>
                 Spotify requires playlist covers to be exactly 300x300 pixels in a 1:1 square ratio. Our tool 
                 automatically generates covers in this precise dimension, ensuring your artwork looks crisp on 
                 all devices - from desktop to mobile, from standard to retina displays.
               </p>
               
               <h3>AI-Powered Design Intelligence</h3>
-              <p className="text-gray-900">
+              <p>
                 Our AI analyzes millions of successful Spotify playlists to understand what makes covers engaging. 
                 It considers color psychology, typography trends, and visual hierarchy to create designs that not 
                 only look professional but also psychologically appeal to your target audience.
               </p>
               
               <h3>Genre-Specific Design Adaptation</h3>
-              <p className="text-gray-900">
+              <p>
                 Different music genres have distinct visual languages. Our AI understands these nuances:
               </p>
               <ul>
@@ -358,7 +348,7 @@ export default function SpotifyPlaylistCoverClient({ locale, translations: t }: 
               </ul>
               
               <h3>Free Spotify Playlist Cover Creation</h3>
-              <p className="text-gray-900">
+              <p>
                 Unlike other design tools that require subscriptions or leave watermarks, our Spotify playlist 
                 cover maker is completely free. Create unlimited playlist covers without any hidden costs or 
                 branding on your final designs. Your creativity shouldn't be limited by paywalls.

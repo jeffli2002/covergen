@@ -71,7 +71,7 @@ export default function FacebookEventCoverClient({ locale, translations: t }: Fa
                 designs that make your events stand out and attract more participants.
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex justify-center">
                 <Button 
                   size="lg" 
                   className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8"
@@ -86,16 +86,6 @@ export default function FacebookEventCoverClient({ locale, translations: t }: Fa
                 >
                   <Sparkles className="w-5 h-5 mr-2" />
                   Create Event Cover
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  className="border-gray-300"
-                  asChild
-                >
-                  <Link href={`/${locale}/platforms/facebook`}>
-                    More Facebook Tools
-                  </Link>
                 </Button>
               </div>
               
@@ -133,7 +123,7 @@ export default function FacebookEventCoverClient({ locale, translations: t }: Fa
         <section className="py-20">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              <h2 className="text-3xl font-bold mb-4">
                 Event Marketing Features
               </h2>
               <p className="text-lg text-gray-600">
@@ -146,7 +136,7 @@ export default function FacebookEventCoverClient({ locale, translations: t }: Fa
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
                   <Calendar className="w-6 h-6 text-blue-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold mb-2">
                   Event-Focused Design
                 </h3>
                 <p className="text-gray-600">
@@ -158,7 +148,7 @@ export default function FacebookEventCoverClient({ locale, translations: t }: Fa
                 <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
                   <Users className="w-6 h-6 text-purple-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold mb-2">
                   Audience Targeting
                 </h3>
                 <p className="text-gray-600">
@@ -170,7 +160,7 @@ export default function FacebookEventCoverClient({ locale, translations: t }: Fa
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                   <MapPin className="w-6 h-6 text-green-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold mb-2">
                   Location Emphasis
                 </h3>
                 <p className="text-gray-600">
@@ -182,7 +172,7 @@ export default function FacebookEventCoverClient({ locale, translations: t }: Fa
                 <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
                   <Clock className="w-6 h-6 text-orange-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold mb-2">
                   Time-Sensitive Design
                 </h3>
                 <p className="text-gray-600">
@@ -194,7 +184,7 @@ export default function FacebookEventCoverClient({ locale, translations: t }: Fa
                 <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
                   <Share2 className="w-6 h-6 text-red-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold mb-2">
                   Share-Worthy Visuals
                 </h3>
                 <p className="text-gray-600">
@@ -206,7 +196,7 @@ export default function FacebookEventCoverClient({ locale, translations: t }: Fa
                 <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
                   <Shield className="w-6 h-6 text-indigo-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold mb-2">
                   Brand Consistency
                 </h3>
                 <p className="text-gray-600">
@@ -221,7 +211,7 @@ export default function FacebookEventCoverClient({ locale, translations: t }: Fa
         <section className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              <h2 className="text-3xl font-bold mb-4">
                 Popular Event Cover Styles
               </h2>
               <p className="text-lg text-gray-600">
@@ -232,49 +222,49 @@ export default function FacebookEventCoverClient({ locale, translations: t }: Fa
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
               <div className="bg-white p-6 rounded-lg shadow-sm text-center">
                 <div className="text-4xl mb-3">🎵</div>
-                <h3 className="font-semibold text-gray-900 mb-2">Music Concerts</h3>
+                <h3 className="font-semibold mb-2">Music Concerts</h3>
                 <p className="text-sm text-gray-600">Bold, energetic, artist-focused</p>
               </div>
               
               <div className="bg-white p-6 rounded-lg shadow-sm text-center">
                 <div className="text-4xl mb-3">🎉</div>
-                <h3 className="font-semibold text-gray-900 mb-2">Parties & Celebrations</h3>
+                <h3 className="font-semibold mb-2">Parties & Celebrations</h3>
                 <p className="text-sm text-gray-600">Fun, vibrant, festive designs</p>
               </div>
               
               <div className="bg-white p-6 rounded-lg shadow-sm text-center">
                 <div className="text-4xl mb-3">💼</div>
-                <h3 className="font-semibold text-gray-900 mb-2">Business Events</h3>
+                <h3 className="font-semibold mb-2">Business Events</h3>
                 <p className="text-sm text-gray-600">Professional, clean, informative</p>
               </div>
               
               <div className="bg-white p-6 rounded-lg shadow-sm text-center">
                 <div className="text-4xl mb-3">🎭</div>
-                <h3 className="font-semibold text-gray-900 mb-2">Theater & Arts</h3>
+                <h3 className="font-semibold mb-2">Theater & Arts</h3>
                 <p className="text-sm text-gray-600">Elegant, artistic, dramatic</p>
               </div>
               
               <div className="bg-white p-6 rounded-lg shadow-sm text-center">
                 <div className="text-4xl mb-3">🏃‍♂️</div>
-                <h3 className="font-semibold text-gray-900 mb-2">Sports Events</h3>
+                <h3 className="font-semibold mb-2">Sports Events</h3>
                 <p className="text-sm text-gray-600">Dynamic, competitive, action-packed</p>
               </div>
               
               <div className="bg-white p-6 rounded-lg shadow-sm text-center">
                 <div className="text-4xl mb-3">🎓</div>
-                <h3 className="font-semibold text-gray-900 mb-2">Educational Workshops</h3>
+                <h3 className="font-semibold mb-2">Educational Workshops</h3>
                 <p className="text-sm text-gray-600">Informative, clear, engaging</p>
               </div>
               
               <div className="bg-white p-6 rounded-lg shadow-sm text-center">
                 <div className="text-4xl mb-3">🍷</div>
-                <h3 className="font-semibold text-gray-900 mb-2">Food & Wine</h3>
+                <h3 className="font-semibold mb-2">Food & Wine</h3>
                 <p className="text-sm text-gray-600">Appetizing, sophisticated, inviting</p>
               </div>
               
               <div className="bg-white p-6 rounded-lg shadow-sm text-center">
                 <div className="text-4xl mb-3">🌱</div>
-                <h3 className="font-semibold text-gray-900 mb-2">Community Gatherings</h3>
+                <h3 className="font-semibold mb-2">Community Gatherings</h3>
                 <p className="text-sm text-gray-600">Welcoming, inclusive, warm</p>
               </div>
             </div>
@@ -311,8 +301,8 @@ export default function FacebookEventCoverClient({ locale, translations: t }: Fa
         {/* SEO Content Section */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto prose prose-lg prose-seo prose-p:text-gray-900">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">The Ultimate Facebook Event Cover Maker</h2>
+            <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
+              <h2 className="text-3xl font-bold mb-6 text-center">The Ultimate Facebook Event Cover Maker</h2>
               <p>
                 Creating the perfect Facebook event cover is crucial for event success. Your event cover is 
                 often the first impression potential attendees have of your event, and it can significantly 
@@ -371,13 +361,13 @@ export default function FacebookEventCoverClient({ locale, translations: t }: Fa
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto">
-              <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+              <h2 className="text-3xl font-bold text-center mb-12">
                 Frequently Asked Questions
               </h2>
               
               <div className="space-y-6">
                 <div className="bg-white p-6 rounded-lg shadow-sm">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  <h3 className="text-lg font-semibold mb-2">
                     What size should my Facebook event cover be?
                   </h3>
                   <p className="text-gray-600">
@@ -388,7 +378,7 @@ export default function FacebookEventCoverClient({ locale, translations: t }: Fa
                 </div>
                 
                 <div className="bg-white p-6 rounded-lg shadow-sm">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  <h3 className="text-lg font-semibold mb-2">
                     Can I add event details like date and location?
                   </h3>
                   <p className="text-gray-600">
@@ -399,7 +389,7 @@ export default function FacebookEventCoverClient({ locale, translations: t }: Fa
                 </div>
                 
                 <div className="bg-white p-6 rounded-lg shadow-sm">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  <h3 className="text-lg font-semibold mb-2">
                     How do I make my event stand out in the Facebook feed?
                   </h3>
                   <p className="text-gray-600">
@@ -410,7 +400,7 @@ export default function FacebookEventCoverClient({ locale, translations: t }: Fa
                 </div>
                 
                 <div className="bg-white p-6 rounded-lg shadow-sm">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  <h3 className="text-lg font-semibold mb-2">
                     Can I use the covers for recurring events?
                   </h3>
                   <p className="text-gray-600">
@@ -421,7 +411,7 @@ export default function FacebookEventCoverClient({ locale, translations: t }: Fa
                 </div>
                 
                 <div className="bg-white p-6 rounded-lg shadow-sm">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  <h3 className="text-lg font-semibold mb-2">
                     Are the event covers optimized for sharing?
                   </h3>
                   <p className="text-gray-600">
