@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Check, Crown, Sparkles, Zap } from 'lucide-react'
-import { useAppStore } from '@/lib/store'
 import { useBestAuth } from '@/hooks/useBestAuth'
 import { useRouter } from 'next/navigation'
 import AuthForm from '@/components/auth/AuthForm'
@@ -104,7 +103,6 @@ interface PricingSectionProps {
 const PENDING_PLAN_KEY = 'covergen_pending_plan'
 
 export default function PricingSection({ locale = 'en' }: PricingSectionProps = {}) {
-  const { user } = useAppStore()
   const { user: authUser, session } = useBestAuth()
   const router = useRouter()
   const [showAuthModal, setShowAuthModal] = useState(false)
@@ -259,16 +257,14 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
           {tiers.map((tier) => {
             const Icon = tier.icon
             // Check if this is the user's current tier
-            // Always use subscription info from API when available, fall back to app store
-            const isCurrentTier = subscriptionInfo?.plan === tier.id || 
-                                 (!subscriptionInfo && user?.tier === tier.id)
+            // Only show current tier when user is authenticated and has subscription info
+            const isCurrentTier = !!(authUser && subscriptionInfo?.plan === tier.id)
             
             // Debug logging for all tiers when user is logged in
             if (authUser?.email) {
               console.log(`[PricingSection] Tier comparison for ${tier.id}:`, {
                 tierId: tier.id,
                 subscriptionPlan: subscriptionInfo?.plan,
-                userTier: user?.tier,
                 isCurrentTier,
                 hasSubscriptionInfo: !!subscriptionInfo,
                 subscriptionData: subscriptionInfo

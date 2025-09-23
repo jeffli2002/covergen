@@ -77,6 +77,9 @@ export default function Header({ locale, translations: t }: HeaderProps) {
           }
         })
         .catch(err => console.error('Error fetching subscription:', err))
+    } else {
+      // Clear subscription info when user logs out
+      setSubscriptionInfo(null)
     }
   }, [user, session])
 
@@ -87,6 +90,9 @@ export default function Header({ locale, translations: t }: HeaderProps) {
       console.error('[Header] Sign out failed:', result.error)
     } else {
       console.log('[Header] Sign out successful')
+      // Clear the app store user data
+      const { setUser } = useAppStore.getState()
+      setUser(null)
     }
   }
 
