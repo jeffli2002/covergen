@@ -2,6 +2,8 @@
 import { Metadata } from 'next'
 import { SignUpForm } from '@/components/auth/SignUpForm'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Sign Up | CoverImage',
   description: 'Create a new CoverImage account',
