@@ -372,9 +372,8 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
                       variant={tier.popular ? "default" : "outline"}
                       disabled={
                         loadingSubscription || 
+                        // Disable current plan for paid users (unless trial needing payment setup)
                         (isCurrentTier && !(subscriptionInfo?.isTrialing && subscriptionInfo?.requiresPaymentSetup)) ||
-                        // Disable for Pro+ users on paid plans (they're at highest tier)
-                        (subscriptionInfo?.plan === 'pro_plus' && !subscriptionInfo?.isTrialing && tier.id !== 'free') ||
                         // Disable downgrade options for paid users
                         (subscriptionInfo !== null && !subscriptionInfo.isTrialing && subscriptionInfo.plan !== 'free' && 
                           ((subscriptionInfo.plan === 'pro_plus' && tier.id === 'pro') || 
@@ -405,10 +404,8 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
                         
                         // For paid users (not on trial)
                         if (subscriptionInfo && !subscriptionInfo.isTrialing && subscriptionInfo.plan !== 'free') {
-                          // Pro users can only upgrade to Pro+
-                          if (subscriptionInfo.plan === 'pro' && tier.id === 'pro_plus') return 'Upgrade'
-                          // Pro+ users can't upgrade further (they're at highest tier)
-                          if (subscriptionInfo.plan === 'pro_plus' && tier.id !== 'free') return 'Highest Tier'
+                          // Pro users can upgrade to Pro+
+                          if (subscriptionInfo.plan === 'pro' && tier.id === 'pro_plus') return 'Upgrade Now'
                           // Don't show downgrade options for paid users
                           if ((subscriptionInfo.plan === 'pro_plus' && tier.id === 'pro') || 
                               (subscriptionInfo.plan === 'pro' && tier.id === 'free')) {
