@@ -431,16 +431,6 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                 </p>
               </div>
               
-              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-                <h3 className="text-xl font-semibold mb-4 text-gray-900">
-                  How does the Pro/Pro+ trial work?
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  Pro and Pro+ plans come with a {trialDays}-day free trial. During the trial, Pro users get {config.limits.pro.trial_total} covers total 
-                  and Pro+ users get {config.limits.pro_plus.trial_total} covers total. Trial usage doesn't count against your first paid month - you'll 
-                  get the full monthly quota when your subscription begins.
-                </p>
-              </div>
             </div>
           </div>
         </section>
