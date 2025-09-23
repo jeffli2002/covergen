@@ -3,8 +3,16 @@
 import { createSupabaseClient } from '@/lib/supabase/server'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { authConfig } from '@/config/auth.config'
 
 export async function checkAuthSession() {
+  // Use BestAuth implementation if enabled
+  if (authConfig.USE_BESTAUTH) {
+    const bestAuth = await import('./auth-bestauth')
+    return bestAuth.checkAuthSession()
+  }
+  
+  // Otherwise use Supabase implementation
   const supabase = await createSupabaseClient()
   const { data: { session }, error } = await supabase.auth.getSession()
   
@@ -27,6 +35,13 @@ export async function checkAuthSession() {
 }
 
 export async function signInWithGoogleAction(currentPath?: string) {
+  // Use BestAuth implementation if enabled
+  if (authConfig.USE_BESTAUTH) {
+    const bestAuth = await import('./auth-bestauth')
+    return bestAuth.signInWithGoogleAction(currentPath)
+  }
+  
+  // Otherwise use Supabase implementation
   const supabase = await createSupabaseClient()
   const headersList = await headers()
   const origin = headersList.get('origin') || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'

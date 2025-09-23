@@ -6,7 +6,7 @@
 
 export const authConfig = {
   // Set to true to use BestAuth, false to use Supabase
-  USE_BESTAUTH: false,
+  USE_BESTAUTH: true,
   
   // BestAuth configuration
   BESTAUTH: {

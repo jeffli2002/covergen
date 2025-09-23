@@ -4,8 +4,18 @@ import { cookies } from 'next/headers'
 import { getEnhancedCookieOptions, logCookieOperation } from '@/utils/supabase/cookie-config'
 import { userSyncService } from '@/services/sync/UserSyncService'
 import { sessionBridgeService } from '@/services/bridge/SessionBridgeService'
+import { authConfig } from '@/config/auth.config'
 
 export async function GET(request: Request) {
+  // Route to BestAuth callback if enabled
+  if (authConfig.USE_BESTAUTH) {
+    // BestAuth uses a different callback structure
+    // This route is for Supabase only, BestAuth uses /api/auth/callback/[provider]
+    const { origin } = new URL(request.url)
+    return NextResponse.redirect(`${origin}/auth/error?error=invalid_callback`)
+  }
+  
+  // Otherwise use Supabase implementation
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/en'
