@@ -12,6 +12,7 @@ import { useAnalytics } from '@/lib/analytics'
 import { useAuth } from '@/contexts/AuthContext'
 import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
 import PageSkeleton from '@/components/ui/page-skeleton'
+import { usePaymentReturn } from '@/hooks/usePaymentReturn'
 import { 
   Sparkles, 
   Zap, 
@@ -66,6 +67,9 @@ const features = [
 
 export default function HomePageClient({ locale, translations: t }: HomePageClientProps) {
   console.log('[HomePageClient] Starting render with:', { locale, hasTranslations: !!t })
+  
+  // Check if returning from payment and trigger refresh
+  usePaymentReturn()
   
   const [isPageReady, setIsPageReady] = useState(false)
   

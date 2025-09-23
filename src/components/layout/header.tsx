@@ -39,7 +39,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
       timestamp: new Date().toISOString()
     })
   }, [loading, user])
-  const { user: storeUser } = useAppStore()
+  const { user: storeUser, subscriptionRefreshTrigger } = useAppStore()
   const router = useRouter()
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null)
@@ -65,6 +65,11 @@ export default function Header({ locale, translations: t }: HeaderProps) {
   // Fetch subscription info to check trial status
   useEffect(() => {
     if (user && session) {
+      console.log('[Header] Fetching subscription info due to:', { 
+        user: user?.email, 
+        hasSession: !!session,
+        refreshTrigger: subscriptionRefreshTrigger 
+      })
       fetch('/api/bestauth/subscription/status', {
         headers: {
           'Authorization': `Bearer ${session.token}`
@@ -73,6 +78,12 @@ export default function Header({ locale, translations: t }: HeaderProps) {
         .then(res => res.json())
         .then(data => {
           if (data && !data.error) {
+            console.log('[Header] Subscription info updated:', {
+              tier: data.tier,
+              plan: data.plan,
+              status: data.status,
+              isTrialing: data.isTrialing
+            })
             setSubscriptionInfo(data)
           }
         })
@@ -81,7 +92,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
       // Clear subscription info when user logs out
       setSubscriptionInfo(null)
     }
-  }, [user, session])
+  }, [user, session, subscriptionRefreshTrigger])
 
   const handleLogout = async () => {
     console.log('[Header] Signing out...')

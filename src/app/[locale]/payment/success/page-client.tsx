@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { CheckCircle, Loader2, Sparkles, ArrowRight } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
-import authService from '@/services/authService'
+import { useBestAuth } from '@/hooks/useBestAuth'
 import confetti from 'canvas-confetti'
 
 interface PaymentSuccessClientProps {
@@ -16,7 +16,8 @@ interface PaymentSuccessClientProps {
 
 export default function PaymentSuccessClient({ locale, sessionId }: PaymentSuccessClientProps) {
   const router = useRouter()
-  const { user, setUser } = useAppStore()
+  const { user: authUser, session } = useBestAuth()
+  const { user, setUser, triggerUsageRefresh, triggerSubscriptionRefresh } = useAppStore()
   const [loading, setLoading] = useState(true)
   interface Subscription {
     id: string
@@ -46,25 +47,49 @@ export default function PaymentSuccessClient({ locale, sessionId }: PaymentSucce
       // Wait a bit for webhook to process
       await new Promise(resolve => setTimeout(resolve, 2000))
 
-      // Refresh user data
-      await authService.initialize()
-      const updatedSubscription = await authService.getUserSubscription()
-      
-      if (updatedSubscription) {
-        setSubscription(updatedSubscription)
-        
-        // Update app store with new tier
-        if (user) {
-          const quotaLimits = {
-            pro: 120,
-            pro_plus: 300
+      // Fetch subscription info using BestAuth
+      if (session?.token) {
+        const response = await fetch('/api/bestauth/subscription/status', {
+          headers: {
+            'Authorization': `Bearer ${session.token}`
           }
-          setUser({
-            ...user,
-            tier: updatedSubscription.tier,
-            quotaLimit: quotaLimits[updatedSubscription.tier as keyof typeof quotaLimits] || 10,
-            quotaUsed: 0
-          })
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          console.log('[PaymentSuccess] Subscription loaded:', data)
+          
+          if (data) {
+            setSubscription({
+              id: data.id,
+              user_id: data.user_id,
+              tier: data.tier || data.plan,
+              status: data.status,
+              created_at: data.created_at,
+              updated_at: data.updated_at
+            })
+            
+            // Update app store with new tier
+            if (authUser) {
+              const quotaLimits = {
+                pro: 120,
+                pro_plus: 300
+              }
+              const tier = data.tier || data.plan
+              setUser({
+                id: authUser.id,
+                email: authUser.email,
+                tier: tier,
+                quotaLimit: quotaLimits[tier as keyof typeof quotaLimits] || 10,
+                quotaUsed: 0
+              })
+            }
+            
+            // Trigger refresh in other components
+            console.log('[PaymentSuccess] Triggering subscription refresh')
+            triggerSubscriptionRefresh()
+            triggerUsageRefresh()
+          }
         }
       }
     } catch (error) {
@@ -169,7 +194,7 @@ export default function PaymentSuccessClient({ locale, sessionId }: PaymentSucce
                   <Button
                     className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
                     size="lg"
-                    onClick={() => router.push(`/${locale}`)}
+                    onClick={() => router.push(`/${locale}?from_payment=true`)}
                   >
                     Start Creating
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -192,7 +217,7 @@ export default function PaymentSuccessClient({ locale, sessionId }: PaymentSucce
                 </p>
                 <Button
                   variant="outline"
-                  onClick={() => router.push(`/${locale}`)}
+                  onClick={() => router.push(`/${locale}?from_payment=true`)}
                 >
                   Go to Dashboard
                 </Button>

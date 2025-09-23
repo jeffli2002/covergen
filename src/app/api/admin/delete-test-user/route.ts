@@ -2,6 +2,7 @@
 // WARNING: This should be removed in production
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/bestauth/db'
+import { getBestAuthSupabaseClient } from '@/lib/bestauth/db-client'
 
 export async function DELETE(request: NextRequest) {
   try {
@@ -43,53 +44,73 @@ export async function DELETE(request: NextRequest) {
       passwordResets: 0
     }
     
+    // Prepare DB client (service role)
+    const client = getBestAuthSupabaseClient()
+    if (!client) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 500 })
+    }
+
     // 1. Delete sessions
-    const sessionsResult = await db.pool.query(
-      'DELETE FROM bestauth_sessions WHERE user_id = $1',
-      [user.id]
-    )
-    deletions.sessions = sessionsResult.rowCount || 0
+    const { data: deletedSessions, error: sessionsError } = await client
+      .from('bestauth_sessions')
+      .delete()
+      .eq('user_id', user.id)
+      .select('id')
+    if (sessionsError) throw sessionsError
+    deletions.sessions = deletedSessions?.length || 0
     
     // 2. Delete subscriptions
-    const subscriptionsResult = await db.pool.query(
-      'DELETE FROM bestauth_subscriptions WHERE user_id = $1',
-      [user.id]
-    )
-    deletions.subscriptions = subscriptionsResult.rowCount || 0
+    const { data: deletedSubs, error: subsError } = await client
+      .from('bestauth_subscriptions')
+      .delete()
+      .eq('user_id', user.id)
+      .select('id')
+    if (subsError) throw subsError
+    deletions.subscriptions = deletedSubs?.length || 0
     
     // 3. Delete usage tracking
-    const usageResult = await db.pool.query(
-      'DELETE FROM bestauth_usage_tracking WHERE user_id = $1',
-      [user.id]
-    )
-    deletions.usageTracking = usageResult.rowCount || 0
+    const { data: deletedUsage, error: usageError } = await client
+      .from('bestauth_usage_tracking')
+      .delete()
+      .eq('user_id', user.id)
+      .select('date')
+    if (usageError) throw usageError
+    deletions.usageTracking = deletedUsage?.length || 0
     
     // 4. Delete OAuth accounts
-    const oauthResult = await db.pool.query(
-      'DELETE FROM bestauth_oauth_accounts WHERE user_id = $1',
-      [user.id]
-    )
-    deletions.oauthAccounts = oauthResult.rowCount || 0
+    const { data: deletedOauth, error: oauthError } = await client
+      .from('bestauth_oauth_accounts')
+      .delete()
+      .eq('user_id', user.id)
+      .select('id')
+    if (oauthError) throw oauthError
+    deletions.oauthAccounts = deletedOauth?.length || 0
     
     // 5. Delete magic links
-    const magicLinksResult = await db.pool.query(
-      'DELETE FROM bestauth_magic_links WHERE email = $1',
-      [email]
-    )
-    deletions.magicLinks = magicLinksResult.rowCount || 0
+    const { data: deletedMagic, error: magicError } = await client
+      .from('bestauth_magic_links')
+      .delete()
+      .eq('email', email)
+      .select('email')
+    if (magicError) throw magicError
+    deletions.magicLinks = deletedMagic?.length || 0
     
     // 6. Delete password reset tokens
-    const passwordResetsResult = await db.pool.query(
-      'DELETE FROM bestauth_password_reset_tokens WHERE user_id = $1',
-      [user.id]
-    )
-    deletions.passwordResets = passwordResetsResult.rowCount || 0
+    const { data: deletedResets, error: resetsError } = await client
+      .from('bestauth_password_resets')
+      .delete()
+      .eq('user_id', user.id)
+      .select('id')
+    if (resetsError) throw resetsError
+    deletions.passwordResets = deletedResets?.length || 0
     
     // 7. Finally, delete the user
-    const userResult = await db.pool.query(
-      'DELETE FROM bestauth_users WHERE id = $1',
-      [user.id]
-    )
+    const { data: deletedUsers, error: userDeleteError } = await client
+      .from('bestauth_users')
+      .delete()
+      .eq('id', user.id)
+      .select('id')
+    if (userDeleteError) throw userDeleteError
     
     console.log(`[Admin] Deletion complete:`, deletions)
     
@@ -98,7 +119,7 @@ export async function DELETE(request: NextRequest) {
       message: `Successfully deleted user: ${email}`,
       userId: user.id,
       deletions,
-      userDeleted: userResult.rowCount === 1
+      userDeleted: (deletedUsers?.length || 0) === 1
     })
     
   } catch (error) {

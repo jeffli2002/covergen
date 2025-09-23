@@ -27,6 +27,7 @@ interface AppState {
   currentTask: GenerationTask | null
   tasks: GenerationTask[]
   usageRefreshTrigger: number  // Increment this to trigger usage refresh
+  subscriptionRefreshTrigger: number  // Increment this to trigger subscription refresh
   
   // Actions
   setUser: (user: User | null) => void
@@ -34,6 +35,7 @@ interface AppState {
   addTask: (task: GenerationTask) => void
   updateTask: (id: string, updates: Partial<GenerationTask>) => void
   triggerUsageRefresh: () => void
+  triggerSubscriptionRefresh: () => void
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -41,6 +43,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   currentTask: null,
   tasks: [],
   usageRefreshTrigger: 0,
+  subscriptionRefreshTrigger: 0,
 
   setUser: (user) => set({ user }),
   
@@ -62,5 +65,9 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   triggerUsageRefresh: () => set((state) => ({
     usageRefreshTrigger: state.usageRefreshTrigger + 1
+  })),
+
+  triggerSubscriptionRefresh: () => set((state) => ({
+    subscriptionRefreshTrigger: state.subscriptionRefreshTrigger + 1
   }))
 }))

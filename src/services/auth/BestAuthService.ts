@@ -103,6 +103,9 @@ export class BestAuthService {
       // Create session
       const session = await this.createSession(user.id)
 
+      // Send verification email
+      await this.sendVerificationEmail(user)
+
       // Also create user in Supabase for compatibility
       await this.syncUserToSupabase(user)
 
@@ -675,6 +678,51 @@ export class BestAuthService {
     // Implementation depends on email service
     // For now, log to console
     console.log(`Password reset for ${email}: ${process.env.NEXT_PUBLIC_SITE_URL}/auth/reset-password?token=${token}`)
+  }
+
+  private async sendVerificationEmail(user: any): Promise<void> {
+    try {
+      // Generate verification token
+      const token = this.generateSecureToken()
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+      
+      // Store token in database
+      const stored = await db.verificationTokens.create(user.id, token, expiresAt)
+      if (!stored) {
+        throw new Error('Failed to store verification token')
+      }
+      
+      // Create verification URL
+      const verificationUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/auth/verify-email?token=${token}`
+      
+      // Import email service and template
+      const { emailService } = await import('@/lib/email/service')
+      const { getVerificationEmailTemplate } = await import('@/lib/email/templates/verification')
+      
+      // Get email content
+      const { html, text } = getVerificationEmailTemplate({
+        email: user.email,
+        verificationUrl,
+        name: user.name
+      })
+      
+      // Send email
+      const result = await emailService.send({
+        to: user.email,
+        subject: 'Verify your email - CoverGen Pro',
+        html,
+        text
+      })
+      
+      if (!result.success) {
+        console.error('Failed to send verification email:', result.error)
+      } else {
+        console.log('Verification email sent to:', user.email)
+      }
+    } catch (error) {
+      console.error('Error sending verification email:', error)
+      // Don't throw - allow signup to succeed even if email fails
+    }
   }
 
   private async syncUserToSupabase(user: any): Promise<void> {

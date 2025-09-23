@@ -8,6 +8,7 @@ import { useBestAuth } from '@/hooks/useBestAuth'
 import { useRouter } from 'next/navigation'
 import AuthForm from '@/components/auth/AuthForm'
 import { getClientSubscriptionConfig, getTrialPeriodText, getTrialPeriodFullText, isTrialEnabledClient } from '@/lib/subscription-config-client'
+import { useAppStore } from '@/lib/store'
 
 interface SubscriptionInfo {
   status: string
@@ -105,6 +106,7 @@ const PENDING_PLAN_KEY = 'covergen_pending_plan'
 export default function PricingSection({ locale = 'en' }: PricingSectionProps = {}) {
   const { user: authUser, session } = useBestAuth()
   const router = useRouter()
+  const { subscriptionRefreshTrigger } = useAppStore()
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [pendingPlan, setPendingPlan] = useState<string | null>(null)
   const [subscriptionInfo, setSubscriptionInfo] = useState<SubscriptionInfo | null>(null)
@@ -113,13 +115,13 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
   // Fetch subscription info when component mounts or auth changes
   useEffect(() => {
     if (authUser && session) {
-      console.log('[PricingSection] User authenticated, fetching subscription info for:', authUser.email)
+      console.log('[PricingSection] User authenticated, fetching subscription info for:', authUser.email, 'trigger:', subscriptionRefreshTrigger)
       fetchSubscriptionInfo()
     } else {
       console.log('[PricingSection] No authenticated user, clearing subscription info')
       setSubscriptionInfo(null)
     }
-  }, [authUser, session])
+  }, [authUser, session, subscriptionRefreshTrigger])
   
   const fetchSubscriptionInfo = async () => {
     setLoadingSubscription(true)

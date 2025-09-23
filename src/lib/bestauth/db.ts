@@ -422,6 +422,61 @@ export const db = {
     },
   },
 
+  // Verification token operations
+  verificationTokens: {
+    async create(userId: string, token: string, expiresAt: Date): Promise<boolean> {
+      try {
+        const { error } = await getDb()
+          .from('bestauth_verification_tokens')
+          .insert({
+            user_id: userId,
+            token,
+            expires_at: expiresAt.toISOString(),
+            created_at: new Date().toISOString()
+          })
+        
+        if (error) throw error
+        return true
+      } catch (error) {
+        console.error('Error creating verification token:', error)
+        return false
+      }
+    },
+    
+    async findByToken(token: string): Promise<any | null> {
+      try {
+        const { data, error } = await getDb()
+          .from('bestauth_verification_tokens')
+          .select('*')
+          .eq('token', token)
+          .eq('used', false)
+          .gt('expires_at', new Date().toISOString())
+          .single()
+        
+        if (error) return null
+        return data
+      } catch (error) {
+        console.error('Error finding verification token:', error)
+        return null
+      }
+    },
+    
+    async markAsUsed(token: string): Promise<boolean> {
+      try {
+        const { error } = await getDb()
+          .from('bestauth_verification_tokens')
+          .update({ used: true, used_at: new Date().toISOString() })
+          .eq('token', token)
+        
+        if (error) throw error
+        return true
+      } catch (error) {
+        console.error('Error marking token as used:', error)
+        return false
+      }
+    }
+  },
+
   // Subscription operations
   subscriptions: {
     async findByUserId(userId: string): Promise<any | null> {
