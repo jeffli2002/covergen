@@ -40,11 +40,7 @@ export default function PaymentPageClient({
   
   const [currentSubscription, setCurrentSubscription] = useState<Subscription | null>(null)
   const [proratedAmount, setProratedAmount] = useState<number | null>(null)
-  const [isProcessingTrialUpgrade, setIsProcessingTrialUpgrade] = useState(false)
   const [isLoadingSubscription, setIsLoadingSubscription] = useState(true)
-  
-  // Get trial days from environment variables
-  const trialDays = parseInt(process.env.NEXT_PUBLIC_TRIAL_DAYS || '3')
 
   useEffect(() => {
     // Check if we're in test mode
@@ -130,21 +126,9 @@ export default function PaymentPageClient({
         calculateProratedAmount(subscription)
       }
       
-      // Check if this is a trial user wanting to upgrade or activate
-      if (subscription && subscription.status === 'trialing' && (isUpgrade || isActivation) && initialPlan) {
-        console.log('[PaymentPage] Trial user wants to', isActivation ? 'activate' : 'upgrade', ', processing automatically')
-        setIsProcessingTrialUpgrade(true)
-        // Automatically start the upgrade/activation process for trial users
-        setTimeout(() => {
-          handleSelectPlan(initialPlan as 'pro' | 'pro_plus')
-        }, 1000)
-        return
-      }
-      
-      // Check if this is a new user coming from trial signup
+      // Check if this is a new user
       if (!subscription && initialPlan && initialPlan !== 'free' && authUser) {
         console.log('[PaymentPage] No subscription found, user needs to select a plan')
-        // Don't create manual trial - let user go through checkout process
       }
       
       // Set selected plan based on user's situation
@@ -365,33 +349,6 @@ export default function PaymentPageClient({
     )
   }
 
-  // Show special loading state for trial upgrades
-  if (isProcessingTrialUpgrade) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">
-        <div className="container max-w-6xl mx-auto px-4">
-          <div className="flex flex-col items-center justify-center h-64 space-y-4">
-            <Loader2 className="w-12 h-12 animate-spin text-orange-500" />
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {isActivation ? 'Activating Your Plan' : 'Upgrading Your Trial'}
-              </h2>
-              <p className="text-gray-600">
-                {currentSubscription?.stripe_subscription_id 
-                  ? `${isActivation ? 'Activating' : 'Upgrading instantly to'} ${initialPlan === 'pro_plus' ? 'Pro+' : 'Pro'}...`
-                  : `Setting up ${initialPlan === 'pro_plus' ? 'Pro+' : 'Pro'} subscription...`}
-              </p>
-              <p className="text-sm text-gray-500 mt-2">
-                {currentSubscription?.stripe_subscription_id 
-                  ? 'Your payment method will be charged immediately.'
-                  : 'You\'ll be redirected to secure checkout shortly.'}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   const isTrialUser = currentSubscription?.status === 'trialing'
   
@@ -409,7 +366,7 @@ export default function PaymentPageClient({
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             {(() => {
               if (isActivation) {
-                return 'Add a payment method to convert your trial to a paid subscription and continue using all features.'
+                return 'Add a payment method to activate your subscription.'
               }
               if (currentSubscription?.tier === 'pro' && !isTrialUser) {
                 return 'You\'re currently on the Pro plan. Upgrade to Pro+ for more covers and premium features!'
@@ -543,13 +500,6 @@ export default function PaymentPageClient({
                     <span className="text-gray-600">/month</span>
                   </div>
                   
-                  {/* Free Trial Badge */}
-                  <div className="mt-3">
-                    <Badge className="bg-green-50 text-green-700 border-green-200">
-                      <Sparkles className="w-3 h-3 mr-1" />
-                      {trialDays}-day free trial
-                    </Badge>
-                  </div>
                   
                   {/* Show prorated amount for upgrades */}
                   {isUpgrade && currentSubscription?.tier === 'pro' && plan.id === 'pro_plus' && proratedAmount !== null && (
@@ -592,13 +542,6 @@ export default function PaymentPageClient({
                 </CardContent>
 
                 <CardFooter className="flex flex-col gap-2">
-                  {/* Current Plan Status for all users */}
-                  {isCurrentPlan && isTrialUser && (
-                    <Badge variant="secondary" className="w-full py-2 text-sm">
-                      Current Plan (Trial)
-                    </Badge>
-                  )}
-                  
                   {/* Current Plan Status for paid users */}
                   {isCurrentPlan && isPaidUser && (
                     <Badge className="w-full py-2 text-sm bg-green-100 text-green-800 border-green-200">

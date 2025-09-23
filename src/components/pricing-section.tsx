@@ -7,7 +7,7 @@ import { Check, Crown, Sparkles, Zap } from 'lucide-react'
 import { useBestAuth } from '@/hooks/useBestAuth'
 import { useRouter } from 'next/navigation'
 import AuthForm from '@/components/auth/AuthForm'
-import { getClientSubscriptionConfig, getTrialPeriodText, getTrialPeriodFullText, isTrialEnabledClient } from '@/lib/subscription-config-client'
+import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
 import { useAppStore } from '@/lib/store'
 
 interface SubscriptionInfo {
@@ -27,9 +27,6 @@ interface SubscriptionInfo {
 
 // Get dynamic configuration
 const config = getClientSubscriptionConfig()
-const trialText = getTrialPeriodText()
-const trialFullText = getTrialPeriodFullText()
-const hasTrials = isTrialEnabledClient()
 
 const tiers = [
   {
@@ -71,9 +68,9 @@ const tiers = [
       'Commercial usage rights'
     ],
     limitations: [],
-    cta: hasTrials ? `Start ${trialText}` : 'Get Started',
+    cta: 'Get Started',
     popular: true,
-    badge: hasTrials ? trialFullText : null
+    badge: null
   },
   {
     id: 'pro_plus',
@@ -91,9 +88,9 @@ const tiers = [
       'Dedicated support'
     ],
     limitations: [],
-    cta: hasTrials ? `Start ${trialText}` : 'Get Started',
+    cta: 'Get Started',
     popular: false,
-    badge: hasTrials ? trialFullText : null
+    badge: null
   }
 ]
 
@@ -254,10 +251,7 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4 text-gray-900">Choose Your Plan</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            {hasTrials 
-              ? `Start free or try Pro plans with a ${trialText}. All images are watermark-free.`
-              : 'Choose the plan that works best for you. All images are watermark-free.'
-            }
+            Choose the plan that works best for you. All images are watermark-free.
           </p>
         </div>
 

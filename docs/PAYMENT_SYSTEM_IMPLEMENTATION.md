@@ -27,18 +27,8 @@ The payment system has been fully implemented with comprehensive support for all
 - Creates checkout session via Creem
 - Webhook updates subscription status
 
-✅ **Trial Subscriptions**
-- 3-day trial with or without payment method
-- Trial without payment: Requires checkout to activate
-- Trial with payment: Can activate instantly
-
-✅ **Trial to Paid Conversion**
-- Immediate activation: Uses `updateSubscription` with proration charge
-- Natural trial end: Handled automatically by Creem
-
 ✅ **Upgrades (Pro → Pro+)**
-- Trial users: Updates tier immediately in database
-- Paid users: Creates new checkout with proration
+- Creates new checkout with proration for paid users
 
 ✅ **Downgrades (Pro+ → Pro)**
 - Schedules downgrade at period end

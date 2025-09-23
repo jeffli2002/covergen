@@ -395,8 +395,8 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                   What's the difference between free and Pro plans?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Free users get {config.limits.free.monthly} covers per month ({config.limits.free.daily}/day max) for personal use only. Pro ($9/month) includes a {trialDays}-day trial and 
-                  {config.limits.pro.monthly} covers per month with commercial rights. Pro+ ($19/month) also includes a {trialDays}-day trial and {config.limits.pro_plus.monthly} covers per 
+                  Free users get {config.limits.free.monthly} covers per month ({config.limits.free.daily}/day max) for personal use only. Pro ($9/month) includes 
+                  {config.limits.pro.monthly} covers per month with commercial rights. Pro+ ($19/month) includes {config.limits.pro_plus.monthly} covers per 
                   month with full commercial license for teams and enterprises.
                 </p>
               </div>

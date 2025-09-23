@@ -127,8 +127,7 @@ const getSubscriptionPlansWithConfig = () => {
         `${config.limits.pro.monthly} covers per month`,
         'No watermark',
         'All platform sizes',
-        'Priority support',
-        `${config.trialDays}-day free trial`
+        'Priority support'
       ]
     },
     pro_plus: {
@@ -143,8 +142,7 @@ const getSubscriptionPlansWithConfig = () => {
         'All platform sizes',
         'Advanced customization',
         'Commercial usage license',
-        'Dedicated support',
-        `${config.trialDays}-day free trial`
+        'Dedicated support'
       ]
     }
   }

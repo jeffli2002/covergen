@@ -2,7 +2,7 @@
 
 import { FileText, CheckCircle2, AlertCircle, Globe, Shield, CreditCard, Scale, Mail, MapPin } from 'lucide-react'
 import { Locale } from '@/lib/i18n/config'
-import { getClientSubscriptionConfig, getTrialPeriodFullText, isTrialEnabledClient } from '@/lib/subscription-config-client'
+import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
 
 interface TermsPageClientProps {
   locale: Locale
@@ -12,8 +12,6 @@ interface TermsPageClientProps {
 export default function TermsPageClient({ locale, translations: t }: TermsPageClientProps) {
   // Get configuration for dynamic values
   const config = getClientSubscriptionConfig()
-  const trialFullText = getTrialPeriodFullText()
-  const hasTrials = isTrialEnabledClient()
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="container mx-auto px-4 py-16 max-w-5xl">
@@ -166,7 +164,6 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                     <h4 className="font-semibold text-gray-900 mb-2">Pro Plan</h4>
                     <p className="text-sm font-medium text-gray-900 mb-2">$9/month</p>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      {hasTrials && <li>✓ {trialFullText}</li>}
                       <li>✓ {config.limits.pro.monthly} covers per month</li>
                       <li>✓ No watermark</li>
                       <li>✓ All platform sizes</li>
@@ -178,7 +175,6 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                     <h4 className="font-semibold text-gray-900 mb-2">Pro+ Plan</h4>
                     <p className="text-sm font-medium text-gray-900 mb-2">$19/month</p>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      {hasTrials && <li>✓ {trialFullText}</li>}
                       <li>✓ {config.limits.pro_plus.monthly} covers per month</li>
                       <li>✓ No watermark</li>
                       <li>✓ Full commercial license</li>
@@ -230,29 +226,11 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">4.5 No Refund Policy</h3>
                 <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                   <p className="text-gray-700">• <strong>All Sales Final:</strong> Due to the digital nature of our service, all sales are final</p>
-                  {hasTrials && <p className="text-gray-700">• <strong>Try Before You Buy:</strong> Pro/Pro+ plans include a {trialFullText} to evaluate the service</p>}
                   <p className="text-gray-700">• <strong>Billing Errors:</strong> We will correct any verified billing errors or duplicate charges</p>
                   <p className="text-gray-700">• <strong>Service Credits:</strong> Extended outages may be compensated with service credits at our discretion</p>
                 </div>
               </div>
 
-              {hasTrials && (
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">4.6 Pro/Pro+ Trial Terms</h3>
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <p className="text-gray-700 mb-2">Pro and Pro+ plans include a {trialFullText} with these terms:</p>
-                    <ul className="space-y-1 text-gray-700 text-sm">
-                      <li>• <strong>Pro Trial:</strong> {config.limits.pro.trial_total} covers total ({config.limits.pro.trial_daily} per day average) during {config.trialDays}-day trial</li>
-                      <li>• <strong>Pro+ Trial:</strong> {config.limits.pro_plus.trial_total} covers total ({config.limits.pro_plus.trial_daily} per day average) during {config.trialDays}-day trial</li>
-                      <li>• <strong>Automatic Billing:</strong> Subscription begins automatically after trial ends unless cancelled (cannot be activated early)</li>
-                      <li>• <strong>Fresh Start:</strong> Trial usage doesn't count against your first paid month</li>
-                      <li>• <strong>Full Features:</strong> Access to all plan features during trial</li>
-                      <li>• <strong>Cancel Anytime:</strong> Cancel before trial ends to avoid charges</li>
-                      <li>• <strong>One Trial Per Account:</strong> Limited to one trial per payment method</li>
-                    </ul>
-                  </div>
-                </div>
-              )}
 
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">4.7 Plan Changes</h3>
