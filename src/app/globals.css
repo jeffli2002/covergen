@@ -182,45 +182,120 @@
 }
 
 /* SEO Content Sections - Enhanced visibility with higher specificity */
+/* Reset prose defaults for SEO sections */
+.prose-seo {
+  --tw-prose-body: rgb(17 24 39) !important;
+  --tw-prose-headings: rgb(17 24 39) !important;
+  --tw-prose-lead: rgb(55 65 81) !important;
+  --tw-prose-links: rgb(59 130 246) !important;
+  --tw-prose-bold: rgb(17 24 39) !important;
+  --tw-prose-counters: rgb(75 85 99) !important;
+  --tw-prose-bullets: rgb(107 114 128) !important;
+  --tw-prose-hr: rgb(229 231 235) !important;
+  --tw-prose-quotes: rgb(17 24 39) !important;
+  --tw-prose-quote-borders: rgb(229 231 235) !important;
+  --tw-prose-captions: rgb(75 85 99);
+  --tw-prose-code: rgb(17 24 39);
+  --tw-prose-pre-code: rgb(229 231 235);
+  --tw-prose-pre-bg: rgb(31 41 55);
+  --tw-prose-th-borders: rgb(209 213 219);
+  --tw-prose-td-borders: rgb(229 231 235);
+}
+
+/* Main prose-seo container */
 .prose-seo,
 .prose.prose-seo {
-  @apply text-gray-900 dark:text-gray-100 !important;
+  @apply text-gray-900 dark:text-gray-100;
+  color: rgb(17 24 39) !important;
+}
+
+/* Fix for prose-gray class interference */
+.prose-gray.prose-seo,
+.prose.prose-gray.prose-seo {
+  --tw-prose-body: rgb(17 24 39) !important;
+  --tw-prose-headings: rgb(17 24 39) !important;
 }
 
 .prose-seo p,
-.prose.prose-seo p {
-  @apply text-gray-900 dark:text-gray-200 leading-relaxed !important;
+.prose.prose-seo p,
+.prose-gray.prose-seo p,
+.prose.prose-gray.prose-seo p {
+  @apply text-gray-900 dark:text-gray-200 leading-relaxed;
+  color: rgb(17 24 39) !important;
+  opacity: 1 !important;
 }
 
 .prose-seo h2,
-.prose.prose-seo h2 {
-  @apply text-gray-900 dark:text-white font-bold text-3xl !important;
+.prose.prose-seo h2,
+.prose-gray.prose-seo h2,
+.prose.prose-gray.prose-seo h2 {
+  @apply text-gray-900 dark:text-white font-bold text-3xl;
+  color: rgb(17 24 39) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .prose-seo h3,
-.prose.prose-seo h3 {
-  @apply text-gray-900 dark:text-gray-100 font-semibold text-xl mt-8 mb-4 !important;
+.prose.prose-seo h3,
+.prose-gray.prose-seo h3,
+.prose.prose-gray.prose-seo h3 {
+  @apply text-gray-900 dark:text-gray-100 font-semibold text-xl mt-8 mb-4;
+  color: rgb(17 24 39) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .prose-seo ul, .prose-seo ol,
-.prose.prose-seo ul, .prose.prose-seo ol {
-  @apply text-gray-900 dark:text-gray-200 !important;
+.prose.prose-seo ul, .prose.prose-seo ol,
+.prose-gray.prose-seo ul, .prose-gray.prose-seo ol,
+.prose.prose-gray.prose-seo ul, .prose.prose-gray.prose-seo ol {
+  @apply text-gray-900 dark:text-gray-200;
+  color: rgb(17 24 39) !important;
 }
 
 .prose-seo li,
-.prose.prose-seo li {
-  @apply mb-2 text-gray-900 dark:text-gray-200 !important;
+.prose.prose-seo li,
+.prose-gray.prose-seo li,
+.prose.prose-gray.prose-seo li {
+  @apply mb-2 text-gray-900 dark:text-gray-200;
+  color: rgb(17 24 39) !important;
+  opacity: 1 !important;
 }
 
 .prose-seo strong,
-.prose.prose-seo strong {
-  @apply text-gray-900 dark:text-white font-semibold !important;
+.prose.prose-seo strong,
+.prose-gray.prose-seo strong,
+.prose.prose-gray.prose-seo strong {
+  @apply text-gray-900 dark:text-white font-semibold;
+  color: rgb(17 24 39) !important;
+  font-weight: 600 !important;
 }
 
-/* Override any inherited gray text colors */
-.prose-seo *:not(code),
-.prose.prose-seo *:not(code) {
-  color: inherit;
+/* Override prose-p utility modifier */
+.prose-p\:text-gray-900 p {
+  color: rgb(17 24 39) !important;
+}
+
+/* Override prose-gray default colors */
+.prose-gray {
+  --tw-prose-body: rgb(107 114 128);
+  --tw-prose-headings: rgb(75 85 99);
+}
+
+/* Ensure prose-seo always wins over prose-gray */
+.prose-lg.prose-gray.prose-seo,
+.prose-gray.prose-lg.prose-seo,
+.prose.prose-lg.prose-gray.prose-seo {
+  --tw-prose-body: rgb(17 24 39) !important;
+  --tw-prose-headings: rgb(17 24 39) !important;
+  color: rgb(17 24 39) !important;
+}
+
+/* Force visibility for all SEO content elements */
+section .prose-seo *,
+section .prose-gray.prose-seo * {
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 /* Scrollbar styling */
