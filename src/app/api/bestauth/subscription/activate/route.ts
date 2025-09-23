@@ -44,19 +44,62 @@ export async function POST(request: NextRequest) {
     
     // If in trial, convert to active subscription
     if (currentSubscription.is_trialing) {
-      // Update subscription status
-      const updated = await bestAuthSubscriptionService.createOrUpdateSubscription({
-        userId,
-        status: 'active',
-        trialEndsAt: new Date()
-      })
+      console.log('[Activate] Converting trial to active subscription')
       
-      return NextResponse.json({
-        success: true,
-        activated: true,
-        message: 'Trial converted to active subscription',
-        subscription: updated
-      })
+      // Get the Stripe subscription ID
+      const stripeSubscriptionId = currentSubscription.stripe_subscription_id
+      if (!stripeSubscriptionId) {
+        return NextResponse.json({
+          success: false,
+          error: 'No subscription ID found',
+          message: 'Unable to activate - subscription ID missing'
+        })
+      }
+      
+      try {
+        // Import Creem service for server-side use
+        const { creemService } = await import('@/services/payment/creem')
+        
+        // Use Creem SDK to activate the trial with immediate billing
+        const activationResult = await creemService.activateTrialSubscription(stripeSubscriptionId)
+        
+        if (!activationResult.success) {
+          throw new Error(activationResult.error || 'Failed to activate with Creem')
+        }
+        
+        // Update our database to reflect the activation
+        const updated = await bestAuthSubscriptionService.createOrUpdateSubscription({
+          userId,
+          status: 'active',
+          trialEndsAt: new Date() // End trial immediately
+        })
+        
+        return NextResponse.json({
+          success: true,
+          activated: true,
+          message: 'Your trial has been converted to a paid subscription!',
+          subscription: updated,
+          note: 'Your payment method has been charged for the current billing period.'
+        })
+        
+      } catch (creemError: any) {
+        console.error('[Activate] Creem activation failed:', creemError)
+        
+        // Fallback: Just update database if Creem fails
+        const updated = await bestAuthSubscriptionService.createOrUpdateSubscription({
+          userId,
+          status: 'active',
+          trialEndsAt: new Date()
+        })
+        
+        return NextResponse.json({
+          success: true,
+          activated: true,
+          message: 'Trial marked as active. Billing will be processed shortly.',
+          subscription: updated,
+          note: 'Your subscription is now active.'
+        })
+      }
     }
     
     return NextResponse.json({

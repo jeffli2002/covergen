@@ -436,6 +436,18 @@ export const db = {
       return data
     },
 
+    async findByCustomerId(customerId: string): Promise<any | null> {
+      const { data, error } = await getDb()
+        .from('bestauth_subscriptions')
+        .select('*')
+        .eq('stripe_customer_id', customerId)
+        .single()
+      
+      if (error || !data) return null
+      
+      return data
+    },
+
     async create(subscriptionData: {
       userId: string
       tier?: string
@@ -610,7 +622,7 @@ export const db = {
             }
             return config.limits.free.monthly
           })(),
-          has_payment_method: !!data.stripe_subscription_id,
+          has_payment_method: !!data.stripe_payment_method_id,
           requires_payment_setup: data.status === 'trialing' && !data.stripe_subscription_id,
           next_billing_date: data.current_period_end || null
         }

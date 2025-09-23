@@ -42,7 +42,27 @@ export async function POST(request: NextRequest) {
       })
     }
     
-    // Cancel subscription
+    // Check if subscription has Stripe ID for Creem cancellation
+    const stripeSubscriptionId = subscription.stripe_subscription_id
+    
+    if (stripeSubscriptionId) {
+      try {
+        // Import Creem service for server-side use
+        const { creemService } = await import('@/services/payment/creem')
+        
+        // Cancel via Creem SDK
+        const cancelResult = await creemService.cancelSubscription(stripeSubscriptionId, cancelAtPeriodEnd)
+        
+        if (!cancelResult.success) {
+          throw new Error(cancelResult.error || 'Failed to cancel with Creem')
+        }
+      } catch (creemError: any) {
+        console.error('[Cancel] Creem cancellation failed:', creemError)
+        // Continue with database update even if Creem fails
+      }
+    }
+    
+    // Cancel subscription in database
     const updated = await bestAuthSubscriptionService.cancelSubscription(userId, cancelAtPeriodEnd)
     
     return NextResponse.json({

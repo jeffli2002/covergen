@@ -3,7 +3,6 @@ import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
 import GoogleAnalyticsPageView from '@/components/GoogleAnalyticsPageView'
-import { AuthProvider } from '@/components/providers/auth-provider'
 
 export const metadata: Metadata = {
   title: 'CoverGen',
@@ -26,9 +25,7 @@ export default function RootLayout({
             <GoogleAnalyticsPageView />
           </>
         )}
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        {children}
         <Toaster />
       </body>
     </html>

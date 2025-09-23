@@ -6,7 +6,7 @@ export interface SubscriptionStatus {
   subscription_id?: string
   user_id: string
   tier: 'free' | 'pro' | 'pro_plus'
-  status: 'active' | 'cancelled' | 'expired' | 'pending' | 'trialing' | 'paused'
+  status: 'active' | 'cancelled' | 'expired' | 'pending' | 'trialing' | 'paused' | 'past_due'
   is_trialing: boolean
   trial_days_remaining: number
   can_generate: boolean
@@ -16,6 +16,15 @@ export interface SubscriptionStatus {
   has_payment_method: boolean
   requires_payment_setup: boolean
   next_billing_date?: Date
+  // Stripe fields
+  stripe_subscription_id?: string | null
+  stripe_customer_id?: string | null
+  stripe_payment_method_id?: string | null
+  // Cancellation fields
+  cancel_at_period_end?: boolean
+  cancelled_at?: Date | null
+  // Metadata
+  metadata?: any
 }
 
 export class BestAuthSubscriptionService {
@@ -155,7 +164,7 @@ export class BestAuthSubscriptionService {
   async createOrUpdateSubscription(data: {
     userId: string
     tier?: 'free' | 'pro' | 'pro_plus'
-    status?: 'active' | 'cancelled' | 'expired' | 'pending' | 'trialing' | 'paused'
+    status?: 'active' | 'cancelled' | 'expired' | 'pending' | 'trialing' | 'paused' | 'past_due'
     stripeCustomerId?: string
     stripeSubscriptionId?: string
     stripePriceId?: string
@@ -164,6 +173,7 @@ export class BestAuthSubscriptionService {
     currentPeriodStart?: Date
     currentPeriodEnd?: Date
     cancelAtPeriodEnd?: boolean
+    cancelledAt?: Date
     metadata?: any
   }): Promise<any> {
     try {
@@ -179,6 +189,7 @@ export class BestAuthSubscriptionService {
         current_period_start: data.currentPeriodStart?.toISOString(),
         current_period_end: data.currentPeriodEnd?.toISOString(),
         cancel_at_period_end: data.cancelAtPeriodEnd,
+        cancelled_at: data.cancelledAt?.toISOString(),
         metadata: data.metadata
       })
     } catch (error) {

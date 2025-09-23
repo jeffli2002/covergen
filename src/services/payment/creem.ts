@@ -568,13 +568,18 @@ class CreemPaymentService {
         throw new Error('Creem API key not configured')
       }
 
-      // TODO: Fix Creem SDK integration for cancellation
-      // For now, return a success response
-      console.log(`[Creem] Would cancel subscription ${subscriptionId} at period end: ${cancelAtPeriodEnd}`)
+      // Use the Creem SDK to cancel subscription
+      // Note: Creem API doesn't support cancelAtPeriodEnd parameter directly
+      const result = await getCreemClient().cancelSubscription({
+        id: subscriptionId,
+        xApiKey: CREEM_API_KEY
+      })
+
+      console.log('[Creem] Subscription cancelled:', result)
       
       return {
         success: true,
-        subscription: { id: subscriptionId, status: 'cancel_at_period_end' }
+        subscription: result
       }
     } catch (error: any) {
       console.error('Creem cancel subscription error:', error)
@@ -618,10 +623,13 @@ class CreemPaymentService {
   }
 
   /**
-   * Update subscription (e.g., end trial immediately)
+   * Update subscription (e.g., change items, proration)
    * Note: This should be called from server-side only or through an API endpoint
    */
-  async updateSubscription(subscriptionId: string, updates: any) {
+  async updateSubscription(subscriptionId: string, updates: {
+    items?: Array<{ productId?: string; quantity?: number }>,
+    updateBehavior?: 'proration-charge-immediately' | 'proration-charge' | 'proration-none'
+  }) {
     try {
       // This method should only be called from server-side
       if (typeof window !== 'undefined') {
@@ -633,13 +641,26 @@ class CreemPaymentService {
         throw new Error('Creem API key not configured')
       }
 
-      // TODO: Implement actual API call when Creem SDK supports subscription updates
-      console.log(`[Creem] Would update subscription ${subscriptionId} with:`, updates)
+      console.log(`[Creem] Updating subscription ${subscriptionId}`)
+      
+      // Use the Creem SDK to update subscription
+      const result = await getCreemClient().updateSubscription({
+        id: subscriptionId,
+        xApiKey: CREEM_API_KEY,
+        updateSubscriptionRequestEntity: {
+          items: updates.items?.map(item => ({
+            productId: item.productId,
+            quantity: item.quantity
+          })),
+          updateBehavior: updates.updateBehavior || 'proration-charge-immediately'
+        }
+      })
 
-      // In production, this would make an API call to update the subscription
-      // For now, return success to allow development to continue
+      console.log('[Creem] Subscription update result:', result)
+
       return {
-        success: true
+        success: true,
+        subscription: result
       }
     } catch (error: any) {
       console.error('Creem update subscription error:', error)
@@ -666,12 +687,17 @@ class CreemPaymentService {
         throw new Error('Creem API key not configured')
       }
 
-      // TODO: Fix Creem SDK integration for getting subscription details
-      console.log(`[Creem] Would get subscription ${subscriptionId}`)
+      // Use the Creem SDK to retrieve subscription
+      const result = await getCreemClient().retrieveSubscription({
+        subscriptionId: subscriptionId,
+        xApiKey: CREEM_API_KEY
+      })
+
+      console.log('[Creem] Retrieved subscription:', result)
 
       return {
         success: true,
-        subscription: { id: subscriptionId, status: 'active' }
+        subscription: result
       }
     } catch (error: any) {
       console.error('Creem get subscription error:', error)
@@ -1070,6 +1096,72 @@ class CreemPaymentService {
       return {
         success: false,
         error: error.message || 'Failed to upgrade subscription'
+      }
+    }
+  }
+
+  /**
+   * Activate trial subscription (convert to paid immediately)
+   * This is a workaround since Creem doesn't support ending trials early
+   * We force an immediate charge by updating the subscription with proration
+   */
+  async activateTrialSubscription(subscriptionId: string) {
+    try {
+      if (typeof window !== 'undefined') {
+        throw new Error('This method must be called from server-side')
+      }
+
+      const CREEM_API_KEY = getCreemApiKey()
+      if (!CREEM_API_KEY) {
+        throw new Error('Creem API key not configured')
+      }
+
+      console.log(`[Creem] Attempting to activate trial subscription ${subscriptionId}`)
+
+      // First, get the current subscription to verify it's in trial
+      const subResult = await this.getSubscription(subscriptionId)
+      if (!subResult.success || !subResult.subscription) {
+        throw new Error('Failed to retrieve subscription')
+      }
+
+      const subscription = subResult.subscription as any
+      console.log('[Creem] Current subscription status:', subscription.status)
+
+      if (subscription.status !== 'trialing') {
+        return {
+          success: false,
+          error: 'Subscription is not in trial status'
+        }
+      }
+
+      // WORKAROUND: Since we can't end trials early, we'll update the subscription
+      // with immediate proration charge to trigger billing
+      // This effectively converts the trial to paid by charging immediately
+      const updateResult = await this.updateSubscription(subscriptionId, {
+        items: [{
+          productId: subscription.product?.id || subscription.product,
+          quantity: 1
+        }],
+        updateBehavior: 'proration-charge-immediately' // Force immediate charge
+      })
+
+      if (!updateResult.success) {
+        throw new Error('Failed to update subscription for activation')
+      }
+
+      console.log('[Creem] Trial activation completed with immediate charge')
+
+      return {
+        success: true,
+        activated: true,
+        subscription: updateResult.subscription,
+        message: 'Trial activated with immediate billing'
+      }
+    } catch (error: any) {
+      console.error('Creem activate trial error:', error)
+      return {
+        success: false,
+        error: error.message || 'Failed to activate trial subscription'
       }
     }
   }

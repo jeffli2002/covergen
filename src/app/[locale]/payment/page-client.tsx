@@ -33,7 +33,7 @@ export default function PaymentPageClient({
   const { user } = useAppStore()
   const { user: authUser, loading: authLoading, getUserSubscription } = useAuth()
   const [loading, setLoading] = useState(false)
-  const [selectedPlan, setSelectedPlan] = useState<'pro' | 'pro_plus'>(initialPlan as any)
+  const [selectedPlan, setSelectedPlan] = useState<'pro' | 'pro_plus' | null>(null)
   const [isTestMode, setIsTestMode] = useState(false)
   // Remove the local interface - use the actual subscription data structure
   type Subscription = any
@@ -69,7 +69,9 @@ export default function PaymentPageClient({
     if (!authUser) {
       console.log('[PaymentPage] Not authenticated, redirecting...')
       // Redirect to auth with return URL
-      const returnUrl = `/${locale}/payment?plan=${selectedPlan}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
+      const returnUrl = selectedPlan 
+        ? `/${locale}/payment?plan=${selectedPlan}&redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}` 
+        : `/${locale}/payment?redirect=${encodeURIComponent(redirectUrl || `/${locale}`)}`
       router.push(`/${locale}?auth=signin&redirect=${encodeURIComponent(returnUrl)}`)
       return
     }
@@ -78,7 +80,7 @@ export default function PaymentPageClient({
 
     // Load current subscription
     loadCurrentSubscription()
-  }, [authUser, authLoading, locale, router, selectedPlan, redirectUrl, getUserSubscription])
+  }, [authUser, authLoading, locale, router, redirectUrl, getUserSubscription])
 
   const loadCurrentSubscription = async () => {
     setIsLoadingSubscription(true)
@@ -125,6 +127,25 @@ export default function PaymentPageClient({
       if (!subscription && initialPlan && initialPlan !== 'free' && authUser) {
         console.log('[PaymentPage] No subscription found, user needs to select a plan')
         // Don't create manual trial - let user go through checkout process
+      }
+      
+      // Set selected plan based on user's situation
+      if (!isLoadingSubscription) {
+        // For paid Pro users, don't select any plan by default
+        if (subscription && subscription.tier === 'pro' && subscription.status !== 'trialing') {
+          console.log('[PaymentPage] Paid Pro user, no plan pre-selected')
+          setSelectedPlan(null)
+        }
+        // For paid Pro+ users, don't select any plan
+        else if (subscription && subscription.tier === 'pro_plus' && subscription.status !== 'trialing') {
+          console.log('[PaymentPage] Paid Pro+ user, no plan pre-selected')
+          setSelectedPlan(null)
+        }
+        // For upgrade scenarios or new users, use the initial plan
+        else if (initialPlan && (isUpgrade || isActivation || !subscription || subscription.tier === 'free')) {
+          console.log('[PaymentPage] Setting selected plan to:', initialPlan)
+          setSelectedPlan(initialPlan as 'pro' | 'pro_plus')
+        }
       }
     } catch (error) {
       console.error('Error loading subscription:', error)
@@ -408,12 +429,15 @@ export default function PaymentPageClient({
             console.log('[PaymentPage] Rendering plan:', plan.id, {
               isCurrentPlan,
               isTrialUser,
+              isPaidUser,
               needsPaymentSetup,
               isClickable,
               currentSubscriptionTier: currentSubscription?.tier,
+              currentSubscriptionStatus: currentSubscription?.status,
               planId: plan.id,
               tierMatch: currentSubscription?.tier === plan.id,
-              subscriptionData: currentSubscription,
+              selectedPlan,
+              isSelected,
               loading,
               disabled: !isClickable
             })
@@ -429,9 +453,9 @@ export default function PaymentPageClient({
                   isCurrentPlan && !needsPaymentSetup ? 'ring-2 ring-green-500 bg-green-50' : ''
                 } ${
                   // Highlight Pro+ for Pro users as upgrade option
-                  currentSubscription?.tier === 'pro' && plan.id === 'pro_plus' ? 'ring-2 ring-blue-500' : ''
+                  currentSubscription?.tier === 'pro' && plan.id === 'pro_plus' && !isTrialUser ? 'ring-2 ring-blue-500' : ''
                 }`}
-                onClick={() => isClickable && setSelectedPlan(plan.id as any)}
+                onClick={() => isClickable && setSelectedPlan(plan.id as 'pro' | 'pro_plus')}
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
@@ -573,9 +597,14 @@ export default function PaymentPageClient({
                         isClickable, 
                         needsPaymentSetup, 
                         isCurrentPlan,
-                        isTrialUser 
+                        isTrialUser,
+                        isPaidUser,
+                        currentSubscriptionTier: currentSubscription?.tier
                       })
-                      handleSelectPlan(plan.id as 'pro' | 'pro_plus')
+                      if (isClickable) {
+                        setSelectedPlan(plan.id as 'pro' | 'pro_plus')
+                        handleSelectPlan(plan.id as 'pro' | 'pro_plus')
+                      }
                     }}
                   >
                     {loading && selectedPlan === plan.id ? (

@@ -65,10 +65,13 @@ const features = [
 ]
 
 export default function HomePageClient({ locale, translations: t }: HomePageClientProps) {
+  console.log('[HomePageClient] Starting render with:', { locale, hasTranslations: !!t })
+  
   const [isPageReady, setIsPageReady] = useState(false)
   
   // Initialize page after mount to prevent hydration mismatch
   useEffect(() => {
+    console.log('[HomePageClient] Page mounted, setting ready state')
     setIsPageReady(true)
   }, [])
   
