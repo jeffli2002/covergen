@@ -93,7 +93,7 @@ export default function TwitchGraphicsMakerClient({ locale, translations }: { lo
                   </Button>
                 </Link>
                 <Link href={`/${locale}#pricing`}>
-                  <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-purple-800 px-8 py-6 text-lg border-2">
+                  <Button size="lg" variant="ghost" className="text-white border-2 border-white hover:bg-white hover:text-purple-800 px-8 py-6 text-lg font-semibold">
                     View Pricing
                   </Button>
                 </Link>

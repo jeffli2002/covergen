@@ -93,7 +93,7 @@ export default function LinkedInGraphicsMakerClient({ locale, translations }: { 
                   </Button>
                 </Link>
                 <Link href={`/${locale}#pricing`}>
-                  <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-blue-700 px-8 py-6 text-lg border-2">
+                  <Button size="lg" variant="ghost" className="text-white border-2 border-white hover:bg-white hover:text-blue-700 px-8 py-6 text-lg font-semibold">
                     View Pricing
                   </Button>
                 </Link>
