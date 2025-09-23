@@ -149,6 +149,31 @@ export default function TestSubscriptionPage() {
             <p className="text-red-500">You must be logged in to use debug tools</p>
           </Card>
         )}
+        
+        {/* Admin delete test user - only show for specific email */}
+        {user?.email === 'jeffli2001@gmail.com' && (
+          <Card className="p-4 mt-4 border-red-200 bg-red-50">
+            <h3 className="text-lg font-semibold mb-2 text-red-700">Admin: Delete Test User</h3>
+            <Button 
+              onClick={async () => {
+                if (confirm('Delete test user 994235892@qq.com?')) {
+                  try {
+                    const res = await fetch('/api/admin/delete-test-user?email=994235892@qq.com', {
+                      method: 'DELETE'
+                    })
+                    const data = await res.json()
+                    alert(JSON.stringify(data, null, 2))
+                  } catch (err) {
+                    alert('Error: ' + err)
+                  }
+                }
+              }}
+              variant="destructive"
+            >
+              Delete Test User 994235892@qq.com
+            </Button>
+          </Card>
+        )}
       </div>
     </div>
   )
