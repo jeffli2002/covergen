@@ -62,6 +62,21 @@ export default function Header({ locale, translations: t }: HeaderProps) {
     return () => clearTimeout(timer)
   }, [])
   
+  // Initialize store user when auth user changes
+  useEffect(() => {
+    if (user && !storeUser) {
+      console.log('[Header] Initializing store user from auth user')
+      // Set a default user object in the store - tier will be updated when subscription info is fetched
+      useAppStore.getState().setUser({
+        id: user.id,
+        email: user.email,
+        tier: 'free', // Default to free, will be updated by subscription fetch
+        quotaLimit: 10,
+        quotaUsed: 0
+      })
+    }
+  }, [user, storeUser])
+  
   // Fetch subscription info to check trial status
   useEffect(() => {
     if (user && session) {
@@ -85,6 +100,27 @@ export default function Header({ locale, translations: t }: HeaderProps) {
               isTrialing: data.isTrialing
             })
             setSubscriptionInfo(data)
+            
+            // Update store's user object with the correct tier
+            const tier = data.tier || data.plan || 'free'
+            if (user && (!storeUser || storeUser.tier !== tier)) {
+              console.log('[Header] Updating store user tier:', { 
+                oldTier: storeUser?.tier, 
+                newTier: tier 
+              })
+              const quotaLimits = {
+                free: 10,
+                pro: 120,
+                pro_plus: 300
+              }
+              useAppStore.getState().setUser({
+                id: user.id,
+                email: user.email,
+                tier: tier as 'free' | 'pro' | 'pro_plus',
+                quotaLimit: quotaLimits[tier as keyof typeof quotaLimits] || 10,
+                quotaUsed: storeUser?.quotaUsed || 0
+              })
+            }
           }
         })
         .catch(err => console.error('Error fetching subscription:', err))
@@ -92,7 +128,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
       // Clear subscription info when user logs out
       setSubscriptionInfo(null)
     }
-  }, [user, session, subscriptionRefreshTrigger])
+  }, [user, session, subscriptionRefreshTrigger, storeUser])
 
   const handleLogout = async () => {
     console.log('[Header] Signing out...')

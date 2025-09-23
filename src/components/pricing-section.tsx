@@ -152,6 +152,28 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
           tier: data.tier || data.plan  // Ensure tier field exists
         }
         setSubscriptionInfo(normalizedData)
+        
+        // Update store's user object with the correct tier
+        const tier = normalizedData.tier || normalizedData.plan || 'free'
+        const currentStoreUser = useAppStore.getState().user
+        if (authUser && (!currentStoreUser || currentStoreUser.tier !== tier)) {
+          console.log('[PricingSection] Updating store user tier:', { 
+            oldTier: currentStoreUser?.tier, 
+            newTier: tier 
+          })
+          const quotaLimits = {
+            free: 10,
+            pro: 120,
+            pro_plus: 300
+          }
+          useAppStore.getState().setUser({
+            id: authUser.id,
+            email: authUser.email,
+            tier: tier as 'free' | 'pro' | 'pro_plus',
+            quotaLimit: quotaLimits[tier as keyof typeof quotaLimits] || 10,
+            quotaUsed: currentStoreUser?.quotaUsed || 0
+          })
+        }
       } else {
         console.error('[PricingSection] Subscription API error:', response.status)
         const errorText = await response.text()
