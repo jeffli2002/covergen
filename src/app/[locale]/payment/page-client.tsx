@@ -131,8 +131,18 @@ export default function PaymentPageClient({
       
       // Set selected plan based on user's situation
       if (!isLoadingSubscription) {
-        // For paid Pro users, don't select any plan by default
-        if (subscription && subscription.tier === 'pro' && subscription.status !== 'trialing') {
+        // For upgrade scenarios, select the target plan
+        if (isUpgrade && initialPlan) {
+          console.log('[PaymentPage] Upgrade scenario, selecting target plan:', initialPlan)
+          setSelectedPlan(initialPlan as 'pro' | 'pro_plus')
+        }
+        // For activation scenarios, select the current plan
+        else if (isActivation && subscription) {
+          console.log('[PaymentPage] Activation scenario, selecting current plan:', subscription.tier)
+          setSelectedPlan(subscription.tier as 'pro' | 'pro_plus')
+        }
+        // For paid Pro users not upgrading, don't select any plan
+        else if (subscription && subscription.tier === 'pro' && subscription.status !== 'trialing' && !isUpgrade) {
           console.log('[PaymentPage] Paid Pro user, no plan pre-selected')
           setSelectedPlan(null)
         }
@@ -141,8 +151,8 @@ export default function PaymentPageClient({
           console.log('[PaymentPage] Paid Pro+ user, no plan pre-selected')
           setSelectedPlan(null)
         }
-        // For upgrade scenarios or new users, use the initial plan
-        else if (initialPlan && (isUpgrade || isActivation || !subscription || subscription.tier === 'free')) {
+        // For new users or free users, use the initial plan
+        else if (initialPlan && (!subscription || subscription.tier === 'free')) {
           console.log('[PaymentPage] Setting selected plan to:', initialPlan)
           setSelectedPlan(initialPlan as 'pro' | 'pro_plus')
         }
@@ -422,9 +432,10 @@ export default function PaymentPageClient({
             const isSelected = selectedPlan === plan.id
             
             // Allow trial users to click their current plan to add payment method
-            // Also prevent paid users from selecting their current plan
+            // Also prevent paid users from selecting their current plan (unless upgrading)
             const isPaidUser = currentSubscription && !isTrialUser && currentSubscription.tier !== 'free'
-            const isClickable = !loading && (!isCurrentPlan || (isCurrentPlan && needsPaymentSetup))
+            const isUpgradeTarget = isUpgrade && initialPlan === plan.id
+            const isClickable = !loading && (!isCurrentPlan || (isCurrentPlan && needsPaymentSetup) || isUpgradeTarget)
             
             console.log('[PaymentPage] Rendering plan:', plan.id, {
               isCurrentPlan,
