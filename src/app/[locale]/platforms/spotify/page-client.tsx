@@ -6,7 +6,6 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Music, Disc3, Headphones, Radio, BarChart3, Sparkles } from 'lucide-react'
 import PlatformShowcaseOptimized from '@/components/platform-showcase-optimized'
 import { platformShowcases } from '@/lib/platform-showcases'
-import ImageGenerator from '@/components/image-generator'
 
 const features = [
   {
@@ -89,18 +88,17 @@ export default function SpotifyPlaylistCoverMakerClient({ locale, translations }
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-                <Button 
-                  size="lg" 
-                  variant="ghost" 
-                  className="bg-gray-900 hover:bg-gray-800 px-8 py-6 text-lg shadow-lg font-semibold" 
-                  style={{color: 'white'}}
-                  onClick={() => {
-                    document.getElementById('generator')?.scrollIntoView({ behavior: 'smooth' })
-                  }}
-                >
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  Create Spotify Covers
-                </Button>
+                <Link href={`/${locale}/tools/spotify-playlist-cover`}>
+                  <Button 
+                    size="lg" 
+                    variant="ghost" 
+                    className="bg-gray-900 hover:bg-gray-800 px-8 py-6 text-lg shadow-lg font-semibold" 
+                    style={{color: 'white'}}
+                  >
+                    <Sparkles className="w-5 h-5 mr-2" />
+                    Create Spotify Covers
+                  </Button>
+                </Link>
                 <Link href={`/${locale}#pricing`}>
                   <Button size="lg" variant="ghost" className="text-white border-2 border-white hover:bg-white hover:text-green-600 px-8 py-6 text-lg font-semibold transition-colors">
                     View Pricing
@@ -115,16 +113,6 @@ export default function SpotifyPlaylistCoverMakerClient({ locale, translations }
           </div>
         </section>
 
-        {/* Generation Section */}
-        <section id="generator" className="py-16 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Create Your Spotify Cover</h2>
-              <p className="text-lg text-gray-600">Upload an image and let AI transform it into a perfect Spotify playlist cover</p>
-            </div>
-            <ImageGenerator />
-          </div>
-        </section>
 
         {/* AI Transformation Showcase */}
         <PlatformShowcaseOptimized
@@ -270,17 +258,16 @@ export default function SpotifyPlaylistCoverMakerClient({ locale, translations }
             <p className="text-xl md:text-2xl mb-8 opacity-90">
               Join creators making viral playlist covers with AI
             </p>
-            <Button 
-              size="lg" 
-              variant="ghost" 
-              className="bg-green-400 hover:bg-green-300 px-8 py-6 text-lg font-semibold shadow-lg" 
-              style={{color: 'black'}}
-              onClick={() => {
-                document.getElementById('generator')?.scrollIntoView({ behavior: 'smooth' })
-              }}
-            >
-              Start Creating Spotify Covers
-            </Button>
+            <Link href={`/${locale}/tools/spotify-playlist-cover`}>
+              <Button 
+                size="lg" 
+                variant="ghost" 
+                className="bg-green-400 hover:bg-green-300 px-8 py-6 text-lg font-semibold shadow-lg" 
+                style={{color: 'black'}}
+              >
+                Start Creating Spotify Covers
+              </Button>
+            </Link>
           </div>
         </section>
       </div>
