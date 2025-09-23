@@ -106,8 +106,27 @@ function BestAuthProvider({ children }: { children: React.ReactNode }) {
       return result
     },
     getUserSubscription: async () => {
-      if (!bestAuth.user || !subscriptionService) return null
-      return await subscriptionService.getUserSubscription(bestAuth.user.id)
+      console.log('[AuthContext] getUserSubscription called', {
+        hasUser: !!bestAuth.user,
+        userId: bestAuth.user?.id,
+        hasService: !!subscriptionService
+      })
+      
+      if (!bestAuth.user) {
+        console.log('[AuthContext] No user found, returning null')
+        return null
+      }
+      
+      if (!subscriptionService) {
+        console.log('[AuthContext] Subscription service not loaded yet, waiting...')
+        // Wait for service to load if not ready
+        const { bestAuthSubscriptionService } = await import('@/services/bestauth/BestAuthSubscriptionService')
+        return await bestAuthSubscriptionService.getUserSubscription(bestAuth.user.id)
+      }
+      
+      const subscription = await subscriptionService.getUserSubscription(bestAuth.user.id)
+      console.log('[AuthContext] Subscription loaded:', subscription)
+      return subscription
     }
   }
 
