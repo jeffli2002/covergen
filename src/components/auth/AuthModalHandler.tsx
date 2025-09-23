@@ -4,12 +4,12 @@ import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import AuthForm from './AuthForm'
 import { X } from 'lucide-react'
-import { useBestAuth } from '@/hooks/useBestAuth'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function AuthModalHandler() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { user, loading: authLoading } = useBestAuth()
+  const { user, loading: authLoading } = useAuth()
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [redirectPath, setRedirectPath] = useState<string | null>(null)
 
