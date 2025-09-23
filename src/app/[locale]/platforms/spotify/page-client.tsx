@@ -88,7 +88,7 @@ export default function SpotifyPlaylistCoverMakerClient({ locale, translations }
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-                <Link href={`/${locale}/tools/spotify-playlist-cover`}>
+                <Link href={`/${locale}#generator`}>
                   <Button 
                     size="lg" 
                     variant="ghost" 
@@ -258,7 +258,7 @@ export default function SpotifyPlaylistCoverMakerClient({ locale, translations }
             <p className="text-xl md:text-2xl mb-8 opacity-90">
               Join creators making viral playlist covers with AI
             </p>
-            <Link href={`/${locale}/tools/spotify-playlist-cover`}>
+            <Link href={`/${locale}#generator`}>
               <Button 
                 size="lg" 
                 variant="ghost" 
