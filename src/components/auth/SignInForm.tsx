@@ -12,7 +12,7 @@ import { Icons } from '@/components/icons'
 
 export function SignInForm() {
   const router = useRouter()
-  const { signIn, signInWithOAuth, sendMagicLink } = useAuth()
+  const { signIn, signInWithGoogle } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -44,18 +44,9 @@ export function SignInForm() {
     setError(null)
     setLoading(true)
 
-    try {
-      const result = await sendMagicLink(email)
-      if (result.success) {
-        setMagicLinkSent(true)
-      } else {
-        setError(result.error || 'Failed to send magic link')
-      }
-    } catch (err) {
-      setError('An unexpected error occurred')
-    } finally {
-      setLoading(false)
-    }
+    // Magic link functionality not available in current auth context
+    setError('Magic link sign-in is temporarily unavailable')
+    setLoading(false)
   }
 
   if (magicLinkSent) {
@@ -200,21 +191,14 @@ export function SignInForm() {
       <div className="grid gap-2">
         <Button
           variant="outline"
-          onClick={() => signInWithOAuth('google')}
+          onClick={() => signInWithGoogle()}
           disabled={loading}
         >
           <Icons.google className="mr-2 h-4 w-4" />
           Google
         </Button>
         
-        <Button
-          variant="outline"
-          onClick={() => signInWithOAuth('github')}
-          disabled={loading}
-        >
-          <Icons.gitHub className="mr-2 h-4 w-4" />
-          GitHub
-        </Button>
+        {/* GitHub OAuth not currently supported */}
 
         <Button
           variant="outline"

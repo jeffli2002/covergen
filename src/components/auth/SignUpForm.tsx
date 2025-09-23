@@ -12,7 +12,7 @@ import { Icons } from '@/components/icons'
 
 export function SignUpForm() {
   const router = useRouter()
-  const { signUp, signInWithOAuth } = useAuth()
+  const { signUp, signInWithGoogle } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -138,21 +138,14 @@ export function SignUpForm() {
       <div className="grid gap-2">
         <Button
           variant="outline"
-          onClick={() => signInWithOAuth('google')}
+          onClick={() => signInWithGoogle()}
           disabled={loading}
         >
           <Icons.google className="mr-2 h-4 w-4" />
           Google
         </Button>
         
-        <Button
-          variant="outline"
-          onClick={() => signInWithOAuth('github')}
-          disabled={loading}
-        >
-          <Icons.gitHub className="mr-2 h-4 w-4" />
-          GitHub
-        </Button>
+        {/* GitHub OAuth not currently supported */}
       </div>
 
       <p className="text-center text-sm text-muted-foreground">
