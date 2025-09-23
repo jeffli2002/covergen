@@ -4,7 +4,7 @@ import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { authConfig } from '@/config/auth.config'
 
-export async function checkAuthSession() {
+export async function checkAuthSession(): Promise<{ session: any } | { error: string }> {
   // Route to appropriate implementation based on config
   if (authConfig.USE_BESTAUTH) {
     const { validateSession } = await import('@/lib/bestauth')
@@ -31,13 +31,12 @@ export async function checkAuthSession() {
     
     return { session: null }
   } else {
-    // Fallback to Supabase implementation
-    const supabaseAuth = await import('./auth')
-    return supabaseAuth.checkAuthSession()
+    // This function should only be called when BestAuth is enabled
+    return { error: 'BestAuth not enabled' }
   }
 }
 
-export async function signInWithGoogleAction(currentPath?: string) {
+export async function signInWithGoogleAction(currentPath?: string): Promise<{ error: string } | void> {
   // Route to appropriate implementation based on config
   if (authConfig.USE_BESTAUTH) {
     const headersList = await headers()
@@ -54,8 +53,7 @@ export async function signInWithGoogleAction(currentPath?: string) {
     // Redirect to BestAuth OAuth endpoint
     redirect(oauthUrl)
   } else {
-    // Fallback to Supabase implementation
-    const supabaseAuth = await import('./auth')
-    return supabaseAuth.signInWithGoogleAction(currentPath)
+    // This function should only be called when BestAuth is enabled
+    return { error: 'BestAuth not enabled' }
   }
 }
