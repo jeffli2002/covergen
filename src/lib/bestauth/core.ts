@@ -73,6 +73,35 @@ export async function signUp({
     const passwordHash = await hashPassword(password)
     await db.credentials.create(user.id, passwordHash)
 
+    // Send verification email
+    try {
+      const { EmailService } = await import('@/lib/email/service')
+      const emailService = EmailService.getInstance()
+      
+      // Generate verification token
+      const verificationToken = generateToken()
+      const tokenHash = await hashToken(verificationToken)
+      
+      // Store verification token
+      const expiresAt = new Date()
+      expiresAt.setHours(expiresAt.getHours() + 24) // 24 hour expiry
+      
+      await db.verificationTokens.create({
+        email: user.email,
+        token: tokenHash,
+        expires_at: expiresAt
+      })
+      
+      // Send email
+      const verificationUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/auth/verify-email?token=${verificationToken}`
+      await emailService.sendVerificationEmail(user.email, verificationUrl)
+      
+      console.log('[BestAuth] Verification email sent to:', user.email)
+    } catch (emailError) {
+      // Log error but don't fail signup
+      console.error('[BestAuth] Failed to send verification email:', emailError)
+    }
+
     // Create session
     const session = await createSession(user)
 

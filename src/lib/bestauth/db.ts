@@ -424,14 +424,14 @@ export const db = {
 
   // Verification token operations
   verificationTokens: {
-    async create(userId: string, token: string, expiresAt: Date): Promise<boolean> {
+    async create(data: { email: string, token: string, expires_at: Date }): Promise<boolean> {
       try {
         const { error } = await getDb()
           .from('bestauth_verification_tokens')
           .insert({
-            user_id: userId,
-            token,
-            expires_at: expiresAt.toISOString(),
+            email: data.email,
+            token: data.token,
+            expires_at: data.expires_at.toISOString(),
             created_at: new Date().toISOString()
           })
         
