@@ -26,18 +26,21 @@ interface AppState {
   user: User | null
   currentTask: GenerationTask | null
   tasks: GenerationTask[]
+  usageRefreshTrigger: number  // Increment this to trigger usage refresh
   
   // Actions
   setUser: (user: User | null) => void
   setCurrentTask: (task: GenerationTask | null) => void
   addTask: (task: GenerationTask) => void
   updateTask: (id: string, updates: Partial<GenerationTask>) => void
+  triggerUsageRefresh: () => void
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
   user: null,
   currentTask: null,
   tasks: [],
+  usageRefreshTrigger: 0,
 
   setUser: (user) => set({ user }),
   
@@ -55,5 +58,9 @@ export const useAppStore = create<AppState>((set, get) => ({
     currentTask: state.currentTask?.id === id 
       ? { ...state.currentTask, ...updates }
       : state.currentTask
+  })),
+
+  triggerUsageRefresh: () => set((state) => ({
+    usageRefreshTrigger: state.usageRefreshTrigger + 1
   }))
 }))

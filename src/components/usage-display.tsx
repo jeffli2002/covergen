@@ -5,6 +5,7 @@ import { useBestAuth } from '@/hooks/useBestAuth'
 import { Badge } from '@/components/ui/badge'
 import { Sparkles } from 'lucide-react'
 import { getSubscriptionConfig } from '@/lib/subscription-config'
+import { useAppStore } from '@/lib/store'
 
 interface UsageStatus {
   daily_usage: number
@@ -28,6 +29,7 @@ export default function UsageDisplay({ session: parentSession }: UsageDisplayPro
   const [usageStatus, setUsageStatus] = useState<UsageStatus | null>(null)
   const [loading, setLoading] = useState(false)
   const config = getSubscriptionConfig()
+  const usageRefreshTrigger = useAppStore(state => state.usageRefreshTrigger)
 
   useEffect(() => {
     // For non-logged in users, show free tier limits
@@ -44,7 +46,7 @@ export default function UsageDisplay({ session: parentSession }: UsageDisplayPro
 
     // For logged in users, fetch their actual usage
     fetchUsageStatus()
-  }, [user, session])
+  }, [user, session, usageRefreshTrigger]) // Added usageRefreshTrigger to dependencies
 
   const fetchUsageStatus = async () => {
     try {

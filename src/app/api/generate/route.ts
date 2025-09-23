@@ -5,6 +5,7 @@ import { checkGenerationLimit, incrementGenerationCount, getUserSubscriptionInfo
 import { getSubscriptionConfig } from '@/lib/subscription-config'
 import { withAuth, AuthenticatedRequest, getAuthenticatedUser } from '@/app/api/middleware/withAuth'
 import { authConfig } from '@/config/auth.config'
+import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 
 // Image generation endpoint handler
 async function handler(request: AuthenticatedRequest) {
@@ -43,7 +44,45 @@ async function handler(request: AuthenticatedRequest) {
     
     if (user) {
       // Check current generation limit
-      let limitStatus = await checkGenerationLimit(user.id)
+      let limitStatus = null
+      
+      // Use BestAuth if enabled
+      if (authConfig.USE_BESTAUTH) {
+        console.log('[Generate API] Checking BestAuth limits for user:', user.id)
+        
+        // Check if user can generate
+        const canGenerate = await bestAuthSubscriptionService.canUserGenerate(user.id)
+        const subscription = await bestAuthSubscriptionService.getUserSubscription(user.id)
+        const usageToday = await bestAuthSubscriptionService.getUserUsageToday(user.id)
+        const usageThisMonth = await bestAuthSubscriptionService.getUserUsageThisMonth(user.id)
+        
+        if (subscription) {
+          const config = getSubscriptionConfig()
+          const tier = subscription.tier as 'free' | 'pro' | 'pro_plus'
+          const limits = bestAuthSubscriptionService.getSubscriptionLimits(tier, subscription.is_trialing)
+          
+          limitStatus = {
+            can_generate: canGenerate,
+            daily_usage: usageToday,
+            daily_limit: limits.daily,
+            monthly_usage: usageThisMonth,
+            monthly_limit: limits.monthly,
+            is_trial: subscription.is_trialing,
+            subscription_tier: subscription.tier,
+            trial_ends_at: subscription.trial_days_remaining > 0 ? new Date(Date.now() + subscription.trial_days_remaining * 24 * 60 * 60 * 1000).toISOString() : null,
+            remaining_daily: Math.max(0, limits.daily - usageToday),
+            remaining_monthly: Math.max(0, limits.monthly - usageThisMonth),
+            trial_usage: subscription.is_trialing ? usageThisMonth : 0,
+            trial_limit: subscription.is_trialing ? limits.monthly : null,
+            remaining_trial: subscription.is_trialing ? Math.max(0, limits.monthly - usageThisMonth) : null
+          }
+          
+          console.log('[Generate API] BestAuth limit status:', limitStatus)
+        }
+      } else {
+        // Fallback to Supabase
+        limitStatus = await checkGenerationLimit(user.id)
+      }
       
       if (!limitStatus) {
         console.error('[Generate API] Failed to check generation limit for user:', user.id)
@@ -354,8 +393,20 @@ async function handler(request: AuthenticatedRequest) {
     // Increment generation count for authenticated users after successful generation
     if (user) {
       try {
-        const subInfo = await getUserSubscriptionInfo(user.id)
-        await incrementGenerationCount(user.id, subInfo.subscription_tier)
+        // Use BestAuth increment if enabled, otherwise fallback to Supabase
+        if (authConfig.USE_BESTAUTH) {
+          console.log('[Generate API] Incrementing usage for BestAuth user:', user.id)
+          const result = await bestAuthSubscriptionService.incrementUsage(user.id, 1)
+          if (result.success) {
+            console.log('[Generate API] Usage incremented successfully, new count:', result.newCount)
+          } else {
+            console.error('[Generate API] Failed to increment BestAuth usage')
+          }
+        } else {
+          // Fallback to Supabase increment
+          const subInfo = await getUserSubscriptionInfo(user.id)
+          await incrementGenerationCount(user.id, subInfo.subscription_tier)
+        }
       } catch (error) {
         console.error('Failed to increment generation count:', error)
         // Continue with successful response even if counting fails

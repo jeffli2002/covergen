@@ -11,6 +11,7 @@ import PromptConfigurator from '@/components/prompt-configurator'
 import OutputGallery from '@/components/output-gallery'
 import AuthForm from '@/components/auth/AuthForm'
 import UpgradePrompt from '@/components/auth/UpgradePrompt'
+import { useAppStore } from '@/lib/store'
 
 export default function ImageGenerator() {
   const [mode, setMode] = useState<'image' | 'text'>('image')
@@ -25,6 +26,7 @@ export default function ImageGenerator() {
   const [error, setError] = useState<string | null>(null)
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const triggerUsageRefresh = useAppStore(state => state.triggerUsageRefresh)
   
   // Custom setMode that also clears generated images
   const handleModeChange = (newMode: 'image' | 'text') => {
@@ -191,6 +193,8 @@ export default function ImageGenerator() {
         setGeneratedImages(data.images)
         // Track usage for free tier
         await trackUsage()
+        // Trigger usage refresh to update the header display
+        triggerUsageRefresh()
       } else {
         setGeneratedImages(data.images || [])
       }
