@@ -86,20 +86,37 @@ export default function PaymentPageClient({
     setIsLoadingSubscription(true)
     try {
       const subscription = await getUserSubscription()
-      console.log('[PaymentPage] Loaded subscription:', subscription)
+      console.log('[PaymentPage] Raw subscription data:', {
+        full: subscription,
+        tier: subscription?.tier,
+        plan: subscription?.plan,
+        status: subscription?.status,
+        hasData: !!subscription
+      })
       
       // Normalize the subscription data to ensure tier field exists
-      if (subscription) {
+      if (subscription && subscription.tier) {
         const normalizedSubscription = {
           ...subscription,
-          tier: subscription.tier || subscription.plan || 'free',
+          tier: subscription.tier,
+          plan: subscription.plan || subscription.tier, // Ensure both fields exist
           status: subscription.status || 'active'
         }
         console.log('[PaymentPage] Normalized subscription:', normalizedSubscription)
         setCurrentSubscription(normalizedSubscription)
+      } else if (subscription && subscription.plan) {
+        // Handle case where only plan field exists
+        const normalizedSubscription = {
+          ...subscription,
+          tier: subscription.plan,
+          plan: subscription.plan,
+          status: subscription.status || 'active'
+        }
+        console.log('[PaymentPage] Normalized subscription (from plan):', normalizedSubscription)
+        setCurrentSubscription(normalizedSubscription)
       } else {
-        // Set a default free subscription if none exists
-        console.log('[PaymentPage] No subscription found, setting default free subscription')
+        // Set a default free subscription if none exists or no tier/plan found
+        console.log('[PaymentPage] No valid subscription found, setting default free subscription')
         setCurrentSubscription({
           tier: 'free',
           status: 'active',
