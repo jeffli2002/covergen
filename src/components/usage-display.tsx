@@ -32,19 +32,7 @@ export default function UsageDisplay({ session: parentSession }: UsageDisplayPro
   const usageRefreshTrigger = useAppStore(state => state.usageRefreshTrigger)
 
   useEffect(() => {
-    // For non-logged in users, show free tier limits
-    if (!user) {
-      setUsageStatus({
-        daily_usage: 0,
-        daily_limit: config.limits.free.daily,
-        remaining_daily: config.limits.free.daily,
-        is_trial: false,
-        subscription_tier: 'free'
-      })
-      return
-    }
-
-    // For logged in users, fetch their actual usage
+    // Always fetch usage status (for both authenticated and unauthenticated users)
     fetchUsageStatus()
   }, [user, session, usageRefreshTrigger]) // Added usageRefreshTrigger to dependencies
 
@@ -53,12 +41,22 @@ export default function UsageDisplay({ session: parentSession }: UsageDisplayPro
       setLoading(true)
       console.log('[UsageDisplay] Fetching usage status for user:', user?.email)
       
+      // Debug: Check for session cookie on client side
+      if (typeof document !== 'undefined') {
+        const cookies = document.cookie.split(';').map(c => c.trim())
+        const sessionCookie = cookies.find(c => c.startsWith('covergen_session_id='))
+        console.log('[UsageDisplay] Client-side session cookie:', sessionCookie || 'Not found')
+      }
+      
       const headers: HeadersInit = {}
       if (session?.token) {
         headers['Authorization'] = `Bearer ${session.token}`
       }
       
-      const response = await fetch('/api/usage/status', { headers })
+      const response = await fetch('/api/usage/status', { 
+        headers,
+        credentials: 'same-origin' // Ensure cookies are sent
+      })
       if (response.ok) {
         const data = await response.json()
         console.log('[UsageDisplay] Usage status received:', data)

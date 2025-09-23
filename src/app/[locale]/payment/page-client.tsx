@@ -344,19 +344,35 @@ export default function PaymentPageClient({
     )
   }
 
+  const isTrialUser = currentSubscription?.status === 'trialing'
+  
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">
       <div className="container max-w-6xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4 text-gray-900">
-            {isActivation ? 'Activate Your Plan' : isUpgrade ? 'Upgrade Your Plan' : 'Choose Your Plan'}
+            {isActivation ? 'Activate Your Plan' : isUpgrade ? 'Upgrade Your Plan' : 
+              currentSubscription?.tier === 'pro' ? 'Upgrade to Pro+' :
+              currentSubscription?.tier === 'pro_plus' ? 'Your Subscription' :
+              'Choose Your Plan'}
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            {isActivation 
-              ? 'Add a payment method to convert your trial to a paid subscription and continue using all features.'
-              : 'Start creating professional covers with AI. All plans include watermark-free images.'
-            }
+            {(() => {
+              if (isActivation) {
+                return 'Add a payment method to convert your trial to a paid subscription and continue using all features.'
+              }
+              if (currentSubscription?.tier === 'pro' && !isTrialUser) {
+                return 'You\'re currently on the Pro plan. Upgrade to Pro+ for more covers and premium features!'
+              }
+              if (currentSubscription?.tier === 'pro_plus' && !isTrialUser) {
+                return 'You\'re on our highest tier with all premium features and maximum cover generation.'
+              }
+              if (currentSubscription?.tier === 'free') {
+                return 'Start creating professional covers with AI. Upgrade from the free plan for more covers and features.'
+              }
+              return 'Start creating professional covers with AI. All plans include watermark-free images.'
+            })()}
           </p>
           
           {isTestMode && (
@@ -381,7 +397,6 @@ export default function PaymentPageClient({
           {plans.map((plan) => {
             const Icon = plan.icon
             const isCurrentPlan = currentSubscription?.tier === plan.id
-            const isTrialUser = currentSubscription?.status === 'trialing'
             const needsPaymentSetup = isTrialUser && !currentSubscription?.stripe_subscription_id
             const isSelected = selectedPlan === plan.id
             
@@ -411,14 +426,35 @@ export default function PaymentPageClient({
                 } ${
                   isSelected ? 'ring-2 ring-orange-500 scale-105 shadow-2xl' : ''
                 } ${plan.popular ? 'shadow-xl' : ''} ${
-                  isCurrentPlan && !needsPaymentSetup ? 'opacity-75' : ''
+                  isCurrentPlan && !needsPaymentSetup ? 'ring-2 ring-green-500 bg-green-50' : ''
+                } ${
+                  // Highlight Pro+ for Pro users as upgrade option
+                  currentSubscription?.tier === 'pro' && plan.id === 'pro_plus' ? 'ring-2 ring-blue-500' : ''
                 }`}
                 onClick={() => isClickable && setSelectedPlan(plan.id as any)}
               >
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
                     <Badge className="bg-orange-500 text-white px-4 py-1">
                       Most Popular
+                    </Badge>
+                  </div>
+                )}
+                
+                {/* Current plan badge */}
+                {isCurrentPlan && !needsPaymentSetup && (
+                  <div className="absolute -top-4 left-4 z-10">
+                    <Badge className="bg-green-600 text-white px-4 py-1">
+                      Current Plan
+                    </Badge>
+                  </div>
+                )}
+                
+                {/* Upgrade suggestion badge for Pro users viewing Pro+ */}
+                {currentSubscription?.tier === 'pro' && plan.id === 'pro_plus' && !isTrialUser && (
+                  <div className="absolute -top-4 right-4 z-10">
+                    <Badge className="bg-blue-600 text-white px-4 py-1">
+                      Recommended Upgrade
                     </Badge>
                   </div>
                 )}
@@ -580,6 +616,10 @@ export default function PaymentPageClient({
                           if (isUpgrade && currentSubscription?.tier === 'pro' && plan.id === 'pro_plus') {
                             return 'Upgrade Now'
                           }
+                          // For free users viewing paid plans
+                          if (currentSubscription?.tier === 'free') {
+                            return 'Upgrade Now'
+                          }
                           // Default
                           return 'Get Started'
                         })()}
@@ -615,51 +655,63 @@ export default function PaymentPageClient({
           </p>
 
           {/* Current Plan Info */}
-          {!isLoadingSubscription && (
+          {!isLoadingSubscription && currentSubscription && (
             <Card className={`max-w-2xl mx-auto border-gray-200 ${
-              currentSubscription && currentSubscription.tier !== 'free' 
+              currentSubscription.tier !== 'free' 
                 ? 'bg-green-50 border-green-200' 
                 : 'bg-gray-50'
             }`}>
               <CardContent className="p-6">
                 <h3 className="font-semibold mb-2 flex items-center gap-2">
                   {(() => {
-                    if (currentSubscription?.tier === 'pro') return <><Zap className="w-5 h-5 text-orange-500" /> You have the Pro plan</>;
-                    if (currentSubscription?.tier === 'pro_plus') return <><Crown className="w-5 h-5 text-purple-500" /> You have the Pro+ plan</>;
-                    if (currentSubscription?.tier === 'free' || !currentSubscription) return <><Sparkles className="w-5 h-5 text-gray-500" /> Not ready to upgrade?</>;
-                    // For any other tier value (like trial), don't show the card
+                    if (currentSubscription.tier === 'pro') return <><Zap className="w-5 h-5 text-orange-500" /> You're on the Pro plan</>;
+                    if (currentSubscription.tier === 'pro_plus') return <><Crown className="w-5 h-5 text-purple-500" /> You're on the Pro+ plan</>;
+                    if (currentSubscription.tier === 'free') return <><Sparkles className="w-5 h-5 text-gray-500" /> You're on the Free plan</>;
                     return null;
                   })()}
                 </h3>
-                {currentSubscription?.tier !== 'trial' && (
+                {currentSubscription.tier && (
                   <>
                     <p className="text-sm text-gray-600 mb-4">
                       {(() => {
                         const config = getClientSubscriptionConfig();
                         
-                        switch (currentSubscription?.tier) {
+                        switch (currentSubscription.tier) {
                           case 'pro':
-                            return `You're currently on the Pro plan with ${config.limits.pro.monthly} covers per month.`;
+                            if (isTrialUser) {
+                              return `You're on a ${trialDays}-day trial with ${config.limits.pro.monthly} covers per month. ${currentSubscription.trial_days_remaining ? `${currentSubscription.trial_days_remaining} days remaining.` : ''}`;
+                            }
+                            return `You have ${config.limits.pro.monthly} covers per month. Consider upgrading to Pro+ for ${config.limits.pro_plus.monthly} covers and additional features.`;
                           case 'pro_plus':
-                            return `You're currently on the Pro+ plan with ${config.limits.pro_plus.monthly} covers per month.`;
+                            if (isTrialUser) {
+                              return `You're on a ${trialDays}-day trial with ${config.limits.pro_plus.monthly} covers per month. ${currentSubscription.trial_days_remaining ? `${currentSubscription.trial_days_remaining} days remaining.` : ''}`;
+                            }
+                            return `You're on our highest tier with ${config.limits.pro_plus.monthly} covers per month and all premium features.`;
                           case 'free':
                           default:
-                            return `Continue using the free plan with ${config.limits.free.monthly} covers per month (${config.limits.free.daily} per day).`;
+                            return `You have ${config.limits.free.monthly} covers per month (${config.limits.free.daily} per day). Upgrade to Pro for more covers and features.`;
                         }
                       })()}
                     </p>
-                    <Button 
-                      variant={currentSubscription && currentSubscription.tier !== 'free' ? 'default' : 'ghost'}
-                      className={currentSubscription && currentSubscription.tier !== 'free' ? 'bg-green-600 hover:bg-green-700' : ''}
-                      onClick={() => router.push(`/${locale}`)}
-                    >
-                      {(() => {
-                        if (currentSubscription?.tier === 'pro' || currentSubscription?.tier === 'pro_plus') {
-                          return 'Go to Dashboard';
-                        }
-                        return 'Continue with Free Plan';
-                      })()}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant={currentSubscription.tier !== 'free' ? 'default' : 'ghost'}
+                        className={currentSubscription.tier !== 'free' ? 'bg-green-600 hover:bg-green-700' : ''}
+                        onClick={() => router.push(`/${locale}/account`)}
+                      >
+                        {currentSubscription.tier !== 'free' ? 'Manage Subscription' : 'View Account'}
+                      </Button>
+                      {currentSubscription.tier === 'pro' && (
+                        <Button 
+                          variant="outline"
+                          onClick={() => handleSelectPlan('pro_plus')}
+                          disabled={loading}
+                        >
+                          <Crown className="w-4 h-4 mr-2" />
+                          Upgrade to Pro+
+                        </Button>
+                      )}
+                    </div>
                   </>
                 )}
               </CardContent>

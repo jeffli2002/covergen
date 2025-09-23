@@ -146,6 +146,7 @@ export default function ImageGenerator() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'same-origin', // Include cookies in the request
         body: JSON.stringify({
           prompt: enhancedPrompt,
           referenceImages: mode === 'image' ? imagesToSend : undefined,

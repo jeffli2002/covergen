@@ -214,6 +214,12 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
       const isUpgrading = (subscriptionInfo.plan === 'free' && (tierKey === 'pro' || tierKey === 'pro_plus')) ||
                          (subscriptionInfo.plan === 'pro' && tierKey === 'pro_plus')
       
+      // For paid users clicking on their current plan, go to account page instead
+      if (subscriptionInfo.plan === tierKey && !subscriptionInfo.isTrialing) {
+        router.push(`/${locale}/account`)
+        return
+      }
+      
       if (isActivating) {
         paymentUrl = `/${locale}/payment?plan=${tierKey}&activate=true`
       } else if (isUpgrading) {

@@ -89,6 +89,15 @@ export const db = {
       }
     },
 
+    async getTodayBySession(sessionId: string): Promise<number> {
+      try {
+        return await bestAuthDb.usage.getTodayBySession(sessionId)
+      } catch (error) {
+        console.error('BestAuth: Failed to get session usage:', error)
+        return 0
+      }
+    },
+
     async increment(userId: string, amount: number = 1): Promise<number> {
       try {
         return await bestAuthDb.usage.increment(userId, amount)
@@ -99,11 +108,29 @@ export const db = {
       }
     },
 
+    async incrementBySession(sessionId: string, amount: number = 1): Promise<number> {
+      try {
+        return await bestAuthDb.usage.incrementBySession(sessionId, amount)
+      } catch (error) {
+        console.error('BestAuth: Failed to increment session usage:', error)
+        return amount
+      }
+    },
+
     async checkLimit(userId: string): Promise<boolean> {
       try {
         return await bestAuthDb.usage.checkLimit(userId)
       } catch (error) {
         console.error('BestAuth: Failed to check limit:', error)
+        return true // Allow generation on error
+      }
+    },
+
+    async checkLimitBySession(sessionId: string): Promise<boolean> {
+      try {
+        return await bestAuthDb.usage.checkLimitBySession(sessionId)
+      } catch (error) {
+        console.error('BestAuth: Failed to check session limit:', error)
         return true // Allow generation on error
       }
     },

@@ -62,6 +62,18 @@ export class BestAuthSubscriptionService {
   }
 
   /**
+   * Get session's usage for today
+   */
+  async getSessionUsageToday(sessionId: string): Promise<number> {
+    try {
+      return await db.usage.getTodayBySession(sessionId)
+    } catch (error) {
+      console.error('Error getting session usage:', error)
+      return 0
+    }
+  }
+
+  /**
    * Get user's usage for the current month
    */
   async getUserUsageThisMonth(userId: string): Promise<number> {
@@ -94,6 +106,26 @@ export class BestAuthSubscriptionService {
   }
 
   /**
+   * Increment session's usage count
+   */
+  async incrementSessionUsage(sessionId: string, amount: number = 1): Promise<{success: boolean, newCount?: number}> {
+    try {
+      // First check if session can generate
+      const canGenerate = await db.usage.checkLimitBySession(sessionId)
+      
+      if (!canGenerate) {
+        return { success: false }
+      }
+      
+      const newCount = await db.usage.incrementBySession(sessionId, amount)
+      return { success: true, newCount }
+    } catch (error) {
+      console.error('Error incrementing session usage:', error)
+      return { success: false }
+    }
+  }
+
+  /**
    * Check if user can generate (hasn't hit limits)
    */
   async canUserGenerate(userId: string): Promise<boolean> {
@@ -101,6 +133,18 @@ export class BestAuthSubscriptionService {
       return await db.usage.checkLimit(userId)
     } catch (error) {
       console.error('Error checking generation limit:', error)
+      return false
+    }
+  }
+
+  /**
+   * Check if session can generate (hasn't hit limits)
+   */
+  async canSessionGenerate(sessionId: string): Promise<boolean> {
+    try {
+      return await db.usage.checkLimitBySession(sessionId)
+    } catch (error) {
+      console.error('Error checking session generation limit:', error)
       return false
     }
   }

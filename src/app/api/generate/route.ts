@@ -6,6 +6,7 @@ import { getSubscriptionConfig } from '@/lib/subscription-config'
 import { withAuth, AuthenticatedRequest, getAuthenticatedUser } from '@/app/api/middleware/withAuth'
 import { authConfig } from '@/config/auth.config'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
+import { getOrCreateSessionId } from '@/lib/session-utils'
 
 // Image generation endpoint handler
 async function handler(request: AuthenticatedRequest) {
@@ -42,9 +43,15 @@ async function handler(request: AuthenticatedRequest) {
     // Get authenticated user from request (BestAuth middleware adds it)
     const user = request.user
     
+    // Get session ID for unauthenticated users
+    const sessionInfo = user ? null : await getOrCreateSessionId()
+    const sessionId = sessionInfo?.sessionId || null
+    
+    // Check generation limits
+    let limitStatus = null
+    
     if (user) {
-      // Check current generation limit
-      let limitStatus = null
+      // Check current generation limit for authenticated users
       
       // Use BestAuth if enabled
       if (authConfig.USE_BESTAUTH) {
@@ -258,6 +265,68 @@ async function handler(request: AuthenticatedRequest) {
           { status: 429 }
         )
       }
+    } else if (sessionId) {
+      // Check limits for unauthenticated users by session
+      console.log('[Generate API] Checking limits for session:', sessionId)
+      
+      if (authConfig.USE_BESTAUTH) {
+        const canGenerate = await bestAuthSubscriptionService.canSessionGenerate(sessionId)
+        const usageToday = await bestAuthSubscriptionService.getSessionUsageToday(sessionId)
+        const config = getSubscriptionConfig()
+        const dailyLimit = config.limits.free.daily
+        
+        limitStatus = {
+          can_generate: canGenerate,
+          daily_usage: usageToday,
+          daily_limit: dailyLimit,
+          monthly_usage: usageToday, // For free tier, we only track daily
+          monthly_limit: config.limits.free.monthly,
+          is_trial: false,
+          subscription_tier: 'free',
+          trial_ends_at: null,
+          remaining_daily: Math.max(0, dailyLimit - usageToday),
+          remaining_monthly: Math.max(0, config.limits.free.monthly - usageToday),
+          trial_usage: 0,
+          trial_limit: null,
+          remaining_trial: null
+        }
+        
+        console.log('[Generate API] Session limit status:', limitStatus)
+        
+        // If session has reached their limit, return error
+        if (!limitStatus.can_generate) {
+          return NextResponse.json(
+            { 
+              error: `Daily generation limit reached (${limitStatus.daily_usage}/${limitStatus.daily_limit} today). Please try again tomorrow or sign in to get more generations.`,
+              limit_reached: true,
+              daily_usage: limitStatus.daily_usage,
+              daily_limit: limitStatus.daily_limit,
+              subscription_tier: 'free',
+              is_trial: false,
+              remaining_daily: 0
+            },
+            { status: 429 }
+          )
+        }
+      } else {
+        // For non-BestAuth, allow generation (no tracking)
+        const config = getSubscriptionConfig()
+        limitStatus = {
+          can_generate: true,
+          daily_usage: 0,
+          daily_limit: config.limits.free.daily,
+          monthly_usage: 0,
+          monthly_limit: config.limits.free.monthly,
+          is_trial: false,
+          subscription_tier: 'free',
+          trial_ends_at: null,
+          remaining_daily: config.limits.free.daily,
+          remaining_monthly: config.limits.free.monthly,
+          trial_usage: 0,
+          trial_limit: null,
+          remaining_trial: null
+        }
+      }
     }
 
     if (mode === 'image' && (!referenceImages || referenceImages.length === 0)) {
@@ -390,8 +459,9 @@ async function handler(request: AuthenticatedRequest) {
       })
     }
 
-    // Increment generation count for authenticated users after successful generation
+    // Increment generation count after successful generation
     if (user) {
+      // Increment for authenticated users
       try {
         // Use BestAuth increment if enabled, otherwise fallback to Supabase
         if (authConfig.USE_BESTAUTH) {
@@ -411,9 +481,25 @@ async function handler(request: AuthenticatedRequest) {
         console.error('Failed to increment generation count:', error)
         // Continue with successful response even if counting fails
       }
+    } else if (sessionId && authConfig.USE_BESTAUTH) {
+      // Increment for unauthenticated users with session
+      try {
+        console.log('[Generate API] Incrementing usage for session:', sessionId)
+        console.log('[Generate API] Session info:', sessionInfo)
+        const result = await bestAuthSubscriptionService.incrementSessionUsage(sessionId, 1)
+        console.log('[Generate API] Increment result:', result)
+        if (result.success) {
+          console.log('[Generate API] Session usage incremented successfully, new count:', result.newCount)
+        } else {
+          console.error('[Generate API] Failed to increment session usage - result:', result)
+        }
+      } catch (error) {
+        console.error('Failed to increment session generation count:', error)
+        // Continue with successful response even if counting fails
+      }
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       images: generatedImages,
       metadata: {
@@ -423,6 +509,22 @@ async function handler(request: AuthenticatedRequest) {
         timestamp: new Date().toISOString(),
       },
     })
+    
+    // If a new session was created, ensure the cookie is set in the response
+    if (sessionInfo?.isNew && sessionId) {
+      const { getSessionCookieOptions } = await import('@/lib/session-utils')
+      const cookieOptions = getSessionCookieOptions()
+      response.cookies.set(cookieOptions.name, sessionId, {
+        ...cookieOptions,
+        httpOnly: cookieOptions.httpOnly,
+        secure: cookieOptions.secure,
+        sameSite: cookieOptions.sameSite,
+        maxAge: cookieOptions.maxAge,
+        path: cookieOptions.path
+      })
+    }
+    
+    return response
   } catch (error) {
     console.error('Generation error:', error)
     

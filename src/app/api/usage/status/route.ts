@@ -5,6 +5,7 @@ import { getSubscriptionConfig } from '@/lib/subscription-config'
 import { authConfig } from '@/config/auth.config'
 import { validateSessionFromRequest } from '@/lib/bestauth/request-utils'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
+import { getOrCreateSessionId } from '@/lib/session-utils'
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,6 +13,7 @@ export async function GET(request: NextRequest) {
     const config = getSubscriptionConfig()
     
     let userId: string | null = null
+    let sessionId: string | null = null
     
     // Use BestAuth if enabled
     if (authConfig.USE_BESTAUTH) {
@@ -42,6 +44,43 @@ export async function GET(request: NextRequest) {
           subscription_tier: subscription?.tier || 'free',
           trial_ends_at: (subscription as any)?.trial_ends_at
         })
+      } else {
+        // No authenticated user, use session ID
+        const sessionInfo = await getOrCreateSessionId()
+        sessionId = sessionInfo.sessionId
+        console.log('[Usage Status] Using session ID:', sessionId, 'isNew:', sessionInfo.isNew)
+        
+        // Get usage data for session
+        const usageToday = await bestAuthSubscriptionService.getSessionUsageToday(sessionId)
+        const dailyLimit = config.limits.free.daily
+        
+        const response = NextResponse.json({
+          daily_usage: usageToday,
+          daily_limit: dailyLimit,
+          monthly_usage: usageToday, // For free tier, we only track daily
+          monthly_limit: config.limits.free.monthly,
+          remaining_daily: Math.max(0, dailyLimit - usageToday),
+          remaining_monthly: Math.max(0, config.limits.free.monthly - usageToday),
+          is_trial: false,
+          subscription_tier: 'free',
+          trial_ends_at: null
+        })
+        
+        // If a new session was created, ensure the cookie is set in the response
+        if (sessionInfo.isNew) {
+          const { getSessionCookieOptions } = await import('@/lib/session-utils')
+          const cookieOptions = getSessionCookieOptions()
+          response.cookies.set(cookieOptions.name, sessionId, {
+            ...cookieOptions,
+            httpOnly: cookieOptions.httpOnly,
+            secure: cookieOptions.secure,
+            sameSite: cookieOptions.sameSite,
+            maxAge: cookieOptions.maxAge,
+            path: cookieOptions.path
+          })
+        }
+        
+        return response
       }
     } else {
       // Fallback to Supabase auth

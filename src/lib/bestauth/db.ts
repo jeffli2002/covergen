@@ -655,6 +655,34 @@ export const db = {
       }
     },
 
+    async getTodayBySession(sessionId: string): Promise<number> {
+      try {
+        const today = new Date().toISOString().split('T')[0]
+        console.log('[DB] Getting session usage for:', sessionId, 'date:', today)
+        
+        const { data, error } = await getDb()
+          .from('bestauth_usage_tracking')
+          .select('generation_count')
+          .eq('session_id', sessionId)
+          .eq('date', today)
+          .single()
+        
+        if (error) {
+          // No record found is normal, return 0
+          if (error.code === 'PGRST116' || error.message?.includes('No rows found')) {
+            return 0
+          }
+          console.error('Error getting session usage:', error)
+          return 0
+        }
+        
+        return data?.generation_count || 0
+      } catch (err) {
+        console.error('Error getting session usage today:', err)
+        return 0
+      }
+    },
+
     async increment(userId: string, amount: number = 1): Promise<number> {
       try {
         // First, ensure the user exists in bestauth_users table
@@ -723,6 +751,62 @@ export const db = {
       }
     },
 
+    async incrementBySession(sessionId: string, amount: number = 1): Promise<number> {
+      try {
+        const today = new Date().toISOString().split('T')[0]
+        console.log('[DB] Incrementing session usage for:', sessionId, 'date:', today, 'amount:', amount)
+        
+        // Check if record exists
+        const existing = await getDb()
+          .from('bestauth_usage_tracking')
+          .select('generation_count')
+          .eq('session_id', sessionId)
+          .eq('date', today)
+          .single()
+        
+        let newCount: number
+        
+        if (existing.data) {
+          console.log('[DB] Found existing record with count:', existing.data.generation_count)
+          // Update existing record
+          const { data, error } = await getDb()
+            .from('bestauth_usage_tracking')
+            .update({ generation_count: (existing.data.generation_count || 0) + amount })
+            .eq('session_id', sessionId)
+            .eq('date', today)
+            .select('generation_count')
+            .single()
+          
+          if (error) {
+            console.error('[DB] Error updating session usage:', error)
+            return (existing.data.generation_count || 0) + amount
+          }
+          newCount = data?.generation_count || 0
+          console.log('[DB] Updated session usage, new count:', newCount)
+        } else {
+          console.log('[DB] No existing record, inserting new one')
+          // Insert new record
+          const { data, error } = await getDb()
+            .from('bestauth_usage_tracking')
+            .insert({ session_id: sessionId, date: today, generation_count: amount })
+            .select('generation_count')
+            .single()
+          
+          if (error) {
+            console.error('[DB] Error inserting session usage:', error)
+            return amount
+          }
+          newCount = data?.generation_count || 0
+          console.log('[DB] Inserted session usage, count:', newCount)
+        }
+        
+        return newCount
+      } catch (err) {
+        console.error('Error incrementing session usage:', err)
+        return amount
+      }
+    },
+
     async checkLimit(userId: string): Promise<boolean> {
       try {
         const config = getSubscriptionConfig()
@@ -764,6 +848,19 @@ export const db = {
         return todayUsage < config.limits.free.daily
       } catch (err) {
         console.error('Error checking limit:', err)
+        return true // Allow on error
+      }
+    },
+
+    async checkLimitBySession(sessionId: string): Promise<boolean> {
+      try {
+        const config = getSubscriptionConfig()
+        const todayUsage = await this.getTodayBySession(sessionId)
+        
+        // Session-based users are always free tier
+        return todayUsage < config.limits.free.daily
+      } catch (err) {
+        console.error('Error checking session limit:', err)
         return true // Allow on error
       }
     },
