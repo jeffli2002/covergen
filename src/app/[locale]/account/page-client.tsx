@@ -534,10 +534,30 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   const TRIAL_LIMITS = getTrialLimits()
   const trialLimits = isTrialing ? TRIAL_LIMITS[currentPlan as keyof typeof TRIAL_LIMITS] : null
   
-  // Calculate usage based on whether it's a trial
-  const dailyLimit = isTrialing && trialLimits ? trialLimits.daily : (planDetails?.credits || config.limits.free.daily)
-  const currentUsage = usage?.today || 0
-  const usagePercentage = (currentUsage / dailyLimit) * 100
+  // Calculate usage based on subscription type and trial status
+  const isPaidUser = !isTrialing && (currentPlan === 'pro' || currentPlan === 'pro_plus')
+  let currentUsage: number
+  let usageLimit: number
+  let usagePeriod: string
+  
+  if (isPaidUser) {
+    // Paid users: show monthly usage
+    currentUsage = usage?.thisMonth || 0
+    usageLimit = planDetails?.credits || config.limits[currentPlan as keyof typeof config.limits].monthly
+    usagePeriod = 'This Month'
+  } else if (isTrialing) {
+    // Trial users: show daily usage with trial limits
+    currentUsage = usage?.today || 0
+    usageLimit = trialLimits?.daily || config.limits.free.daily
+    usagePeriod = 'Today'
+  } else {
+    // Free users: show daily usage
+    currentUsage = usage?.today || 0
+    usageLimit = config.limits.free.daily
+    usagePeriod = 'Today'
+  }
+  
+  const usagePercentage = (currentUsage / usageLimit) * 100
 
   // Show loading state while checking auth or loading data
   if (loading || authLoading || initialAuthCheck) {
@@ -812,7 +832,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <History className="w-5 h-5" />
-                Usage {isTrialing ? 'Today' : 'This Month'}
+                Usage {usagePeriod}
               </CardTitle>
               <CardDescription>
                 Track your cover generation usage
@@ -823,14 +843,14 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                 <div className="flex justify-between mb-2">
                   <span className="text-sm text-gray-600">Covers Generated</span>
                   <span className="text-sm font-medium">
-                    {currentUsage} / {dailyLimit}
+                    {currentUsage} / {usageLimit}
                   </span>
                 </div>
                 <Progress value={usagePercentage} className="h-2" />
               </div>
 
               <p className="text-sm text-gray-600">
-                {dailyLimit - currentUsage} credits remaining {isTrialing ? 'today' : 'this month'}
+                {usageLimit - currentUsage} credits remaining {usagePeriod.toLowerCase()}
               </p>
 
               {usagePercentage >= 80 && currentPlan !== 'pro_plus' && (

@@ -72,7 +72,28 @@ export async function GET(request: NextRequest) {
     })
     console.log('[BestAuth Account API] Subscription fetch complete:', !!subscription)
     
-    console.log('[BestAuth Account API] Step 4: Fetching payments...')
+    console.log('[BestAuth Account API] Step 4: Fetching usage data...')
+    const usageToday = await withTimeout(
+      bestAuthSubscriptionService.getUserUsageToday(userId),
+      5,
+      'Usage today fetch'
+    ).catch(err => {
+      console.error('[BestAuth Account API] Error fetching usage today:', err)
+      return 0
+    })
+    console.log('[BestAuth Account API] Usage today fetch complete:', usageToday)
+    
+    const usageThisMonth = await withTimeout(
+      bestAuthSubscriptionService.getUserUsageThisMonth(userId),
+      5,
+      'Usage this month fetch'
+    ).catch(err => {
+      console.error('[BestAuth Account API] Error fetching usage this month:', err)
+      return 0
+    })
+    console.log('[BestAuth Account API] Usage this month fetch complete:', usageThisMonth)
+    
+    console.log('[BestAuth Account API] Step 5: Fetching payments...')
     const payments = await withTimeout(
       bestAuthSubscriptionService.getPaymentHistory(userId, 5), 
       5, 
@@ -116,13 +137,15 @@ export async function GET(request: NextRequest) {
         createdAt: p.created_at
       })),
       usage: subscription ? {
-        today: subscription.usage_today,
+        today: usageToday,
+        thisMonth: usageThisMonth,
         limits: {
           daily: subscription.daily_limit,
           monthly: subscription.monthly_limit
         }
       } : {
-        today: 0,
+        today: usageToday,
+        thisMonth: usageThisMonth,
         limits: { daily: 3, monthly: 90 }
       }
     }
