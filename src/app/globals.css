@@ -298,6 +298,100 @@ section .prose-gray.prose-seo * {
   visibility: visible !important;
 }
 
+/* Fix for all prose classes without prose-seo - ensure readable text colors */
+.prose:not(.prose-seo),
+.prose.prose-lg:not(.prose-seo) {
+  --tw-prose-body: rgb(17 24 39) !important;
+  --tw-prose-headings: rgb(17 24 39) !important;
+  --tw-prose-lead: rgb(55 65 81) !important;
+  --tw-prose-links: rgb(59 130 246) !important;
+  --tw-prose-bold: rgb(17 24 39) !important;
+  --tw-prose-counters: rgb(75 85 99) !important;
+  --tw-prose-bullets: rgb(107 114 128) !important;
+  --tw-prose-hr: rgb(229 231 235) !important;
+  --tw-prose-quotes: rgb(17 24 39) !important;
+  --tw-prose-quote-borders: rgb(229 231 235) !important;
+  --tw-prose-captions: rgb(75 85 99);
+  --tw-prose-code: rgb(17 24 39);
+  color: rgb(17 24 39) !important;
+}
+
+/* Ensure all prose text elements have proper color */
+.prose:not(.prose-seo) p,
+.prose.prose-lg:not(.prose-seo) p {
+  @apply text-gray-900 dark:text-gray-200;
+  color: rgb(17 24 39) !important;
+  opacity: 1 !important;
+}
+
+.prose:not(.prose-seo) h1,
+.prose:not(.prose-seo) h2,
+.prose:not(.prose-seo) h3,
+.prose:not(.prose-seo) h4,
+.prose:not(.prose-seo) h5,
+.prose.prose-lg:not(.prose-seo) h1,
+.prose.prose-lg:not(.prose-seo) h2,
+.prose.prose-lg:not(.prose-seo) h3,
+.prose.prose-lg:not(.prose-seo) h4,
+.prose.prose-lg:not(.prose-seo) h5 {
+  @apply text-gray-900 dark:text-white;
+  color: rgb(17 24 39) !important;
+  opacity: 1 !important;
+}
+
+.prose:not(.prose-seo) strong,
+.prose.prose-lg:not(.prose-seo) strong {
+  @apply text-gray-900 dark:text-white font-semibold;
+  color: rgb(17 24 39) !important;
+  font-weight: 600 !important;
+}
+
+.prose:not(.prose-seo) ul,
+.prose:not(.prose-seo) ol,
+.prose:not(.prose-seo) li,
+.prose.prose-lg:not(.prose-seo) ul,
+.prose.prose-lg:not(.prose-seo) ol,
+.prose.prose-lg:not(.prose-seo) li {
+  @apply text-gray-900 dark:text-gray-200;
+  color: rgb(17 24 39) !important;
+}
+
+/* Force all prose elements to be visible */
+section .prose *,
+section .prose.prose-lg * {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Fix light gray text colors in enhanced content sections */
+.prose .text-gray-700,
+.prose .text-gray-800,
+.prose.prose-lg .text-gray-700,
+.prose.prose-lg .text-gray-800,
+.text-sm.text-gray-700,
+.text-sm.text-gray-800 {
+  @apply text-gray-900 dark:text-gray-200;
+  color: rgb(17 24 39) !important;
+  opacity: 1 !important;
+}
+
+/* Ensure colored background boxes have proper text contrast */
+.bg-blue-50 .text-gray-800,
+.bg-red-50 .text-gray-800,
+.bg-green-50 .text-gray-800,
+.bg-purple-50 .text-gray-800,
+.bg-yellow-50 .text-gray-800,
+.bg-gray-50 .text-gray-800 {
+  color: rgb(17 24 39) !important;
+}
+
+/* FAQ details sections */
+details.bg-gray-50 p,
+details.bg-gray-50 summary {
+  @apply text-gray-900 dark:text-gray-100;
+  color: rgb(17 24 39) !important;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
