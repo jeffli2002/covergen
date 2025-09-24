@@ -236,7 +236,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         </section>
 
         {/* Generation Section */}
-        <section id="generator" className="py-16 bg-gray-50">
+        <section id="generator" className="py-16 bg-gray-50 scroll-mt-20">
           <div className="container mx-auto px-4">
             <ImageGenerator />
           </div>
@@ -286,7 +286,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         </section>
 
         {/* Features Section */}
-        <section id="features" className="py-20 bg-white">
+        <section id="features" className="py-20 bg-white scroll-mt-20">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-900">Why Choose CoverGen Pro?</h2>
@@ -613,7 +613,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         </section> */}
 
         {/* Pricing Section */}
-        <section id="pricing">
+        <section id="pricing" className="scroll-mt-20">
           <PricingSection locale={locale} />
         </section>
 
