@@ -154,31 +154,78 @@
 
 /* Prose content styling for blog posts */
 .prose {
-  @apply text-gray-900 dark:text-gray-300;
+  color: rgb(17 24 39);
+}
+
+.dark .prose {
+  color: rgb(209 213 219);
 }
 
 .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
-  @apply text-gray-900 dark:text-gray-100 font-bold;
+  color: rgb(17 24 39);
+  font-weight: 700;
+}
+
+.dark .prose h1, .dark .prose h2, .dark .prose h3, .dark .prose h4, .dark .prose h5, .dark .prose h6 {
+  color: rgb(243 244 246);
 }
 
 .prose strong {
-  @apply text-gray-900 dark:text-gray-100 font-semibold;
+  color: rgb(17 24 39);
+  font-weight: 600;
+}
+
+.dark .prose strong {
+  color: rgb(243 244 246);
 }
 
 .prose a {
-  @apply text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300;
+  color: rgb(147 51 234);
+}
+
+.prose a:hover {
+  color: rgb(109 40 217);
+}
+
+.dark .prose a {
+  color: rgb(167 139 250);
+}
+
+.dark .prose a:hover {
+  color: rgb(196 181 253);
 }
 
 .prose code {
-  @apply bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-1 py-0.5 rounded;
+  background-color: rgb(243 244 246);
+  color: rgb(31 41 55);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+}
+
+.dark .prose code {
+  background-color: rgb(55 65 81);
+  color: rgb(229 231 235);
 }
 
 .prose pre {
-  @apply bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700;
+  background-color: rgb(243 244 246);
+  border: 1px solid rgb(229 231 235);
+}
+
+.dark .prose pre {
+  background-color: rgb(31 41 55);
+  border-color: rgb(55 65 81);
 }
 
 .prose blockquote {
-  @apply border-l-4 border-purple-500 dark:border-purple-400 bg-gray-50 dark:bg-gray-800/50;
+  border-left-width: 4px;
+  border-left-color: rgb(147 51 234);
+  background-color: rgb(249 250 251);
+}
+
+.dark .prose blockquote {
+  border-left-color: rgb(167 139 250);
+  background-color: rgba(31, 41, 55, 0.5);
 }
 
 /* SEO Content Sections - Enhanced visibility with higher specificity */
@@ -205,8 +252,12 @@
 /* Main prose-seo container */
 .prose-seo,
 .prose.prose-seo {
-  @apply text-gray-900 dark:text-gray-100;
   color: rgb(17 24 39) !important;
+}
+
+.dark .prose-seo,
+.dark .prose.prose-seo {
+  color: rgb(243 244 246) !important;
 }
 
 /* Fix for prose-gray class interference */
@@ -220,55 +271,101 @@
 .prose.prose-seo p,
 .prose-gray.prose-seo p,
 .prose.prose-gray.prose-seo p {
-  @apply text-gray-900 dark:text-gray-200 leading-relaxed;
+  line-height: 1.75;
   color: rgb(17 24 39) !important;
   opacity: 1 !important;
+}
+
+.dark .prose-seo p,
+.dark .prose.prose-seo p,
+.dark .prose-gray.prose-seo p,
+.dark .prose.prose-gray.prose-seo p {
+  color: rgb(229 231 235) !important;
 }
 
 .prose-seo h2,
 .prose.prose-seo h2,
 .prose-gray.prose-seo h2,
 .prose.prose-gray.prose-seo h2 {
-  @apply text-gray-900 dark:text-white font-bold text-3xl;
+  font-weight: 700;
+  font-size: 1.875rem;
+  line-height: 2.25rem;
   color: rgb(17 24 39) !important;
   opacity: 1 !important;
   visibility: visible !important;
+}
+
+.dark .prose-seo h2,
+.dark .prose.prose-seo h2,
+.dark .prose-gray.prose-seo h2,
+.dark .prose.prose-gray.prose-seo h2 {
+  color: rgb(255 255 255) !important;
 }
 
 .prose-seo h3,
 .prose.prose-seo h3,
 .prose-gray.prose-seo h3,
 .prose.prose-gray.prose-seo h3 {
-  @apply text-gray-900 dark:text-gray-100 font-semibold text-xl mt-8 mb-4;
+  font-weight: 600;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
   color: rgb(17 24 39) !important;
   opacity: 1 !important;
   visibility: visible !important;
+}
+
+.dark .prose-seo h3,
+.dark .prose.prose-seo h3,
+.dark .prose-gray.prose-seo h3,
+.dark .prose.prose-gray.prose-seo h3 {
+  color: rgb(243 244 246) !important;
 }
 
 .prose-seo ul, .prose-seo ol,
 .prose.prose-seo ul, .prose.prose-seo ol,
 .prose-gray.prose-seo ul, .prose-gray.prose-seo ol,
 .prose.prose-gray.prose-seo ul, .prose.prose-gray.prose-seo ol {
-  @apply text-gray-900 dark:text-gray-200;
   color: rgb(17 24 39) !important;
+}
+
+.dark .prose-seo ul, .dark .prose-seo ol,
+.dark .prose.prose-seo ul, .dark .prose.prose-seo ol,
+.dark .prose-gray.prose-seo ul, .dark .prose-gray.prose-seo ol,
+.dark .prose.prose-gray.prose-seo ul, .dark .prose.prose-gray.prose-seo ol {
+  color: rgb(229 231 235) !important;
 }
 
 .prose-seo li,
 .prose.prose-seo li,
 .prose-gray.prose-seo li,
 .prose.prose-gray.prose-seo li {
-  @apply mb-2 text-gray-900 dark:text-gray-200;
+  margin-bottom: 0.5rem;
   color: rgb(17 24 39) !important;
   opacity: 1 !important;
+}
+
+.dark .prose-seo li,
+.dark .prose.prose-seo li,
+.dark .prose-gray.prose-seo li,
+.dark .prose.prose-gray.prose-seo li {
+  color: rgb(229 231 235) !important;
 }
 
 .prose-seo strong,
 .prose.prose-seo strong,
 .prose-gray.prose-seo strong,
 .prose.prose-gray.prose-seo strong {
-  @apply text-gray-900 dark:text-white font-semibold;
   color: rgb(17 24 39) !important;
   font-weight: 600 !important;
+}
+
+.dark .prose-seo strong,
+.dark .prose.prose-seo strong,
+.dark .prose-gray.prose-seo strong,
+.dark .prose.prose-gray.prose-seo strong {
+  color: rgb(255 255 255) !important;
 }
 
 /* Override prose-p utility modifier */
@@ -319,9 +416,13 @@ section .prose-gray.prose-seo * {
 /* Ensure all prose text elements have proper color */
 .prose:not(.prose-seo) p,
 .prose.prose-lg:not(.prose-seo) p {
-  @apply text-gray-900 dark:text-gray-200;
   color: rgb(17 24 39) !important;
   opacity: 1 !important;
+}
+
+.dark .prose:not(.prose-seo) p,
+.dark .prose.prose-lg:not(.prose-seo) p {
+  color: rgb(229 231 235) !important;
 }
 
 .prose:not(.prose-seo) h1,
@@ -334,16 +435,32 @@ section .prose-gray.prose-seo * {
 .prose.prose-lg:not(.prose-seo) h3,
 .prose.prose-lg:not(.prose-seo) h4,
 .prose.prose-lg:not(.prose-seo) h5 {
-  @apply text-gray-900 dark:text-white;
   color: rgb(17 24 39) !important;
   opacity: 1 !important;
 }
 
+.dark .prose:not(.prose-seo) h1,
+.dark .prose:not(.prose-seo) h2,
+.dark .prose:not(.prose-seo) h3,
+.dark .prose:not(.prose-seo) h4,
+.dark .prose:not(.prose-seo) h5,
+.dark .prose.prose-lg:not(.prose-seo) h1,
+.dark .prose.prose-lg:not(.prose-seo) h2,
+.dark .prose.prose-lg:not(.prose-seo) h3,
+.dark .prose.prose-lg:not(.prose-seo) h4,
+.dark .prose.prose-lg:not(.prose-seo) h5 {
+  color: rgb(255 255 255) !important;
+}
+
 .prose:not(.prose-seo) strong,
 .prose.prose-lg:not(.prose-seo) strong {
-  @apply text-gray-900 dark:text-white font-semibold;
   color: rgb(17 24 39) !important;
   font-weight: 600 !important;
+}
+
+.dark .prose:not(.prose-seo) strong,
+.dark .prose.prose-lg:not(.prose-seo) strong {
+  color: rgb(255 255 255) !important;
 }
 
 .prose:not(.prose-seo) ul,
@@ -352,8 +469,16 @@ section .prose-gray.prose-seo * {
 .prose.prose-lg:not(.prose-seo) ul,
 .prose.prose-lg:not(.prose-seo) ol,
 .prose.prose-lg:not(.prose-seo) li {
-  @apply text-gray-900 dark:text-gray-200;
   color: rgb(17 24 39) !important;
+}
+
+.dark .prose:not(.prose-seo) ul,
+.dark .prose:not(.prose-seo) ol,
+.dark .prose:not(.prose-seo) li,
+.dark .prose.prose-lg:not(.prose-seo) ul,
+.dark .prose.prose-lg:not(.prose-seo) ol,
+.dark .prose.prose-lg:not(.prose-seo) li {
+  color: rgb(229 231 235) !important;
 }
 
 /* Force all prose elements to be visible */
@@ -412,13 +537,18 @@ details.bg-gray-50 summary {
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-100 dark:bg-gray-700;
+  background-color: rgb(243 244 246);
+}
+
+.dark ::-webkit-scrollbar-track {
+  background-color: rgb(55 65 81);
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gradient-to-b from-purple-500 to-blue-500 rounded-full;
+  background-image: linear-gradient(to bottom, rgb(168 85 247), rgb(59 130 246));
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply from-purple-600 to-blue-600;
+  background-image: linear-gradient(to bottom, rgb(147 51 234), rgb(37 99 235));
 }
