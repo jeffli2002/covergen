@@ -495,23 +495,38 @@ class CreemPaymentService {
     try {
       // Client-side implementation - delegate to API route
       if (typeof window !== 'undefined') {
-        const authService = (await import('@/services/authService')).default
+        // Check auth configuration
+        const { authConfig } = await import('@/config/auth.config')
         
-        // Ensure we have a valid session
-        const sessionResult = await authService.ensureValidSession()
-        
-        if (!sessionResult.success || !sessionResult.session) {
-          throw new Error(sessionResult.error || 'Authentication required')
+        let headers: HeadersInit = {
+          'Content-Type': 'application/json',
         }
         
-        const authToken = sessionResult.session.access_token
+        let credentials: RequestCredentials = 'same-origin'
+        
+        if (authConfig.USE_BESTAUTH) {
+          // BestAuth uses session cookies
+          console.log('[CreemService Portal] Using BestAuth - including credentials')
+          credentials = 'include'
+        } else {
+          // Supabase uses Bearer tokens
+          const authService = (await import('@/services/authService')).default
+          
+          // Ensure we have a valid session
+          const sessionResult = await authService.ensureValidSession()
+          
+          if (!sessionResult.success || !sessionResult.session) {
+            throw new Error(sessionResult.error || 'Authentication required')
+          }
+          
+          const authToken = sessionResult.session.access_token
+          headers.Authorization = `Bearer ${authToken}`
+        }
         
         const response = await fetch('/api/payment/create-portal', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken}`
-          },
+          headers,
+          credentials,
           body: JSON.stringify({
             returnUrl
           })
@@ -523,6 +538,17 @@ class CreemPaymentService {
         }
 
         const data = await response.json()
+        
+        // Handle cases where portal URL isn't available
+        if (!data.url && data.message) {
+          console.warn('[CreemService Portal]', data.message)
+          // Return a temporary message
+          return {
+            success: false,
+            error: data.message || 'Billing portal is currently unavailable'
+          }
+        }
+        
         return {
           success: true,
           url: data.url
