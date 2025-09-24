@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Check, CreditCard, Crown, Home, Info, Loader2, Shield, Sparkles, UserCircle, Zap } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
-import { useAuth } from '@/contexts/AuthContext'
+import { useBestAuth } from '@/hooks/useBestAuth'
 import { creemService, SUBSCRIPTION_PLANS, CREEM_TEST_CARDS } from '@/services/payment/creem'
 import { toast } from 'sonner'
 import CreemDebug from '@/components/debug/CreemDebug'
@@ -31,7 +31,7 @@ export default function PaymentPageClient({
 }: PaymentPageClientProps) {
   const router = useRouter()
   const { user } = useAppStore()
-  const { user: authUser, loading: authLoading, getUserSubscription } = useAuth()
+  const { user: authUser, loading: authLoading, session } = useBestAuth()
   const [loading, setLoading] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<'pro' | 'pro_plus' | null>(null)
   const [isTestMode, setIsTestMode] = useState(false)
@@ -52,8 +52,8 @@ export default function PaymentPageClient({
       authLoading: authLoading,
       storeUser: !!user,
       storeUserEmail: user?.email,
-      session: authUser ? 'Present' : 'Missing',
-      getUserSubscription: typeof getUserSubscription
+      session: session ? 'Present' : 'Missing',
+      sessionToken: session?.token ? 'Present' : 'Missing'
     })
 
     // Wait for auth to load
@@ -76,12 +76,31 @@ export default function PaymentPageClient({
 
     // Load current subscription
     loadCurrentSubscription()
-  }, [authUser, authLoading, locale, router, redirectUrl, getUserSubscription])
+  }, [authUser, authLoading, locale, router, redirectUrl, session])
 
   const loadCurrentSubscription = async () => {
     setIsLoadingSubscription(true)
     try {
-      const subscription = await getUserSubscription()
+      // Use BestAuth API to get subscription
+      if (!session?.token) {
+        console.log('[PaymentPage] No session token, cannot fetch subscription')
+        setCurrentSubscription({ tier: 'free', status: 'active', plan: 'free' })
+        setIsLoadingSubscription(false)
+        return
+      }
+
+      const response = await fetch('/api/bestauth/subscription/status', {
+        headers: {
+          'Authorization': `Bearer ${session.token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      
+      let subscription = null
+      if (response.ok) {
+        subscription = await response.json()
+      }
+      
       console.log('[PaymentPage] Raw subscription data:', {
         full: subscription,
         tier: subscription?.tier,
@@ -521,7 +540,8 @@ export default function PaymentPageClient({
                   {/* Debug info - remove after fixing */}
                   {plan.id === 'pro' && isUpgrade && (
                     <div className="text-xs text-red-500 mb-2">
-                      DEBUG: isCurrentPlan={String(isCurrentPlan)}, isPaidUser={String(isPaidUser)}, tier={currentSubscription?.tier}
+                      DEBUG: isCurrentPlan={String(isCurrentPlan)}, isPaidUser={String(isPaidUser)}, tier={currentSubscription?.tier}<br/>
+                      User: {authUser?.email}, Status: {currentSubscription?.status}
                     </div>
                   )}
                   <div className="flex justify-center mb-4">
