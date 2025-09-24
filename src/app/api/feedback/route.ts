@@ -77,8 +77,23 @@ export async function POST(request: NextRequest) {
     // Map context to feedback type
     const typeMap: Record<string, 'bug' | 'feature' | 'improvement' | 'other'> = {
       'generation': 'feature',
-      'result': 'improvement',
+      'result': 'improvement', 
       'general': 'other'
+    }
+
+    // If feedback includes type information from feedback page, use that
+    let feedbackType = typeMap[data.context] || 'other'
+    
+    // Check if the feedback message contains type indicators from the feedback page
+    if (data.feedback) {
+      const message = data.feedback.toLowerCase()
+      if (message.includes('bug') || message.includes('error') || message.includes('broken')) {
+        feedbackType = 'bug'
+      } else if (message.includes('feature') || message.includes('add') || message.includes('suggest')) {
+        feedbackType = 'feature'  
+      } else if (message.includes('love') || message.includes('great') || message.includes('awesome')) {
+        feedbackType = 'improvement'
+      }
     }
 
     // Prepare feedback data
@@ -86,7 +101,7 @@ export async function POST(request: NextRequest) {
       user_id: userId,
       email: data.email?.trim() || null,
       message: data.feedback?.trim() || `Rating: ${data.rating}/5 for ${data.context}`,
-      type: typeMap[data.context] || 'other',
+      type: feedbackType,
       rating: data.rating,
       page_url: request.headers.get('referer') || null,
       user_agent: request.headers.get('user-agent') || null,

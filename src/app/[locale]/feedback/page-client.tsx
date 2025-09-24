@@ -22,17 +22,51 @@ export default function FeedbackPageClient({ locale, translations: t }: Feedback
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Simulate form submission
-    setTimeout(() => {
-      setShowSuccess(true)
+    const formData = new FormData(e.currentTarget)
+    const email = formData.get('email') as string
+    const message = formData.get('message') as string
+
+    try {
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          context: 'general',
+          rating: 5, // Default rating for feedback page submissions
+          feedback: `[${feedbackType.toUpperCase()}] ${message}`, // Include type in message for better categorization
+          email: email || undefined,
+          timestamp: new Date().toISOString()
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        console.error('API error response:', data)
+        throw new Error(data.error || 'Failed to submit feedback')
+      }
+
+      if (data.success) {
+        setShowSuccess(true)
+        // Reset form
+        const form = e.target as HTMLFormElement
+        form.reset()
+        setFeedbackType('general')
+        // Hide success message after 5 seconds
+        setTimeout(() => setShowSuccess(false), 5000)
+      } else {
+        throw new Error('Unexpected response format')
+      }
+    } catch (error) {
+      console.error('Error submitting feedback:', error)
+      // Show error message
+      setShowSuccess(false)
+      alert(error instanceof Error ? error.message : 'Failed to submit feedback. Please try again.')
+    } finally {
       setIsSubmitting(false)
-      // Reset form
-      const form = e.target as HTMLFormElement
-      form.reset()
-      setFeedbackType('general')
-      // Hide success message after 5 seconds
-      setTimeout(() => setShowSuccess(false), 5000)
-    }, 1000)
+    }
   }
 
   return (
@@ -124,6 +158,7 @@ export default function FeedbackPageClient({ locale, translations: t }: Feedback
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email (optional)</label>
               <Input
                 id="email"
+                name="email"
                 type="email"
                 placeholder="your@email.com"
                 className="w-full"
@@ -138,6 +173,7 @@ export default function FeedbackPageClient({ locale, translations: t }: Feedback
               <label htmlFor="message" className="block text-sm font-medium text-gray-700">Your Feedback</label>
               <Textarea
                 id="message"
+                name="message"
                 required
                 rows={6}
                 placeholder={
