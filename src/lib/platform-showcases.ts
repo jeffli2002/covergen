@@ -81,7 +81,7 @@ export const platformShowcases = {
       title: "Life Aesthetic Notes 🌸",
       originalImage: "/platform-examples/rednote/original1.jpg",
       optimizedImage: "/platform-examples/rednote/original1.jpg",
-      enhancedImage: "/platform-examples/rednote/enhangcedImage1.png",
+      enhancedImage: "/platform-examples/rednote/enhancedImage1.png",
       targetDimensions: { width: 1080, height: 1440, label: "1080×1440 (3:4)" }
     }
   ]

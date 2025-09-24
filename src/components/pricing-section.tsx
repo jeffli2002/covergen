@@ -286,12 +286,21 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
             // Only show current tier when user is authenticated and has subscription info
             const isCurrentTier = !!(authUser && subscriptionInfo?.plan === tier.id)
             
+            // Check if this is an upgrade option (Pro user viewing Pro+)
+            const isUpgradeOption = subscriptionInfo?.plan === 'pro' && tier.id === 'pro_plus' && !subscriptionInfo?.isTrialing
+            
+            // Determine if plan is selectable
+            const isPaidUser = subscriptionInfo && !subscriptionInfo.isTrialing && subscriptionInfo.plan !== 'free'
+            const needsPaymentSetup = subscriptionInfo?.isTrialing && subscriptionInfo?.requiresPaymentSetup
+            
             // Debug logging for all tiers when user is logged in
             if (authUser?.email) {
               console.log(`[PricingSection] Tier comparison for ${tier.id}:`, {
                 tierId: tier.id,
                 subscriptionPlan: subscriptionInfo?.plan,
                 isCurrentTier,
+                isUpgradeOption,
+                isPaidUser,
                 hasSubscriptionInfo: !!subscriptionInfo,
                 subscriptionData: subscriptionInfo
               })
@@ -300,9 +309,20 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
             return (
               <Card 
                 key={tier.id} 
-                className={`relative transition-all duration-300 hover:scale-105 hover:-translate-y-2 ${
+                className={`relative transition-all duration-300 ${
+                  // Only allow hover effects if it's selectable
+                  (!isCurrentTier || needsPaymentSetup || isUpgradeOption) ? 'hover:scale-105 hover:-translate-y-2 hover:shadow-2xl' : ''
+                } ${
                   tier.popular ? 'border-orange-500 shadow-xl scale-105' : 'border-gray-200'
-                } ${isCurrentTier ? 'ring-2 ring-orange-500' : ''} bg-white hover:shadow-2xl`}
+                } ${
+                  // Current plan styling
+                  isCurrentTier && isPaidUser && !isUpgradeOption ? 'ring-2 ring-gray-400 bg-gray-50 opacity-90' : ''
+                } ${
+                  isCurrentTier && !isPaidUser ? 'ring-2 ring-green-500' : ''
+                } ${
+                  // Upgrade option highlighting
+                  isUpgradeOption ? 'ring-2 ring-blue-500' : ''
+                } bg-white`}
               >
                 {tier.popular && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
@@ -316,6 +336,24 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
                   <div className="absolute -top-3 right-4">
                     <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg">
                       {tier.badge}
+                    </span>
+                  </div>
+                )}
+                
+                {/* Current plan badge */}
+                {isCurrentTier && isPaidUser && !isUpgradeOption && (
+                  <div className="absolute -top-3 left-4">
+                    <span className="bg-gray-600 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg">
+                      Your Current Plan
+                    </span>
+                  </div>
+                )}
+                
+                {/* Upgrade recommendation badge */}
+                {isUpgradeOption && (
+                  <div className="absolute -top-3 right-4">
+                    <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg animate-pulse">
+                      Recommended Upgrade
                     </span>
                   </div>
                 )}
@@ -392,11 +430,11 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
                       variant={tier.popular ? "default" : "outline"}
                       disabled={
                         loadingSubscription || 
-                        // Disable current plan for paid users (unless trial needing payment setup)
-                        (isCurrentTier && !(subscriptionInfo?.isTrialing && subscriptionInfo?.requiresPaymentSetup)) ||
+                        // Disable current plan for paid users only
+                        (isCurrentTier && isPaidUser && !isUpgradeOption) ||
                         // Disable downgrade options for paid users
-                        (subscriptionInfo !== null && !subscriptionInfo.isTrialing && subscriptionInfo.plan !== 'free' && 
-                          ((subscriptionInfo.plan === 'pro_plus' && tier.id === 'pro') || 
+                        (isPaidUser && 
+                          ((subscriptionInfo.plan === 'pro_plus' && (tier.id === 'pro' || tier.id === 'free')) || 
                            (subscriptionInfo.plan === 'pro' && tier.id === 'free')))
                       }
                       onClick={() => handleSubscribe(tier.id)}
@@ -425,11 +463,11 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
                         // For paid users (not on trial)
                         if (subscriptionInfo && !subscriptionInfo.isTrialing && subscriptionInfo.plan !== 'free') {
                           // Pro users can upgrade to Pro+
-                          if (subscriptionInfo.plan === 'pro' && tier.id === 'pro_plus') return 'Upgrade Now'
+                          if (subscriptionInfo.plan === 'pro' && tier.id === 'pro_plus') return 'Upgrade to Pro+'
                           // Don't show downgrade options for paid users
-                          if ((subscriptionInfo.plan === 'pro_plus' && tier.id === 'pro') || 
+                          if ((subscriptionInfo.plan === 'pro_plus' && (tier.id === 'pro' || tier.id === 'free')) || 
                               (subscriptionInfo.plan === 'pro' && tier.id === 'free')) {
-                            return 'Downgrade'
+                            return 'Downgrade Not Available'
                           }
                         }
                         

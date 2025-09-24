@@ -108,6 +108,21 @@ async function handleCheckoutComplete(data: any) {
     // Create service role client for admin operations
     const adminSupabase = createAdminSupabaseClient()
 
+    // Mark the checkout session as completed
+    if (subscriptionId) {
+      const { error: completeError } = await adminSupabase
+        .rpc('complete_checkout_session', {
+          p_session_id: subscriptionId,
+          p_subscription_id: subscriptionId
+        })
+
+      if (completeError) {
+        console.error('[Webhook] Error marking checkout session as completed:', completeError)
+      } else {
+        console.log('[Webhook] Marked checkout session as completed:', subscriptionId)
+      }
+    }
+
     // Get subscription configuration
     const config = getSubscriptionConfig()
     

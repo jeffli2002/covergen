@@ -7,6 +7,8 @@ import { Camera, ShoppingBag, Sparkle, TrendingUp, Sparkles, Heart } from 'lucid
 import RednoteIcon from '@/components/icons/RednoteIcon'
 import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
 import { RednoteEnhancedContent } from './enhanced-content'
+import PlatformShowcaseOptimized from '@/components/platform-showcase-optimized'
+import { platformShowcases } from '@/lib/platform-showcases'
 
 const features = [
   {
@@ -172,6 +174,13 @@ export default function RednoteCoverMakerClient({ locale, translations }: { loca
             </div>
           </div>
         </section>
+
+        {/* AI Transformation Showcase */}
+        <PlatformShowcaseOptimized
+          platform="RedNote"
+          showcases={platformShowcases.rednote}
+          primaryColor="red"
+        />
 
         {/* XHS Specific Features */}
         <section className="py-16 bg-white">

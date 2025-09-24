@@ -16,6 +16,14 @@ const supabaseAdmin = createClient(
   }
 )
 
+// Configuration for checkout sessions
+const CHECKOUT_CONFIG = {
+  maxAttemptsPerHour: 5,
+  sessionExpirationMinutes: 30,
+  concurrentCheckMessage: 'You already have an active checkout session. Please complete it or wait for it to expire.',
+  rateLimitMessage: 'Too many checkout attempts. Please try again in an hour.'
+}
+
 async function handler(req: AuthenticatedRequest) {
   try {
     console.log('Create checkout API called')
@@ -34,6 +42,56 @@ async function handler(req: AuthenticatedRequest) {
       return NextResponse.json(
         { error: 'Missing required parameters' },
         { status: 400 }
+      )
+    }
+
+    // Check if user can create checkout session (rate limiting and concurrent session check)
+    console.log('Checking checkout session eligibility for user:', user.id)
+    const { data: eligibility, error: eligibilityError } = await supabaseAdmin
+      .rpc('can_create_checkout_session', {
+        p_user_id: user.id,
+        p_max_attempts: CHECKOUT_CONFIG.maxAttemptsPerHour,
+        p_window_minutes: 60
+      })
+      .single()
+
+    if (eligibilityError) {
+      console.error('Error checking checkout eligibility:', eligibilityError)
+      return NextResponse.json(
+        { error: 'Unable to process checkout request at this time' },
+        { status: 500 }
+      )
+    }
+
+    if (!eligibility.allowed) {
+      console.warn('Checkout session creation denied:', eligibility.reason)
+      console.warn('User:', user.email, 'Active session:', eligibility.active_session_id)
+      
+      // If there's an active session, return it instead of creating a new one
+      if (eligibility.active_session_id) {
+        const { data: activeSession } = await supabaseAdmin
+          .from('checkout_sessions')
+          .select('session_id, plan_id, expires_at')
+          .eq('id', eligibility.active_session_id)
+          .single()
+
+        if (activeSession && new Date(activeSession.expires_at) > new Date()) {
+          console.log('Returning existing active session:', activeSession.session_id)
+          return NextResponse.json({
+            sessionId: activeSession.session_id,
+            url: `https://app.creem.io/checkout/${activeSession.session_id}`,
+            existingSession: true,
+            message: 'Using existing checkout session'
+          })
+        }
+      }
+
+      return NextResponse.json(
+        { 
+          error: eligibility.reason,
+          attemptsRemaining: eligibility.attempts_remaining || 0
+        },
+        { status: 429 } // Too Many Requests
       )
     }
 
@@ -129,6 +187,30 @@ async function handler(req: AuthenticatedRequest) {
       userId: user.id,
       email: user.email
     })
+
+    // Record the checkout session in our database
+    const sessionMetadata = {
+      userEmail: user.email,
+      planId: planId,
+      currentPlan: subscription?.tier || 'free',
+      createdAt: new Date().toISOString()
+    }
+
+    const { data: recordedSession, error: recordError } = await supabaseAdmin
+      .rpc('record_checkout_session', {
+        p_user_id: user.id,
+        p_session_id: result.sessionId!,
+        p_plan_id: planId,
+        p_expires_minutes: CHECKOUT_CONFIG.sessionExpirationMinutes,
+        p_metadata: sessionMetadata
+      })
+
+    if (recordError) {
+      console.error('Error recording checkout session:', recordError)
+      // Don't fail the request, just log the error
+    } else {
+      console.log('Recorded checkout session:', recordedSession)
+    }
 
     return NextResponse.json({
       sessionId: result.sessionId,

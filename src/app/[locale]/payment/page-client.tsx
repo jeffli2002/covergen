@@ -410,7 +410,21 @@ export default function PaymentPageClient({
             // Also prevent paid users from selecting their current plan (unless upgrading)
             const isPaidUser = currentSubscription && !isTrialUser && currentSubscription.tier !== 'free'
             const isUpgradeTarget = isUpgrade && initialPlan === plan.id
-            const isClickable = !loading && (!isCurrentPlan || (isCurrentPlan && needsPaymentSetup) || isUpgradeTarget)
+            
+            // Check if this is an upgrade scenario (Pro user viewing Pro+ plan)
+            const isUpgradeOption = currentSubscription?.tier === 'pro' && plan.id === 'pro_plus' && !isTrialUser
+            
+            // Determine if plan is clickable:
+            // 1. Trial users can click their current plan to add payment
+            // 2. Paid users cannot click their current plan
+            // 3. All users can click higher tier plans (upgrades)
+            const isClickable = !loading && (
+              (!isCurrentPlan && !isPaidUser) || // Free users can click any plan
+              (isCurrentPlan && needsPaymentSetup) || // Trial users can click to add payment
+              isUpgradeTarget || // Upgrade target is always clickable
+              isUpgradeOption || // Pro users can upgrade to Pro+
+              (!isCurrentPlan && isPaidUser) // Paid users can click different plans (upgrades)
+            )
             
             console.log('[PaymentPage] Rendering plan:', plan.id, {
               isCurrentPlan,
@@ -432,14 +446,16 @@ export default function PaymentPageClient({
               <Card 
                 key={plan.id}
                 className={`relative transition-all duration-300 ${
-                  isClickable ? 'cursor-pointer hover:shadow-2xl hover:scale-[1.02]' : 'cursor-not-allowed'
+                  isClickable ? 'cursor-pointer hover:shadow-2xl hover:scale-[1.02]' : 'cursor-not-allowed opacity-75'
                 } ${
                   isSelected ? 'ring-2 ring-orange-500 scale-105 shadow-2xl' : ''
                 } ${plan.popular ? 'shadow-xl' : ''} ${
-                  isCurrentPlan && !needsPaymentSetup ? 'ring-2 ring-green-500 bg-green-50' : ''
+                  isCurrentPlan && !needsPaymentSetup && isPaidUser ? 'ring-2 ring-gray-400 bg-gray-50' : ''
+                } ${
+                  isCurrentPlan && !needsPaymentSetup && !isPaidUser ? 'ring-2 ring-green-500 bg-green-50' : ''
                 } ${
                   // Highlight Pro+ for Pro users as upgrade option
-                  currentSubscription?.tier === 'pro' && plan.id === 'pro_plus' && !isTrialUser ? 'ring-2 ring-blue-500' : ''
+                  isUpgradeOption ? 'ring-2 ring-blue-500 hover:ring-blue-600' : ''
                 }`}
                 onClick={() => isClickable && setSelectedPlan(plan.id as 'pro' | 'pro_plus')}
               >
@@ -452,10 +468,19 @@ export default function PaymentPageClient({
                 )}
                 
                 {/* Current plan badge */}
-                {isCurrentPlan && !needsPaymentSetup && (
+                {isCurrentPlan && !needsPaymentSetup && isPaidUser && (
+                  <div className="absolute -top-4 left-4 z-10">
+                    <Badge className="bg-gray-600 text-white px-4 py-1">
+                      Your Current Plan
+                    </Badge>
+                  </div>
+                )}
+                
+                {/* Trial current plan badge */}
+                {isCurrentPlan && isTrialUser && (
                   <div className="absolute -top-4 left-4 z-10">
                     <Badge className="bg-green-600 text-white px-4 py-1">
-                      Current Plan
+                      Trial - {currentSubscription?.stripe_subscription_id ? 'Active' : 'Add Payment'}
                     </Badge>
                   </div>
                 )}
@@ -613,9 +638,9 @@ export default function PaymentPageClient({
                           if (isUpgrade && isTrialUser && !currentSubscription?.stripe_subscription_id) {
                             return 'Add Payment & Upgrade'
                           }
-                          // Regular upgrade
-                          if (isUpgrade && currentSubscription?.tier === 'pro' && plan.id === 'pro_plus') {
-                            return 'Upgrade Now'
+                          // Regular upgrade or Pro user viewing Pro+ (upgrade opportunity)
+                          if ((isUpgrade || isUpgradeOption) && currentSubscription?.tier === 'pro' && plan.id === 'pro_plus') {
+                            return 'Upgrade to Pro+'
                           }
                           // For free users viewing paid plans
                           if (currentSubscription?.tier === 'free') {
