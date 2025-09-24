@@ -27,7 +27,7 @@ const features = [
   {
     icon: Headphones,
     title: 'Mood Matching',
-    description: 'Visuals that capture your playlist\'s vibe'
+    description: "Visuals that capture your playlist's vibe"
   }
 ]
 
@@ -46,7 +46,7 @@ export default function SpotifyPlaylistCoverMakerClient({ locale, translations }
       {
         '@type': 'HowToStep',
         name: 'Describe the mood',
-        text: 'Input keywords that capture your playlist\'s vibe and energy'
+        text: "Input keywords that capture your playlist's vibe and energy"
       },
       {
         '@type': 'HowToStep',
@@ -76,7 +76,7 @@ export default function SpotifyPlaylistCoverMakerClient({ locale, translations }
           ]} />
         </BreadcrumbWrapper>
         
-        {/* Hero Section */>
+        {/* Hero Section */}
         <section className="py-20 bg-gradient-to-br from-green-500 to-green-700">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
