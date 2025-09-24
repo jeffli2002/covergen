@@ -215,11 +215,6 @@ export default function Footer({ locale, translations: t }: FooterProps) {
                   Accessibility
                 </Link>
               </li>
-              <li>
-                <Link href={`/${locale}/status`} className="hover:text-blue-600 transition-colors">
-                  Status
-                </Link>
-              </li>
             </ul>
           </div>
         </div>
