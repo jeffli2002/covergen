@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Instagram, Image, Grid3x3, Film, Heart, Sparkles } from 'lucide-react'
 import PlatformShowcaseOptimized from '@/components/platform-showcase-optimized'
 import { platformShowcases } from '@/lib/platform-showcases'
+import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
 
 const features = [
   {
@@ -68,6 +69,13 @@ export default function InstagramContentMakerClient({ locale, translations }: { 
       />
       
       <div className="min-h-screen bg-background">
+        <BreadcrumbWrapper>
+          <Breadcrumb items={[
+            { name: 'Platforms', href: `/${locale}/platforms` },
+            { name: 'Instagram', current: true }
+          ]} />
+        </BreadcrumbWrapper>
+        
         {/* Hero Section */}
         <section className="py-20 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400">
           <div className="container mx-auto px-4">

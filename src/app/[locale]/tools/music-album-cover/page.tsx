@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Sparkles, Music, Disc, Headphones, Mic, Radio, Star, Wand2, Palette, Download, Share2, Volume2 } from 'lucide-react'
+import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
 
 // Lazy load the tool component
 const MusicAlbumCoverTool = dynamic(() => import('@/components/tools/MusicAlbumCoverTool'), {
@@ -24,6 +25,13 @@ export const metadata: Metadata = {
 export default function MusicAlbumCoverPage({ params: { locale } }: { params: { locale: string } }) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 via-pink-50 to-red-50">
+      <BreadcrumbWrapper>
+        <Breadcrumb items={[
+          { name: 'Tools', href: `/${locale}/tools` },
+          { name: 'Music Album Cover', current: true }
+        ]} />
+      </BreadcrumbWrapper>
+      
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-pink-600 to-red-600 py-20">
         <div className="container mx-auto px-4">
@@ -88,7 +96,7 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Music Design Features
             </h2>
             <p className="text-lg text-gray-900">
@@ -101,10 +109,10 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
               <div className="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Disc className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold mb-2">
                 All Genres
               </h3>
-              <p className="text-gray-900">
+              <p>
                 From hip-hop to classical, we've got you covered
               </p>
             </div>
@@ -113,10 +121,10 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
               <div className="w-16 h-16 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Headphones className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold mb-2">
                 Streaming Ready
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Optimized for Spotify, Apple Music, and more
               </p>
             </div>
@@ -125,10 +133,10 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
               <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Mic className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold mb-2">
                 Artist Focused
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Designs that represent your unique sound
               </p>
             </div>
@@ -137,10 +145,10 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
               <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Palette className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold mb-2">
                 Custom Artwork
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Unique designs that match your aesthetic
               </p>
             </div>
@@ -149,10 +157,10 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
               <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Radio className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold mb-2">
                 Vinyl & CD Ready
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Perfect for physical releases too
               </p>
             </div>
@@ -161,10 +169,10 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
               <div className="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Volume2 className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold mb-2">
                 Trend Aware
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Styles that resonate with today's listeners
               </p>
             </div>
@@ -176,7 +184,7 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl font-bold mb-4">
               Popular Album Cover Styles
             </h2>
             <p className="text-lg text-gray-900">
@@ -187,49 +195,49 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🎵</div>
-              <h3 className="font-semibold text-gray-900 mb-2">Hip-Hop/Rap</h3>
+              <h3 className="font-semibold mb-2">Hip-Hop/Rap</h3>
               <p className="text-sm text-gray-900">Bold typography, urban aesthetics</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🎸</div>
-              <h3 className="font-semibold text-gray-900 mb-2">Rock/Metal</h3>
+              <h3 className="font-semibold mb-2">Rock/Metal</h3>
               <p className="text-sm text-gray-900">Dark themes, powerful imagery</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🎧</div>
-              <h3 className="font-semibold text-gray-900 mb-2">Electronic/EDM</h3>
+              <h3 className="font-semibold mb-2">Electronic/EDM</h3>
               <p className="text-sm text-gray-900">Neon colors, futuristic vibes</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">💕</div>
-              <h3 className="font-semibold text-gray-900 mb-2">Pop</h3>
+              <h3 className="font-semibold mb-2">Pop</h3>
               <p className="text-sm text-gray-900">Bright colors, trendy aesthetics</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🌾</div>
-              <h3 className="font-semibold text-gray-900 mb-2">Country/Folk</h3>
+              <h3 className="font-semibold mb-2">Country/Folk</h3>
               <p className="text-sm text-gray-900">Natural elements, vintage feels</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🎺</div>
-              <h3 className="font-semibold text-gray-900 mb-2">Jazz/Blues</h3>
+              <h3 className="font-semibold mb-2">Jazz/Blues</h3>
               <p className="text-sm text-gray-900">Sophisticated, artistic designs</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🎻</div>
-              <h3 className="font-semibold text-gray-900 mb-2">Classical</h3>
+              <h3 className="font-semibold mb-2">Classical</h3>
               <p className="text-sm text-gray-900">Elegant, timeless aesthetics</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🎹</div>
-              <h3 className="font-semibold text-gray-900 mb-2">R&B/Soul</h3>
+              <h3 className="font-semibold mb-2">R&B/Soul</h3>
               <p className="text-sm text-gray-900">Smooth, warm, emotional vibes</p>
             </div>
           </div>
@@ -260,41 +268,41 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
       {/* SEO Content Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto prose prose-lg prose-seo prose-p:text-gray-900">
-            <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">Professional Album Cover Design for Every Artist</h2>
-            <p className="text-gray-900">
+          <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
+            <h2 className="text-3xl font-bold mb-6 text-center">Professional Album Cover Design for Every Artist</h2>
+            <p>
               In today's music landscape, your album cover is more than just artwork – it's your music's first impression, 
               a visual representation of your sound, and often the deciding factor in whether someone clicks play. Our 
               AI-powered music album cover maker helps independent artists, bands, producers, and record labels create 
               professional album artwork that captures their unique sound and attracts listeners across all platforms.
             </p>
             
-            <h3 className="font-semibold text-gray-900">Optimized for All Music Platforms</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Optimized for All Music Platforms</h3>
+            <p>
               Different streaming platforms and music stores have specific requirements for album artwork. Our tool creates 
               covers that look perfect on Spotify, Apple Music, Amazon Music, SoundCloud, Bandcamp, and YouTube Music. 
               From the 3000x3000 pixel requirement for streaming platforms to the specific aspect ratios needed for 
               physical releases, every cover is generated with technical specifications in mind.
             </p>
             
-            <h3 className="font-semibold text-gray-900">Genre-Specific Visual Language</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Genre-Specific Visual Language</h3>
+            <p>
               Music fans have visual expectations for different genres. Hip-hop albums often feature bold typography 
               and urban aesthetics, while electronic music embraces futuristic, neon-soaked visuals. Jazz covers tend 
               toward sophisticated, artistic designs, and country music often incorporates natural, vintage elements. 
               Our AI understands these genre conventions while helping you create something uniquely yours.
             </p>
             
-            <h3 className="font-semibold text-gray-900">Perfect for Independent Artists</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Perfect for Independent Artists</h3>
+            <p>
               Professional album cover design can cost hundreds of dollars and take weeks to complete. Our tool democratizes 
               music design, allowing independent artists to create professional-quality artwork in minutes. Whether you're 
               releasing a single, EP, or full album, generate multiple concepts, test different styles, and find the 
               perfect visual representation of your music without breaking the bank.
             </p>
             
-            <h3 className="font-semibold text-gray-900">From Digital to Physical</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">From Digital to Physical</h3>
+            <p>
               While streaming dominates music consumption, physical releases are experiencing a renaissance. Vinyl sales 
               are at their highest point in decades, and fans love collecting physical music. Our album covers are designed 
               to work beautifully at any size, from tiny streaming thumbnails to large vinyl gatefolds. Create cohesive 
@@ -308,16 +316,16 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+            <h2 className="text-3xl font-bold text-center mb-12">
               Frequently Asked Questions
             </h2>
             
             <div className="space-y-6">
               <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold mb-2">
                   What size should my album cover be?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Most streaming platforms require 3000x3000 pixels at minimum, though we recommend this size as it 
                   works well everywhere. Our tool automatically generates covers at this optimal resolution. For vinyl 
                   or CD releases, we can also provide higher resolutions and print-ready formats with proper color profiles.
@@ -325,10 +333,10 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
               </div>
               
               <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold mb-2">
                   Can I include my band photo or artist image?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Absolutely! Upload your photos, and our AI will incorporate them into professional album cover designs. 
                   Whether you want a prominent artist photo, subtle band imagery, or abstract representations, the tool 
                   can work with your existing visuals or generate completely new artwork based on your music's vibe.
@@ -336,10 +344,10 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
               </div>
               
               <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold mb-2">
                   Do the covers work for singles, EPs, and albums?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Yes! Our tool creates artwork suitable for any type of release. Whether you're dropping a single, 
                   releasing an EP, or launching a full album, the designs work perfectly. You can also create consistent 
                   artwork for series releases or maintain visual branding across your entire discography.
@@ -347,10 +355,10 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
               </div>
               
               <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold mb-2">
                   Can I use the covers for commercial releases?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Free users can create covers for personal projects and independent releases. For major label releases, 
                   commercial distribution, or merchandise, you'll need a Pro subscription which includes full commercial 
                   licensing rights. This ensures you can use your artwork anywhere without legal concerns.
@@ -358,10 +366,10 @@ export default function MusicAlbumCoverPage({ params: { locale } }: { params: { 
               </div>
               
               <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold mb-2">
                   How do I make my album stand out on streaming platforms?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Great album covers work at thumbnail size and grab attention in crowded feeds. Our AI creates designs 
                   with strong contrast, readable text even when small, and eye-catching visuals that stop scrollers. 
                   We also recommend testing your cover at different sizes to ensure it's effective across all contexts.

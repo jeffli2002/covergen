@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Music, Disc3, Headphones, Radio, BarChart3, Sparkles } from 'lucide-react'
 import PlatformShowcaseOptimized from '@/components/platform-showcase-optimized'
 import { platformShowcases } from '@/lib/platform-showcases'
+import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
 
 const features = [
   {
@@ -68,7 +69,14 @@ export default function SpotifyPlaylistCoverMakerClient({ locale, translations }
       />
       
       <div className="min-h-screen bg-background">
-        {/* Hero Section */}
+        <BreadcrumbWrapper>
+          <Breadcrumb items={[
+            { name: 'Platforms', href: `/${locale}/platforms` },
+            { name: 'Spotify', current: true }
+          ]} />
+        </BreadcrumbWrapper>
+        
+        {/* Hero Section */>
         <section className="py-20 bg-gradient-to-br from-green-500 to-green-700">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">

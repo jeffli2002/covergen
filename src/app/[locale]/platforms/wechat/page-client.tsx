@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { MessageCircle, Users, Globe, Smartphone, QrCode, Sparkles } from 'lucide-react'
+import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
 
 const features = [
   {
@@ -66,6 +67,13 @@ export default function WeChatCoverMakerClient({ locale, translations }: { local
       />
       
       <div className="min-h-screen bg-background">
+        <BreadcrumbWrapper>
+          <Breadcrumb items={[
+            { name: 'Platforms', href: `/${locale}/platforms` },
+            { name: 'WeChat', current: true }
+          ]} />
+        </BreadcrumbWrapper>
+        
         {/* Hero Section */}
         <section className="py-20 bg-gradient-to-br from-green-600 to-green-800">
           <div className="container mx-auto px-4">

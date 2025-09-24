@@ -222,7 +222,7 @@ export default function ToolsHubClient({ locale, translations: t }: ToolsHubClie
                             <Icon className="w-7 h-7 text-white" />
                           </div>
                           
-                          <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors">
+                          <h3 className="text-xl font-semibold mb-2 group-hover:text-purple-600 transition-colors">
                             {tool.name}
                           </h3>
                           
@@ -252,7 +252,7 @@ export default function ToolsHubClient({ locale, translations: t }: ToolsHubClie
         <section className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              <h2 className="text-3xl font-bold mb-4">
                 Why Use Our Design Tools?
               </h2>
               <p className="text-lg text-gray-900">
@@ -265,7 +265,7 @@ export default function ToolsHubClient({ locale, translations: t }: ToolsHubClie
                 <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Sparkles className="w-6 h-6 text-purple-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">AI-Powered</h3>
+                <h3 className="font-semibold mb-2">AI-Powered</h3>
                 <p className="text-sm text-gray-900">Smart design suggestions and instant generation</p>
               </div>
               
@@ -273,7 +273,7 @@ export default function ToolsHubClient({ locale, translations: t }: ToolsHubClie
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Shield className="w-6 h-6 text-green-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">No Watermarks</h3>
+                <h3 className="font-semibold mb-2">No Watermarks</h3>
                 <p className="text-sm text-gray-900">Clean exports for professional use</p>
               </div>
               
@@ -281,7 +281,7 @@ export default function ToolsHubClient({ locale, translations: t }: ToolsHubClie
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Image className="w-6 h-6 text-blue-600" aria-label="HD Quality" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">HD Quality</h3>
+                <h3 className="font-semibold mb-2">HD Quality</h3>
                 <p className="text-sm text-gray-900">High-resolution exports for all purposes</p>
               </div>
               
@@ -289,7 +289,7 @@ export default function ToolsHubClient({ locale, translations: t }: ToolsHubClie
                 <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Zap className="w-6 h-6 text-orange-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Instant Results</h3>
+                <h3 className="font-semibold mb-2">Instant Results</h3>
                 <p className="text-sm text-gray-900">Generate designs in seconds, not hours</p>
               </div>
             </div>
@@ -321,7 +321,7 @@ export default function ToolsHubClient({ locale, translations: t }: ToolsHubClie
         {/* SEO Content Section */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto prose prose-lg prose-seo prose-p:text-gray-900">
+            <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
               <h2>Free AI Design Tools for Content Creators</h2>
               <p>
                 In the digital age, visual content is essential for capturing attention and conveying messages 

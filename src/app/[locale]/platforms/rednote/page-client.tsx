@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Camera, ShoppingBag, Sparkle, TrendingUp, Sparkles, Heart } from 'lucide-react'
 import RednoteIcon from '@/components/icons/RednoteIcon'
+import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
 
 const features = [
   {
@@ -67,6 +68,13 @@ export default function RednoteCoverMakerClient({ locale, translations }: { loca
       />
       
       <div className="min-h-screen bg-background">
+        <BreadcrumbWrapper>
+          <Breadcrumb items={[
+            { name: 'Platforms', href: `/${locale}/platforms` },
+            { name: 'Rednote', current: true }
+          ]} />
+        </BreadcrumbWrapper>
+        
         {/* Hero Section */}
         <section className="py-20 bg-gradient-to-br from-red-50 via-pink-50 to-red-100">
           <div className="container mx-auto px-4">

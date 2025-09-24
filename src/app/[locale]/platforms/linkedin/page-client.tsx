@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Linkedin, Briefcase, TrendingUp, Users, Award, Sparkles } from 'lucide-react'
+import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
 
 const features = [
   {
@@ -66,6 +67,13 @@ export default function LinkedInGraphicsMakerClient({ locale, translations }: { 
       />
       
       <div className="min-h-screen bg-background">
+        <BreadcrumbWrapper>
+          <Breadcrumb items={[
+            { name: 'Platforms', href: `/${locale}/platforms` },
+            { name: 'LinkedIn', current: true }
+          ]} />
+        </BreadcrumbWrapper>
+        
         {/* Hero Section */}
         <section className="py-20 bg-gradient-to-br from-blue-600 to-blue-800">
           <div className="container mx-auto px-4">

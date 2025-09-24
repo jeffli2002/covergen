@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Twitch, Users, Zap, Shield, Gamepad2, Sparkles } from 'lucide-react'
+import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
 
 const features = [
   {
@@ -66,6 +67,13 @@ export default function TwitchGraphicsMakerClient({ locale, translations }: { lo
       />
       
       <div className="min-h-screen bg-background">
+        <BreadcrumbWrapper>
+          <Breadcrumb items={[
+            { name: 'Platforms', href: `/${locale}/platforms` },
+            { name: 'Twitch', current: true }
+          ]} />
+        </BreadcrumbWrapper>
+        
         {/* Hero Section */}
         <section className="py-20 bg-gradient-to-br from-purple-900 to-purple-600">
           <div className="container mx-auto px-4">

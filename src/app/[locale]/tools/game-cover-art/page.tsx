@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Sparkles, Gamepad2, Sword, Zap, Trophy, Shield, Star, Wand2, Palette, Download, Share2, Target } from 'lucide-react'
+import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
 
 // Lazy load the tool component
 const GameCoverArtTool = dynamic(() => import('@/components/tools/GameCoverArtTool'), {
@@ -24,6 +25,13 @@ export const metadata: Metadata = {
 export default function GameCoverArtPage({ params: { locale } }: { params: { locale: string } }) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-purple-50 to-pink-50">
+      <BreadcrumbWrapper>
+        <Breadcrumb items={[
+          { name: 'Tools', href: `/${locale}/tools` },
+          { name: 'Game Cover Art', current: true }
+        ]} />
+      </BreadcrumbWrapper>
+      
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 py-20">
         <div className="container mx-auto px-4">
@@ -88,7 +96,7 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Game Art Features
             </h2>
             <p className="text-lg text-gray-900">
@@ -101,10 +109,10 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               <div className="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Sword className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold mb-2">
                 Genre-Specific Styles
               </h3>
-              <p className="text-gray-900">
+              <p>
                 From RPG to FPS, perfect for any game genre
               </p>
             </div>
@@ -113,10 +121,10 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Trophy className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold mb-2">
                 AAA Quality
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Professional artwork that rivals big studios
               </p>
             </div>
@@ -125,10 +133,10 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               <div className="w-16 h-16 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold mb-2">
                 Platform Ready
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Optimized for Steam, Epic, mobile stores
               </p>
             </div>
@@ -137,10 +145,10 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Palette className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold mb-2">
                 Custom Artwork
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Unique visuals that represent your game
               </p>
             </div>
@@ -149,10 +157,10 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               <div className="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Target className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold mb-2">
                 Player-Focused Design
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Covers that attract your target audience
               </p>
             </div>
@@ -161,10 +169,10 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Download className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold mb-2">
                 Multi-Format Export
               </h3>
-              <p className="text-gray-900">
+              <p>
                 Ready for all platforms and marketing
               </p>
             </div>
@@ -176,7 +184,7 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl font-bold mb-4">
               Popular Game Cover Styles
             </h2>
             <p className="text-lg text-gray-900">
@@ -187,49 +195,49 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">⚔️</div>
-              <h3 className="font-semibold text-gray-900 mb-2">Action/Adventure</h3>
+              <h3 className="font-semibold mb-2">Action/Adventure</h3>
               <p className="text-sm text-gray-900">Dynamic heroes, epic battles</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🎮</div>
-              <h3 className="font-semibold text-gray-900 mb-2">Indie Games</h3>
+              <h3 className="font-semibold mb-2">Indie Games</h3>
               <p className="text-sm text-gray-900">Creative, artistic, unique styles</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🧙</div>
-              <h3 className="font-semibold text-gray-900 mb-2">Fantasy RPG</h3>
+              <h3 className="font-semibold mb-2">Fantasy RPG</h3>
               <p className="text-sm text-gray-900">Magic, dragons, medieval themes</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🚀</div>
-              <h3 className="font-semibold text-gray-900 mb-2">Sci-Fi</h3>
+              <h3 className="font-semibold mb-2">Sci-Fi</h3>
               <p className="text-sm text-gray-900">Futuristic, space, technology</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🔫</div>
-              <h3 className="font-semibold text-gray-900 mb-2">FPS/Shooter</h3>
+              <h3 className="font-semibold mb-2">FPS/Shooter</h3>
               <p className="text-sm text-gray-900">Intense combat, military themes</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🏆</div>
-              <h3 className="font-semibold text-gray-900 mb-2">Sports</h3>
+              <h3 className="font-semibold mb-2">Sports</h3>
               <p className="text-sm text-gray-900">Athletic, competitive, energetic</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">📱</div>
-              <h3 className="font-semibold text-gray-900 mb-2">Mobile Games</h3>
+              <h3 className="font-semibold mb-2">Mobile Games</h3>
               <p className="text-sm text-gray-900">Casual, colorful, accessible</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <div className="text-4xl mb-3">🎲</div>
-              <h3 className="font-semibold text-gray-900 mb-2">Strategy</h3>
+              <h3 className="font-semibold mb-2">Strategy</h3>
               <p className="text-sm text-gray-900">Tactical, intelligent, complex</p>
             </div>
           </div>
@@ -260,17 +268,17 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
       {/* SEO Content Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto prose prose-lg prose-seo prose-p:text-gray-900">
-            <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">Professional Game Cover Art That Sells</h2>
-            <p className="text-gray-900">
+          <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
+            <h2 className="text-3xl font-bold mb-6 text-center">Professional Game Cover Art That Sells</h2>
+            <p>
               In the competitive gaming industry, your cover art is often the first and most important interaction 
               potential players have with your game. Whether you're an indie developer launching on Steam, a mobile 
               game studio targeting app stores, or creating physical box art, our AI-powered game cover art creator 
               helps you design compelling visuals that capture your game's essence and attract your target audience.
             </p>
             
-            <h3 className="font-semibold text-gray-900">Optimized for Every Gaming Platform</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Optimized for Every Gaming Platform</h3>
+            <p>
               Different platforms have different requirements and audiences. Our game cover art creator understands 
               these nuances, generating Steam-optimized covers that work well as small thumbnails, mobile game icons 
               that pop on app stores, console box art that stands out on retail shelves, and promotional materials 
@@ -278,8 +286,8 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               platform-specific technical requirements.
             </p>
             
-            <h3 className="font-semibold text-gray-900">Genre-Specific Visual Language</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Genre-Specific Visual Language</h3>
+            <p>
               Gaming audiences have specific expectations for different genres. Our AI has been trained on thousands 
               of successful game covers across all genres. Fantasy RPGs get epic, magical aesthetics with rich 
               fantasy elements. FPS games receive bold, action-packed designs with military themes. Indie games get 
@@ -287,16 +295,16 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               chilling designs that promise thrills.
             </p>
             
-            <h3 className="font-semibold text-gray-900">Psychology-Driven Design Elements</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">Psychology-Driven Design Elements</h3>
+            <p>
               Successful game covers use specific psychological triggers to attract players. Our AI incorporates 
               proven design principles: character positioning that draws the eye, color schemes that evoke the right 
               emotions, typography that matches the game's tone, and composition that works at any size. The result 
               is cover art that not only looks professional but also performs well in converting browsers into buyers.
             </p>
             
-            <h3 className="font-semibold text-gray-900">From Concept to Market-Ready</h3>
-            <p className="text-gray-900">
+            <h3 className="font-semibold">From Concept to Market-Ready</h3>
+            <p>
               Game development is time-intensive, and marketing materials often come as an afterthought. Our tool 
               bridges this gap by creating market-ready cover art in minutes, not weeks. Generate multiple concepts 
               for A/B testing, create variations for different regions or platforms, and maintain consistent branding 
@@ -311,16 +319,16 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+            <h2 className="text-3xl font-bold text-center mb-12">
               Frequently Asked Questions
             </h2>
             
             <div className="space-y-6">
               <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold mb-2">
                   What platforms are the covers optimized for?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Our game covers work perfectly for Steam (460x215, 616x353), Epic Games Store, mobile app stores 
                   (iOS App Store, Google Play), console platforms (PlayStation, Xbox, Nintendo), and physical box art. 
                   We also provide social media sizes for marketing campaigns.
@@ -328,10 +336,10 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               </div>
               
               <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold mb-2">
                   Can I include my game's characters and logo?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Yes! Upload your game's logo, character artwork, screenshots, or concept art. Our AI will integrate 
                   these elements seamlessly into professional cover designs. You can also describe your characters 
                   or game world, and the AI will generate appropriate artwork.
@@ -339,10 +347,10 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               </div>
               
               <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold mb-2">
                   What game genres does the tool support?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   All major genres are supported: Action, Adventure, RPG, FPS, Strategy, Puzzle, Horror, Sci-Fi, 
                   Fantasy, Sports, Racing, Simulation, Indie, Mobile, and more. Each genre has specialized templates 
                   and AI training to ensure authentic visual styling that appeals to genre fans.
@@ -350,10 +358,10 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               </div>
               
               <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold mb-2">
                   Can I create covers for game series or DLC?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Absolutely! Create consistent branding across your entire game franchise. Design main game covers, 
                   DLC/expansion covers, sequel covers, and special edition artwork that maintains visual cohesion. 
                   Perfect for building recognizable game series branding.
@@ -361,10 +369,10 @@ export default function GameCoverArtPage({ params: { locale } }: { params: { loc
               </div>
               
               <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold mb-2">
                   What resolution and formats are available?
                 </h3>
-                <p className="text-gray-900">
+                <p>
                   Free users get HD quality suitable for most digital platforms. Pro users get 4K resolution (3840x2160) 
                   and print-ready formats with CMYK color profiles for physical distribution. All major formats are 
                   supported: PNG, JPG, PDF, and vector formats for scalability.

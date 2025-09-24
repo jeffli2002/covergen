@@ -96,7 +96,7 @@ export default function MobileHeader() {
   return (
     <>
       {/* Mobile Header */}
-      <header className="lg:hidden border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 h-20">
+      <header className="lg:hidden border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 h-20 sticky top-0 z-40">
         <div className="flex h-full items-center justify-between px-4">
           <h1 className="text-xl md:text-2xl font-bold text-primary">CoverGen Pro</h1>
           

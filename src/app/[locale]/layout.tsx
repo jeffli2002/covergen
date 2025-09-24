@@ -27,14 +27,11 @@ export default async function LocaleLayout({
           {/* Auth Modal Handler */}
           <AuthModalHandler />
           
-          {/* Header Container with fixed height to prevent jumping */}
-          <div className="h-16 lg:h-16">
-            {/* Desktop Header */}
-            <Header locale={params.locale} translations={dict} />
-            
-            {/* Mobile Header */}
-            <MobileHeader />
-          </div>
+          {/* Desktop Header */}
+          <Header locale={params.locale} translations={dict} />
+          
+          {/* Mobile Header */}
+          <MobileHeader />
           
           {/* Main Content with flex-grow to fill remaining space */}
           <main className="flex-1 flex flex-col">

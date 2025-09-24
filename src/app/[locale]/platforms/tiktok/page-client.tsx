@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Music, Sparkles, Smartphone, Zap, TrendingUp } from 'lucide-react'
 import PlatformShowcaseOptimized from '@/components/platform-showcase-optimized'
 import { platformShowcases } from '@/lib/platform-showcases'
+import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
 
 const features = [
   {
@@ -68,6 +69,13 @@ export default function TikTokCoverMakerClient({ locale, translations }: { local
       />
       
       <div className="min-h-screen bg-background">
+        <BreadcrumbWrapper>
+          <Breadcrumb items={[
+            { name: 'Platforms', href: `/${locale}/platforms` },
+            { name: 'TikTok', current: true }
+          ]} />
+        </BreadcrumbWrapper>
+        
         {/* Hero Section */}
         <section className="py-20 bg-gradient-to-br from-pink-50 to-purple-100">
           <div className="container mx-auto px-4">
