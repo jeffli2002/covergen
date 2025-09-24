@@ -363,7 +363,7 @@ section .prose.prose-lg * {
   visibility: visible !important;
 }
 
-/* Fix light gray text colors in enhanced content sections */
+/* Fix light gray text colors in enhanced content sections - Updated to avoid circular dependency */
 .prose .text-gray-700,
 .prose .text-gray-800,
 .prose.prose-lg .text-gray-700,
