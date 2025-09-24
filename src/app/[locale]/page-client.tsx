@@ -79,6 +79,35 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
     setIsPageReady(true)
   }, [])
   
+  // Handle hash navigation on page load
+  useEffect(() => {
+    // Only run after page is ready
+    if (!isPageReady) return
+    
+    // Check if there's a hash in the URL
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const hash = window.location.hash.slice(1) // Remove the #
+      
+      // Small delay to ensure all elements are rendered
+      setTimeout(() => {
+        const element = document.getElementById(hash)
+        if (element) {
+          // Calculate the offset to account for sticky header
+          // Desktop header is 64px (h-16), mobile header is 80px (h-20)
+          const isMobile = window.innerWidth < 1024 // lg breakpoint
+          const headerHeight = isMobile ? 80 : 64
+          const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+          const offsetPosition = elementPosition - headerHeight - 20 // Extra 20px for padding
+          
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          })
+        }
+      }, 100)
+    }
+  }, [isPageReady])
+  
   // Structured data for SEO
   const structuredData = {
     '@context': 'https://schema.org',
@@ -151,6 +180,28 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
       }
     }
   }, [authUser])
+
+  // Handle hash navigation (e.g., #pricing from platform pages)
+  useEffect(() => {
+    if (isPageReady && window.location.hash) {
+      // Wait for all components to render
+      setTimeout(() => {
+        const targetId = window.location.hash.substring(1)
+        const targetElement = document.getElementById(targetId)
+        
+        if (targetElement) {
+          // Calculate header height based on screen size
+          const headerHeight = window.innerWidth >= 1024 ? 64 : 80 // desktop: 64px, mobile: 80px
+          const scrollPosition = targetElement.offsetTop - headerHeight - 20 // extra padding
+          
+          window.scrollTo({
+            top: scrollPosition,
+            behavior: 'smooth'
+          })
+        }
+      }, 100) // Small delay to ensure everything is rendered
+    }
+  }, [isPageReady])
 
   // Track page view and A/B test variants
   useEffect(() => {
@@ -613,7 +664,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         </section> */}
 
         {/* Pricing Section */}
-        <section id="pricing" className="scroll-mt-20">
+        <section id="pricing" className="scroll-mt-20 lg:scroll-mt-24 pt-4">
           <PricingSection locale={locale} />
         </section>
 
