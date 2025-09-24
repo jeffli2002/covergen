@@ -63,31 +63,24 @@ export default function BilibiliCoverClient({ locale, translations: t }: Bilibil
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  size="lg" 
-                  className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white px-8"
-                  onClick={() => {
-                    const generator = document.getElementById('generator')
-                    if (generator) {
-                      generator.scrollIntoView({ behavior: 'smooth' })
-                    } else {
-                      window.location.href = `/${locale}#generator`
-                    }
-                  }}
-                >
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  Start Creating Now
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  className="border-gray-300"
-                  asChild
-                >
-                  <Link href={`/${locale}/tutorials`}>
-                    View Tutorials
-                  </Link>
-                </Button>
+                <Link href={`/${locale}#generator`}>
+                  <Button 
+                    size="lg" 
+                    className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white px-8"
+                  >
+                    <Sparkles className="w-5 h-5 mr-2" />
+                    Start Creating Now
+                  </Button>
+                </Link>
+                <Link href={`/${locale}#pricing`}>
+                  <Button 
+                    size="lg" 
+                    variant="outline"
+                    className="border-gray-300 text-gray-800 hover:bg-gray-800 hover:text-white px-8 py-6 text-lg font-semibold border-2"
+                  >
+                    View Pricing
+                  </Button>
+                </Link>
               </div>
               
               {/* Trust Indicators */}
