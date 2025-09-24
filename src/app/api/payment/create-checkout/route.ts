@@ -47,13 +47,21 @@ async function handler(req: AuthenticatedRequest) {
 
     // Check if user can create checkout session (rate limiting and concurrent session check)
     console.log('Checking checkout session eligibility for user:', user.id)
+    
+    interface EligibilityResponse {
+      allowed: boolean
+      reason?: string
+      active_session_id?: string
+      attempts_remaining?: number
+    }
+    
     const { data: eligibility, error: eligibilityError } = await supabaseAdmin
       .rpc('can_create_checkout_session', {
         p_user_id: user.id,
         p_max_attempts: CHECKOUT_CONFIG.maxAttemptsPerHour,
         p_window_minutes: 60
       })
-      .single()
+      .single() as { data: EligibilityResponse | null; error: any }
 
     if (eligibilityError) {
       console.error('Error checking checkout eligibility:', eligibilityError)
@@ -63,12 +71,12 @@ async function handler(req: AuthenticatedRequest) {
       )
     }
 
-    if (!eligibility.allowed) {
-      console.warn('Checkout session creation denied:', eligibility.reason)
-      console.warn('User:', user.email, 'Active session:', eligibility.active_session_id)
+    if (!eligibility || !eligibility.allowed) {
+      console.warn('Checkout session creation denied:', eligibility?.reason)
+      console.warn('User:', user.email, 'Active session:', eligibility?.active_session_id)
       
       // If there's an active session, return it instead of creating a new one
-      if (eligibility.active_session_id) {
+      if (eligibility?.active_session_id) {
         const { data: activeSession } = await supabaseAdmin
           .from('checkout_sessions')
           .select('session_id, plan_id, expires_at')
@@ -88,8 +96,8 @@ async function handler(req: AuthenticatedRequest) {
 
       return NextResponse.json(
         { 
-          error: eligibility.reason,
-          attemptsRemaining: eligibility.attempts_remaining || 0
+          error: eligibility?.reason || 'Checkout session creation not allowed',
+          attemptsRemaining: eligibility?.attempts_remaining || 0
         },
         { status: 429 } // Too Many Requests
       )
