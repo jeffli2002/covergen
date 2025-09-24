@@ -78,7 +78,7 @@ export const softwareApplicationSchema: WithContext<SoftwareApplication> = {
       price: '19',
       priceCurrency: 'USD',
       name: 'Pro+ Plan',
-      description: 'Everything in Pro + API access, team features',
+      description: 'Everything in Pro + team features',
       priceValidUntil: '2026-12-31',
     },
   ],
@@ -100,7 +100,6 @@ export const softwareApplicationSchema: WithContext<SoftwareApplication> = {
     'Instant generation in under 10 seconds',
     'Local image editing with masks',
     'Commercial usage rights',
-    'API access for developers',
     'Team collaboration features',
   ],
 }

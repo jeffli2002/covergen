@@ -94,8 +94,8 @@ export default function PricingPage({
           ...(hasTrials ? { trialDuration: `P${config.trialDays}D` } : {})
         },
         description: hasTrials
-          ? `${trialText}, ${config.limits.pro_plus.monthly} covers per month, full commercial license, API access`
-          : `${config.limits.pro_plus.monthly} covers per month, full commercial license, API access`
+          ? `${trialText}, ${config.limits.pro_plus.monthly} covers per month, full commercial license`
+          : `${config.limits.pro_plus.monthly} covers per month, full commercial license`
       }
     ]
   }

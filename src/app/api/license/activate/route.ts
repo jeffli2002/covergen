@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
 
     if (!subscription) {
       return NextResponse.json(
-        { error: 'Pro+ subscription required for API access' },
+        { error: 'Pro+ subscription required for advanced features' },
         { status: 403 }
       )
     }
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     // For now, return an error indicating that license creation is not available
     // The actual license key should be created during the subscription process
     return NextResponse.json(
-      { error: 'No active license found. Please contact support to activate your API access.' },
+      { error: 'No active license found. Please contact support to activate your advanced features.' },
       { status: 404 }
     )
   } catch (error: any) {

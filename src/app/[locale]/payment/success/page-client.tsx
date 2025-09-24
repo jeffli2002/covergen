@@ -118,8 +118,7 @@ export default function PaymentSuccessClient({ locale, sessionId }: PaymentSucce
           features: [
             'Everything in Pro',
             'Commercial license',
-            'Custom brand templates',
-            'API access'
+            'Custom brand templates'
           ]
         }
       default:

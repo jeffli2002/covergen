@@ -179,7 +179,6 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                       <li>✓ No watermark</li>
                       <li>✓ Full commercial license</li>
                       <li>✓ Custom brand templates</li>
-                      <li>✓ API access</li>
                       <li>✓ Dedicated support</li>
                     </ul>
                   </div>

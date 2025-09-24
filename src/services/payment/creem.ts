@@ -1165,7 +1165,7 @@ class CreemPaymentService {
   }
 
   /**
-   * Validate a license key (for Pro+ API access)
+   * Validate a license key (for Pro+ features)
    */
   async validateLicense(licenseKey: string) {
     try {

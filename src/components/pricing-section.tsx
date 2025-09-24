@@ -39,6 +39,7 @@ const tiers = [
     features: [
       `${config.limits.free.monthly} covers per month`,
       `${config.limits.free.daily} covers per day max`,
+      'Basic tool usage',
       'No watermark',
       'All platform sizes',
       'Email support',
@@ -62,6 +63,7 @@ const tiers = [
     icon: Zap,
     features: [
       `${config.limits.pro.monthly} covers per month`,
+      'All tool usage',
       'No watermark',
       'All platform sizes',
       'Priority support',
@@ -81,10 +83,10 @@ const tiers = [
     icon: Crown,
     features: [
       `${config.limits.pro_plus.monthly} covers per month`,
+      'All tool usage',
       'No watermark',
       'Full commercial license',
       'Custom brand templates',
-      'API access',
       'Dedicated support'
     ],
     limitations: [],

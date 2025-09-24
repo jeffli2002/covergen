@@ -56,7 +56,6 @@ const plans: Record<PlanType, SubscriptionPlan> = {
     features: [
       'Everything in Pro',
       'Bulk generation',
-      'API access',
       'Custom templates',
       'Dedicated support',
       'Commercial license'
