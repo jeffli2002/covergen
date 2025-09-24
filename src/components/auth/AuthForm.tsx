@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Alert } from '@/components/ui/alert'
 import { Input } from '@/components/ui/input'
-import { User, Mail, Lock, Eye, EyeOff, Chrome, Wand2 } from 'lucide-react'
+import { User, Mail, Lock, Eye, EyeOff, Wand2 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { GoogleOAuthButton } from '@/components/ui/google-oauth-button'
 import * as gtag from '@/lib/gtag'
 
 interface AuthFormProps {
@@ -128,7 +129,6 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
   }
 
   const handleGoogleSignIn = async () => {
-    setIsLoading(true)
     setMessage({ type: '', text: '' })
 
     try {
@@ -144,8 +144,6 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'Google login failed' })
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -216,6 +214,27 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
                 </p>
               </Alert>
             )}
+            
+            {/* Google OAuth Button - Most Prominent */}
+            <div className="mb-6">
+              <GoogleOAuthButton
+                onClick={handleGoogleSignIn}
+                disabled={isLoading}
+                variant="primary"
+                size="large"
+                showTrustSignals={true}
+              />
+            </div>
+
+            <div className="relative mb-6">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-gray-500">Or continue with email</span>
+              </div>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-4">
               {!isLogin && (
                 <div>
@@ -320,26 +339,6 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
                 </div>
               )}
             </form>
-
-            <div className="relative mt-6">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-gray-500">Or</span>
-              </div>
-            </div>
-
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full mt-4"
-              onClick={handleGoogleSignIn}
-              disabled={isLoading}
-            >
-              <Chrome className="h-4 w-4 mr-2" />
-              Continue with Google
-            </Button>
 
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
