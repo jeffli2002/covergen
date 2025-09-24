@@ -50,15 +50,34 @@ export async function POST(request: NextRequest) {
         // Import Creem service for server-side use
         const { creemService } = await import('@/services/payment/creem')
         
+        console.log('[Cancel] Attempting to cancel via Creem:', {
+          stripeSubscriptionId,
+          cancelAtPeriodEnd,
+          hasCreemService: !!creemService
+        })
+        
         // Cancel via Creem SDK
         const cancelResult = await creemService.cancelSubscription(stripeSubscriptionId, cancelAtPeriodEnd)
+        
+        console.log('[Cancel] Creem cancelResult:', cancelResult)
         
         if (!cancelResult.success) {
           throw new Error(cancelResult.error || 'Failed to cancel with Creem')
         }
       } catch (creemError: any) {
-        console.error('[Cancel] Creem cancellation failed:', creemError)
-        // Continue with database update even if Creem fails
+        console.error('[Cancel] Creem cancellation failed:', {
+          error: creemError.message,
+          stack: creemError.stack,
+          details: creemError
+        })
+        // Return error to client instead of continuing
+        return NextResponse.json(
+          { 
+            error: `Failed to cancel subscription: ${creemError.message || 'Unknown Creem error'}`,
+            details: process.env.NODE_ENV === 'development' ? creemError.toString() : undefined
+          },
+          { status: 500 }
+        )
       }
     }
     

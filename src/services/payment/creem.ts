@@ -566,6 +566,13 @@ class CreemPaymentService {
         throw new Error('Creem API key not configured')
       }
 
+      console.log('[Creem] Attempting to cancel subscription:', {
+        subscriptionId,
+        cancelAtPeriodEnd,
+        apiKeyPrefix: CREEM_API_KEY.substring(0, 15) + '...',
+        isTestMode: getCreemTestMode()
+      })
+
       // Use the Creem SDK to cancel subscription
       // Note: Creem API doesn't support cancelAtPeriodEnd parameter directly
       const result = await getCreemClient().cancelSubscription({
@@ -580,7 +587,21 @@ class CreemPaymentService {
         subscription: result
       }
     } catch (error: any) {
-      console.error('Creem cancel subscription error:', error)
+      console.error('[Creem] Cancel subscription error:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        fullError: error
+      })
+      
+      // Check if it's a specific Creem API error
+      if (error.response?.data?.error) {
+        return {
+          success: false,
+          error: error.response.data.error
+        }
+      }
+      
       return {
         success: false,
         error: error.message || 'Failed to cancel subscription'
