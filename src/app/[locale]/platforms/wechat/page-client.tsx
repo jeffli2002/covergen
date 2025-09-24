@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { MessageCircle, Users, Globe, Smartphone, QrCode, Sparkles } from 'lucide-react'
 import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
+import { WeChatEnhancedContent } from './enhanced-content'
 
 const features = [
   {
@@ -304,6 +305,9 @@ export default function WeChatCoverMakerClient({ locale, translations }: { local
             </Link>
           </div>
         </section>
+
+        {/* Enhanced Content for SEO and AdSense */}
+        <WeChatEnhancedContent />
       </div>
     </>
   )

@@ -7,6 +7,7 @@ import { Instagram, Image, Grid3x3, Film, Heart, Sparkles } from 'lucide-react'
 import PlatformShowcaseOptimized from '@/components/platform-showcase-optimized'
 import { platformShowcases } from '@/lib/platform-showcases'
 import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
+import { InstagramEnhancedContent } from './enhanced-content'
 
 const features = [
   {
@@ -320,6 +321,9 @@ export default function InstagramContentMakerClient({ locale, translations }: { 
             </Link>
           </div>
         </section>
+
+        {/* Enhanced Content for SEO and AdSense */}
+        <InstagramEnhancedContent />
       </div>
     </>
   )

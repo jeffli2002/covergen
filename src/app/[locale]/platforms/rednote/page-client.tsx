@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Camera, ShoppingBag, Sparkle, TrendingUp, Sparkles, Heart } from 'lucide-react'
 import RednoteIcon from '@/components/icons/RednoteIcon'
 import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
+import { RednoteEnhancedContent } from './enhanced-content'
 
 const features = [
   {
@@ -284,6 +285,9 @@ export default function RednoteCoverMakerClient({ locale, translations }: { loca
             </Link>
           </div>
         </section>
+
+        {/* Enhanced Content for SEO and AdSense */}
+        <RednoteEnhancedContent />
       </div>
     </>
   )

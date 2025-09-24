@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Twitch, Users, Zap, Shield, Gamepad2, Sparkles } from 'lucide-react'
 import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
+import { TwitchEnhancedContent } from './enhanced-content'
 
 const features = [
   {
@@ -241,6 +242,9 @@ export default function TwitchGraphicsMakerClient({ locale, translations }: { lo
             </Link>
           </div>
         </section>
+
+        {/* Enhanced Content for SEO and AdSense */}
+        <TwitchEnhancedContent locale={locale} />
       </div>
     </>
   )

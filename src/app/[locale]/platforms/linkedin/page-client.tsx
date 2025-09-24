@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Linkedin, Briefcase, TrendingUp, Users, Award, Sparkles } from 'lucide-react'
 import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
+import { LinkedInEnhancedContent } from './enhanced-content'
 
 const features = [
   {
@@ -288,6 +289,9 @@ export default function LinkedInGraphicsMakerClient({ locale, translations }: { 
             </Link>
           </div>
         </section>
+
+        {/* Enhanced Content for SEO and AdSense */}
+        <LinkedInEnhancedContent />
       </div>
     </>
   )

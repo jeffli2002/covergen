@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Sparkles, CheckCircle, Zap, Globe, Palette, Shield } from 'lucide-react'
 import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
 import { generateStructuredData } from '@/lib/seo-utils'
+import { BilibiliEnhancedContent } from './enhanced-content'
 
 interface BilibiliCoverClientProps {
   locale: Locale
@@ -345,6 +346,9 @@ export default function BilibiliCoverClient({ locale, translations: t }: Bilibil
             </div>
           </div>
         </section>
+
+        {/* Enhanced Content for SEO and AdSense */}
+        <BilibiliEnhancedContent />
       </main>
     </>
   )

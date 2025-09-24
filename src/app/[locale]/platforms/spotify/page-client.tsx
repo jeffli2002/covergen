@@ -7,6 +7,7 @@ import { Music, Disc3, Headphones, Radio, BarChart3, Sparkles } from 'lucide-rea
 import PlatformShowcaseOptimized from '@/components/platform-showcase-optimized'
 import { platformShowcases } from '@/lib/platform-showcases'
 import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
+import { SpotifyEnhancedContent } from './enhanced-content'
 
 const features = [
   {
@@ -278,6 +279,9 @@ export default function SpotifyPlaylistCoverMakerClient({ locale, translations }
             </Link>
           </div>
         </section>
+
+        {/* Enhanced Content for SEO and AdSense */}
+        <SpotifyEnhancedContent />
       </div>
     </>
   )
