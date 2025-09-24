@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
+import Link from 'next/link'
 import ImagePreviewModal from './image-preview-modal'
 import { platformSizes, type Platform } from '@/lib/utils'
 import { preprocessImageForPlatform } from '@/lib/image-resizer'
@@ -247,14 +248,16 @@ export default function ModeSelector({
               <span className="text-sm text-gray-900 font-medium">Batch Processing</span>
               <span className="px-2 py-0.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs font-bold rounded">PRO</span>
             </div>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-7 text-xs text-blue-600 hover:text-blue-700"
-            >
-              <Sparkles className="w-3 h-3 mr-1" />
-              Upgrade
-            </Button>
+            <Link href="/pricing">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 text-xs text-blue-600 hover:text-blue-700"
+              >
+                <Sparkles className="w-3 h-3 mr-1" />
+                Upgrade
+              </Button>
+            </Link>
           </div>
 
           {/* Reference Images */}

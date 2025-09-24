@@ -181,7 +181,7 @@ export default function MobileHeader() {
                         const userTier = subscriptionInfo?.subscription_tier || subscriptionInfo?.plan
                         if (userTier === 'pro') {
                           // Pro users go directly to payment page for Pro+
-                          window.location.href = `/${currentLocale}/payment?plan=pro_plus&upgrade=true`
+                          window.location.href = '/pricing'
                         } else {
                           // Free users go to pricing section
                           const pricingSection = document.getElementById('pricing')

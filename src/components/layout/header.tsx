@@ -368,7 +368,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
               </DropdownMenuContent>
             </DropdownMenu>
             
-            <Link href={`/${locale}/payment`} className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">
+            <Link href={`/${locale}#pricing`} className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">
               {t.navigation.pricing}
             </Link>
           </nav>

@@ -234,7 +234,7 @@ export default function PromptConfigurator({
                   <span>{error}</span>
                   {(error.includes('upgrade to Pro plan') || error.includes('limit reached')) && (
                     <a 
-                      href="/payment?plan=pro" 
+                      href="/pricing" 
                       className="inline-flex items-center gap-1 text-white bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 px-3 py-1.5 rounded-md font-semibold transition-all transform hover:scale-105 shadow-lg"
                     >
                       <Crown className="w-4 h-4" />
