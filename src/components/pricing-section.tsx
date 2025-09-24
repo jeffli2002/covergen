@@ -290,8 +290,8 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
             const isUpgradeOption = subscriptionInfo?.plan === 'pro' && tier.id === 'pro_plus' && !subscriptionInfo?.isTrialing
             
             // Determine if plan is selectable
-            const isPaidUser = subscriptionInfo && !subscriptionInfo.isTrialing && subscriptionInfo.plan !== 'free'
-            const needsPaymentSetup = subscriptionInfo?.isTrialing && subscriptionInfo?.requiresPaymentSetup
+            const isPaidUser = !!(subscriptionInfo && !subscriptionInfo.isTrialing && subscriptionInfo.plan !== 'free')
+            const needsPaymentSetup = !!(subscriptionInfo?.isTrialing && subscriptionInfo?.requiresPaymentSetup)
             
             // Debug logging for all tiers when user is logged in
             if (authUser?.email) {
@@ -433,7 +433,7 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
                         // Disable current plan for paid users only
                         (isCurrentTier && isPaidUser && !isUpgradeOption) ||
                         // Disable downgrade options for paid users
-                        (isPaidUser && 
+                        (isPaidUser && subscriptionInfo && 
                           ((subscriptionInfo.plan === 'pro_plus' && (tier.id === 'pro' || tier.id === 'free')) || 
                            (subscriptionInfo.plan === 'pro' && tier.id === 'free')))
                       }

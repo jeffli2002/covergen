@@ -27,6 +27,13 @@ export interface CheckoutSessionStatus {
   attemptsRemaining?: number
 }
 
+interface EligibilityResponse {
+  allowed: boolean
+  reason?: string
+  active_session_id?: string
+  attempts_remaining?: number
+}
+
 export interface CheckoutSessionConfig {
   maxAttemptsPerHour: number
   sessionExpirationMinutes: number
@@ -58,7 +65,7 @@ export class CheckoutSessionManager {
           p_max_attempts: this.config.maxAttemptsPerHour,
           p_window_minutes: 60
         })
-        .single()
+        .single() as { data: EligibilityResponse | null; error: any }
 
       if (error) {
         console.error('Error checking checkout eligibility:', error)
@@ -68,7 +75,7 @@ export class CheckoutSessionManager {
         }
       }
 
-      if (data.allowed) {
+      if (data?.allowed) {
         return {
           canCreate: true,
           attemptsRemaining: data.attempts_remaining
@@ -76,7 +83,7 @@ export class CheckoutSessionManager {
       }
 
       // If there's an active session, get its details
-      if (data.active_session_id) {
+      if (data?.active_session_id) {
         const { data: activeSession } = await supabaseAdmin
           .from('checkout_sessions')
           .select('session_id, expires_at')
@@ -86,18 +93,18 @@ export class CheckoutSessionManager {
         if (activeSession) {
           return {
             canCreate: false,
-            reason: data.reason,
+            reason: data?.reason,
             activeSessionId: activeSession.session_id,
             activeSessionUrl: `https://app.creem.io/checkout/${activeSession.session_id}`,
-            attemptsRemaining: data.attempts_remaining || 0
+            attemptsRemaining: data?.attempts_remaining || 0
           }
         }
       }
 
       return {
         canCreate: false,
-        reason: data.reason,
-        attemptsRemaining: data.attempts_remaining || 0
+        reason: data?.reason,
+        attemptsRemaining: data?.attempts_remaining || 0
       }
     } catch (error) {
       console.error('Error in canCreateSession:', error)

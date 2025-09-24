@@ -4,9 +4,9 @@
  */
 
 import { useState, useCallback, useRef } from 'react'
-import { toast } from 'react-hot-toast'
+import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import { useBestAuth } from '@/lib/bestauth/react'
+import { useBestAuth } from '@/hooks/useBestAuth'
 import { creemService } from '@/services/payment/creem'
 import { bestAuthPaymentService } from '@/services/payment/bestauth-payment'
 import authService from '@/services/authService'
@@ -77,7 +77,7 @@ export function useCheckoutSession(options: UseCheckoutSessionOptions = {}) {
         userEmail = bestAuthUser.email
         userId = bestAuthUser.id
       } else {
-        const user = authService.getUser()
+        const user = authService.getCurrentUser()
         if (!user) {
           throw new Error('Please sign in to continue')
         }
