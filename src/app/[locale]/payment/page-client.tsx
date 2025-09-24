@@ -478,14 +478,7 @@ export default function PaymentPageClient({
                   isClickable ? 'cursor-pointer hover:shadow-2xl hover:scale-[1.02]' : 'cursor-not-allowed opacity-75'
                 } ${
                   isSelected ? 'ring-2 ring-orange-500 scale-105 shadow-2xl' : ''
-                } ${plan.popular ? 'shadow-xl' : ''} ${
-                  isCurrentPlan && !needsPaymentSetup && isPaidUser ? 'ring-2 ring-gray-400 bg-gray-50' : ''
-                } ${
-                  isCurrentPlan && !needsPaymentSetup && !isPaidUser ? 'ring-2 ring-green-500 bg-green-50' : ''
-                } ${
-                  // Highlight Pro+ for Pro users as upgrade option
-                  isUpgradeOption ? 'ring-2 ring-blue-500 hover:ring-blue-600' : ''
-                }`}
+                } ${plan.popular ? 'shadow-xl' : ''}`}
                 onClick={() => isClickable && setSelectedPlan(plan.id as 'pro' | 'pro_plus')}
               >
                 {plan.popular && (
@@ -514,14 +507,6 @@ export default function PaymentPageClient({
                   </div>
                 )}
                 
-                {/* Upgrade suggestion badge for Pro users viewing Pro+ */}
-                {currentSubscription?.tier === 'pro' && plan.id === 'pro_plus' && !isTrialUser && (
-                  <div className="absolute -top-4 right-4 z-10">
-                    <Badge className="bg-blue-600 text-white px-4 py-1">
-                      Recommended Upgrade
-                    </Badge>
-                  </div>
-                )}
                 
                 {isSelected && (
                   <div className="absolute -inset-0.5 bg-orange-500 rounded-lg opacity-20"></div>
@@ -537,13 +522,6 @@ export default function PaymentPageClient({
                 )}
 
                 <CardHeader className="text-center pb-4">
-                  {/* Debug info - remove after fixing */}
-                  {plan.id === 'pro' && isUpgrade && (
-                    <div className="text-xs text-red-500 mb-2">
-                      DEBUG: isCurrentPlan={String(isCurrentPlan)}, isPaidUser={String(isPaidUser)}, tier={currentSubscription?.tier}<br/>
-                      User: {authUser?.email}, Status: {currentSubscription?.status}
-                    </div>
-                  )}
                   <div className="flex justify-center mb-4">
                     <div className={`p-4 rounded-full ${
                       plan.popular 
@@ -603,13 +581,6 @@ export default function PaymentPageClient({
                 </CardContent>
 
                 <CardFooter className="flex flex-col gap-2">
-                  {/* Current Plan Status for paid users */}
-                  {isCurrentPlan && isPaidUser && (
-                    <Badge className="w-full py-2 text-sm bg-green-100 text-green-800 border-green-200">
-                      Current Plan
-                    </Badge>
-                  )}
-                  
                   <Button
                     className={`w-full transition-all duration-300 ${
                       isSelected
