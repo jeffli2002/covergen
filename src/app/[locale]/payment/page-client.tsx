@@ -646,8 +646,12 @@ export default function PaymentPageClient({
                           if (currentSubscription?.tier === 'free') {
                             return 'Upgrade Now'
                           }
+                          // For Pro users viewing Pro plan in upgrade scenario
+                          if (isUpgrade && currentSubscription?.tier === 'pro' && plan.id === 'pro') {
+                            return 'Current Plan'
+                          }
                           // Default
-                          return 'Get Started'
+                          return 'Upgrade Now'
                         })()}
                       </>
                     )}
