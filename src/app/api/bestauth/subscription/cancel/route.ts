@@ -64,6 +64,11 @@ export async function POST(request: NextRequest) {
         if (!cancelResult.success) {
           throw new Error(cancelResult.error || 'Failed to cancel with Creem')
         }
+        
+        // If already cancelled on Creem side, just update our database
+        if (cancelResult.alreadyCancelled) {
+          console.log('[Cancel] Subscription already cancelled on Creem, updating local database')
+        }
       } catch (creemError: any) {
         console.error('[Cancel] Creem cancellation failed:', {
           error: creemError.message,
@@ -122,7 +127,7 @@ export async function DELETE(request: NextRequest) {
     }
     
     // Check if subscription is scheduled for cancellation
-    if (subscription.status !== 'cancelled') {
+    if (!subscription.cancel_at_period_end) {
       return NextResponse.json({
         success: false,
         message: 'Subscription is not scheduled for cancellation',

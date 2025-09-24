@@ -594,6 +594,16 @@ class CreemPaymentService {
         fullError: error
       })
       
+      // Check if subscription is already cancelled
+      if (error.message?.includes('Subscription already canceled') || 
+          error.response?.data?.message?.includes('Subscription already canceled')) {
+        console.log('[Creem] Subscription was already cancelled on Creem side, treating as success')
+        return {
+          success: true,
+          alreadyCancelled: true
+        }
+      }
+      
       // Check if it's a specific Creem API error
       if (error.response?.data?.error) {
         return {

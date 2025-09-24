@@ -264,11 +264,18 @@ export class BestAuthSubscriptionService {
         throw new Error('Subscription not found')
       }
       
-      return await db.subscriptions.update(userId, {
-        status: cancelAtPeriodEnd ? 'active' : 'cancelled',
+      // If cancelling at period end, keep status as active but set the flag
+      // If cancelling immediately, set status to cancelled
+      const updateData: any = {
         cancelAtPeriodEnd,
         cancelledAt: new Date()
-      })
+      }
+      
+      if (!cancelAtPeriodEnd) {
+        updateData.status = 'cancelled'
+      }
+      
+      return await db.subscriptions.update(userId, updateData)
     } catch (error) {
       console.error('Error cancelling subscription:', error)
       throw error
