@@ -56,12 +56,21 @@ export default function PlatformShowcaseOptimized({
     }
   }
 
-  const getAspectRatio = () => {
+  // Get image dimensions for display
+  const getImageDimensions = () => {
     const { width, height } = current.targetDimensions
-    if (width === 1280 && height === 720) return 'aspect-[16/9]'
-    if (width === 1080 && height === 1920) return 'aspect-[9/16] max-w-sm' // Smaller for TikTok vertical
-    if (width === 1080 && height === 1080) return 'aspect-square'
-    return 'aspect-video'
+    // Scale down very large images while maintaining aspect ratio
+    const maxWidth = 800
+    const aspectRatio = width / height
+    
+    if (width > maxWidth) {
+      return {
+        width: maxWidth,
+        height: Math.round(maxWidth / aspectRatio)
+      }
+    }
+    
+    return { width, height }
   }
 
   // Get optimized image path
@@ -116,14 +125,15 @@ export default function PlatformShowcaseOptimized({
                 : 'grid-cols-1 lg:grid-cols-2 max-w-6xl mx-auto' // Horizontal/square images
             }`}>
               {/* Original Image */}
-              <div>
-                <div className={`relative ${getAspectRatio()} bg-gray-100 rounded-xl overflow-hidden`}>
+              <div className="flex justify-center items-center">
+                <div className="relative bg-gray-100 rounded-xl overflow-hidden w-full">
                   <Image
                     src={getImageSrc(current)}
                     alt={`Original photo for ${platform} - ${current.title}`}
-                    fill
+                    width={800}
+                    height={600}
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 40vw"
-                    className="object-cover"
+                    className="w-full h-auto object-contain"
                     priority={currentIndex === 0}
                     quality={85}
                     onLoad={() => handleImageLoad(current.originalImage)}
@@ -133,7 +143,7 @@ export default function PlatformShowcaseOptimized({
                   {!imagesLoaded[current.originalImage] && (
                     <div className="absolute inset-0 bg-gray-200 animate-pulse" />
                   )}
-                  <div className="absolute inset-0 bg-black/20" />
+                  {/* Remove overlay on original image for clarity */}
                   <div className="absolute top-4 left-4 flex items-center px-3 py-1.5 bg-gray-900 text-white rounded-full text-sm font-medium">
                     <Camera className="w-4 h-4 mr-2" />
                     Original Photo (Resized)
@@ -142,14 +152,15 @@ export default function PlatformShowcaseOptimized({
               </div>
 
               {/* AI Enhanced Version */}
-              <div>
-                <div className={`relative ${getAspectRatio()} bg-gray-100 rounded-xl overflow-hidden`}>
+              <div className="flex justify-center items-center">
+                <div className="relative bg-gray-100 rounded-xl overflow-hidden w-full">
                   <Image
                     src={current.enhancedImage || getImageSrc(current)}
                     alt={`AI enhanced ${platform} content - ${current.title}`}
-                    fill
+                    width={getImageDimensions().width}
+                    height={getImageDimensions().height}
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 40vw"
-                    className={`object-cover ${!current.enhancedImage ? 'brightness-110 contrast-125 saturate-150' : ''}`}
+                    className={`w-full h-auto ${!current.enhancedImage ? 'brightness-110 contrast-125 saturate-150' : ''}`}
                     quality={85}
                     onLoad={() => {
                       handleImageLoad(current.originalImage)
