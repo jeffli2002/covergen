@@ -421,7 +421,7 @@ export default function PaymentPageClient({
             const isClickable = !loading && (
               (!isCurrentPlan && !isPaidUser) || // Free users can click any plan
               (isCurrentPlan && needsPaymentSetup) || // Trial users can click to add payment
-              isUpgradeTarget || // Upgrade target is always clickable
+              (isUpgradeTarget && !isCurrentPlan) || // Upgrade target is clickable only if not current plan
               isUpgradeOption || // Pro users can upgrade to Pro+
               (!isCurrentPlan && isPaidUser) // Paid users can click different plans (upgrades)
             )
