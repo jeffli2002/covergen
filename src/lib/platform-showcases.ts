@@ -74,5 +74,15 @@ export const platformShowcases = {
       optimizedImage: "/platform-examples/linkedin/original-2.webp",
       targetDimensions: { width: 1584, height: 396, label: "1584×396 (4:1)" }
     }
+  ],
+
+  rednote: [
+    {
+      title: "Life Aesthetic Notes 🌸",
+      originalImage: "/platform-examples/rednote/original1.jpg",
+      optimizedImage: "/platform-examples/rednote/original1.jpg",
+      enhancedImage: "/platform-examples/rednote/enhangcedImage1.png",
+      targetDimensions: { width: 1080, height: 1440, label: "1080×1440 (3:4)" }
+    }
   ]
 }
