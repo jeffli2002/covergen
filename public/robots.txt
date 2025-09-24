@@ -1,5 +1,5 @@
 # robots.txt for CoverGen Pro
-# Last updated: 2025-09-06
+# Last updated: 2025-01-28
 # AI-powered cover and thumbnail generator for content creators
 
 # Default - Allow all crawlers with content prioritization
@@ -17,6 +17,8 @@ Allow: /en/help
 Allow: /en/support
 Allow: /en/feedback
 Allow: /en/status
+Allow: /en/payment
+Allow: /en/account
 
 # Explicitly allow popular platform pages (high-priority SEO targets)
 Allow: /en/platforms/youtube
@@ -49,10 +51,19 @@ Allow: /ar/*
 # Block access to API routes
 Disallow: /api/
 
+# Block access to test and debug pages
+Disallow: /*/test-*
+Disallow: /*/oauth-*
+Disallow: /*/debug-*
+Disallow: /*/check-*
+Disallow: /*/clear-*
+Disallow: /*/session-*
+Disallow: /*/auth-*
+Disallow: /*/admin-*
+
 # Block access to user dashboard and editor pages (require login)
 Disallow: /dashboard/
 Disallow: /editor/
-Disallow: /account/
 Disallow: /settings/
 Disallow: /admin/
 
@@ -74,6 +85,7 @@ Disallow: /mobile/
 
 # Allow specific important resources
 Allow: /images/
+Allow: /platform-examples/
 Allow: /favicon.ico
 Allow: /og-image.png
 Allow: /twitter-image.png

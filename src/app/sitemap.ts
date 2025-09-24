@@ -133,6 +133,42 @@ export default function sitemap(): MetadataRoute.Sitemap {
         languages: generateLanguageAlternates('/refund'),
       },
     },
+    {
+      url: `${baseUrl}/en/account`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly' as const,
+      priority: 0.5,
+      alternates: {
+        languages: generateLanguageAlternates('/account'),
+      },
+    },
+    {
+      url: `${baseUrl}/en/payment`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+      alternates: {
+        languages: generateLanguageAlternates('/payment'),
+      },
+    },
+    {
+      url: `${baseUrl}/en/tools`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+      alternates: {
+        languages: generateLanguageAlternates('/tools'),
+      },
+    },
+    {
+      url: `${baseUrl}/en/platforms`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+      alternates: {
+        languages: generateLanguageAlternates('/platforms'),
+      },
+    },
   ]
   
   // Platform-specific pages with proper priorities and keywords focus
@@ -162,7 +198,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Tool-specific pages with SEO focus on low-KD keywords
   const tools = [
     { name: 'anime-poster-maker', priority: 0.8 },
-    { name: 'bilibili-video-cover', priority: 0.8 },
     { name: 'spotify-playlist-cover', priority: 0.85 },
     { name: 'facebook-event-cover', priority: 0.8 },
     { name: 'social-media-poster', priority: 0.85 },
