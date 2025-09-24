@@ -447,6 +447,11 @@ export default function PaymentPageClient({
               willShowCurrentPlan: isCurrentPlan && isPaidUser
             })
             
+            // Temporary debug info directly on the page
+            if (plan.id === 'pro' && isUpgrade) {
+              console.warn(`DEBUG Pro Plan: isCurrentPlan=${isCurrentPlan}, isPaidUser=${isPaidUser}, tier=${currentSubscription?.tier}`)
+            }
+            
             return (
               <Card 
                 key={plan.id}
@@ -513,6 +518,12 @@ export default function PaymentPageClient({
                 )}
 
                 <CardHeader className="text-center pb-4">
+                  {/* Debug info - remove after fixing */}
+                  {plan.id === 'pro' && isUpgrade && (
+                    <div className="text-xs text-red-500 mb-2">
+                      DEBUG: isCurrentPlan={String(isCurrentPlan)}, isPaidUser={String(isPaidUser)}, tier={currentSubscription?.tier}
+                    </div>
+                  )}
                   <div className="flex justify-center mb-4">
                     <div className={`p-4 rounded-full ${
                       plan.popular 
