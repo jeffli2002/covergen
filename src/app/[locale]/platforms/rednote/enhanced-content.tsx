@@ -470,8 +470,8 @@ export const RednoteEnhancedContent = () => {
               <div className="bg-gray-100 rounded-xl p-4">
                 <h5 className="font-semibold mb-2">Engagement Metrics</h5>
                 <ul className="text-sm space-y-1">
-                  <li>• Save rate (>5% excellent)</li>
-                  <li>• Share rate (>2% viral potential)</li>
+                  <li>• Save rate (&gt;5% excellent)</li>
+                  <li>• Share rate (&gt;2% viral potential)</li>
                   <li>• Comment quality score</li>
                   <li>• Follow conversion rate</li>
                 </ul>
