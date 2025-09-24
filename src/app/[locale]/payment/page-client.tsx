@@ -402,13 +402,13 @@ export default function PaymentPageClient({
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
           {plans.map((plan) => {
             const Icon = plan.icon
-            const isCurrentPlan = currentSubscription?.tier === plan.id
+            const isCurrentPlan = currentSubscription?.tier === plan.id || currentSubscription?.plan === plan.id
             const needsPaymentSetup = isTrialUser && !currentSubscription?.stripe_subscription_id
             const isSelected = selectedPlan === plan.id
             
             // Allow trial users to click their current plan to add payment method
             // Also prevent paid users from selecting their current plan (unless upgrading)
-            const isPaidUser = currentSubscription && !isTrialUser && currentSubscription.tier !== 'free'
+            const isPaidUser = currentSubscription && !isTrialUser && currentSubscription.tier !== 'free' && currentSubscription.tier !== undefined
             const isUpgradeTarget = isUpgrade && initialPlan === plan.id
             
             // Check if this is an upgrade scenario (Pro user viewing Pro+ plan)
@@ -433,13 +433,18 @@ export default function PaymentPageClient({
               needsPaymentSetup,
               isClickable,
               currentSubscriptionTier: currentSubscription?.tier,
+              currentSubscriptionPlan: currentSubscription?.plan,
               currentSubscriptionStatus: currentSubscription?.status,
               planId: plan.id,
               tierMatch: currentSubscription?.tier === plan.id,
+              planMatch: currentSubscription?.plan === plan.id,
+              subscription: currentSubscription,
               selectedPlan,
               isSelected,
               loading,
-              disabled: !isClickable
+              disabled: !isClickable,
+              isUpgrade,
+              willShowCurrentPlan: isCurrentPlan && isPaidUser
             })
             
             return (
