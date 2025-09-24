@@ -33,6 +33,7 @@ interface FeedbackData {
   rating: number
   feedback?: string
   email?: string
+  name?: string
   timestamp: string
 }
 
@@ -100,9 +101,11 @@ export async function POST(request: NextRequest) {
     const feedbackData = {
       user_id: userId,
       email: data.email?.trim() || null,
+      name: data.name?.trim() || null, // Optional name field from forms
       message: data.feedback?.trim() || `Rating: ${data.rating}/5 for ${data.context}`,
       type: feedbackType,
       rating: data.rating,
+      context: data.context || 'general', // Track feedback source context
       page_url: request.headers.get('referer') || null,
       user_agent: request.headers.get('user-agent') || null,
     }
