@@ -124,15 +124,15 @@ export class BestAuthPaymentService {
     }
   }
 
-  async upgradeSubscription(newPlanId: PlanId) {
+  async upgradeSubscription(newPlanId: PlanId, subscriptionId?: string) {
     try {
-      const response = await fetch('/api/payment/upgrade-subscription', {
+      const response = await fetch('/api/bestauth/payment/upgrade-subscription', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include', // Include cookies for BestAuth
-        body: JSON.stringify({ newPlanId })
+        body: JSON.stringify({ newPlanId, subscriptionId })
       })
 
       if (!response.ok) {
