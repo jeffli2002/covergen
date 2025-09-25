@@ -14,6 +14,7 @@ import { platformIcons, platformGuidelines, platformEnhancements, generatePlatfo
 import UpgradePrompt from '@/components/auth/UpgradePrompt'
 import authService from '@/services/authService'
 import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
+import { usePathname } from 'next/navigation'
 
 interface DailyLimitStatus {
   daily_count: number
@@ -37,6 +38,9 @@ export default function GenerationForm() {
   
   // Get subscription configuration
   const config = getClientSubscriptionConfig()
+  
+  const pathname = usePathname()
+  const locale = pathname.split('/')[1] || 'en'
   
   const { user, addTask } = useAppStore()
 
@@ -471,7 +475,7 @@ export default function GenerationForm() {
           onClose={() => setShowUpgradeModal(false)}
           onUpgrade={() => {
             setShowUpgradeModal(false)
-            window.location.href = '/pricing'
+            window.location.href = `/${locale}/pricing`
           }}
           dailyCount={dailyLimitStatus.daily_count}
           dailyLimit={dailyLimitStatus.daily_limit}

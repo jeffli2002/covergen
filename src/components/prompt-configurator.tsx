@@ -18,6 +18,7 @@ import {
   FileText,
   Crown
 } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 import { platformSizes, type Platform } from '@/lib/utils'
 import { platformIcons, platformGuidelines, platformEnhancements, generatePlatformPrompt } from '@/lib/platform-configs'
 
@@ -50,6 +51,9 @@ export default function PromptConfigurator({
   onGenerate,
   error
 }: PromptConfiguratorProps) {
+  const pathname = usePathname()
+  const locale = pathname.split('/')[1] || 'en'
+  
   const handleCopyPrompt = () => {
     let textToCopy
     if (platform !== 'none') {
@@ -234,7 +238,7 @@ export default function PromptConfigurator({
                   <span>{error}</span>
                   {(error.includes('upgrade to Pro plan') || error.includes('limit reached')) && (
                     <a 
-                      href="/pricing" 
+                      href={`/${locale}/pricing`} 
                       className="inline-flex items-center gap-1 text-white bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 px-3 py-1.5 rounded-md font-semibold transition-all transform hover:scale-105 shadow-lg"
                     >
                       <Crown className="w-4 h-4" />

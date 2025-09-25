@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Sparkles, Zap, Shield, Check } from 'lucide-react'
 import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
+import { usePathname } from 'next/navigation'
 
 interface UpgradePromptProps {
   onClose?: () => void
@@ -23,6 +24,10 @@ export default function UpgradePrompt({
 }: UpgradePromptProps) {
   // Get subscription configuration
   const config = getClientSubscriptionConfig()
+  
+  // Get current locale from pathname
+  const pathname = usePathname()
+  const locale = pathname.split('/')[1] || 'en' // Extract locale from path
   
   const features = [
     { icon: Zap, text: 'Unlimited daily generations' },
@@ -86,7 +91,7 @@ export default function UpgradePrompt({
           <div className="space-y-3">
             <Button 
               className="w-full bg-purple-600 hover:bg-purple-700"
-              onClick={onUpgrade || (() => window.location.href = '/pricing')}
+              onClick={onUpgrade || (() => window.location.href = `/${locale}/pricing`)}
             >
               Upgrade to Pro
             </Button>

@@ -5,6 +5,7 @@ import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 import { Zap, Info } from 'lucide-react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { FREE_TIER_LIMITS } from '@/lib/rate-limit'
 import {
   Tooltip,
@@ -27,6 +28,8 @@ export function UsageIndicator({
   isAnonymous = true,
   className = '',
 }: UsageIndicatorProps) {
+  const pathname = usePathname()
+  const locale = pathname.split('/')[1] || 'en'
   const percentage = (usedCovers / totalCovers) * 100
   const remaining = totalCovers - usedCovers
   
@@ -91,7 +94,7 @@ export function UsageIndicator({
         
         {percentage >= 100 && (
           <div className="mt-3">
-            <Link href="/pricing" className="w-full">
+            <Link href={`/${locale}/pricing`} className="w-full">
               <Button 
                 size="sm"
                 className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
@@ -131,7 +134,7 @@ export function CompactUsageIndicator({
         {remaining > 0 ? `${remaining} free covers left` : 'Free limit reached'}
       </span>
       {percentage >= 100 && (
-        <Link href="/pricing">
+        <Link href={`/${locale}/pricing`}>
           <Button size="sm" variant="outline">
             <Zap className="h-3 w-3" />
           </Button>

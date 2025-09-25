@@ -15,6 +15,7 @@ import {
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import ImagePreviewModal from './image-preview-modal'
 import { platformSizes, type Platform } from '@/lib/utils'
 import { preprocessImageForPlatform } from '@/lib/image-resizer'
@@ -38,6 +39,9 @@ export default function ModeSelector({
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [preprocessedImages, setPreprocessedImages] = useState<string[]>([])
   const [isPreprocessing, setIsPreprocessing] = useState(false)
+  
+  const pathname = usePathname()
+  const locale = pathname.split('/')[1] || 'en'
 
   const preprocessImages = useCallback(async () => {
     if (!platform || platform === 'none' || referenceImages.length === 0) {
@@ -248,7 +252,7 @@ export default function ModeSelector({
               <span className="text-sm text-gray-900 font-medium">Batch Processing</span>
               <span className="px-2 py-0.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs font-bold rounded">PRO</span>
             </div>
-            <Link href="/pricing">
+            <Link href={`/${locale}/pricing`}>
               <Button
                 size="sm"
                 variant="ghost"

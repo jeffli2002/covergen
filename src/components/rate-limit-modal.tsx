@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { AlertTriangle, Zap, Crown } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { usePathname } from 'next/navigation'
 import { FREE_TIER_LIMITS } from '@/lib/rate-limit'
 
 interface RateLimitModalProps {
@@ -29,6 +30,8 @@ export function RateLimitModal({
   isSignedIn = false 
 }: RateLimitModalProps) {
   const { user } = useAuth()
+  const pathname = usePathname()
+  const locale = pathname.split('/')[1] || 'en'
   
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -79,7 +82,7 @@ export function RateLimitModal({
             </Link>
           )}
           
-          <Link href="/pricing" className="w-full">
+          <Link href={`/${locale}/pricing`} className="w-full">
             <Button 
               className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
               variant="default"
@@ -140,7 +143,7 @@ export function PlatformRestrictedModal({
         </DialogHeader>
         
         <DialogFooter className="flex-col sm:flex-col space-y-2">
-          <Link href="/pricing" className="w-full">
+          <Link href={`/${locale}/pricing`} className="w-full">
             <Button 
               className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
               variant="default"

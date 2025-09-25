@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { 
   Download, 
   Loader2,
@@ -33,6 +34,9 @@ export default function OutputGallery({
 }: OutputGalleryProps) {
   const [previewImage, setPreviewImage] = useState<string | null>(null)
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+  
+  const pathname = usePathname()
+  const locale = pathname.split('/')[1] || 'en'
 
   const openImagePreview = (imageUrl: string) => {
     setPreviewImage(imageUrl)
@@ -162,7 +166,7 @@ export default function OutputGallery({
               <span className="text-sm text-gray-900 font-medium">Advanced Features</span>
               <span className="px-2 py-0.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs font-bold rounded">PRO</span>
             </div>
-            <Link href="/pricing">
+            <Link href={`/${locale}/pricing`}>
               <Button
                 size="sm"
                 variant="ghost"
