@@ -37,7 +37,7 @@ export default function ImageGenerator() {
   }
   
   const { user } = useAuth()
-  const { canGenerate, getRemainingGenerations, trackUsage, freeTierLimit } = useFreeTier()
+  const { canGenerate, getRemainingGenerations, trackUsage, freeTierLimit, usageToday } = useFreeTier()
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -67,11 +67,9 @@ export default function ImageGenerator() {
     
     // Check free tier limits
     if (!canGenerate()) {
-      if (!user) {
-        setShowAuthModal(true)
-      } else {
-        setShowUpgradeModal(true)
-      }
+      // Always show upgrade modal when hitting usage limit
+      // It will show "Try Again Tomorrow" option for both logged in and guest users
+      setShowUpgradeModal(true)
       return
     }
     
@@ -334,10 +332,9 @@ export default function ImageGenerator() {
       {showUpgradeModal && (
         <UpgradePrompt 
           onClose={() => setShowUpgradeModal(false)}
-          onUpgrade={() => {
-            setShowUpgradeModal(false)
-            setShowAuthModal(true)
-          }}
+          dailyCount={usageToday}
+          dailyLimit={freeTierLimit}
+          // Don't pass onUpgrade - let UpgradePrompt handle the pricing redirect
         />
       )}
     </div>
