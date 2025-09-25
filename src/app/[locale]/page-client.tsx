@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 import ImageGenerator from '@/components/image-generator'
 import PricingSection from '@/components/pricing-section'
 import FeedbackModal from '@/components/feedback-modal'
+import AIShowcase from '@/components/ai-showcase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useAppStore } from '@/lib/store'
@@ -292,6 +293,9 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
             <ImageGenerator />
           </div>
         </section>
+
+        {/* AI Showcase Section */}
+        <AIShowcase />
 
         {/* Technology Section - Nano Banana */}
         <section className="py-16 bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50">
