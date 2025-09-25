@@ -115,6 +115,8 @@ export function PlatformRestrictedModal({
   platformName,
 }: PlatformRestrictedModalProps) {
   const { user } = useAuth()
+  const pathname = usePathname()
+  const locale = pathname.split('/')[1] || 'en'
   
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
