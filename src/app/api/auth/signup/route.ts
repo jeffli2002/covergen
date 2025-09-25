@@ -17,8 +17,20 @@ export async function POST(request: NextRequest) {
     // Validate input
     const { email, password, name } = signUpSchema.parse(body)
     
-    // Sign up user
-    const result = await signUp({ email, password, name })
+    // Get session ID from cookie
+    let sessionId: string | undefined
+    const cookieHeader = request.headers.get('cookie')
+    if (cookieHeader) {
+      const cookies = cookieHeader.split(';')
+      const sessionCookie = cookies.find(c => c.trim().startsWith('covergen_session_id='))
+      if (sessionCookie) {
+        sessionId = sessionCookie.split('=')[1]
+        console.log('[SignUp API] Found session ID:', sessionId)
+      }
+    }
+    
+    // Sign up user with session ID
+    const result = await signUp({ email, password, name, sessionId })
     
     if (!result.success) {
       return NextResponse.json(

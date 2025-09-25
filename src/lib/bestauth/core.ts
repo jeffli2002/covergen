@@ -50,7 +50,8 @@ export async function signUp({
   email,
   password,
   name,
-}: SignUpData): Promise<AuthResult<AuthSession>> {
+  sessionId,
+}: SignUpData & { sessionId?: string }): Promise<AuthResult<AuthSession>> {
   try {
     // Check if user already exists
     const existingUser = await db.users.findByEmail(email)
@@ -114,6 +115,20 @@ export async function signUp({
     } catch (emailError) {
       // Log error but don't fail signup
       console.error('[BestAuth] Failed to send verification email:', emailError)
+    }
+
+    // Merge session usage if sessionId is provided
+    if (sessionId) {
+      try {
+        console.log('[BestAuth] Merging session usage for new user:', user.id, 'session:', sessionId)
+        const merged = await db.usage.mergeSessionUsageToUser(user.id, sessionId)
+        if (merged) {
+          console.log('[BestAuth] Successfully merged session usage')
+        }
+      } catch (mergeError) {
+        console.error('[BestAuth] Failed to merge session usage:', mergeError)
+        // Don't fail signup if merge fails
+      }
     }
 
     // Create session

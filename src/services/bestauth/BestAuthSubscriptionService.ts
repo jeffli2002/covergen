@@ -384,6 +384,19 @@ export class BestAuthSubscriptionService {
   }
 
   /**
+   * Merge session usage to user on signup
+   */
+  async mergeSessionUsageToUser(userId: string, sessionId: string): Promise<boolean> {
+    try {
+      console.log('[BestAuthSubscriptionService.mergeSessionUsageToUser] Merging session usage:', { userId, sessionId })
+      return await db.usage.mergeSessionUsageToUser(userId, sessionId)
+    } catch (error) {
+      console.error('Error merging session usage:', error)
+      return false
+    }
+  }
+
+  /**
    * Check subscription limits based on tier
    */
   getSubscriptionLimits(tier: 'free' | 'pro' | 'pro_plus', isTrialing: boolean = false) {

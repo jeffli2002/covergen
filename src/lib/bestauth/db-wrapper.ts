@@ -170,6 +170,15 @@ export const db = {
         console.error('BestAuth: Failed to get monthly usage:', error)
         return 0
       }
+    },
+
+    async mergeSessionUsageToUser(userId: string, sessionId: string): Promise<boolean> {
+      try {
+        return await bestAuthDb.usage.mergeSessionUsageToUser(userId, sessionId)
+      } catch (error) {
+        console.error('BestAuth: Failed to merge session usage:', error)
+        return false
+      }
     }
   },
 

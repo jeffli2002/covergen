@@ -991,6 +991,30 @@ export const db = {
         return 0
       }
     },
+
+    async mergeSessionUsageToUser(userId: string, sessionId: string): Promise<boolean> {
+      try {
+        console.log('[DB] Merging session usage to user:', { userId, sessionId })
+        
+        // Call the SQL function to merge usage
+        const { error } = await getDb()
+          .rpc('merge_session_usage_to_user', {
+            p_user_id: userId,
+            p_session_id: sessionId
+          })
+        
+        if (error) {
+          console.error('[DB] Error merging session usage:', error)
+          return false
+        }
+        
+        console.log('[DB] Successfully merged session usage to user')
+        return true
+      } catch (err) {
+        console.error('Error merging session usage:', err)
+        return false
+      }
+    },
   },
 
   // User profile operations

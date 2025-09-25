@@ -47,7 +47,20 @@ function BestAuthProvider({ children }: { children: React.ReactNode }) {
     user: bestAuth.user,
     loading: bestAuth.loading,
     signUp: async (email: string, password: string, metadata?: any) => {
-      const result = await bestAuth.signUp({ email, password, ...metadata })
+      // Get session ID from cookie before signup
+      let sessionId: string | undefined
+      try {
+        const cookies = document.cookie.split(';')
+        const sessionCookie = cookies.find(c => c.trim().startsWith('covergen_session_id='))
+        if (sessionCookie) {
+          sessionId = sessionCookie.split('=')[1]
+          console.log('[AuthContext] Found session ID for signup:', sessionId)
+        }
+      } catch (err) {
+        console.error('[AuthContext] Failed to get session ID:', err)
+      }
+
+      const result = await bestAuth.signUp({ email, password, sessionId, ...metadata })
       
       // Create default subscription for new users
       if (result.success && bestAuth.user && subscriptionService) {
