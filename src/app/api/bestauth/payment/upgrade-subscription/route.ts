@@ -51,10 +51,11 @@ async function handler(req: AuthenticatedRequest) {
     }
 
     // Upgrade subscription via Creem
-    const result = await creemService.updateSubscription(
-      subscriptionId,
-      newPlanId === 'pro' ? process.env.CREEM_PRO_PLAN_ID! : process.env.CREEM_PRO_PLUS_PLAN_ID!
-    )
+    const newProductId = newPlanId === 'pro' ? process.env.CREEM_PRO_PLAN_ID! : process.env.CREEM_PRO_PLUS_PLAN_ID!
+    const result = await creemService.updateSubscription(subscriptionId, {
+      items: [{ productId: newProductId, quantity: 1 }],
+      updateBehavior: 'proration-charge-immediately'
+    })
 
     if (!result.success) {
       return NextResponse.json(
@@ -72,7 +73,7 @@ async function handler(req: AuthenticatedRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Subscription upgraded to ${SUBSCRIPTION_PLANS[newPlanId].name}`,
+      message: `Subscription upgraded to ${SUBSCRIPTION_PLANS[newPlanId as keyof typeof SUBSCRIPTION_PLANS].name}`,
       subscription: result.subscription
     })
   } catch (error: any) {
