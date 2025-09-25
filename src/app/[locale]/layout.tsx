@@ -23,7 +23,7 @@ export default async function LocaleLayout({
   return (
     <ErrorBoundary>
       <Providers>
-        <div className="min-h-screen bg-background flex flex-col">
+        <div className="min-h-screen flex flex-col">
           {/* Auth Modal Handler */}
           <AuthModalHandler />
           

@@ -5,11 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Search, HelpCircle, MessageCircle, BookOpen, Video, Image, Settings, Zap } from 'lucide-react'
-import { getClientSubscriptionConfig, getTrialPeriodFullText } from '@/lib/subscription-config-client'
+import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
 
 // Get configuration for use in the FAQ content
 const config = getClientSubscriptionConfig()
-const trialFullText = getTrialPeriodFullText()
 
 const faqCategories = [
   {
@@ -84,9 +83,7 @@ const faqCategories = [
       },
       {
         question: 'How do I upgrade to Pro?',
-        answer: trialFullText 
-          ? `Click the upgrade button in your dashboard or visit the pricing page to choose your plan. All plans include a ${trialFullText}.`
-          : 'Click the upgrade button in your dashboard or visit the pricing page to choose your plan.'
+        answer: 'Click the upgrade button in your dashboard or visit the pricing page to choose your plan.'
       },
       {
         question: 'Can I cancel my subscription?',

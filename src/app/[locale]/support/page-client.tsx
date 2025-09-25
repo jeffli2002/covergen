@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Mail, MessageSquare, FileQuestion, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Locale } from '@/lib/i18n/config'
-import { getClientSubscriptionConfig, getTrialPeriodFullText, isTrialEnabledClient } from '@/lib/subscription-config-client'
+import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
 
 interface SupportPageClientProps {
   locale: Locale
@@ -14,8 +14,6 @@ interface SupportPageClientProps {
 export default function SupportPageClient({ locale, translations: t }: SupportPageClientProps) {
   // Get configuration for dynamic values
   const config = getClientSubscriptionConfig()
-  const trialFullText = getTrialPeriodFullText()
-  const hasTrials = isTrialEnabledClient()
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-16">
@@ -90,14 +88,6 @@ export default function SupportPageClient({ locale, translations: t }: SupportPa
         <div className="bg-white rounded-xl shadow-sm p-8">
           <h2 className="text-2xl font-semibold mb-6">Frequently Asked Questions</h2>
           <div className="space-y-6">
-            {hasTrials && (
-              <div className="border-l-4 border-blue-500 pl-4">
-                <h4 className="font-semibold text-gray-900">How does the Pro/Pro+ trial work?</h4>
-                <p className="text-gray-600 mt-1">
-                  Pro and Pro+ plans include a {trialFullText}. During the trial, Pro users get {config.limits.pro.trial_total} covers total ({config.limits.pro.trial_daily}/day average) and Pro+ users get {config.limits.pro_plus.trial_total} covers total ({config.limits.pro_plus.trial_daily}/day average). Trial usage doesn't count against your first paid month.
-                </p>
-              </div>
-            )}
             <div className="border-l-4 border-blue-500 pl-4">
               <h4 className="font-semibold text-gray-900">What happens when I reach my limit?</h4>
               <p className="text-gray-600 mt-1">
@@ -125,7 +115,7 @@ export default function SupportPageClient({ locale, translations: t }: SupportPa
             <div className="border-l-4 border-blue-500 pl-4">
               <h4 className="font-semibold text-gray-900">What's your refund policy?</h4>
               <p className="text-gray-600 mt-1">
-                All sales are final due to the digital nature of our service. {hasTrials && `Pro/Pro+ plans include a ${trialFullText} so you can evaluate the service before committing.`}
+                All sales are final due to the digital nature of our service.
               </p>
             </div>
           </div>

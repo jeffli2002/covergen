@@ -60,17 +60,17 @@ export default function BlogPostPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
+    <div className="min-h-screen" style={{ backgroundColor: 'white' }}>
       <div className="container mx-auto px-4 py-8">
         <Link href="/en/blog">
-          <Button variant="ghost" className="mb-8">
+          <Button variant="outline" className="mb-8 border-gray-300 text-gray-700 hover:bg-gray-50">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Blog
           </Button>
         </Link>
 
         <article className="max-w-4xl mx-auto">
-          <div className="bg-white dark:bg-gray-700/50 backdrop-blur rounded-2xl shadow-xl overflow-hidden border border-gray-200 dark:border-gray-600">
+          <div className="bg-gray-50 rounded-2xl shadow-xl overflow-hidden border border-gray-200">
             {/* Header Image */}
             <div className="h-64 md:h-96 bg-gradient-to-br from-purple-500 to-pink-500 relative">
               <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
@@ -82,8 +82,8 @@ export default function BlogPostPage() {
 
             <div className="p-8 md:p-12">
               {/* Meta Information */}
-              <div className="flex flex-wrap items-center gap-4 mb-8 text-sm text-gray-600 dark:text-gray-300">
-                <span className="bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 px-3 py-1 rounded-full">
+              <div className="flex flex-wrap items-center gap-4 mb-8 text-sm text-gray-700">
+                <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-medium">
                   {post.category}
                 </span>
                 <span className="flex items-center gap-1">
@@ -111,10 +111,10 @@ export default function BlogPostPage() {
                     <User className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900 dark:text-white">
+                    <p className="font-medium text-gray-900">
                       {post.author.name}
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                    <p className="text-sm text-gray-700">
                       {post.author.title}
                     </p>
                   </div>
@@ -126,7 +126,7 @@ export default function BlogPostPage() {
                     className={`flex items-center gap-2 transition-colors ${
                       liked
                         ? 'text-red-500'
-                        : 'text-gray-500 hover:text-red-500 dark:text-gray-300 dark:hover:text-red-400'
+                        : 'text-gray-600 hover:text-red-500'
                     }`}
                   >
                     <Heart
@@ -161,7 +161,7 @@ export default function BlogPostPage() {
               </div>
 
               {/* Article Content */}
-              <div className="prose prose-lg dark:prose-invert max-w-none prose-headings:text-gray-900 dark:prose-headings:text-gray-100 prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-strong:text-gray-900 dark:prose-strong:text-gray-100 prose-a:text-purple-600 dark:prose-a:text-purple-400 prose-blockquote:text-gray-700 dark:prose-blockquote:text-gray-300">
+              <div className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-800 prose-strong:text-gray-900 prose-a:text-purple-700 hover:prose-a:text-purple-800 prose-blockquote:text-gray-800">
                 <div dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br/>').replace(/#{1,6}\s(.+)/g, '<h$1>$1</h$1>').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }} />
               </div>
 
@@ -170,7 +170,7 @@ export default function BlogPostPage() {
                 {post.tags.map(tag => (
                   <span
                     key={tag}
-                    className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-600/50 text-gray-700 dark:text-gray-200 rounded-full"
+                    className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full"
                   >
                     #{tag}
                   </span>
@@ -182,7 +182,7 @@ export default function BlogPostPage() {
           {/* Related Posts */}
           {relatedPosts.length > 0 && (
             <div className="mt-12">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
                 Related Posts
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -192,7 +192,7 @@ export default function BlogPostPage() {
                     href={`/en/blog/${relatedPost.slug}`}
                     className="group"
                   >
-                    <div className="bg-white dark:bg-gray-700/50 backdrop-blur rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-gray-200 dark:border-gray-600">
+                    <div className="bg-gray-50 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-gray-200">
                       <div className="h-32 bg-gradient-to-br from-purple-500 to-pink-500 relative">
                         <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center p-4">
                           <h3 className="text-white text-sm font-medium text-center line-clamp-2">
@@ -201,10 +201,10 @@ export default function BlogPostPage() {
                         </div>
                       </div>
                       <div className="p-4">
-                        <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+                        <p className="text-sm text-gray-700 line-clamp-2">
                           {relatedPost.excerpt}
                         </p>
-                        <div className="flex items-center gap-2 mt-2 text-xs text-gray-500 dark:text-gray-300">
+                        <div className="flex items-center gap-2 mt-2 text-xs text-gray-600">
                           <span>{relatedPost.readingTime}</span>
                           <span>•</span>
                           <span>{new Date(relatedPost.date).toLocaleDateString()}</span>
