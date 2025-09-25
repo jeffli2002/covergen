@@ -227,7 +227,7 @@ export function generateEnhancedSchema(type: 'platform' | 'tool', data: any) {
     '@type': 'Organization',
     name: 'CoverGen Pro',
     url: 'https://covergen.pro',
-    logo: 'https://covergen.pro/logo.png',
+    logo: 'https://covergen.pro/blueLogoTransparent.png',
     sameAs: [
       'https://twitter.com/covergenai',
       'https://www.facebook.com/covergenai',

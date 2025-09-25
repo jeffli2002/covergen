@@ -17,12 +17,7 @@ export default function Footer({ locale, translations: t }: FooterProps) {
           {/* Brand */}
           <div className="space-y-4 lg:col-span-2">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <h3 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                {t.common.appName}
-              </h3>
+              <img src="/blueLogoTransparent.png" alt="CoverGen Logo" className="h-12 w-auto" />
             </div>
             <p className="text-sm text-gray-600 leading-relaxed">
               {t.footer.madeWith} <Heart className="inline w-4 h-4 text-red-500 mx-1" /> {t.footer.by}

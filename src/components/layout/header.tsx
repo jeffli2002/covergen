@@ -243,12 +243,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
         <div className="container mx-auto px-4 flex h-16 items-center justify-between">
           {/* Logo */}
           <a href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              {t.common.appName}
-            </h1>
+            <img src="/blueLogoTransparent.png" alt="CoverGen Logo" className="h-14 w-auto" />
             <span className="text-sm text-gray-600 font-medium">
               Powered by Nano Banana*
             </span>

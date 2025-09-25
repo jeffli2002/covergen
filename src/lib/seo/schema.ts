@@ -10,7 +10,7 @@ export const organizationSchema: WithContext<Organization> = {
   url: 'https://covergen.pro',
   logo: {
     '@type': 'ImageObject',
-    url: 'https://covergen.pro/logo.png',
+    url: 'https://covergen.pro/blueLogoTransparent.png',
     width: '600',
     height: '600',
   },
@@ -378,7 +378,7 @@ export function generateLocalBusinessSchema(): WithContext<any> {
     '@type': 'LocalBusiness',
     '@id': 'https://covergen.pro/#localbusiness',
     name: 'CoverGen Pro Support',
-    image: 'https://covergen.pro/logo.png',
+    image: 'https://covergen.pro/blueLogoTransparent.png',
     url: 'https://covergen.pro',
     telephone: '+1-555-123-4567',
     email: 'support@covergen.pro',

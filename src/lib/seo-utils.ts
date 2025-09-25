@@ -96,7 +96,7 @@ export function generateStructuredData(type: string, data: any) {
           name: 'CoverGen AI',
           logo: {
             '@type': 'ImageObject',
-            url: `${SEO_CONSTANTS.siteUrl}/logo.png`
+            url: `${SEO_CONSTANTS.siteUrl}/blueLogoTransparent.png`
           }
         }
       }
