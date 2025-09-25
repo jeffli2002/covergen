@@ -350,9 +350,7 @@ describe('Creem Payment API Integration Tests', () => {
       });
 
       mockCreem.generateCustomerLinks.mockResolvedValue({
-        data: {
-          portalUrl: 'https://portal.creem.io/test'
-        }
+        customerPortalLink: 'https://portal.creem.io/test'
       });
 
       const request = createNextRequest({
@@ -373,10 +371,9 @@ describe('Creem Payment API Integration Tests', () => {
       });
 
       expect(mockCreem.generateCustomerLinks).toHaveBeenCalledWith({
-        customerId: 'cus_test_123',
         xApiKey: 'test_secret_key',
-        generateCustomerLinks: {
-          returnUrl: 'http://localhost:3000/account'
+        createCustomerPortalLinkRequestEntity: {
+          customerId: 'cus_test_123'
         }
       });
     });

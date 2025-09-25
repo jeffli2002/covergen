@@ -572,23 +572,25 @@ class CreemPaymentService {
       const creem = getCreemClient()
       const result = await creem.generateCustomerLinks({
         xApiKey: CREEM_API_KEY,
-        customerId: customerId
+        createCustomerPortalLinkRequestEntity: {
+          customerId: customerId
+        }
       })
 
       console.log('[Creem] Portal session result:', {
-        success: !!result?.data?.customerPortalLink,
-        hasUrl: !!result?.data?.customerPortalLink,
+        success: !!result?.customerPortalLink,
+        hasUrl: !!result?.customerPortalLink,
         customerId,
-        result: result?.data
+        result: result
       })
 
-      if (!result?.data?.customerPortalLink) {
+      if (!result?.customerPortalLink) {
         throw new Error('Failed to create customer portal session')
       }
 
       return {
         success: true,
-        url: result.data.customerPortalLink
+        url: result.customerPortalLink
       }
     } catch (error: any) {
       console.error('Creem portal session error:', error)
