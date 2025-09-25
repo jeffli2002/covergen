@@ -555,17 +555,40 @@ class CreemPaymentService {
         }
       }
       
-      // Server-side implementation - temporarily simplified
+      // Server-side implementation - use Creem SDK
       const CREEM_API_KEY = getCreemApiKey()
       if (!CREEM_API_KEY) {
         throw new Error('Creem API key not configured')
       }
 
-      // TODO: Fix Creem SDK integration for customer portal
-      // For now, return a placeholder URL
+      console.log('[Creem] Creating customer portal session:', {
+        customerId,
+        hasApiKey: !!CREEM_API_KEY,
+        apiKeyPrefix: CREEM_API_KEY.substring(0, 15) + '...',
+        testMode: getCreemTestMode()
+      })
+
+      // Generate customer links using Creem SDK
+      const creem = getCreemClient()
+      const result = await creem.generateCustomerLinks({
+        xApiKey: CREEM_API_KEY,
+        customerId: customerId
+      })
+
+      console.log('[Creem] Portal session result:', {
+        success: !!result?.data?.customerPortalLink,
+        hasUrl: !!result?.data?.customerPortalLink,
+        customerId,
+        result: result?.data
+      })
+
+      if (!result?.data?.customerPortalLink) {
+        throw new Error('Failed to create customer portal session')
+      }
+
       return {
         success: true,
-        url: `https://app.creem.io/customer/${customerId}?return_url=${encodeURIComponent(returnUrl)}`
+        url: result.data.customerPortalLink
       }
     } catch (error: any) {
       console.error('Creem portal session error:', error)
