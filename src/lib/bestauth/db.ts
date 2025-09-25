@@ -484,9 +484,14 @@ export const db = {
         .from('bestauth_subscriptions')
         .select('*')
         .eq('user_id', userId)
-        .single()
+        .maybeSingle() // Use maybeSingle to avoid error when no rows
       
-      if (error || !data) return null
+      if (error) {
+        console.error('[findByUserId] Error:', error)
+        return null
+      }
+      
+      if (!data) return null
       
       return data
     },
@@ -602,12 +607,20 @@ export const db = {
 
     async getStatus(userId: string): Promise<any | null> {
       try {
+        console.log('[db.getStatus] Starting getStatus for userId:', userId)
+        
         // Get subscription data directly from table instead of RPC
-        const { data, error } = await getDb()
+        const db = getDb()
+        if (!db) {
+          console.error('[db.getStatus] Failed to get database client')
+          throw new Error('Database connection not available')
+        }
+        
+        const { data, error } = await db
           .from('bestauth_subscriptions')
           .select('*')
           .eq('user_id', userId)
-          .single()
+          .maybeSingle() // Use maybeSingle instead of single to avoid error when no rows
         
         console.log('[db.getStatus] Raw subscription data:', {
           userId,
@@ -617,8 +630,13 @@ export const db = {
           status: data?.status
         })
         
-        if (error || !data) {
-          console.log('[db.getStatus] No subscription found or error occurred')
+        if (error) {
+          console.error('[db.getStatus] Database error:', error)
+          throw error
+        }
+        
+        if (!data) {
+          console.log('[db.getStatus] No subscription found for user')
           return null
         }
         
@@ -636,7 +654,7 @@ export const db = {
               .select('generation_count')
               .eq('user_id', userId)
               .eq('date', new Date().toISOString().split('T')[0])
-              .single()
+              .maybeSingle()
             
             if (!usageError && usageData) {
               usageToday = usageData.generation_count || 0

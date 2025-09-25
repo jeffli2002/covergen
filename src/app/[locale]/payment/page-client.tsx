@@ -10,6 +10,7 @@ import { Check, CreditCard, Crown, Home, Info, Loader2, Shield, Sparkles, UserCi
 import { useAppStore } from '@/lib/store'
 import { useBestAuth } from '@/hooks/useBestAuth'
 import { creemService, SUBSCRIPTION_PLANS, CREEM_TEST_CARDS } from '@/services/payment/creem'
+import { bestAuthPaymentService } from '@/services/payment/bestauth-payment'
 import { toast } from 'sonner'
 import CreemDebug from '@/components/debug/CreemDebug'
 import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
@@ -272,7 +273,7 @@ export default function PaymentPageClient({
         // Trial user without payment method needs to go through checkout
         console.log('[PaymentPage] Trial user needs to add payment method first')
         
-        const result = await creemService.createCheckoutSession({
+        const result = await bestAuthPaymentService.createCheckoutSession({
           userId: authUser.id,
           userEmail: authUser.email,
           planId,
@@ -291,7 +292,7 @@ export default function PaymentPageClient({
         // For new subscriptions, create checkout session
         console.log('[PaymentPage] Creating new checkout session...')
         
-        const result = await creemService.createCheckoutSession({
+        const result = await bestAuthPaymentService.createCheckoutSession({
           userId: authUser.id,
           userEmail: authUser.email,
           planId,

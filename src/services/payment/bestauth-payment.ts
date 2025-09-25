@@ -29,7 +29,7 @@ export class BestAuthPaymentService {
       // Client-side implementation - delegate to API route
       if (typeof window !== 'undefined') {
         const baseUrl = window.location.origin
-        const apiUrl = `${baseUrl}/api/payment/create-checkout`
+        const apiUrl = `${baseUrl}/api/bestauth/payment/create-checkout`
         
         console.log('[BestAuthPaymentService] Creating checkout session')
         
@@ -77,7 +77,7 @@ export class BestAuthPaymentService {
 
   async cancelSubscription(subscriptionId: string, cancelAtPeriodEnd: boolean = true) {
     try {
-      const response = await fetch('/api/payment/cancel-subscription', {
+      const response = await fetch('/api/bestauth/payment/cancel-subscription', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -149,7 +149,7 @@ export class BestAuthPaymentService {
 
   async resumeSubscription(subscriptionId: string) {
     try {
-      const response = await fetch('/api/payment/resume-subscription', {
+      const response = await fetch('/api/bestauth/payment/resume-subscription', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

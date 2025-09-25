@@ -154,10 +154,21 @@ export async function GET(request: NextRequest) {
     })
     
     return NextResponse.json(response)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Subscription status error:', error)
+    console.error('Error stack:', error?.stack)
+    
+    // Return more detailed error for debugging
     return NextResponse.json(
-      { error: 'Failed to get subscription status' },
+      { 
+        error: 'Failed to get subscription status',
+        details: process.env.NODE_ENV === 'development' ? {
+          message: error?.message || 'Unknown error',
+          code: error?.code,
+          hint: error?.hint,
+          details: error?.details
+        } : undefined
+      },
       { status: 500 }
     )
   }
