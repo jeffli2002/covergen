@@ -644,12 +644,17 @@ export const db = {
         let usageToday = 0
         try {
           // First, ensure the user exists in bestauth_users table
-          const userExists = await db.users.findById(userId)
+          const { data: userExists } = await db
+            .from('bestauth_users')
+            .select('id')
+            .eq('id', userId)
+            .maybeSingle()
+          
           if (!userExists) {
             console.warn(`User ${userId} not found in bestauth_users, usage tracking disabled`)
             usageToday = 0
           } else {
-            const { data: usageData, error: usageError } = await getDb()
+            const { data: usageData, error: usageError } = await db
               .from('bestauth_usage_tracking')
               .select('generation_count')
               .eq('user_id', userId)
