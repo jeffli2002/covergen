@@ -121,6 +121,8 @@ export function CompactUsageIndicator({
   totalCovers,
   className = '',
 }: CompactUsageIndicatorProps) {
+  const pathname = usePathname()
+  const locale = pathname.split('/')[1] || 'en'
   const percentage = (usedCovers / totalCovers) * 100
   const remaining = totalCovers - usedCovers
   
