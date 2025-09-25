@@ -56,8 +56,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       session: {
         userId,
-        userEmail,
-        provider: session.data.provider
+        userEmail
       },
       userCheck: {
         existsInDb: !!user,
