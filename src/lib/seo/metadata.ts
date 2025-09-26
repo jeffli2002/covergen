@@ -1,13 +1,15 @@
 import { Metadata } from 'next'
 import { organizationSchema, websiteSchema, softwareApplicationSchema } from './schema'
 import { getAllKeywords, getPlatformKeywords } from './platform-keywords'
+import { generateAlternateUrls, shouldNoIndex } from './canonical'
+import { type Locale } from '@/lib/i18n/config'
 
 interface GenerateMetadataParams {
   title: string
   description: string
   keywords?: string[]
   path: string
-  locale?: string
+  locale?: Locale
   images?: Array<{
     url: string
     width?: number
@@ -16,6 +18,7 @@ interface GenerateMetadataParams {
   }>
   noindex?: boolean
   schema?: any
+  searchParams?: Record<string, string | string[] | undefined>
 }
 
 const DEFAULT_KEYWORDS = getAllKeywords()
@@ -29,9 +32,15 @@ export function generateMetadata({
   images = [],
   noindex = false,
   schema,
+  searchParams,
 }: GenerateMetadataParams): Metadata {
   const baseUrl = 'https://covergen.pro'
-  const url = `${baseUrl}${locale !== 'en' ? `/${locale}` : ''}${path}`
+  
+  // Generate canonical and alternate URLs using centralized function
+  const { canonical, languages } = generateAlternateUrls(path, locale, searchParams)
+  
+  // Check if page should be noindex based on path
+  const shouldBeNoIndex = noindex || shouldNoIndex(path)
   
   const defaultImage = {
     url: 'https://covergen.pro/og-image.png',
@@ -51,19 +60,13 @@ export function generateMetadata({
     publisher: 'CoverGen AI',
     metadataBase: new URL(baseUrl),
     alternates: {
-      canonical: url,
-      languages: {
-        'en': `${baseUrl}${path}`,
-        'es': `${baseUrl}/es${path}`,
-        'pt-BR': `${baseUrl}/pt${path}`,
-        'zh-CN': `${baseUrl}/zh${path}`,
-        'ar': `${baseUrl}/ar${path}`,
-      },
+      canonical,
+      languages,
     },
     openGraph: {
       type: 'website',
       locale: locale === 'zh' ? 'zh_CN' : locale === 'pt' ? 'pt_BR' : locale,
-      url,
+      url: canonical,
       title,
       description,
       siteName: 'CoverGen AI',
@@ -78,13 +81,13 @@ export function generateMetadata({
       images: metaImages.map(img => img.url),
     },
     robots: {
-      index: !noindex,
-      follow: !noindex,
-      nocache: noindex,
+      index: !shouldBeNoIndex,
+      follow: !shouldBeNoIndex,
+      nocache: shouldBeNoIndex,
       googleBot: {
-        index: !noindex,
-        follow: !noindex,
-        noimageindex: noindex,
+        index: !shouldBeNoIndex,
+        follow: !shouldBeNoIndex,
+        noimageindex: shouldBeNoIndex,
         'max-video-preview': -1,
         'max-image-preview': 'large',
         'max-snippet': -1,
@@ -108,7 +111,11 @@ export function generateMetadata({
 }
 
 // Platform-specific metadata generators
-export function generatePlatformMetadata(platform: string, locale: string = 'en'): Metadata {
+export function generatePlatformMetadata(
+  platform: string, 
+  locale: Locale = 'en',
+  searchParams?: Record<string, string | string[] | undefined>
+): Metadata {
   const platformData: Record<string, { title: string; description: string; keywords: string[] }> = {
     youtube: {
       title: 'YouTube Thumbnail Maker - AI-Powered Thumbnail Generator | CoverGen AI',
@@ -145,10 +152,20 @@ export function generatePlatformMetadata(platform: string, locale: string = 'en'
       description: 'Create engaging Xiaohongshu (Little Red Book) covers with AI nano banana generation. Optimized for Chinese social media engagement.',
       keywords: ['Xiaohongshu cover maker', 'RED note cover', 'Little Red Book cover', 'Chinese social media cover'],
     },
+    rednote: {
+      title: 'RedNote Cover Maker - Little Red Book Cover Generator | CoverGen AI',
+      description: 'Create engaging RedNote (Xiaohongshu) covers with AI nano banana generation. Optimized for Chinese social media engagement.',
+      keywords: ['RedNote cover maker', 'Xiaohongshu cover', 'Little Red Book cover', 'Chinese social media cover'],
+    },
     wechat: {
       title: 'WeChat Moments Cover Designer - AI Cover Generator | CoverGen AI',
       description: 'Design beautiful WeChat Moments covers with AI-powered nano banana technology. Perfect for WeChat articles and moments.',
       keywords: ['WeChat cover maker', 'WeChat moments cover', 'WeChat article cover', 'Chinese social media design'],
+    },
+    bilibili: {
+      title: 'Bilibili Cover Maker - AI Video Cover Generator | CoverGen AI',
+      description: 'Create eye-catching Bilibili video covers with AI-powered generation. Optimized for Bilibili\'s platform requirements and audience.',
+      keywords: ['Bilibili cover maker', 'Bilibili thumbnail generator', 'Bilibili video cover', 'Chinese video platform cover'],
     },
   }
 
@@ -164,11 +181,88 @@ export function generatePlatformMetadata(platform: string, locale: string = 'en'
     keywords: data.keywords,
     path: `/platforms/${platform}`,
     locale,
+    searchParams,
     images: [{
       url: `https://covergen.pro/${platform}-cover-generator-og.jpg`,
       width: 1200,
       height: 630,
       alt: `${platform.charAt(0).toUpperCase() + platform.slice(1)} Cover Generator - CoverGen AI`,
+    }],
+  })
+}
+
+// Tool-specific metadata generator
+export function generateToolMetadata(
+  tool: string,
+  locale: Locale = 'en',
+  searchParams?: Record<string, string | string[] | undefined>
+): Metadata {
+  const toolData: Record<string, { title: string; description: string; keywords: string[] }> = {
+    'spotify-playlist-cover': {
+      title: 'Spotify Playlist Cover Maker - Create AI Covers | CoverGen Pro',
+      description: 'Design professional Spotify playlist covers with AI. Create eye-catching 300x300 pixel artwork that makes your playlists stand out. Free, instant generation.',
+      keywords: ['spotify playlist cover', 'playlist cover maker', 'spotify cover generator', 'playlist artwork', 'music cover design'],
+    },
+    'facebook-event-cover': {
+      title: 'Facebook Event Cover Maker - AI Event Banner Generator | CoverGen Pro',
+      description: 'Create stunning Facebook event covers with AI. Perfect 1920x1080 dimensions for maximum engagement. Free event banner maker.',
+      keywords: ['facebook event cover', 'event banner maker', 'facebook cover photo', 'event cover generator', 'social media event banner'],
+    },
+    'anime-poster-maker': {
+      title: 'Anime Poster Maker - AI Anime Cover Generator | CoverGen Pro',
+      description: 'Create stunning anime-style posters and covers with AI. Perfect for manga covers, anime thumbnails, and Japanese-style artwork.',
+      keywords: ['anime poster maker', 'anime cover generator', 'manga cover maker', 'anime thumbnail creator', 'anime art generator'],
+    },
+    'book-cover-creator': {
+      title: 'Book Cover Creator - AI Book Cover Design | CoverGen Pro',
+      description: 'Design professional book covers with AI. Perfect for self-publishers, authors, and indie writers. All genres supported.',
+      keywords: ['book cover creator', 'book cover maker', 'ebook cover design', 'novel cover generator', 'self publishing cover'],
+    },
+    'game-cover-art': {
+      title: 'Game Cover Art Generator - AI Gaming Artwork | CoverGen Pro',
+      description: 'Create epic game cover art with AI. Perfect for Steam, Epic Games, indie games, and gaming thumbnails.',
+      keywords: ['game cover art', 'gaming cover maker', 'steam cover generator', 'game thumbnail creator', 'gaming artwork'],
+    },
+    'music-album-cover': {
+      title: 'Music Album Cover Maker - AI Album Art Generator | CoverGen Pro',
+      description: 'Design professional album covers with AI. Perfect for musicians, bands, and music producers. All music genres supported.',
+      keywords: ['album cover maker', 'music cover generator', 'album art creator', 'music artwork design', 'band cover maker'],
+    },
+    'social-media-poster': {
+      title: 'Social Media Poster Maker - AI Post Generator | CoverGen Pro',
+      description: 'Create eye-catching social media posts with AI. Perfect for Instagram, Facebook, Twitter, and all social platforms.',
+      keywords: ['social media poster', 'post maker', 'social media graphics', 'content creator tool', 'social media design'],
+    },
+    'webinar-poster-maker': {
+      title: 'Webinar Poster Maker - AI Webinar Graphics | CoverGen Pro',
+      description: 'Design professional webinar posters and banners with AI. Perfect for online events, workshops, and virtual conferences.',
+      keywords: ['webinar poster', 'webinar banner maker', 'online event cover', 'virtual event graphics', 'webinar design'],
+    },
+    'event-poster-designer': {
+      title: 'Event Poster Designer - AI Event Graphics | CoverGen Pro',
+      description: 'Create stunning event posters with AI. Perfect for concerts, festivals, conferences, and all types of events.',
+      keywords: ['event poster designer', 'event flyer maker', 'concert poster generator', 'festival banner creator', 'event graphics'],
+    },
+  }
+
+  const data = toolData[tool] || {
+    title: `${tool.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} | CoverGen Pro`,
+    description: `Create stunning designs with our AI-powered ${tool.replace(/-/g, ' ')} tool.`,
+    keywords: [`${tool.replace(/-/g, ' ')}`, 'AI design tool', 'cover maker'],
+  }
+
+  return generateMetadata({
+    title: data.title,
+    description: data.description,
+    keywords: data.keywords,
+    path: `/tools/${tool}`,
+    locale,
+    searchParams,
+    images: [{
+      url: `https://covergen.pro/tools/${tool}-og.jpg`,
+      width: 1200,
+      height: 630,
+      alt: data.title,
     }],
   })
 }
@@ -181,29 +275,33 @@ export function generateBlogMetadata(
   author: string,
   publishDate: string,
   tags: string[] = [],
-  locale: string = 'en'
+  locale: Locale = 'en'
 ): Metadata {
+  const metadata = generateMetadata({
+    title: `${title} | CoverGen AI Blog`,
+    description,
+    keywords: [...tags, 'AI design blog', 'cover design tips', 'thumbnail creation guide'],
+    path: `/blog/${slug}`,
+    locale,
+    images: [{
+      url: `https://covergen.pro/blog/${slug}/og-image.jpg`,
+      width: 1200,
+      height: 630,
+      alt: title,
+    }],
+  })
+
   return {
-    ...generateMetadata({
-      title: `${title} | CoverGen AI Blog`,
-      description,
-      keywords: [...tags, 'AI design blog', 'cover design tips', 'thumbnail creation guide'],
-      path: `/blog/${slug}`,
-      locale,
-      images: [{
-        url: `https://covergen.pro/blog/${slug}/og-image.jpg`,
-        width: 1200,
-        height: 630,
-        alt: title,
-      }],
-    }),
+    ...metadata,
     openGraph: {
+      ...metadata.openGraph,
       type: 'article',
       authors: [author],
       publishedTime: publishDate,
       tags,
     },
     other: {
+      ...metadata.other,
       'article:author': author,
       'article:published_time': publishDate,
       'article:tag': tags.join(','),

@@ -3,42 +3,55 @@ import PricingSection from '@/components/pricing-section'
 import { Locale } from '@/lib/i18n/config'
 import { getStaticSubscriptionConfig, getStaticTrialPeriodText, isStaticTrialEnabled } from '@/lib/subscription-config-static'
 import ClientBoundary from '@/components/client-boundary'
+import { generateMetadata as generateSeoMetadata } from '@/lib/seo/metadata'
 
 // Get configuration at build time
 const config = getStaticSubscriptionConfig()
 const trialText = getStaticTrialPeriodText()
 const hasTrials = isStaticTrialEnabled()
 
-export const metadata: Metadata = {
-  title: hasTrials 
-    ? 'Pricing - AI Cover Generation Plans with Free Trial'
-    : 'Pricing - AI Cover Generation Plans',
-  description: hasTrials
+export async function generateMetadata({
+  params: { locale },
+  searchParams,
+}: {
+  params: { locale: Locale }
+  searchParams: Record<string, string | string[] | undefined>
+}): Promise<Metadata> {
+  const title = hasTrials 
+    ? 'Pricing - AI Cover Generation Plans with Free Trial | CoverGen Pro'
+    : 'Pricing - AI Cover Generation Plans | CoverGen Pro'
+    
+  const description = hasTrials
     ? `Start free with ${config.limits.free.monthly} covers/month or try Pro plans with ${trialText}. Pro at $9/month (${config.limits.pro.monthly} covers), Pro+ at $19/month (${config.limits.pro_plus.monthly} covers).`
-    : `Start free with ${config.limits.free.monthly} covers/month. Pro at $9/month (${config.limits.pro.monthly} covers), Pro+ at $19/month (${config.limits.pro_plus.monthly} covers).`,
-  keywords: [
-    'CoverGen AI pricing',
-    'cover generator pricing',
-    'AI design tool cost',
-    'thumbnail maker pricing',
-    'content creator tools pricing',
-    'affordable cover generator',
-    hasTrials ? `${trialText}` : 'pro plans',
-    'pro cover generation',
-    'monthly cover quotas'
-  ],
-  openGraph: {
-    title: hasTrials
-      ? `CoverGen AI Pricing - Free Plan + Pro with ${config.trialDays}-Day Trial`
-      : 'CoverGen AI Pricing - Choose Your Perfect Plan',
-    description: hasTrials
-      ? `Free plan: ${config.limits.free.monthly} covers/month. Pro plans include ${trialText}. Upgrade for more monthly covers.`
-      : `Free plan: ${config.limits.free.monthly} covers/month. Upgrade to Pro for ${config.limits.pro.monthly} or Pro+ for ${config.limits.pro_plus.monthly} covers/month.`,
-    images: ['/pricing-og.jpg'],
-  },
-  alternates: {
-    canonical: 'https://covergen.pro/pricing',
-  },
+    : `Start free with ${config.limits.free.monthly} covers/month. Pro at $9/month (${config.limits.pro.monthly} covers), Pro+ at $19/month (${config.limits.pro_plus.monthly} covers).`
+    
+  return generateSeoMetadata({
+    title,
+    description,
+    keywords: [
+      'CoverGen AI pricing',
+      'cover generator pricing',
+      'AI design tool cost',
+      'thumbnail maker pricing',
+      'content creator tools pricing',
+      'affordable cover generator',
+      hasTrials ? `${trialText}` : 'pro plans',
+      'pro cover generation',
+      'monthly cover quotas',
+      'free cover maker',
+      'premium cover generator',
+      'cover generation plans'
+    ],
+    path: '/pricing',
+    locale,
+    searchParams,
+    images: [{
+      url: 'https://covergen.pro/pricing-og.jpg',
+      width: 1200,
+      height: 630,
+      alt: 'CoverGen Pro Pricing Plans',
+    }],
+  })
 }
 
 export default function PricingPage({
