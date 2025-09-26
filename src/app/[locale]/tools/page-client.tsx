@@ -16,7 +16,9 @@ import {
   Palette,
   Globe,
   Zap,
-  Shield
+  Shield,
+  Briefcase,
+  TrendingUp
 } from 'lucide-react'
 import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
 
@@ -26,6 +28,39 @@ interface ToolsHubClientProps {
 }
 
 const tools = [
+  {
+    name: 'Instagram Thumbnail Maker',
+    description: 'Create stunning thumbnails for Reels, Feed posts, and Stories',
+    icon: Image,
+    href: '/tools/instagram-thumbnail-maker',
+    color: 'from-pink-500 to-purple-500',
+    category: 'Social',
+    popular: true,
+    new: true,
+    kd: 10
+  },
+  {
+    name: 'AI Thumbnail Generator Free',
+    description: 'Generate professional thumbnails instantly with AI technology',
+    icon: Sparkles,
+    href: '/tools/ai-thumbnail-generator-free',
+    color: 'from-blue-500 to-purple-500',
+    category: 'AI Tools',
+    popular: true,
+    trending: true,
+    growth: '+900%'
+  },
+  {
+    name: 'LinkedIn Banner Maker',
+    description: 'Professional profile headers that boost your career visibility',
+    icon: Briefcase,
+    href: '/tools/linkedin-banner-maker',
+    color: 'from-blue-600 to-blue-700',
+    category: 'Business',
+    popular: true,
+    new: true,
+    kd: 7
+  },
   {
     name: 'Anime Poster Maker',
     description: 'Create stunning anime-style posters with AI-generated artwork',
@@ -111,14 +146,15 @@ const tools = [
 
 const categories = [
   { name: 'All', count: tools.length },
+  { name: 'AI Tools', count: tools.filter(t => t.category === 'AI Tools').length },
+  { name: 'Social', count: tools.filter(t => t.category === 'Social').length },
+  { name: 'Business', count: tools.filter(t => t.category === 'Business').length },
   { name: 'Entertainment', count: tools.filter(t => t.category === 'Entertainment').length },
   { name: 'Video', count: tools.filter(t => t.category === 'Video').length },
   { name: 'Music', count: tools.filter(t => t.category === 'Music').length },
   { name: 'Events', count: tools.filter(t => t.category === 'Events').length },
-  { name: 'Social', count: tools.filter(t => t.category === 'Social').length },
   { name: 'Publishing', count: tools.filter(t => t.category === 'Publishing').length },
-  { name: 'Gaming', count: tools.filter(t => t.category === 'Gaming').length },
-  { name: 'Business', count: tools.filter(t => t.category === 'Business').length }
+  { name: 'Gaming', count: tools.filter(t => t.category === 'Gaming').length }
 ]
 
 export default function ToolsHubClient({ locale, translations: t }: ToolsHubClientProps) {
@@ -211,11 +247,29 @@ export default function ToolsHubClient({ locale, translations: t }: ToolsHubClie
                   const Icon = tool.icon
                   return (
                     <Card key={tool.name} className="group hover:shadow-lg transition-shadow relative">
-                      {tool.popular && (
-                        <div className="absolute top-4 right-4 bg-orange-100 text-orange-700 text-xs font-medium px-2 py-1 rounded-full">
-                          Popular
-                        </div>
-                      )}
+                      <div className="absolute top-4 right-4 flex gap-2">
+                        {tool.new && (
+                          <div className="bg-green-100 text-green-700 text-xs font-medium px-2 py-1 rounded-full">
+                            New
+                          </div>
+                        )}
+                        {tool.trending && (
+                          <div className="bg-purple-100 text-purple-700 text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1">
+                            <TrendingUp className="w-3 h-3" />
+                            {tool.growth}
+                          </div>
+                        )}
+                        {tool.popular && !tool.new && !tool.trending && (
+                          <div className="bg-orange-100 text-orange-700 text-xs font-medium px-2 py-1 rounded-full">
+                            Popular
+                          </div>
+                        )}
+                        {tool.kd && (
+                          <div className="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-1 rounded-full">
+                            KD: {tool.kd}
+                          </div>
+                        )}
+                      </div>
                       <CardContent className="p-6">
                         <Link href={`/${locale}${tool.href}`} className="block">
                           <div className={`w-14 h-14 rounded-xl bg-gradient-to-r ${tool.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>

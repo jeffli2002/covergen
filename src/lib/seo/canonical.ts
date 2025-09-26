@@ -79,9 +79,10 @@ export function generateAlternateUrls(
     const url = getCanonicalUrl(pathWithoutLocale, localeCode as Locale, includeParams)
     
     // Use full locale codes for alternates (e.g., 'zh-CN' instead of 'zh')
-    const alternateKey = localeCode === 'zh' ? 'zh-CN' : 
-                        localeCode === 'pt' ? 'pt-BR' : 
-                        localeCode === 'ar' ? 'ar-SA' :
+    // Cast to string to handle future locale additions
+    const alternateKey = (localeCode as string) === 'zh' ? 'zh-CN' : 
+                        (localeCode as string) === 'pt' ? 'pt-BR' : 
+                        (localeCode as string) === 'ar' ? 'ar-SA' :
                         localeCode
     
     languages[alternateKey] = url.replace(BASE_URL, '') // Return relative URLs for alternates

@@ -65,7 +65,7 @@ export function generateMetadata({
     },
     openGraph: {
       type: 'website',
-      locale: locale === 'zh' ? 'zh_CN' : locale === 'pt' ? 'pt_BR' : locale,
+      locale: (locale as string) === 'zh' ? 'zh_CN' : (locale as string) === 'pt' ? 'pt_BR' : locale,
       url: canonical,
       title,
       description,
@@ -300,11 +300,13 @@ export function generateBlogMetadata(
       publishedTime: publishDate,
       tags,
     },
-    other: {
-      ...metadata.other,
-      'article:author': author,
-      'article:published_time': publishDate,
-      'article:tag': tags.join(','),
-    },
+    other: Object.fromEntries(
+      Object.entries({
+        ...(metadata.other || {}),
+        'article:author': author,
+        'article:published_time': publishDate,
+        'article:tag': tags.join(','),
+      }).filter(([_, value]) => value !== undefined)
+    ) as Record<string, string | number | (string | number)[]>,
   }
 }
