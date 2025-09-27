@@ -121,10 +121,10 @@ export default function TutorialsContent() {
       <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950 dark:to-blue-950 border-b">
         <div className="container mx-auto px-4 py-16">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+            <h1 className="text-hero-title mb-4 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
               AI Generation Tips
             </h1>
-            <p className="text-xl text-muted-foreground mb-8">
+            <p className="text-body-lg text-muted-foreground mb-8">
               Master the art of AI-powered cover generation with expert tips and tutorials
             </p>
           </div>
@@ -136,7 +136,7 @@ export default function TutorialsContent() {
           {/* Sidebar Navigation */}
           <div className="lg:col-span-1">
             <div className="sticky top-8 space-y-4">
-              <h3 className="text-lg font-semibold mb-4">Categories</h3>
+              <h3 className="text-heading-5 mb-4">Categories</h3>
               {tutorialCategories.map((category) => {
                 const Icon = category.icon
                 return (
@@ -174,7 +174,7 @@ export default function TutorialsContent() {
                         <category.icon className="w-6 h-6 text-primary" />
                       </div>
                       <div>
-                        <h2 className="text-2xl font-bold">{category.title}</h2>
+                        <h2 className="text-heading-4">{category.title}</h2>
                         <p className="text-muted-foreground">{category.description}</p>
                       </div>
                     </div>

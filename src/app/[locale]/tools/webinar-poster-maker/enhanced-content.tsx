@@ -314,7 +314,7 @@ export default function WebinarPosterContent({ locale }: Props) {
       </section>
 
       {/* CTA Section */}
-      <section className="container mx-auto px-4">
+      <section className="cta-section container mx-auto px-4">
         <div className="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-3xl p-12 text-center text-white">
           <h2 className="text-3xl font-bold mb-4">
             Create Your Next Webinar Poster in Minutes

@@ -118,10 +118,10 @@ export default function HelpPage() {
       <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 border-b">
         <div className="container mx-auto px-4 py-16">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-hero-title mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Help Center
             </h1>
-            <p className="text-xl text-muted-foreground mb-8">
+            <p className="text-body-lg text-muted-foreground mb-8">
               Find answers to common questions and learn how to get the most out of CoverGen AI
             </p>
             
@@ -145,7 +145,7 @@ export default function HelpPage() {
           {/* Sidebar Navigation */}
           <div className="lg:col-span-1">
             <div className="sticky top-8 space-y-4">
-              <h3 className="text-lg font-semibold mb-4">Categories</h3>
+              <h3 className="text-heading-5 mb-4">Categories</h3>
               {faqCategories.map((category) => {
                 const Icon = category.icon
                 return (
@@ -176,14 +176,14 @@ export default function HelpPage() {
             {searchQuery ? (
               // Search Results
               <div className="space-y-6">
-                <h2 className="text-2xl font-bold mb-6">
+                <h2 className="text-heading-4 mb-6">
                   Search Results for "{searchQuery}" ({filteredFAQs.length} results)
                 </h2>
                 {filteredFAQs.length > 0 ? (
                   filteredFAQs.map((faq, index) => (
                     <Card key={index} className="hover:shadow-md transition-shadow">
                       <CardContent className="p-6">
-                        <h3 className="text-lg font-semibold mb-3">{faq.question}</h3>
+                        <h3 className="text-ui-lg mb-3">{faq.question}</h3>
                         <p className="text-muted-foreground leading-relaxed">{faq.answer}</p>
                       </CardContent>
                     </Card>
@@ -191,7 +191,7 @@ export default function HelpPage() {
                 ) : (
                   <div className="text-center py-12">
                     <HelpCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">No results found</h3>
+                    <h3 className="text-heading-5 mb-2">No results found</h3>
                     <p className="text-muted-foreground mb-4">
                       Try different keywords or browse our categories below
                     </p>
@@ -211,7 +211,7 @@ export default function HelpPage() {
                           <category.icon className="w-6 h-6 text-primary" />
                         </div>
                         <div>
-                          <h2 className="text-2xl font-bold">{category.title}</h2>
+                          <h2 className="text-heading-4">{category.title}</h2>
                           <p className="text-muted-foreground">{category.description}</p>
                         </div>
                       </div>
@@ -239,7 +239,7 @@ export default function HelpPage() {
         <div className="mt-16 bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-800 dark:to-blue-900 rounded-2xl p-8">
           <div className="text-center max-w-2xl mx-auto">
             <MessageCircle className="w-16 h-16 text-primary mx-auto mb-4" />
-            <h3 className="text-2xl font-bold mb-2">Still need help?</h3>
+            <h3 className="text-heading-4 mb-2">Still need help?</h3>
             <p className="text-muted-foreground mb-6">
               Can't find what you're looking for? Our support team is here to help you get the most out of CoverGen AI.
             </p>

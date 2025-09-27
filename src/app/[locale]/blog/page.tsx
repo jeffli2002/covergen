@@ -55,10 +55,10 @@ export default function BlogPage() {
     <div className="min-h-screen" style={{ backgroundColor: 'white' }}>
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+          <h1 className="text-hero-title bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
             Our Blog
           </h1>
-          <p className="text-xl text-gray-700 max-w-2xl mx-auto">
+          <p className="text-body-lg text-gray-700 max-w-2xl mx-auto">
             Discover the latest insights, tips, and strategies for content creation across all platforms
           </p>
         </div>
@@ -72,7 +72,7 @@ export default function BlogPage() {
               <div className="h-48 bg-gradient-to-br from-purple-500 to-pink-500 relative">
                 {/* Placeholder for blog post image */}
                 <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
-                  <h3 className="text-white text-2xl font-bold text-center px-4">
+                  <h3 className="text-white text-heading-4 text-center px-4">
                     {post.title}
                   </h3>
                 </div>
@@ -89,7 +89,7 @@ export default function BlogPage() {
                   </span>
                 </div>
 
-                <h2 className="text-xl font-semibold text-gray-900 mb-2 line-clamp-2">
+                <h2 className="text-heading-5 text-gray-900 mb-2 line-clamp-2">
                   {post.title}
                 </h2>
 

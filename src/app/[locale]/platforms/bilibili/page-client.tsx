@@ -54,11 +54,11 @@ export default function BilibiliCoverClient({ locale, translations: t }: Bilibil
                 Optimized for B站 Platform
               </div>
               
-              <h1 className="text-5xl font-bold text-gray-900 mb-6">
+              <h1 className="text-hero-title text-gray-900">
                 Bilibili Video Cover Maker
               </h1>
               
-              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+              <p className="text-hero-subtitle text-gray-600 mb-8">
                 Create eye-catching Bilibili video covers with AI technology. Perfect 16:10 aspect ratio, 
                 optimized for anime, gaming, and vlog content on B站.
               </p>
@@ -77,7 +77,7 @@ export default function BilibiliCoverClient({ locale, translations: t }: Bilibil
                   <Button 
                     size="lg" 
                     variant="outline"
-                    className="border-gray-300 text-gray-800 hover:bg-gray-800 hover:text-white px-8 py-6 text-lg font-semibold border-2"
+                    className="border-gray-300 text-gray-800 hover:bg-gray-800 hover:text-white px-8 py-6 text-lg font-light border-2"
                   >
                     View Pricing
                   </Button>
@@ -87,19 +87,19 @@ export default function BilibiliCoverClient({ locale, translations: t }: Bilibil
               {/* Trust Indicators */}
               <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-pink-600">16:10</div>
+                  <div className="text-3xl font-thin text-pink-600">16:10</div>
                   <div className="text-sm text-gray-600">Perfect Ratio</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-pink-600">中文</div>
+                  <div className="text-3xl font-thin text-pink-600">中文</div>
                   <div className="text-sm text-gray-600">Chinese Support</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-pink-600">AI</div>
+                  <div className="text-3xl font-thin text-pink-600">AI</div>
                   <div className="text-sm text-gray-600">Powered by AI</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-pink-600">Free</div>
+                  <div className="text-3xl font-thin text-pink-600">Free</div>
                   <div className="text-sm text-gray-600">No Watermark</div>
                 </div>
               </div>
@@ -111,7 +111,7 @@ export default function BilibiliCoverClient({ locale, translations: t }: Bilibil
         <section className="py-20">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              <h2 className="text-section-title text-gray-900 mb-4">
                 Features Designed for Bilibili Creators
               </h2>
               <p className="text-lg text-gray-600">
@@ -124,7 +124,7 @@ export default function BilibiliCoverClient({ locale, translations: t }: Bilibil
                 <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center mb-4">
                   <Palette className="w-6 h-6 text-pink-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-feature-title text-gray-900 mb-2">
                   Anime & ACG Styles
                 </h3>
                 <p className="text-gray-600">
@@ -136,7 +136,7 @@ export default function BilibiliCoverClient({ locale, translations: t }: Bilibil
                 <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
                   <Globe className="w-6 h-6 text-purple-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-feature-title text-gray-900 mb-2">
                   Bilingual Support
                 </h3>
                 <p className="text-gray-600">
@@ -148,10 +148,10 @@ export default function BilibiliCoverClient({ locale, translations: t }: Bilibil
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
                   <Zap className="w-6 h-6 text-blue-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-feature-title text-gray-900 mb-2">
                   AI Enhancement
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-feature-description">
                   Smart color matching and composition based on Bilibili trending styles
                 </p>
               </div>
@@ -160,10 +160,10 @@ export default function BilibiliCoverClient({ locale, translations: t }: Bilibil
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                   <CheckCircle className="w-6 h-6 text-green-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-feature-title text-gray-900 mb-2">
                   Platform Optimized
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-feature-description">
                   16:10 aspect ratio with high resolution for perfect Bilibili display
                 </p>
               </div>
@@ -172,10 +172,10 @@ export default function BilibiliCoverClient({ locale, translations: t }: Bilibil
                 <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
                   <Sparkles className="w-6 h-6 text-orange-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-feature-title text-gray-900 mb-2">
                   Trending Elements
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-feature-description">
                   Stay updated with latest Bilibili design trends and popular elements
                 </p>
               </div>
@@ -184,10 +184,10 @@ export default function BilibiliCoverClient({ locale, translations: t }: Bilibil
                 <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
                   <Shield className="w-6 h-6 text-red-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-feature-title text-gray-900 mb-2">
                   Copyright Safe
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-feature-description">
                   All generated content is original and safe for commercial use
                 </p>
               </div>
@@ -199,7 +199,7 @@ export default function BilibiliCoverClient({ locale, translations: t }: Bilibil
         <section className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              <h2 className="text-section-title text-gray-900 mb-4">
                 How to Create Bilibili Covers
               </h2>
               <p className="text-lg text-gray-600">
@@ -210,56 +210,56 @@ export default function BilibiliCoverClient({ locale, translations: t }: Bilibil
             <div className="max-w-4xl mx-auto">
               <div className="space-y-8">
                 <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 bg-pink-600 text-white rounded-full flex items-center justify-center font-bold">
+                  <div className="flex-shrink-0 w-12 h-12 bg-pink-600 text-white rounded-full flex items-center justify-center font-thin">
                     1
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    <h3 className="text-feature-title text-gray-900 mb-2">
                       Enter Your Video Title
                     </h3>
-                    <p className="text-gray-600">
+                    <p className="text-feature-description">
                       Type your Bilibili video title in Chinese or English. Our AI understands both languages.
                     </p>
                   </div>
                 </div>
                 
                 <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 bg-pink-600 text-white rounded-full flex items-center justify-center font-bold">
+                  <div className="flex-shrink-0 w-12 h-12 bg-pink-600 text-white rounded-full flex items-center justify-center font-thin">
                     2
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    <h3 className="text-feature-title text-gray-900 mb-2">
                       Select Content Category
                     </h3>
-                    <p className="text-gray-600">
+                    <p className="text-feature-description">
                       Choose from anime, gaming, technology, lifestyle, or education categories for optimized styles.
                     </p>
                   </div>
                 </div>
                 
                 <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 bg-pink-600 text-white rounded-full flex items-center justify-center font-bold">
+                  <div className="flex-shrink-0 w-12 h-12 bg-pink-600 text-white rounded-full flex items-center justify-center font-thin">
                     3
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    <h3 className="text-feature-title text-gray-900 mb-2">
                       Generate with AI
                     </h3>
-                    <p className="text-gray-600">
+                    <p className="text-feature-description">
                       Let our AI create multiple cover options based on Bilibili's trending design patterns.
                     </p>
                   </div>
                 </div>
                 
                 <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 bg-pink-600 text-white rounded-full flex items-center justify-center font-bold">
+                  <div className="flex-shrink-0 w-12 h-12 bg-pink-600 text-white rounded-full flex items-center justify-center font-thin">
                     4
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    <h3 className="text-feature-title text-gray-900 mb-2">
                       Download in HD
                     </h3>
-                    <p className="text-gray-600">
+                    <p className="text-feature-description">
                       Export your cover in high resolution, perfectly sized for Bilibili's 16:10 aspect ratio.
                     </p>
                   </div>
@@ -270,12 +270,12 @@ export default function BilibiliCoverClient({ locale, translations: t }: Bilibil
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-r from-pink-600 to-purple-600">
+        <section className="cta-section py-20 bg-gradient-to-r from-pink-600 to-purple-600">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">
+            <h2 className="text-hero-title text-white mb-4">
               Ready to Create Amazing Bilibili Covers?
             </h2>
-            <p className="text-xl text-white/90 mb-8">
+            <p className="text-hero-subtitle text-white/90 mb-8">
               Join thousands of B站 creators using our AI-powered cover maker
             </p>
             <Button 
@@ -300,7 +300,7 @@ export default function BilibiliCoverClient({ locale, translations: t }: Bilibil
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto prose prose-lg">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Why Choose Our Bilibili Cover Maker?</h2>
+              <h2 className="text-section-title text-gray-900 mb-6 text-center">Why Choose Our Bilibili Cover Maker?</h2>
               <p>
                 Creating compelling video covers for Bilibili (B站) is crucial for attracting viewers in the competitive 
                 Chinese video platform ecosystem. Our AI-powered Bilibili cover maker is specifically designed to help 

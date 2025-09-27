@@ -245,7 +245,7 @@ export default function SocialMediaPosterPage({ params: { locale } }: { params: 
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600">
+      <section className="cta-section py-20 bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
             Ready to Go Viral?

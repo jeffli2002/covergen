@@ -47,7 +47,7 @@ export default function Footer({ locale, translations: t }: FooterProps) {
 
           {/* Platforms */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Platforms</h3>
+            <h3 className="text-ui-lg mb-4">Platforms</h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li>
                 <Link href={`/${locale}/platforms/youtube`} className="hover:text-blue-600 transition-colors">
@@ -99,7 +99,7 @@ export default function Footer({ locale, translations: t }: FooterProps) {
 
           {/* Tools */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Tools</h3>
+            <h3 className="text-ui-lg mb-4">Tools</h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li>
                 <Link href={`/${locale}/tools/youtube-thumbnail-ideas`} className="hover:text-blue-600 transition-colors">
@@ -196,7 +196,7 @@ export default function Footer({ locale, translations: t }: FooterProps) {
 
           {/* Resources */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Resources</h3>
+            <h3 className="text-ui-lg mb-4">Resources</h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li>
                 <Link href={`/${locale}#features`} className="hover:text-blue-600 transition-colors">
@@ -238,7 +238,7 @@ export default function Footer({ locale, translations: t }: FooterProps) {
 
           {/* Legal */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">{t.footer.legal}</h3>
+            <h3 className="text-ui-lg mb-4">{t.footer.legal}</h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li>
                 <Link href={`/${locale}/privacy`} className="hover:text-blue-600 transition-colors">

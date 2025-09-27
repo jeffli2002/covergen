@@ -78,7 +78,7 @@ export default function TikTokCoverMakerClient({ locale, translations }: { local
         </BreadcrumbWrapper>
         
         {/* Hero Section */}
-        <section className="py-20 bg-gradient-to-br from-pink-50 to-purple-100">
+        <section className="py-20 bg-gradient-to-br from-pink-50 to-purple-100 platform-hero-section">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
               <div className="flex justify-center mb-6">
@@ -87,12 +87,12 @@ export default function TikTokCoverMakerClient({ locale, translations }: { local
                 </div>
               </div>
               
-              <h1 className="text-5xl md:text-6xl font-bold mb-6 text-gray-900">
+              <h1 className="text-hero-title mb-6 text-gray-900">
                 TikTok Cover Maker
               </h1>
               
-              <p className="text-xl md:text-2xl text-gray-700 mb-8 leading-relaxed">
-                Create covers that make viewers <span className="bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent font-semibold">stop scrolling</span> and 
+              <p className="text-hero-subtitle text-gray-700 mb-8">
+                Create covers that make viewers <span className="text-pink-600 font-medium">stop scrolling</span> and 
                 start watching. AI-powered vertical covers for viral TikTok content.
               </p>
               
@@ -118,9 +118,9 @@ export default function TikTokCoverMakerClient({ locale, translations }: { local
         </section>
 
         {/* Features Grid */}
-        <section className="py-16 bg-white">
+        <section className="py-16 bg-white platform-features-grid">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+            <h2 className="text-section-title text-center mb-12">
               Built for TikTok Success
             </h2>
             
@@ -133,8 +133,8 @@ export default function TikTokCoverMakerClient({ locale, translations }: { local
                         <feature.icon className="w-8 h-8 text-purple-600" />
                       </div>
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-gray-600">{feature.description}</p>
+                    <h3 className="text-feature-title">{feature.title}</h3>
+                    <p className="text-feature-description">{feature.description}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -224,12 +224,12 @@ export default function TikTokCoverMakerClient({ locale, translations }: { local
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-br from-pink-600 to-purple-600 text-white">
+        <section className="py-20 bg-gradient-to-br from-pink-600 to-purple-600 text-white cta-section">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            <h2 className="text-white">
               Ready to Go Viral on TikTok?
             </h2>
-            <p className="text-xl md:text-2xl mb-8 opacity-90">
+            <p className="opacity-90 text-white">
               Create scroll-stopping covers that boost your views and engagement
             </p>
             <Link href={`/${locale}#generator`}>

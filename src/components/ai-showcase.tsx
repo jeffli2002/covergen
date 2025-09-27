@@ -287,17 +287,17 @@ function ShowcaseItem({ item, index, isActive, isHovered, isVisible, onHover, on
               isActive ? "opacity-100 max-h-96" : "opacity-0 max-h-0 overflow-hidden"
             )}>
               <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-5 border border-blue-100">
-                <h4 className="font-semibold text-gray-900 mb-3">AI Enhancements Applied:</h4>
+                <h4 className="text-ui-lg text-gray-900 mb-3">AI Enhancements Applied:</h4>
                 <ul className="space-y-2">
-                  <li className="flex items-center gap-2 text-sm text-gray-700">
+                  <li className="flex items-center gap-2 text-body-sm text-gray-700">
                     <div className="w-1.5 h-1.5 rounded-full bg-blue-600" />
                     Platform-specific dimensions and layout
                   </li>
-                  <li className="flex items-center gap-2 text-sm text-gray-700">
+                  <li className="flex items-center gap-2 text-body-sm text-gray-700">
                     <div className="w-1.5 h-1.5 rounded-full bg-purple-600" />
                     Professional typography and branding
                   </li>
-                  <li className="flex items-center gap-2 text-sm text-gray-700">
+                  <li className="flex items-center gap-2 text-body-sm text-gray-700">
                     <div className="w-1.5 h-1.5 rounded-full bg-pink-600" />
                     Color grading and visual optimization
                   </li>

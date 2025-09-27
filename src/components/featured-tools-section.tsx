@@ -57,10 +57,10 @@ export default function FeaturedToolsSection({ locale }: FeaturedToolsSectionPro
               <Zap className="mr-1 h-3 w-3" />
               {isZh ? '热门工具' : 'Trending Tools'}
             </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            <h2 className="text-section-title text-gray-900 dark:text-white mb-4">
               {isZh ? '专业设计工具，完全免费' : 'Professional Design Tools, Completely Free'}
             </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+            <p className="text-body-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               {isZh 
                 ? '使用我们的 AI 驱动工具，为您的内容创建引人注目的视觉效果。无需设计经验。'
                 : 'Create eye-catching visuals for your content with our AI-powered tools. No design experience needed.'}

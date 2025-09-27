@@ -78,7 +78,7 @@ export default function InstagramContentMakerClient({ locale, translations }: { 
         </BreadcrumbWrapper>
         
         {/* Hero Section */}
-        <section className="py-20 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400">
+        <section className="py-20 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 platform-hero-section">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
               <div className="flex justify-center mb-6">
@@ -87,12 +87,12 @@ export default function InstagramContentMakerClient({ locale, translations }: { 
                 </div>
               </div>
               
-              <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white">
+              <h1 className="text-hero-title text-white">
                 Instagram Content Maker
               </h1>
               
-              <p className="text-xl md:text-2xl text-white mb-8 leading-relaxed">
-                Create content that <span className="bg-white text-pink-600 px-2 py-1 rounded font-semibold">stops the scroll</span>. 
+              <p className="text-hero-subtitle text-white mb-8">
+                Create content that <span className="text-white font-medium">stops the scroll</span>. 
                 AI-powered designs for Instagram success.
               </p>
               
@@ -104,7 +104,7 @@ export default function InstagramContentMakerClient({ locale, translations }: { 
                   </Button>
                 </Link>
                 <Link href={`/${locale}#pricing`}>
-                  <Button size="lg" variant="ghost" className="text-white border-2 border-white hover:bg-white hover:text-pink-600 px-8 py-6 text-lg font-semibold">
+                  <Button size="lg" variant="ghost" className="text-white border-2 border-white hover:bg-white hover:text-pink-600 px-8 py-6 text-lg font-light">
                     View Pricing
                   </Button>
                 </Link>
@@ -127,7 +127,7 @@ export default function InstagramContentMakerClient({ locale, translations }: { 
         {/* Features Grid */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+            <h2 className="text-section-title text-center mb-12">
               Everything You Need for Instagram
             </h2>
             
@@ -140,8 +140,8 @@ export default function InstagramContentMakerClient({ locale, translations }: { 
                         <feature.icon className="w-8 h-8 text-pink-600" />
                       </div>
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-gray-600">{feature.description}</p>
+                    <h3 className="text-feature-title">{feature.title}</h3>
+                    <p className="text-feature-description">{feature.description}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -153,7 +153,7 @@ export default function InstagramContentMakerClient({ locale, translations }: { 
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+              <h2 className="text-section-title text-center mb-12">
                 All Instagram Formats Covered
               </h2>
               
@@ -306,16 +306,16 @@ export default function InstagramContentMakerClient({ locale, translations }: { 
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 text-white">
+        <section className="cta-section py-20 bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 text-white">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            <h2 className="text-hero-title text-white mb-6">
               Ready to Grow Your Instagram?
             </h2>
-            <p className="text-xl md:text-2xl mb-8 opacity-90">
+            <p className="text-hero-subtitle text-white mb-8 opacity-90">
               Create content that gets likes, saves, and new followers
             </p>
             <Link href={`/${locale}#generator`}>
-              <Button size="lg" className="bg-white text-pink-600 hover:bg-gray-100 px-8 py-6 text-lg font-semibold">
+              <Button size="lg" className="bg-white text-pink-600 hover:bg-gray-100 px-8 py-6 text-lg font-light shadow-lg">
                 Start Creating Instagram Content
               </Button>
             </Link>

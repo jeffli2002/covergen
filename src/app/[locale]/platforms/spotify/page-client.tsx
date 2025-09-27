@@ -87,12 +87,12 @@ export default function SpotifyPlaylistCoverMakerClient({ locale, translations }
                 </div>
               </div>
               
-              <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white">
+              <h1 className="text-hero-title text-white">
                 Spotify Cover Art Maker
               </h1>
               
-              <p className="text-xl md:text-2xl text-green-50 mb-8 leading-relaxed">
-                Create playlist covers that <span className="text-green-100 font-semibold">get discovered</span>. 
+              <p className="text-hero-subtitle text-green-50 mb-8">
+                Create playlist covers that <span className="text-green-100 font-light">get discovered</span>. 
                 AI-powered art that makes your music stand out.
               </p>
               
@@ -101,7 +101,7 @@ export default function SpotifyPlaylistCoverMakerClient({ locale, translations }
                   <Button 
                     size="lg" 
                     variant="ghost" 
-                    className="bg-gray-900 hover:bg-gray-800 px-8 py-6 text-lg shadow-lg font-semibold" 
+                    className="bg-gray-900 hover:bg-gray-800 px-8 py-6 text-lg shadow-lg font-light" 
                     style={{color: 'white'}}
                   >
                     <Sparkles className="w-5 h-5 mr-2" />
@@ -109,7 +109,7 @@ export default function SpotifyPlaylistCoverMakerClient({ locale, translations }
                   </Button>
                 </Link>
                 <Link href={`/${locale}#pricing`}>
-                  <Button size="lg" variant="ghost" className="text-white border-2 border-white hover:bg-white hover:text-green-600 px-8 py-6 text-lg font-semibold transition-colors">
+                  <Button size="lg" variant="ghost" className="text-white border-2 border-white hover:bg-white hover:text-green-600 px-8 py-6 text-lg font-light transition-colors">
                     View Pricing
                   </Button>
                 </Link>
@@ -133,7 +133,7 @@ export default function SpotifyPlaylistCoverMakerClient({ locale, translations }
         {/* Features Grid */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+            <h2 className="text-section-title text-center mb-12">
               Optimized for Spotify Success
             </h2>
             
@@ -146,8 +146,8 @@ export default function SpotifyPlaylistCoverMakerClient({ locale, translations }
                         <feature.icon className="w-8 h-8 text-green-600" />
                       </div>
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-gray-600">{feature.description}</p>
+                    <h3 className="text-feature-title mb-2">{feature.title}</h3>
+                    <p className="text-feature-description">{feature.description}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -159,7 +159,7 @@ export default function SpotifyPlaylistCoverMakerClient({ locale, translations }
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+              <h2 className="text-section-title text-center mb-12">
                 Cover Art for Every Genre
               </h2>
               
@@ -191,21 +191,21 @@ export default function SpotifyPlaylistCoverMakerClient({ locale, translations }
         <section className="py-16 bg-black text-white">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-green-400">
+              <h2 className="text-section-title text-center mb-12 text-green-400">
                 Why Great Cover Art Matters
               </h2>
               
               <div className="grid md:grid-cols-3 gap-8 text-center">
                 <div className="bg-gray-900 rounded-2xl p-8">
-                  <div className="text-4xl font-bold text-green-400 mb-2">85%</div>
+                  <div className="text-4xl font-thin text-green-400 mb-2">85%</div>
                   <p className="text-gray-300">of listeners judge playlists by their covers</p>
                 </div>
                 <div className="bg-gray-900 rounded-2xl p-8">
-                  <div className="text-4xl font-bold text-green-400 mb-2">3x</div>
+                  <div className="text-4xl font-thin text-green-400 mb-2">3x</div>
                   <p className="text-gray-300">more likely to save playlists with pro covers</p>
                 </div>
                 <div className="bg-gray-900 rounded-2xl p-8">
-                  <div className="text-4xl font-bold text-green-400 mb-2">60M+</div>
+                  <div className="text-4xl font-thin text-green-400 mb-2">60M+</div>
                   <p className="text-gray-300">playlists created on Spotify</p>
                 </div>
               </div>
@@ -217,21 +217,21 @@ export default function SpotifyPlaylistCoverMakerClient({ locale, translations }
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+              <h2 className="text-section-title text-center mb-12">
                 Spotify Cover Best Practices
               </h2>
               
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   <div className="bg-green-50 rounded-2xl p-6">
-                    <h3 className="text-xl font-semibold mb-3">🎨 Bold & Simple</h3>
+                    <h3 className="text-feature-title mb-3">🎨 Bold & Simple</h3>
                     <p className="text-gray-600">
                       Covers appear small on mobile. Our AI ensures designs are clear and impactful at any size.
                     </p>
                   </div>
                   
                   <div className="bg-green-50 rounded-2xl p-6">
-                    <h3 className="text-xl font-semibold mb-3">🌈 Genre-Appropriate Colors</h3>
+                    <h3 className="text-feature-title mb-3">🌈 Genre-Appropriate Colors</h3>
                     <p className="text-gray-600">
                       Each genre has visual expectations. AI matches colors to your music style automatically.
                     </p>
@@ -240,14 +240,14 @@ export default function SpotifyPlaylistCoverMakerClient({ locale, translations }
                 
                 <div className="space-y-6">
                   <div className="bg-green-50 rounded-2xl p-6">
-                    <h3 className="text-xl font-semibold mb-3">📱 Mobile-First Design</h3>
+                    <h3 className="text-feature-title mb-3">📱 Mobile-First Design</h3>
                     <p className="text-gray-600">
                       80% of Spotify usage is mobile. Designs are optimized for small screen visibility.
                     </p>
                   </div>
                   
                   <div className="bg-green-50 rounded-2xl p-6">
-                    <h3 className="text-xl font-semibold mb-3">✨ Stand Out in Browse</h3>
+                    <h3 className="text-feature-title mb-3">✨ Stand Out in Browse</h3>
                     <p className="text-gray-600">
                       Unique covers get featured. Our AI creates distinctive art that catches the algorithm's eye.
                     </p>
@@ -259,19 +259,19 @@ export default function SpotifyPlaylistCoverMakerClient({ locale, translations }
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-br from-green-600 to-black text-white">
+        <section className="cta-section py-20 bg-gradient-to-br from-green-600 to-black text-white">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            <h2 className="text-hero-title mb-6">
               Ready to Make Your Playlists Pop?
             </h2>
-            <p className="text-xl md:text-2xl mb-8 opacity-90">
+            <p className="text-hero-subtitle mb-8 opacity-90">
               Join creators making viral playlist covers with AI
             </p>
             <Link href={`/${locale}#generator`}>
               <Button 
                 size="lg" 
                 variant="ghost" 
-                className="bg-green-400 hover:bg-green-300 px-8 py-6 text-lg font-semibold shadow-lg" 
+                className="bg-green-400 hover:bg-green-300 px-8 py-6 text-lg font-light shadow-lg" 
                 style={{color: 'black'}}
               >
                 Start Creating Spotify Covers

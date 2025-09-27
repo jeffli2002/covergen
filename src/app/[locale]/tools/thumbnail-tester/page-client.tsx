@@ -272,7 +272,7 @@ export default function ThumbnailTesterClient({ locale, translations: t }: Thumb
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-r from-green-600 to-teal-600">
+        <section className="cta-section py-20 bg-gradient-to-r from-green-600 to-teal-600">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl font-bold text-white mb-4">
               Stop Guessing - Start Testing Your Thumbnails

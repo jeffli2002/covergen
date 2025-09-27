@@ -269,7 +269,7 @@ export default function SpotifyPlaylistCoverContent({ locale }: Props) {
       </section>
 
       {/* CTA Section */}
-      <section className="container mx-auto px-4">
+      <section className="cta-section container mx-auto px-4">
         <div className="bg-gradient-to-br from-green-600 to-black rounded-3xl p-12 text-center text-white">
           <h2 className="text-3xl font-bold mb-4">
             Ready to Make Your Playlists Stand Out?

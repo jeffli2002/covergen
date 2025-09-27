@@ -275,7 +275,7 @@ export default function PodcastCoverMakerClient({ locale, translations: t }: Pod
 
 
         {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-r from-purple-600 to-purple-700">
+        <section className="cta-section py-20 bg-gradient-to-r from-purple-600 to-purple-700">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl font-bold text-white mb-4">
               Ready to Launch Your Podcast with Style?

@@ -8,44 +8,44 @@ export const YouTubeEnhancedContent = () => {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto prose prose-lg">
-            <h2 className="text-3xl md:text-4xl font-bold mb-8">
+            <h2 className="text-article-title mb-8">
               The Complete Guide to YouTube Thumbnails That Convert
             </h2>
             
             <div className="bg-blue-50 rounded-2xl p-6 mb-8">
-              <p className="text-lg font-medium text-blue-800 mb-0">
-                <strong>Key Insight:</strong> YouTube thumbnails can increase your click-through rate by up to 154% 
+              <p className="text-article-lead text-blue-800 mb-0">
+                <strong className="font-semibold">Key Insight:</strong> YouTube thumbnails can increase your click-through rate by up to 154% 
                 when properly optimized. This comprehensive guide reveals the psychology, design principles, and 
                 technical requirements that top creators use to maximize their views.
               </p>
             </div>
 
-            <h3 className="text-2xl font-bold mt-8 mb-4">Table of Contents</h3>
+            <h3 className="text-content-section-title mt-8 mb-4">Table of Contents</h3>
             <nav className="bg-gray-50 rounded-xl p-6 mb-8">
               <ol className="space-y-2">
-                <li><a href="#psychology" className="text-blue-700 hover:text-blue-800 hover:underline">The Psychology Behind Click-Worthy Thumbnails</a></li>
-                <li><a href="#technical" className="text-blue-700 hover:text-blue-800 hover:underline">Technical Requirements and Best Practices</a></li>
-                <li><a href="#design" className="text-blue-700 hover:text-blue-800 hover:underline">Design Principles That Drive Engagement</a></li>
-                <li><a href="#mistakes" className="text-blue-700 hover:text-blue-800 hover:underline">Common Mistakes That Kill Your CTR</a></li>
-                <li><a href="#optimization" className="text-blue-700 hover:text-blue-800 hover:underline">A/B Testing and Optimization Strategies</a></li>
-                <li><a href="#tools" className="text-blue-700 hover:text-blue-800 hover:underline">Essential Tools and Resources</a></li>
-                <li><a href="#case-studies" className="text-blue-700 hover:text-blue-800 hover:underline">Case Studies: Before and After</a></li>
+                <li><a href="#psychology" className="text-sm text-blue-700 hover:text-blue-800">The Psychology Behind Click-Worthy Thumbnails</a></li>
+                <li><a href="#technical" className="text-sm text-blue-700 hover:text-blue-800">Technical Requirements and Best Practices</a></li>
+                <li><a href="#design" className="text-sm text-blue-700 hover:text-blue-800">Design Principles That Drive Engagement</a></li>
+                <li><a href="#mistakes" className="text-sm text-blue-700 hover:text-blue-800">Common Mistakes That Kill Your CTR</a></li>
+                <li><a href="#optimization" className="text-sm text-blue-700 hover:text-blue-800">A/B Testing and Optimization Strategies</a></li>
+                <li><a href="#tools" className="text-sm text-blue-700 hover:text-blue-800">Essential Tools and Resources</a></li>
+                <li><a href="#case-studies" className="text-sm text-blue-700 hover:text-blue-800">Case Studies: Before and After</a></li>
               </ol>
             </nav>
 
-            <h3 id="psychology" className="text-2xl font-bold mt-12 mb-6">
+            <h3 id="psychology" className="text-content-section-title mt-12 mb-6">
               The Psychology Behind Click-Worthy Thumbnails
             </h3>
             
-            <p className="mb-4">
+            <p className="text-article-body mb-4">
               Understanding viewer psychology is the foundation of creating thumbnails that convert. When a 
               potential viewer scrolls through YouTube, they make split-second decisions based on visual cues. 
               Research shows that viewers spend an average of only 1.7 seconds looking at a thumbnail before 
               deciding whether to click or scroll past.
             </p>
 
-            <h4 className="text-xl font-semibold mt-6 mb-4">The Curiosity Gap</h4>
-            <p className="mb-4">
+            <h4 className="text-content-subsection-title mt-6 mb-4">The Curiosity Gap</h4>
+            <p className="text-article-body mb-4">
               The most successful thumbnails create what psychologists call a "curiosity gap" - the space 
               between what viewers know and what they want to know. This psychological trigger is incredibly 
               powerful because humans are naturally driven to close information gaps.
@@ -54,15 +54,15 @@ export const YouTubeEnhancedContent = () => {
             <div className="bg-gray-50 rounded-xl p-6 my-6">
               <h5 className="font-semibold mb-3">Examples of Curiosity Gap Techniques:</h5>
               <ul className="space-y-2">
-                <li><strong>Partial reveals:</strong> Showing part of something intriguing but not the whole picture</li>
-                <li><strong>Contrasts:</strong> Before/after, expectation/reality, normal/extreme</li>
-                <li><strong>Questions:</strong> Visual representations of "what if" or "how to" scenarios</li>
-                <li><strong>Unexpected elements:</strong> Something that doesn't quite fit the expected pattern</li>
+                <li><strong className="font-semibold">Partial reveals:</strong> Showing part of something intriguing but not the whole picture</li>
+                <li><strong className="font-semibold">Contrasts:</strong> Before/after, expectation/reality, normal/extreme</li>
+                <li><strong className="font-semibold">Questions:</strong> Visual representations of "what if" or "how to" scenarios</li>
+                <li><strong className="font-semibold">Unexpected elements:</strong> Something that doesn't quite fit the expected pattern</li>
               </ul>
             </div>
 
-            <h4 className="text-xl font-semibold mt-6 mb-4">Emotional Triggers</h4>
-            <p className="mb-4">
+            <h4 className="text-content-subsection-title mt-6 mb-4">Emotional Triggers</h4>
+            <p className="text-article-body mb-4">
               Successful thumbnails evoke immediate emotional responses. The most effective emotions for 
               driving clicks include:
             </p>
@@ -75,17 +75,17 @@ export const YouTubeEnhancedContent = () => {
               <li><strong>Satisfaction:</strong> Results, achievements, transformations</li>
             </ul>
 
-            <h3 id="technical" className="text-2xl font-bold mt-12 mb-6">
+            <h3 id="technical" className="text-content-section-title mt-12 mb-6">
               Technical Requirements and Best Practices
             </h3>
 
-            <p className="mb-4">
+            <p className="text-article-body mb-4">
               YouTube has specific technical requirements for thumbnails, but meeting the bare minimum isn't 
               enough. To maximize visibility and engagement, you need to optimize for how thumbnails appear 
               across different devices and contexts.
             </p>
 
-            <h4 className="text-xl font-semibold mt-6 mb-4">Optimal Specifications</h4>
+            <h4 className="text-content-subsection-title mt-6 mb-4">Optimal Specifications</h4>
             
             <div className="bg-blue-50 rounded-xl p-6 my-6">
               <h5 className="font-semibold mb-3">YouTube Thumbnail Requirements:</h5>
@@ -97,13 +97,13 @@ export const YouTubeEnhancedContent = () => {
               </ul>
             </div>
 
-            <p className="mb-4">
+            <p className="text-article-body mb-4">
               However, these are just the basics. Professional creators follow additional guidelines to ensure 
               their thumbnails look great everywhere:
             </p>
 
-            <h4 className="text-xl font-semibold mt-6 mb-4">Mobile Optimization</h4>
-            <p className="mb-4">
+            <h4 className="text-content-subsection-title mt-6 mb-4">Mobile Optimization</h4>
+            <p className="text-article-body mb-4">
               Over 70% of YouTube watch time happens on mobile devices, making mobile optimization crucial. 
               On small screens, your thumbnail appears at roughly 120x90 pixels - about the size of a postage 
               stamp. This means:
@@ -116,8 +116,8 @@ export const YouTubeEnhancedContent = () => {
               <li>Faces should take up at least 25% of the frame</li>
             </ul>
 
-            <h4 className="text-xl font-semibold mt-6 mb-4">The Safe Zone Principle</h4>
-            <p className="mb-4">
+            <h4 className="text-content-subsection-title mt-6 mb-4">The Safe Zone Principle</h4>
+            <p className="text-article-body mb-4">
               YouTube overlays various elements on thumbnails in different contexts. The video duration appears 
               in the bottom-right corner, while playlist indicators can appear in the top-right. To ensure 
               your key elements remain visible:
@@ -133,25 +133,25 @@ export const YouTubeEnhancedContent = () => {
               </ul>
             </div>
 
-            <h3 id="design" className="text-2xl font-bold mt-12 mb-6">
+            <h3 id="design" className="text-content-section-title mt-12 mb-6">
               Design Principles That Drive Engagement
             </h3>
 
-            <p className="mb-4">
+            <p className="text-article-body mb-4">
               Great thumbnail design isn't about artistic beauty - it's about communication efficiency. Your 
               thumbnail needs to tell a story in milliseconds while competing against dozens of other videos 
               for attention.
             </p>
 
-            <h4 className="text-xl font-semibold mt-6 mb-4">The Rule of Thirds</h4>
-            <p className="mb-4">
+            <h4 className="text-content-subsection-title mt-6 mb-4">The Rule of Thirds</h4>
+            <p className="text-article-body mb-4">
               Professional photographers and designers use the rule of thirds to create visually appealing 
               compositions. Divide your thumbnail into a 3x3 grid and place important elements along these 
               lines or at their intersections. This creates natural focal points that draw the eye.
             </p>
 
-            <h4 className="text-xl font-semibold mt-6 mb-4">Color Psychology in Thumbnails</h4>
-            <p className="mb-4">
+            <h4 className="text-content-subsection-title mt-6 mb-4">Color Psychology in Thumbnails</h4>
+            <p className="text-article-body mb-4">
               Colors evoke emotions and can significantly impact click-through rates. Understanding color 
               psychology helps you choose palettes that align with your content and audience expectations:
             </p>
@@ -175,8 +175,8 @@ export const YouTubeEnhancedContent = () => {
               </div>
             </div>
 
-            <h4 className="text-xl font-semibold mt-6 mb-4">Typography That Converts</h4>
-            <p className="mb-4">
+            <h4 className="text-content-subsection-title mt-6 mb-4">Typography That Converts</h4>
+            <p className="text-article-body mb-4">
               Text on thumbnails should be treated as a design element, not just information. Effective 
               thumbnail typography follows these principles:
             </p>
@@ -189,25 +189,25 @@ export const YouTubeEnhancedContent = () => {
               <li><strong>Test at thumbnail size:</strong> If you can't read it at 120px wide, make it bigger</li>
             </ul>
 
-            <h3 id="mistakes" className="text-2xl font-bold mt-12 mb-6">
+            <h3 id="mistakes" className="text-content-section-title mt-12 mb-6">
               Common Mistakes That Kill Your CTR
             </h3>
 
-            <p className="mb-4">
+            <p className="text-article-body mb-4">
               Even experienced creators make thumbnail mistakes that can devastate their click-through rates. 
               Here are the most common pitfalls and how to avoid them:
             </p>
 
-            <h4 className="text-xl font-semibold mt-6 mb-4">1. Clickbait Without Payoff</h4>
-            <p className="mb-4">
+            <h4 className="text-content-subsection-title mt-6 mb-4">1. Clickbait Without Payoff</h4>
+            <p className="text-article-body mb-4">
               While curiosity gaps work, misleading thumbnails damage your channel long-term. YouTube's 
               algorithm heavily weights "session duration" - if viewers immediately leave after clicking, 
               your videos get demoted. Always ensure your thumbnail accurately represents your content while 
               still being intriguing.
             </p>
 
-            <h4 className="text-xl font-semibold mt-6 mb-4">2. Information Overload</h4>
-            <p className="mb-4">
+            <h4 className="text-content-subsection-title mt-6 mb-4">2. Information Overload</h4>
+            <p className="text-article-body mb-4">
               Trying to communicate too much in one thumbnail confuses viewers and reduces clicks. Remember 
               the 3-second rule: if a viewer can't understand your thumbnail's message in 3 seconds, it's 
               too complex.
@@ -223,8 +223,8 @@ export const YouTubeEnhancedContent = () => {
               </ul>
             </div>
 
-            <h4 className="text-xl font-semibold mt-6 mb-4">3. Ignoring Brand Consistency</h4>
-            <p className="mb-4">
+            <h4 className="text-content-subsection-title mt-6 mb-4">3. Ignoring Brand Consistency</h4>
+            <p className="text-article-body mb-4">
               Your thumbnails should be instantly recognizable as yours. Developing a consistent visual style 
               helps viewers identify your content in their feed, increasing clicks from subscribers. This 
               doesn't mean every thumbnail should look identical, but they should share common elements:
@@ -237,18 +237,18 @@ export const YouTubeEnhancedContent = () => {
               <li>Consistent photo editing style</li>
             </ul>
 
-            <h3 id="optimization" className="text-2xl font-bold mt-12 mb-6">
+            <h3 id="optimization" className="text-content-section-title mt-12 mb-6">
               A/B Testing and Optimization Strategies
             </h3>
 
-            <p className="mb-4">
+            <p className="text-article-body mb-4">
               The most successful YouTubers don't rely on guesswork - they systematically test and optimize 
               their thumbnails based on data. Here's how to implement a testing strategy that consistently 
               improves your CTR:
             </p>
 
-            <h4 className="text-xl font-semibold mt-6 mb-4">Setting Up A/B Tests</h4>
-            <p className="mb-4">
+            <h4 className="text-content-subsection-title mt-6 mb-4">Setting Up A/B Tests</h4>
+            <p className="text-article-body mb-4">
               YouTube now offers native A/B testing for thumbnails through YouTube Studio. To run effective tests:
             </p>
 
@@ -259,7 +259,7 @@ export const YouTubeEnhancedContent = () => {
               <li>Apply winning elements to future thumbnails</li>
             </ol>
 
-            <h4 className="text-xl font-semibold mt-6 mb-4">What to Test</h4>
+            <h4 className="text-content-subsection-title mt-6 mb-4">What to Test</h4>
             
             <div className="bg-gray-50 rounded-xl p-6 my-6">
               <h5 className="font-semibold mb-3">Testing Variables:</h5>
@@ -272,16 +272,16 @@ export const YouTubeEnhancedContent = () => {
               </ul>
             </div>
 
-            <h3 id="tools" className="text-2xl font-bold mt-12 mb-6">
+            <h3 id="tools" className="text-content-section-title mt-12 mb-6">
               Essential Tools and Resources
             </h3>
 
-            <p className="mb-4">
+            <p className="text-article-body mb-4">
               Creating professional thumbnails doesn't require expensive software or years of design experience. 
               Here are the tools that top creators use:
             </p>
 
-            <h4 className="text-xl font-semibold mt-6 mb-4">Design Tools</h4>
+            <h4 className="text-content-subsection-title mt-6 mb-4">Design Tools</h4>
             
             <div className="space-y-4 mb-6">
               <div className="border rounded-xl p-4">
@@ -307,8 +307,8 @@ export const YouTubeEnhancedContent = () => {
               </div>
             </div>
 
-            <h4 className="text-xl font-semibold mt-6 mb-4">Analytics Tools</h4>
-            <p className="mb-4">
+            <h4 className="text-content-subsection-title mt-6 mb-4">Analytics Tools</h4>
+            <p className="text-article-body mb-4">
               Understanding your thumbnail performance is crucial for improvement:
             </p>
 
@@ -318,51 +318,51 @@ export const YouTubeEnhancedContent = () => {
               <li><strong>VidIQ:</strong> Thumbnail preview and optimization suggestions</li>
             </ul>
 
-            <h3 id="case-studies" className="text-2xl font-bold mt-12 mb-6">
+            <h3 id="case-studies" className="text-content-section-title mt-12 mb-6">
               Case Studies: Before and After
             </h3>
 
-            <p className="mb-4">
+            <p className="text-article-body mb-4">
               Let's examine real-world examples of thumbnail transformations and their impact on channel performance:
             </p>
 
             <div className="bg-green-50 rounded-xl p-6 my-6">
               <h4 className="font-semibold text-green-900 mb-3">Case Study 1: Gaming Channel</h4>
-              <p className="text-green-900 mb-2">
-                <strong>Before:</strong> Generic gameplay screenshots with small text
+              <p className="text-sm text-green-900 mb-2">
+                <strong className="font-semibold">Before:</strong> Generic gameplay screenshots with small text
               </p>
-              <p className="text-green-900 mb-2">
-                <strong>After:</strong> Creator's face with emotional reaction + bold text highlighting key moment
+              <p className="text-sm text-green-900 mb-2">
+                <strong className="font-semibold">After:</strong> Creator's face with emotional reaction + bold text highlighting key moment
               </p>
-              <p className="text-green-900">
-                <strong>Result:</strong> 312% increase in CTR, 45% increase in average view duration
+              <p className="text-sm text-green-900">
+                <strong className="font-semibold">Result:</strong> 312% increase in CTR, 45% increase in average view duration
               </p>
             </div>
 
             <div className="bg-blue-50 rounded-xl p-6 my-6">
               <h4 className="font-semibold text-blue-900 mb-3">Case Study 2: Educational Channel</h4>
-              <p className="text-blue-900 mb-2">
-                <strong>Before:</strong> Text-heavy slides from the video
+              <p className="text-sm text-blue-900 mb-2">
+                <strong className="font-semibold">Before:</strong> Text-heavy slides from the video
               </p>
-              <p className="text-blue-900 mb-2">
-                <strong>After:</strong> Clean diagram with curiosity-inducing question
+              <p className="text-sm text-blue-900 mb-2">
+                <strong className="font-semibold">After:</strong> Clean diagram with curiosity-inducing question
               </p>
-              <p className="text-blue-900">
-                <strong>Result:</strong> 189% increase in CTR, 67% increase in session duration
+              <p className="text-sm text-blue-900">
+                <strong className="font-semibold">Result:</strong> 189% increase in CTR, 67% increase in session duration
               </p>
             </div>
 
-            <h3 className="text-2xl font-bold mt-12 mb-6">
+            <h3 className="text-content-section-title mt-12 mb-6">
               Conclusion: Your Thumbnail Strategy Moving Forward
             </h3>
 
-            <p className="mb-4">
+            <p className="text-article-body mb-4">
               Creating thumbnails that convert is both an art and a science. While the principles in this 
               guide provide a strong foundation, remember that every audience is unique. What works for one 
               channel might not work for another.
             </p>
 
-            <p className="mb-4">
+            <p className="text-article-body mb-4">
               The key to long-term success is developing a systematic approach: understand the psychology, 
               follow technical best practices, apply design principles, avoid common mistakes, and continuously 
               test and optimize based on your data.
@@ -379,7 +379,7 @@ export const YouTubeEnhancedContent = () => {
               </ol>
             </div>
 
-            <p className="text-lg font-medium mt-8">
+            <p className="text-article-lead mt-8">
               Remember: your thumbnail is your video's first impression. Make it count. Start implementing 
               these strategies today, and watch your channel growth accelerate.
             </p>
@@ -391,19 +391,19 @@ export const YouTubeEnhancedContent = () => {
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold mb-8">
+            <h2 className="text-article-title mb-8">
               How YouTube's Algorithm Evaluates Thumbnails
             </h2>
             
             <div className="prose prose-lg">
-              <p className="mb-6">
+              <p className="text-article-body mb-6">
                 YouTube's recommendation algorithm is a complex system that considers hundreds of signals. 
                 While YouTube doesn't publicly reveal all factors, extensive testing and analysis by the 
                 creator community has revealed how thumbnails impact your video's reach.
               </p>
 
-              <h3 className="text-2xl font-bold mt-8 mb-4">The Click-Through Rate (CTR) Factor</h3>
-              <p className="mb-4">
+              <h3 className="text-content-section-title mt-8 mb-4">The Click-Through Rate (CTR) Factor</h3>
+              <p className="text-article-body mb-4">
                 CTR is the percentage of people who click on your video after seeing the thumbnail. YouTube 
                 uses this as a primary signal of content relevance and quality. Average CTRs vary by niche:
               </p>
@@ -419,15 +419,15 @@ export const YouTubeEnhancedContent = () => {
                 </ul>
               </div>
 
-              <h3 className="text-2xl font-bold mt-8 mb-4">Impression Click-Through Rate vs. Unique Viewers</h3>
-              <p className="mb-4">
+              <h3 className="text-content-section-title mt-8 mb-4">Impression Click-Through Rate vs. Unique Viewers</h3>
+              <p className="text-article-body mb-4">
                 YouTube distinguishes between impressions (how many times your thumbnail was shown) and 
                 unique viewers (individual people who saw it). A thumbnail that performs well across diverse 
                 audiences gets promoted more broadly.
               </p>
 
-              <h3 className="text-2xl font-bold mt-8 mb-4">The First 48 Hours</h3>
-              <p className="mb-4">
+              <h3 className="text-content-section-title mt-8 mb-4">The First 48 Hours</h3>
+              <p className="text-article-body mb-4">
                 Your thumbnail's performance in the first 48 hours after upload is crucial. YouTube uses this 
                 initial data to determine how widely to promote your video. A strong thumbnail can mean the 
                 difference between 10,000 and 1,000,000 views.
@@ -441,16 +441,16 @@ export const YouTubeEnhancedContent = () => {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
+            <h2 className="text-article-title mb-8 text-center">
               Frequently Asked Questions About YouTube Thumbnails
             </h2>
             
             <div className="space-y-6">
               <details className="bg-gray-50 rounded-xl p-6 cursor-pointer">
-                <summary className="text-xl font-semibold">
+                <summary className="text-faq-question">
                   How often should I change my thumbnail after uploading?
                 </summary>
-                <p className="mt-4 text-gray-800">
+                <p className="text-faq-answer mt-4">
                   If your video is underperforming (CTR below 2%), consider changing the thumbnail after 
                   48-72 hours. However, if the video is gaining traction, avoid changes as they can reset 
                   momentum. Always save your original thumbnail before making changes.
@@ -458,10 +458,10 @@ export const YouTubeEnhancedContent = () => {
               </details>
 
               <details className="bg-gray-50 rounded-xl p-6 cursor-pointer">
-                <summary className="text-xl font-semibold">
+                <summary className="text-faq-question">
                   Should I use my face in every thumbnail?
                 </summary>
-                <p className="mt-4 text-gray-800">
+                <p className="text-faq-answer mt-4">
                   Human faces increase CTR by an average of 38%, but they're not mandatory for every video. 
                   Use faces for personal stories, reactions, or tutorials. For product reviews, comparisons, 
                   or data-driven content, the subject matter might be more compelling than a face.
@@ -469,10 +469,10 @@ export const YouTubeEnhancedContent = () => {
               </details>
 
               <details className="bg-gray-50 rounded-xl p-6 cursor-pointer">
-                <summary className="text-xl font-semibold">
+                <summary className="text-faq-question">
                   What's the ideal text-to-image ratio for thumbnails?
                 </summary>
-                <p className="mt-4 text-gray-800">
+                <p className="text-faq-answer mt-4">
                   Text should occupy no more than 30% of your thumbnail. The sweet spot is 15-25%, allowing 
                   the visual elements to tell most of the story. Remember, viewers can read your video title, 
                   so thumbnail text should complement, not repeat it.
@@ -480,10 +480,10 @@ export const YouTubeEnhancedContent = () => {
               </details>
 
               <details className="bg-gray-50 rounded-xl p-6 cursor-pointer">
-                <summary className="text-xl font-semibold">
+                <summary className="text-faq-question">
                   How do I make thumbnails for YouTube Shorts?
                 </summary>
-                <p className="mt-4 text-gray-800">
+                <p className="text-faq-answer mt-4">
                   YouTube Shorts use vertical thumbnails (9:16 ratio) taken from the video itself. While you 
                   can't upload custom thumbnails for Shorts, you can select which frame to use. Choose a 
                   frame with high visual impact and ensure any text is centered and large enough for mobile viewing.
@@ -491,10 +491,10 @@ export const YouTubeEnhancedContent = () => {
               </details>
 
               <details className="bg-gray-50 rounded-xl p-6 cursor-pointer">
-                <summary className="text-xl font-semibold">
+                <summary className="text-faq-question">
                   Do thumbnails affect YouTube SEO?
                 </summary>
-                <p className="mt-4 text-gray-800">
+                <p className="text-faq-answer mt-4">
                   While thumbnails don't directly impact search rankings, they significantly affect CTR, which 
                   is a major ranking factor. Videos with higher CTRs get promoted more in search results and 
                   recommendations. Additionally, YouTube's AI can now "read" text in thumbnails, potentially 
@@ -503,10 +503,10 @@ export const YouTubeEnhancedContent = () => {
               </details>
 
               <details className="bg-gray-50 rounded-xl p-6 cursor-pointer">
-                <summary className="text-xl font-semibold">
+                <summary className="text-faq-question">
                   What's the best time to upload for maximum thumbnail visibility?
                 </summary>
-                <p className="mt-4 text-gray-800">
+                <p className="text-faq-answer mt-4">
                   Upload timing affects initial impression velocity. For most channels, Tuesday-Thursday 
                   between 2-4 PM (in your audience's primary timezone) yields the highest engagement. However, 
                   consistency matters more than perfect timing - YouTube rewards regular upload schedules.
@@ -514,10 +514,10 @@ export const YouTubeEnhancedContent = () => {
               </details>
 
               <details className="bg-gray-50 rounded-xl p-6 cursor-pointer">
-                <summary className="text-xl font-semibold">
+                <summary className="text-faq-question">
                   Should I create different thumbnails for different platforms?
                 </summary>
-                <p className="mt-4 text-gray-800">
+                <p className="text-faq-answer mt-4">
                   If you share your YouTube videos on other platforms, consider creating platform-specific 
                   thumbnails. Twitter, Facebook, and LinkedIn all display thumbnails differently. A thumbnail 
                   optimized for YouTube's 16:9 format might appear cropped or unclear on other platforms.
@@ -525,10 +525,10 @@ export const YouTubeEnhancedContent = () => {
               </details>
 
               <details className="bg-gray-50 rounded-xl p-6 cursor-pointer">
-                <summary className="text-xl font-semibold">
+                <summary className="text-faq-question">
                   How do I know if my thumbnail is working?
                 </summary>
-                <p className="mt-4 text-gray-800">
+                <p className="text-faq-answer mt-4">
                   Check YouTube Analytics &gt; Reach &gt; Impressions click-through rate. Good CTR varies by niche, 
                   but generally: Below 2% needs immediate improvement, 2-5% is average, 5-10% is good, and 
                   above 10% is excellent. Also monitor average view duration - high CTR with low retention 
@@ -544,14 +544,14 @@ export const YouTubeEnhancedContent = () => {
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
+            <h2 className="text-article-title mb-8 text-center">
               YouTube Thumbnail Resources and Tools
             </h2>
             
             <div className="grid md:grid-cols-3 gap-8">
               <div className="bg-white rounded-xl p-6 shadow-sm">
-                <h3 className="text-xl font-semibold mb-4">Free Resources</h3>
-                <ul className="space-y-3 text-gray-800">
+                <h3 className="text-content-subsection-title mb-4">Free Resources</h3>
+                <ul className="space-y-3 text-article-body text-gray-800">
                   <li>• YouTube Creator Academy thumbnail course</li>
                   <li>• Google Fonts for thumbnail typography</li>
                   <li>• Unsplash/Pexels for background images</li>
@@ -561,8 +561,8 @@ export const YouTubeEnhancedContent = () => {
               </div>
               
               <div className="bg-white rounded-xl p-6 shadow-sm">
-                <h3 className="text-xl font-semibold mb-4">Premium Tools</h3>
-                <ul className="space-y-3 text-gray-800">
+                <h3 className="text-content-subsection-title mb-4">Premium Tools</h3>
+                <ul className="space-y-3 text-article-body text-gray-800">
                   <li>• CoverGen Pro - AI thumbnail generation</li>
                   <li>• Adobe Creative Suite</li>
                   <li>• TubeBuddy thumbnail A/B testing</li>
@@ -572,8 +572,8 @@ export const YouTubeEnhancedContent = () => {
               </div>
               
               <div className="bg-white rounded-xl p-6 shadow-sm">
-                <h3 className="text-xl font-semibold mb-4">Learning Resources</h3>
-                <ul className="space-y-3 text-gray-800">
+                <h3 className="text-content-subsection-title mb-4">Learning Resources</h3>
+                <ul className="space-y-3 text-article-body text-gray-800">
                   <li>• Roberto Blake's thumbnail tutorials</li>
                   <li>• Think Media optimization guides</li>
                   <li>• Derral Eves algorithm insights</li>

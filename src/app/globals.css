@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import article typography styles */
+@import '../styles/article-typography.css';
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -76,6 +79,578 @@
   
   .layout-ready {
     opacity: 1;
+  }
+}
+
+/* Global Typography System - Using Tailwind Typography Tokens */
+@layer base {
+  /* Display Typography */
+  .display-1 {
+    @apply text-display-1 md:text-display-1 lg:text-display-1;
+  }
+  
+  .display-2 {
+    @apply text-display-2 md:text-display-2 lg:text-display-2;
+  }
+  
+  /* Headings - Apply to all h1-h6 by default */
+  h1 {
+    @apply text-heading-3 md:text-heading-2 lg:text-heading-1;
+  }
+  
+  h2 {
+    @apply text-heading-4 md:text-heading-3 lg:text-heading-2;
+  }
+  
+  h3 {
+    @apply text-heading-5 md:text-heading-4 lg:text-heading-3;
+  }
+  
+  h4 {
+    @apply text-heading-6 md:text-heading-5 lg:text-heading-4;
+  }
+  
+  h5 {
+    @apply text-body-md md:text-heading-6;
+  }
+  
+  h6 {
+    @apply text-body-sm md:text-body-md;
+  }
+  
+  /* Platform page specific typography */
+  .platform-hero {
+    @apply text-heading-2 md:text-heading-1 lg:text-display-2;
+  }
+  
+  .platform-subtitle {
+    @apply text-body-lg md:text-body-lg;
+  }
+  
+  .platform-section-title {
+    @apply text-heading-4 md:text-heading-3 lg:text-heading-2;
+  }
+  
+  .platform-feature-title {
+    @apply text-ui-lg;
+  }
+  
+  /* Tool page specific typography */
+  .tool-hero {
+    @apply text-heading-2 md:text-heading-1 lg:text-display-2;
+  }
+  
+  .tool-badge {
+    @apply text-body-sm font-light;
+  }
+  
+  .tool-stat {
+    @apply text-heading-3 md:text-heading-2;
+  }
+  
+  .tool-stat-label {
+    @apply text-body-sm font-light;
+  }
+  
+  .tool-feature-title {
+    @apply text-ui-lg;
+  }
+  
+  /* Body text variations */
+  .body-large {
+    @apply text-body-lg;
+  }
+  
+  .body-default {
+    @apply text-body-md;
+  }
+  
+  .body-small {
+    @apply text-body-sm;
+  }
+  
+  /* Default paragraph styles */
+  p {
+    @apply text-body-md;
+  }
+  
+  /* Button styles */
+  .btn-large {
+    @apply text-lg font-medium;
+  }
+  
+  .btn-default {
+    @apply text-base font-medium;
+  }
+  
+  .btn-small {
+    @apply text-sm font-medium;
+  }
+  
+  /* UI Typography */
+  .ui-nav {
+    @apply text-sm font-medium;
+  }
+  
+  .ui-menu-item {
+    @apply text-sm font-normal;
+  }
+  
+  .ui-breadcrumb {
+    @apply text-sm font-light;
+  }
+  
+  .ui-label {
+    @apply text-sm font-medium;
+  }
+  
+  .ui-helper {
+    @apply text-xs font-normal;
+  }
+  
+  .ui-caption {
+    @apply text-xs font-normal;
+  }
+  
+  .ui-overline {
+    @apply text-xs font-medium uppercase tracking-wider;
+  }
+  
+  /* Article content typography */
+  .article-title {
+    @apply text-3xl md:text-4xl lg:text-5xl font-extralight tracking-tight;
+  }
+  
+  .article-lead {
+    @apply text-xl md:text-2xl font-light leading-relaxed text-gray-700;
+  }
+  
+  .article-body {
+    @apply text-base md:text-lg font-normal leading-relaxed;
+  }
+  
+  .article-caption {
+    @apply text-sm font-light text-gray-600 leading-relaxed;
+  }
+  
+  /* Content sections */
+  .content-section-title {
+    @apply text-2xl md:text-3xl font-extralight tracking-tight;
+  }
+  
+  .content-subsection-title {
+    @apply text-xl md:text-2xl font-light;
+  }
+  
+  .content-emphasis {
+    @apply font-medium;
+  }
+  
+  /* FAQ specific */
+  .faq-question {
+    @apply text-lg md:text-xl font-light;
+  }
+  
+  .faq-answer {
+    @apply text-base font-normal leading-relaxed text-gray-800;
+  }
+  
+  /* Apply ultra-thin style to common elements */
+  .hero-title {
+    @apply text-heading-2 md:text-heading-1 lg:text-display-2;
+  }
+  
+  .section-title {
+    @apply text-heading-4 md:text-heading-3 lg:text-heading-2;
+  }
+  
+  .card-title {
+    @apply text-heading-5 md:text-heading-4;
+  }
+  
+  /* Lists with proper typography */
+  ul, ol {
+    @apply text-base font-normal leading-relaxed;
+  }
+  
+  /* Strong and emphasis */
+  strong, b {
+    @apply font-medium;
+  }
+  
+  em, i {
+    @apply font-light italic;
+  }
+  
+  /* Links */
+  a {
+    @apply font-normal;
+  }
+  
+  /* Blockquotes */
+  blockquote {
+    @apply text-lg font-light italic;
+  }
+  
+  /* Enhanced Content Sections - For SEO-optimized content */
+  .enhanced-content {
+    @apply space-y-8;
+  }
+  
+  .enhanced-content h2 {
+    @apply text-2xl md:text-3xl font-extralight tracking-tight mb-6;
+  }
+  
+  .enhanced-content h3 {
+    @apply text-xl md:text-2xl font-light mb-4;
+  }
+  
+  .enhanced-content h4 {
+    @apply text-lg md:text-xl font-light mb-3;
+  }
+  
+  .enhanced-content p {
+    @apply text-base md:text-lg font-normal leading-relaxed mb-4;
+  }
+  
+  .enhanced-content ul {
+    @apply list-disc pl-6 space-y-2 mb-4;
+  }
+  
+  .enhanced-content ol {
+    @apply list-decimal pl-6 space-y-2 mb-4;
+  }
+  
+  .enhanced-content li {
+    @apply text-base md:text-lg font-normal leading-relaxed;
+  }
+  
+  /* Features Grid Typography */
+  .feature-grid {
+    @apply grid gap-6;
+  }
+  
+  .feature-card h3 {
+    @apply text-lg font-medium mb-2;
+  }
+  
+  .feature-card p {
+    @apply text-base font-normal text-gray-700;
+  }
+  
+  /* Templates Section Typography */
+  .template-grid {
+    @apply grid gap-4;
+  }
+  
+  .template-item {
+    @apply text-base font-medium;
+  }
+  
+  /* Best Practices Section Typography */
+  .best-practice-item h3 {
+    @apply text-lg md:text-xl font-medium mb-3;
+  }
+  
+  .best-practice-item p {
+    @apply text-base font-normal text-gray-700;
+  }
+  
+  /* AI Transformation Showcase Typography */
+  .showcase-title {
+    @apply text-2xl md:text-3xl font-extralight tracking-tight mb-8;
+  }
+  
+  .showcase-subtitle {
+    @apply text-lg font-light text-gray-700 mb-6;
+  }
+  
+  .showcase-caption {
+    @apply text-sm font-normal text-gray-600;
+  }
+  
+  /* CTA Section Typography */
+  .cta-title {
+    @apply text-3xl md:text-4xl lg:text-5xl font-thin tracking-tight mb-6;
+  }
+  
+  .cta-subtitle {
+    @apply text-xl md:text-2xl font-light mb-8;
+  }
+  
+  /* Platform/Tool Comparison */
+  .comparison-table th {
+    @apply text-sm font-medium uppercase tracking-wider;
+  }
+  
+  .comparison-table td {
+    @apply text-base font-normal;
+  }
+  
+  /* Stats and Metrics */
+  .stat-value {
+    @apply text-3xl md:text-4xl font-extralight;
+  }
+  
+  .stat-label {
+    @apply text-sm font-normal text-gray-600;
+  }
+  
+  /* Tool Styles Grid */
+  .style-grid h3 {
+    @apply text-base font-medium mb-2;
+  }
+  
+  .style-grid p {
+    @apply text-sm font-normal text-gray-600;
+  }
+  
+  /* Testimonials and Quotes */
+  .testimonial-text {
+    @apply text-lg font-light italic mb-4;
+  }
+  
+  .testimonial-author {
+    @apply text-sm font-medium;
+  }
+  
+  .testimonial-role {
+    @apply text-sm font-normal text-gray-600;
+  }
+  
+  /* Platform Page Components - Auto-apply typography */
+  /* Hero Section */
+  .platform-hero-section h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl font-thin tracking-tight !important;
+  }
+  
+  .platform-hero-section p {
+    @apply text-lg md:text-xl font-light leading-relaxed !important;
+  }
+  
+  /* Apply to common hero patterns */
+  section.py-20 > div > div > h1:first-of-type {
+    @apply text-4xl md:text-5xl lg:text-6xl font-thin tracking-tight;
+  }
+  
+  section.py-20 > div > div > p {
+    @apply text-lg md:text-xl font-light leading-relaxed;
+  }
+  
+  /* Features Grid */
+  .platform-features-grid h2 {
+    @apply text-2xl md:text-3xl lg:text-4xl font-extralight text-center mb-12 !important;
+  }
+  
+  .platform-features-grid h3,
+  .feature-card h3 {
+    @apply text-lg font-medium mb-2 !important;
+  }
+  
+  .platform-features-grid p,
+  .feature-card p {
+    @apply text-base font-normal text-gray-700 !important;
+  }
+  
+  /* Apply to sections with cards */
+  section .card h3 {
+    @apply text-lg font-medium mb-2;
+  }
+  
+  section .card p {
+    @apply text-base font-normal text-gray-700;
+  }
+  
+  /* Templates Section */
+  .platform-templates h2 {
+    @apply text-2xl md:text-3xl lg:text-4xl font-extralight text-center mb-12;
+  }
+  
+  .platform-templates .template-item {
+    @apply text-base font-medium;
+  }
+  
+  .platform-templates p {
+    @apply text-lg text-gray-700;
+  }
+  
+  /* Best Practices Section */
+  .platform-best-practices h2 {
+    @apply text-2xl md:text-3xl lg:text-4xl font-extralight text-center mb-12;
+  }
+  
+  .platform-best-practices h3 {
+    @apply text-lg md:text-xl font-medium mb-3;
+  }
+  
+  .platform-best-practices p {
+    @apply text-base font-normal text-gray-700;
+  }
+  
+  /* Tool Page Components */
+  /* Tool Hero Section */
+  .tool-hero-section h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl font-thin tracking-tight;
+  }
+  
+  .tool-hero-section p {
+    @apply text-lg md:text-xl font-light leading-relaxed;
+  }
+  
+  .tool-hero-section .badge {
+    @apply text-sm font-light;
+  }
+  
+  /* Tool Features */
+  .tool-features h2 {
+    @apply text-2xl md:text-3xl font-extralight mb-4;
+  }
+  
+  .tool-features h3 {
+    @apply text-base font-medium mb-2;
+  }
+  
+  .tool-features p {
+    @apply text-base font-normal text-gray-700;
+  }
+  
+  /* Popular Styles Section */
+  .tool-styles h2 {
+    @apply text-2xl md:text-3xl font-extralight mb-4;
+  }
+  
+  .tool-styles h3 {
+    @apply text-base font-medium mb-2;
+  }
+  
+  .tool-styles p {
+    @apply text-sm font-normal text-gray-600;
+  }
+  
+  /* SEO Content Section */
+  .seo-content h2 {
+    @apply text-2xl md:text-3xl font-extralight mb-6 text-center;
+  }
+  
+  .seo-content h3 {
+    @apply text-xl md:text-2xl font-light mt-8 mb-4;
+  }
+  
+  .seo-content p {
+    @apply text-base md:text-lg font-normal leading-relaxed mb-4;
+  }
+  
+  /* FAQ Sections */
+  .faq-section h2 {
+    @apply text-2xl md:text-3xl lg:text-4xl font-extralight text-center mb-12;
+  }
+  
+  .faq-section h3 {
+    @apply text-lg md:text-xl font-light mb-2;
+  }
+  
+  .faq-section p {
+    @apply text-base font-normal leading-relaxed text-gray-800;
+  }
+  
+  /* CTA Sections */
+  .cta-section h2 {
+    @apply text-3xl md:text-4xl lg:text-5xl font-thin tracking-tight mb-6;
+  }
+  
+  .cta-section p {
+    @apply text-xl md:text-2xl font-light mb-8;
+  }
+  
+  /* Typography Utility Classes for Quick Application */
+  /* Use these classes directly in components */
+  
+  /* Hero Typography */
+  .text-hero-title {
+    @apply text-heading-2 md:text-heading-1 lg:text-display-2;
+  }
+  
+  .text-hero-subtitle {
+    @apply text-body-lg md:text-body-lg;
+  }
+  
+  /* Section Typography */
+  .text-section-title {
+    @apply text-heading-4 md:text-heading-3 lg:text-heading-2;
+  }
+  
+  .text-section-subtitle {
+    @apply text-heading-5 md:text-heading-4;
+  }
+  
+  /* Feature Typography */
+  .text-feature-title {
+    @apply text-ui-lg;
+  }
+  
+  .text-feature-description {
+    @apply text-body-md text-gray-700;
+  }
+  
+  /* Card Typography */
+  .text-card-title {
+    @apply text-ui-lg;
+  }
+  
+  .text-card-description {
+    @apply text-body-sm text-gray-600;
+  }
+  
+  /* Platform Page Auto-Apply */
+  [class*="platforms/"] section h1,
+  main:has([href*="/platforms"]) section h1 {
+    @apply text-heading-2 md:text-heading-1 lg:text-display-2 !important;
+  }
+  
+  [class*="platforms/"] section h2,
+  main:has([href*="/platforms"]) section h2 {
+    @apply text-2xl md:text-3xl lg:text-4xl font-extralight !important;
+  }
+  
+  [class*="platforms/"] section h3,
+  main:has([href*="/platforms"]) section h3 {
+    @apply text-xl md:text-2xl font-light !important;
+  }
+  
+  /* Remove font-bold, font-semibold from platform pages */
+  [class*="platforms/"] .font-bold,
+  [class*="platforms/"] .font-semibold {
+    @apply font-light !important;
+  }
+  
+  /* Platform hero sections */
+  section[class*="bg-gradient"]:has(h1) h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl font-thin tracking-tight !important;
+  }
+  
+  section[class*="bg-gradient"]:has(h1) p {
+    @apply text-lg md:text-xl font-light leading-relaxed !important;
+  }
+  
+  /* Override specific font weights in platform pages */
+  .text-5xl.font-bold,
+  .text-6xl.font-bold {
+    @apply font-thin !important;
+  }
+  
+  .text-3xl.font-bold,
+  .text-4xl.font-bold {
+    @apply font-extralight !important;
+  }
+  
+  .text-xl.font-semibold,
+  .text-lg.font-semibold {
+    @apply font-light !important;
+  }
+  
+  .text-lg.font-medium,
+  .text-base.font-medium {
+    @apply font-normal !important;
   }
 }
 
@@ -156,6 +731,31 @@
   }
 }
 
+/* Platform and Tool Page Typography Overrides */
+/* Target platform pages by URL structure */
+[data-platform-page] h1,
+body:has([href*="/platforms/youtube"]) h1,
+body:has([href*="/platforms/instagram"]) h1,
+body:has([href*="/platforms/tiktok"]) h1,
+body:has([href*="/platforms/twitch"]) h1,
+body:has([href*="/platforms/spotify"]) h1,
+body:has([href*="/platforms/bilibili"]) h1,
+body:has([href*="/platforms/rednote"]) h1,
+body:has([href*="/platforms/linkedin"]) h1,
+body:has([href*="/platforms/wechat"]) h1 {
+  @apply text-4xl md:text-5xl lg:text-6xl font-thin tracking-tight !important;
+}
+
+[data-platform-page] h2,
+body:has([href*="/platforms/"]) section h2 {
+  @apply text-2xl md:text-3xl lg:text-4xl font-extralight !important;
+}
+
+[data-platform-page] h3,
+body:has([href*="/platforms/"]) section h3 {
+  @apply text-xl md:text-2xl font-light !important;
+}
+
 /* Prose content styling for blog posts */
 .prose {
   color: rgb(17 24 39);
@@ -165,9 +765,34 @@
   color: rgb(209 213 219);
 }
 
-.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+.prose h1 {
+  @apply text-3xl md:text-4xl lg:text-5xl font-thin tracking-tight;
   color: rgb(17 24 39);
-  font-weight: 700;
+}
+
+.prose h2 {
+  @apply text-2xl md:text-3xl lg:text-4xl font-extralight;
+  color: rgb(17 24 39);
+}
+
+.prose h3 {
+  @apply text-xl md:text-2xl lg:text-3xl font-extralight;
+  color: rgb(17 24 39);
+}
+
+.prose h4 {
+  @apply text-lg md:text-xl lg:text-2xl font-light;
+  color: rgb(17 24 39);
+}
+
+.prose h5 {
+  @apply text-base md:text-lg font-light;
+  color: rgb(17 24 39);
+}
+
+.prose h6 {
+  @apply text-sm md:text-base font-normal;
+  color: rgb(17 24 39);
 }
 
 .dark .prose h1, .dark .prose h2, .dark .prose h3, .dark .prose h4, .dark .prose h5, .dark .prose h6 {
@@ -176,7 +801,7 @@
 
 .prose strong {
   color: rgb(17 24 39);
-  font-weight: 600;
+  font-weight: 500; /* Changed from 600 to 500 (medium) */
 }
 
 .dark .prose strong {

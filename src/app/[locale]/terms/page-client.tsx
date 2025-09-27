@@ -20,16 +20,16 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
           <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
             <FileText className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">Terms of Service</h1>
+          <h1 className="text-hero-title text-gray-900 mb-4">Terms of Service</h1>
           <div className="flex items-center justify-center gap-2 text-gray-600">
             <CheckCircle2 className="w-5 h-5 text-green-500" />
-            <p className="text-lg">Effective Date: August 31, 2025</p>
+            <p className="text-body-lg">Effective Date: August 31, 2025</p>
           </div>
         </div>
 
         {/* Quick Navigation */}
         <div className="bg-blue-50 rounded-2xl p-6 mb-12 border border-blue-100">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <h2 className="text-heading-5 text-gray-900 mb-4 flex items-center gap-2">
             <Globe className="w-5 h-5 text-blue-600" />
             Quick Navigation
           </h2>
@@ -49,7 +49,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
         <div className="space-y-8">
           {/* Section 1: Introduction */}
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Agreement to Terms</h2>
+            <h2 className="text-section-title text-gray-900 mb-4">1. Agreement to Terms</h2>
             <div className="prose prose-gray max-w-none">
               <p className="text-gray-700 leading-relaxed">
                 By accessing or using CoverGen Pro ("Service", "Platform", or "We"), you agree to be bound by these Terms of Service ("Terms"). If you disagree with any part of these terms, you do not have permission to access our Service.
@@ -67,13 +67,13 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
 
           {/* Section 2: Service Description */}
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">2. Our Service</h2>
+            <h2 className="text-section-title text-gray-900 mb-4">2. Our Service</h2>
             <p className="text-gray-700 mb-6">
               CoverGen Pro is an AI-powered platform that enables users to create professional cover images and posters for various content platforms including:
             </p>
             <div className="grid md:grid-cols-2 gap-4 mb-6">
               <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="font-semibold text-gray-900 mb-2">Supported Platforms</h4>
+                <h4 className="text-ui-lg text-gray-900 mb-2">Supported Platforms</h4>
                 <ul className="space-y-1 text-gray-700 text-sm">
                   <li>• YouTube thumbnails</li>
                   <li>• TikTok covers</li>
@@ -83,7 +83,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                 </ul>
               </div>
               <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="font-semibold text-gray-900 mb-2">Key Features</h4>
+                <h4 className="text-ui-lg text-gray-900 mb-2">Key Features</h4>
                 <ul className="space-y-1 text-gray-700 text-sm">
                   <li>• AI-powered generation</li>
                   <li>• Custom templates</li>
@@ -97,14 +97,14 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
 
           {/* Section 3: User Accounts */}
           <section id="accounts" className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+            <h2 className="text-section-title text-gray-900 mb-6 flex items-center gap-3">
               <Shield className="w-6 h-6 text-blue-600" />
               3. User Accounts
             </h2>
             
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">3.1 Account Registration</h3>
+                <h3 className="text-heading-5 text-gray-900 mb-3">3.1 Account Registration</h3>
                 <ul className="space-y-2 text-gray-700">
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
@@ -122,7 +122,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">3.2 Account Security</h3>
+                <h3 className="text-heading-5 text-gray-900 mb-3">3.2 Account Security</h3>
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <p className="text-gray-700">
                     You are responsible for:
@@ -139,17 +139,17 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
 
           {/* Section 4: Subscription & Payment */}
           <section id="subscription" className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+            <h2 className="text-section-title text-gray-900 mb-6 flex items-center gap-3">
               <CreditCard className="w-6 h-6 text-blue-600" />
               4. Subscription Plans & Payment
             </h2>
 
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">4.1 Available Plans</h3>
+                <h3 className="text-heading-5 text-gray-900 mb-4">4.1 Available Plans</h3>
                 <div className="grid md:grid-cols-3 gap-4">
                   <div className="border border-gray-200 rounded-lg p-4">
-                    <h4 className="font-semibold text-gray-900 mb-2">Free Plan</h4>
+                    <h4 className="text-ui-lg text-gray-900 mb-2">Free Plan</h4>
                     <p className="text-sm font-medium text-gray-900 mb-2">$0/forever</p>
                     <ul className="space-y-1 text-sm text-gray-600">
                       <li>✓ {config.limits.free.monthly} covers per month</li>
@@ -161,7 +161,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                     </ul>
                   </div>
                   <div className="border border-blue-200 bg-blue-50 rounded-lg p-4">
-                    <h4 className="font-semibold text-gray-900 mb-2">Pro Plan</h4>
+                    <h4 className="text-ui-lg text-gray-900 mb-2">Pro Plan</h4>
                     <p className="text-sm font-medium text-gray-900 mb-2">$9/month</p>
                     <ul className="space-y-1 text-sm text-gray-600">
                       <li>✓ {config.limits.pro.monthly} covers per month</li>
@@ -172,7 +172,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                     </ul>
                   </div>
                   <div className="border border-purple-200 bg-purple-50 rounded-lg p-4">
-                    <h4 className="font-semibold text-gray-900 mb-2">Pro+ Plan</h4>
+                    <h4 className="text-ui-lg text-gray-900 mb-2">Pro+ Plan</h4>
                     <p className="text-sm font-medium text-gray-900 mb-2">$19/month</p>
                     <ul className="space-y-1 text-sm text-gray-600">
                       <li>✓ {config.limits.pro_plus.monthly} covers per month</li>
@@ -186,7 +186,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">4.2 Billing & Payment Terms</h3>
+                <h3 className="text-heading-5 text-gray-900 mb-3">4.2 Billing & Payment Terms</h3>
                 <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                   <p className="text-gray-700">• <strong>Billing Cycles:</strong> Subscriptions are billed monthly or annually in advance</p>
                   <p className="text-gray-700">• <strong>Payment Methods:</strong> We accept credit cards, debit cards, PayPal, and region-specific payment methods</p>
@@ -197,7 +197,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">4.3 Auto-Renewal</h3>
+                <h3 className="text-heading-5 text-gray-900 mb-3">4.3 Auto-Renewal</h3>
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <p className="text-gray-700 mb-2">
                     <strong>Important:</strong> All paid subscriptions automatically renew until cancelled:
@@ -212,7 +212,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">4.4 Cancellation Policy</h3>
+                <h3 className="text-heading-5 text-gray-900 mb-3">4.4 Cancellation Policy</h3>
                 <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                   <p className="text-gray-700">• <strong>Cancel Anytime:</strong> You can cancel your subscription at any time</p>
                   <p className="text-gray-700">• <strong>Access Until End of Period:</strong> You'll retain access until the end of your current billing period</p>
@@ -222,7 +222,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">4.5 No Refund Policy</h3>
+                <h3 className="text-heading-5 text-gray-900 mb-3">4.5 No Refund Policy</h3>
                 <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                   <p className="text-gray-700">• <strong>All Sales Final:</strong> Due to the digital nature of our service, all sales are final</p>
                   <p className="text-gray-700">• <strong>Billing Errors:</strong> We will correct any verified billing errors or duplicate charges</p>
@@ -232,10 +232,10 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
 
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">4.7 Plan Changes</h3>
+                <h3 className="text-heading-5 text-gray-900 mb-3">4.7 Plan Changes</h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="bg-gray-50 rounded-lg p-4">
-                    <h4 className="font-semibold text-gray-800 mb-2">Upgrades</h4>
+                    <h4 className="text-ui-lg text-gray-800 mb-2">Upgrades</h4>
                     <ul className="space-y-1 text-sm text-gray-600">
                       <li>• Take effect immediately</li>
                       <li>• Prorated charge for current period</li>
@@ -243,7 +243,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                     </ul>
                   </div>
                   <div className="bg-gray-50 rounded-lg p-4">
-                    <h4 className="font-semibold text-gray-800 mb-2">Downgrades</h4>
+                    <h4 className="text-ui-lg text-gray-800 mb-2">Downgrades</h4>
                     <ul className="space-y-1 text-sm text-gray-600">
                       <li>• Take effect at next billing cycle</li>
                       <li>• No refund for current period</li>
@@ -254,7 +254,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">4.8 Price Changes</h3>
+                <h3 className="text-heading-5 text-gray-900 mb-3">4.8 Price Changes</h3>
                 <div className="bg-gray-50 rounded-lg p-4">
                   <p className="text-gray-700">
                     We may adjust prices with <strong>30 days advance notice</strong> via email. You can accept the new price or cancel before it takes effect. Promotional pricing is time-limited and may not be renewed.
@@ -266,11 +266,11 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
 
           {/* Section 5: Content & Licensing */}
           <section id="content" className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">5. Content Rights & Licensing</h2>
+            <h2 className="text-section-title text-gray-900 mb-6">5. Content Rights & Licensing</h2>
 
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">5.1 Your Content</h3>
+                <h3 className="text-heading-5 text-gray-900 mb-3">5.1 Your Content</h3>
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <p className="text-gray-700 text-sm">
                     <strong>You retain all rights</strong> to content you upload. We only use your content to provide our services to you.
@@ -279,7 +279,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">5.2 Generated Content</h3>
+                <h3 className="text-heading-5 text-gray-900 mb-3">5.2 Generated Content</h3>
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <p className="text-gray-700 text-sm">
                     <strong>You own all generated images</strong>, subject to compliance with applicable laws and these Terms.
@@ -289,10 +289,10 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
             </div>
 
             <div className="mt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">5.3 Usage Rights by Plan</h3>
+              <h3 className="text-heading-5 text-gray-900 mb-3">5.3 Usage Rights by Plan</h3>
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-gray-900 mb-2">Free Plan</h4>
+                  <h4 className="text-ui-lg text-gray-900 mb-2">Free Plan</h4>
                   <div className="space-y-2 text-sm text-gray-700">
                     <p><strong>Personal Use Only</strong></p>
                     <ul className="space-y-1 text-gray-600">
@@ -307,7 +307,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                   </div>
                 </div>
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-gray-900 mb-2">Pro Plan</h4>
+                  <h4 className="text-ui-lg text-gray-900 mb-2">Pro Plan</h4>
                   <div className="space-y-2 text-sm text-gray-700">
                     <p><strong>Personal & Commercial Use</strong></p>
                     <ul className="space-y-1 text-gray-600">
@@ -321,7 +321,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                   </div>
                 </div>
                 <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-gray-900 mb-2">Pro+ Plan</h4>
+                  <h4 className="text-ui-lg text-gray-900 mb-2">Pro+ Plan</h4>
                   <div className="space-y-2 text-sm text-gray-700">
                     <p><strong>Full Commercial License</strong></p>
                     <ul className="space-y-1 text-gray-600">
@@ -344,7 +344,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
             </div>
 
             <div className="mt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">5.3 AI Generation Disclaimer</h3>
+              <h3 className="text-heading-5 text-gray-900 mb-3">5.3 AI Generation Disclaimer</h3>
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 space-y-3">
                 <p className="text-gray-700">
                   <strong>Important:</strong> CoverGen Pro uses advanced AI models to generate images based on your inputs. Please understand:
@@ -365,10 +365,10 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
 
           {/* Section 6: Acceptable Use */}
           <section id="acceptable-use" className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">6. Acceptable Use Policy</h2>
+            <h2 className="text-section-title text-gray-900 mb-6">6. Acceptable Use Policy</h2>
             
             <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
-              <h3 className="text-lg font-semibold text-red-900 mb-3">Prohibited Uses</h3>
+              <h3 className="text-heading-5 text-red-900 mb-3">Prohibited Uses</h3>
               <p className="text-gray-700 mb-3">You may NOT use our Service to:</p>
               <ul className="space-y-2 text-gray-700">
                 <li>❌ Generate illegal, harmful, or abusive content</li>
@@ -381,7 +381,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
             </div>
 
             <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-green-900 mb-3">Permitted Uses</h3>
+              <h3 className="text-heading-5 text-green-900 mb-3">Permitted Uses</h3>
               <ul className="space-y-2 text-gray-700">
                 <li>✅ Create content for personal or commercial projects</li>
                 <li>✅ Generate images for your social media channels</li>
@@ -393,7 +393,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
 
           {/* Section 7: Intellectual Property */}
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">7. Intellectual Property</h2>
+            <h2 className="text-section-title text-gray-900 mb-4">7. Intellectual Property</h2>
             <div className="space-y-4">
               <p className="text-gray-700">
                 The CoverGen Pro service, including its design, features, and technology, is protected by intellectual property laws. All rights not expressly granted to you are reserved by us.
@@ -408,7 +408,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
 
           {/* Section 8: Privacy */}
           <section id="privacy" className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">8. Privacy & Data Protection</h2>
+            <h2 className="text-section-title text-gray-900 mb-4">8. Privacy & Data Protection</h2>
             <p className="text-gray-700 mb-4">
               Your privacy is important to us. Our use of your personal information is governed by our Privacy Policy.
             </p>
@@ -420,11 +420,11 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
 
           {/* Section 9: Disclaimers & Liability */}
           <section id="liability" className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">9. Disclaimers & Limitations</h2>
+            <h2 className="text-section-title text-gray-900 mb-6">9. Disclaimers & Limitations</h2>
             
             <div className="space-y-6">
               <div className="bg-gray-50 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">9.1 Service Availability & Performance</h3>
+                <h3 className="text-heading-5 text-gray-900 mb-3">9.1 Service Availability & Performance</h3>
                 <div className="space-y-3">
                   <p className="text-gray-700">
                     The Service is provided "AS IS" and "AS AVAILABLE". We do not guarantee:
@@ -445,9 +445,9 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
               </div>
 
               <div className="bg-gray-50 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">9.2 AI-Specific Disclaimers</h3>
+                <h3 className="text-heading-5 text-gray-900 mb-3">9.2 AI-Specific Disclaimers</h3>
                 <div className="space-y-3">
-                  <p className="text-gray-700 font-semibold">We specifically disclaim liability for:</p>
+                  <p className="text-gray-700 text-ui-lg">We specifically disclaim liability for:</p>
                   <ul className="space-y-2 text-gray-700 text-sm">
                     <li>• AI-generated content that doesn't meet your expectations</li>
                     <li>• Failed generations due to prompt complexity or AI limitations</li>
@@ -460,7 +460,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
               </div>
 
               <div className="bg-gray-50 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">9.3 Limitation of Liability</h3>
+                <h3 className="text-heading-5 text-gray-900 mb-3">9.3 Limitation of Liability</h3>
                 <p className="text-gray-700 mb-3">
                   To the fullest extent permitted by law, CoverGen Pro shall not be liable for:
                 </p>
@@ -477,7 +477,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
 
           {/* Section 10: Indemnification */}
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">10. Indemnification</h2>
+            <h2 className="text-section-title text-gray-900 mb-4">10. Indemnification</h2>
             <p className="text-gray-700">
               You agree to indemnify and hold harmless CoverGen Pro, its affiliates, and their respective officers, directors, employees, and agents from any claims, damages, or expenses arising from:
             </p>
@@ -490,16 +490,16 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
 
           {/* Section 11: Termination */}
           <section id="termination" className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">11. Termination</h2>
+            <h2 className="text-section-title text-gray-900 mb-4">11. Termination</h2>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2">By You</h3>
+                <h3 className="text-ui-lg text-gray-900 mb-2">By You</h3>
                 <p className="text-gray-700 text-sm">
                   You may terminate your account at any time through your account settings.
                 </p>
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2">By Us</h3>
+                <h3 className="text-ui-lg text-gray-900 mb-2">By Us</h3>
                 <p className="text-gray-700 text-sm">
                   We may suspend or terminate your account for violations of these Terms.
                 </p>
@@ -509,7 +509,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
 
           {/* Section 12: Changes to Terms */}
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">12. Modifications to Terms</h2>
+            <h2 className="text-section-title text-gray-900 mb-4">12. Modifications to Terms</h2>
             <p className="text-gray-700">
               We reserve the right to modify these Terms at any time. Material changes will be notified via email or through the Service. Continued use after modifications constitutes acceptance.
             </p>
@@ -517,7 +517,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
 
           {/* Section 13: Governing Law */}
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
+            <h2 className="text-section-title text-gray-900 mb-4 flex items-center gap-3">
               <Scale className="w-6 h-6 text-blue-600" />
               13. Governing Law & Disputes
             </h2>
@@ -533,11 +533,11 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
 
           {/* Section 14: Contact Information */}
           <section id="contact" className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-sm border border-blue-100 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">14. Contact Us</h2>
+            <h2 className="text-section-title text-gray-900 mb-6">14. Contact Us</h2>
             
             <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-white rounded-lg p-6">
-                <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <h3 className="text-ui-lg text-gray-900 mb-4 flex items-center gap-2">
                   <Globe className="w-5 h-5 text-blue-600" />
                   English
                 </h3>
@@ -566,7 +566,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
               </div>
 
               <div className="bg-white rounded-lg p-6">
-                <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <h3 className="text-ui-lg text-gray-900 mb-4 flex items-center gap-2">
                   <Globe className="w-5 h-5 text-blue-600" />
                   中文
                 </h3>

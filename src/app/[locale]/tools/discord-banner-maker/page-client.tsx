@@ -270,7 +270,7 @@ export default function DiscordBannerMakerClient({ locale, translations: t }: Di
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-r from-indigo-600 to-purple-600">
+        <section className="cta-section py-20 bg-gradient-to-r from-indigo-600 to-purple-600">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl font-bold text-white mb-4">
               Ready to Make Your Server Stand Out?

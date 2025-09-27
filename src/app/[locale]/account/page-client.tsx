@@ -580,7 +580,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
           <Card>
             <CardContent className="p-8 text-center">
               <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold mb-2">Unable to Load Account Data</h2>
+              <h2 className="text-heading-5 mb-2">Unable to Load Account Data</h2>
               <p className="text-gray-600 mb-4">{loadError}</p>
               <div className="flex gap-2 justify-center">
                 <Button 
@@ -611,8 +611,8 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="container max-w-4xl mx-auto px-4">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">My Account</h1>
-          <p className="text-gray-600 mt-2">Manage your subscription and account settings</p>
+          <h1 className="text-hero-title text-gray-900">My Account</h1>
+          <p className="text-body-lg text-gray-600 mt-2">Manage your subscription and account settings</p>
         </div>
 
         <div className="space-y-6">
@@ -627,11 +627,11 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Email</label>
+                  <label className="text-ui-sm text-gray-700">Email</label>
                   <p className="text-gray-900 mt-1">{accountData?.user?.email || authUser?.email || 'Not available'}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">User ID</label>
+                  <label className="text-ui-sm text-gray-700">User ID</label>
                   <p className="text-gray-500 text-sm font-mono mt-1">{accountData?.user?.id || authUser?.id || 'Not available'}</p>
                 </div>
               </div>
@@ -650,7 +650,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
               {/* Plan Header */}
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-2xl font-bold flex items-center gap-3">
+                  <h3 className="text-heading-4 flex items-center gap-3">
                     {planDetails?.name}
                     {isTrialing && (
                       <Badge className="bg-blue-100 text-blue-800 border-blue-200">
@@ -685,7 +685,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                   <Sparkles className="h-4 w-4 text-blue-600" />
                   <AlertDescription className="text-blue-800">
                     <div className="space-y-2">
-                      <p className="font-medium">Trial Limits:</p>
+                      <p className="text-ui-md">Trial Limits:</p>
                       <ul className="space-y-1 text-sm">
                         <li>• {trialLimits.daily} covers per day</li>
                         <li>• {trialLimits.total} total covers during trial</li>
@@ -698,7 +698,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                         </p>
                       )}
                       {subscription.stripe_subscription_id ? (
-                        <p className="text-sm mt-2 font-medium text-blue-900">
+                        <p className="text-ui-sm mt-2 text-blue-900">
                           ✓ Your subscription will automatically activate when the trial ends
                         </p>
                       ) : (
@@ -842,7 +842,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
               <div>
                 <div className="flex justify-between mb-2">
                   <span className="text-sm text-gray-600">Covers Generated</span>
-                  <span className="text-sm font-medium">
+                  <span className="text-ui-sm">
                     {currentUsage} / {usageLimit}
                   </span>
                 </div>

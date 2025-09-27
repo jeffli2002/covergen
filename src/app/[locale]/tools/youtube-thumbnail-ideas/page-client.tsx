@@ -291,7 +291,7 @@ export default function YouTubeThumbnailIdeasClient({ locale, translations }: Yo
       </section>
 
       {/* CTA Section */}
-      <section className="px-4 py-20 sm:px-6 lg:px-8">
+      <section className="cta-section px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl text-center">
           <Youtube className="mx-auto mb-6 h-16 w-16 text-red-600" />
           <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">

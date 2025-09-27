@@ -122,7 +122,7 @@ export default function PlatformsHubClient({ locale, translations: t }: Platform
                 AI-Powered Design for Every Platform
               </div>
               
-              <h1 className="text-5xl font-bold text-gray-900 mb-6">
+              <h1 className="text-hero-title text-gray-900 mb-6">
                 Cover Makers for All Social Platforms
               </h1>
               
@@ -152,15 +152,15 @@ export default function PlatformsHubClient({ locale, translations: t }: Platform
               {/* Stats */}
               <div className="mt-12 grid grid-cols-3 gap-6 max-w-2xl mx-auto">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-gray-900">25+</div>
+                  <div className="text-heading-2 text-gray-900">25+</div>
                   <div className="text-sm text-gray-600">Platforms Supported</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-gray-900">5B+</div>
+                  <div className="text-heading-2 text-gray-900">5B+</div>
                   <div className="text-sm text-gray-600">Combined Users</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-gray-900">100%</div>
+                  <div className="text-heading-2 text-gray-900">100%</div>
                   <div className="text-sm text-gray-600">Perfect Dimensions</div>
                 </div>
               </div>
@@ -183,7 +183,7 @@ export default function PlatformsHubClient({ locale, translations: t }: Platform
                             <Icon className="w-7 h-7 text-white" />
                           </div>
                           
-                          <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                          <h3 className="text-feature-title text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
                             {platform.name}
                           </h3>
                           
@@ -213,7 +213,7 @@ export default function PlatformsHubClient({ locale, translations: t }: Platform
         <section className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              <h2 className="text-section-title text-gray-900 mb-4">
                 Why Use Platform-Specific Cover Makers?
               </h2>
               <p className="text-lg text-gray-600">
@@ -226,7 +226,7 @@ export default function PlatformsHubClient({ locale, translations: t }: Platform
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <TrendingUp className="w-6 h-6 text-blue-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Perfect Dimensions</h3>
+                <h3 className="text-feature-title text-gray-900 mb-2">Perfect Dimensions</h3>
                 <p className="text-sm text-gray-600">Each platform requires specific sizes and ratios</p>
               </div>
               
@@ -234,7 +234,7 @@ export default function PlatformsHubClient({ locale, translations: t }: Platform
                 <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Users className="w-6 h-6 text-purple-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Audience Optimization</h3>
+                <h3 className="text-feature-title text-gray-900 mb-2">Audience Optimization</h3>
                 <p className="text-sm text-gray-600">Designs tailored to platform demographics</p>
               </div>
               
@@ -242,7 +242,7 @@ export default function PlatformsHubClient({ locale, translations: t }: Platform
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Sparkles className="w-6 h-6 text-green-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Trending Styles</h3>
+                <h3 className="text-feature-title text-gray-900 mb-2">Trending Styles</h3>
                 <p className="text-sm text-gray-600">Stay current with platform-specific trends</p>
               </div>
               
@@ -250,7 +250,7 @@ export default function PlatformsHubClient({ locale, translations: t }: Platform
                 <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Globe className="w-6 h-6 text-orange-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Global Reach</h3>
+                <h3 className="text-feature-title text-gray-900 mb-2">Global Reach</h3>
                 <p className="text-sm text-gray-600">Support for international platforms</p>
               </div>
             </div>
@@ -260,7 +260,7 @@ export default function PlatformsHubClient({ locale, translations: t }: Platform
         {/* CTA Section */}
         <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">
+            <h2 className="text-section-title text-white mb-4">
               Ready to Create Platform-Perfect Covers?
             </h2>
             <p className="text-xl text-white/90 mb-8">

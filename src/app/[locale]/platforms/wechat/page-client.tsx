@@ -85,24 +85,24 @@ export default function WeChatCoverMakerClient({ locale, translations }: { local
                 </div>
               </div>
               
-              <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white">
+              <h1 className="text-hero-title text-white">
                 微信 WeChat Cover Maker
               </h1>
               
-              <p className="text-xl md:text-2xl text-green-50 mb-8 leading-relaxed">
-                Create covers that <span className="bg-white text-green-700 px-2 py-1 rounded font-semibold">connect & convert</span> in 
+              <p className="text-hero-subtitle text-green-50 mb-8">
+                Create covers that <span className="text-white font-medium">connect & convert</span> in 
                 China's super-app. AI-powered designs for WeChat success.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
                 <Link href={`/${locale}#generator`}>
-                  <Button size="lg" variant="ghost" className="bg-white hover:bg-gray-100 px-8 py-6 text-lg shadow-lg font-semibold" style={{color: '#15803d'}}>
+                  <Button size="lg" variant="ghost" className="bg-white hover:bg-gray-100 px-8 py-6 text-lg shadow-lg font-light" style={{color: '#15803d'}}>
                     <Sparkles className="w-5 h-5 mr-2 text-green-700" />
                     Create WeChat Covers
                   </Button>
                 </Link>
                 <Link href={`/${locale}#pricing`}>
-                  <Button size="lg" variant="ghost" className="text-white border-2 border-white hover:bg-white hover:text-green-700 px-8 py-6 text-lg font-semibold transition-colors">
+                  <Button size="lg" variant="ghost" className="text-white border-2 border-white hover:bg-white hover:text-green-700 px-8 py-6 text-lg font-light transition-colors">
                     View Pricing
                   </Button>
                 </Link>
@@ -118,7 +118,7 @@ export default function WeChatCoverMakerClient({ locale, translations }: { local
         {/* Features Grid */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+            <h2 className="text-section-title text-center mb-12">
               Built for WeChat Ecosystem
             </h2>
             
@@ -131,8 +131,8 @@ export default function WeChatCoverMakerClient({ locale, translations }: { local
                         <feature.icon className="w-8 h-8 text-green-600" />
                       </div>
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-gray-600">{feature.description}</p>
+                    <h3 className="text-feature-title mb-2">{feature.title}</h3>
+                    <p className="text-feature-description">{feature.description}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -144,42 +144,42 @@ export default function WeChatCoverMakerClient({ locale, translations }: { local
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+              <h2 className="text-section-title text-center mb-12">
                 All WeChat Content Formats
               </h2>
               
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="bg-white rounded-2xl p-8 hover:shadow-lg transition-shadow">
                   <div className="text-3xl mb-4">📱</div>
-                  <h3 className="text-xl font-semibold mb-3">Moments Cover</h3>
+                  <h3 className="text-feature-title mb-3">Moments Cover</h3>
                   <p className="text-gray-600 mb-4">Eye-catching covers for your WeChat Moments posts that drive engagement.</p>
                   <p className="text-sm text-green-600 font-medium">1080 x 1080px (Square)</p>
                 </div>
                 
                 <div className="bg-white rounded-2xl p-8 hover:shadow-lg transition-shadow">
                   <div className="text-3xl mb-4">📰</div>
-                  <h3 className="text-xl font-semibold mb-3">Article Header</h3>
+                  <h3 className="text-feature-title mb-3">Article Header</h3>
                   <p className="text-gray-600 mb-4">Professional headers for WeChat official account articles.</p>
                   <p className="text-sm text-green-600 font-medium">900 x 500px (16:9)</p>
                 </div>
                 
                 <div className="bg-white rounded-2xl p-8 hover:shadow-lg transition-shadow">
                   <div className="text-3xl mb-4">🏪</div>
-                  <h3 className="text-xl font-semibold mb-3">Mini-Program Banner</h3>
+                  <h3 className="text-feature-title mb-3">Mini-Program Banner</h3>
                   <p className="text-gray-600 mb-4">Attractive banners for WeChat mini-program promotion.</p>
                   <p className="text-sm text-green-600 font-medium">750 x 400px</p>
                 </div>
                 
                 <div className="bg-white rounded-2xl p-8 hover:shadow-lg transition-shadow">
                   <div className="text-3xl mb-4">🎯</div>
-                  <h3 className="text-xl font-semibold mb-3">Ad Campaign Graphics</h3>
+                  <h3 className="text-feature-title mb-3">Ad Campaign Graphics</h3>
                   <p className="text-gray-600 mb-4">Conversion-focused designs for WeChat advertising.</p>
                   <p className="text-sm text-green-600 font-medium">Multiple formats supported</p>
                 </div>
               </div>
 
               <div className="mt-12">
-                <h3 className="text-2xl font-semibold text-center mb-6">Popular WeChat Content Types</h3>
+                <h3 className="text-section-title text-center mb-6">Popular WeChat Content Types</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {[
                     '🛍️ E-commerce',
@@ -206,27 +206,27 @@ export default function WeChatCoverMakerClient({ locale, translations }: { local
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+              <h2 className="text-section-title text-center mb-12">
                 Designed for Chinese Market Success
               </h2>
               
               <div className="grid md:grid-cols-3 gap-8 text-center">
                 <div className="bg-gray-50 rounded-2xl p-8">
-                  <div className="text-4xl font-bold text-green-600 mb-2">1.3B</div>
+                  <div className="text-4xl font-thin text-green-600 mb-2">1.3B</div>
                   <p className="text-gray-600">Monthly active users on WeChat</p>
                 </div>
                 <div className="bg-gray-50 rounded-2xl p-8">
-                  <div className="text-4xl font-bold text-green-600 mb-2">90%</div>
+                  <div className="text-4xl font-thin text-green-600 mb-2">90%</div>
                   <p className="text-gray-600">of Chinese internet users on WeChat</p>
                 </div>
                 <div className="bg-gray-50 rounded-2xl p-8">
-                  <div className="text-4xl font-bold text-green-600 mb-2">45min</div>
+                  <div className="text-4xl font-thin text-green-600 mb-2">45min</div>
                   <p className="text-gray-600">Average daily usage per user</p>
                 </div>
               </div>
 
               <div className="mt-12 bg-green-50 rounded-2xl p-8">
-                <h3 className="text-2xl font-semibold mb-6 text-center">Cultural Design Elements</h3>
+                <h3 className="text-section-title mb-6 text-center">Cultural Design Elements</h3>
                 <div className="grid md:grid-cols-2 gap-6">
                   <ul className="space-y-3 text-gray-700">
                     <li>• Red & gold for prosperity themes</li>
@@ -248,21 +248,21 @@ export default function WeChatCoverMakerClient({ locale, translations }: { local
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+              <h2 className="text-section-title text-center mb-12">
                 WeChat Content Best Practices
               </h2>
               
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   <div className="bg-white rounded-2xl p-6 shadow-sm">
-                    <h3 className="text-xl font-semibold mb-3">🎯 Clear Value Proposition</h3>
+                    <h3 className="text-feature-title mb-3">🎯 Clear Value Proposition</h3>
                     <p className="text-gray-600">
                       Chinese users expect immediate value. Our AI ensures your message is crystal clear.
                     </p>
                   </div>
                   
                   <div className="bg-white rounded-2xl p-6 shadow-sm">
-                    <h3 className="text-xl font-semibold mb-3">🏮 Cultural Sensitivity</h3>
+                    <h3 className="text-feature-title mb-3">🏮 Cultural Sensitivity</h3>
                     <p className="text-gray-600">
                       Designs that respect Chinese culture and resonate with local preferences.
                     </p>
@@ -271,14 +271,14 @@ export default function WeChatCoverMakerClient({ locale, translations }: { local
                 
                 <div className="space-y-6">
                   <div className="bg-white rounded-2xl p-6 shadow-sm">
-                    <h3 className="text-xl font-semibold mb-3">📱 Mobile-Only Platform</h3>
+                    <h3 className="text-feature-title mb-3">📱 Mobile-Only Platform</h3>
                     <p className="text-gray-600">
                       All designs optimized for mobile viewing and sharing within WeChat.
                     </p>
                   </div>
                   
                   <div className="bg-white rounded-2xl p-6 shadow-sm">
-                    <h3 className="text-xl font-semibold mb-3">🔗 QR Code Integration</h3>
+                    <h3 className="text-feature-title mb-3">🔗 QR Code Integration</h3>
                     <p className="text-gray-600">
                       Smart layouts that seamlessly incorporate QR codes for easy following.
                     </p>
@@ -290,16 +290,16 @@ export default function WeChatCoverMakerClient({ locale, translations }: { local
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-br from-green-700 to-green-900 text-white">
+        <section className="cta-section py-20 bg-gradient-to-br from-green-700 to-green-900 text-white">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            <h2 className="text-hero-title mb-6">
               Ready to Succeed on WeChat?
             </h2>
-            <p className="text-xl md:text-2xl mb-8 opacity-90">
+            <p className="text-hero-subtitle mb-8 opacity-90">
               Create covers that connect with 1.3 billion users
             </p>
             <Link href={`/${locale}#generator`}>
-              <Button size="lg" variant="ghost" className="bg-white hover:bg-gray-100 px-8 py-6 text-lg font-semibold shadow-lg" style={{color: '#15803d'}}>
+              <Button size="lg" variant="ghost" className="bg-white hover:bg-gray-100 px-8 py-6 text-lg font-light shadow-lg" style={{color: '#15803d'}}>
                 Start Creating WeChat Covers
               </Button>
             </Link>

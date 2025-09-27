@@ -1,0 +1,246 @@
+/* Global Article Typography Styles
+   Ensures consistent typography across all enhanced content pages
+   Uses the typography system from src/lib/typography.ts */
+
+/* Article Content Container */
+.article-content,
+.enhanced-content {
+  /* Applies to all article body text */
+  @apply text-base md:text-lg font-normal leading-relaxed;
+}
+
+/* Article Headings - Ultra-thin modern style */
+.article-content h1,
+.enhanced-content h1 {
+  @apply text-3xl md:text-4xl lg:text-5xl font-extralight tracking-tight mb-8;
+}
+
+.article-content h2,
+.enhanced-content h2 {
+  @apply text-2xl md:text-3xl lg:text-4xl font-extralight mb-8;
+}
+
+.article-content h3,
+.enhanced-content h3 {
+  @apply text-2xl md:text-3xl font-extralight tracking-tight mt-12 mb-6;
+}
+
+.article-content h4,
+.enhanced-content h4 {
+  @apply text-xl md:text-2xl font-light mt-6 mb-4;
+}
+
+.article-content h5,
+.enhanced-content h5 {
+  @apply text-lg font-light mb-3;
+}
+
+.article-content h6,
+.enhanced-content h6 {
+  @apply text-base font-normal mb-2;
+}
+
+/* Paragraphs and Body Text */
+.article-content p,
+.enhanced-content p {
+  @apply text-base md:text-lg font-normal leading-relaxed mb-4;
+}
+
+.article-content p.lead,
+.enhanced-content p.lead {
+  @apply text-xl md:text-2xl font-light leading-relaxed text-gray-700;
+}
+
+/* Lists */
+.article-content ul,
+.article-content ol,
+.enhanced-content ul,
+.enhanced-content ol {
+  @apply mb-6 space-y-2;
+}
+
+.article-content ul,
+.enhanced-content ul {
+  @apply list-disc pl-6;
+}
+
+.article-content ol,
+.enhanced-content ol {
+  @apply list-decimal pl-6;
+}
+
+.article-content li,
+.enhanced-content li {
+  @apply text-base md:text-lg font-normal leading-relaxed;
+}
+
+/* Strong and Emphasis */
+.article-content strong,
+.article-content b,
+.enhanced-content strong,
+.enhanced-content b {
+  @apply font-medium; /* Using medium instead of bold for modern look */
+}
+
+.article-content em,
+.article-content i,
+.enhanced-content em,
+.enhanced-content i {
+  @apply font-light italic;
+}
+
+/* Links */
+.article-content a,
+.enhanced-content a {
+  @apply font-normal hover:underline transition-colors;
+}
+
+/* Blockquotes */
+.article-content blockquote,
+.enhanced-content blockquote {
+  @apply text-lg font-light italic border-l-4 pl-4 my-6;
+}
+
+/* Code */
+.article-content code,
+.enhanced-content code {
+  @apply font-mono text-sm bg-gray-100 px-1 py-0.5 rounded;
+}
+
+.article-content pre code,
+.enhanced-content pre code {
+  @apply bg-transparent p-0; /* Reset for code blocks */
+}
+
+/* Tables */
+.article-content table {
+  @apply w-full border-collapse mb-8;
+}
+
+.article-content th {
+  @apply text-left font-medium p-3 border-b-2;
+}
+
+.article-content td {
+  @apply p-3 border-b;
+}
+
+/* Special Content Blocks */
+.article-content .key-insight {
+  @apply bg-blue-50 rounded-2xl p-6 mb-8;
+}
+
+.article-content .key-insight p {
+  @apply text-xl md:text-2xl font-light leading-relaxed text-blue-800 mb-0;
+}
+
+.article-content .table-of-contents {
+  @apply bg-gray-50 rounded-xl p-6 mb-8;
+}
+
+.article-content .table-of-contents a {
+  @apply text-sm font-medium hover:text-primary transition-colors;
+}
+
+/* Case Studies */
+.article-content .case-study {
+  @apply rounded-xl p-6 my-6;
+}
+
+.article-content .case-study h4 {
+  @apply font-medium mb-3;
+}
+
+.article-content .case-study p {
+  @apply text-base font-normal mb-2;
+}
+
+/* FAQ Sections */
+.article-content .faq-item summary {
+  @apply text-lg md:text-xl font-light cursor-pointer;
+}
+
+.article-content .faq-item p {
+  @apply text-base font-normal leading-relaxed text-gray-800 mt-4;
+}
+
+/* Responsive Images */
+.article-content img {
+  @apply max-w-full h-auto rounded-xl my-6;
+}
+
+/* HR Dividers */
+.article-content hr {
+  @apply my-12 border-gray-200;
+}
+
+/* Utility Classes for Direct Use */
+.text-ultra-thin {
+  @apply font-thin;
+}
+
+.text-extra-light {
+  @apply font-extralight;
+}
+
+.text-light {
+  @apply font-light;
+}
+
+.text-regular {
+  @apply font-normal;
+}
+
+.text-medium {
+  @apply font-medium;
+}
+
+/* Platform-specific color accents */
+.platform-youtube {
+  --platform-color: theme('colors.red.600');
+}
+
+.platform-instagram {
+  --platform-color: theme('colors.pink.600');
+}
+
+.platform-tiktok {
+  --platform-color: theme('colors.black');
+}
+
+.platform-twitch {
+  --platform-color: theme('colors.purple.600');
+}
+
+.platform-spotify {
+  --platform-color: theme('colors.green.600');
+}
+
+.platform-bilibili {
+  --platform-color: theme('colors.blue.500');
+}
+
+.platform-rednote {
+  --platform-color: theme('colors.red.500');
+}
+
+.platform-linkedin {
+  --platform-color: theme('colors.blue.700');
+}
+
+.platform-wechat {
+  --platform-color: theme('colors.green.600');
+}
+
+/* Apply platform colors */
+.article-content a {
+  color: var(--platform-color, theme('colors.blue.700'));
+}
+
+.article-content .key-insight {
+  background-color: color-mix(in srgb, var(--platform-color, theme('colors.blue.600')) 10%, white);
+}
+
+.article-content .key-insight p {
+  color: color-mix(in srgb, var(--platform-color, theme('colors.blue.800')) 90%, black);
+}

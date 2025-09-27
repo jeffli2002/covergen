@@ -318,7 +318,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                 <div className="p-2">
                   {/* Social Media Tools */}
                   <div className="mb-3">
-                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 px-3">Social Media Tools</div>
+                    <div className="text-ui-sm text-gray-500 uppercase tracking-wider mb-1 px-3">Social Media Tools</div>
                     <div className="grid grid-cols-2 gap-0">
                       <DropdownMenuItem asChild className="h-auto p-0">
                         <Link href={`/${locale}/tools/instagram-thumbnail-maker`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
@@ -345,7 +345,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                   
                   {/* Video & Streaming */}
                   <div className="mb-3">
-                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 px-3">Video & Streaming</div>
+                    <div className="text-ui-sm text-gray-500 uppercase tracking-wider mb-1 px-3">Video & Streaming</div>
                     <div className="grid grid-cols-2 gap-0">
                       <DropdownMenuItem asChild className="h-auto p-0">
                         <Link href={`/${locale}/tools/thumbnail-tester`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
@@ -362,7 +362,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                   
                   {/* Music & Audio */}
                   <div className="mb-3">
-                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 px-3">Music & Audio</div>
+                    <div className="text-ui-sm text-gray-500 uppercase tracking-wider mb-1 px-3">Music & Audio</div>
                     <div className="grid grid-cols-2 gap-0">
                       <DropdownMenuItem asChild className="h-auto p-0">
                         <Link href={`/${locale}/tools/spotify-playlist-cover`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
@@ -384,7 +384,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                   
                   {/* Publishing & Books */}
                   <div className="mb-3">
-                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 px-3">Publishing Tools</div>
+                    <div className="text-ui-sm text-gray-500 uppercase tracking-wider mb-1 px-3">Publishing Tools</div>
                     <div className="grid grid-cols-2 gap-0">
                       <DropdownMenuItem asChild className="h-auto p-0">
                         <Link href={`/${locale}/tools/book-cover-creator`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
@@ -406,7 +406,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                   
                   {/* Creative & Design */}
                   <div className="mb-3">
-                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 px-3">Creative Design</div>
+                    <div className="text-ui-sm text-gray-500 uppercase tracking-wider mb-1 px-3">Creative Design</div>
                     <div className="grid grid-cols-2 gap-0">
                       <DropdownMenuItem asChild className="h-auto p-0">
                         <Link href={`/${locale}/tools/anime-poster-maker`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
@@ -423,7 +423,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                   
                   {/* Event & Business */}
                   <div className="mb-3">
-                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 px-3">Event & Business</div>
+                    <div className="text-ui-sm text-gray-500 uppercase tracking-wider mb-1 px-3">Event & Business</div>
                     <div className="grid grid-cols-2 gap-0">
                       <DropdownMenuItem asChild className="h-auto p-0">
                         <Link href={`/${locale}/tools/event-poster-designer`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
@@ -663,7 +663,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                 
                 {/* Platforms Section */}
                 <div>
-                  <div className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Platforms</div>
+                  <div className="text-ui-md text-gray-500 uppercase tracking-wider mb-2">Platforms</div>
                   <div className="space-y-2 ml-4">
                     <Link 
                       href={`/${locale}/platforms/youtube`} 

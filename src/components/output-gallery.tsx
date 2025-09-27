@@ -93,8 +93,8 @@ export default function OutputGallery({
                 <div className="w-12 h-12 md:w-20 md:h-20 mb-3 md:mb-4 rounded-2xl bg-gradient-to-r from-orange-100 to-red-100 flex items-center justify-center mx-auto">
                   <ImageIcon className="w-6 h-6 md:w-10 md:h-10 text-orange-600" />
                 </div>
-                <h4 className="text-base md:text-xl font-bold text-gray-900 mb-1 md:mb-2">Ready for generation</h4>
-                <p className="text-xs md:text-sm text-gray-600">Configure your prompt and hit generate</p>
+                <h4 className="text-ui-lg md:text-heading-5 text-gray-900 mb-1 md:mb-2">Ready for generation</h4>
+                <p className="text-body-sm text-gray-600">Configure your prompt and hit generate</p>
               </div>
             ) : (
               <div className="w-full max-w-md p-4 md:p-6">

@@ -122,12 +122,12 @@ function YouTubeThumbnailMakerContent({ locale, translations, onGenerate, isGene
                 </div>
               </div>
               
-              <h1 className="text-5xl md:text-6xl font-bold mb-6 text-gray-900">
+              <h1 className="text-hero-title mb-6 text-gray-900">
                 YouTube Thumbnail Maker
               </h1>
               
-              <p className="text-xl md:text-2xl text-gray-800 mb-8 leading-relaxed">
-                Create thumbnails that <span className="text-red-600 font-semibold">stop the scroll</span> and 
+              <p className="text-hero-subtitle text-gray-700 mb-8">
+                Create thumbnails that <span className="text-red-600 font-medium">stop the scroll</span> and 
                 boost your views. AI-powered generation optimized for YouTube's algorithm.
               </p>
               
@@ -164,7 +164,7 @@ function YouTubeThumbnailMakerContent({ locale, translations, onGenerate, isGene
         {/* Features Grid */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+            <h2 className="text-section-title text-center mb-12">
               YouTube-Specific Features
             </h2>
             
@@ -177,8 +177,8 @@ function YouTubeThumbnailMakerContent({ locale, translations, onGenerate, isGene
                         <feature.icon className="w-8 h-8 text-red-600" />
                       </div>
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-gray-700">{feature.description}</p>
+                    <h3 className="text-feature-title mb-2">{feature.title}</h3>
+                    <p className="text-feature-description">{feature.description}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -197,7 +197,7 @@ function YouTubeThumbnailMakerContent({ locale, translations, onGenerate, isGene
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+              <h2 className="text-section-title text-center mb-12">
                 Thumbnail Templates for Every YouTube Niche
               </h2>
               
@@ -227,13 +227,13 @@ function YouTubeThumbnailMakerContent({ locale, translations, onGenerate, isGene
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+              <h2 className="text-section-title text-center mb-12">
                 YouTube Thumbnail Best Practices
               </h2>
               
               <div className="space-y-6">
                 <div className="bg-gray-50 rounded-2xl p-6">
-                  <h3 className="text-xl font-semibold mb-3">1. Use High Contrast Colors</h3>
+                  <h3 className="text-feature-title mb-3">1. Use High Contrast Colors</h3>
                   <p className="text-gray-700">
                     Thumbnails need to stand out in YouTube's busy interface. Our AI automatically 
                     applies high contrast to ensure maximum visibility.
@@ -241,7 +241,7 @@ function YouTubeThumbnailMakerContent({ locale, translations, onGenerate, isGene
                 </div>
                 
                 <div className="bg-gray-50 rounded-2xl p-6">
-                  <h3 className="text-xl font-semibold mb-3">2. Keep Text Large and Readable</h3>
+                  <h3 className="text-feature-title mb-3">2. Keep Text Large and Readable</h3>
                   <p className="text-gray-700">
                     Remember that most viewers see thumbnails on mobile devices. CoverGen AI ensures 
                     text remains readable even at small sizes.
@@ -249,7 +249,7 @@ function YouTubeThumbnailMakerContent({ locale, translations, onGenerate, isGene
                 </div>
                 
                 <div className="bg-gray-50 rounded-2xl p-6">
-                  <h3 className="text-xl font-semibold mb-3">3. Avoid the Bottom-Right Corner</h3>
+                  <h3 className="text-feature-title mb-3">3. Avoid the Bottom-Right Corner</h3>
                   <p className="text-gray-700">
                     YouTube displays the video duration in the bottom-right. Our templates automatically 
                     keep important elements away from this area.
@@ -257,7 +257,7 @@ function YouTubeThumbnailMakerContent({ locale, translations, onGenerate, isGene
                 </div>
                 
                 <div className="bg-gray-50 rounded-2xl p-6">
-                  <h3 className="text-xl font-semibold mb-3">4. Test Multiple Variations</h3>
+                  <h3 className="text-feature-title mb-3">4. Test Multiple Variations</h3>
                   <p className="text-gray-700">
                     Generate multiple thumbnail options and A/B test them. Pro users can create 
                     unlimited variations to find the perfect thumbnail.
@@ -271,7 +271,7 @@ function YouTubeThumbnailMakerContent({ locale, translations, onGenerate, isGene
         {/* CTA Section */}
         <section className="py-20 bg-gradient-to-br from-red-600 to-red-700 text-white">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            <h2 className="text-hero-title mb-6 text-white">
               Ready to Boost Your YouTube Views?
             </h2>
             <p className="text-xl md:text-2xl mb-8 opacity-90">
@@ -279,7 +279,7 @@ function YouTubeThumbnailMakerContent({ locale, translations, onGenerate, isGene
             </p>
             <Button 
               size="lg" 
-              className="bg-white text-red-600 hover:bg-gray-100 px-8 py-6 text-lg font-semibold"
+              className="bg-white text-red-600 hover:bg-gray-100 px-8 py-6 text-lg font-medium"
               onClick={() => {
                 if (onGenerate) {
                   onGenerate()

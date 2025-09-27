@@ -55,7 +55,7 @@ export default function InstagramOptimizedClient({ locale, translations }: { loc
             </h1>
             
             <p className="text-xl md:text-2xl text-white mb-8 leading-relaxed">
-              Create content that <span className="bg-white text-pink-600 px-2 py-1 rounded font-semibold">stops the scroll</span>. 
+              Create content that <span className="text-white font-semibold">stops the scroll</span>. 
               AI-powered designs for Instagram success.
             </p>
             

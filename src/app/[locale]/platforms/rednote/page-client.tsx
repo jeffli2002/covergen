@@ -88,12 +88,12 @@ export default function RednoteCoverMakerClient({ locale, translations }: { loca
                 </div>
               </div>
               
-              <h1 className="text-5xl md:text-6xl font-bold mb-6 text-gray-900">
+              <h1 className="text-hero-title text-gray-900">
                 Rednote (小红书) Cover Maker
               </h1>
               
-              <p className="text-xl md:text-2xl text-gray-700 mb-8 leading-relaxed">
-                Create covers that <span className="bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text text-transparent font-semibold">go viral</span> on 
+              <p className="text-hero-subtitle text-gray-700 mb-8">
+                Create covers that <span className="text-red-600 font-medium">go viral</span> on 
                 Rednote. AI-powered designs for lifestyle influencers.
               </p>
               
@@ -121,7 +121,7 @@ export default function RednoteCoverMakerClient({ locale, translations }: { loca
         {/* Features Grid */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+            <h2 className="text-section-title text-center mb-12">
               Designed for Rednote Success
             </h2>
             
@@ -134,8 +134,8 @@ export default function RednoteCoverMakerClient({ locale, translations }: { loca
                         <feature.icon className="w-8 h-8 text-red-500" />
                       </div>
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-gray-600">{feature.description}</p>
+                    <h3 className="text-feature-title mb-2">{feature.title}</h3>
+                    <p className="text-feature-description">{feature.description}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -147,7 +147,7 @@ export default function RednoteCoverMakerClient({ locale, translations }: { loca
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+              <h2 className="text-section-title text-center mb-12">
                 Popular Rednote Content Categories
               </h2>
               
@@ -186,13 +186,13 @@ export default function RednoteCoverMakerClient({ locale, translations }: { loca
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+              <h2 className="text-section-title text-center mb-12">
                 Rednote-Specific Optimization
               </h2>
               
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl p-8">
-                  <h3 className="text-2xl font-semibold mb-4">📐 Perfect Dimensions</h3>
+                  <h3 className="text-section-title mb-4">📐 Perfect Dimensions</h3>
                   <ul className="space-y-3 text-gray-700">
                     <li>• Square (1:1): 1080 x 1080px</li>
                     <li>• Vertical (3:4): 1080 x 1440px</li>
@@ -202,7 +202,7 @@ export default function RednoteCoverMakerClient({ locale, translations }: { loca
                 </div>
                 
                 <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl p-8">
-                  <h3 className="text-2xl font-semibold mb-4">🎨 Style Elements</h3>
+                  <h3 className="text-section-title mb-4">🎨 Style Elements</h3>
                   <ul className="space-y-3 text-gray-700">
                     <li>• Minimal, clean aesthetics</li>
                     <li>• Soft, lifestyle photography</li>
@@ -215,17 +215,17 @@ export default function RednoteCoverMakerClient({ locale, translations }: { loca
               <div className="mt-12 grid md:grid-cols-3 gap-6 text-center">
                 <div className="bg-gray-50 rounded-2xl p-6">
                   <div className="text-3xl mb-2">🌟</div>
-                  <h4 className="font-semibold mb-2">Filter Effects</h4>
+                  <h4 className="font-light mb-2">Filter Effects</h4>
                   <p className="text-gray-600">AI applies Rednote-popular filters automatically</p>
                 </div>
                 <div className="bg-gray-50 rounded-2xl p-6">
                   <div className="text-3xl mb-2">📝</div>
-                  <h4 className="font-semibold mb-2">Title Cards</h4>
+                  <h4 className="font-light mb-2">Title Cards</h4>
                   <p className="text-gray-600">Eye-catching title overlays that drive clicks</p>
                 </div>
                 <div className="bg-gray-50 rounded-2xl p-6">
                   <div className="text-3xl mb-2">🎯</div>
-                  <h4 className="font-semibold mb-2">Tag Optimization</h4>
+                  <h4 className="font-light mb-2">Tag Optimization</h4>
                   <p className="text-gray-600">Designs that complement trending hashtags</p>
                 </div>
               </div>
@@ -237,22 +237,22 @@ export default function RednoteCoverMakerClient({ locale, translations }: { loca
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+              <h2 className="text-section-title text-center mb-12">
                 Rednote Cover Best Practices
               </h2>
               
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   <div className="bg-white rounded-2xl p-6 shadow-sm">
-                    <h3 className="text-xl font-semibold mb-3">✨ First Impression Matters</h3>
-                    <p className="text-gray-600">
+                    <h3 className="text-feature-title mb-3">✨ First Impression Matters</h3>
+                    <p className="text-feature-description">
                       Your cover is your hook. Our AI ensures it's visually striking and on-brand for Rednote users.
                     </p>
                   </div>
                   
                   <div className="bg-white rounded-2xl p-6 shadow-sm">
-                    <h3 className="text-xl font-semibold mb-3">🎨 Lifestyle Aesthetic</h3>
-                    <p className="text-gray-600">
+                    <h3 className="text-feature-title mb-3">🎨 Lifestyle Aesthetic</h3>
+                    <p className="text-feature-description">
                       Clean, aspirational visuals perform best. AI creates that perfect lifestyle vibe automatically.
                     </p>
                   </div>
@@ -260,15 +260,15 @@ export default function RednoteCoverMakerClient({ locale, translations }: { loca
                 
                 <div className="space-y-6">
                   <div className="bg-white rounded-2xl p-6 shadow-sm">
-                    <h3 className="text-xl font-semibold mb-3">📱 Mobile-First</h3>
-                    <p className="text-gray-600">
+                    <h3 className="text-feature-title mb-3">📱 Mobile-First</h3>
+                    <p className="text-feature-description">
                       100% of Rednote users are on mobile. Designs are optimized for small screen impact.
                     </p>
                   </div>
                   
                   <div className="bg-white rounded-2xl p-6 shadow-sm">
-                    <h3 className="text-xl font-semibold mb-3">🌏 Cultural Relevance</h3>
-                    <p className="text-gray-600">
+                    <h3 className="text-feature-title mb-3">🌏 Cultural Relevance</h3>
+                    <p className="text-feature-description">
                       Designs that resonate with Chinese aesthetics while maintaining global appeal.
                     </p>
                   </div>
@@ -279,16 +279,16 @@ export default function RednoteCoverMakerClient({ locale, translations }: { loca
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-br from-red-500 to-pink-500 text-white">
+        <section className="cta-section py-20 bg-gradient-to-br from-red-500 to-pink-500 text-white">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            <h2 className="text-hero-title mb-6">
               Ready to Shine on Rednote?
             </h2>
-            <p className="text-xl md:text-2xl mb-8 opacity-90">
+            <p className="text-hero-subtitle mb-8 opacity-90">
               Create covers that capture hearts and drive engagement
             </p>
             <Link href={`/${locale}#generator`}>
-              <Button size="lg" className="bg-white text-red-500 hover:bg-gray-100 px-8 py-6 text-lg font-semibold">
+              <Button size="lg" className="bg-white text-red-500 hover:bg-gray-100 px-8 py-6 text-lg font-light shadow-lg">
                 Start Creating Rednote Covers
               </Button>
             </Link>

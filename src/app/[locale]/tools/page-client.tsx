@@ -395,7 +395,7 @@ export default function ToolsHubClient({ locale, translations: t }: ToolsHubClie
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-r from-purple-600 to-pink-600">
+        <section className="cta-section py-20 bg-gradient-to-r from-purple-600 to-pink-600">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl font-bold text-white mb-4">
               Start Creating Amazing Designs Today

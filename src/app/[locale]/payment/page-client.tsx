@@ -377,13 +377,13 @@ export default function PaymentPageClient({
       <div className="container max-w-6xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4 text-gray-900">
+          <h1 className="text-hero-title mb-4 text-gray-900">
             {isActivation ? 'Activate Your Plan' : isUpgrade ? 'Upgrade Your Plan' : 
               currentSubscription?.tier === 'pro' ? 'Upgrade to Pro+' :
               currentSubscription?.tier === 'pro_plus' ? 'Your Subscription' :
               'Choose Your Plan'}
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-body-lg text-gray-600 max-w-2xl mx-auto">
             {(() => {
               if (isActivation) {
                 return 'Add a payment method to activate your subscription.'
@@ -533,10 +533,10 @@ export default function PaymentPageClient({
                     </div>
                   </div>
                   
-                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                  <CardTitle className="text-heading-4">{plan.name}</CardTitle>
                   
                   <div className="mt-4">
-                    <span className="text-4xl font-bold">${plan.price / 100}</span>
+                    <span className="text-heading-2">${plan.price / 100}</span>
                     <span className="text-gray-600">/month</span>
                   </div>
                   
@@ -565,7 +565,7 @@ export default function PaymentPageClient({
 
                 <CardContent className="space-y-4">
                   <div className="text-center py-2 bg-gray-50 rounded-lg">
-                    <span className={`text-2xl font-bold ${plan.popular ? 'text-orange-600' : 'text-gray-700'}`}>
+                    <span className={`text-heading-4 ${plan.popular ? 'text-orange-600' : 'text-gray-700'}`}>
                       {plan.credits}
                     </span>
                     <span className="text-gray-600 ml-1">credits/month</span>

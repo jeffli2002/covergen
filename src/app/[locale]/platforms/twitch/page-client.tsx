@@ -85,24 +85,24 @@ export default function TwitchGraphicsMakerClient({ locale, translations }: { lo
                 </div>
               </div>
               
-              <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white">
+              <h1 className="text-hero-title text-white">
                 Twitch Graphics Maker
               </h1>
               
-              <p className="text-xl md:text-2xl text-purple-100 mb-8 leading-relaxed">
-                Level up your stream with <span className="bg-white text-purple-800 px-2 py-1 rounded font-semibold">professional graphics</span>. 
+              <p className="text-hero-subtitle text-purple-100 mb-8">
+                Level up your stream with <span className="text-white font-medium">professional graphics</span>. 
                 AI-powered overlays, banners, and panels that make you stand out.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
                 <Link href={`/${locale}#generator`}>
-                  <Button size="lg" className="bg-white text-purple-800 hover:bg-gray-100 px-8 py-6 text-lg shadow-lg">
+                  <Button size="lg" className="bg-white text-purple-800 hover:bg-gray-100 px-8 py-6 text-lg shadow-lg font-light">
                     <Sparkles className="w-5 h-5 mr-2" />
                     Create Twitch Graphics
                   </Button>
                 </Link>
                 <Link href={`/${locale}#pricing`}>
-                  <Button size="lg" variant="ghost" className="text-white border-2 border-white hover:bg-white hover:text-purple-800 px-8 py-6 text-lg font-semibold">
+                  <Button size="lg" variant="ghost" className="text-white border-2 border-white hover:bg-white hover:text-purple-800 px-8 py-6 text-lg font-light">
                     View Pricing
                   </Button>
                 </Link>
@@ -118,7 +118,7 @@ export default function TwitchGraphicsMakerClient({ locale, translations }: { lo
         {/* Features Grid */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+            <h2 className="text-section-title text-center mb-12">
               Built for Twitch Streamers
             </h2>
             
@@ -131,8 +131,8 @@ export default function TwitchGraphicsMakerClient({ locale, translations }: { lo
                         <feature.icon className="w-8 h-8 text-purple-600" />
                       </div>
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-gray-600">{feature.description}</p>
+                    <h3 className="text-feature-title mb-2">{feature.title}</h3>
+                    <p className="text-feature-description">{feature.description}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -144,32 +144,32 @@ export default function TwitchGraphicsMakerClient({ locale, translations }: { lo
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+              <h2 className="text-section-title text-center mb-12">
                 All Twitch Graphics You Need
               </h2>
               
               <div className="grid md:grid-cols-3 gap-8">
                 <div className="bg-white rounded-2xl p-6 text-center hover:shadow-lg transition-shadow">
                   <div className="text-4xl mb-4">🎮</div>
-                  <h3 className="text-xl font-semibold mb-2">Stream Overlays</h3>
+                  <h3 className="text-feature-title mb-2">Stream Overlays</h3>
                   <p className="text-gray-600">Webcam frames, alerts, and HUD elements</p>
                 </div>
                 
                 <div className="bg-white rounded-2xl p-6 text-center hover:shadow-lg transition-shadow">
                   <div className="text-4xl mb-4">🖼️</div>
-                  <h3 className="text-xl font-semibold mb-2">Channel Banners</h3>
+                  <h3 className="text-feature-title mb-2">Channel Banners</h3>
                   <p className="text-gray-600">Profile banner, video player banner, offline screen</p>
                 </div>
                 
                 <div className="bg-white rounded-2xl p-6 text-center hover:shadow-lg transition-shadow">
                   <div className="text-4xl mb-4">📊</div>
-                  <h3 className="text-xl font-semibold mb-2">Info Panels</h3>
+                  <h3 className="text-feature-title mb-2">Info Panels</h3>
                   <p className="text-gray-600">About, schedule, donation, and social panels</p>
                 </div>
               </div>
 
               <div className="mt-12 text-center">
-                <h3 className="text-2xl font-semibold mb-6">Popular Streaming Categories</h3>
+                <h3 className="text-section-title mb-6">Popular Streaming Categories</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {[
                     '🎮 Gaming',
@@ -195,14 +195,14 @@ export default function TwitchGraphicsMakerClient({ locale, translations }: { lo
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+              <h2 className="text-section-title text-center mb-12">
                 Perfect Twitch Dimensions
               </h2>
               
               <div className="bg-purple-50 rounded-2xl p-8">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <h3 className="text-xl font-semibold mb-4">Banner Sizes</h3>
+                    <h3 className="text-feature-title mb-4">Banner Sizes</h3>
                     <ul className="space-y-2 text-gray-700">
                       <li>• Profile Banner: 1200 x 480px</li>
                       <li>• Video Player Banner: 1920 x 480px</li>
@@ -210,7 +210,7 @@ export default function TwitchGraphicsMakerClient({ locale, translations }: { lo
                     </ul>
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold mb-4">Panel & Overlay Sizes</h3>
+                    <h3 className="text-feature-title mb-4">Panel & Overlay Sizes</h3>
                     <ul className="space-y-2 text-gray-700">
                       <li>• Info Panels: 320 x 100px</li>
                       <li>• Webcam Overlay: 1920 x 1080px</li>
@@ -227,16 +227,16 @@ export default function TwitchGraphicsMakerClient({ locale, translations }: { lo
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-br from-purple-800 to-purple-600 text-white">
+        <section className="cta-section py-20 bg-gradient-to-br from-purple-800 to-purple-600 text-white">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            <h2 className="text-hero-title mb-6">
               Ready to Level Up Your Stream?
             </h2>
-            <p className="text-xl md:text-2xl mb-8 opacity-90">
+            <p className="text-hero-subtitle mb-8 opacity-90">
               Join thousands of streamers creating professional graphics with AI
             </p>
             <Link href={`/${locale}#generator`}>
-              <Button size="lg" className="bg-white text-purple-800 hover:bg-gray-100 px-8 py-6 text-lg font-semibold shadow-lg">
+              <Button size="lg" className="bg-white text-purple-800 hover:bg-gray-100 px-8 py-6 text-lg font-light shadow-lg">
                 Start Creating Stream Graphics
               </Button>
             </Link>

@@ -85,12 +85,12 @@ export default function LinkedInGraphicsMakerClient({ locale, translations }: { 
                 </div>
               </div>
               
-              <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white">
+              <h1 className="text-hero-title text-white">
                 LinkedIn Graphics Maker
               </h1>
               
-              <p className="text-xl md:text-2xl text-blue-100 mb-8 leading-relaxed">
-                Create graphics that <span className="bg-white text-blue-700 px-2 py-1 rounded font-semibold">command attention</span> in 
+              <p className="text-hero-subtitle text-blue-100 mb-8">
+                Create graphics that <span className="text-white font-medium">command attention</span> in 
                 professional feeds. AI-powered designs for LinkedIn success.
               </p>
               
@@ -102,7 +102,7 @@ export default function LinkedInGraphicsMakerClient({ locale, translations }: { 
                   </Button>
                 </Link>
                 <Link href={`/${locale}#pricing`}>
-                  <Button size="lg" variant="ghost" className="text-white border-2 border-white hover:bg-white hover:text-blue-700 px-8 py-6 text-lg font-semibold">
+                  <Button size="lg" variant="ghost" className="text-white border-2 border-white hover:bg-white hover:text-blue-700 px-8 py-6 text-lg font-light">
                     View Pricing
                   </Button>
                 </Link>
@@ -118,7 +118,7 @@ export default function LinkedInGraphicsMakerClient({ locale, translations }: { 
         {/* Features Grid */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+            <h2 className="text-section-title text-center mb-12">
               Built for LinkedIn Professionals
             </h2>
             
@@ -131,8 +131,8 @@ export default function LinkedInGraphicsMakerClient({ locale, translations }: { 
                         <feature.icon className="w-8 h-8 text-blue-600" />
                       </div>
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-gray-600">{feature.description}</p>
+                    <h3 className="text-feature-title mb-2">{feature.title}</h3>
+                    <p className="text-feature-description">{feature.description}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -144,42 +144,42 @@ export default function LinkedInGraphicsMakerClient({ locale, translations }: { 
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+              <h2 className="text-section-title text-center mb-12">
                 LinkedIn Graphics for Every Need
               </h2>
               
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="bg-white rounded-2xl p-8 hover:shadow-lg transition-shadow">
                   <div className="text-3xl mb-4">🖼️</div>
-                  <h3 className="text-xl font-semibold mb-3">Profile Banner</h3>
+                  <h3 className="text-feature-title mb-3">Profile Banner</h3>
                   <p className="text-gray-600 mb-4">Make a strong first impression with a professional banner that showcases your expertise.</p>
                   <p className="text-sm text-blue-600 font-medium">1584 x 396 pixels</p>
                 </div>
                 
                 <div className="bg-white rounded-2xl p-8 hover:shadow-lg transition-shadow">
                   <div className="text-3xl mb-4">📱</div>
-                  <h3 className="text-xl font-semibold mb-3">Post Images</h3>
+                  <h3 className="text-feature-title mb-3">Post Images</h3>
                   <p className="text-gray-600 mb-4">Boost engagement with eye-catching visuals for your LinkedIn posts and updates.</p>
                   <p className="text-sm text-blue-600 font-medium">1200 x 627 pixels</p>
                 </div>
                 
                 <div className="bg-white rounded-2xl p-8 hover:shadow-lg transition-shadow">
                   <div className="text-3xl mb-4">📰</div>
-                  <h3 className="text-xl font-semibold mb-3">Article Covers</h3>
+                  <h3 className="text-feature-title mb-3">Article Covers</h3>
                   <p className="text-gray-600 mb-4">Create compelling covers for LinkedIn articles that drive readership.</p>
                   <p className="text-sm text-blue-600 font-medium">1280 x 720 pixels</p>
                 </div>
                 
                 <div className="bg-white rounded-2xl p-8 hover:shadow-lg transition-shadow">
                   <div className="text-3xl mb-4">🎠</div>
-                  <h3 className="text-xl font-semibold mb-3">Carousel Posts</h3>
+                  <h3 className="text-feature-title mb-3">Carousel Posts</h3>
                   <p className="text-gray-600 mb-4">Design swipeable carousel posts that tell your professional story.</p>
                   <p className="text-sm text-blue-600 font-medium">1080 x 1080 pixels</p>
                 </div>
               </div>
 
               <div className="mt-12">
-                <h3 className="text-2xl font-semibold text-center mb-6">Popular LinkedIn Content Types</h3>
+                <h3 className="text-section-title text-center mb-6">Popular LinkedIn Content Types</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {[
                     '💡 Thought Leadership',
@@ -206,21 +206,21 @@ export default function LinkedInGraphicsMakerClient({ locale, translations }: { 
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+              <h2 className="text-section-title text-center mb-12">
                 The Power of Visual Content on LinkedIn
               </h2>
               
               <div className="grid md:grid-cols-3 gap-8 text-center">
                 <div className="bg-blue-50 rounded-2xl p-8">
-                  <div className="text-4xl font-bold text-blue-600 mb-2">2x</div>
+                  <div className="text-4xl font-thin text-blue-600 mb-2">2x</div>
                   <p className="text-gray-600">more engagement with images vs text-only posts</p>
                 </div>
                 <div className="bg-blue-50 rounded-2xl p-8">
-                  <div className="text-4xl font-bold text-blue-600 mb-2">98%</div>
+                  <div className="text-4xl font-thin text-blue-600 mb-2">98%</div>
                   <p className="text-gray-600">more comments on posts with custom graphics</p>
                 </div>
                 <div className="bg-blue-50 rounded-2xl p-8">
-                  <div className="text-4xl font-bold text-blue-600 mb-2">900M+</div>
+                  <div className="text-4xl font-thin text-blue-600 mb-2">900M+</div>
                   <p className="text-gray-600">professionals active on LinkedIn</p>
                 </div>
               </div>
@@ -232,21 +232,21 @@ export default function LinkedInGraphicsMakerClient({ locale, translations }: { 
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+              <h2 className="text-section-title text-center mb-12">
                 LinkedIn Visual Best Practices
               </h2>
               
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   <div className="bg-white rounded-2xl p-6 shadow-sm">
-                    <h3 className="text-xl font-semibold mb-3">🎯 Professional Polish</h3>
+                    <h3 className="text-feature-title mb-3">🎯 Professional Polish</h3>
                     <p className="text-gray-600">
                       Maintain a clean, professional aesthetic. Our AI ensures your graphics reflect corporate standards.
                     </p>
                   </div>
                   
                   <div className="bg-white rounded-2xl p-6 shadow-sm">
-                    <h3 className="text-xl font-semibold mb-3">📊 Data Visualization</h3>
+                    <h3 className="text-feature-title mb-3">📊 Data Visualization</h3>
                     <p className="text-gray-600">
                       Transform insights into compelling visuals. AI helps create infographics that drive engagement.
                     </p>
@@ -255,14 +255,14 @@ export default function LinkedInGraphicsMakerClient({ locale, translations }: { 
                 
                 <div className="space-y-6">
                   <div className="bg-white rounded-2xl p-6 shadow-sm">
-                    <h3 className="text-xl font-semibold mb-3">🎨 Brand Consistency</h3>
+                    <h3 className="text-feature-title mb-3">🎨 Brand Consistency</h3>
                     <p className="text-gray-600">
                       Keep your visual identity consistent. Upload brand assets for cohesive professional presence.
                     </p>
                   </div>
                   
                   <div className="bg-white rounded-2xl p-6 shadow-sm">
-                    <h3 className="text-xl font-semibold mb-3">💬 Clear Messaging</h3>
+                    <h3 className="text-feature-title mb-3">💬 Clear Messaging</h3>
                     <p className="text-gray-600">
                       Combine visuals with concise text. Our AI balances imagery and copy for maximum impact.
                     </p>
@@ -274,16 +274,16 @@ export default function LinkedInGraphicsMakerClient({ locale, translations }: { 
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-br from-blue-700 to-blue-900 text-white">
+        <section className="cta-section py-20 bg-gradient-to-br from-blue-700 to-blue-900 text-white">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            <h2 className="text-hero-title mb-6">
               Ready to Elevate Your LinkedIn Presence?
             </h2>
-            <p className="text-xl md:text-2xl mb-8 opacity-90">
+            <p className="text-hero-subtitle mb-8 opacity-90">
               Join professionals creating standout LinkedIn content with AI
             </p>
             <Link href={`/${locale}#generator`}>
-              <Button size="lg" className="bg-white text-blue-700 hover:bg-gray-100 px-8 py-6 text-lg font-semibold shadow-lg">
+              <Button size="lg" className="bg-white text-blue-700 hover:bg-gray-100 px-8 py-6 text-lg font-light shadow-lg">
                 Start Creating Professional Graphics
               </Button>
             </Link>

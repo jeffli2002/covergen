@@ -470,7 +470,7 @@ export default function ThumbnailMakerHubClient({ locale, translations }: Props)
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-br from-blue-600 to-purple-700 py-16">
+      <section className="cta-section bg-gradient-to-br from-blue-600 to-purple-700 py-16">
         <div className="container mx-auto px-4 text-center text-white">
           <h2 className="text-3xl font-bold mb-4">
             Start Creating Professional Thumbnails & Covers Today
