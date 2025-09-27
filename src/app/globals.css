@@ -5,6 +5,44 @@
 /* Import article typography styles */
 @import '../styles/article-typography.css';
 
+/* Auto-scrolling animation for platform icons */
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes scroll-slow {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes scroll-icons {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.333%);
+  }
+}
+
+.animate-scroll-slow {
+  animation: scroll-slow 30s linear infinite;
+  animation-play-state: paused;
+}
+
+.animate-scroll-slow:hover,
+.animate-scroll-slow:focus {
+  animation-play-state: running;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

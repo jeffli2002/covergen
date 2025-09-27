@@ -26,7 +26,7 @@ import {
   Facebook,
   Linkedin,
 } from 'lucide-react'
-import { TikTokIcon, SpotifyIcon, TwitterXIcon } from '@/components/icons/brand-icons'
+import { TikTokIcon, SpotifyIcon, TwitterXIcon, FacebookIcon } from '@/components/icons/brand-icons'
 import { Locale } from '@/lib/i18n/config'
 
 interface HomePageClientProps {
@@ -38,6 +38,7 @@ const platformIcons = [
   { name: 'YouTube', icon: Youtube, color: 'text-red-500' },
   { name: 'Instagram', icon: Instagram, color: 'text-pink-500' },
   { name: 'TikTok', icon: TikTokIcon, color: 'text-black' },
+  { name: 'Facebook', icon: FacebookIcon, color: 'text-blue-600' },
   { name: 'Spotify', icon: SpotifyIcon, color: 'text-green-500' },
   { name: 'LinkedIn', icon: Linkedin, color: 'text-blue-700' },
   { name: 'X', icon: TwitterXIcon, color: 'text-black' },
@@ -253,17 +254,59 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
               </p>
 
               
-              {/* Platform Icons with animations */}
-              <div className="flex justify-center gap-6 md:gap-8 lg:gap-12 mb-8 flex-wrap px-4">
-                {platformIcons.map((platform) => (
-                  <div key={platform.name} className="flex flex-col items-center gap-2 md:gap-3 group">
-                    <div className="p-3 md:p-4 lg:p-5 rounded-3xl bg-gray-50 shadow-sm hover:shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-2 border border-gray-100">
-                      <platform.icon className={`w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 ${platform.color}`} />
+              {/* Platform Icons - show 6 initially, scroll to reveal all */}
+              <div className="flex justify-center mb-8">
+                <div className="relative group">
+                  {/* Container that shows 6 icons width */}
+                  <div className="relative overflow-hidden" style={{ width: 'min(95vw, 780px)' }}>
+                    {/* Gradient overlays for fade in/out effect */}
+                    <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white via-white/70 to-transparent z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-white via-white/70 to-transparent z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    
+                    <div 
+                      className="flex gap-4 md:gap-5 lg:gap-6 py-2 transition-transform duration-300"
+                      tabIndex={0}
+                      style={{
+                        width: 'max-content',
+                        animation: 'scroll-icons 20s linear infinite paused',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.animationPlayState = 'running'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.animationPlayState = 'paused'
+                      }}
+                      onFocus={(e) => {
+                        e.currentTarget.style.animationPlayState = 'running'
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.animationPlayState = 'paused'
+                      }}
+                    >
+                      {/* Duplicate icons for seamless scrolling */}
+                      {[...platformIcons, ...platformIcons, ...platformIcons].map((platform, index) => (
+                        <div key={`${platform.name}-${index}`} className="flex flex-col items-center gap-2 group flex-shrink-0">
+                          <div className="p-4 md:p-5 lg:p-6 rounded-2xl bg-gray-50 shadow-sm hover:shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-2 border border-gray-100">
+                            <platform.icon className={`w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 ${platform.color}`} />
+                          </div>
+                          <span className="text-sm md:text-base font-normal text-gray-700">{platform.name}</span>
+                        </div>
+                      ))}
                     </div>
-                    <span className="text-sm md:text-base lg:text-lg font-normal text-gray-700">{platform.name}</span>
                   </div>
-                ))}
+                </div>
               </div>
+
+              <style jsx>{`
+                @keyframes scroll {
+                  0% {
+                    transform: translateX(0);
+                  }
+                  100% {
+                    transform: translateX(-50%);
+                  }
+                }
+              `}</style>
 
               {/* Free generation highlight */}
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl px-6 py-4 mb-8 max-w-3xl mx-auto border border-green-200">
