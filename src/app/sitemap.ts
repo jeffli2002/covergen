@@ -179,6 +179,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { name: 'spotify', priority: 0.9 },
     { name: 'twitch', priority: 0.9 },
     { name: 'linkedin', priority: 0.85 },
+    { name: 'bilibili', priority: 0.85 }, // Added missing platform
     { name: 'wechat', priority: 0.85 },
     { name: 'rednote', priority: 0.85 },
   ]
@@ -201,6 +202,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { name: 'instagram-thumbnail-maker', priority: 0.95 }, // KD: 10
     { name: 'linkedin-banner-maker', priority: 0.95 }, // KD: 7
     { name: 'youtube-thumbnail-ideas', priority: 0.93 }, // KD: 22
+    { name: 'thumbnail-maker-hub', priority: 0.9 }, // Hub page
+    { name: 'thumbnail-tester', priority: 0.88 }, // Tool page
     // Existing tools
     { name: 'anime-poster-maker', priority: 0.8 },
     { name: 'spotify-playlist-cover', priority: 0.85 },
@@ -211,6 +214,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { name: 'webinar-poster-maker', priority: 0.75 },
     { name: 'event-poster-designer', priority: 0.75 },
     { name: 'music-album-cover', priority: 0.85 },
+    { name: 'podcast-cover-maker', priority: 0.83 }, // Added missing tool
+    { name: 'discord-banner-maker', priority: 0.82 }, // Added missing tool
+    { name: 'kindle-cover-creator', priority: 0.84 }, // Added missing tool
+    { name: 'wattpad-cover-maker', priority: 0.8 }, // Added missing tool
   ]
   
   const toolRoutes = tools.flatMap((tool) => [

@@ -1,5 +1,5 @@
 # robots.txt for CoverGen Pro
-# Last updated: 2025-01-28
+# Last updated: 2025-01-29
 # AI-powered cover and thumbnail generator for content creators
 
 # Default - Allow all crawlers with content prioritization
@@ -41,6 +41,15 @@ Allow: /en/tools/game-cover-art
 Allow: /en/tools/webinar-poster-maker
 Allow: /en/tools/event-poster-designer
 Allow: /en/tools/music-album-cover
+Allow: /en/tools/podcast-cover-maker
+Allow: /en/tools/discord-banner-maker
+Allow: /en/tools/kindle-cover-creator
+Allow: /en/tools/wattpad-cover-maker
+Allow: /en/tools/instagram-thumbnail-maker
+Allow: /en/tools/linkedin-banner-maker
+Allow: /en/tools/youtube-thumbnail-ideas
+Allow: /en/tools/thumbnail-maker-hub
+Allow: /en/tools/thumbnail-tester
 
 # Allow localized versions
 Allow: /es/*
