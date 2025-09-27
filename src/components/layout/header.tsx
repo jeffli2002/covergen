@@ -536,11 +536,11 @@ export default function Header({ locale, translations: t }: HeaderProps) {
               <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
             ) : user ? (
               <>
-                {/* <UserMenu /> */}
-                
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <User className="w-4 h-4" />
-                  <span>{user.email}</span>
+                {/* User Avatar */}
+                <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
+                    {user.email.charAt(0).toUpperCase()}
+                  </div>
                 </div>
                 
                 {/* Upgrade/Account button */}
@@ -670,12 +670,16 @@ export default function Header({ locale, translations: t }: HeaderProps) {
             <img src="/blueLogoTransparent.png" alt="CoverGen Pro" className="h-8 w-auto" />
           </Link>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Button and User Avatar */}
           <div className="flex items-center gap-2">
             {!loading && user && (
-              <div className="flex items-center gap-2">
+              <>
                 <UsageDisplay session={session} />
-              </div>
+                {/* User Avatar */}
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
+                  {user.email.charAt(0).toUpperCase()}
+                </div>
+              </>
             )}
             <Button
               variant="ghost"
@@ -770,6 +774,19 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                     <div className="w-full h-10 bg-gray-100 animate-pulse rounded" />
                   ) : user ? (
                     <div className="space-y-3">
+                      {/* User Info */}
+                      <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold shadow-sm">
+                          {user.email.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-gray-900">{user.email}</div>
+                          <div className="text-xs text-gray-500">
+                            {subscriptionInfo?.tier === 'pro_plus' ? 'Pro+ Member' : 
+                             subscriptionInfo?.tier === 'pro' ? 'Pro Member' : 'Free Plan'}
+                          </div>
+                        </div>
+                      </div>
                       <Link 
                         href={`/${locale}/account`}
                         className="block text-base font-medium text-gray-700 hover:text-blue-600"
