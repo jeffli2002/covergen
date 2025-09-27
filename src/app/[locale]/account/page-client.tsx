@@ -62,7 +62,7 @@ const getTrialLimits = () => {
 export default function AccountPageClient({ locale }: AccountPageClientProps) {
   const router = useRouter()
   const { user: appStoreUser, setUser } = useAppStore()
-  const { user: authUser, session, loading: authLoading } = useBestAuth()
+  const { user: authUser, session, loading: authLoading, signOut } = useBestAuth()
   const [loading, setLoading] = useState(true)
   const [initialAuthCheck, setInitialAuthCheck] = useState(true)
   const [loadingMessage, setLoadingMessage] = useState('Checking authentication...')
@@ -457,31 +457,23 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
 
   const handleSignOut = async () => {
     try {
-      // Clear local state first
-      setUser(null)
+      // Use the BestAuth hook's signOut method which already emits events
+      const result = await signOut()
       
-      // Call BestAuth signout API
-      if (session?.token) {
-        const response = await fetch('/api/auth/signout', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session.token}`,
-            'Content-Type': 'application/json'
-          }
-        })
+      if (result.success) {
+        // Clear local state
+        setUser(null)
         
-        if (!response.ok) {
-          console.error('Sign out API call failed')
-        }
+        // The signOut method in useBestAuth already emits the auth change event
+        // Just redirect to home
+        router.push(`/${locale}`)
+      } else {
+        console.error('Sign out failed:', result.error)
+        toast.error('Failed to sign out. Please try again.')
       }
-      
-      // Clear any stored auth data and redirect
-      localStorage.removeItem('bestauth-session')
-      router.push(`/${locale}`)
     } catch (error) {
       console.error('Error signing out:', error)
-      // Still redirect even if API call fails
-      router.push(`/${locale}`)
+      toast.error('An error occurred while signing out.')
     }
   }
 
