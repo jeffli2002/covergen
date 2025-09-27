@@ -34,7 +34,10 @@ export default function PaymentPageClient({
   const { user } = useAppStore()
   const { user: authUser, loading: authLoading, session } = useBestAuth()
   const [loading, setLoading] = useState(false)
-  const [selectedPlan, setSelectedPlan] = useState<'pro' | 'pro_plus' | null>(null)
+  const [selectedPlan, setSelectedPlan] = useState<'pro' | 'pro_plus' | null>(
+    // Pre-select target plan for upgrade scenarios
+    isUpgrade && initialPlan ? initialPlan as 'pro' | 'pro_plus' : null
+  )
   const [isTestMode, setIsTestMode] = useState(false)
   // Remove the local interface - use the actual subscription data structure
   type Subscription = any
@@ -152,32 +155,30 @@ export default function PaymentPageClient({
       }
       
       // Set selected plan based on user's situation
-      if (!isLoadingSubscription) {
-        // For upgrade scenarios, select the target plan
-        if (isUpgrade && initialPlan) {
-          console.log('[PaymentPage] Upgrade scenario, selecting target plan:', initialPlan)
-          setSelectedPlan(initialPlan as 'pro' | 'pro_plus')
-        }
-        // For activation scenarios, select the current plan
-        else if (isActivation && subscription) {
-          console.log('[PaymentPage] Activation scenario, selecting current plan:', subscription.tier)
-          setSelectedPlan(subscription.tier as 'pro' | 'pro_plus')
-        }
-        // For paid Pro users not upgrading, don't select any plan
-        else if (subscription && subscription.tier === 'pro' && subscription.status !== 'trialing' && !isUpgrade) {
-          console.log('[PaymentPage] Paid Pro user, no plan pre-selected')
-          setSelectedPlan(null)
-        }
-        // For paid Pro+ users, don't select any plan
-        else if (subscription && subscription.tier === 'pro_plus' && subscription.status !== 'trialing') {
-          console.log('[PaymentPage] Paid Pro+ user, no plan pre-selected')
-          setSelectedPlan(null)
-        }
-        // For new users or free users, use the initial plan
-        else if (initialPlan && (!subscription || subscription.tier === 'free')) {
-          console.log('[PaymentPage] Setting selected plan to:', initialPlan)
-          setSelectedPlan(initialPlan as 'pro' | 'pro_plus')
-        }
+      // For upgrade scenarios, select the target plan immediately
+      if (isUpgrade && initialPlan && !selectedPlan) {
+        console.log('[PaymentPage] Upgrade scenario, selecting target plan:', initialPlan)
+        setSelectedPlan(initialPlan as 'pro' | 'pro_plus')
+      }
+      // For activation scenarios, select the current plan
+      else if (isActivation && subscription && !selectedPlan) {
+        console.log('[PaymentPage] Activation scenario, selecting current plan:', subscription.tier)
+        setSelectedPlan(subscription.tier as 'pro' | 'pro_plus')
+      }
+      // For paid Pro users not upgrading, don't select any plan
+      else if (subscription && subscription.tier === 'pro' && subscription.status !== 'trialing' && !isUpgrade) {
+        console.log('[PaymentPage] Paid Pro user, no plan pre-selected')
+        if (selectedPlan) setSelectedPlan(null)
+      }
+      // For paid Pro+ users, don't select any plan
+      else if (subscription && subscription.tier === 'pro_plus' && subscription.status !== 'trialing') {
+        console.log('[PaymentPage] Paid Pro+ user, no plan pre-selected')
+        if (selectedPlan) setSelectedPlan(null)
+      }
+      // For new users or free users, use the initial plan
+      else if (initialPlan && (!subscription || subscription.tier === 'free') && !selectedPlan) {
+        console.log('[PaymentPage] Setting selected plan to:', initialPlan)
+        setSelectedPlan(initialPlan as 'pro' | 'pro_plus')
       }
     } catch (error) {
       console.error('Error loading subscription:', error)
@@ -490,8 +491,8 @@ export default function PaymentPageClient({
                   </div>
                 )}
                 
-                {/* Current plan badge */}
-                {isCurrentPlan && !needsPaymentSetup && isPaidUser && (
+                {/* Current plan badge - Don't show for paid users during upgrade */}
+                {isCurrentPlan && !needsPaymentSetup && isPaidUser && !isUpgrade && (
                   <div className="absolute -top-4 left-4 z-10">
                     <Badge className="bg-gray-600 text-white px-4 py-1">
                       Your Current Plan

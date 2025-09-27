@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import type { User, SignUpData, SignInData } from '@/lib/bestauth/types'
+import { authEvents } from '@/lib/events/auth-events'
 
 interface AuthState {
   user: User | null
@@ -102,6 +103,9 @@ export function useBestAuth() {
         error: null,
       })
       
+      // Emit auth change event
+      authEvents.emitAuthChange('signin')
+      
       return { success: true }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Sign up failed'
@@ -134,6 +138,9 @@ export function useBestAuth() {
         error: null,
       })
       
+      // Emit auth change event
+      authEvents.emitAuthChange('signin')
+      
       return { success: true }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Sign in failed'
@@ -161,6 +168,9 @@ export function useBestAuth() {
         loading: false,
         error: null,
       })
+      
+      // Emit auth change event
+      authEvents.emitAuthChange('signout')
       
       router.push('/')
       return { success: true }

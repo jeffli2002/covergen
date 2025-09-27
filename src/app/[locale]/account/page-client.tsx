@@ -19,6 +19,7 @@ import { toast } from 'sonner'
 import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
 import ActivationConfirmDialog from '@/components/subscription/ActivationConfirmDialog'
 import { useBestAuth } from '@/hooks/useBestAuth'
+import { authEvents } from '@/lib/events/auth-events'
 
 // Simple date formatter to avoid date-fns dependency
 const formatDate = (date: Date) => {
@@ -288,6 +289,13 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
             ...subscription,
             cancel_at_period_end: true
           })
+          
+          // Emit subscription change event
+          authEvents.emitSubscriptionChange({
+            ...subscription,
+            cancel_at_period_end: true
+          })
+          authEvents.emitAuthChange('subscription_update')
         }
         
         // Then reload data from server (might have slight delay)
@@ -332,6 +340,13 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
             ...subscription,
             cancel_at_period_end: false
           })
+          
+          // Emit subscription change event
+          authEvents.emitSubscriptionChange({
+            ...subscription,
+            cancel_at_period_end: false
+          })
+          authEvents.emitAuthChange('subscription_update')
         }
         
         // Then reload data from server (might have slight delay)

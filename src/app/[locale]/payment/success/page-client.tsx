@@ -8,6 +8,7 @@ import { CheckCircle, Loader2, Sparkles, ArrowRight } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
 import { useBestAuth } from '@/hooks/useBestAuth'
 import confetti from 'canvas-confetti'
+import { authEvents } from '@/lib/events/auth-events'
 
 interface PaymentSuccessClientProps {
   locale: string
@@ -89,6 +90,10 @@ export default function PaymentSuccessClient({ locale, sessionId }: PaymentSucce
             console.log('[PaymentSuccess] Triggering subscription refresh')
             triggerSubscriptionRefresh()
             triggerUsageRefresh()
+            
+            // Emit subscription change event
+            authEvents.emitSubscriptionChange(data)
+            authEvents.emitAuthChange('subscription_update')
           }
         }
       }

@@ -13,6 +13,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAppStore } from '@/lib/store'
 import { toast } from 'sonner'
+import { authEvents } from '@/lib/events/auth-events'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,21 +29,52 @@ interface HeaderProps {
 }
 
 export default function Header({ locale, translations: t }: HeaderProps) {
+  const router = useRouter()
   const { user, loading, signOut, session } = useBestAuth()
+  const { user: storeUser, subscriptionRefreshTrigger, triggerSubscriptionRefresh } = useAppStore()
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null)
   
-  // Debug logging for auth state
+  // Force refresh header when auth state changes
   useEffect(() => {
-    console.log('[Header] Auth state:', { 
+    console.log('[Header] Auth state changed:', { 
       loading, 
       hasUser: !!user, 
       userEmail: user?.email,
       timestamp: new Date().toISOString()
     })
-  }, [loading, user])
-  const { user: storeUser, subscriptionRefreshTrigger } = useAppStore()
-  const router = useRouter()
-  const [showAuthModal, setShowAuthModal] = useState(false)
-  const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null)
+    
+    // If user state changed, refresh subscription
+    if (user && !loading) {
+      triggerSubscriptionRefresh()
+    }
+  }, [loading, user?.id, triggerSubscriptionRefresh])
+  
+  // Listen for auth events
+  useEffect(() => {
+    const unsubscribeAuth = authEvents.onAuthChange((event) => {
+      console.log('[Header] Auth event received:', event.detail)
+      // Refresh subscription data
+      triggerSubscriptionRefresh()
+      // Force re-render
+      router.refresh()
+    })
+    
+    const unsubscribeSubscription = authEvents.onSubscriptionChange((event) => {
+      console.log('[Header] Subscription event received:', event.detail)
+      // Update subscription info immediately
+      if (event.detail.data) {
+        setSubscriptionInfo(event.detail.data)
+      }
+      // Refresh subscription data
+      triggerSubscriptionRefresh()
+    })
+    
+    return () => {
+      unsubscribeAuth()
+      unsubscribeSubscription()
+    }
+  }, [router, triggerSubscriptionRefresh])
   const [activating, setActivating] = useState(false)
   const [showActivationConfirm, setShowActivationConfirm] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
@@ -141,11 +173,19 @@ export default function Header({ locale, translations: t }: HeaderProps) {
       // Clear the app store user data
       const { setUser } = useAppStore.getState()
       setUser(null)
+      // Force refresh to update UI
+      router.refresh()
     }
   }
 
   const handleAuthSuccess = () => {
     setShowAuthModal(false)
+    
+    // Trigger subscription refresh to update header
+    triggerSubscriptionRefresh()
+    
+    // Force router refresh to update UI
+    router.refresh()
     
     // Check if there's a pending plan from pricing section
     const pendingPlan = localStorage.getItem('covergen_pending_plan')
