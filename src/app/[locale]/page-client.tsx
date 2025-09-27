@@ -6,7 +6,6 @@ import ImageGenerator from '@/components/image-generator'
 import PricingSection from '@/components/pricing-section'
 import FeedbackModal from '@/components/feedback-modal'
 import AIShowcase from '@/components/ai-showcase'
-import FeaturedToolsSection from '@/components/featured-tools-section'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useAppStore } from '@/lib/store'
@@ -297,9 +296,6 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
 
         {/* AI Showcase Section */}
         <AIShowcase />
-
-        {/* Featured Tools Section */}
-        <FeaturedToolsSection locale={locale} />
 
         {/* Technology Section - Nano Banana */}
         <section className="py-16 bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50">

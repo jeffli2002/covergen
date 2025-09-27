@@ -1,387 +1,428 @@
 'use client'
 
-import React, { useState } from 'react'
+import { Locale } from '@/lib/i18n/config'
 import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  Briefcase, 
-  TrendingUp, 
-  Users, 
-  Building2, 
-  Award,
-  Target,
-  Palette,
-  Download,
-  ArrowRight,
-  CheckCircle2,
-  Star,
-  BarChart3,
-  Globe,
-  Linkedin
-} from 'lucide-react'
+import { Sparkles, Linkedin, Users, Briefcase, TrendingUp, Award, Shield } from 'lucide-react'
+import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
+import { generateStructuredData } from '@/lib/seo-utils'
+
+// Lazy load the LinkedIn Banner Tool
+const LinkedInBannerTool = dynamic(
+  () => import(/* webpackChunkName: "linkedin-banner-tool" */ '@/components/tools/LinkedInBannerTool'),
+  {
+    loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded-lg" />,
+    ssr: false
+  }
+)
 
 interface LinkedInBannerMakerClientProps {
-  locale: string
+  locale: Locale
   translations: any
 }
 
-export default function LinkedInBannerMakerClient({ locale, translations }: LinkedInBannerMakerClientProps) {
-  const isZh = locale === 'zh'
-
-  const features = [
-    {
-      icon: <Target className="h-6 w-6" />,
-      title: isZh ? 'LinkedIn 完美尺寸' : 'Perfect LinkedIn Dimensions',
-      description: isZh 
-        ? '1584x396 像素，专为 LinkedIn 个人资料优化'
-        : '1584x396 pixels, optimized for LinkedIn profile headers',
-    },
-    {
-      icon: <Briefcase className="h-6 w-6" />,
-      title: isZh ? '专业模板库' : 'Professional Templates',
-      description: isZh 
-        ? '数百个行业特定模板，展示您的专业形象'
-        : 'Hundreds of industry-specific templates to showcase your expertise',
-    },
-    {
-      icon: <Building2 className="h-6 w-6" />,
-      title: isZh ? '品牌一致性' : 'Brand Consistency',
-      description: isZh 
-        ? '轻松添加公司标志、品牌色彩和职业信息'
-        : 'Easily add company logos, brand colors, and professional details',
-    },
-    {
-      icon: <BarChart3 className="h-6 w-6" />,
-      title: isZh ? '提升曝光率' : 'Boost Profile Views',
-      description: isZh 
-        ? '专业横幅可提升个人资料访问量高达 40%'
-        : 'Professional banners can increase profile views by up to 40%',
-    },
+export default function LinkedInBannerMakerClient({ locale, translations: t }: LinkedInBannerMakerClientProps) {
+  const breadcrumbItems = [
+    { name: 'Tools', href: `/${locale}/tools` },
+    { name: 'LinkedIn Banner Maker', current: true }
   ]
 
-  const industries = [
-    { name: isZh ? '科技' : 'Technology', count: '150+' },
-    { name: isZh ? '金融' : 'Finance', count: '120+' },
-    { name: isZh ? '咨询' : 'Consulting', count: '100+' },
-    { name: isZh ? '市场营销' : 'Marketing', count: '80+' },
-    { name: isZh ? '医疗健康' : 'Healthcare', count: '90+' },
-    { name: isZh ? '教育' : 'Education', count: '70+' },
-  ]
-
-  const benefits = [
-    {
-      title: isZh ? '建立专业形象' : 'Build Professional Image',
-      description: isZh 
-        ? '第一印象决定一切，专业横幅展示您的职业素养'
-        : 'First impressions matter - show your professionalism instantly',
-      stat: '67%',
-      statDesc: isZh ? '的招聘者会查看横幅' : 'of recruiters check banners',
-    },
-    {
-      title: isZh ? '突出个人品牌' : 'Highlight Personal Brand',
-      description: isZh 
-        ? '用视觉元素强化您的个人品牌和专业定位'
-        : 'Reinforce your personal brand and professional positioning',
-      stat: '5x',
-      statDesc: isZh ? '更容易被记住' : 'more memorable',
-    },
-    {
-      title: isZh ? '增加连接机会' : 'Increase Connections',
-      description: isZh 
-        ? '优质的个人资料更容易获得有价值的商业连接'
-        : 'Quality profiles attract more valuable business connections',
-      stat: '+28%',
-      statDesc: isZh ? '连接请求增长' : 'connection requests',
-    },
-  ]
-
-  const testimonials = [
-    {
-      name: "Michael Chen",
-      role: isZh ? "高级产品经理 @ 微软" : "Senior Product Manager @ Microsoft",
-      content: isZh 
-        ? "专业的 LinkedIn 横幅让我的个人资料访问量增加了 45%，收到了更多猎头的邀请。"
-        : "Professional LinkedIn banner increased my profile views by 45% and attracted more recruiter interest.",
-      rating: 5,
-    },
-    {
-      name: "Sarah Johnson",
-      role: isZh ? "营销总监 @ Salesforce" : "Marketing Director @ Salesforce",
-      content: isZh 
-        ? "终于找到了一个能快速制作专业横幅的工具！节省时间，效果出色。"
-        : "Finally found a tool that creates professional banners quickly! Saves time with excellent results.",
-      rating: 5,
-    },
-    {
-      name: "David Lee",
-      role: isZh ? "创业顾问" : "Startup Consultant",
-      content: isZh 
-        ? "作为独立顾问，专业形象至关重要。这个工具帮我建立了可信的在线形象。"
-        : "As an independent consultant, professional image is crucial. This tool helped establish my credible online presence.",
-      rating: 5,
-    },
-  ]
+  // Structured data for this page
+  const structuredData = generateStructuredData('howto', {
+    title: 'How to Create LinkedIn Profile Banners with AI',
+    description: 'Step-by-step guide to creating professional LinkedIn banners using AI technology',
+    steps: [
+      { name: 'Choose Professional Style', text: 'Select from industry-specific templates and designs' },
+      { name: 'Add Your Information', text: 'Include your title, expertise, and company details' },
+      { name: 'Generate Banner', text: 'AI creates multiple professional banner options' },
+      { name: 'Customize Elements', text: 'Fine-tune colors, fonts, and layout to match your brand' },
+      { name: 'Download', text: 'Export in perfect 1584x396 pixels for LinkedIn' }
+    ]
+  })
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="text-center">
-            <div className="mb-4 flex items-center justify-center gap-2">
-              <Badge className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-                <TrendingUp className="mr-1 h-3 w-3" />
-                {isZh ? 'KD: 7 - 超低竞争' : 'KD: 7 - Ultra Low Competition'}
-              </Badge>
-              <Badge variant="outline" className="border-blue-500 text-blue-600">
-                <Linkedin className="mr-1 h-3 w-3" />
-                {isZh ? '专业必备' : 'Professional Essential'}
-              </Badge>
-            </div>
-            
-            <h1 className="mb-6 text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
-              {isZh ? 'LinkedIn 横幅制作工具' : 'LinkedIn Banner Maker'}
-              <span className="mt-2 block text-3xl text-blue-600 dark:text-blue-400 sm:text-4xl">
-                {isZh ? '打造专业的第一印象' : 'Create a Professional First Impression'}
-              </span>
-            </h1>
-            
-            <p className="mx-auto mb-8 max-w-3xl text-lg text-gray-600 dark:text-gray-300 sm:text-xl">
-              {isZh 
-                ? '为您的 LinkedIn 个人资料创建引人注目的横幅。完美尺寸、专业设计，帮助您在职业社交网络中脱颖而出。'
-                : 'Create eye-catching banners for your LinkedIn profile. Perfect dimensions, professional designs to help you stand out in the professional network.'}
-            </p>
-            
-            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
-                <Briefcase className="mr-2 h-5 w-5" />
-                {isZh ? '开始制作横幅' : 'Start Creating Banner'}
-              </Button>
-              <Button size="lg" variant="outline">
-                <Palette className="mr-2 h-5 w-5" />
-                {isZh ? '浏览专业模板' : 'Browse Templates'}
-              </Button>
-            </div>
-            
-            <div className="mt-8 flex items-center justify-center gap-6 text-sm text-gray-600 dark:text-gray-300">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                <span>{isZh ? '50万+ 专业人士使用' : '500K+ professionals'}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4" />
-                <span>{isZh ? '支持 180+ 国家' : '180+ countries'}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="mb-12 text-center text-3xl font-bold text-gray-900 dark:text-white">
-            {isZh ? '专为 LinkedIn 优化的功能' : 'Features Optimized for LinkedIn'}
-          </h2>
-          
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {features.map((feature, index) => (
-              <Card key={index} className="group hover:shadow-lg transition-all duration-300 border-blue-100">
-                <CardHeader>
-                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors dark:bg-blue-900 dark:text-blue-400">
-                    {feature.icon}
-                  </div>
-                  <CardTitle className="text-lg">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription>{feature.description}</CardDescription>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Industry Templates */}
-      <section className="px-4 py-16 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="mb-4 text-center text-3xl font-bold text-gray-900 dark:text-white">
-            {isZh ? '行业专属模板' : 'Industry-Specific Templates'}
-          </h2>
-          <p className="mb-12 text-center text-lg text-gray-600 dark:text-gray-300">
-            {isZh 
-              ? '为每个行业精心设计的专业模板'
-              : 'Professionally designed templates for every industry'}
-          </p>
-          
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
-            {industries.map((industry, index) => (
-              <Card key={index} className="text-center hover:shadow-lg transition-shadow cursor-pointer">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base">{industry.name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{industry.count}</p>
-                  <p className="text-sm text-gray-500">{isZh ? '模板' : 'templates'}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Benefits with Stats */}
-      <section className="px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="mb-12 text-center text-3xl font-bold text-gray-900 dark:text-white">
-            {isZh ? '提升您的职业影响力' : 'Boost Your Professional Impact'}
-          </h2>
-          
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            {benefits.map((benefit, index) => (
-              <Card key={index} className="text-center hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="mb-4 text-4xl font-bold text-blue-600 dark:text-blue-400">
-                    {benefit.stat}
-                  </div>
-                  <CardTitle className="text-xl">{benefit.title}</CardTitle>
-                  <CardDescription className="text-sm">{benefit.statDesc}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 dark:text-gray-300">{benefit.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="px-4 py-16 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="mb-12 text-center text-3xl font-bold text-gray-900 dark:text-white">
-            {isZh ? '三步创建专业横幅' : 'Create Professional Banner in 3 Steps'}
-          </h2>
-          
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            <div className="relative text-center">
-              <div className="mb-4 inline-flex h-20 w-20 items-center justify-center rounded-full bg-blue-600 text-white">
-                <span className="text-3xl font-bold">1</span>
-              </div>
-              <h3 className="mb-2 text-xl font-semibold">{isZh ? '选择行业模板' : 'Choose Industry Template'}</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                {isZh 
-                  ? '从数百个专业设计的行业模板中选择'
-                  : 'Select from hundreds of professionally designed industry templates'}
-              </p>
-              <ArrowRight className="absolute top-20 right-0 hidden md:block h-6 w-6 text-blue-400 -translate-y-1/2 translate-x-1/2" />
-            </div>
-            
-            <div className="relative text-center">
-              <div className="mb-4 inline-flex h-20 w-20 items-center justify-center rounded-full bg-blue-600 text-white">
-                <span className="text-3xl font-bold">2</span>
-              </div>
-              <h3 className="mb-2 text-xl font-semibold">{isZh ? '个性化定制' : 'Personalize Your Design'}</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                {isZh 
-                  ? '添加您的信息、公司标志和专业成就'
-                  : 'Add your information, company logo, and professional achievements'}
-              </p>
-              <ArrowRight className="absolute top-20 right-0 hidden md:block h-6 w-6 text-blue-400 -translate-y-1/2 translate-x-1/2" />
-            </div>
-            
-            <div className="text-center">
-              <div className="mb-4 inline-flex h-20 w-20 items-center justify-center rounded-full bg-blue-600 text-white">
-                <span className="text-3xl font-bold">3</span>
-              </div>
-              <h3 className="mb-2 text-xl font-semibold">{isZh ? '下载并上传' : 'Download & Upload'}</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                {isZh 
-                  ? '下载完美尺寸的横幅，直接上传到 LinkedIn'
-                  : 'Download perfectly sized banner and upload directly to LinkedIn'}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="mb-12 text-center text-3xl font-bold text-gray-900 dark:text-white">
-            {isZh ? '专业人士的选择' : 'Trusted by Professionals'}
-          </h2>
-          
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="mb-4 flex items-center justify-between">
-                    <Award className="h-8 w-8 text-blue-600" />
-                    <div className="flex gap-1">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      ))}
-                    </div>
-                  </div>
-                  <CardTitle className="text-lg">{testimonial.name}</CardTitle>
-                  <CardDescription>{testimonial.role}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 dark:text-gray-300">"{testimonial.content}"</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="px-4 py-20 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 to-blue-700">
-        <div className="mx-auto max-w-4xl text-center text-white">
-          <h2 className="mb-4 text-3xl font-bold">
-            {isZh 
-              ? '立即提升您的 LinkedIn 形象'
-              : 'Elevate Your LinkedIn Presence Today'}
-          </h2>
-          <p className="mb-8 text-lg opacity-90">
-            {isZh 
-              ? '加入 50 万专业人士的行列，用专业横幅展示您的职业价值'
-              : 'Join 500K professionals showcasing their value with professional banners'}
-          </p>
-          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-gray-100">
-              <CheckCircle2 className="mr-2 h-5 w-5" />
-              {isZh ? '免费制作横幅' : 'Create Banner Free'}
-            </Button>
-            <div className="flex items-center gap-2 text-sm opacity-90">
-              <Download className="h-4 w-4" />
-              <span>{isZh ? '完美尺寸 · 无水印' : 'Perfect Size · No Watermark'}</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Schema Markup */}
+    <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "SoftwareApplication",
-            "name": "LinkedIn Banner Maker",
-            "applicationCategory": "BusinessApplication",
-            "offers": {
-              "@type": "Offer",
-              "price": "0",
-              "priceCurrency": "USD"
-            }
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-    </div>
+      
+      <BreadcrumbWrapper>
+        <Breadcrumb items={breadcrumbItems} />
+      </BreadcrumbWrapper>
+
+      <main className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+        {/* Hero Section */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-50 py-20">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto text-center">
+              <div className="inline-flex items-center gap-2 bg-blue-100 px-4 py-2 rounded-full text-blue-700 text-sm font-medium mb-6">
+                <Linkedin className="w-4 h-4" />
+                Optimized for LinkedIn Profiles
+              </div>
+              
+              <h1 className="text-5xl font-bold text-gray-900 mb-6">
+                LinkedIn Banner Maker
+              </h1>
+              
+              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                Create professional LinkedIn profile banners that showcase your expertise. Perfect 1584x396 
+                pixel designs that help you stand out and attract more opportunities.
+              </p>
+              
+              <div className="flex justify-center">
+                <Button 
+                  size="lg" 
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8"
+                  onClick={() => {
+                    const generator = document.getElementById('generator')
+                    if (generator) {
+                      generator.scrollIntoView({ behavior: 'smooth' })
+                    }
+                  }}
+                >
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  Create LinkedIn Banner
+                </Button>
+              </div>
+              
+              {/* Trust Indicators */}
+              <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-blue-600">1584x396</div>
+                  <div className="text-sm text-gray-600">Perfect Size</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-blue-600">HD</div>
+                  <div className="text-sm text-gray-600">High Quality</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-blue-600">Pro</div>
+                  <div className="text-sm text-gray-600">Professional</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-blue-600">AI</div>
+                  <div className="text-sm text-gray-600">Smart Design</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Tool Component */}
+        <section className="py-12" id="generator">
+          <div className="container mx-auto px-4">
+            <LinkedInBannerTool />
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section className="py-20">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">
+                Professional LinkedIn Features
+              </h2>
+              <p className="text-lg text-gray-600">
+                Everything you need to create banners that enhance your professional presence
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                  <Briefcase className="w-6 h-6 text-blue-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  Industry-Specific Design
+                </h3>
+                <p className="text-gray-600">
+                  Templates tailored for tech, finance, consulting, healthcare, and more professional fields
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                  <Award className="w-6 h-6 text-purple-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  Personal Branding
+                </h3>
+                <p className="text-gray-600">
+                  Showcase your achievements, skills, and unique value proposition professionally
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                  <TrendingUp className="w-6 h-6 text-green-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  Career Advancement
+                </h3>
+                <p className="text-gray-600">
+                  Attract recruiters and opportunities with professional, eye-catching banner designs
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
+                  <Users className="w-6 h-6 text-orange-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  Network Growth
+                </h3>
+                <p className="text-gray-600">
+                  Professional banners increase profile views and connection requests by up to 40%
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
+                  <Linkedin className="w-6 h-6 text-red-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  LinkedIn Optimized
+                </h3>
+                <p className="text-gray-600">
+                  Perfect 1584x396 pixel dimensions ensure your banner looks crisp on all devices
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
+                  <Shield className="w-6 h-6 text-indigo-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  Brand Consistency
+                </h3>
+                <p className="text-gray-600">
+                  Maintain professional brand identity with customizable colors, fonts, and logos
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Popular Professional Categories */}
+        <section className="py-20 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">
+                Popular Professional Banner Styles
+              </h2>
+              <p className="text-lg text-gray-600">
+                Get inspired by these trending LinkedIn banner categories
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">💻</div>
+                <h3 className="font-semibold mb-2">Tech Professional</h3>
+                <p className="text-sm text-gray-600">Modern, innovative, cutting-edge</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">📊</div>
+                <h3 className="font-semibold mb-2">Business Executive</h3>
+                <p className="text-sm text-gray-600">Corporate, leadership, strategic</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">🎨</div>
+                <h3 className="font-semibold mb-2">Creative Professional</h3>
+                <p className="text-sm text-gray-600">Artistic, unique, expressive</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">🏥</div>
+                <h3 className="font-semibold mb-2">Healthcare Expert</h3>
+                <p className="text-sm text-gray-600">Trustworthy, caring, professional</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">📈</div>
+                <h3 className="font-semibold mb-2">Finance & Banking</h3>
+                <p className="text-sm text-gray-600">Reliable, analytical, results-driven</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">🎓</div>
+                <h3 className="font-semibold mb-2">Education & Academia</h3>
+                <p className="text-sm text-gray-600">Knowledgeable, inspiring, scholarly</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">⚖️</div>
+                <h3 className="font-semibold mb-2">Legal Professional</h3>
+                <p className="text-sm text-gray-600">Authoritative, precise, trustworthy</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">🚀</div>
+                <h3 className="font-semibold mb-2">Startup Founder</h3>
+                <p className="text-sm text-gray-600">Innovative, dynamic, visionary</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="py-20 bg-gradient-to-r from-blue-600 to-blue-700">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl font-bold text-white mb-4">
+              Ready to Elevate Your LinkedIn Profile?
+            </h2>
+            <p className="text-xl text-white/90 mb-8">
+              Create a professional banner that opens doors to new opportunities
+            </p>
+            <Button 
+              size="lg" 
+              className="bg-white text-blue-600 hover:bg-gray-100"
+              onClick={() => {
+                const generator = document.getElementById('generator')
+                if (generator) {
+                  generator.scrollIntoView({ behavior: 'smooth' })
+                }
+              }}
+            >
+              <Sparkles className="w-5 h-5 mr-2" />
+              Start Creating Now
+            </Button>
+          </div>
+        </section>
+
+        {/* SEO Content Section */}
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
+              <h2 className="text-3xl font-bold mb-6 text-center">The Ultimate LinkedIn Banner Maker</h2>
+              <p>
+                Your LinkedIn profile is your digital business card, and your banner is the first visual 
+                element that captures attention. A professional LinkedIn banner can increase your profile 
+                views by up to 40% and significantly improve your chances of making meaningful professional 
+                connections. Our AI-powered LinkedIn banner maker helps you create stunning, industry-specific 
+                banners that communicate your professional value instantly.
+              </p>
+              
+              <h3>Why LinkedIn Banners Matter</h3>
+              <p>
+                In today's competitive professional landscape, standing out on LinkedIn is crucial:
+              </p>
+              <ul>
+                <li>67% of recruiters check LinkedIn banners when reviewing profiles</li>
+                <li>Profiles with professional banners receive 5x more connection requests</li>
+                <li>Visual branding increases profile memorability by 65%</li>
+                <li>Professional banners correlate with 28% more InMail responses</li>
+                <li>Complete profiles with banners rank higher in LinkedIn search results</li>
+              </ul>
+              
+              <h3>Perfect LinkedIn Banner Dimensions</h3>
+              <p>
+                LinkedIn requires specific dimensions for profile banners: 1584x396 pixels with a 4:1 
+                aspect ratio. Our tool automatically generates banners in these exact dimensions, ensuring 
+                your design looks crisp and professional on all devices. The banner displays differently 
+                on mobile and desktop, so our AI optimizes the design to ensure important elements remain 
+                visible across all viewports.
+              </p>
+              
+              <h3>Industry-Specific Design Intelligence</h3>
+              <p>
+                Our AI understands the visual language of different industries. Whether you're in tech, 
+                finance, healthcare, or creative fields, the AI generates designs that resonate with your 
+                industry's aesthetic expectations. It incorporates appropriate color schemes, typography, 
+                and visual elements that communicate professionalism while maintaining your unique personal brand.
+              </p>
+              
+              <h3>Professional Branding Elements</h3>
+              <p>
+                A great LinkedIn banner goes beyond aesthetics. It should communicate your professional 
+                value proposition, showcase your expertise, and create a cohesive brand identity. Our tool 
+                helps you incorporate key branding elements including your tagline, areas of expertise, 
+                company logos, and professional achievements in a visually appealing layout.
+              </p>
+              
+              <h3>Free Professional Design Tool</h3>
+              <p>
+                Professional design shouldn't require expensive software or hiring designers. Our LinkedIn 
+                banner maker is completely free to use, with no watermarks or hidden costs. Create unlimited 
+                professional banners that help you stand out in the competitive LinkedIn ecosystem and 
+                attract the opportunities you deserve.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section className="py-16 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-3xl font-bold text-center mb-12">
+                Frequently Asked Questions
+              </h2>
+              
+              <div className="space-y-6">
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 className="text-lg font-semibold mb-2">
+                    What size should my LinkedIn banner be?
+                  </h3>
+                  <p className="text-gray-600">
+                    LinkedIn banners must be exactly 1584x396 pixels (4:1 aspect ratio). Our tool 
+                    automatically creates banners in this precise size, ensuring your design looks 
+                    perfect on both desktop and mobile devices without any cropping issues.
+                  </p>
+                </div>
+                
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 className="text-lg font-semibold mb-2">
+                    Can I add my company logo to the banner?
+                  </h3>
+                  <p className="text-gray-600">
+                    Absolutely! You can include your company logo, personal branding elements, and 
+                    professional certifications. Our AI will intelligently position these elements 
+                    to create a cohesive, professional design that enhances your credibility.
+                  </p>
+                </div>
+                
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 className="text-lg font-semibold mb-2">
+                    How do I make my LinkedIn banner stand out?
+                  </h3>
+                  <p className="text-gray-600">
+                    Use high-quality visuals that reflect your industry, incorporate your unique value 
+                    proposition, maintain consistent branding with your resume and portfolio, and ensure 
+                    text is readable on mobile devices. Our AI handles these considerations automatically.
+                  </p>
+                </div>
+                
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 className="text-lg font-semibold mb-2">
+                    Should my banner match my industry standards?
+                  </h3>
+                  <p className="text-gray-600">
+                    While maintaining industry relevance is important, your banner should also reflect 
+                    your unique professional identity. Our tool offers industry-specific templates while 
+                    allowing personalization to showcase what makes you stand out in your field.
+                  </p>
+                </div>
+                
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 className="text-lg font-semibold mb-2">
+                    How often should I update my LinkedIn banner?
+                  </h3>
+                  <p className="text-gray-600">
+                    Update your banner when you change roles, achieve significant milestones, rebrand 
+                    your professional identity, or at least annually to keep your profile fresh. Regular 
+                    updates show you're active and engaged in your professional development.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </>
   )
 }

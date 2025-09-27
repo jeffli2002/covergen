@@ -201,32 +201,32 @@ export function generateToolMetadata(
     'spotify-playlist-cover': {
       title: 'Spotify Playlist Cover Maker - Create AI Covers | CoverGen Pro',
       description: 'Design professional Spotify playlist covers with AI. Create eye-catching 300x300 pixel artwork that makes your playlists stand out. Free, instant generation.',
-      keywords: ['spotify playlist cover', 'playlist cover maker', 'spotify cover generator', 'playlist artwork', 'music cover design'],
+      keywords: ['spotify playlist cover', 'playlist cover maker', 'spotify cover generator', 'playlist artwork', 'music cover design', 'spotify canvas maker', 'spotify playlist cover maker', 'mixtape cover generator', 'album art generator', 'spotify cover art'],
     },
     'facebook-event-cover': {
       title: 'Facebook Event Cover Maker - AI Event Banner Generator | CoverGen Pro',
       description: 'Create stunning Facebook event covers with AI. Perfect 1920x1080 dimensions for maximum engagement. Free event banner maker.',
-      keywords: ['facebook event cover', 'event banner maker', 'facebook cover photo', 'event cover generator', 'social media event banner'],
+      keywords: ['facebook event cover', 'event banner maker', 'facebook cover photo', 'event cover generator', 'social media event banner', 'fall facebook covers', 'facebook cover maker app', 'how to make facebook post shareable', 'facebook cover dimensions', 'facebook banner maker'],
     },
     'anime-poster-maker': {
       title: 'Anime Poster Maker - AI Anime Cover Generator | CoverGen Pro',
       description: 'Create stunning anime-style posters and covers with AI. Perfect for manga covers, anime thumbnails, and Japanese-style artwork.',
-      keywords: ['anime poster maker', 'anime cover generator', 'manga cover maker', 'anime thumbnail creator', 'anime art generator'],
+      keywords: ['anime poster maker', 'anime cover generator', 'manga cover maker', 'anime thumbnail creator', 'anime art generator', 'ai anime generator', 'anime poster design', 'manga cover creator', 'anime wallpaper maker', 'japanese poster maker'],
     },
     'book-cover-creator': {
       title: 'Book Cover Creator - AI Book Cover Design | CoverGen Pro',
       description: 'Design professional book covers with AI. Perfect for self-publishers, authors, and indie writers. All genres supported.',
-      keywords: ['book cover creator', 'book cover maker', 'ebook cover design', 'novel cover generator', 'self publishing cover'],
+      keywords: ['book cover creator', 'book cover maker', 'ebook cover design', 'novel cover generator', 'self publishing cover', 'blank book cover', 'fantasy book covers', 'book sleeve', 'ai book cover generator', 'kindle cover creator', 'wattpad cover maker', 'book cover generator free', 'kindle book cover maker'],
     },
     'game-cover-art': {
       title: 'Game Cover Art Generator - AI Gaming Artwork | CoverGen Pro',
       description: 'Create epic game cover art with AI. Perfect for Steam, Epic Games, indie games, and gaming thumbnails.',
-      keywords: ['game cover art', 'gaming cover maker', 'steam cover generator', 'game thumbnail creator', 'gaming artwork'],
+      keywords: ['game cover art', 'gaming cover maker', 'steam cover generator', 'game thumbnail creator', 'gaming artwork', 'fortnite thumbnail', 'minecraft thumbnail', 'gaming thumbnail maker', 'fortnite thumbnails', 'game poster maker', 'video game cover art', 'roblox thumbnail maker ai'],
     },
     'music-album-cover': {
       title: 'Music Album Cover Maker - AI Album Art Generator | CoverGen Pro',
       description: 'Design professional album covers with AI. Perfect for musicians, bands, and music producers. All music genres supported.',
-      keywords: ['album cover maker', 'music cover generator', 'album art creator', 'music artwork design', 'band cover maker'],
+      keywords: ['album cover maker', 'music cover generator', 'album art creator', 'music artwork design', 'band cover maker', 'album art generator', 'ai album art generator', 'cd cover dimensions', 'cd jewel case template', 'compact disk cover size', 'best album covers of all time', 'iconic album covers', 'tyler the creator album cover', 'free album cover generator'],
     },
     'social-media-poster': {
       title: 'Social Media Poster Maker - AI Post Generator | CoverGen Pro',
@@ -241,7 +241,57 @@ export function generateToolMetadata(
     'event-poster-designer': {
       title: 'Event Poster Designer - AI Event Graphics | CoverGen Pro',
       description: 'Create stunning event posters with AI. Perfect for concerts, festivals, conferences, and all types of events.',
-      keywords: ['event poster designer', 'event flyer maker', 'concert poster generator', 'festival banner creator', 'event graphics'],
+      keywords: ['event poster designer', 'event flyer maker', 'concert poster generator', 'festival banner creator', 'event graphics', 'halloween poster creator', 'birthday poster maker', 'wedding invitation cover', 'poster maker free online'],
+    },
+    'youtube-thumbnail-ideas': {
+      title: 'YouTube Thumbnail Ideas - Boost CTR with Creative Designs | CoverGen Pro',
+      description: 'Discover hundreds of YouTube thumbnail ideas and design inspiration. Learn how to create eye-catching thumbnails that boost CTR and video views.',
+      keywords: ['youtube thumbnail ideas', 'youtube thumbnail inspiration', 'clickable thumbnails', 'youtube cover ideas', 'thumbnail design tips', 'youtube thumbnail examples', 'viral thumbnail designs', 'youtube thumbnail templates', 'thumbnail tester', 'thumbnail preview', 'thumbnail sketch'],
+    },
+    'ai-thumbnail-generator-free': {
+      title: 'AI Thumbnail Generator Free - No Watermark | CoverGen Pro',
+      description: 'Generate stunning thumbnails with AI technology completely free. No watermarks, no sign-up required. Perfect for YouTube, social media, and more.',
+      keywords: ['ai thumbnail generator free', 'ai thumbnail maker', 'thumbnail generator', 'free thumbnail maker', 'thumbnail maker no watermark free', 'ai powered thumbnail', 'youtube thumbnail ai', 'ai image generator', 'free cover generator no signup'],
+    },
+    'instagram-thumbnail-maker': {
+      title: 'Instagram Thumbnail Maker - Create Stunning IG Covers | CoverGen Pro',
+      description: 'Design eye-catching Instagram thumbnails and post covers with AI. Perfect square format for Instagram posts, reels, and IGTV.',
+      keywords: ['instagram thumbnail maker', 'instagram cover creator', 'instagram post maker', 'instagram story designer', 'instagram thumbnail generator', 'ig thumbnail maker', 'instagram grid maker', 'instagram highlight cover maker'],
+    },
+    'linkedin-banner-maker': {
+      title: 'LinkedIn Banner Maker - Professional Cover Creator | CoverGen Pro',
+      description: 'Create professional LinkedIn banner images with AI. Perfect dimensions for personal profiles and company pages.',
+      keywords: ['linkedin banner maker', 'linkedin cover creator', 'professional cover generator', 'linkedin header designer', 'linkedin background image', 'professional banner maker', 'career banner design'],
+    },
+    'wattpad-cover-maker': {
+      title: 'Wattpad Cover Maker - AI Story Cover Generator | CoverGen Pro',
+      description: 'Create stunning covers for your Wattpad stories with AI. Perfect dimensions, genre-specific designs, and instant generation for all your novels.',
+      keywords: ['wattpad cover maker', 'wattpad cover creator', 'story cover generator', 'novel cover maker', 'wattpad book cover', 'fanfiction cover design', 'wattpad cover dimensions', 'free wattpad cover maker'],
+    },
+    'discord-banner-maker': {
+      title: 'Discord Banner Maker - AI Server Banner Generator | CoverGen Pro',
+      description: 'Create professional Discord server banners with AI. Perfect dimensions for server headers, user profiles, and community branding.',
+      keywords: ['discord banner maker', 'discord server banner maker', 'discord banner generator', 'discord header creator', 'discord banner dimensions', 'discord server banner', 'discord profile banner'],
+    },
+    'podcast-cover-maker': {
+      title: 'Podcast Cover Maker - AI Podcast Art Generator | CoverGen Pro',
+      description: 'Create professional podcast covers with AI. Perfect 3000x3000 dimensions for Apple Podcasts, Spotify, and all major platforms.',
+      keywords: ['podcast cover maker', 'podcast cover art maker', 'podcast artwork generator', 'podcast cover design', 'podcast thumbnail creator', 'podcast cover dimensions', 'apple podcast cover'],
+    },
+    'thumbnail-maker-hub': {
+      title: 'Thumbnail Maker Hub - All AI Cover & Thumbnail Tools | CoverGen Pro',
+      description: 'Explore our complete collection of AI thumbnail and cover makers. Create professional images for YouTube, TikTok, Spotify, podcasts, and more platforms.',
+      keywords: ['thumbnail maker', 'cover maker', 'thumbnail generator', 'youtube thumbnail maker', 'tiktok thumbnail', 'spotify cover maker', 'podcast cover maker', 'ai thumbnail generator', 'free thumbnail maker', 'thumbnail maker no watermark'],
+    },
+    'kindle-cover-creator': {
+      title: 'Kindle Cover Creator - AI eBook Cover Generator | CoverGen Pro',
+      description: 'Create professional Kindle book covers with AI. Perfect dimensions for Amazon KDP, genre-specific designs, and instant high-quality generation.',
+      keywords: ['kindle cover creator', 'kindle book cover maker', 'amazon kdp cover', 'ebook cover design', 'kindle cover dimensions', 'kindle cover size', 'self publishing cover', 'kdp cover generator'],
+    },
+    'thumbnail-tester': {
+      title: 'Thumbnail Tester - Preview & Optimize Your Thumbnails | CoverGen Pro',
+      description: 'Test how your thumbnails look on YouTube, TikTok, and other platforms. Preview different sizes, compare CTR potential, and optimize your thumbnail designs.',
+      keywords: ['thumbnail tester', 'thumbnail preview', 'youtube thumbnail tester', 'thumbnail checker', 'thumbnail analyzer', 'ctr optimizer', 'thumbnail comparison tool', 'thumbnail preview tool', 'thumbnail sketch'],
     },
   }
 

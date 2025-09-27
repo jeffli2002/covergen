@@ -18,7 +18,13 @@ import {
   Zap,
   Shield,
   Briefcase,
-  TrendingUp
+  TrendingUp,
+  Youtube,
+  MessageSquare,
+  Mic,
+  Tablet,
+  BarChart3,
+  Grid
 } from 'lucide-react'
 import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
 
@@ -40,17 +46,6 @@ const tools = [
     kd: 10
   },
   {
-    name: 'AI Thumbnail Generator Free',
-    description: 'Generate professional thumbnails instantly with AI technology',
-    icon: Sparkles,
-    href: '/tools/ai-thumbnail-generator-free',
-    color: 'from-blue-500 to-purple-500',
-    category: 'AI Tools',
-    popular: true,
-    trending: true,
-    growth: '+900%'
-  },
-  {
     name: 'LinkedIn Banner Maker',
     description: 'Professional profile headers that boost your career visibility',
     icon: Briefcase,
@@ -60,6 +55,82 @@ const tools = [
     popular: true,
     new: true,
     kd: 7
+  },
+  {
+    name: 'YouTube Thumbnail Ideas',
+    description: 'Discover proven thumbnail designs that boost CTR and views',
+    icon: Youtube,
+    href: '/tools/youtube-thumbnail-ideas',
+    color: 'from-red-600 to-red-700',
+    category: 'Inspiration',
+    popular: true,
+    new: true,
+    kd: 22
+  },
+  {
+    name: 'Wattpad Cover Maker',
+    description: 'Design captivating book covers for your Wattpad stories',
+    icon: Book,
+    href: '/tools/wattpad-cover-maker',
+    color: 'from-orange-500 to-red-500',
+    category: 'Publishing',
+    popular: true,
+    new: true,
+    kd: 8
+  },
+  {
+    name: 'Discord Banner Maker',
+    description: 'Create custom Discord server banners and profile headers',
+    icon: MessageSquare,
+    href: '/tools/discord-banner-maker',
+    color: 'from-indigo-500 to-purple-600',
+    category: 'Social',
+    popular: true,
+    new: true,
+    kd: 10
+  },
+  {
+    name: 'Podcast Cover Maker',
+    description: 'Professional podcast artwork that attracts listeners',
+    icon: Mic,
+    href: '/tools/podcast-cover-maker',
+    color: 'from-purple-500 to-pink-500',
+    category: 'Audio',
+    popular: true,
+    new: true,
+    kd: 23
+  },
+  {
+    name: 'Kindle Cover Creator',
+    description: 'Design bestselling book covers for Kindle publishing',
+    icon: Tablet,
+    href: '/tools/kindle-cover-creator',
+    color: 'from-gray-700 to-gray-900',
+    category: 'Publishing',
+    popular: true,
+    new: true,
+    kd: 13
+  },
+  {
+    name: 'Thumbnail Tester',
+    description: 'Test and compare thumbnail designs for maximum CTR',
+    icon: BarChart3,
+    href: '/tools/thumbnail-tester',
+    color: 'from-green-500 to-teal-500',
+    category: 'Analytics',
+    popular: true,
+    new: true,
+    kd: 29
+  },
+  {
+    name: 'Thumbnail Maker Hub',
+    description: 'All-in-one thumbnail creation tools for every platform',
+    icon: Grid,
+    href: '/tools/thumbnail-maker-hub',
+    color: 'from-blue-600 to-purple-600',
+    category: 'Hub',
+    popular: true,
+    featured: true
   },
   {
     name: 'Anime Poster Maker',
@@ -146,15 +217,18 @@ const tools = [
 
 const categories = [
   { name: 'All', count: tools.length },
-  { name: 'AI Tools', count: tools.filter(t => t.category === 'AI Tools').length },
   { name: 'Social', count: tools.filter(t => t.category === 'Social').length },
   { name: 'Business', count: tools.filter(t => t.category === 'Business').length },
+  { name: 'Inspiration', count: tools.filter(t => t.category === 'Inspiration').length },
   { name: 'Entertainment', count: tools.filter(t => t.category === 'Entertainment').length },
   { name: 'Video', count: tools.filter(t => t.category === 'Video').length },
   { name: 'Music', count: tools.filter(t => t.category === 'Music').length },
   { name: 'Events', count: tools.filter(t => t.category === 'Events').length },
   { name: 'Publishing', count: tools.filter(t => t.category === 'Publishing').length },
-  { name: 'Gaming', count: tools.filter(t => t.category === 'Gaming').length }
+  { name: 'Gaming', count: tools.filter(t => t.category === 'Gaming').length },
+  { name: 'Audio', count: tools.filter(t => t.category === 'Audio').length },
+  { name: 'Analytics', count: tools.filter(t => t.category === 'Analytics').length },
+  { name: 'Hub', count: tools.filter(t => t.category === 'Hub').length }
 ]
 
 export default function ToolsHubClient({ locale, translations: t }: ToolsHubClientProps) {

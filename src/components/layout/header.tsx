@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Crown, LogOut, Sparkles, User, ChevronDown, CreditCard, Loader2 } from 'lucide-react'
+import { Crown, LogOut, Sparkles, User, ChevronDown, CreditCard, Loader2, Menu } from 'lucide-react'
 import { useBestAuth } from '@/hooks/useBestAuth'
 import AuthForm from '@/components/auth/AuthForm'
 import UserMenu from '@/components/auth/UserMenu'
@@ -46,6 +46,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
   const [activating, setActivating] = useState(false)
   const [showActivationConfirm, setShowActivationConfirm] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const currentTier = storeUser?.tier || 'free'
   
   // Debug logging
@@ -239,15 +240,12 @@ export default function Header({ locale, translations: t }: HeaderProps) {
 
   return (
     <>
-      <header className="hidden lg:block border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50">
+      <header className="hidden lg:block border-b border-gray-200 bg-white sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 flex h-16 items-center justify-between">
           {/* Logo */}
-          <a href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <img src="/blueLogoTransparent.png" alt="CoverGen Logo" className="h-14 w-auto" />
-            <span className="text-sm text-gray-600 font-medium">
-              Powered by Nano Banana*
-            </span>
-          </a>
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <img src="/blueLogoTransparent.png" alt="CoverGen Pro" className="h-10 w-auto" />
+          </Link>
 
           {/* Navigation */}
           <nav className="flex items-center space-x-8">
@@ -260,52 +258,54 @@ export default function Header({ locale, translations: t }: HeaderProps) {
               <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">
                 Platforms <ChevronDown className="w-4 h-4" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-48">
-                <DropdownMenuItem asChild>
-                  <Link href={`/${locale}/platforms/youtube`} className="cursor-pointer">
-                    YouTube Thumbnail Maker
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href={`/${locale}/platforms/tiktok`} className="cursor-pointer">
-                    TikTok Cover Creator
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href={`/${locale}/platforms/instagram`} className="cursor-pointer">
-                    Instagram Post Designer
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href={`/${locale}/platforms/spotify`} className="cursor-pointer">
-                    Spotify Cover Art
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href={`/${locale}/platforms/twitch`} className="cursor-pointer">
-                    Twitch Thumbnail Maker
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href={`/${locale}/platforms/linkedin`} className="cursor-pointer">
-                    LinkedIn Cover Creator
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href={`/${locale}/platforms/wechat`} className="cursor-pointer">
-                    WeChat Cover Maker
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href={`/${locale}/platforms/rednote`} className="cursor-pointer">
-                    Rednote Cover
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href={`/${locale}/platforms/bilibili`} className="cursor-pointer">
-                    Bilibili Video Cover
-                  </Link>
-                </DropdownMenuItem>
+              <DropdownMenuContent className="w-56 p-2" align="start">
+                <div className="grid gap-0">
+                  <DropdownMenuItem asChild className="h-auto p-0">
+                    <Link href={`/${locale}/platforms/youtube`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                      <div className="text-sm font-medium text-gray-900">YouTube</div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="h-auto p-0">
+                    <Link href={`/${locale}/platforms/tiktok`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                      <div className="text-sm font-medium text-gray-900">TikTok</div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="h-auto p-0">
+                    <Link href={`/${locale}/platforms/instagram`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                      <div className="text-sm font-medium text-gray-900">Instagram</div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="h-auto p-0">
+                    <Link href={`/${locale}/platforms/spotify`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                      <div className="text-sm font-medium text-gray-900">Spotify</div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="h-auto p-0">
+                    <Link href={`/${locale}/platforms/twitch`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                      <div className="text-sm font-medium text-gray-900">Twitch</div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="h-auto p-0">
+                    <Link href={`/${locale}/platforms/linkedin`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                      <div className="text-sm font-medium text-gray-900">LinkedIn</div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="h-auto p-0">
+                    <Link href={`/${locale}/platforms/wechat`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                      <div className="text-sm font-medium text-gray-900">WeChat</div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="h-auto p-0">
+                    <Link href={`/${locale}/platforms/rednote`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                      <div className="text-sm font-medium text-gray-900">Rednote</div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="h-auto p-0">
+                    <Link href={`/${locale}/platforms/bilibili`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                      <div className="text-sm font-medium text-gray-900">Bilibili</div>
+                    </Link>
+                  </DropdownMenuItem>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
             
@@ -314,58 +314,186 @@ export default function Header({ locale, translations: t }: HeaderProps) {
               <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">
                 Tools <ChevronDown className="w-4 h-4" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-48">
-                <DropdownMenuItem asChild>
-                  <Link href={`/${locale}/tools/anime-poster-maker`} className="cursor-pointer">
-                    Anime Poster Maker
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href={`/${locale}/tools/spotify-playlist-cover`} className="cursor-pointer">
-                    Spotify Playlist Cover
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href={`/${locale}/tools/facebook-event-cover`} className="cursor-pointer">
-                    Facebook Event Cover
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href={`/${locale}/tools/social-media-poster`} className="cursor-pointer">
-                    Social Media Poster
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href={`/${locale}/tools/book-cover-creator`} className="cursor-pointer">
-                    Book Cover Creator
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href={`/${locale}/tools/game-cover-art`} className="cursor-pointer">
-                    Game Cover Art
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href={`/${locale}/tools/webinar-poster-maker`} className="cursor-pointer">
-                    Webinar Poster Maker
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href={`/${locale}/tools/event-poster-designer`} className="cursor-pointer">
-                    Event Poster Designer
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href={`/${locale}/tools/music-album-cover`} className="cursor-pointer">
-                    Music Album Cover
-                  </Link>
-                </DropdownMenuItem>
+              <DropdownMenuContent className="w-80 max-h-[80vh] overflow-y-auto" align="start">
+                <div className="p-2">
+                  {/* Social Media Tools */}
+                  <div className="mb-3">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 px-3">Social Media Tools</div>
+                    <div className="grid grid-cols-2 gap-0">
+                      <DropdownMenuItem asChild className="h-auto p-0">
+                        <Link href={`/${locale}/tools/instagram-thumbnail-maker`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                          <div className="text-sm font-medium text-gray-900">Instagram Maker</div>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="h-auto p-0">
+                        <Link href={`/${locale}/tools/facebook-event-cover`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                          <div className="text-sm font-medium text-gray-900">Facebook Cover</div>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="h-auto p-0">
+                        <Link href={`/${locale}/tools/linkedin-banner-maker`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                          <div className="text-sm font-medium text-gray-900">LinkedIn Banner</div>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="h-auto p-0">
+                        <Link href={`/${locale}/tools/social-media-poster`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                          <div className="text-sm font-medium text-gray-900">Social Poster</div>
+                        </Link>
+                      </DropdownMenuItem>
+                    </div>
+                  </div>
+                  
+                  {/* Video & Streaming */}
+                  <div className="mb-3">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 px-3">Video & Streaming</div>
+                    <div className="grid grid-cols-2 gap-0">
+                      <DropdownMenuItem asChild className="h-auto p-0">
+                        <Link href={`/${locale}/tools/youtube-thumbnail-ideas`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                          <div className="text-sm font-medium text-gray-900">YouTube Ideas</div>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="h-auto p-0">
+                        <Link href={`/${locale}/tools/ai-thumbnail-generator-free`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                          <div className="text-sm font-medium text-gray-900">AI Generator</div>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="h-auto p-0">
+                        <Link href={`/${locale}/tools/thumbnail-tester`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                          <div className="text-sm font-medium text-gray-900">Thumbnail Tester</div>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="h-auto p-0">
+                        <Link href={`/${locale}/tools/discord-banner-maker`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                          <div className="text-sm font-medium text-gray-900">Discord Banner</div>
+                        </Link>
+                      </DropdownMenuItem>
+                    </div>
+                  </div>
+                  
+                  {/* Music & Audio */}
+                  <div className="mb-3">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 px-3">Music & Audio</div>
+                    <div className="grid grid-cols-2 gap-0">
+                      <DropdownMenuItem asChild className="h-auto p-0">
+                        <Link href={`/${locale}/tools/spotify-playlist-cover`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                          <div className="text-sm font-medium text-gray-900">Spotify Playlist</div>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="h-auto p-0">
+                        <Link href={`/${locale}/tools/music-album-cover`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                          <div className="text-sm font-medium text-gray-900">Album Cover</div>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="h-auto p-0">
+                        <Link href={`/${locale}/tools/podcast-cover-maker`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                          <div className="text-sm font-medium text-gray-900">Podcast Cover</div>
+                        </Link>
+                      </DropdownMenuItem>
+                    </div>
+                  </div>
+                  
+                  {/* Publishing & Books */}
+                  <div className="mb-3">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 px-3">Publishing Tools</div>
+                    <div className="grid grid-cols-2 gap-0">
+                      <DropdownMenuItem asChild className="h-auto p-0">
+                        <Link href={`/${locale}/tools/book-cover-creator`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                          <div className="text-sm font-medium text-gray-900">Book Cover</div>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="h-auto p-0">
+                        <Link href={`/${locale}/tools/kindle-cover-creator`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                          <div className="text-sm font-medium text-gray-900">Kindle Cover</div>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="h-auto p-0">
+                        <Link href={`/${locale}/tools/wattpad-cover-maker`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                          <div className="text-sm font-medium text-gray-900">Wattpad Cover</div>
+                        </Link>
+                      </DropdownMenuItem>
+                    </div>
+                  </div>
+                  
+                  {/* Creative & Design */}
+                  <div className="mb-3">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 px-3">Creative Design</div>
+                    <div className="grid grid-cols-2 gap-0">
+                      <DropdownMenuItem asChild className="h-auto p-0">
+                        <Link href={`/${locale}/tools/anime-poster-maker`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                          <div className="text-sm font-medium text-gray-900">Anime Poster</div>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="h-auto p-0">
+                        <Link href={`/${locale}/tools/game-cover-art`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                          <div className="text-sm font-medium text-gray-900">Game Cover</div>
+                        </Link>
+                      </DropdownMenuItem>
+                    </div>
+                  </div>
+                  
+                  {/* Event & Business */}
+                  <div className="mb-3">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 px-3">Event & Business</div>
+                    <div className="grid grid-cols-2 gap-0">
+                      <DropdownMenuItem asChild className="h-auto p-0">
+                        <Link href={`/${locale}/tools/event-poster-designer`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                          <div className="text-sm font-medium text-gray-900">Event Poster</div>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="h-auto p-0">
+                        <Link href={`/${locale}/tools/webinar-poster-maker`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                          <div className="text-sm font-medium text-gray-900">Webinar Poster</div>
+                        </Link>
+                      </DropdownMenuItem>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Explore All Tools */}
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                  <DropdownMenuItem asChild className="h-auto p-0">
+                    <Link href={`/${locale}/tools/thumbnail-maker-hub`} className="block px-3 py-2 rounded-md hover:bg-blue-50 transition-colors text-center">
+                      <div className="font-medium text-blue-600">Browse All Tools →</div>
+                    </Link>
+                  </DropdownMenuItem>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
             
             <Link href={`/${locale}#pricing`} className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">
               {t.navigation.pricing}
             </Link>
+            
+            {/* Resources Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">
+                Resources <ChevronDown className="w-4 h-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-48 p-2" align="start">
+                <div className="grid gap-0">
+                  <DropdownMenuItem asChild className="h-auto p-0">
+                    <Link href={`/${locale}/tutorials`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                      <div className="text-sm text-gray-700">Tutorials</div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="h-auto p-0">
+                    <Link href={`/${locale}/blog`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                      <div className="text-sm text-gray-700">Blog</div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="h-auto p-0">
+                    <Link href={`/${locale}#faq`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                      <div className="text-sm text-gray-700">FAQ</div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="h-auto p-0">
+                    <Link href={`/${locale}/support`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
+                      <div className="text-sm text-gray-700">Support Center</div>
+                    </Link>
+                  </DropdownMenuItem>
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
 
           {/* User section */}
@@ -477,16 +605,16 @@ export default function Header({ locale, translations: t }: HeaderProps) {
             ) : (
               <div className="flex items-center gap-3">
                 <Button 
-                  variant="outline" 
+                  variant="ghost" 
                   size="sm" 
-                  className="text-sm border-gray-300 text-gray-700 hover:bg-gray-50" 
+                  className="text-sm text-gray-700 hover:text-gray-900 font-medium" 
                   onClick={() => setShowAuthModal(true)}
                 >
-                  Sign In
+                  Log in
                 </Button>
                 <Button 
                   size="sm" 
-                  className="text-sm bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white" 
+                  className="text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium px-5" 
                   onClick={() => {
                     const generatorSection = document.getElementById('generator')
                     if (generatorSection) {
@@ -496,13 +624,190 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                     }
                   }}
                 >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Get Started
+                  Get Started Free
                 </Button>
               </div>
             )}
           </div>
         </div>
+      </header>
+
+      {/* Mobile Header */}
+      <header className="lg:hidden border-b border-gray-200 bg-white sticky top-0 z-50 shadow-sm">
+        <div className="container mx-auto px-4 flex h-16 items-center justify-between">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2">
+            <img src="/blueLogoTransparent.png" alt="CoverGen Pro" className="h-8 w-auto" />
+          </Link>
+
+          {/* Mobile Menu Button */}
+          <div className="flex items-center gap-2">
+            {!loading && user && (
+              <div className="flex items-center gap-2">
+                <UsageDisplay session={session} />
+              </div>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden"
+            >
+              <Menu className="w-5 h-5" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="absolute top-16 left-0 right-0 bg-white border-b border-gray-200 shadow-lg">
+            <div className="container mx-auto px-4 py-4">
+              <nav className="space-y-4">
+                <Link 
+                  href={`/${locale}#features`} 
+                  className="block text-base font-medium text-gray-700 hover:text-blue-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Features
+                </Link>
+                
+                {/* Platforms Section */}
+                <div>
+                  <div className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Platforms</div>
+                  <div className="space-y-2 ml-4">
+                    <Link 
+                      href={`/${locale}/platforms/youtube`} 
+                      className="block text-base text-gray-600 hover:text-blue-600"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      YouTube
+                    </Link>
+                    <Link 
+                      href={`/${locale}/platforms/tiktok`} 
+                      className="block text-base text-gray-600 hover:text-blue-600"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      TikTok
+                    </Link>
+                    <Link 
+                      href={`/${locale}/platforms/instagram`} 
+                      className="block text-base text-gray-600 hover:text-blue-600"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Instagram
+                    </Link>
+                    <Link 
+                      href={`/${locale}/platforms`} 
+                      className="block text-base font-medium text-blue-600 hover:text-blue-700"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      View All Platforms →
+                    </Link>
+                  </div>
+                </div>
+                
+                {/* Tools Section */}
+                <div>
+                  <div className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Tools</div>
+                  <div className="space-y-2 ml-4">
+                    <Link 
+                      href={`/${locale}/tools/ai-thumbnail-generator-free`} 
+                      className="block text-base text-gray-600 hover:text-blue-600"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      AI Generator
+                    </Link>
+                    <Link 
+                      href={`/${locale}/tools/youtube-thumbnail-ideas`} 
+                      className="block text-base text-gray-600 hover:text-blue-600"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      YouTube Ideas
+                    </Link>
+                    <Link 
+                      href={`/${locale}/tools/thumbnail-maker-hub`} 
+                      className="block text-base font-medium text-blue-600 hover:text-blue-700"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Browse All Tools →
+                    </Link>
+                  </div>
+                </div>
+                
+                <Link 
+                  href={`/${locale}#pricing`} 
+                  className="block text-base font-medium text-gray-700 hover:text-blue-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Pricing
+                </Link>
+                <Link 
+                  href={`/${locale}/support`} 
+                  className="block text-base font-medium text-gray-700 hover:text-blue-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Support
+                </Link>
+                
+                <div className="pt-4 border-t border-gray-200">
+                  {loading ? (
+                    <div className="w-full h-10 bg-gray-100 animate-pulse rounded" />
+                  ) : user ? (
+                    <div className="space-y-3">
+                      <Link 
+                        href={`/${locale}/account`}
+                        className="block text-base font-medium text-gray-700 hover:text-blue-600"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Account
+                      </Link>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => {
+                          handleLogout()
+                          setMobileMenuOpen(false)
+                        }}
+                        className="w-full text-gray-600 hover:text-red-600"
+                      >
+                        Sign Out
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => {
+                          setShowAuthModal(true)
+                          setMobileMenuOpen(false)
+                        }}
+                      >
+                        Log in
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                        onClick={() => {
+                          const generatorSection = document.getElementById('generator')
+                          if (generatorSection) {
+                            generatorSection.scrollIntoView({ behavior: 'smooth' })
+                          } else if (window.location.pathname !== '/') {
+                            window.location.href = '/#generator'
+                          }
+                          setMobileMenuOpen(false)
+                        }}
+                      >
+                        Get Started Free
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </nav>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Auth Modal - Rendered outside header */}

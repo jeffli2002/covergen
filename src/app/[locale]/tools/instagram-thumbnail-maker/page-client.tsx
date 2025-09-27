@@ -1,293 +1,433 @@
 'use client'
 
-import React from 'react'
+import { Locale } from '@/lib/i18n/config'
 import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Badge } from '@/components/ui/badge'
-import { CheckCircle2, Zap, Palette, Download, Smartphone, TrendingUp, Star, Users, ArrowRight } from 'lucide-react'
+import { Sparkles, Instagram, Users, Image, Camera, Play, Shield } from 'lucide-react'
+import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
+import { generateStructuredData } from '@/lib/seo-utils'
+
+// Lazy load the Instagram Thumbnail Tool
+const InstagramThumbnailTool = dynamic(
+  () => import(/* webpackChunkName: "instagram-thumbnail-tool" */ '@/components/tools/InstagramThumbnailTool'),
+  {
+    loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded-lg" />,
+    ssr: false
+  }
+)
 
 interface InstagramThumbnailMakerClientProps {
-  locale: string
+  locale: Locale
   translations: any
 }
 
-export default function InstagramThumbnailMakerClient({ locale, translations }: InstagramThumbnailMakerClientProps) {
-  const isZh = locale === 'zh'
-
-  const features = [
-    {
-      icon: <Smartphone className="h-6 w-6" />,
-      title: isZh ? '完美适配 Instagram 尺寸' : 'Perfect Instagram Sizes',
-      description: isZh 
-        ? '自动适配 Reels (9:16)、Feed (1:1) 和 Stories (9:16) 的最佳尺寸'
-        : 'Auto-optimized for Reels (9:16), Feed (1:1), and Stories (9:16)',
-    },
-    {
-      icon: <Zap className="h-6 w-6" />,
-      title: isZh ? 'AI 智能生成' : 'AI-Powered Generation',
-      description: isZh 
-        ? '使用先进的 AI 技术，根据您的内容自动生成吸引人的缩略图'
-        : 'Advanced AI technology creates engaging thumbnails based on your content',
-    },
-    {
-      icon: <Palette className="h-6 w-6" />,
-      title: isZh ? 'Instagram 风格模板' : 'Instagram-Style Templates',
-      description: isZh 
-        ? '专为 Instagram 算法优化的时尚模板，提升曝光率'
-        : 'Trendy templates optimized for Instagram algorithm and engagement',
-    },
-    {
-      icon: <Download className="h-6 w-6" />,
-      title: isZh ? '高清无水印下载' : 'HD Download, No Watermark',
-      description: isZh 
-        ? '导出高清图片，完全无水印，直接发布到 Instagram'
-        : 'Export high-quality images with no watermark, ready for Instagram',
-    },
+export default function InstagramThumbnailMakerClient({ locale, translations: t }: InstagramThumbnailMakerClientProps) {
+  const breadcrumbItems = [
+    { name: 'Tools', href: `/${locale}/tools` },
+    { name: 'Instagram Thumbnail Maker', current: true }
   ]
 
-  const templates = [
-    { id: 1, name: isZh ? '时尚 Reels' : 'Fashion Reels', category: 'reels' },
-    { id: 2, name: isZh ? '美食分享' : 'Food Posts', category: 'feed' },
-    { id: 3, name: isZh ? '旅行故事' : 'Travel Stories', category: 'stories' },
-    { id: 4, name: isZh ? '健身动态' : 'Fitness Content', category: 'reels' },
-    { id: 5, name: isZh ? '美妆教程' : 'Beauty Tutorials', category: 'feed' },
-    { id: 6, name: isZh ? '生活记录' : 'Lifestyle Vlogs', category: 'stories' },
-  ]
-
-  const testimonials = [
-    {
-      name: "Sarah Chen",
-      role: isZh ? "时尚博主" : "Fashion Influencer",
-      content: isZh 
-        ? "这个工具让我的 Instagram 内容更加专业！Reels 的观看量提升了 300%。"
-        : "This tool made my Instagram content look so professional! My Reels views increased by 300%.",
-      rating: 5,
-    },
-    {
-      name: "Mike Johnson",
-      role: isZh ? "健身教练" : "Fitness Coach",
-      content: isZh 
-        ? "完美的尺寸和模板选择，节省了大量时间。强烈推荐！"
-        : "Perfect sizes and template selection. Saved me hours of work. Highly recommend!",
-      rating: 5,
-    },
-  ]
+  // Structured data for this page
+  const structuredData = generateStructuredData('howto', {
+    title: 'How to Create Instagram Thumbnails with AI',
+    description: 'Step-by-step guide to creating professional Instagram thumbnails using AI technology',
+    steps: [
+      { name: 'Choose Instagram Format', text: 'Select Reels (9:16), Feed (1:1), or Stories format' },
+      { name: 'Enter Content Details', text: 'Type your post title, description, and style preferences' },
+      { name: 'Generate Thumbnail', text: 'AI creates multiple thumbnail options instantly' },
+      { name: 'Customize Design', text: 'Fine-tune colors, text, and visual elements' },
+      { name: 'Download', text: 'Export in perfect dimensions for Instagram' }
+    ]
+  })
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="text-center">
-            <Badge className="mb-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white">
-              <TrendingUp className="mr-1 h-3 w-3" />
-              {isZh ? 'KD: 10 - 超低竞争关键词' : 'KD: 10 - Ultra Low Competition'}
-            </Badge>
-            <h1 className="mb-6 text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
-              {isZh ? 'Instagram 缩略图制作工具' : 'Instagram Thumbnail Maker'}
-            </h1>
-            <p className="mx-auto mb-8 max-w-3xl text-lg text-gray-600 dark:text-gray-300 sm:text-xl">
-              {isZh 
-                ? '为您的 Reels、Feed 和 Stories 创建令人惊艳的缩略图。使用 AI 技术和专业模板，让您的 Instagram 内容脱颖而出。'
-                : 'Create stunning thumbnails for your Reels, Feed posts, and Stories. Stand out on Instagram with AI-powered designs and professional templates.'}
-            </p>
-            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button size="lg" className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700">
-                {isZh ? '免费开始制作' : 'Start Creating Free'}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-              <Button size="lg" variant="outline">
-                {isZh ? '查看模板库' : 'Browse Templates'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Grid */}
-      <section className="px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="mb-12 text-center text-3xl font-bold text-gray-900 dark:text-white">
-            {isZh ? '为什么选择我们的 Instagram 缩略图制作工具？' : 'Why Choose Our Instagram Thumbnail Maker?'}
-          </h2>
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {features.map((feature, index) => (
-              <Card key={index} className="border-pink-100 hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-pink-100 to-purple-100 text-pink-600 dark:from-pink-900 dark:to-purple-900 dark:text-pink-400">
-                    {feature.icon}
-                  </div>
-                  <CardTitle className="text-lg">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription>{feature.description}</CardDescription>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Templates Section */}
-      <section className="px-4 py-16 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="mb-4 text-center text-3xl font-bold text-gray-900 dark:text-white">
-            {isZh ? 'Instagram 专属模板' : 'Instagram-Optimized Templates'}
-          </h2>
-          <p className="mb-12 text-center text-lg text-gray-600 dark:text-gray-300">
-            {isZh 
-              ? '选择适合您内容风格的专业模板，快速创建吸引人的缩略图'
-              : 'Choose from professional templates designed for your content style'}
-          </p>
-          
-          <Tabs defaultValue="all" className="w-full">
-            <TabsList className="grid w-full max-w-md mx-auto grid-cols-4 mb-8">
-              <TabsTrigger value="all">{isZh ? '全部' : 'All'}</TabsTrigger>
-              <TabsTrigger value="reels">Reels</TabsTrigger>
-              <TabsTrigger value="feed">Feed</TabsTrigger>
-              <TabsTrigger value="stories">Stories</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="all" className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {templates.map((template) => (
-                <Card key={template.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
-                  <div className="aspect-square bg-gradient-to-br from-pink-100 to-purple-100 dark:from-pink-900 dark:to-purple-900" />
-                  <CardHeader>
-                    <CardTitle className="text-lg">{template.name}</CardTitle>
-                    <Badge variant="secondary">{template.category}</Badge>
-                  </CardHeader>
-                </Card>
-              ))}
-            </TabsContent>
-          </Tabs>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="mb-12 text-center text-3xl font-bold text-gray-900 dark:text-white">
-            {isZh ? '如何制作 Instagram 缩略图' : 'How to Create Instagram Thumbnails'}
-          </h2>
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            <div className="text-center">
-              <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-pink-100 text-pink-600 dark:bg-pink-900 dark:text-pink-400">
-                <span className="text-2xl font-bold">1</span>
-              </div>
-              <h3 className="mb-2 text-xl font-semibold">{isZh ? '选择格式' : 'Choose Format'}</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                {isZh ? '选择 Reels、Feed 或 Stories 格式' : 'Select Reels, Feed, or Stories format'}
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-purple-100 text-purple-600 dark:bg-purple-900 dark:text-purple-400">
-                <span className="text-2xl font-bold">2</span>
-              </div>
-              <h3 className="mb-2 text-xl font-semibold">{isZh ? '自定义设计' : 'Customize Design'}</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                {isZh ? '添加文字、贴纸和滤镜' : 'Add text, stickers, and filters'}
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-pink-100 text-pink-600 dark:bg-pink-900 dark:text-pink-400">
-                <span className="text-2xl font-bold">3</span>
-              </div>
-              <h3 className="mb-2 text-xl font-semibold">{isZh ? '下载发布' : 'Download & Post'}</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                {isZh ? '高清下载，直接发布到 Instagram' : 'Download in HD and post to Instagram'}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="px-4 py-16 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="mb-12 text-center text-3xl font-bold text-gray-900 dark:text-white">
-            {isZh ? '用户好评' : 'What Our Users Say'}
-          </h2>
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="border-pink-100">
-                <CardHeader>
-                  <div className="flex items-center gap-1 mb-2">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                  <CardTitle className="text-lg">{testimonial.name}</CardTitle>
-                  <CardDescription>{testimonial.role}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 dark:text-gray-300">"{testimonial.content}"</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-4xl text-center">
-          <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">
-            {isZh 
-              ? '立即开始创建专业的 Instagram 缩略图'
-              : 'Start Creating Professional Instagram Thumbnails Today'}
-          </h2>
-          <p className="mb-8 text-lg text-gray-600 dark:text-gray-300">
-            {isZh 
-              ? '加入数千名内容创作者，使用我们的工具提升 Instagram 互动率'
-              : 'Join thousands of content creators using our tool to boost Instagram engagement'}
-          </p>
-          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button size="lg" className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700">
-              <CheckCircle2 className="mr-2 h-5 w-5" />
-              {isZh ? '免费制作缩略图' : 'Create Thumbnail Free'}
-            </Button>
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-              <Users className="h-4 w-4" />
-              <span>{isZh ? '已有 10,000+ 创作者使用' : '10,000+ creators already using'}</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Schema Markup for SEO */}
+    <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-              {
-                "@type": "Question",
-                "name": isZh ? "Instagram 缩略图的最佳尺寸是多少？" : "What are the best sizes for Instagram thumbnails?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": isZh 
-                    ? "Reels 和 Stories 使用 9:16 (1080x1920px)，Feed 帖子使用 1:1 (1080x1080px)。"
-                    : "Use 9:16 (1080x1920px) for Reels and Stories, and 1:1 (1080x1080px) for Feed posts."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": isZh ? "这个工具是免费的吗？" : "Is this tool free to use?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": isZh 
-                    ? "是的，基础功能完全免费，包括模板和高清下载。"
-                    : "Yes, basic features including templates and HD downloads are completely free."
-                }
-              }
-            ]
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-    </div>
+      
+      <BreadcrumbWrapper>
+        <Breadcrumb items={breadcrumbItems} />
+      </BreadcrumbWrapper>
+
+      <main className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+        {/* Hero Section */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-purple-50 via-pink-50 to-purple-50 py-20">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto text-center">
+              <div className="inline-flex items-center gap-2 bg-purple-100 px-4 py-2 rounded-full text-purple-700 text-sm font-medium mb-6">
+                <Instagram className="w-4 h-4" />
+                Optimized for Instagram
+              </div>
+              
+              <h1 className="text-5xl font-bold text-gray-900 mb-6">
+                Instagram Thumbnail Maker
+              </h1>
+              
+              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                Create eye-catching thumbnails for Reels, Feed posts, and Stories. Use AI to design 
+                thumbnails that stop scrollers and boost your engagement rate.
+              </p>
+              
+              <div className="flex justify-center">
+                <Button 
+                  size="lg" 
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8"
+                  onClick={() => {
+                    const generator = document.getElementById('generator')
+                    if (generator) {
+                      generator.scrollIntoView({ behavior: 'smooth' })
+                    }
+                  }}
+                >
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  Create Instagram Thumbnail
+                </Button>
+              </div>
+              
+              {/* Trust Indicators */}
+              <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-purple-600">9:16</div>
+                  <div className="text-sm text-gray-600">Reels Size</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-purple-600">1:1</div>
+                  <div className="text-sm text-gray-600">Feed Posts</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-purple-600">HD</div>
+                  <div className="text-sm text-gray-600">High Quality</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-purple-600">AI</div>
+                  <div className="text-sm text-gray-600">Smart Design</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Tool Component */}
+        <section className="py-12" id="generator">
+          <div className="container mx-auto px-4">
+            <InstagramThumbnailTool />
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section className="py-20">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">
+                Instagram-Optimized Features
+              </h2>
+              <p className="text-lg text-gray-600">
+                Everything you need to create thumbnails that perform on Instagram
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                  <Play className="w-6 h-6 text-purple-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  Reels Optimization
+                </h3>
+                <p className="text-gray-600">
+                  Perfect 9:16 vertical format for Reels with eye-catching designs that boost play rates
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center mb-4">
+                  <Image className="w-6 h-6 text-pink-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  Feed-Perfect Squares
+                </h3>
+                <p className="text-gray-600">
+                  1:1 square thumbnails that look stunning in your feed grid and carousel posts
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                  <Camera className="w-6 h-6 text-green-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  Story Highlights
+                </h3>
+                <p className="text-gray-600">
+                  Create cohesive story highlight covers that enhance your profile aesthetic
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
+                  <Users className="w-6 h-6 text-orange-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  Algorithm-Friendly
+                </h3>
+                <p className="text-gray-600">
+                  Designs optimized for Instagram's algorithm to maximize reach and engagement
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                  <Instagram className="w-6 h-6 text-blue-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  Trending Styles
+                </h3>
+                <p className="text-gray-600">
+                  Stay current with Instagram's latest design trends and aesthetic preferences
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
+                  <Shield className="w-6 h-6 text-indigo-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  Brand Consistency
+                </h3>
+                <p className="text-gray-600">
+                  Maintain your visual identity across all Instagram content formats
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Popular Content Types */}
+        <section className="py-20 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">
+                Popular Instagram Content Styles
+              </h2>
+              <p className="text-lg text-gray-600">
+                Get inspired by these trending Instagram thumbnail categories
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">👗</div>
+                <h3 className="font-semibold mb-2">Fashion & Outfit</h3>
+                <p className="text-sm text-gray-600">Stylish, trendy, aesthetic</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">🍕</div>
+                <h3 className="font-semibold mb-2">Food & Recipe</h3>
+                <p className="text-sm text-gray-600">Appetizing, vibrant, mouth-watering</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">💪</div>
+                <h3 className="font-semibold mb-2">Fitness & Health</h3>
+                <p className="text-sm text-gray-600">Motivational, energetic, inspiring</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">✈️</div>
+                <h3 className="font-semibold mb-2">Travel & Adventure</h3>
+                <p className="text-sm text-gray-600">Wanderlust, scenic, captivating</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">💄</div>
+                <h3 className="font-semibold mb-2">Beauty & Makeup</h3>
+                <p className="text-sm text-gray-600">Glamorous, tutorial, transformative</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">🏠</div>
+                <h3 className="font-semibold mb-2">Home & DIY</h3>
+                <p className="text-sm text-gray-600">Creative, cozy, inspirational</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">🎨</div>
+                <h3 className="font-semibold mb-2">Art & Design</h3>
+                <p className="text-sm text-gray-600">Creative, aesthetic, eye-catching</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">📚</div>
+                <h3 className="font-semibold mb-2">Educational</h3>
+                <p className="text-sm text-gray-600">Informative, clear, engaging</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="py-20 bg-gradient-to-r from-purple-600 to-pink-600">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl font-bold text-white mb-4">
+              Ready to Create Scroll-Stopping Thumbnails?
+            </h2>
+            <p className="text-xl text-white/90 mb-8">
+              Design Instagram thumbnails that drive engagement in seconds
+            </p>
+            <Button 
+              size="lg" 
+              className="bg-white text-purple-600 hover:bg-gray-100"
+              onClick={() => {
+                const generator = document.getElementById('generator')
+                if (generator) {
+                  generator.scrollIntoView({ behavior: 'smooth' })
+                }
+              }}
+            >
+              <Sparkles className="w-5 h-5 mr-2" />
+              Start Creating Now
+            </Button>
+          </div>
+        </section>
+
+        {/* SEO Content Section */}
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
+              <h2 className="text-3xl font-bold mb-6 text-center">The Ultimate Instagram Thumbnail Maker</h2>
+              <p>
+                In the fast-paced world of Instagram, your thumbnail is your first impression. Whether 
+                it's a Reel cover, feed post preview, or story highlight, a compelling thumbnail can 
+                make the difference between a scroll-past and a click. Our AI-powered Instagram thumbnail 
+                maker helps you create professional, engaging thumbnails that stop thumbs and drive engagement.
+              </p>
+              
+              <h3>Why Instagram Thumbnails Matter</h3>
+              <p>
+                Instagram's algorithm prioritizes content that generates engagement. Your thumbnail directly impacts:
+              </p>
+              <ul>
+                <li>Click-through rates on Reels and IGTV videos</li>
+                <li>Profile aesthetic and brand consistency</li>
+                <li>Story highlight organization and appeal</li>
+                <li>Feed grid visual harmony</li>
+                <li>Overall content discoverability</li>
+              </ul>
+              
+              <h3>Perfect Instagram Dimensions</h3>
+              <p>
+                Instagram supports various content formats, each with optimal dimensions:
+              </p>
+              <ul>
+                <li><strong>Reels & IGTV:</strong> 9:16 aspect ratio (1080x1920 pixels)</li>
+                <li><strong>Feed Posts:</strong> 1:1 square (1080x1080 pixels)</li>
+                <li><strong>Stories:</strong> 9:16 vertical (1080x1920 pixels)</li>
+                <li><strong>Carousels:</strong> Can mix square and portrait formats</li>
+              </ul>
+              <p>
+                Our tool automatically generates thumbnails in these exact dimensions, ensuring your 
+                content looks perfect across all Instagram placements.
+              </p>
+              
+              <h3>AI-Powered Design Intelligence</h3>
+              <p>
+                Our AI understands Instagram's visual language. It analyzes trending content styles, 
+                color psychology, and engagement patterns to create thumbnails that resonate with your 
+                audience. Whether you're creating content for fashion, food, fitness, or any other niche, 
+                the AI adapts its design approach to match your content category and target demographic.
+              </p>
+              
+              <h3>Mobile-First Thumbnail Design</h3>
+              <p>
+                With 98% of Instagram users accessing the platform via mobile, your thumbnails must be 
+                optimized for small screens. Our designs ensure text remains readable, visual elements 
+                are clear, and the overall impact isn't lost on mobile devices. This mobile-first approach 
+                maximizes your content's appeal and accessibility.
+              </p>
+              
+              <h3>Free Instagram Marketing Tool</h3>
+              <p>
+                Professional Instagram marketing shouldn't require expensive design software or hiring 
+                designers. Our Instagram thumbnail maker is completely free to use, with no watermarks 
+                or hidden costs. Create unlimited thumbnails for all your Instagram content, whether 
+                you're an influencer, business owner, or casual creator looking to improve your Instagram presence.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section className="py-16 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-3xl font-bold text-center mb-12">
+                Frequently Asked Questions
+              </h2>
+              
+              <div className="space-y-6">
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 className="text-lg font-semibold mb-2">
+                    What size should my Instagram Reels thumbnail be?
+                  </h3>
+                  <p className="text-gray-600">
+                    Instagram Reels use a 9:16 aspect ratio (1080x1920 pixels). Our tool automatically 
+                    creates thumbnails in this exact size, ensuring your Reels covers look perfect and 
+                    professional without any cropping issues.
+                  </p>
+                </div>
+                
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 className="text-lg font-semibold mb-2">
+                    Can I create thumbnails for Instagram carousel posts?
+                  </h3>
+                  <p className="text-gray-600">
+                    Absolutely! Our tool supports all Instagram formats including carousel posts. You can 
+                    create cohesive thumbnails for multi-image posts, ensuring your carousel tells a 
+                    visually compelling story from the first slide.
+                  </p>
+                </div>
+                
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 className="text-lg font-semibold mb-2">
+                    How do I make my thumbnails stand out in the Instagram feed?
+                  </h3>
+                  <p className="text-gray-600">
+                    Use high contrast, bold colors, and clear focal points. Our AI creates thumbnails 
+                    with optimal visual hierarchy, ensuring your content catches attention even in a 
+                    crowded feed. Include faces when possible, as they naturally draw more engagement.
+                  </p>
+                </div>
+                
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 className="text-lg font-semibold mb-2">
+                    Can I maintain brand consistency across all my thumbnails?
+                  </h3>
+                  <p className="text-gray-600">
+                    Yes! You can specify your brand colors, style preferences, and visual themes. The AI 
+                    will incorporate these elements while creating thumbnails, helping you maintain a 
+                    cohesive Instagram aesthetic that strengthens your brand identity.
+                  </p>
+                </div>
+                
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 className="text-lg font-semibold mb-2">
+                    Do the thumbnails work for Instagram Story Highlights?
+                  </h3>
+                  <p className="text-gray-600">
+                    Yes, our tool is perfect for creating Instagram Story Highlight covers. You can design 
+                    matching covers for all your highlights, creating an organized and professional-looking 
+                    profile that encourages visitors to explore your content.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </>
   )
 }

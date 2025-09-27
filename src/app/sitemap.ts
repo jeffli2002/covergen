@@ -201,6 +201,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { name: 'instagram-thumbnail-maker', priority: 0.95 }, // KD: 10
     { name: 'linkedin-banner-maker', priority: 0.95 }, // KD: 7
     { name: 'ai-thumbnail-generator-free', priority: 0.95 }, // KD: 21, +900% growth
+    { name: 'youtube-thumbnail-ideas', priority: 0.93 }, // KD: 22
     // Existing tools
     { name: 'anime-poster-maker', priority: 0.8 },
     { name: 'spotify-playlist-cover', priority: 0.85 },

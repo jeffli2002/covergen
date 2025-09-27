@@ -1,45 +1,19 @@
-import { Metadata } from 'next'
-import { getDictionary } from '@/lib/i18n/get-dictionary'
-import { Locale } from '@/lib/i18n/config'
+import ClientBoundary from '@/components/client-boundary'
+
 import InstagramThumbnailMakerClient from './page-client'
+import { Locale } from '@/lib/i18n/config'
+import { getDictionary } from '@/lib/i18n/get-dictionary'
+import { Metadata } from 'next'
 
-export async function generateMetadata({
-  params: { locale }
-}: {
-  params: { locale: Locale }
-}): Promise<Metadata> {
-  const title = (locale as string) === 'zh' 
-    ? 'Instagram 缩略图制作工具 - 免费创建精美 Reels 封面' 
-    : 'Instagram Thumbnail Maker - Create Stunning Reels Covers Free'
-  
-  const description = (locale as string) === 'zh'
-    ? '使用我们的免费 Instagram 缩略图制作工具，轻松创建吸引人的 Reels、Feed 和 Story 封面。专为 Instagram 优化的尺寸和模板。'
-    : 'Create eye-catching Instagram thumbnails for Reels, Feed posts, and Stories with our free Instagram thumbnail maker. Optimized sizes and templates for maximum engagement.'
-
-  return {
-    title,
-    description,
-    keywords: 'instagram thumbnail maker, instagram reels thumbnail, instagram cover maker, instagram feed preview, instagram story cover, free instagram thumbnail generator, instagram post thumbnail, instagram reel cover maker',
-    openGraph: {
-      title,
-      description,
-      type: 'website',
-      images: ['/og-instagram-thumbnail.png'],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/og-instagram-thumbnail.png'],
-    },
-    alternates: {
-      canonical: `/tools/instagram-thumbnail-maker`,
-      languages: {
-        'en': '/en/tools/instagram-thumbnail-maker',
-        'zh': '/zh/tools/instagram-thumbnail-maker',
-      },
-    },
-  }
+export const metadata: Metadata = {
+  title: 'Instagram Thumbnail Maker - Create Stunning Reels & Post Covers | CoverGen Pro',
+  description: 'Design perfect Instagram thumbnails with AI. Optimized for Reels (9:16), Feed posts (1:1), and Stories. Create covers that boost engagement and views.',
+  keywords: 'instagram thumbnail maker, instagram reels thumbnail, instagram cover maker, instagram feed preview, instagram story cover, free instagram thumbnail generator, instagram post thumbnail, instagram reel cover maker',
+  openGraph: {
+    title: 'Instagram Thumbnail Maker - AI-Powered Design | CoverGen Pro',
+    description: 'Create engaging Instagram thumbnails that drive views and engagement. Perfect dimensions for all Instagram formats.',
+    type: 'website',
+  },
 }
 
 export default async function InstagramThumbnailMakerPage({
@@ -48,6 +22,10 @@ export default async function InstagramThumbnailMakerPage({
   params: { locale: Locale }
 }) {
   const dict = await getDictionary(params.locale)
-  
-  return <InstagramThumbnailMakerClient locale={params.locale} translations={dict} />
+
+  return (
+    <ClientBoundary>
+      <InstagramThumbnailMakerClient locale={params.locale} translations={dict} />
+    </ClientBoundary>
+  )
 }

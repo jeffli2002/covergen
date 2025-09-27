@@ -17,22 +17,28 @@ export async function generateMetadata({
   // Override with Instagram-specific optimizations
   return {
     ...metadata,
-    title: 'Instagram Post & Story Maker - AI Content Creator | CoverGen Pro',
-    description: 'Create stunning Instagram posts, stories, and reels covers with AI. Perfect square posts, story graphics, and carousel designs that boost engagement.',
+    title: 'Instagram Thumbnail Maker - AI Post & Story Creator | CoverGen Pro',
+    description: 'Create stunning Instagram thumbnails, posts, and stories with AI. Instagram grid maker, highlight cover maker, and post designer all in one tool. Perfect dimensions for maximum engagement.',
     keywords: [
-      'Instagram post maker',
-      'Instagram story creator',
-      'Instagram reel cover',
-      'Instagram carousel maker',
-      'Instagram graphic designer',
-      'Instagram content creator',
-      'Instagram template maker',
+      'instagram thumbnail maker',
+      'instagram post maker', 
+      'instagram grid maker',
+      'instagram highlight cover maker',
+      'instagram story designer',
+      'instagram thumbnail generator',
+      'instagram cover creator',
+      'ig thumbnail maker',
+      'instagram reel cover',
+      'instagram carousel maker',
+      'instagram graphic designer',
+      'instagram content creator',
+      'instagram template maker',
       'social media graphics',
-      'Instagram feed planner',
-      'Instagram aesthetic',
-      'Instagram cover design',
-      'Instagram post generator',
-      'free Instagram maker'
+      'instagram feed planner',
+      'instagram aesthetic',
+      'instagram cover design',
+      'instagram post generator',
+      'free instagram maker'
     ].join(', '),
   }
 }
