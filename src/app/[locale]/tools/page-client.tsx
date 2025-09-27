@@ -308,13 +308,7 @@ export default function ToolsHubClient({ locale, translations: t }: ToolsHubClie
                             New
                           </div>
                         )}
-                        {tool.trending && (
-                          <div className="bg-purple-100 text-purple-700 text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1">
-                            <TrendingUp className="w-3 h-3" />
-                            {tool.growth}
-                          </div>
-                        )}
-                        {tool.popular && !tool.new && !tool.trending && (
+                        {tool.popular && !tool.new && (
                           <div className="bg-orange-100 text-orange-700 text-xs font-medium px-2 py-1 rounded-full">
                             Popular
                           </div>

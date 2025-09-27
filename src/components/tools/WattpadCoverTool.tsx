@@ -267,7 +267,13 @@ export default function WattpadCoverTool() {
               
               <div className="flex-1 flex items-center">
                 {generatedImages.length > 0 ? (
-                  <OutputGallery outputs={generatedImages} />
+                  <OutputGallery 
+                    generatedImages={generatedImages}
+                    downloadingId={null}
+                    onDownload={() => {}}
+                    onGenerateNew={() => setGeneratedImages([])}
+                    platform="wattpad"
+                  />
                 ) : (
                   <div className="w-full aspect-[512/800] bg-gray-50 rounded-lg flex flex-col items-center justify-center text-gray-500 border-2 border-dashed border-gray-200">
                     <Sparkles className="w-12 h-12 mb-4 opacity-20" />
