@@ -54,6 +54,14 @@ export default function Header({ locale, translations: t }: HeaderProps) {
   useEffect(() => {
     const unsubscribeAuth = authEvents.onAuthChange((event) => {
       console.log('[Header] Auth event received:', event.detail)
+      
+      if (event.detail.type === 'signout') {
+        // Clear all state immediately for sign out
+        setSubscriptionInfo(null)
+        const { setUser } = useAppStore.getState()
+        setUser(null)
+      }
+      
       // Refresh subscription data
       triggerSubscriptionRefresh()
       // Force re-render
@@ -532,9 +540,9 @@ export default function Header({ locale, translations: t }: HeaderProps) {
             <UsageDisplay session={session} />
             
             <LanguageSwitcher currentLocale={locale} />
-            {loading ? (
+            {loading || !isInitialized ? (
               <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
-            ) : user ? (
+            ) : user && user.email ? (
               <>
                 
                 {/* Upgrade/Account button */}
@@ -613,7 +621,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                   title="Account"
                 >
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm hover:shadow-md transition-shadow">
-                    {user.email.charAt(0).toUpperCase()}
+                    {user?.email?.charAt(0).toUpperCase() || 'U'}
                   </div>
                 </Button>
               </>
@@ -657,7 +665,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
 
           {/* Mobile Menu Button and User Avatar */}
           <div className="flex items-center gap-2">
-            {!loading && user && (
+            {!loading && user && user.email && (
               <>
                 <UsageDisplay session={session} />
                 {/* User Avatar - Account link */}
@@ -770,10 +778,10 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                       {/* User Info */}
                       <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold shadow-sm">
-                          {user.email.charAt(0).toUpperCase()}
+                          {user?.email?.charAt(0).toUpperCase() || 'U'}
                         </div>
                         <div className="flex-1">
-                          <div className="text-sm font-medium text-gray-900">{user.email}</div>
+                          <div className="text-sm font-medium text-gray-900">{user?.email || 'User'}</div>
                           <div className="text-xs text-gray-500">
                             {subscriptionInfo?.tier === 'pro_plus' ? 'Pro+ Member' : 
                              subscriptionInfo?.tier === 'pro' ? 'Pro Member' : 'Free Plan'}
