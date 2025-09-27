@@ -172,7 +172,13 @@ export function useBestAuth() {
       // Emit auth change event
       authEvents.emitAuthChange('signout')
       
-      router.push('/')
+      // Force a complete page reload to clear all React state
+      if (typeof window !== 'undefined') {
+        setTimeout(() => {
+          window.location.href = '/'
+        }, 100)
+      }
+      
       return { success: true }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Sign out failed'

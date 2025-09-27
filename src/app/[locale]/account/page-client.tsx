@@ -464,9 +464,8 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
         // Clear local state
         setUser(null)
         
-        // The signOut method in useBestAuth already emits the auth change event
-        // Just redirect to home
-        router.push(`/${locale}`)
+        // Force a complete page reload to clear all React state
+        window.location.href = `/${locale}`
       } else {
         console.error('Sign out failed:', result.error)
         toast.error('Failed to sign out. Please try again.')

@@ -34,6 +34,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
   const { user: storeUser, subscriptionRefreshTrigger, triggerSubscriptionRefresh } = useAppStore()
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null)
+  const [forceUpdate, setForceUpdate] = useState(0)
   
   // Force refresh header when auth state changes
   useEffect(() => {
@@ -47,6 +48,11 @@ export default function Header({ locale, translations: t }: HeaderProps) {
     // If user state changed, refresh subscription
     if (user && !loading) {
       triggerSubscriptionRefresh()
+    } else if (!user && !loading) {
+      // User signed out - clear all local state
+      setSubscriptionInfo(null)
+      const { setUser } = useAppStore.getState()
+      setUser(null)
     }
   }, [loading, user?.id, triggerSubscriptionRefresh])
   
@@ -60,6 +66,8 @@ export default function Header({ locale, translations: t }: HeaderProps) {
         setSubscriptionInfo(null)
         const { setUser } = useAppStore.getState()
         setUser(null)
+        // Force complete re-render
+        setForceUpdate(prev => prev + 1)
       }
       
       // Refresh subscription data
