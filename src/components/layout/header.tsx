@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Crown, LogOut, Sparkles, User, ChevronDown, CreditCard, Loader2, Menu } from 'lucide-react'
+import { Crown, Sparkles, User, ChevronDown, CreditCard, Loader2, Menu } from 'lucide-react'
 import { useBestAuth } from '@/hooks/useBestAuth'
 import AuthForm from '@/components/auth/AuthForm'
 import UserMenu from '@/components/auth/UserMenu'
@@ -619,17 +619,6 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                 >
                   <User className="w-4 h-4 mr-2" />
                   Account
-                </Button>
-
-                {/* Logout button */}
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={handleLogout}
-                  className="text-gray-600 hover:text-red-600 hover:bg-red-50"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Logout
                 </Button>
               </>
             ) : (
