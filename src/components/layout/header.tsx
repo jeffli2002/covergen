@@ -348,11 +348,6 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                     <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 px-3">Video & Streaming</div>
                     <div className="grid grid-cols-2 gap-0">
                       <DropdownMenuItem asChild className="h-auto p-0">
-                        <Link href={`/${locale}/tools/youtube-thumbnail-ideas`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
-                          <div className="text-sm font-medium text-gray-900">YouTube Ideas</div>
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild className="h-auto p-0">
                         <Link href={`/${locale}/tools/thumbnail-tester`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
                           <div className="text-sm font-medium text-gray-900">Thumbnail Tester</div>
                         </Link>
@@ -447,7 +442,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                 {/* Explore All Tools */}
                 <div className="mt-3 pt-3 border-t border-gray-200">
                   <DropdownMenuItem asChild className="h-auto p-0">
-                    <Link href={`/${locale}/tools/thumbnail-maker-hub`} className="block px-3 py-2 rounded-md hover:bg-blue-50 transition-colors text-center">
+                    <Link href={`/${locale}/tools`} className="block px-3 py-2 rounded-md hover:bg-blue-50 transition-colors text-center">
                       <div className="font-medium text-blue-600">Browse All Tools →</div>
                     </Link>
                   </DropdownMenuItem>
@@ -706,14 +701,7 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                   <div className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Tools</div>
                   <div className="space-y-2 ml-4">
                     <Link 
-                      href={`/${locale}/tools/youtube-thumbnail-ideas`} 
-                      className="block text-base text-gray-600 hover:text-blue-600"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      YouTube Ideas
-                    </Link>
-                    <Link 
-                      href={`/${locale}/tools/thumbnail-maker-hub`} 
+                      href={`/${locale}/tools`} 
                       className="block text-base font-medium text-blue-600 hover:text-blue-700"
                       onClick={() => setMobileMenuOpen(false)}
                     >
