@@ -14,7 +14,11 @@ import {
   Play,
   Clock,
   Star,
-  Users
+  Users,
+  Youtube,
+  Eye,
+  MousePointer,
+  Zap
 } from 'lucide-react'
 
 const tutorialCategories = [
@@ -55,6 +59,54 @@ const tutorialCategories = [
         difficulty: 'Intermediate',
         tags: ['YouTube', 'Thumbnails', 'Engagement'],
         content: 'Use bright colors, clear text, expressive faces, and avoid cluttered designs.'
+      }
+    ]
+  },
+  {
+    id: 'youtube-thumbnail-ideas',
+    title: 'YouTube Thumbnail Ideas',
+    icon: Youtube,
+    description: 'Proven strategies for creating high-CTR YouTube thumbnails',
+    tutorials: [
+      {
+        title: 'Gaming Thumbnail Strategies',
+        description: 'Learn how to create epic gaming thumbnails that capture exciting moments.',
+        duration: '10 min read',
+        difficulty: 'Intermediate',
+        tags: ['Gaming', 'YouTube', 'CTR Optimization'],
+        content: 'Epic Moment Highlights: Capture the most exciting gaming moments with dynamic effects and flame graphics. Use bold text + shocked face + explosion background for 12-15% CTR. Before/After comparisons showing dramatic improvements in skills or gear upgrades can achieve 10-12% CTR.'
+      },
+      {
+        title: 'Vlog Thumbnail Psychology',
+        description: 'Master the art of emotional expressions and lifestyle showcase for vlogs.',
+        duration: '8 min read',
+        difficulty: 'Beginner',
+        tags: ['Vlog', 'Emotions', 'Lifestyle'],
+        content: 'Emotional Expressions: Use exaggerated facial expressions to convey video emotions. Close-up faces with minimal text and bright colors can achieve 8-10% CTR. Lifestyle Showcase: Display aspirational lifestyle scenes that viewers desire using beautiful scenery, silhouettes, and dreamy filters for 9-11% CTR.'
+      },
+      {
+        title: 'Tutorial Thumbnail Formats',
+        description: 'Create clear, informative thumbnails for educational content.',
+        duration: '7 min read',
+        difficulty: 'Beginner',
+        tags: ['Tutorials', 'Education', 'Clear Design'],
+        content: 'Numbered Steps: Clearly show tutorial steps (e.g., "5 Steps") with final result and tool icons for 11-13% CTR. Problem-Solution Format: Show visual contrast between common problems (red X) and solutions (green check) with bold arrows for 10-12% CTR.'
+      },
+      {
+        title: 'Entertainment & Mystery',
+        description: 'Create suspenseful thumbnails that drive curiosity and clicks.',
+        duration: '9 min read',
+        difficulty: 'Advanced',
+        tags: ['Entertainment', 'Suspense', 'Trending'],
+        content: 'Mystery & Suspense: Use question marks and blurred elements to create curiosity. Blur key parts with "You won\'t believe" text for 13-16% CTR. Celebrity/Trending Topics: Combine current trends or celebrities with comparison elements for 14-17% CTR.'
+      },
+      {
+        title: 'Design Principles for High CTR',
+        description: 'Master the golden rules of YouTube thumbnail design.',
+        duration: '12 min read',
+        difficulty: 'Intermediate',
+        tags: ['Design', 'Best Practices', 'Optimization'],
+        content: 'High Contrast: Use light/dark contrast to make thumbnails pop in feed. Three Color Rule: Limit to 3 main colors for clean, powerful visuals. Dynamic Elements: Add arrows, explosions to suggest exciting content. Key Info Focus: Ensure main message is clear even on small mobile screens. These principles combined can increase CTR by 3x and boost watch time significantly.'
       }
     ]
   }

@@ -29,30 +29,6 @@ export default function ThumbnailMakerHubClient({ locale, translations }: Props)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   const tools: Tool[] = [
-    // YouTube Tools
-    {
-      id: 'youtube-thumbnail-ideas',
-      name: 'YouTube Thumbnail Ideas',
-      description: 'Discover creative thumbnail designs and boost your CTR with proven templates',
-      icon: <Youtube className="w-6 h-6" />,
-      category: 'youtube',
-      keywords: ['youtube thumbnail ideas', 'thumbnail tester', 'thumbnail preview', 'thumbnail sketch'],
-      kd: 22,
-      searchVolume: '320/mo',
-      trending: true,
-    },
-    {
-      id: 'ai-thumbnail-generator-free',
-      name: 'AI Thumbnail Generator (Free)',
-      description: 'Generate stunning thumbnails with AI - no watermarks, no signup required',
-      icon: <Sparkles className="w-6 h-6" />,
-      category: 'ai-tools',
-      keywords: ['ai thumbnail generator free', 'thumbnail maker no watermark', 'free thumbnail maker'],
-      kd: 21,
-      searchVolume: '210/mo',
-      trending: true,
-    },
-    
     // Social Media Tools
     {
       id: 'instagram-thumbnail-maker',
@@ -202,7 +178,6 @@ export default function ThumbnailMakerHubClient({ locale, translations }: Props)
 
   const categories = [
     { id: 'all', name: 'All Tools', icon: <Grid className="w-4 h-4" /> },
-    { id: 'youtube', name: 'YouTube', icon: <Youtube className="w-4 h-4" /> },
     { id: 'social-media', name: 'Social Media', icon: <Users className="w-4 h-4" /> },
     { id: 'music', name: 'Music & Audio', icon: <Music className="w-4 h-4" /> },
     { id: 'gaming', name: 'Gaming', icon: <Gamepad2 className="w-4 h-4" /> },
@@ -321,7 +296,7 @@ export default function ThumbnailMakerHubClient({ locale, translations }: Props)
               {filteredTools.map((tool) => (
                 <Link
                   key={tool.id}
-                  href={`/tools/${tool.id}`}
+                  href={`/${locale}/tools/${tool.id}`}
                   className={`block ${
                     viewMode === 'grid'
                       ? 'bg-white rounded-xl shadow-lg hover:shadow-xl transition-all p-6'
@@ -349,38 +324,10 @@ export default function ThumbnailMakerHubClient({ locale, translations }: Props)
                         {tool.description}
                       </p>
                       
-                      {viewMode === 'grid' && (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {tool.kd && (
-                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                              KD: {tool.kd}
-                            </span>
-                          )}
-                          {tool.searchVolume && (
-                            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                              {tool.searchVolume}
-                            </span>
-                          )}
-                        </div>
-                      )}
                     </div>
                   </div>
                   
                   <div className={viewMode === 'list' ? 'flex items-center gap-4' : ''}>
-                    {viewMode === 'list' && (
-                      <>
-                        {tool.kd && (
-                          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded whitespace-nowrap">
-                            KD: {tool.kd}
-                          </span>
-                        )}
-                        {tool.searchVolume && (
-                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded whitespace-nowrap">
-                            {tool.searchVolume}
-                          </span>
-                        )}
-                      </>
-                    )}
                     <Button variant="outline" size="sm" className={viewMode === 'grid' ? 'w-full' : ''}>
                       Use Tool →
                     </Button>
@@ -511,7 +458,7 @@ export default function ThumbnailMakerHubClient({ locale, translations }: Props)
                         <td className="py-3 px-4"><strong>Wattpad Cover</strong></td>
                         <td className="py-3 px-4">512x800</td>
                         <td className="py-3 px-4">JPG, PNG</td>
-                        <td className="py-3 px-4">Ultra-low competition keyword (KD:8)</td>
+                        <td className="py-3 px-4">Popular for story writers</td>
                       </tr>
                     </tbody>
                   </table>
@@ -533,11 +480,12 @@ export default function ThumbnailMakerHubClient({ locale, translations }: Props)
             and perfect dimensions for every platform.
           </p>
           <div className="flex gap-4 justify-center">
-            <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
-              <Sparkles className="w-5 h-5 mr-2" />
-              Try AI Generator Free
-            </Button>
-            <Button size="lg" variant="outline" className="text-white border-white hover:bg-white/10">
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="text-white border-white hover:bg-white/10"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            >
               Browse All Tools
             </Button>
           </div>

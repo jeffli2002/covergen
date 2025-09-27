@@ -243,16 +243,6 @@ export function generateToolMetadata(
       description: 'Create stunning event posters with AI. Perfect for concerts, festivals, conferences, and all types of events.',
       keywords: ['event poster designer', 'event flyer maker', 'concert poster generator', 'festival banner creator', 'event graphics', 'halloween poster creator', 'birthday poster maker', 'wedding invitation cover', 'poster maker free online'],
     },
-    'youtube-thumbnail-ideas': {
-      title: 'YouTube Thumbnail Ideas - Boost CTR with Creative Designs | CoverGen Pro',
-      description: 'Discover hundreds of YouTube thumbnail ideas and design inspiration. Learn how to create eye-catching thumbnails that boost CTR and video views.',
-      keywords: ['youtube thumbnail ideas', 'youtube thumbnail inspiration', 'clickable thumbnails', 'youtube cover ideas', 'thumbnail design tips', 'youtube thumbnail examples', 'viral thumbnail designs', 'youtube thumbnail templates', 'thumbnail tester', 'thumbnail preview', 'thumbnail sketch'],
-    },
-    'ai-thumbnail-generator-free': {
-      title: 'AI Thumbnail Generator Free - No Watermark | CoverGen Pro',
-      description: 'Generate stunning thumbnails with AI technology completely free. No watermarks, no sign-up required. Perfect for YouTube, social media, and more.',
-      keywords: ['ai thumbnail generator free', 'ai thumbnail maker', 'thumbnail generator', 'free thumbnail maker', 'thumbnail maker no watermark free', 'ai powered thumbnail', 'youtube thumbnail ai', 'ai image generator', 'free cover generator no signup'],
-    },
     'instagram-thumbnail-maker': {
       title: 'Instagram Thumbnail Maker - Create Stunning IG Covers | CoverGen Pro',
       description: 'Design eye-catching Instagram thumbnails and post covers with AI. Perfect square format for Instagram posts, reels, and IGTV.',

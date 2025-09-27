@@ -12,7 +12,6 @@ export default function SEOFooterLinks({ locale }: SEOFooterLinksProps) {
     {
       title: isZh ? 'AI 工具' : 'AI Tools',
       links: [
-        { href: '/tools/ai-thumbnail-generator-free', label: isZh ? 'AI 缩略图生成器' : 'AI Thumbnail Generator Free' },
         { href: '/tools/instagram-thumbnail-maker', label: isZh ? 'Instagram 缩略图制作' : 'Instagram Thumbnail Maker' },
         { href: '/tools/linkedin-banner-maker', label: isZh ? 'LinkedIn 横幅制作' : 'LinkedIn Banner Maker' },
       ]

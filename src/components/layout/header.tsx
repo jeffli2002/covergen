@@ -353,11 +353,6 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild className="h-auto p-0">
-                        <Link href={`/${locale}/tools/ai-thumbnail-generator-free`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
-                          <div className="text-sm font-medium text-gray-900">AI Generator</div>
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild className="h-auto p-0">
                         <Link href={`/${locale}/tools/thumbnail-tester`} className="block px-4 py-2.5 hover:bg-gray-100 transition-colors">
                           <div className="text-sm font-medium text-gray-900">Thumbnail Tester</div>
                         </Link>
@@ -710,13 +705,6 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                 <div>
                   <div className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Tools</div>
                   <div className="space-y-2 ml-4">
-                    <Link 
-                      href={`/${locale}/tools/ai-thumbnail-generator-free`} 
-                      className="block text-base text-gray-600 hover:text-blue-600"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      AI Generator
-                    </Link>
                     <Link 
                       href={`/${locale}/tools/youtube-thumbnail-ideas`} 
                       className="block text-base text-gray-600 hover:text-blue-600"

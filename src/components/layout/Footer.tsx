@@ -56,11 +56,6 @@ export default function Footer({ locale, translations: t }: FooterProps) {
             <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Products</h3>
             <ul className="space-y-3 text-sm">
               <li>
-                <Link href={`/${locale}/tools/ai-thumbnail-generator-free`} className="text-gray-600 hover:text-gray-900 transition-colors">
-                  AI Generator
-                </Link>
-              </li>
-              <li>
                 <Link href={`/${locale}/tools/youtube-thumbnail-ideas`} className="text-gray-600 hover:text-gray-900 transition-colors">
                   Thumbnail Ideas
                 </Link>

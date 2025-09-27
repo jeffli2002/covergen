@@ -42,8 +42,7 @@ const tools = [
     color: 'from-pink-500 to-purple-500',
     category: 'Social',
     popular: true,
-    new: true,
-    kd: 10
+    new: true
   },
   {
     name: 'LinkedIn Banner Maker',
@@ -53,19 +52,7 @@ const tools = [
     color: 'from-blue-600 to-blue-700',
     category: 'Business',
     popular: true,
-    new: true,
-    kd: 7
-  },
-  {
-    name: 'YouTube Thumbnail Ideas',
-    description: 'Discover proven thumbnail designs that boost CTR and views',
-    icon: Youtube,
-    href: '/tools/youtube-thumbnail-ideas',
-    color: 'from-red-600 to-red-700',
-    category: 'Inspiration',
-    popular: true,
-    new: true,
-    kd: 22
+    new: true
   },
   {
     name: 'Wattpad Cover Maker',
@@ -75,8 +62,7 @@ const tools = [
     color: 'from-orange-500 to-red-500',
     category: 'Publishing',
     popular: true,
-    new: true,
-    kd: 8
+    new: true
   },
   {
     name: 'Discord Banner Maker',
@@ -86,8 +72,7 @@ const tools = [
     color: 'from-indigo-500 to-purple-600',
     category: 'Social',
     popular: true,
-    new: true,
-    kd: 10
+    new: true
   },
   {
     name: 'Podcast Cover Maker',
@@ -97,8 +82,7 @@ const tools = [
     color: 'from-purple-500 to-pink-500',
     category: 'Audio',
     popular: true,
-    new: true,
-    kd: 23
+    new: true
   },
   {
     name: 'Kindle Cover Creator',
@@ -108,8 +92,7 @@ const tools = [
     color: 'from-gray-700 to-gray-900',
     category: 'Publishing',
     popular: true,
-    new: true,
-    kd: 13
+    new: true
   },
   {
     name: 'Thumbnail Tester',
@@ -119,8 +102,7 @@ const tools = [
     color: 'from-green-500 to-teal-500',
     category: 'Analytics',
     popular: true,
-    new: true,
-    kd: 29
+    new: true
   },
   {
     name: 'Thumbnail Maker Hub',
@@ -219,7 +201,6 @@ const categories = [
   { name: 'All', count: tools.length },
   { name: 'Social', count: tools.filter(t => t.category === 'Social').length },
   { name: 'Business', count: tools.filter(t => t.category === 'Business').length },
-  { name: 'Inspiration', count: tools.filter(t => t.category === 'Inspiration').length },
   { name: 'Entertainment', count: tools.filter(t => t.category === 'Entertainment').length },
   { name: 'Video', count: tools.filter(t => t.category === 'Video').length },
   { name: 'Music', count: tools.filter(t => t.category === 'Music').length },
@@ -336,11 +317,6 @@ export default function ToolsHubClient({ locale, translations: t }: ToolsHubClie
                         {tool.popular && !tool.new && !tool.trending && (
                           <div className="bg-orange-100 text-orange-700 text-xs font-medium px-2 py-1 rounded-full">
                             Popular
-                          </div>
-                        )}
-                        {tool.kd && (
-                          <div className="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-1 rounded-full">
-                            KD: {tool.kd}
                           </div>
                         )}
                       </div>

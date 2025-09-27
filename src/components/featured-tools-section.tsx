@@ -35,17 +35,6 @@ export default function FeaturedToolsSection({ locale }: FeaturedToolsSectionPro
       stats: { users: '50K+', rating: 4.9 }
     },
     {
-      title: isZh ? '免费 AI 缩略图生成器' : 'AI Thumbnail Generator Free',
-      description: isZh 
-        ? '使用 AI 技术即时生成专业缩略图。支持所有主流平台。'
-        : 'Generate professional thumbnails instantly with AI. Works for all major platforms.',
-      icon: Sparkles,
-      href: '/tools/ai-thumbnail-generator-free',
-      color: 'from-blue-500 to-purple-500',
-      badge: { text: '+900% Growth', color: 'bg-purple-100 text-purple-700' },
-      stats: { users: '500K+', rating: 4.9 }
-    },
-    {
       title: isZh ? 'LinkedIn 横幅制作器' : 'LinkedIn Banner Maker',
       description: isZh 
         ? '创建专业的个人资料横幅，提升您的职业形象和曝光率。'

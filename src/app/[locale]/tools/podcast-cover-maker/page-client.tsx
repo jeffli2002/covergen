@@ -1,321 +1,436 @@
 'use client'
 
-import { useState } from 'react'
-import { Mic, Radio, Headphones, Palette, Download, Zap, TrendingUp, Music } from 'lucide-react'
-import GenerationForm from '@/components/generation-form'
+import { Locale } from '@/lib/i18n/config'
+import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
+import { Sparkles, Mic, Radio, Headphones, Palette, Download, Shield } from 'lucide-react'
+import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
+import { generateStructuredData } from '@/lib/seo-utils'
 
-interface Props {
-  locale: string
+// Lazy load the Podcast Cover Maker Tool
+const PodcastCoverMakerTool = dynamic(
+  () => import(/* webpackChunkName: "podcast-cover-maker-tool" */ '@/components/tools/PodcastCoverMakerTool'),
+  {
+    loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded-lg" />,
+    ssr: false
+  }
+)
+
+interface PodcastCoverMakerClientProps {
+  locale: Locale
   translations: any
 }
 
-export default function PodcastCoverMakerClient({ locale, translations }: Props) {
-  const [selectedGenre, setSelectedGenre] = useState('business')
-
-  const podcastGenres = [
-    { id: 'business', name: 'Business', icon: <TrendingUp className="w-5 h-5" />, style: 'Professional, clean, corporate colors' },
-    { id: 'true-crime', name: 'True Crime', icon: <Radio className="w-5 h-5" />, style: 'Dark, mysterious, noir aesthetics' },
-    { id: 'comedy', name: 'Comedy', icon: <Mic className="w-5 h-5" />, style: 'Bright, fun, playful designs' },
-    { id: 'education', name: 'Education', icon: <Headphones className="w-5 h-5" />, style: 'Academic, trustworthy, informative' },
-    { id: 'wellness', name: 'Health & Wellness', icon: <Music className="w-5 h-5" />, style: 'Calming, natural, peaceful colors' },
-    { id: 'tech', name: 'Technology', icon: <Zap className="w-5 h-5" />, style: 'Modern, futuristic, digital elements' },
+export default function PodcastCoverMakerClient({ locale, translations: t }: PodcastCoverMakerClientProps) {
+  const breadcrumbItems = [
+    { name: 'Tools', href: `/${locale}/tools` },
+    { name: 'Podcast Cover Maker', current: true }
   ]
 
-  const features = [
-    {
-      title: 'Perfect 3000x3000 Size',
-      description: 'Meets Apple Podcasts and Spotify requirements',
-      icon: <Radio className="w-6 h-6" />,
-    },
-    {
-      title: 'Platform Compliance',
-      description: 'Follows all major platform guidelines automatically',
-      icon: <Headphones className="w-6 h-6" />,
-    },
-    {
-      title: 'Genre-Specific Styles',
-      description: 'AI understands podcast genres and audience expectations',
-      icon: <Palette className="w-6 h-6" />,
-    },
-    {
-      title: 'High Resolution Export',
-      description: 'Crystal clear quality at required specifications',
-      icon: <Download className="w-6 h-6" />,
-    },
-  ]
+  // Structured data for this page
+  const structuredData = generateStructuredData('howto', {
+    title: 'How to Create Podcast Covers with AI',
+    description: 'Step-by-step guide to creating professional podcast covers using AI technology',
+    steps: [
+      { name: 'Enter Podcast Details', text: 'Type your podcast name and description' },
+      { name: 'Choose Genre', text: 'Select from various podcast genre templates' },
+      { name: 'Generate Cover', text: 'AI creates multiple cover options instantly' },
+      { name: 'Customize Design', text: 'Fine-tune colors, fonts, and layout' },
+      { name: 'Download', text: 'Export in perfect 3000x3000 pixels for all platforms' }
+    ]
+  })
 
-  const platformSpecs = [
-    { platform: 'Apple Podcasts', size: '3000x3000', format: 'JPG/PNG', maxSize: '512KB' },
-    { platform: 'Spotify', size: '3000x3000', format: 'JPG/PNG', maxSize: '10MB' },
-    { platform: 'Google Podcasts', size: '3000x3000', format: 'JPG/PNG', maxSize: '10MB' },
-    { platform: 'Stitcher', size: '3000x3000', format: 'JPG/PNG', maxSize: '10MB' },
-  ]
 
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-purple-600 to-pink-600 pt-20 pb-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center text-white">
-            <h1 className="text-5xl font-bold mb-6">
-              Podcast Cover Maker
-            </h1>
-            <p className="text-xl mb-8 text-purple-100">
-              Create professional podcast covers that attract listeners. AI-generated artwork 
-              that meets all platform requirements.
-            </p>
-            <div className="flex gap-4 justify-center flex-wrap">
-              <div className="flex items-center gap-2 text-sm bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      
+      <BreadcrumbWrapper>
+        <Breadcrumb items={breadcrumbItems} />
+      </BreadcrumbWrapper>
+
+      <main className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+        {/* Hero Section */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-purple-50 via-white to-purple-50 py-20">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto text-center">
+              <div className="inline-flex items-center gap-2 bg-purple-100 px-4 py-2 rounded-full text-purple-700 text-sm font-medium mb-6">
                 <Mic className="w-4 h-4" />
-                <span>KD: 23 (Low Competition)</span>
+                Optimized for All Podcast Platforms
               </div>
-              <div className="flex items-center gap-2 text-sm bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-                <Radio className="w-4 h-4" />
-                <span>Growing 133% YoY</span>
+              
+              <h1 className="text-5xl font-bold text-gray-900 mb-6">
+                Podcast Cover Maker
+              </h1>
+              
+              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                Create professional podcast covers that attract listeners. Perfect 3000x3000 pixel 
+                artwork that meets Apple Podcasts, Spotify, and all platform requirements.
+              </p>
+              
+              <div className="flex justify-center">
+                <Button 
+                  size="lg" 
+                  className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-8"
+                  onClick={() => {
+                    const generator = document.getElementById('generator')
+                    if (generator) {
+                      generator.scrollIntoView({ behavior: 'smooth' })
+                    } else {
+                      window.location.href = `/${locale}#generator`
+                    }
+                  }}
+                >
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  Create Podcast Cover
+                </Button>
+              </div>
+              
+              {/* Trust Indicators */}
+              <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-purple-600">3000x3000</div>
+                  <div className="text-sm text-gray-600">Perfect Size</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-purple-600">HD</div>
+                  <div className="text-sm text-gray-600">High Quality</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-purple-600">Free</div>
+                  <div className="text-sm text-gray-600">No Watermark</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-purple-600">AI</div>
+                  <div className="text-sm text-gray-600">Smart Design</div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Main Content */}
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            {/* Tool Section */}
-            <div id="tool" className="bg-white rounded-2xl shadow-xl p-8 mb-16">
-              <h2 className="text-2xl font-bold mb-6">Design Your Podcast Cover</h2>
-              
-              {/* Genre Selector */}
-              <div className="mb-8">
-                <label className="block text-sm font-medium mb-3">Select Your Podcast Genre</label>
-                <div className="grid md:grid-cols-3 gap-4">
-                  {podcastGenres.slice(0, 6).map((genre) => (
-                    <button
-                      key={genre.id}
-                      onClick={() => setSelectedGenre(genre.id)}
-                      className={`p-4 rounded-lg border-2 transition-all ${
-                        selectedGenre === genre.id
-                          ? 'border-purple-600 bg-purple-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600">
-                          {genre.icon}
-                        </div>
-                        <h3 className="font-semibold">{genre.name}</h3>
-                      </div>
-                      <p className="text-xs text-gray-600 text-left">{genre.style}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
+        {/* Tool Component */}
+        <section className="py-12" id="generator">
+          <div className="container mx-auto px-4">
+            <PodcastCoverMakerTool />
+          </div>
+        </section>
 
-              <GenerationForm 
-                mode="podcast-cover"
-                platform="podcast"
-                aspectRatio="3000x3000"
-                translations={translations}
-              />
-            </div>
-
-            {/* Features Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-              {features.map((feature, index) => (
-                <div key={index} className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center text-white mb-4">
-                    {feature.icon}
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.description}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Platform Specifications */}
-            <div className="bg-gray-50 rounded-2xl p-12 mb-16">
-              <h2 className="text-3xl font-bold text-center mb-12">
-                Platform Requirements Met Automatically
+        {/* Features Section */}
+        <section className="py-20">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">
+                Podcast Marketing Features
               </h2>
-              
-              <div className="overflow-x-auto">
-                <table className="w-full bg-white rounded-lg overflow-hidden">
-                  <thead className="bg-purple-600 text-white">
-                    <tr>
-                      <th className="px-6 py-4 text-left">Platform</th>
-                      <th className="px-6 py-4 text-left">Size</th>
-                      <th className="px-6 py-4 text-left">Format</th>
-                      <th className="px-6 py-4 text-left">Max File Size</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {platformSpecs.map((spec, index) => (
-                      <tr key={index} className="border-b border-gray-100">
-                        <td className="px-6 py-4 font-medium">{spec.platform}</td>
-                        <td className="px-6 py-4">{spec.size}</td>
-                        <td className="px-6 py-4">{spec.format}</td>
-                        <td className="px-6 py-4">{spec.maxSize}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              
-              <p className="text-center mt-6 text-gray-600">
-                Our AI automatically optimizes your cover to meet all platform specifications
+              <p className="text-lg text-gray-600">
+                Everything you need to create podcast covers that attract listeners
               </p>
             </div>
-
-            {/* Best Practices */}
-            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-12 mb-16">
-              <h2 className="text-3xl font-bold text-center mb-12">
-                Podcast Cover Best Practices
-              </h2>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                  <Radio className="w-6 h-6 text-purple-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  Platform-Perfect Sizing
+                </h3>
+                <p className="text-gray-600">
+                  Automatic 3000x3000 pixels for Apple Podcasts, Spotify, and all major platforms
+                </p>
+              </div>
               
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="bg-white rounded-xl p-8">
-                  <h3 className="text-xl font-semibold mb-4 text-purple-600">Design Tips</h3>
-                  <ul className="space-y-3">
-                    <li className="flex items-start gap-2">
-                      <span className="text-purple-600 mt-1">•</span>
-                      <span>Use bold, readable text - covers appear small on devices</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-purple-600 mt-1">•</span>
-                      <span>Include your podcast name prominently</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-purple-600 mt-1">•</span>
-                      <span>Avoid too much detail - simplicity wins</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-purple-600 mt-1">•</span>
-                      <span>Use consistent branding across episodes</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-purple-600 mt-1">•</span>
-                      <span>Test visibility at thumbnail size</span>
-                    </li>
-                  </ul>
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center mb-4">
+                  <Mic className="w-6 h-6 text-pink-600" />
                 </div>
-                
-                <div className="bg-white rounded-xl p-8">
-                  <h3 className="text-xl font-semibold mb-4 text-pink-600">Technical Requirements</h3>
-                  <ul className="space-y-3">
-                    <li className="flex items-start gap-2">
-                      <span className="text-pink-600 mt-1">✓</span>
-                      <span>Minimum 1400x1400, recommended 3000x3000</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-pink-600 mt-1">✓</span>
-                      <span>RGB color mode (not CMYK)</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-pink-600 mt-1">✓</span>
-                      <span>72 DPI resolution minimum</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-pink-600 mt-1">✓</span>
-                      <span>Square format (1:1 ratio)</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-pink-600 mt-1">✓</span>
-                      <span>No explicit content or misleading imagery</span>
-                    </li>
-                  </ul>
+                <h3 className="text-lg font-semibold mb-2">
+                  Genre-Specific Design
+                </h3>
+                <p className="text-gray-600">
+                  AI understands podcast genres and creates designs that resonate with your audience
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                  <Palette className="w-6 h-6 text-green-600" />
                 </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  Brand Consistency
+                </h3>
+                <p className="text-gray-600">
+                  Maintain visual identity across episodes with consistent styling options
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
+                  <Headphones className="w-6 h-6 text-orange-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  Audience Targeting
+                </h3>
+                <p className="text-gray-600">
+                  Designs optimized to attract your specific podcast audience demographic
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
+                  <Download className="w-6 h-6 text-red-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  High Resolution Export
+                </h3>
+                <p className="text-gray-600">
+                  Crystal clear quality that meets all platform specifications and requirements
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
+                  <Shield className="w-6 h-6 text-indigo-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  Platform Compliance
+                </h3>
+                <p className="text-gray-600">
+                  Automatically follows all major platform guidelines and content policies
+                </p>
               </div>
             </div>
+          </div>
+        </section>
 
-            {/* Success Stories */}
-            <div className="bg-gray-900 text-white rounded-2xl p-12 mb-16">
-              <h2 className="text-3xl font-bold text-center mb-12">
-                Why Professional Podcast Covers Matter
+        {/* Popular Podcast Types */}
+        <section className="py-20 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">
+                Popular Podcast Cover Styles
               </h2>
+              <p className="text-lg text-gray-600">
+                Get inspired by these trending podcast categories
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">💼</div>
+                <h3 className="font-semibold mb-2">Business & Finance</h3>
+                <p className="text-sm text-gray-600">Professional, trustworthy, corporate</p>
+              </div>
               
-              <div className="max-w-3xl mx-auto space-y-6 text-gray-300">
-                <p>
-                  Your podcast cover is often the first impression potential listeners get. Studies show that 
-                  podcasts with professional covers get <span className="text-purple-400 font-semibold">47% more downloads</span> in 
-                  their first month compared to those with amateur designs.
-                </p>
-                
-                <p>
-                  Apple Podcasts and Spotify both use visual appeal as a ranking factor. A well-designed cover 
-                  can improve your <span className="text-pink-400 font-semibold">discoverability by up to 30%</span>.
-                </p>
-                
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mt-8">
-                  <h3 className="text-xl font-semibold mb-4">Platform Algorithm Tips</h3>
-                  <ul className="space-y-2">
-                    <li>• High contrast covers perform better in search results</li>
-                    <li>• Clear, readable text improves click-through rates</li>
-                    <li>• Consistent branding builds listener trust</li>
-                    <li>• Genre-appropriate design attracts target audience</li>
-                  </ul>
-                </div>
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">🎭</div>
+                <h3 className="font-semibold mb-2">True Crime</h3>
+                <p className="text-sm text-gray-600">Dark, mysterious, compelling</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">😄</div>
+                <h3 className="font-semibold mb-2">Comedy</h3>
+                <p className="text-sm text-gray-600">Bright, fun, energetic</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">📚</div>
+                <h3 className="font-semibold mb-2">Education</h3>
+                <p className="text-sm text-gray-600">Clear, informative, academic</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">💚</div>
+                <h3 className="font-semibold mb-2">Health & Wellness</h3>
+                <p className="text-sm text-gray-600">Calming, natural, inspiring</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">🚀</div>
+                <h3 className="font-semibold mb-2">Technology</h3>
+                <p className="text-sm text-gray-600">Modern, sleek, futuristic</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">🎵</div>
+                <h3 className="font-semibold mb-2">Music & Arts</h3>
+                <p className="text-sm text-gray-600">Creative, vibrant, artistic</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">🏈</div>
+                <h3 className="font-semibold mb-2">Sports</h3>
+                <p className="text-sm text-gray-600">Dynamic, competitive, bold</p>
               </div>
             </div>
+          </div>
+        </section>
 
-            {/* FAQ Section */}
-            <div className="bg-white rounded-2xl shadow-xl p-12">
-              <h2 className="text-3xl font-bold mb-8">Frequently Asked Questions</h2>
+
+
+        {/* CTA Section */}
+        <section className="py-20 bg-gradient-to-r from-purple-600 to-purple-700">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl font-bold text-white mb-4">
+              Ready to Launch Your Podcast with Style?
+            </h2>
+            <p className="text-xl text-white/90 mb-8">
+              Create professional podcast covers in seconds
+            </p>
+            <Button 
+              size="lg" 
+              className="bg-white text-purple-600 hover:bg-gray-100"
+              onClick={() => {
+                const generator = document.getElementById('generator')
+                if (generator) {
+                  generator.scrollIntoView({ behavior: 'smooth' })
+                } else {
+                  window.location.href = `/${locale}#generator`
+                }
+              }}
+            >
+              <Sparkles className="w-5 h-5 mr-2" />
+              Start Creating Now
+            </Button>
+          </div>
+        </section>
+
+        {/* SEO Content Section */}
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
+              <h2 className="text-3xl font-bold mb-6 text-center">The Ultimate Podcast Cover Maker</h2>
+              <p>
+                Creating a professional podcast cover is crucial for success in the competitive podcasting 
+                landscape. Your cover art is often the first thing potential listeners see when browsing 
+                podcast directories, and it can make or break their decision to hit play. Our AI-powered 
+                podcast cover maker helps you design stunning, platform-compliant artwork that attracts 
+                listeners and grows your audience.
+              </p>
+              
+              <h3>Why Podcast Cover Art Matters</h3>
+              <p>
+                In podcast directories filled with thousands of shows, your cover art serves as your primary 
+                marketing tool. A compelling podcast cover can:
+              </p>
+              <ul>
+                <li>Increase discovery rates in podcast app searches</li>
+                <li>Communicate your podcast's genre and tone instantly</li>
+                <li>Build credibility and professionalism</li>
+                <li>Improve click-through rates by up to 47%</li>
+                <li>Create memorable brand recognition</li>
+              </ul>
+              
+              <h3>Perfect Podcast Cover Dimensions</h3>
+              <p>
+                All major podcast platforms require square artwork with specific dimensions. Apple Podcasts 
+                mandates a minimum of 1400x1400 pixels, but we recommend 3000x3000 pixels for optimal 
+                quality across all platforms. Our tool automatically generates covers at this perfect size, 
+                ensuring your artwork looks crisp on every device from smartphones to high-resolution displays.
+              </p>
+              
+              <h3>Genre-Specific Design Intelligence</h3>
+              <p>
+                Different podcast genres attract different audiences with distinct visual preferences. A true 
+                crime podcast needs dark, mysterious aesthetics, while a comedy show benefits from bright, 
+                playful designs. Our AI understands these nuances and creates covers that resonate with your 
+                target listeners, increasing the likelihood they'll give your show a chance.
+              </p>
+              
+              <h3>Platform Compliance Guaranteed</h3>
+              <p>
+                Each podcast platform has specific requirements beyond dimensions. Apple Podcasts prohibits 
+                explicit imagery, requires readable text at small sizes, and favors high contrast designs. 
+                Spotify has similar guidelines with additional considerations for mobile display. Our tool 
+                ensures your cover meets all platform requirements automatically, preventing rejection and 
+                maximizing visibility.
+              </p>
+              
+              <h3>Free Professional Design Tool</h3>
+              <p>
+                Unlike expensive design software or hiring graphic designers, our podcast cover maker is 
+                completely free. Create unlimited professional covers without watermarks, subscriptions, or 
+                hidden fees. Whether you're launching your first podcast or refreshing an established show's 
+                branding, professional cover art should be accessible to every podcaster.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section className="py-16 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-3xl font-bold text-center mb-12">
+                Frequently Asked Questions
+              </h2>
               
               <div className="space-y-6">
-                <div>
-                  <h3 className="text-xl font-semibold mb-2">What size should my podcast cover be?</h3>
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 className="text-lg font-semibold mb-2">
+                    What size should my podcast cover be?
+                  </h3>
                   <p className="text-gray-600">
-                    The recommended size is 3000x3000 pixels. This meets all platform requirements and ensures 
-                    your cover looks crisp on all devices. Our tool automatically creates this size.
+                    The recommended size is 3000x3000 pixels. This exceeds all platform requirements and 
+                    ensures your cover looks sharp on every device. Our tool automatically creates covers 
+                    at this optimal size.
                   </p>
                 </div>
                 
-                <div>
-                  <h3 className="text-xl font-semibold mb-2">Can I use the same cover for all platforms?</h3>
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 className="text-lg font-semibold mb-2">
+                    Can I use the same cover for all podcast platforms?
+                  </h3>
                   <p className="text-gray-600">
-                    Yes! A 3000x3000 JPG or PNG works for Apple Podcasts, Spotify, Google Podcasts, and all 
-                    other major platforms. We ensure your cover meets all specifications.
+                    Yes! A 3000x3000 pixel JPG or PNG works perfectly for Apple Podcasts, Spotify, Google 
+                    Podcasts, and all other major platforms. We ensure your cover meets universal standards 
+                    so you only need one version.
                   </p>
                 </div>
                 
-                <div>
-                  <h3 className="text-xl font-semibold mb-2">How often should I update my podcast cover?</h3>
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 className="text-lg font-semibold mb-2">
+                    How do I make my podcast cover stand out?
+                  </h3>
                   <p className="text-gray-600">
-                    Your main podcast cover should stay consistent for branding. However, you can create 
-                    special covers for seasons, series, or special episodes.
+                    Use bold, readable text for your podcast name, choose colors that contrast well, keep 
+                    the design simple but eye-catching, and ensure it looks good at small thumbnail sizes. 
+                    Our AI automatically optimizes for these factors.
                   </p>
                 </div>
                 
-                <div>
-                  <h3 className="text-xl font-semibold mb-2">What makes a good podcast cover?</h3>
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 className="text-lg font-semibold mb-2">
+                    Should I update my podcast cover design?
+                  </h3>
                   <p className="text-gray-600">
-                    Clear, readable text (especially the podcast name), simple but eye-catching design, 
-                    appropriate colors for your genre, and professional quality that builds trust.
+                    Your main podcast cover should remain consistent for brand recognition. However, you can 
+                    create special covers for seasons, limited series, or special episodes while maintaining 
+                    your core visual identity.
+                  </p>
+                </div>
+                
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 className="text-lg font-semibold mb-2">
+                    What file format should I use for my podcast cover?
+                  </h3>
+                  <p className="text-gray-600">
+                    Most platforms accept both JPG and PNG formats. JPG is recommended for photographic 
+                    images and complex artwork, while PNG is better for designs with text and solid colors. 
+                    Our tool exports in both formats.
                   </p>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="bg-gradient-to-br from-purple-600 to-pink-600 py-16">
-        <div className="container mx-auto px-4 text-center text-white">
-          <h2 className="text-3xl font-bold mb-4">
-            Ready to Launch Your Podcast with Style?
-          </h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Create a professional podcast cover that attracts listeners and meets all platform requirements.
-          </p>
-          <Button size="lg" className="bg-white text-purple-600 hover:bg-gray-100">
-            <Mic className="w-5 h-5 mr-2" />
-            Create Podcast Cover
-          </Button>
-        </div>
-      </section>
-    </div>
+        </section>
+      </main>
+    </>
   )
 }

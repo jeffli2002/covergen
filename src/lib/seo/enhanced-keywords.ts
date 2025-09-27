@@ -30,8 +30,6 @@ export const TRENDING_KEYWORDS: KeywordData[] = [
   // AI-Powered Rising Stars (KD 15-25)
   { keyword: 'machine learning thumbnail tool', searchVolume: 420, kd: 15, trend: '+250%', intent: 'informational' },
   { keyword: 'ai powered poster generator', searchVolume: 890, kd: 17, trend: '+290%', intent: 'commercial' },
-  { keyword: 'ai thumbnail generator free', searchVolume: 210, kd: 21, trend: '+900%', intent: 'commercial' },
-  { keyword: 'youtube thumbnail ideas', searchVolume: 320, kd: 22, trend: '+86%', intent: 'informational' },
   { keyword: 'podcast cover maker', searchVolume: 30, kd: 23, trend: '+133%', intent: 'commercial' },
   { keyword: 'ai album art generator', searchVolume: 210, kd: 24, trend: '+257%', intent: 'commercial' },
   { keyword: 'podcast cover art maker', searchVolume: 40, kd: 25, trend: '+107%', intent: 'informational' },
@@ -128,7 +126,6 @@ export const ENHANCED_PLATFORM_KEYWORDS = createPlatformKeywords({
       { keyword: 'free youtube thumbnail maker', searchVolume: 18100, kd: 20, intent: 'commercial' },
       { keyword: 'youtube thumbnail templates', searchVolume: 14800, kd: 22, intent: 'commercial' },
       { keyword: 'youtube gaming thumbnail maker', searchVolume: 3600, kd: 24, intent: 'commercial' },
-      { keyword: 'youtube thumbnail ideas', searchVolume: 9900, kd: 18, intent: 'informational' },
       // Add more from existing list with estimates...
     ],
     totalKeywords: 55,
@@ -159,7 +156,6 @@ export const ENHANCED_PLATFORM_KEYWORDS = createPlatformKeywords({
       { keyword: 'ai thumbnail maker', searchVolume: 8100, kd: 18, intent: 'commercial' },
       { keyword: 'ai cover generator', searchVolume: 6600, kd: 19, intent: 'commercial' },
       { keyword: 'ai poster maker', searchVolume: 3600, kd: 17, intent: 'commercial' },
-      { keyword: 'ai thumbnail generator free', searchVolume: 2900, kd: 15, intent: 'commercial' },
       { keyword: 'ai powered cover maker', searchVolume: 1900, kd: 16, intent: 'commercial' },
       { keyword: 'ai album cover generator', searchVolume: 4400, kd: 20, intent: 'commercial' },
       { keyword: 'ai book cover generator', searchVolume: 3600, kd: 21, intent: 'commercial' },
@@ -188,7 +184,6 @@ export const ENHANCED_PLATFORM_KEYWORDS = createPlatformKeywords({
       { keyword: 'thumbnail generator api', searchVolume: 20, kd: 15, intent: 'commercial' },
       { keyword: 'ai thumbnail generator free', searchVolume: 210, kd: 21, intent: 'commercial', trend: '+900%' },
       { keyword: 'wedding invitation cover', searchVolume: 70, kd: 21, intent: 'commercial' },
-      { keyword: 'youtube thumbnail ideas', searchVolume: 320, kd: 22, intent: 'informational' },
       { keyword: 'halloween poster creator', searchVolume: 10, kd: 22, intent: 'informational' },
       { keyword: 'instagram grid maker', searchVolume: 2400, kd: 23, intent: 'commercial' },
       { keyword: 'podcast cover maker', searchVolume: 30, kd: 23, intent: 'commercial' },

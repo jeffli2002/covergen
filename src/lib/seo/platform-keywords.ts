@@ -35,7 +35,6 @@ export const PLATFORM_KEYWORDS = {
     'clickbait thumbnail generator',
     'YouTube thumbnail templates',
     'free thumbnail maker',
-    'YouTube thumbnail ideas',
     'YouTube cover design',
     'YouTube banner maker',
     'YouTube channel cover',

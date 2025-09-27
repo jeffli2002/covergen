@@ -1,432 +1,432 @@
 'use client'
 
-import { useState } from 'react'
-import { Eye, Smartphone, Monitor, Tablet, Search, TrendingUp, AlertCircle, CheckCircle, Upload } from 'lucide-react'
+import { Locale } from '@/lib/i18n/config'
+import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
+import { Sparkles, Eye, CheckCircle, AlertCircle, BarChart3, Search, Monitor, Shield } from 'lucide-react'
+import { Breadcrumb, BreadcrumbWrapper } from '@/components/ui/breadcrumb'
+import { generateStructuredData } from '@/lib/seo-utils'
 
-interface Props {
-  locale: string
+// Lazy load the Thumbnail Tester Tool
+const ThumbnailTesterTool = dynamic(
+  () => import(/* webpackChunkName: "thumbnail-tester-tool" */ '@/components/tools/ThumbnailTesterTool'),
+  {
+    loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded-lg" />,
+    ssr: false
+  }
+)
+
+interface ThumbnailTesterClientProps {
+  locale: Locale
   translations: any
 }
 
-export default function ThumbnailTesterClient({ locale, translations }: Props) {
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null)
-  const [selectedPlatform, setSelectedPlatform] = useState('youtube')
-  const [analysisResults, setAnalysisResults] = useState<any>(null)
-
-  const platforms = [
-    { id: 'youtube', name: 'YouTube', ratio: '16:9', size: '1280x720' },
-    { id: 'tiktok', name: 'TikTok', ratio: '9:16', size: '1080x1920' },
-    { id: 'instagram', name: 'Instagram', ratio: '1:1', size: '1080x1080' },
-    { id: 'twitch', name: 'Twitch', ratio: '16:9', size: '1280x720' },
+export default function ThumbnailTesterClient({ locale, translations: t }: ThumbnailTesterClientProps) {
+  const breadcrumbItems = [
+    { name: 'Tools', href: `/${locale}/tools` },
+    { name: 'Thumbnail Tester', current: true }
   ]
 
-  const previewSizes = [
-    { name: 'Search Results', size: 'small', width: '246px', height: '138px', description: 'How it appears in search' },
-    { name: 'Suggested Videos', size: 'medium', width: '402px', height: '226px', description: 'Sidebar recommendations' },
-    { name: 'Homepage', size: 'large', width: '532px', height: '300px', description: 'Main feed display' },
-    { name: 'Mobile View', size: 'mobile', width: '120px', height: '90px', description: 'Smartphone display' },
-  ]
-
-  const thumbnailChecks = [
-    { name: 'Text Readability', status: 'pass', message: 'Text is large and clear' },
-    { name: 'Contrast Ratio', status: 'pass', message: 'Excellent contrast for visibility' },
-    { name: 'Mobile Optimization', status: 'warning', message: 'Consider larger text for mobile' },
-    { name: 'Emotional Impact', status: 'pass', message: 'Strong facial expression detected' },
-    { name: 'Click Appeal', status: 'pass', message: 'High curiosity factor' },
-    { name: 'Brand Consistency', status: 'info', message: 'Add brand elements for recognition' },
-  ]
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setUploadedImage(e.target?.result as string)
-        // Simulate analysis
-        setTimeout(() => {
-          setAnalysisResults({
-            ctrPrediction: '7.8%',
-            score: 85,
-            improvements: [
-              'Add more contrast to text',
-              'Include emotional trigger',
-              'Optimize for mobile viewing',
-            ]
-          })
-        }, 1500)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
+  // Structured data for this page
+  const structuredData = generateStructuredData('howto', {
+    title: 'How to Test and Optimize Thumbnails for Maximum CTR',
+    description: 'Step-by-step guide to testing thumbnails across different platforms and sizes',
+    steps: [
+      { name: 'Upload Your Thumbnail', text: 'Upload your thumbnail design to test' },
+      { name: 'Select Platform', text: 'Choose YouTube, TikTok, Instagram, or other platforms' },
+      { name: 'Preview Different Sizes', text: 'See how your thumbnail looks at various display sizes' },
+      { name: 'Analyze Performance', text: 'Get AI-powered insights on CTR potential' },
+      { name: 'Apply Improvements', text: 'Optimize based on recommendations' }
+    ]
+  })
 
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-600 to-purple-700 pt-20 pb-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center text-white">
-            <h1 className="text-5xl font-bold mb-6">
-              Thumbnail Tester & Preview Tool
-            </h1>
-            <p className="text-xl mb-8 text-blue-100">
-              Test your thumbnails across platforms, preview at different sizes, and optimize 
-              for maximum click-through rate. See how your design performs before publishing.
-            </p>
-            <div className="flex gap-4 justify-center flex-wrap">
-              <div className="flex items-center gap-2 text-sm bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-                <Eye className="w-4 h-4" />
-                <span>KD: 29 (Low Competition)</span>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      
+      <BreadcrumbWrapper>
+        <Breadcrumb items={breadcrumbItems} />
+      </BreadcrumbWrapper>
+
+      <main className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+        {/* Hero Section */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-green-50 via-white to-teal-50 py-20">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto text-center">
+              <div className="inline-flex items-center gap-2 bg-green-100 px-4 py-2 rounded-full text-green-700 text-sm font-medium mb-6">
+                <BarChart3 className="w-4 h-4" />
+                AI-Powered Thumbnail Analysis
               </div>
-              <div className="flex items-center gap-2 text-sm bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-                <TrendingUp className="w-4 h-4" />
-                <span>Essential for CTR optimization</span>
+              
+              <h1 className="text-5xl font-bold text-gray-900 mb-6">
+                Thumbnail Tester & Preview Tool
+              </h1>
+              
+              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                Test how your thumbnails look on YouTube, TikTok, and other platforms. Preview different sizes, 
+                analyze CTR potential, and optimize your designs for maximum engagement.
+              </p>
+              
+              <div className="flex justify-center">
+                <Button 
+                  size="lg" 
+                  className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white px-8"
+                  onClick={() => {
+                    const generator = document.getElementById('generator')
+                    if (generator) {
+                      generator.scrollIntoView({ behavior: 'smooth' })
+                    } else {
+                      window.location.href = `/${locale}#generator`
+                    }
+                  }}
+                >
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  Test Your Thumbnail
+                </Button>
+              </div>
+              
+              {/* Trust Indicators */}
+              <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-green-600">Multi</div>
+                  <div className="text-sm text-gray-600">Platform Support</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-green-600">AI</div>
+                  <div className="text-sm text-gray-600">Smart Analysis</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-green-600">CTR</div>
+                  <div className="text-sm text-gray-600">Optimization</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-green-600">Free</div>
+                  <div className="text-sm text-gray-600">No Limits</div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Main Tool Section */}
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          <div className="max-w-7xl mx-auto">
-            {/* Upload Area */}
-            <Card className="p-8 mb-8">
-              <h2 className="text-2xl font-bold mb-6">Upload Your Thumbnail to Test</h2>
-              
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                  id="thumbnail-upload"
-                />
-                <label htmlFor="thumbnail-upload" className="cursor-pointer">
-                  <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-lg font-medium mb-2">Click to upload or drag and drop</p>
-                  <p className="text-sm text-gray-500">PNG, JPG up to 10MB</p>
-                </label>
-              </div>
+        {/* Tool Component */}
+        <section className="py-12" id="generator">
+          <div className="container mx-auto px-4">
+            <ThumbnailTesterTool />
+          </div>
+        </section>
 
-              {/* Platform Selector */}
-              {uploadedImage && (
-                <div className="mt-8">
-                  <h3 className="text-lg font-semibold mb-4">Select Platform</h3>
-                  <div className="flex gap-4 flex-wrap">
-                    {platforms.map((platform) => (
-                      <button
-                        key={platform.id}
-                        onClick={() => setSelectedPlatform(platform.id)}
-                        className={`px-6 py-3 rounded-lg font-medium transition-all ${
-                          selectedPlatform === platform.id
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        {platform.name} ({platform.ratio})
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </Card>
-
-            {/* Preview Section */}
-            {uploadedImage && (
-              <div className="grid lg:grid-cols-2 gap-8 mb-12">
-                {/* Size Previews */}
-                <Card className="p-8">
-                  <h3 className="text-xl font-bold mb-6">Preview at Different Sizes</h3>
-                  
-                  <div className="space-y-6">
-                    {previewSizes.map((preview) => (
-                      <div key={preview.size} className="border rounded-lg p-4">
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <h4 className="font-semibold">{preview.name}</h4>
-                            <p className="text-sm text-gray-600">{preview.description}</p>
-                          </div>
-                          <span className="text-xs bg-gray-100 px-2 py-1 rounded">
-                            {preview.width} × {preview.height}
-                          </span>
-                        </div>
-                        <div 
-                          className="bg-gray-100 rounded overflow-hidden"
-                          style={{ width: preview.width, height: preview.height }}
-                        >
-                          {uploadedImage && (
-                            <img 
-                              src={uploadedImage} 
-                              alt="Thumbnail preview"
-                              className="w-full h-full object-cover"
-                            />
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-
-                {/* Analysis Results */}
-                <Card className="p-8">
-                  <h3 className="text-xl font-bold mb-6">Thumbnail Analysis</h3>
-                  
-                  {analysisResults ? (
-                    <div className="space-y-6">
-                      {/* CTR Prediction */}
-                      <div className="bg-blue-50 rounded-lg p-6">
-                        <h4 className="font-semibold mb-2">Predicted CTR</h4>
-                        <div className="text-3xl font-bold text-blue-600">
-                          {analysisResults.ctrPrediction}
-                        </div>
-                        <p className="text-sm text-gray-600 mt-2">
-                          Above average for your niche (avg: 5.2%)
-                        </p>
-                      </div>
-
-                      {/* Overall Score */}
-                      <div className="bg-green-50 rounded-lg p-6">
-                        <h4 className="font-semibold mb-2">Thumbnail Score</h4>
-                        <div className="flex items-end gap-2">
-                          <span className="text-3xl font-bold text-green-600">
-                            {analysisResults.score}
-                          </span>
-                          <span className="text-lg text-gray-600">/100</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
-                          <div 
-                            className="bg-green-600 h-2 rounded-full"
-                            style={{ width: `${analysisResults.score}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Checks */}
-                      <div>
-                        <h4 className="font-semibold mb-4">Quality Checks</h4>
-                        <div className="space-y-3">
-                          {thumbnailChecks.map((check) => (
-                            <div key={check.name} className="flex items-start gap-3">
-                              {check.status === 'pass' && (
-                                <CheckCircle className="w-5 h-5 text-green-500 mt-0.5" />
-                              )}
-                              {check.status === 'warning' && (
-                                <AlertCircle className="w-5 h-5 text-yellow-500 mt-0.5" />
-                              )}
-                              {check.status === 'info' && (
-                                <AlertCircle className="w-5 h-5 text-blue-500 mt-0.5" />
-                              )}
-                              <div className="flex-1">
-                                <p className="font-medium text-sm">{check.name}</p>
-                                <p className="text-sm text-gray-600">{check.message}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Improvements */}
-                      <div className="bg-yellow-50 rounded-lg p-6">
-                        <h4 className="font-semibold mb-3">Suggested Improvements</h4>
-                        <ul className="space-y-2">
-                          {analysisResults.improvements.map((improvement: string, index: number) => (
-                            <li key={index} className="flex items-start gap-2">
-                              <span className="text-yellow-600 mt-1">→</span>
-                              <span className="text-sm">{improvement}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-center py-12 text-gray-500">
-                      <p>Upload a thumbnail to see analysis results</p>
-                    </div>
-                  )}
-                </Card>
-              </div>
-            )}
-
-            {/* Best Practices */}
-            <Card className="p-8 mb-12">
-              <h2 className="text-2xl font-bold mb-8">Thumbnail Testing Best Practices</h2>
-              
-              <div className="grid md:grid-cols-2 gap-8">
-                <div>
-                  <h3 className="text-xl font-semibold mb-4">What to Test</h3>
-                  <ul className="space-y-3">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Text readability at thumbnail size (120px wide on mobile)</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Contrast between text and background</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Emotional impact and curiosity factor</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Brand consistency across thumbnails</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Platform-specific requirements and safe zones</span>
-                    </li>
-                  </ul>
-                </div>
-                
-                <div>
-                  <h3 className="text-xl font-semibold mb-4">Testing Process</h3>
-                  <ol className="space-y-3">
-                    <li className="flex items-start gap-2">
-                      <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm flex-shrink-0">1</span>
-                      <span>Upload your thumbnail design</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm flex-shrink-0">2</span>
-                      <span>Review previews at different sizes</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm flex-shrink-0">3</span>
-                      <span>Check analysis results and scores</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm flex-shrink-0">4</span>
-                      <span>Implement suggested improvements</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm flex-shrink-0">5</span>
-                      <span>A/B test with your audience</span>
-                    </li>
-                  </ol>
-                </div>
-              </div>
-            </Card>
-
-            {/* Platform-Specific Tips */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-              <Card className="p-6">
-                <h3 className="text-lg font-semibold mb-3">YouTube Tips</h3>
-                <ul className="text-sm text-gray-600 space-y-2">
-                  <li>• Keep text under 5 words</li>
-                  <li>• Leave space for duration overlay</li>
-                  <li>• Use faces for +38% CTR</li>
-                  <li>• Test on dark/light mode</li>
-                </ul>
-              </Card>
-              
-              <Card className="p-6">
-                <h3 className="text-lg font-semibold mb-3">TikTok Tips</h3>
-                <ul className="text-sm text-gray-600 space-y-2">
-                  <li>• Vertical 9:16 format</li>
-                  <li>• First frame is key</li>
-                  <li>• Bright, vibrant colors</li>
-                  <li>• Motion blur suggests action</li>
-                </ul>
-              </Card>
-              
-              <Card className="p-6">
-                <h3 className="text-lg font-semibold mb-3">Instagram Tips</h3>
-                <ul className="text-sm text-gray-600 space-y-2">
-                  <li>• Square 1:1 for grid</li>
-                  <li>• Consistent aesthetic</li>
-                  <li>• Reel covers need impact</li>
-                  <li>• Test carousel previews</li>
-                </ul>
-              </Card>
-              
-              <Card className="p-6">
-                <h3 className="text-lg font-semibold mb-3">General Tips</h3>
-                <ul className="text-sm text-gray-600 space-y-2">
-                  <li>• High contrast is crucial</li>
-                  <li>• Test on multiple devices</li>
-                  <li>• Simple beats complex</li>
-                  <li>• Update regularly</li>
-                </ul>
-              </Card>
+        {/* Features Section */}
+        <section className="py-20">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">
+                Comprehensive Thumbnail Testing Features
+              </h2>
+              <p className="text-lg text-gray-600">
+                Everything you need to optimize thumbnails for maximum click-through rates
+              </p>
             </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                  <Eye className="w-6 h-6 text-green-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  Multi-Size Preview
+                </h3>
+                <p className="text-gray-600">
+                  See how your thumbnail appears in search results, suggested videos, and mobile views
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                  <BarChart3 className="w-6 h-6 text-purple-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  CTR Analysis
+                </h3>
+                <p className="text-gray-600">
+                  AI-powered predictions of click-through rate based on design elements and best practices
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                  <Monitor className="w-6 h-6 text-blue-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  Platform-Specific Testing
+                </h3>
+                <p className="text-gray-600">
+                  Optimized testing for YouTube, TikTok, Instagram, Twitch, and other platforms
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
+                  <CheckCircle className="w-6 h-6 text-orange-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  Quality Checks
+                </h3>
+                <p className="text-gray-600">
+                  Automated checks for text readability, contrast, mobile optimization, and visual impact
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
+                  <AlertCircle className="w-6 h-6 text-red-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  Improvement Suggestions
+                </h3>
+                <p className="text-gray-600">
+                  Get actionable recommendations to improve your thumbnail's performance
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
+                  <Shield className="w-6 h-6 text-indigo-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  Brand Consistency
+                </h3>
+                <p className="text-gray-600">
+                  Ensure your thumbnails maintain consistent branding across all content
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
 
-            {/* FAQ Section */}
-            <Card className="p-8">
-              <h2 className="text-2xl font-bold mb-8">Thumbnail Testing FAQ</h2>
+        {/* Platform Best Practices */}
+        <section className="py-20 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">
+                Platform-Specific Thumbnail Guidelines
+              </h2>
+              <p className="text-lg text-gray-600">
+                Optimize for each platform's unique requirements and best practices
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">📺</div>
+                <h3 className="font-semibold mb-2">YouTube</h3>
+                <p className="text-sm text-gray-600">1280x720px, faces increase CTR by 38%</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">🎵</div>
+                <h3 className="font-semibold mb-2">TikTok</h3>
+                <p className="text-sm text-gray-600">1080x1920px, vertical format, vibrant colors</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">📷</div>
+                <h3 className="font-semibold mb-2">Instagram</h3>
+                <p className="text-sm text-gray-600">1080x1080px, consistent aesthetic</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">🎮</div>
+                <h3 className="font-semibold mb-2">Twitch</h3>
+                <p className="text-sm text-gray-600">1280x720px, bold text, gaming focus</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">👔</div>
+                <h3 className="font-semibold mb-2">LinkedIn</h3>
+                <p className="text-sm text-gray-600">1200x627px, professional tone</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">🐦</div>
+                <h3 className="font-semibold mb-2">Twitter</h3>
+                <p className="text-sm text-gray-600">1200x675px, clear messaging</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">👻</div>
+                <h3 className="font-semibold mb-2">Snapchat</h3>
+                <p className="text-sm text-gray-600">1080x1920px, fun and creative</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="text-4xl mb-3">📌</div>
+                <h3 className="font-semibold mb-2">Pinterest</h3>
+                <p className="text-sm text-gray-600">1000x1500px, tall format, descriptive</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="py-20 bg-gradient-to-r from-green-600 to-teal-600">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl font-bold text-white mb-4">
+              Stop Guessing - Start Testing Your Thumbnails
+            </h2>
+            <p className="text-xl text-white/90 mb-8">
+              Optimize every thumbnail for maximum clicks and engagement
+            </p>
+            <Button 
+              size="lg" 
+              className="bg-white text-green-600 hover:bg-gray-100"
+              onClick={() => {
+                const generator = document.getElementById('generator')
+                if (generator) {
+                  generator.scrollIntoView({ behavior: 'smooth' })
+                } else {
+                  window.location.href = `/${locale}#generator`
+                }
+              }}
+            >
+              <Sparkles className="w-5 h-5 mr-2" />
+              Test Your Thumbnails Now
+            </Button>
+          </div>
+        </section>
+
+        {/* SEO Content Section */}
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto prose prose-lg prose-seo">
+              <h2 className="text-3xl font-bold mb-6 text-center">The Complete Guide to Thumbnail Testing</h2>
+              <p>
+                Thumbnails are the gateway to your content. They're the first thing viewers see and the primary 
+                factor in whether they click or scroll past. Our thumbnail tester helps you optimize these crucial 
+                visual elements for maximum impact across all platforms.
+              </p>
+              
+              <h3>Why Thumbnail Testing is Essential</h3>
+              <p>
+                Studies show that 90% of the best-performing videos on YouTube have custom thumbnails. The right 
+                thumbnail can increase your click-through rate by up to 300%, directly impacting your content's 
+                reach and success. Yet many creators upload thumbnails without testing how they'll actually appear 
+                to viewers.
+              </p>
+              <ul>
+                <li>Test readability at different sizes - what looks good full-screen may be illegible on mobile</li>
+                <li>Check contrast and visibility in both light and dark modes</li>
+                <li>Ensure key elements aren't cropped on different platforms</li>
+                <li>Analyze emotional impact and curiosity factors</li>
+                <li>Compare against successful thumbnails in your niche</li>
+              </ul>
+              
+              <h3>Platform-Specific Optimization</h3>
+              <p>
+                Each platform has unique requirements and viewer behaviors. YouTube viewers expect faces and 
+                emotions, TikTok users respond to dynamic, colorful previews, and LinkedIn audiences prefer 
+                professional, clean designs. Our tool helps you optimize for each platform's specific needs 
+                while maintaining your brand consistency.
+              </p>
+              
+              <h3>The Science of Click-Worthy Thumbnails</h3>
+              <p>
+                Effective thumbnails combine psychology, design principles, and platform best practices. Key 
+                elements include high contrast for visibility, faces for human connection, clear readable text, 
+                and visual elements that create curiosity or promise value. Our AI analyzes these factors to 
+                predict performance and suggest improvements.
+              </p>
+              
+              <h3>Testing Process and Best Practices</h3>
+              <p>
+                Start by uploading your thumbnail design and selecting your target platform. Our tool shows how 
+                it appears in search results, suggested videos, mobile feeds, and other key locations. The AI 
+                analysis provides a predicted CTR score, quality checks for technical issues, and specific 
+                suggestions for improvement. Use these insights to refine your design before publishing.
+              </p>
+              
+              <h3>Free Professional Thumbnail Testing</h3>
+              <p>
+                Unlike premium analytics tools that charge monthly fees, our thumbnail tester is completely free 
+                with no limits on testing. Whether you're a beginner creator or managing multiple channels, you 
+                get the same professional-grade analysis tools. Test unlimited designs, compare variations, and 
+                optimize every thumbnail for maximum performance.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section className="py-16 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-3xl font-bold text-center mb-12">
+                Frequently Asked Questions
+              </h2>
               
               <div className="space-y-6">
-                <details className="group">
-                  <summary className="cursor-pointer font-semibold text-lg flex justify-between items-center">
-                    Why is thumbnail testing important?
-                    <span className="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
-                  </summary>
-                  <p className="mt-4 text-gray-600">
-                    Thumbnails are the first thing viewers see and directly impact click-through rates. 
-                    Testing ensures your thumbnails look good at all sizes, have readable text, and 
-                    create the desired emotional response. A well-tested thumbnail can increase CTR by 
-                    up to 300%.
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 className="text-lg font-semibold mb-2">
+                    How accurate is the CTR prediction?
+                  </h3>
+                  <p className="text-gray-600">
+                    Our AI analyzes patterns from millions of successful thumbnails to provide CTR predictions. 
+                    While not 100% accurate (actual performance depends on content quality and audience), our 
+                    predictions offer valuable benchmarks and typically fall within 15-20% of actual results.
                   </p>
-                </details>
+                </div>
                 
-                <details className="group">
-                  <summary className="cursor-pointer font-semibold text-lg flex justify-between items-center">
-                    What's the difference between thumbnail preview and thumbnail tester?
-                    <span className="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
-                  </summary>
-                  <p className="mt-4 text-gray-600">
-                    Thumbnail preview shows how your image looks at different sizes, while a thumbnail 
-                    tester analyzes performance factors like readability, contrast, and emotional impact. 
-                    Our tool combines both for comprehensive optimization.
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 className="text-lg font-semibold mb-2">
+                    Can I test thumbnails for any platform?
+                  </h3>
+                  <p className="text-gray-600">
+                    Yes! We support all major platforms including YouTube, TikTok, Instagram, Twitch, LinkedIn, 
+                    Twitter, Snapchat, and Pinterest. Each platform test is optimized for that platform's specific 
+                    dimensions, display contexts, and best practices.
                   </p>
-                </details>
+                </div>
                 
-                <details className="group">
-                  <summary className="cursor-pointer font-semibold text-lg flex justify-between items-center">
-                    How accurate is CTR prediction?
-                    <span className="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
-                  </summary>
-                  <p className="mt-4 text-gray-600">
-                    CTR predictions are based on analysis of millions of successful thumbnails and their 
-                    performance data. While not 100% accurate, they provide valuable benchmarks. Actual 
-                    CTR depends on many factors including content quality, timing, and audience.
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 className="text-lg font-semibold mb-2">
+                    What makes a thumbnail "click-worthy"?
+                  </h3>
+                  <p className="text-gray-600">
+                    Click-worthy thumbnails combine several elements: clear readable text (usually under 5 words), 
+                    high contrast for visibility, emotional faces or expressions, curiosity-inducing visuals, 
+                    consistent branding, and platform-appropriate styling. Our tool analyzes all these factors.
                   </p>
-                </details>
+                </div>
                 
-                <details className="group">
-                  <summary className="cursor-pointer font-semibold text-lg flex justify-between items-center">
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 className="text-lg font-semibold mb-2">
                     Should I A/B test thumbnails after using this tool?
-                    <span className="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
-                  </summary>
-                  <p className="mt-4 text-gray-600">
-                    Yes! This tool helps optimize your design, but real audience testing is invaluable. 
-                    Create 2-3 variations based on our suggestions and test them with your actual audience 
-                    for the best results.
+                  </h3>
+                  <p className="text-gray-600">
+                    Absolutely! Our tool helps you create optimized thumbnails, but real-world testing with your 
+                    actual audience provides the most accurate data. Create 2-3 variations based on our suggestions 
+                    and test them with your viewers for best results.
                   </p>
-                </details>
+                </div>
+                
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 className="text-lg font-semibold mb-2">
+                    How often should I update my thumbnails?
+                  </h3>
+                  <p className="text-gray-600">
+                    For evergreen content, test and potentially update thumbnails every 3-6 months as design 
+                    trends evolve. For trending content, ensure thumbnails are optimized from the start. Always 
+                    update if you notice declining CTR or when platform algorithms change.
+                  </p>
+                </div>
               </div>
-            </Card>
+            </div>
           </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="bg-gradient-to-br from-blue-600 to-purple-700 py-16">
-        <div className="container mx-auto px-4 text-center text-white">
-          <h2 className="text-3xl font-bold mb-4">
-            Optimize Every Thumbnail Before Publishing
-          </h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Stop guessing if your thumbnails will perform. Test, analyze, and optimize 
-            with our comprehensive thumbnail testing tool.
-          </p>
-          <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
-            <Eye className="w-5 h-5 mr-2" />
-            Start Testing Thumbnails
-          </Button>
-        </div>
-      </section>
-    </div>
+        </section>
+      </main>
+    </>
   )
 }

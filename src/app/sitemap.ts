@@ -200,7 +200,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Ultra-low competition keywords (KD < 30) - HIGHEST PRIORITY
     { name: 'instagram-thumbnail-maker', priority: 0.95 }, // KD: 10
     { name: 'linkedin-banner-maker', priority: 0.95 }, // KD: 7
-    { name: 'ai-thumbnail-generator-free', priority: 0.95 }, // KD: 21, +900% growth
     { name: 'youtube-thumbnail-ideas', priority: 0.93 }, // KD: 22
     // Existing tools
     { name: 'anime-poster-maker', priority: 0.8 },
