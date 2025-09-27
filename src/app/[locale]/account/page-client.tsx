@@ -580,8 +580,8 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600">{loadingMessage}</p>
-          <p className="text-sm text-gray-500 mt-2">This should only take a moment...</p>
+          <p className="text-body-md text-gray-600">{loadingMessage}</p>
+          <p className="text-ui-sm text-gray-500 mt-2">This should only take a moment...</p>
         </div>
       </div>
     )
@@ -595,8 +595,8 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
           <Card>
             <CardContent className="p-8 text-center">
               <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-              <h2 className="text-heading-5 mb-2">Unable to Load Account Data</h2>
-              <p className="text-gray-600 mb-4">{loadError}</p>
+              <h2 className="text-heading-4 text-gray-900 mb-2">Unable to Load Account Data</h2>
+              <p className="text-body-md text-gray-600 mb-4">{loadError}</p>
               <div className="flex gap-2 justify-center">
                 <Button 
                   onClick={() => {
@@ -634,7 +634,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
           {/* Account Information */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-heading-5">
                 <User className="w-5 h-5" />
                 Account Information
               </CardTitle>
@@ -643,11 +643,11 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-ui-sm text-gray-700">Email</label>
-                  <p className="text-gray-900 mt-1">{accountData?.user?.email || authUser?.email || 'Not available'}</p>
+                  <p className="text-body-md text-gray-900 mt-1">{accountData?.user?.email || authUser?.email || 'Not available'}</p>
                 </div>
                 <div>
                   <label className="text-ui-sm text-gray-700">User ID</label>
-                  <p className="text-gray-500 text-sm font-mono mt-1">{accountData?.user?.id || authUser?.id || 'Not available'}</p>
+                  <p className="text-ui-sm text-gray-500 font-mono mt-1">{accountData?.user?.id || authUser?.id || 'Not available'}</p>
                 </div>
               </div>
             </CardContent>
@@ -656,7 +656,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
           {/* Current Plan & Subscription */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-heading-5">
                 Current Plan
                 {getPlanIcon(currentPlan)}
               </CardTitle>
@@ -674,7 +674,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                       </Badge>
                     )}
                   </h3>
-                  <p className="text-gray-600 mt-1">
+                  <p className="text-body-md text-gray-600 mt-1">
                     {isTrialing ? (
                       <>Free {trialLimits?.days || 7}-day trial</>
                     ) : currentPlan === 'free' ? (
@@ -701,13 +701,13 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                   <AlertDescription className="text-blue-800">
                     <div className="space-y-2">
                       <p className="text-ui-md">Trial Limits:</p>
-                      <ul className="space-y-1 text-sm">
+                      <ul className="space-y-1 text-ui-sm">
                         <li>• {trialLimits.daily} covers per day</li>
                         <li>• {trialLimits.total} total covers during trial</li>
                         <li>• {trialLimits.days} days trial period</li>
                       </ul>
                       {subscription.trial_ends_at && (
-                        <p className="text-sm mt-2">
+                        <p className="text-ui-sm mt-2">
                           <Clock className="inline w-4 h-4 mr-1" />
                           Trial ends on {formatDateTime(new Date(subscription.trial_ends_at))}
                         </p>
@@ -717,7 +717,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                           ✓ Your subscription will automatically activate when the trial ends
                         </p>
                       ) : (
-                        <p className="text-sm mt-2 text-blue-800">
+                        <p className="text-ui-sm mt-2 text-blue-800">
                           ⚠️ Please add a payment method to continue after trial
                         </p>
                       )}
@@ -728,7 +728,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
 
               {/* Subscription Dates */}
               {subscription && !isTrialing && currentPlan !== 'free' && (
-                <div className="space-y-2 text-sm text-gray-600">
+                <div className="space-y-2 text-ui-sm text-gray-600">
                   {subscription.current_period_end && (
                     <p>
                       <Calendar className="inline w-4 h-4 mr-1" />
@@ -782,7 +782,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                         <Button 
                           variant="outline"
                           onClick={() => router.push(`/${locale}/payment?plan=${currentPlan}&activate=true`)}
-                          className="text-sm"
+                          className="text-ui-sm"
                         >
                           <CreditCard className="mr-2 h-4 w-4" />
                           Add Payment Method
@@ -845,18 +845,18 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
           {/* Usage */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-heading-5">
                 <History className="w-5 h-5" />
                 Usage {usagePeriod}
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-ui-sm text-gray-600">
                 Track your cover generation usage
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <div className="flex justify-between mb-2">
-                  <span className="text-sm text-gray-600">Covers Generated</span>
+                  <span className="text-ui-sm text-gray-600">Covers Generated</span>
                   <span className="text-ui-sm">
                     {currentUsage} / {usageLimit}
                   </span>
@@ -864,7 +864,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                 <Progress value={usagePercentage} className="h-2" />
               </div>
 
-              <p className="text-sm text-gray-600">
+              <p className="text-ui-sm text-gray-600">
                 {usageLimit - currentUsage} credits remaining {usagePeriod.toLowerCase()}
               </p>
 
@@ -882,7 +882,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
           {/* Plan Features */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-heading-5">
                 <Shield className="w-5 h-5" />
                 Plan Features
               </CardTitle>
@@ -892,7 +892,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                 {planDetails?.features.map((feature, index) => (
                   <li key={index} className="flex items-start gap-3">
                     <Shield className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">{feature}</span>
+                    <span className="text-body-md text-gray-700">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -902,7 +902,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
           {/* Account Actions */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-heading-5">
                 <Settings className="w-5 h-5" />
                 Account Actions
               </CardTitle>

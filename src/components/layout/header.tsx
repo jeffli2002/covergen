@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Crown, Sparkles, User, ChevronDown, CreditCard, Loader2, Menu } from 'lucide-react'
+import { Crown, Sparkles, ChevronDown, CreditCard, Loader2, Menu } from 'lucide-react'
 import { useBestAuth } from '@/hooks/useBestAuth'
 import AuthForm from '@/components/auth/AuthForm'
 import UserMenu from '@/components/auth/UserMenu'
@@ -536,12 +536,6 @@ export default function Header({ locale, translations: t }: HeaderProps) {
               <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
             ) : user ? (
               <>
-                {/* User Avatar */}
-                <div className="flex items-center gap-2">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
-                    {user.email.charAt(0).toUpperCase()}
-                  </div>
-                </div>
                 
                 {/* Upgrade/Account button */}
                 {(() => {
@@ -610,15 +604,17 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                   return null
                 })()}
 
-                {/* Account link */}
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                {/* User Avatar - Account link */}
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => router.push(`/${locale}/account`)}
-                  className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                  className="p-1 hover:bg-gray-100 rounded-full"
+                  title="Account"
                 >
-                  <User className="w-4 h-4 mr-2" />
-                  Account
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm hover:shadow-md transition-shadow">
+                    {user.email.charAt(0).toUpperCase()}
+                  </div>
                 </Button>
               </>
             ) : (
@@ -664,10 +660,18 @@ export default function Header({ locale, translations: t }: HeaderProps) {
             {!loading && user && (
               <>
                 <UsageDisplay session={session} />
-                {/* User Avatar */}
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
-                  {user.email.charAt(0).toUpperCase()}
-                </div>
+                {/* User Avatar - Account link */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.push(`/${locale}/account`)}
+                  className="p-0.5 hover:bg-gray-100 rounded-full"
+                  title="Account"
+                >
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
+                    {user.email.charAt(0).toUpperCase()}
+                  </div>
+                </Button>
               </>
             )}
             <Button
