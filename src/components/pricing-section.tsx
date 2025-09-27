@@ -273,7 +273,7 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4 text-gray-900">Choose Your Plan</h2>
+          <h2 className="text-2xl font-light mb-4 text-gray-900">Choose Your Plan</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Choose the plan that works best for you. All images are watermark-free.
           </p>
@@ -329,9 +329,9 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
                     </div>
                   </div>
                   
-                  <CardTitle className="text-2xl text-gray-900">{tier.name}</CardTitle>
+                  <CardTitle className="text-xl text-gray-900">{tier.name}</CardTitle>
                   
-                  <div className="text-3xl font-bold text-gray-900">
+                  <div className="text-2xl font-medium text-gray-900">
                     {tier.price}
                     <span className="text-sm font-normal text-gray-500">
                       /{tier.period}

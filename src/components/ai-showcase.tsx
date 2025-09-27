@@ -99,10 +99,10 @@ export default function AIShowcase() {
             <span className="text-sm font-medium text-gray-700">AI-Powered Enhancement</span>
           </div>
           
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-900">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-light mb-6 text-gray-900">
             See the Magic in Action
           </h2>
-          <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto font-medium leading-relaxed">
+          <p className="text-lg md:text-xl text-gray-600 max-w-4xl mx-auto font-normal leading-relaxed">
             Watch how our AI transforms ordinary images into stunning, 
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> platform-optimized covers</span> in seconds
           </p>
@@ -162,7 +162,7 @@ function ShowcaseItem({ item, index, isActive, isHovered, isVisible, onHover, on
             {item.platform[0]}
           </div>
           <div>
-            <h3 className="text-2xl md:text-3xl font-bold text-gray-900">{item.platform}</h3>
+            <h3 className="text-xl md:text-2xl font-semibold text-gray-900">{item.platform}</h3>
             <p className="text-sm md:text-base text-gray-600 mt-1">Platform-optimized design</p>
           </div>
         </div>

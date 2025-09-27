@@ -243,12 +243,12 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         <section className="py-16 md:py-24 lg:py-32 bg-white relative overflow-hidden">
           <div className="container mx-auto px-4 relative">
             <div className="max-w-5xl mx-auto text-center">
-              <h1 className="text-4xl md:text-6xl lg:text-8xl font-bold tracking-tight mb-6 md:mb-8 text-gray-900 leading-tight">
+              <h1 className="text-2xl md:text-3xl lg:text-5xl font-thin tracking-tight mb-6 md:mb-8 text-gray-900 leading-tight">
                 Create Stunning Covers with{' '}
                 <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">AI Magic</span>
               </h1>
               
-              <p className="text-lg md:text-xl lg:text-2xl text-gray-600 mb-4 max-w-4xl mx-auto px-4 font-medium leading-relaxed">
+              <p className="text-base md:text-lg lg:text-xl text-gray-600 mb-4 max-w-4xl mx-auto px-4 font-light leading-relaxed">
                 Generate professional covers and posters for your content across all platforms.
               </p>
 
@@ -260,21 +260,21 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                     <div className="p-3 md:p-4 lg:p-5 rounded-3xl bg-gray-50 shadow-sm hover:shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-2 border border-gray-100">
                       <platform.icon className={`w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 ${platform.color}`} />
                     </div>
-                    <span className="text-sm md:text-base lg:text-lg font-medium text-gray-700">{platform.name}</span>
+                    <span className="text-sm md:text-base lg:text-lg font-normal text-gray-700">{platform.name}</span>
                   </div>
                 ))}
               </div>
 
               {/* Free generation highlight */}
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl px-6 py-4 mb-8 max-w-3xl mx-auto border border-green-200">
-                <p className="text-lg md:text-xl font-semibold text-green-800">
+                <p className="text-base md:text-lg font-medium text-green-800">
                   🎉 <span className="underline decoration-2 decoration-green-400">TRY FREE TODAY</span> • No Sign-in Required • Unlimited Creativity
                 </p>
               </div>
 
               <Button 
                 size="lg" 
-                className="text-xl md:text-2xl px-12 py-8 mb-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-3xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border-0"
+                className="text-lg md:text-xl px-10 py-6 mb-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-3xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border-0"
                 onClick={() => {
                   trackInteraction('homepage_cta', 'click', undefined)
                   document.getElementById('generator')?.scrollIntoView({ behavior: 'smooth' })
@@ -304,11 +304,11 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
               <div className="flex justify-center mb-6">
                 <div className="text-6xl">🍌</div>
               </div>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-gray-900">
+              <h2 className="text-xl md:text-2xl lg:text-3xl font-extralight mb-6 text-gray-900">
                 Powered by Google's Advanced AI
               </h2>
               <div className="bg-white rounded-3xl p-8 shadow-lg border border-yellow-200">
-                <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                <h3 className="text-xl font-medium text-gray-800 mb-4">
                   Google Gemini 2.5 Flash <span className="text-yellow-600">("Nano Banana")</span>
                 </h3>
                 <p className="text-lg text-gray-600 mb-6 leading-relaxed">
@@ -317,15 +317,15 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                 </p>
                 <div className="grid md:grid-cols-3 gap-6 text-left">
                   <div className="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-2xl p-6">
-                    <h4 className="font-bold text-gray-800 mb-2">⚡ Lightning Fast</h4>
+                    <h4 className="font-medium text-gray-800 mb-2">⚡ Lightning Fast</h4>
                     <p className="text-gray-600">Generate high-quality images in seconds, not minutes</p>
                   </div>
                   <div className="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-2xl p-6">
-                    <h4 className="font-bold text-gray-800 mb-2">🎨 Superior Quality</h4>
+                    <h4 className="font-medium text-gray-800 mb-2">🎨 Superior Quality</h4>
                     <p className="text-gray-600">State-of-the-art AI understanding for perfect compositions</p>
                   </div>
                   <div className="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-2xl p-6">
-                    <h4 className="font-bold text-gray-800 mb-2">🌐 Multi-Language</h4>
+                    <h4 className="font-medium text-gray-800 mb-2">🌐 Multi-Language</h4>
                     <p className="text-gray-600">Understands prompts in 100+ languages naturally</p>
                   </div>
                 </div>
@@ -344,9 +344,9 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         <section id="features" className="py-20 bg-white scroll-mt-20">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-900">Why Choose CoverGen Pro?</h2>
-              <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto font-medium leading-relaxed">
-                Built for content creators who want <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold">professional results</span> without the complexity
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-extralight mb-6 text-gray-900">Why Choose CoverGen Pro?</h2>
+              <p className="text-lg md:text-xl text-gray-600 max-w-4xl mx-auto font-normal leading-relaxed">
+                Built for content creators who want <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-semibold">professional results</span> without the complexity
               </p>
             </div>
 
@@ -369,7 +369,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                         }`} />
                       </div>
                     </div>
-                    <h3 className="text-xl font-bold mb-4 text-gray-800">{feature.title}</h3>
+                    <h3 className="text-base font-medium mb-4 text-gray-800">{feature.title}</h3>
                     <p className="text-base text-gray-600 leading-relaxed">{feature.description}</p>
                   </CardContent>
                 </Card>
@@ -384,26 +384,26 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto text-center">
               <div className="group">
                 <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl p-6 transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-blue-200">
-                  <div className="text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">10s</div>
-                  <div className="text-base font-medium text-blue-700">{t.stats.generationTime}</div>
+                  <div className="text-2xl md:text-3xl font-medium mb-2 bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">10s</div>
+                  <div className="text-base font-normal text-blue-700">{t.stats.generationTime}</div>
                 </div>
               </div>
               <div className="group">
                 <div className="bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl p-6 transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-purple-200">
-                  <div className="text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">6+</div>
-                  <div className="text-base font-medium text-purple-700">{t.stats.platforms}</div>
+                  <div className="text-2xl md:text-3xl font-medium mb-2 bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">6+</div>
+                  <div className="text-base font-normal text-purple-700">{t.stats.platforms}</div>
                 </div>
               </div>
               <div className="group">
                 <div className="bg-gradient-to-br from-pink-100 to-pink-200 rounded-2xl p-6 transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-pink-200">
-                  <div className="text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-pink-600 to-pink-800 bg-clip-text text-transparent">99.9%</div>
-                  <div className="text-base font-medium text-pink-700">{t.stats.uptime}</div>
+                  <div className="text-2xl md:text-3xl font-medium mb-2 bg-gradient-to-r from-pink-600 to-pink-800 bg-clip-text text-transparent">99.9%</div>
+                  <div className="text-base font-normal text-pink-700">{t.stats.uptime}</div>
                 </div>
               </div>
               <div className="group">
                 <div className="bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl p-6 transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-orange-200">
-                  <div className="text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-orange-600 to-orange-800 bg-clip-text text-transparent">70%</div>
-                  <div className="text-base font-medium text-orange-700">{t.stats.timeSaved}</div>
+                  <div className="text-2xl md:text-3xl font-medium mb-2 bg-gradient-to-r from-orange-600 to-orange-800 bg-clip-text text-transparent">70%</div>
+                  <div className="text-base font-normal text-orange-700">{t.stats.timeSaved}</div>
                 </div>
               </div>
             </div>
@@ -411,21 +411,21 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         </section>
 
         {/* FAQ Section */}
-        <section className="py-24 bg-gradient-to-br from-gray-50 via-white to-blue-50">
+        <section id="faq" className="py-24 bg-gradient-to-br from-gray-50 via-white to-blue-50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-900">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-light mb-6 text-gray-900">
                 Frequently Asked Questions
               </h2>
               <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto font-medium">
                 Everything you need to know about CoverGen Pro. Can't find the answer you're looking for? 
-                <a href="mailto:contact@covergen.pro" className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:from-blue-700 hover:to-purple-700 hover:underline ml-1 font-bold">Contact us</a>.
+                <a href="mailto:contact@covergen.pro" className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:from-blue-700 hover:to-purple-700 hover:underline ml-1 font-semibold">Contact us</a>.
               </p>
             </div>
 
             <div className="max-w-4xl mx-auto space-y-6">
               <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-                <h3 className="text-xl font-semibold mb-4 text-gray-900">
+                <h3 className="text-lg font-medium mb-4 text-gray-900">
                   How does AI cover generation work?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
@@ -436,7 +436,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
               </div>
 
               <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-                <h3 className="text-xl font-semibold mb-4 text-gray-900">
+                <h3 className="text-lg font-medium mb-4 text-gray-900">
                   Which social media platforms are supported?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
@@ -446,7 +446,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
               </div>
 
               <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-                <h3 className="text-xl font-semibold mb-4 text-gray-900">
+                <h3 className="text-lg font-medium mb-4 text-gray-900">
                   What's the difference between free and Pro plans?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
@@ -457,7 +457,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
               </div>
 
               <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-                <h3 className="text-xl font-semibold mb-4 text-gray-900">
+                <h3 className="text-lg font-medium mb-4 text-gray-900">
                   Can I use the generated images commercially?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
@@ -467,7 +467,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
               </div>
 
               <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-                <h3 className="text-xl font-semibold mb-4 text-gray-900">
+                <h3 className="text-lg font-medium mb-4 text-gray-900">
                   How long does image generation take?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
@@ -477,7 +477,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
               </div>
 
               <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-                <h3 className="text-xl font-semibold mb-4 text-gray-900">
+                <h3 className="text-lg font-medium mb-4 text-gray-900">
                   Is my content safe and private?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
@@ -494,11 +494,11 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         {/* <section className="py-24 bg-gradient-to-br from-purple-50 via-white to-pink-50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-900">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-light mb-6 text-gray-900">
                 What Creators Are Saying
               </h2>
               <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto font-medium">
-                Join thousands of satisfied creators who've transformed their content with <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent font-bold">AI-powered covers</span>
+                Join thousands of satisfied creators who've transformed their content with <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent font-semibold">AI-powered covers</span>
               </p>
             </div>
 
@@ -652,7 +652,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
             {/* <div className="text-center mt-16">
               <Button 
                 size="lg" 
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-semibold rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-medium rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300"
                 onClick={() => {
                   trackInteraction('testimonials_cta', 'click', user?.id)
                   document.getElementById('generator')?.scrollIntoView({ behavior: 'smooth' })
@@ -675,16 +675,16 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         {/* CTA Section */}
         <section className="py-24 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-extralight mb-6 text-white">
               Ready to Transform Your Content?
             </h2>
-            <p className="text-xl md:text-2xl mb-12 text-white/90 max-w-3xl mx-auto font-medium">
+            <p className="text-lg md:text-xl mb-12 text-white/90 max-w-3xl mx-auto font-normal">
               Join thousands of creators who save hours every week with AI-powered cover generation
             </p>
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
               <Button 
                 size="lg" 
-                className="text-xl md:text-2xl px-12 py-8 bg-white text-gray-900 hover:bg-gray-100 font-bold rounded-3xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+                className="text-lg md:text-xl px-10 py-6 bg-white text-gray-900 hover:bg-gray-100 font-medium rounded-3xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
                 onClick={() => {
                   trackInteraction('bottom_cta', 'click', user?.id)
                   document.getElementById('generator')?.scrollIntoView({ behavior: 'smooth' })
@@ -697,7 +697,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
               <Button 
                 size="lg" 
                 variant="outline"
-                className="text-xl px-10 py-8 border-2 border-white bg-white/20 backdrop-blur-sm text-white hover:bg-white hover:text-gray-900 rounded-3xl font-semibold transition-all duration-300"
+                className="text-xl px-10 py-8 border-2 border-white bg-white/20 backdrop-blur-sm text-white hover:bg-white hover:text-gray-900 rounded-3xl font-medium transition-all duration-300"
                 onClick={() => {
                   setFeedbackModal({ isOpen: true, context: 'general' })
                   trackInteraction('feedback_button', 'click', user?.id)
