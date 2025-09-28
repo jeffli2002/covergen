@@ -25,8 +25,9 @@ export function getCanonicalUrl(
   // Ensure path starts with /
   const normalizedPath = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`
   
-  // Build the full URL with locale (except for default 'en')
-  const localePrefix = locale === 'en' ? '' : `/${locale}`
+  // Build the full URL with locale prefix for all locales
+  // Always include locale prefix to avoid 404 errors
+  const localePrefix = `/${locale}`
   const fullPath = `${localePrefix}${normalizedPath}`
   
   // Handle query parameters if provided

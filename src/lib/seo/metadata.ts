@@ -46,7 +46,7 @@ export function generateMetadata({
     url: 'https://covergen.pro/og-image.png',
     width: 1200,
     height: 630,
-    alt: 'CoverGen AI - AI-Powered Cover Generator',
+    alt: 'CoverGen Pro - AI-Powered Cover Generator',
   }
 
   const metaImages = images.length > 0 ? images : [defaultImage]
@@ -55,9 +55,9 @@ export function generateMetadata({
     title,
     description,
     keywords: [...DEFAULT_KEYWORDS, ...keywords],
-    authors: [{ name: 'CoverGen AI Team' }],
-    creator: 'CoverGen AI',
-    publisher: 'CoverGen AI',
+    authors: [{ name: 'CoverGen Pro Team' }],
+    creator: 'CoverGen Pro',
+    publisher: 'CoverGen Pro',
     metadataBase: new URL(baseUrl),
     alternates: {
       canonical,
@@ -69,7 +69,7 @@ export function generateMetadata({
       url: canonical,
       title,
       description,
-      siteName: 'CoverGen AI',
+      siteName: 'CoverGen Pro',
       images: metaImages,
     },
     twitter: {
@@ -96,8 +96,8 @@ export function generateMetadata({
     other: {
       'apple-mobile-web-app-capable': 'yes',
       'apple-mobile-web-app-status-bar-style': 'default',
-      'apple-mobile-web-app-title': 'CoverGen AI',
-      'application-name': 'CoverGen AI',
+      'apple-mobile-web-app-title': 'CoverGen Pro',
+      'application-name': 'CoverGen Pro',
       'msapplication-TileColor': '#2563eb',
       'msapplication-config': '/browserconfig.xml',
       'theme-color': '#ffffff',
