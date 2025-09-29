@@ -2,7 +2,7 @@ import HomePageClient from './page-client'
 import { getDictionary } from '@/lib/i18n/get-dictionary'
 import { Locale } from '@/lib/i18n/config'
 import { Metadata } from 'next'
-import { generateMetadata } from '@/lib/seo/metadata'
+import { generateMetadata as createMetadata } from '@/lib/seo/metadata'
 
 export async function generateMetadata({
   params: { locale },
@@ -11,7 +11,7 @@ export async function generateMetadata({
   params: { locale: Locale }
   searchParams: Record<string, string | string[] | undefined>
 }): Promise<Metadata> {
-  const metadata = generateMetadata({
+  const metadata = createMetadata({
     title: 'AI Cover Generator - Free Thumbnail Maker | CoverGen Pro',
     description: 'Create stunning covers and thumbnails for YouTube, TikTok, Spotify, and more with AI. Free cover generator with no watermark. Professional designs in seconds.',
     keywords: [
