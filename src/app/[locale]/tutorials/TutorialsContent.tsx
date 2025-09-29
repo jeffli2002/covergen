@@ -4,129 +4,43 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Lightbulb, 
-  Image, 
-  Target, 
-  Palette, 
-  TrendingUp, 
-  BookOpen,
-  Play,
-  Clock,
-  Star,
-  Users,
-  Youtube,
-  Eye,
-  MousePointer,
-  Zap
-} from 'lucide-react'
-
-const tutorialCategories = [
-  {
-    id: 'prompt-engineering',
-    title: 'Prompt Engineering',
-    icon: Lightbulb,
-    description: 'Learn how to write effective prompts for better AI generation',
-    tutorials: [
-      {
-        title: 'Writing Clear and Specific Prompts',
-        description: 'Learn the art of crafting prompts that give AI clear direction for your cover designs.',
-        duration: '5 min read',
-        difficulty: 'Beginner',
-        tags: ['Basics', 'Prompts', 'AI Tips'],
-        content: 'Start with a clear subject, add style preferences, and specify mood or atmosphere.'
-      },
-      {
-        title: 'Using Reference Images Effectively',
-        description: 'Maximize the impact of your reference images to maintain brand consistency.',
-        duration: '7 min read',
-        difficulty: 'Intermediate',
-        tags: ['Reference Images', 'Branding', 'Consistency'],
-        content: 'Choose reference images that represent your brand colors, style, and aesthetic.'
-      }
-    ]
-  },
-  {
-    id: 'platform-optimization',
-    title: 'Platform Optimization',
-    icon: Target,
-    description: 'Optimize your covers for different social media platforms',
-    tutorials: [
-      {
-        title: 'YouTube Thumbnail Best Practices',
-        description: 'Create click-worthy thumbnails that drive views and engagement.',
-        duration: '8 min read',
-        difficulty: 'Intermediate',
-        tags: ['YouTube', 'Thumbnails', 'Engagement'],
-        content: 'Use bright colors, clear text, expressive faces, and avoid cluttered designs.'
-      }
-    ]
-  },
-  {
-    id: 'youtube-thumbnail-ideas',
-    title: 'YouTube Thumbnail Ideas',
-    icon: Youtube,
-    description: 'Proven strategies for creating high-CTR YouTube thumbnails',
-    tutorials: [
-      {
-        title: 'Gaming Thumbnail Strategies',
-        description: 'Learn how to create epic gaming thumbnails that capture exciting moments.',
-        duration: '10 min read',
-        difficulty: 'Intermediate',
-        tags: ['Gaming', 'YouTube', 'CTR Optimization'],
-        content: 'Epic Moment Highlights: Capture the most exciting gaming moments with dynamic effects and flame graphics. Use bold text + shocked face + explosion background for 12-15% CTR. Before/After comparisons showing dramatic improvements in skills or gear upgrades can achieve 10-12% CTR.'
-      },
-      {
-        title: 'Vlog Thumbnail Psychology',
-        description: 'Master the art of emotional expressions and lifestyle showcase for vlogs.',
-        duration: '8 min read',
-        difficulty: 'Beginner',
-        tags: ['Vlog', 'Emotions', 'Lifestyle'],
-        content: 'Emotional Expressions: Use exaggerated facial expressions to convey video emotions. Close-up faces with minimal text and bright colors can achieve 8-10% CTR. Lifestyle Showcase: Display aspirational lifestyle scenes that viewers desire using beautiful scenery, silhouettes, and dreamy filters for 9-11% CTR.'
-      },
-      {
-        title: 'Tutorial Thumbnail Formats',
-        description: 'Create clear, informative thumbnails for educational content.',
-        duration: '7 min read',
-        difficulty: 'Beginner',
-        tags: ['Tutorials', 'Education', 'Clear Design'],
-        content: 'Numbered Steps: Clearly show tutorial steps (e.g., "5 Steps") with final result and tool icons for 11-13% CTR. Problem-Solution Format: Show visual contrast between common problems (red X) and solutions (green check) with bold arrows for 10-12% CTR.'
-      },
-      {
-        title: 'Entertainment & Mystery',
-        description: 'Create suspenseful thumbnails that drive curiosity and clicks.',
-        duration: '9 min read',
-        difficulty: 'Advanced',
-        tags: ['Entertainment', 'Suspense', 'Trending'],
-        content: 'Mystery & Suspense: Use question marks and blurred elements to create curiosity. Blur key parts with "You won\'t believe" text for 13-16% CTR. Celebrity/Trending Topics: Combine current trends or celebrities with comparison elements for 14-17% CTR.'
-      },
-      {
-        title: 'Design Principles for High CTR',
-        description: 'Master the golden rules of YouTube thumbnail design.',
-        duration: '12 min read',
-        difficulty: 'Intermediate',
-        tags: ['Design', 'Best Practices', 'Optimization'],
-        content: 'High Contrast: Use light/dark contrast to make thumbnails pop in feed. Three Color Rule: Limit to 3 main colors for clean, powerful visuals. Dynamic Elements: Add arrows, explosions to suggest exciting content. Key Info Focus: Ensure main message is clear even on small mobile screens. These principles combined can increase CTR by 3x and boost watch time significantly.'
-      }
-    ]
-  }
-]
+import { Clock, ChevronRight, CheckCircle } from 'lucide-react'
+import { tutorialCategories } from '@/data/tutorials'
 
 export default function TutorialsContent() {
-  const [activeCategory, setActiveCategory] = useState('prompt-engineering')
+  const [activeCategory, setActiveCategory] = useState('getting-started')
+  const [expandedTutorials, setExpandedTutorials] = useState<Set<string>>(new Set())
+
+  const toggleTutorial = (tutorialTitle: string) => {
+    const newExpanded = new Set(expandedTutorials)
+    if (newExpanded.has(tutorialTitle)) {
+      newExpanded.delete(tutorialTitle)
+    } else {
+      newExpanded.add(tutorialTitle)
+    }
+    setExpandedTutorials(newExpanded)
+  }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white dark:bg-white">
       {/* Header */}
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950 dark:to-blue-950 border-b">
+      <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-50 dark:via-indigo-50 dark:to-purple-50 border-b">
         <div className="container mx-auto px-4 py-16">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-hero-title mb-4 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-              AI Generation Tips
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-thin tracking-tight mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Complete Tutorial Guide
             </h1>
-            <p className="text-body-lg text-muted-foreground mb-8">
-              Master the art of AI-powered cover generation with expert tips and tutorials
+            <p className="text-lg md:text-xl font-light leading-relaxed text-gray-700 dark:text-gray-700 mb-8">
+              Master every aspect of AI-powered cover generation with our comprehensive tutorials
             </p>
+            <div className="flex justify-center gap-4">
+              <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-100 dark:text-emerald-700 border-0 px-4 py-1 text-sm font-light">
+                {tutorialCategories.reduce((acc, cat) => acc + cat.tutorials.length, 0)} Tutorials
+              </Badge>
+              <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-100 dark:text-blue-700 border-0 px-4 py-1 text-sm font-light">
+                {tutorialCategories.length} Categories
+              </Badge>
+            </div>
           </div>
         </div>
       </div>
@@ -136,24 +50,31 @@ export default function TutorialsContent() {
           {/* Sidebar Navigation */}
           <div className="lg:col-span-1">
             <div className="sticky top-8 space-y-4">
-              <h3 className="text-heading-5 mb-4">Categories</h3>
+              <h3 className="text-xl md:text-2xl font-light mb-4">Tutorial Categories</h3>
               {tutorialCategories.map((category) => {
                 const Icon = category.icon
+                const isActive = activeCategory === category.id
                 return (
                   <button
                     key={category.id}
                     onClick={() => setActiveCategory(category.id)}
-                    className={`w-full text-left p-4 rounded-lg border transition-all ${
-                      activeCategory === category.id
-                        ? 'border-primary bg-primary/5 text-primary'
-                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                    className={`w-full text-left p-4 rounded-lg border transition-all duration-200 ${
+                      isActive
+                        ? 'border-blue-300 bg-blue-100 text-blue-700 shadow-sm dark:bg-blue-100 dark:border-blue-300 dark:text-blue-700'
+                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 dark:border-gray-200 dark:hover:bg-gray-50 dark:hover:border-gray-300'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <Icon className="w-5 h-5" />
-                      <div>
-                        <div className="font-medium">{category.title}</div>
-                        <div className="text-sm text-muted-foreground">{category.description}</div>
+                      <div className={`p-2 rounded-lg transition-colors duration-200 ${
+                        isActive ? 'bg-blue-200 dark:bg-blue-200' : 'bg-purple-100 dark:bg-purple-100'
+                      }`}>
+                        <Icon className={`w-5 h-5 ${isActive ? 'text-blue-700' : 'text-purple-700'}`} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-base font-medium">{category.title}</div>
+                        <div className={`text-sm font-light ${isActive ? 'text-blue-600' : 'text-gray-600 dark:text-gray-600'}`}>
+                          {category.tutorials.length} tutorials
+                        </div>
                       </div>
                     </div>
                   </button>
@@ -169,50 +90,97 @@ export default function TutorialsContent() {
                 .filter(category => category.id === activeCategory)
                 .map(category => (
                   <div key={category.id}>
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="p-3 bg-primary/10 rounded-lg">
-                        <category.icon className="w-6 h-6 text-primary" />
+                    <div className="flex items-center gap-3 mb-8">
+                      <div className="p-3 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-100 dark:to-purple-100 rounded-lg">
+                        <category.icon className="w-6 h-6 text-blue-700 dark:text-blue-700" />
                       </div>
                       <div>
-                        <h2 className="text-heading-4">{category.title}</h2>
-                        <p className="text-muted-foreground">{category.description}</p>
+                        <h2 className="text-2xl md:text-3xl font-extralight">{category.title}</h2>
+                        <p className="text-base font-normal text-gray-600 dark:text-gray-600">{category.description}</p>
                       </div>
                     </div>
                     
-                    <div className="space-y-4">
-                      {category.tutorials.map((tutorial, index) => (
-                        <Card key={index} className="hover:shadow-md transition-shadow">
-                          <CardHeader>
-                            <div className="flex items-start justify-between">
-                              <CardTitle className="text-lg">{tutorial.title}</CardTitle>
-                              <Badge className="bg-green-100 text-green-800">
-                                {tutorial.difficulty}
-                              </Badge>
-                            </div>
-                            <p className="text-muted-foreground">{tutorial.description}</p>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="mb-4">
-                              <p className="text-sm leading-relaxed">{tutorial.content}</p>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                <div className="flex items-center gap-1">
+                    <div className="space-y-6">
+                      {category.tutorials.map((tutorial, index) => {
+                        const isExpanded = expandedTutorials.has(tutorial.title)
+                        return (
+                          <Card key={index} className="overflow-hidden bg-white dark:bg-white border-gray-200 dark:border-gray-200">
+                            <CardHeader 
+                              className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-50 transition-colors duration-200"
+                              onClick={() => toggleTutorial(tutorial.title)}
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <CardTitle className="text-lg font-medium mb-2 flex items-center gap-2">
+                                    {tutorial.title}
+                                    <ChevronRight className={`w-4 h-4 transition-transform ${
+                                      isExpanded ? 'rotate-90' : ''
+                                    }`} />
+                                  </CardTitle>
+                                  <p className="text-base font-normal text-gray-600 dark:text-gray-600">{tutorial.description}</p>
+                                </div>
+                                <Badge className={`ml-4 border-0 text-sm font-light ${
+                                  tutorial.difficulty === 'Beginner' 
+                                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-100 dark:text-emerald-700' 
+                                    : tutorial.difficulty === 'Intermediate'
+                                    ? 'bg-amber-100 text-amber-700 dark:bg-amber-100 dark:text-amber-700'
+                                    : 'bg-rose-100 text-rose-700 dark:bg-rose-100 dark:text-rose-700'
+                                }`}>
+                                  {tutorial.difficulty}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-4 mt-3">
+                                <div className="flex items-center gap-1 text-sm font-light text-gray-600 dark:text-gray-600">
                                   <Clock className="w-4 h-4" />
                                   {tutorial.duration}
                                 </div>
+                                <div className="flex gap-2">
+                                  {tutorial.tags.slice(0, 3).map((tag, tagIndex) => (
+                                    <Badge key={tagIndex} variant="secondary" className="text-xs font-normal bg-gray-100 dark:bg-gray-100 text-gray-700 dark:text-gray-700 border-0">
+                                      {tag}
+                                    </Badge>
+                                  ))}
+                                </div>
                               </div>
-                              <div className="flex gap-2">
-                                {tutorial.tags.map((tag, tagIndex) => (
-                                  <Badge key={tagIndex} variant="secondary" className="text-xs">
-                                    {tag}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
+                            </CardHeader>
+                            {isExpanded && (
+                              <CardContent className="border-t border-gray-200 dark:border-gray-200">
+                                <div className="pt-6 space-y-6">
+                                  <div>
+                                    <p className="text-base md:text-lg font-normal leading-relaxed mb-6 text-gray-700 dark:text-gray-700">{tutorial.content}</p>
+                                  </div>
+                                  {tutorial.steps && (
+                                    <div className="space-y-4">
+                                      <h3 className="text-xl md:text-2xl font-light mb-4">Step-by-Step Guide</h3>
+                                      {tutorial.steps.map((step, stepIndex) => (
+                                        <div key={stepIndex} className="flex gap-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-50 border border-gray-200 dark:border-gray-200">
+                                          <div className="flex-shrink-0">
+                                            <div className="w-8 h-8 bg-blue-100 dark:bg-blue-100 text-blue-700 dark:text-blue-700 rounded-full flex items-center justify-center font-semibold">
+                                              {stepIndex + 1}
+                                            </div>
+                                          </div>
+                                          <div className="flex-1">
+                                            <h4 className="text-base font-medium mb-1">{step.title}</h4>
+                                            <p className="text-sm font-normal text-gray-600 dark:text-gray-600 leading-relaxed">
+                                              {step.description}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                  <div className="pt-4 border-t">
+                                    <Button className="w-full sm:w-auto text-base font-medium">
+                                      <CheckCircle className="w-4 h-4 mr-2" />
+                                      Mark as Completed
+                                    </Button>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            )}
+                          </Card>
+                        )
+                      })}
                     </div>
                   </div>
                 ))}
