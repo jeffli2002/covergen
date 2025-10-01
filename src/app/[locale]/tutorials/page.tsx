@@ -13,7 +13,13 @@ export const metadata: Metadata = {
     'social media design guide',
     'AI design tutorials',
     'cover maker guide',
-    'content creator tutorials'
+    'content creator tutorials',
+    'sora 2 tutorial',
+    'sora 2 cover guide',
+    'sora 2 video generation',
+    'sora 2 tips and tricks',
+    'sora 2 workflow guide',
+    'sora 2 ai tutorial'
   ],
   openGraph: {
     title: 'CoverGen AI Tutorials - Master AI Cover Generation',

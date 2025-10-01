@@ -43,7 +43,14 @@ export async function generateMetadata({
       // Brand keywords
       'covergen pro',
       'covergen ai',
-      'cover generation tool'
+      'cover generation tool',
+      
+      // Sora 2 keywords
+      'sora 2 cover generator',
+      'sora 2 thumbnail maker',
+      'sora 2 ai integration',
+      'sora 2 video covers',
+      'sora 2 content creation'
     ],
     path: '/',
     locale,
