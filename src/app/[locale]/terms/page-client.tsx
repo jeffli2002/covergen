@@ -152,8 +152,8 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                     <h4 className="text-ui-lg text-gray-900 mb-2">Free Plan</h4>
                     <p className="text-sm font-medium text-gray-900 mb-2">$0/forever</p>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ {config.limits.free.monthly} covers per month</li>
-                      <li>✓ {config.limits.free.daily} covers per day max</li>
+                      <li>✓ 10 images + 5 videos per month</li>
+                      <li>✓ 3 images + 1 video per day max</li>
                       <li>✓ No watermark</li>
                       <li>✓ All platform sizes</li>
                       <li>✓ Email support</li>
@@ -162,9 +162,9 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                   </div>
                   <div className="border border-blue-200 bg-blue-50 rounded-lg p-4">
                     <h4 className="text-ui-lg text-gray-900 mb-2">Pro Plan</h4>
-                    <p className="text-sm font-medium text-gray-900 mb-2">$9/month</p>
+                    <p className="text-sm font-medium text-gray-900 mb-2">$16.99/month</p>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ {config.limits.pro.monthly} covers per month</li>
+                      <li>✓ 100 images + 30 videos per month</li>
                       <li>✓ No watermark</li>
                       <li>✓ All platform sizes</li>
                       <li>✓ Priority support</li>
@@ -173,9 +173,9 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                   </div>
                   <div className="border border-purple-200 bg-purple-50 rounded-lg p-4">
                     <h4 className="text-ui-lg text-gray-900 mb-2">Pro+ Plan</h4>
-                    <p className="text-sm font-medium text-gray-900 mb-2">$19/month</p>
+                    <p className="text-sm font-medium text-gray-900 mb-2">$29.99/month</p>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ {config.limits.pro_plus.monthly} covers per month</li>
+                      <li>✓ 200 images + 60 videos per month</li>
                       <li>✓ No watermark</li>
                       <li>✓ Full commercial license</li>
                       <li>✓ Custom brand templates</li>

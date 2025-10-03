@@ -25,6 +25,7 @@ import {
   Instagram,
   Facebook,
   Linkedin,
+  Video,
 } from 'lucide-react'
 import { TikTokIcon, SpotifyIcon, TwitterXIcon, FacebookIcon } from '@/components/icons/brand-icons'
 import { Locale } from '@/lib/i18n/config'
@@ -241,12 +242,14 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
       
       <div className="animate-in fade-in duration-300">
         {/* Hero Section */}
-        <section className="py-16 md:py-24 lg:py-32 bg-white relative overflow-hidden">
+        <section className="py-20 bg-white relative overflow-hidden">
           <div className="container mx-auto px-4 relative">
             <div className="max-w-5xl mx-auto text-center">
               <h1 className="text-2xl md:text-3xl lg:text-5xl font-thin tracking-tight mb-6 md:mb-8 text-gray-900 leading-tight">
-                Create Stunning Covers with{' '}
-                <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">AI Magic</span>
+                Next-Gen Storytelling: Videos with{' '}
+                <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent font-semibold">Sora 2</span>
+                , Images with{' '}
+                <span className="bg-gradient-to-r from-yellow-600 via-orange-600 to-amber-600 bg-clip-text text-transparent font-semibold">Nano Banana</span>
               </h1>
               
               <p className="text-base md:text-lg lg:text-xl text-gray-600 mb-4 max-w-4xl mx-auto px-4 font-light leading-relaxed">
@@ -308,30 +311,37 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                 }
               `}</style>
 
-              {/* Free generation highlight */}
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl px-6 py-4 mb-8 max-w-3xl mx-auto border border-green-200">
-                <p className="text-base md:text-lg font-medium text-green-800">
-                  🎉 <span className="underline decoration-2 decoration-green-400">TRY FREE TODAY</span> • No Sign-in Required • Unlimited Creativity
-                </p>
+              <div className="flex flex-col sm:flex-row gap-4 items-center justify-center mb-8">
+                <Button 
+                  size="lg" 
+                  className="text-lg md:text-xl px-10 py-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-2xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 border-0"
+                  onClick={() => {
+                    trackInteraction('homepage_cta', 'click', undefined)
+                    document.getElementById('generator')?.scrollIntoView({ behavior: 'smooth' })
+                  }}
+                >
+                  <Sparkles className="w-6 h-6 md:w-8 md:h-8 mr-3" />
+                  {ctaText}
+                </Button>
+                
+                <Button 
+                  size="lg" 
+                  className="text-lg md:text-xl px-10 py-6 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium rounded-2xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 border-0"
+                  onClick={() => {
+                    trackInteraction('sora_cta', 'click', undefined)
+                    window.location.href = `/${locale}/sora`
+                  }}
+                >
+                  <Video className="w-6 h-6 md:w-8 md:h-8 mr-3" />
+                  Try Sora 2
+                </Button>
               </div>
-
-              <Button 
-                size="lg" 
-                className="text-lg md:text-xl px-10 py-6 mb-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-3xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border-0"
-                onClick={() => {
-                  trackInteraction('homepage_cta', 'click', undefined)
-                  document.getElementById('generator')?.scrollIntoView({ behavior: 'smooth' })
-                }}
-              >
-                <Sparkles className="w-6 h-6 md:w-8 md:h-8 mr-3" />
-                {ctaText}
-              </Button>
             </div>
           </div>
         </section>
 
         {/* Generation Section */}
-        <section id="generator" className="py-16 bg-gray-50 scroll-mt-20">
+        <section id="generator" className="py-20 bg-gray-50 scroll-mt-20">
           <div className="container mx-auto px-4">
             <ImageGenerator />
           </div>
@@ -341,7 +351,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         <AIShowcase />
 
         {/* Technology Section - Nano Banana */}
-        <section className="py-16 bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50">
+        <section className="py-20 bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
               <div className="flex justify-center mb-6">
@@ -350,7 +360,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
               <h2 className="text-xl md:text-2xl lg:text-3xl font-extralight mb-6 text-gray-900">
                 Powered by Google's Advanced AI
               </h2>
-              <div className="bg-white rounded-3xl p-8 shadow-lg border border-yellow-200">
+              <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow duration-300 border border-yellow-200">
                 <h3 className="text-xl font-medium text-gray-800 mb-4">
                   Google Gemini 2.5 Flash <span className="text-yellow-600">("Nano Banana")</span>
                 </h3>
@@ -454,7 +464,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         </section>
 
         {/* FAQ Section */}
-        <section id="faq" className="py-24 bg-gradient-to-br from-gray-50 via-white to-blue-50">
+        <section id="faq" className="py-20 bg-gradient-to-br from-gray-50 via-white to-blue-50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-light mb-6 text-gray-900">
@@ -467,7 +477,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
             </div>
 
             <div className="max-w-4xl mx-auto space-y-6">
-              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+              <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer">
                 <h3 className="text-lg font-medium mb-4 text-gray-900">
                   How does AI cover generation work?
                 </h3>
@@ -478,7 +488,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                 </p>
               </div>
 
-              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+              <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer">
                 <h3 className="text-lg font-medium mb-4 text-gray-900">
                   Which social media platforms are supported?
                 </h3>
@@ -488,18 +498,18 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                 </p>
               </div>
 
-              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+              <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer">
                 <h3 className="text-lg font-medium mb-4 text-gray-900">
                   What's the difference between free and Pro plans?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Free users get {config.limits.free.monthly} covers per month ({config.limits.free.daily}/day max) for personal use only. Pro ($9/month) includes 
-                  {config.limits.pro.monthly} covers per month with commercial rights. Pro+ ($19/month) includes {config.limits.pro_plus.monthly} covers per 
-                  month with full commercial license for teams and enterprises.
+                  Free users get 10 images + 5 videos per month (3 images + 1 video daily max) for personal use only. 
+                  Pro ($16.99/month) includes 100 images + 30 videos per month with commercial rights. 
+                  Pro+ ($29.99/month) includes 200 images + 60 videos per month with full commercial license for teams and enterprises.
                 </p>
               </div>
 
-              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+              <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer">
                 <h3 className="text-lg font-medium mb-4 text-gray-900">
                   Can I use the generated images commercially?
                 </h3>
@@ -509,7 +519,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                 </p>
               </div>
 
-              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+              <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer">
                 <h3 className="text-lg font-medium mb-4 text-gray-900">
                   How long does image generation take?
                 </h3>
@@ -519,13 +529,88 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                 </p>
               </div>
 
-              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+              <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer">
                 <h3 className="text-lg font-medium mb-4 text-gray-900">
                   Is my content safe and private?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
                   Yes! We take privacy seriously. Your reference images are processed securely and deleted 
                   after generation. We never store or share your content with third parties.
+                </p>
+              </div>
+
+              {/* Sora 2 Video Generation FAQs */}
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-8 shadow-sm border border-purple-200 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+                <h3 className="text-lg font-medium mb-4 text-gray-900 flex items-center gap-2">
+                  <span className="text-2xl">🎬</span>
+                  What is Sora 2 video generation?
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Sora 2 is OpenAI's latest AI video generation model that creates realistic videos from text descriptions. 
+                  Our platform integrates Sora 2 to help you generate professional video content for your social media, 
+                  presentations, or marketing materials. Simply describe what you want to see, and Sora 2 brings it to life 
+                  with stunning visual quality and natural motion.
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-8 shadow-sm border border-purple-200 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+                <h3 className="text-lg font-medium mb-4 text-gray-900">
+                  How long does Sora 2 video generation take?
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Sora 2 video generation typically takes 2-5 minutes depending on video length and complexity. 
+                  The process involves multiple AI processing steps to ensure high-quality output with smooth motion, 
+                  accurate scene composition, and natural lighting. You'll receive a notification when your video is ready, 
+                  and Pro users get priority processing for faster results.
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-8 shadow-sm border border-purple-200 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+                <h3 className="text-lg font-medium mb-4 text-gray-900">
+                  What video formats and quality does Sora 2 support?
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Sora 2 generates videos in MP4 format with two quality options: Standard (720p) and HD (1080p). 
+                  You can choose between landscape (16:9) and portrait (9:16) aspect ratios to perfectly match your platform needs. 
+                  All videos include natural camera movements, realistic lighting, and professional-grade visual quality 
+                  suitable for social media, presentations, and commercial use.
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-8 shadow-sm border border-purple-200 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+                <h3 className="text-lg font-medium mb-4 text-gray-900">
+                  How are video limits different from image limits?
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Videos and images have separate generation limits. Free users get 1 video per day (5 per month) and 
+                  3 images per day (10 per month). Pro users ($16.99/month) get 30 videos and 100 images per month. 
+                  Pro+ users ($29.99/month) get 60 videos and 200 images per month. Video generation consumes more 
+                  computational resources, which is why limits are lower than images.
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-8 shadow-sm border border-purple-200 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+                <h3 className="text-lg font-medium mb-4 text-gray-900">
+                  What makes a good Sora 2 video prompt?
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Great Sora 2 prompts are specific and descriptive. Include details about: <strong>scene description</strong> 
+                  (what's happening), <strong>camera movement</strong> (pan, zoom, static), <strong>lighting</strong> 
+                  (daylight, golden hour, neon), <strong>mood</strong> (energetic, calm, dramatic), and <strong>style</strong> 
+                  (cinematic, documentary, artistic). For example: "A slow pan across a bustling Tokyo street at night, 
+                  neon signs reflecting on wet pavement, cinematic lighting, vibrant colors."
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-8 shadow-sm border border-purple-200 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+                <h3 className="text-lg font-medium mb-4 text-gray-900">
+                  Can I use Sora 2 videos commercially?
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Free plan videos are for personal use only. Pro plan ($16.99/month) includes commercial usage rights 
+                  for small businesses and content creators, perfect for social media content, YouTube videos, and 
+                  marketing materials. Pro+ plan ($29.99/month) offers full commercial license with team and enterprise 
+                  usage rights, ideal for agencies and larger organizations.
                 </p>
               </div>
               
@@ -716,7 +801,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         </section>
 
         {/* CTA Section */}
-        <section className="py-24 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
+        <section className="py-20 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-extralight mb-6 text-white">
               Ready to Transform Your Content?
@@ -727,7 +812,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
               <Button 
                 size="lg" 
-                className="text-lg md:text-xl px-10 py-6 bg-white text-gray-900 hover:bg-gray-100 font-medium rounded-3xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+                className="text-lg md:text-xl px-10 py-6 bg-white text-gray-900 hover:bg-gray-100 font-medium rounded-2xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
                 onClick={() => {
                   trackInteraction('bottom_cta', 'click', user?.id)
                   document.getElementById('generator')?.scrollIntoView({ behavior: 'smooth' })
@@ -740,7 +825,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
               <Button 
                 size="lg" 
                 variant="outline"
-                className="text-xl px-10 py-8 border-2 border-white bg-white/20 backdrop-blur-sm text-white hover:bg-white hover:text-gray-900 rounded-3xl font-medium transition-all duration-300"
+                className="text-lg md:text-xl px-10 py-6 border-2 border-white bg-white/20 backdrop-blur-sm text-white hover:bg-white hover:text-gray-900 rounded-2xl font-medium transition-all duration-300"
                 onClick={() => {
                   setFeedbackModal({ isOpen: true, context: 'general' })
                   trackInteraction('feedback_button', 'click', user?.id)

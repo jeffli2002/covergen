@@ -18,16 +18,16 @@ const faqCategories = [
     description: 'Learn the basics of CoverGen AI',
     faqs: [
       {
-        question: 'How do I create my first cover image?',
-        answer: 'Upload a reference image, enter your title, select a platform, and click generate. Our AI will create multiple cover options in seconds.'
+        question: 'How do I create my first cover image or video?',
+        answer: 'For images: Upload a reference image, enter your title, select a platform, and click generate. For videos: Go to Sora generator, enter a text prompt, choose aspect ratio, and generate. Our AI creates multiple options in seconds.'
       },
       {
         question: 'What image formats are supported?',
         answer: 'We support JPEG, PNG, and WebP formats. Upload images up to 5MB for best results.'
       },
       {
-        question: 'How many images can I generate?',
-        answer: `Free users get ${config.limits.free.monthly} covers per month. Pro users get ${config.limits.pro.monthly} per month, and Pro+ users get ${config.limits.pro_plus.monthly} per month.`
+        question: 'How many images and videos can I generate?',
+        answer: 'Free: 10 images + 5 videos/month (3 images + 1 video daily). Pro ($16.99): 100 images + 30 videos/month. Pro+ ($29.99): 200 images + 60 videos/month. Pro/Pro+ have no fixed daily limits.'
       }
     ]
   },
@@ -72,6 +72,46 @@ const faqCategories = [
     ]
   },
   {
+    id: 'sora-video',
+    title: 'Sora 2 Video Generation',
+    icon: Video,
+    description: 'AI-powered video creation with OpenAI Sora 2',
+    faqs: [
+      {
+        question: 'What is Sora 2 video generation?',
+        answer: 'Sora 2 is OpenAI\'s advanced AI video generation model that creates high-quality videos from text prompts. Perfect for YouTube intros, social media content, promotional videos, and more.'
+      },
+      {
+        question: 'How do I create a Sora 2 video?',
+        answer: 'Navigate to the Sora video generator, enter your text prompt describing the video you want, select aspect ratio (16:9 for YouTube, 9:16 for TikTok/Shorts, 1:1 for Instagram), and click generate. Your video will be ready in 30-60 seconds.'
+      },
+      {
+        question: 'What are the video generation limits?',
+        answer: `Free plan: 5 videos/month with 1 video daily limit. Pro plan ($16.99/month): 30 videos/month. Pro+ plan ($29.99/month): 60 videos/month. Pro and Pro+ users have no fixed daily limits.`
+      },
+      {
+        question: 'How long does video generation take?',
+        answer: 'Sora 2 video generation typically takes 2-5 minutes depending on video length and complexity. The process involves multiple AI processing steps to ensure high-quality output with smooth motion, accurate scene composition, and natural lighting. You\'ll receive a notification when your video is ready, and Pro users get priority processing for faster results.'
+      },
+      {
+        question: 'What video formats and quality are available?',
+        answer: 'Sora 2 generates videos in MP4 format with two quality options: Standard (720p) and HD (1080p). You can choose between landscape (16:9) and portrait (9:16) aspect ratios to perfectly match your platform needs - YouTube, TikTok, Instagram Reels, and more. All videos include natural camera movements, realistic lighting, and professional-grade visual quality.'
+      },
+      {
+        question: 'Can I use Sora 2 videos commercially?',
+        answer: 'Free plan allows personal use only. Pro plan includes commercial usage rights for your business and content. Pro+ plan provides full commercial license including client work and team usage.'
+      },
+      {
+        question: 'How do I write effective video prompts?',
+        answer: 'Be specific and descriptive. Include details about: subject/scene, visual style, camera movement, lighting, and mood. Example: "A serene beach sunset with gentle waves, cinematic drone shot, warm golden hour lighting, peaceful atmosphere."'
+      },
+      {
+        question: 'What makes Sora 2 different from other AI video tools?',
+        answer: 'Sora 2 offers superior video quality with realistic motion, better physics understanding, and consistent character/scene coherence. It creates longer, more complex videos with professional-grade output suitable for content creators and businesses.'
+      }
+    ]
+  },
+  {
     id: 'account-billing',
     title: 'Account & Billing',
     icon: Settings,
@@ -91,7 +131,7 @@ const faqCategories = [
       },
       {
         question: 'What\'s included in Pro and Pro+ plans?',
-        answer: 'Pro users get access to professional features with commercial usage rights. Pro+ users get priority generation, enhanced features, and full commercial license for teams and enterprises.'
+        answer: 'Pro ($16.99/month): 100 images + 30 videos, all features, commercial rights. Pro+ ($29.99/month): 200 images + 60 videos, priority generation, enhanced features, full commercial license for teams and client work.'
       },
       {
         question: 'How do I reset my password?',

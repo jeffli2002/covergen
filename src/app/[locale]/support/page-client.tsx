@@ -89,9 +89,33 @@ export default function SupportPageClient({ locale, translations: t }: SupportPa
           <h2 className="text-heading-3 mb-6">Frequently Asked Questions</h2>
           <div className="space-y-6">
             <div className="border-l-4 border-blue-500 pl-4">
+              <h4 className="text-heading-5 text-gray-900">What is Sora 2 video generation?</h4>
+              <p className="text-body-md text-gray-600 mt-1">
+                Sora 2 is OpenAI's advanced AI video generation model. Create stunning AI-generated videos from text prompts for your content. Perfect for YouTube intros, social media clips, and promotional videos.
+              </p>
+            </div>
+            <div className="border-l-4 border-blue-500 pl-4">
+              <h4 className="text-heading-5 text-gray-900">How many images and videos can I generate?</h4>
+              <p className="text-body-md text-gray-600 mt-1">
+                Free: 10 images + 5 videos/month (3 images + 1 video daily). Pro ($16.99): 100 images + 30 videos/month. Pro+ ($29.99): 200 images + 60 videos/month. Pro/Pro+ users have no fixed daily limits.
+              </p>
+            </div>
+            <div className="border-l-4 border-blue-500 pl-4">
+              <h4 className="text-heading-5 text-gray-900">How long does video generation take?</h4>
+              <p className="text-body-md text-gray-600 mt-1">
+                Sora 2 video generation typically takes 30-60 seconds depending on video length and complexity. You'll receive a notification when your video is ready to download.
+              </p>
+            </div>
+            <div className="border-l-4 border-blue-500 pl-4">
+              <h4 className="text-heading-5 text-gray-900">What video formats and resolutions are supported?</h4>
+              <p className="text-body-md text-gray-600 mt-1">
+                Videos are generated in MP4 format with 1080p HD resolution. Choose from various aspect ratios including 16:9 (YouTube), 9:16 (TikTok/Shorts), and 1:1 (Instagram).
+              </p>
+            </div>
+            <div className="border-l-4 border-blue-500 pl-4">
               <h4 className="text-heading-5 text-gray-900">What happens when I reach my limit?</h4>
               <p className="text-body-md text-gray-600 mt-1">
-                Free users have {config.limits.free.daily} covers per day ({config.limits.free.monthly}/month max). Pro/Pro+ users can use their monthly quota anytime without fixed daily limits. When you reach your limit, you'll see an upgrade prompt or need to wait for the next billing cycle.
+                When you reach your image or video limit, you'll see an upgrade prompt. Pro/Pro+ users can use their monthly quota anytime. Free users need to wait for daily/monthly reset.
               </p>
             </div>
             <div className="border-l-4 border-blue-500 pl-4">
@@ -101,15 +125,15 @@ export default function SupportPageClient({ locale, translations: t }: SupportPa
               </p>
             </div>
             <div className="border-l-4 border-blue-500 pl-4">
-              <h4 className="text-heading-5 text-gray-900">Do Pro users have daily limits?</h4>
+              <h4 className="text-heading-5 text-gray-900">Can I use generated videos commercially?</h4>
               <p className="text-body-md text-gray-600 mt-1">
-                Pro ($9/month, {config.limits.pro.monthly} covers) and Pro+ ($19/month, {config.limits.pro_plus.monthly} covers) have no fixed daily limits. You can use your remaining monthly balance anytime during the billing cycle.
+                Free plan: Personal use only. Pro plan: Personal and commercial use allowed. Pro+ plan: Full commercial license with extended rights for teams and client work.
               </p>
             </div>
             <div className="border-l-4 border-blue-500 pl-4">
-              <h4 className="text-heading-5 text-gray-900">My generated image isn't loading</h4>
+              <h4 className="text-heading-5 text-gray-900">My generated image/video isn't loading</h4>
               <p className="text-body-md text-gray-600 mt-1">
-                Try refreshing the page or clearing your browser cache. If the issue persists, contact support.
+                Try refreshing the page or clearing your browser cache. For videos, ensure your browser supports MP4 playback. If the issue persists, contact support.
               </p>
             </div>
             <div className="border-l-4 border-blue-500 pl-4">

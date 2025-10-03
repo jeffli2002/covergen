@@ -120,24 +120,27 @@ const getSubscriptionPlansWithConfig = () => {
     pro: {
       id: 'pro',
       name: 'Pro',
-      price: 900, // $9.00 in cents
+      price: 1699, // $16.99 in cents
       priceId: CREEM_PRODUCTS.pro,
       credits: config.limits.pro.monthly,
       features: [
-        `${config.limits.pro.monthly} covers per month`,
+        '100 images/month',
+        '30 videos/month',
         'No watermark',
         'All platform sizes',
-        'Priority support'
+        'Priority support',
+        'Commercial usage rights'
       ]
     },
     pro_plus: {
       id: 'pro_plus',
       name: 'Pro+',
-      price: 1900, // $19.00 in cents
+      price: 2999, // $29.99 in cents
       priceId: CREEM_PRODUCTS.pro_plus,
       credits: config.limits.pro_plus.monthly,
       features: [
-        `${config.limits.pro_plus.monthly} covers per month`,
+        '200 images/month',
+        '60 videos/month',
         'No watermark',
         'All platform sizes',
         'Advanced customization',
@@ -153,8 +156,8 @@ export const SUBSCRIPTION_PLANS = getSubscriptionPlansWithConfig()
 
 // Price IDs for subscription tiers (to be created in Creem dashboard)
 export const CREEM_PRICES = {
-  pro: getCreemTestMode() ? 'price_test_pro_900' : 'price_pro_900',
-  pro_plus: getCreemTestMode() ? 'price_test_proplus_1900' : 'price_proplus_1900',
+  pro: getCreemTestMode() ? 'price_test_pro_1699' : 'price_pro_1699',
+  pro_plus: getCreemTestMode() ? 'price_test_proplus_2999' : 'price_proplus_2999',
 }
 
 export interface CreateCheckoutSessionParams {

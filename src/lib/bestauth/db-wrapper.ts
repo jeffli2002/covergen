@@ -179,6 +179,33 @@ export const db = {
         console.error('BestAuth: Failed to merge session usage:', error)
         return false
       }
+    },
+
+    async getTodayByType(userId: string, type: 'image' | 'video'): Promise<number> {
+      try {
+        return await bestAuthDb.usage.getTodayByType(userId, type)
+      } catch (error) {
+        console.error(`BestAuth: Failed to get ${type} usage:`, error)
+        return 0
+      }
+    },
+
+    async getMonthlyUsageByType(userId: string, type: 'image' | 'video'): Promise<number> {
+      try {
+        return await bestAuthDb.usage.getMonthlyUsageByType(userId, type)
+      } catch (error) {
+        console.error(`BestAuth: Failed to get monthly ${type} usage:`, error)
+        return 0
+      }
+    },
+
+    async incrementByType(userId: string, type: 'image' | 'video', amount: number = 1): Promise<number> {
+      try {
+        return await bestAuthDb.usage.incrementByType(userId, type, amount)
+      } catch (error) {
+        console.error(`BestAuth: Failed to increment ${type} usage:`, error)
+        return amount
+      }
     }
   },
 

@@ -7,7 +7,6 @@ import { useBestAuth } from '@/hooks/useBestAuth'
 import AuthForm from '@/components/auth/AuthForm'
 import UserMenu from '@/components/auth/UserMenu'
 import LanguageSwitcher from '@/components/language-switcher'
-import UsageDisplay from '@/components/usage-display'
 import { Locale } from '@/lib/i18n/config'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -365,6 +364,10 @@ export default function Header({ locale, translations: t }: HeaderProps) {
               </DropdownMenuContent>
             </DropdownMenu>
             
+            <Link href={`/${locale}/sora`} className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">
+              Sora 2 Video
+            </Link>
+            
             {/* Tools Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">
@@ -544,9 +547,6 @@ export default function Header({ locale, translations: t }: HeaderProps) {
 
           {/* User section */}
           <div className="flex items-center gap-3">
-            {/* Usage Display */}
-            <UsageDisplay session={session} />
-            
             <LanguageSwitcher currentLocale={locale} />
             {loading || !isInitialized ? (
               <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
@@ -675,7 +675,6 @@ export default function Header({ locale, translations: t }: HeaderProps) {
           <div className="flex items-center gap-2">
             {!loading && user && user.email && (
               <>
-                <UsageDisplay session={session} />
                 {/* User Avatar - Account link */}
                 <Button
                   variant="ghost"
@@ -748,6 +747,15 @@ export default function Header({ locale, translations: t }: HeaderProps) {
                     </Link>
                   </div>
                 </div>
+                
+                {/* Sora 2 Link */}
+                <Link 
+                  href={`/${locale}/sora`} 
+                  className="block text-base font-medium text-gray-700 hover:text-blue-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Sora 2 Video
+                </Link>
                 
                 {/* Tools Section */}
                 <div>

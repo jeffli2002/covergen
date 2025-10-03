@@ -173,6 +173,44 @@ export class BestAuthSubscriptionService {
   }
 
   /**
+   * Check if user can generate image (hasn't hit image limits)
+   */
+  async canUserGenerateImage(userId: string): Promise<boolean> {
+    try {
+      const subscription = await this.getUserSubscription(userId)
+      if (!subscription) return false
+      
+      const limits = this.getSubscriptionLimits(subscription.tier, subscription.is_trialing)
+      const usageToday = await db.usage.getTodayByType(userId, 'image')
+      const usageThisMonth = await db.usage.getMonthlyUsageByType(userId, 'image')
+      
+      return usageToday < limits.images.daily && usageThisMonth < limits.images.monthly
+    } catch (error) {
+      console.error('Error checking image generation limit:', error)
+      return false
+    }
+  }
+
+  /**
+   * Check if user can generate video (hasn't hit video limits)
+   */
+  async canUserGenerateVideo(userId: string): Promise<boolean> {
+    try {
+      const subscription = await this.getUserSubscription(userId)
+      if (!subscription) return false
+      
+      const limits = this.getSubscriptionLimits(subscription.tier, subscription.is_trialing)
+      const usageToday = await db.usage.getTodayByType(userId, 'video')
+      const usageThisMonth = await db.usage.getMonthlyUsageByType(userId, 'video')
+      
+      return usageToday < limits.videos.daily && usageThisMonth < limits.videos.monthly
+    } catch (error) {
+      console.error('Error checking video generation limit:', error)
+      return false
+    }
+  }
+
+  /**
    * Check if session can generate (hasn't hit limits)
    */
   async canSessionGenerate(sessionId: string): Promise<boolean> {
@@ -398,42 +436,68 @@ export class BestAuthSubscriptionService {
 
   /**
    * Check subscription limits based on tier
+   * Returns separate limits for images and videos
    */
   getSubscriptionLimits(tier: 'free' | 'pro' | 'pro_plus', isTrialing: boolean = false) {
     const config = getSubscriptionConfig()
+    
+    // Import subscription plans for detailed limits
+    const { getSubscriptionPlans } = require('@/lib/subscription-plans')
+    const plans = getSubscriptionPlans()
+    const plan = plans.find((p: any) => p.id === tier)
+    
+    if (!plan) {
+      // Fallback to default free limits
+      return {
+        daily: 3,
+        monthly: 10,
+        images: { daily: 3, monthly: 10 },
+        videos: { daily: 1, monthly: 5 }
+      }
+    }
     
     if (isTrialing) {
       // Use configured trial limits from environment variables
       if (tier === 'pro') {
         return {
           daily: config.limits.pro.trial_daily,
-          monthly: config.limits.pro.trial_total || 0
+          monthly: config.limits.pro.trial_total || 0,
+          images: { daily: config.limits.pro.trial_daily, monthly: config.limits.pro.trial_total || 0 },
+          videos: { daily: config.limits.pro.trial_daily, monthly: config.limits.pro.trial_total || 0 }
         }
       } else if (tier === 'pro_plus') {
         return {
           daily: config.limits.pro_plus.trial_daily,
-          monthly: config.limits.pro_plus.trial_total || 0
+          monthly: config.limits.pro_plus.trial_total || 0,
+          images: { daily: config.limits.pro_plus.trial_daily, monthly: config.limits.pro_plus.trial_total || 0 },
+          videos: { daily: config.limits.pro_plus.trial_daily, monthly: config.limits.pro_plus.trial_total || 0 }
         }
       } else {
         // Free tier doesn't have trials, use regular limits
         return {
-          daily: config.limits.free.daily,
-          monthly: config.limits.free.monthly
+          daily: plan.limits.images.daily + plan.limits.videos.daily,
+          monthly: plan.limits.images.monthly + plan.limits.videos.monthly,
+          images: plan.limits.images,
+          videos: plan.limits.videos
         }
       }
     }
     
-    // Regular (non-trial) limits
+    // Regular (non-trial) limits from subscription plans
     if (tier === 'free') {
       return {
-        daily: config.limits.free.daily,
-        monthly: config.limits.free.monthly
+        daily: plan.limits.images.daily + plan.limits.videos.daily,
+        monthly: plan.limits.images.monthly + plan.limits.videos.monthly,
+        images: plan.limits.images,
+        videos: plan.limits.videos
       }
     } else {
-      // Pro and Pro+ use monthly limits only when not in trial
+      // Pro and Pro+ use their configured limits
       return {
-        daily: config.limits[tier].monthly, // No daily limit for paid plans
-        monthly: config.limits[tier].monthly
+        daily: plan.limits.images.daily + plan.limits.videos.daily,
+        monthly: plan.limits.images.monthly + plan.limits.videos.monthly,
+        images: plan.limits.images,
+        videos: plan.limits.videos
       }
     }
   }

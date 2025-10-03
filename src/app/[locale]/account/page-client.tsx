@@ -841,23 +841,40 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                 Usage {usagePeriod}
               </CardTitle>
               <CardDescription className="text-ui-sm text-gray-600">
-                Track your cover generation usage
+                Track your cover and video generation usage
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Image Covers Usage */}
               <div>
                 <div className="flex justify-between mb-2">
-                  <span className="text-ui-sm text-gray-600">Covers Generated</span>
+                  <span className="text-ui-sm text-gray-600">Image Covers Generated</span>
                   <span className="text-ui-sm">
                     {currentUsage} / {usageLimit}
                   </span>
                 </div>
                 <Progress value={usagePercentage} className="h-2" />
+                <p className="text-ui-sm text-gray-600 mt-2">
+                  {usageLimit - currentUsage} image credits remaining {usagePeriod.toLowerCase()}
+                </p>
               </div>
 
-              <p className="text-ui-sm text-gray-600">
-                {usageLimit - currentUsage} credits remaining {usagePeriod.toLowerCase()}
-              </p>
+              {/* Video Usage */}
+              <div className="pt-3 border-t">
+                <div className="flex justify-between mb-2">
+                  <span className="text-ui-sm text-gray-600">Sora Videos Generated</span>
+                  <span className="text-ui-sm">
+                    {usage?.videos_today || 0} / {currentPlan === 'pro_plus' ? 10 : currentPlan === 'pro' ? 3 : 1}
+                  </span>
+                </div>
+                <Progress 
+                  value={((usage?.videos_today || 0) / (currentPlan === 'pro_plus' ? 10 : currentPlan === 'pro' ? 3 : 1)) * 100} 
+                  className="h-2" 
+                />
+                <p className="text-ui-sm text-gray-600 mt-2">
+                  {(currentPlan === 'pro_plus' ? 10 : currentPlan === 'pro' ? 3 : 1) - (usage?.videos_today || 0)} video credits remaining today
+                </p>
+              </div>
 
               {usagePercentage >= 80 && currentPlan !== 'pro_plus' && (
                 <Alert className="border-orange-200 bg-orange-50">

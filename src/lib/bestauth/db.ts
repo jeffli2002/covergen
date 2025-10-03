@@ -1038,6 +1038,86 @@ export const db = {
         return false
       }
     },
+
+    async getTodayByType(userId: string, type: 'image' | 'video'): Promise<number> {
+      try {
+        const column = type === 'image' ? 'image_count' : 'video_count'
+        const { data, error } = await getDb()
+          .from('bestauth_usage_tracking')
+          .select(column)
+          .eq('user_id', userId)
+          .eq('date', new Date().toISOString().split('T')[0])
+          .single()
+        
+        if (error) {
+          if (error.code === 'PGRST116' || error.message?.includes('No rows found')) {
+            return 0
+          }
+          return 0
+        }
+        
+        return data?.[column] || 0
+      } catch (err) {
+        console.error(`Error getting ${type} usage today:`, err)
+        return 0
+      }
+    },
+
+    async getMonthlyUsageByType(userId: string, type: 'image' | 'video'): Promise<number> {
+      try {
+        const column = type === 'image' ? 'image_count' : 'video_count'
+        const startOfMonth = new Date()
+        startOfMonth.setDate(1)
+        startOfMonth.setHours(0, 0, 0, 0)
+        
+        const { data, error } = await getDb()
+          .from('bestauth_usage_tracking')
+          .select(column)
+          .eq('user_id', userId)
+          .gte('date', startOfMonth.toISOString().split('T')[0])
+        
+        if (error) {
+          console.error(`Error getting monthly ${type} usage:`, error)
+          return 0
+        }
+        
+        const total = (data || []).reduce((sum, row) => sum + (row[column] || 0), 0)
+        return total
+      } catch (err) {
+        console.error(`Error getting monthly ${type} usage:`, err)
+        return 0
+      }
+    },
+
+    async incrementByType(userId: string, type: 'image' | 'video', amount: number = 1): Promise<number> {
+      try {
+        const today = new Date().toISOString().split('T')[0]
+        
+        // Use SQL function to increment the appropriate count
+        const functionName = type === 'image' ? 'increment_image_usage' : 'increment_video_usage'
+        const { error } = await getDb()
+          .rpc(functionName, { p_user_id: userId })
+        
+        if (error) {
+          console.error(`Error incrementing ${type} usage:`, error)
+          return 0
+        }
+        
+        // Get the updated count
+        const column = type === 'image' ? 'image_count' : 'video_count'
+        const { data } = await getDb()
+          .from('bestauth_usage_tracking')
+          .select(column)
+          .eq('user_id', userId)
+          .eq('date', today)
+          .single()
+        
+        return data?.[column] || amount
+      } catch (err) {
+        console.error(`Error incrementing ${type} usage:`, err)
+        return 0
+      }
+    },
   },
 
   // User profile operations

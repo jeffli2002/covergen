@@ -7,8 +7,14 @@ export interface SubscriptionPlan {
   priceDisplay: string
   features: string[]
   limits: {
-    monthly: number
-    daily: number
+    images: {
+      monthly: number
+      daily: number
+    }
+    videos: {
+      monthly: number
+      daily: number
+    }
   }
   popular?: boolean
 }
@@ -20,40 +26,57 @@ const plans: Record<PlanType, SubscriptionPlan> = {
     price: 0,
     priceDisplay: '$0',
     features: [
-      'Basic cover generation',
-      'Limited templates',
-      'Standard resolution',
-      'Community support'
+      '10 images/month',
+      '5 videos/month',
+      '3 images/day',
+      '1 video/day',
+      'Basic templates',
+      'Standard resolution'
     ],
     limits: {
-      monthly: Number(process.env.NEXT_PUBLIC_LIMIT_FREE_MONTHLY) || 10,
-      daily: Number(process.env.NEXT_PUBLIC_LIMIT_FREE_DAILY) || 3
+      images: {
+        monthly: 10,
+        daily: 3
+      },
+      videos: {
+        monthly: 5,
+        daily: 1
+      }
     }
   },
   pro: {
     id: 'pro',
     name: 'Pro',
-    price: 9.99,
-    priceDisplay: '$9.99/mo',
+    price: 16.99,
+    priceDisplay: '$16.99/mo',
     features: [
-      'Unlimited cover generation',
+      '100 images/month',
+      '30 videos/month',
       'All templates',
       'High resolution exports',
       'Priority support',
       'Advanced editing tools'
     ],
     limits: {
-      monthly: Number(process.env.NEXT_PUBLIC_LIMIT_PRO_MONTHLY) || 500,
-      daily: Number(process.env.NEXT_PUBLIC_LIMIT_PRO_DAILY) || 50
+      images: {
+        monthly: 100,
+        daily: 100
+      },
+      videos: {
+        monthly: 30,
+        daily: 30
+      }
     },
     popular: true
   },
   pro_plus: {
     id: 'pro_plus',
     name: 'Pro+',
-    price: 19.99,
-    priceDisplay: '$19.99/mo',
+    price: 29.99,
+    priceDisplay: '$29.99/mo',
     features: [
+      '200 images/month',
+      '60 videos/month',
       'Everything in Pro',
       'Bulk generation',
       'Custom templates',
@@ -61,8 +84,14 @@ const plans: Record<PlanType, SubscriptionPlan> = {
       'Commercial license'
     ],
     limits: {
-      monthly: Number(process.env.NEXT_PUBLIC_LIMIT_PRO_PLUS_MONTHLY) || 2000,
-      daily: Number(process.env.NEXT_PUBLIC_LIMIT_PRO_PLUS_DAILY) || 200
+      images: {
+        monthly: 200,
+        daily: 200
+      },
+      videos: {
+        monthly: 60,
+        daily: 60
+      }
     }
   }
 }

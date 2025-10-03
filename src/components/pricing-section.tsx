@@ -34,20 +34,20 @@ const tiers = [
     name: 'Free',
     price: '$0',
     period: 'forever',
-    description: 'Perfect for trying out our AI cover generator',
+    description: 'Perfect for trying out our AI generator',
     icon: Sparkles,
     features: [
-      `${config.limits.free.monthly} covers per month`,
-      `${config.limits.free.daily} covers per day max`,
-      'Basic tool usage',
+      '3 images/day + 1 video/day',
+      '10 images/month + 5 videos/month',
+      'Basic templates',
       'No watermark',
       'All platform sizes',
       'Email support',
       'Personal use only'
     ],
     limitations: [
-      `Daily limit: ${config.limits.free.daily} covers`,
-      `Monthly limit: ${config.limits.free.monthly} covers`,
+      'Daily: 3 images + 1 video',
+      'Monthly: 10 images + 5 videos',
       'No commercial usage'
     ],
     cta: 'Get Started',
@@ -57,15 +57,15 @@ const tiers = [
   {
     id: 'pro',
     name: 'Pro',
-    price: '$9',
+    price: '$16.99',
     period: 'per month',
     description: 'Ideal for regular content creators',
     icon: Zap,
     features: [
-      `${config.limits.pro.monthly} covers per month`,
-      'All tool usage',
-      'No watermark',
-      'All platform sizes',
+      '100 images/month',
+      '30 videos/month',
+      'All templates',
+      'High resolution exports',
       'Priority support',
       'Commercial usage rights'
     ],
@@ -77,17 +77,18 @@ const tiers = [
   {
     id: 'pro_plus',
     name: 'Pro+',
-    price: '$19',
+    price: '$29.99',
     period: 'per month',
     description: 'For professional creators and teams',
     icon: Crown,
     features: [
-      `${config.limits.pro_plus.monthly} covers per month`,
-      'All tool usage',
-      'No watermark',
-      'Full commercial license',
-      'Custom brand templates',
-      'Dedicated support'
+      '200 images/month',
+      '60 videos/month',
+      'Everything in Pro',
+      'Bulk generation',
+      'Custom templates',
+      'Dedicated support',
+      'Commercial license'
     ],
     limitations: [],
     cta: 'Get Started',
