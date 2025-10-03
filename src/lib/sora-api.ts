@@ -1,11 +1,20 @@
-export interface SoraCreateTaskInput {
+export interface SoraTextToVideoInput {
   prompt: string
   aspect_ratio?: 'portrait' | 'landscape'
   quality?: 'standard' | 'hd'
 }
 
+export interface SoraImageToVideoInput {
+  prompt?: string
+  image_url: string
+  aspect_ratio?: 'portrait' | 'landscape'
+  quality?: 'standard' | 'hd'
+}
+
+export type SoraCreateTaskInput = SoraTextToVideoInput | SoraImageToVideoInput
+
 export interface SoraCreateTaskRequest {
-  model: 'sora-2-text-to-video'
+  model: 'sora-2-text-to-video' | 'sora-2-image-to-video'
   input: SoraCreateTaskInput
   callBackUrl?: string
 }
@@ -56,6 +65,7 @@ export class SoraApiError extends Error {
 
 export async function createSoraTask(
   input: SoraCreateTaskInput,
+  mode: 'text-to-video' | 'image-to-video' = 'text-to-video',
   callBackUrl?: string
 ): Promise<string> {
   const apiKey = process.env.KIE_API_KEY
@@ -64,8 +74,10 @@ export async function createSoraTask(
     throw new SoraApiError(500, 'KIE_API_KEY is not configured')
   }
 
+  const model = mode === 'text-to-video' ? 'sora-2-text-to-video' : 'sora-2-image-to-video'
+  
   const request: SoraCreateTaskRequest = {
-    model: 'sora-2-text-to-video',
+    model,
     input,
     ...(callBackUrl && { callBackUrl })
   }

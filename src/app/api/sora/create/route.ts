@@ -4,29 +4,71 @@ import { createSoraTask, SoraApiError } from '@/lib/sora-api'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { prompt, aspect_ratio, quality } = body
+    const { mode, prompt, image_url, aspect_ratio, quality } = body
 
-    if (!prompt || typeof prompt !== 'string') {
+    const generationMode = mode || 'text-to-video'
+
+    if (generationMode === 'text-to-video') {
+      // Text-to-video validation
+      if (!prompt || typeof prompt !== 'string') {
+        return NextResponse.json(
+          { error: 'Prompt is required for text-to-video' },
+          { status: 400 }
+        )
+      }
+
+      if (prompt.length > 5000) {
+        return NextResponse.json(
+          { error: 'Prompt must be 5000 characters or less' },
+          { status: 400 }
+        )
+      }
+
+      const taskId = await createSoraTask(
+        {
+          prompt,
+          aspect_ratio: aspect_ratio || 'landscape',
+          quality: quality || 'standard'
+        },
+        'text-to-video'
+      )
+
+      return NextResponse.json({ taskId })
+
+    } else if (generationMode === 'image-to-video') {
+      // Image-to-video validation
+      if (!image_url || typeof image_url !== 'string') {
+        return NextResponse.json(
+          { error: 'Image URL is required for image-to-video' },
+          { status: 400 }
+        )
+      }
+
+      if (prompt && prompt.length > 5000) {
+        return NextResponse.json(
+          { error: 'Prompt must be 5000 characters or less' },
+          { status: 400 }
+        )
+      }
+
+      const taskId = await createSoraTask(
+        {
+          image_url,
+          ...(prompt && { prompt }),
+          aspect_ratio: aspect_ratio || 'landscape',
+          quality: quality || 'standard'
+        },
+        'image-to-video'
+      )
+
+      return NextResponse.json({ taskId })
+
+    } else {
       return NextResponse.json(
-        { error: 'Prompt is required' },
+        { error: 'Invalid mode. Must be text-to-video or image-to-video' },
         { status: 400 }
       )
     }
-
-    if (prompt.length > 5000) {
-      return NextResponse.json(
-        { error: 'Prompt must be 5000 characters or less' },
-        { status: 400 }
-      )
-    }
-
-    const taskId = await createSoraTask({
-      prompt,
-      aspect_ratio: aspect_ratio || 'landscape',
-      quality: quality || 'standard'
-    })
-
-    return NextResponse.json({ taskId })
 
   } catch (error) {
     console.error('Sora create task error:', error)
