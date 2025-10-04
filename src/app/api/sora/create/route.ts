@@ -132,12 +132,10 @@ async function handler(request: AuthenticatedRequest) {
         'text-to-video'
       )
       
-      // Increment video usage count
-      if (authConfig.USE_BESTAUTH && user) {
-        await bestAuthSubscriptionService.incrementUserVideoUsage(user.id)
-      }
+      // Note: Usage tracking moved to query endpoint on successful completion
+      // This ensures users are only charged for successful video generations
 
-      return NextResponse.json({ taskId })
+      return NextResponse.json({ taskId, userId: user.id })
 
     } else if (generationMode === 'image-to-video') {
       // Image-to-video validation
@@ -260,12 +258,10 @@ async function handler(request: AuthenticatedRequest) {
         'image-to-video'
       )
       
-      // Increment video usage count
-      if (authConfig.USE_BESTAUTH && user) {
-        await bestAuthSubscriptionService.incrementUserVideoUsage(user.id)
-      }
+      // Note: Usage tracking moved to query endpoint on successful completion
+      // This ensures users are only charged for successful video generations
 
-      return NextResponse.json({ taskId })
+      return NextResponse.json({ taskId, userId: user.id })
 
     } else {
       return NextResponse.json(

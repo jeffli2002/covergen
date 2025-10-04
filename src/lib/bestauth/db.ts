@@ -1220,4 +1220,47 @@ export const db = {
       return data
     },
   },
+
+  // Video task tracking (to prevent double-charging)
+  videoTasks: {
+    async findByTaskId(taskId: string): Promise<any | null> {
+      const { data, error } = await getDb()
+        .from('sora_video_tasks')
+        .select('*')
+        .eq('task_id', taskId)
+        .maybeSingle()
+      
+      if (error) {
+        console.error('[videoTasks.findByTaskId] Error:', error)
+        return null
+      }
+      
+      return data
+    },
+
+    async create(taskData: {
+      taskId: string
+      userId: string
+      status: string
+      createdAt: Date
+    }): Promise<any> {
+      const { data, error } = await getDb()
+        .from('sora_video_tasks')
+        .insert({
+          task_id: taskData.taskId,
+          user_id: taskData.userId,
+          status: taskData.status,
+          created_at: taskData.createdAt.toISOString(),
+        })
+        .select()
+        .maybeSingle()
+      
+      if (error) {
+        console.error('[videoTasks.create] Error:', error)
+        throw error
+      }
+      
+      return data
+    },
+  },
 }
