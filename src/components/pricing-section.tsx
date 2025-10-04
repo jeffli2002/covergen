@@ -40,7 +40,7 @@ const tiers = [
       '3 images/day + 1 video/day',
       '10 images/month + 5 videos/month',
       'Basic templates',
-      'No watermark',
+      'No watermark on images',
       'All platform sizes',
       'Email support',
       'Personal use only'
@@ -276,7 +276,7 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
         <div className="text-center mb-12">
           <h2 className="text-2xl font-light mb-4 text-gray-900">Choose Your Plan</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Choose the plan that works best for you. All images are watermark-free.
+            Choose the plan that works best for you. All generated images are watermark-free.
           </p>
         </div>
 
@@ -448,7 +448,7 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
         {/* Additional info */}
         <div className="text-center mt-12 space-y-4">
           <p className="text-sm text-gray-600">
-            All plans include watermark-free images for professional use.
+            All plans include watermark-free images for professional use (videos may include watermarks).
           </p>
           <div className="flex justify-center gap-8 text-sm text-gray-600">
             <span>✓ Cancel anytime</span>

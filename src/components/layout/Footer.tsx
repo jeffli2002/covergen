@@ -209,6 +209,11 @@ export default function Footer({ locale, translations: t }: FooterProps) {
                 </Link>
               </li>
               <li>
+                <Link href={`/${locale}/sora2-video`} className="hover:text-blue-600 transition-colors">
+                  Sora 2 Video
+                </Link>
+              </li>
+              <li>
                 <Link href={`/${locale}/tutorials`} className="hover:text-blue-600 transition-colors">
                   Tutorials
                 </Link>

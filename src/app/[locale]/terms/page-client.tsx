@@ -154,7 +154,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                     <ul className="space-y-1 text-sm text-gray-600">
                       <li>✓ 10 images + 5 videos per month</li>
                       <li>✓ 3 images + 1 video per day max</li>
-                      <li>✓ No watermark</li>
+                      <li>✓ No watermark on images</li>
                       <li>✓ All platform sizes</li>
                       <li>✓ Email support</li>
                       <li>✓ Personal use only</li>
@@ -165,7 +165,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                     <p className="text-sm font-medium text-gray-900 mb-2">$16.99/month</p>
                     <ul className="space-y-1 text-sm text-gray-600">
                       <li>✓ 100 images + 30 videos per month</li>
-                      <li>✓ No watermark</li>
+                      <li>✓ No watermark on images</li>
                       <li>✓ All platform sizes</li>
                       <li>✓ Priority support</li>
                       <li>✓ Commercial usage rights</li>
@@ -176,7 +176,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                     <p className="text-sm font-medium text-gray-900 mb-2">$29.99/month</p>
                     <ul className="space-y-1 text-sm text-gray-600">
                       <li>✓ 200 images + 60 videos per month</li>
-                      <li>✓ No watermark</li>
+                      <li>✓ No watermark on images</li>
                       <li>✓ Full commercial license</li>
                       <li>✓ Custom brand templates</li>
                       <li>✓ Dedicated support</li>
@@ -339,7 +339,7 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
 
             <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
               <p className="text-sm text-amber-800">
-                <strong>Important:</strong> Usage rights are tied to your subscription status. Free plan users are limited to personal use only. Upgrade to Pro or Pro+ for commercial usage rights. AI-generated content may include watermarks as required by law.
+                <strong>Important:</strong> Usage rights are tied to your subscription status. Free plan users are limited to personal use only. Upgrade to Pro or Pro+ for commercial usage rights. All generated images are watermark-free, while AI-generated videos may include watermarks as required by law.
               </p>
             </div>
 
