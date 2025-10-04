@@ -31,16 +31,47 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Convert to base64 data URL
+    // Convert to base64
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
     const base64 = buffer.toString('base64')
-    const dataUrl = `data:${file.type};base64,${base64}`
 
-    // Generate a unique ID for this image
+    // Upload to imgbb (free image hosting)
+    const IMGBB_API_KEY = process.env.IMGBB_API_KEY || '3e3e77bd5f717c60d470c01d0dd2e402' // Free public API key
+    
+    try {
+      const formData = new FormData()
+      formData.append('image', base64)
+      
+      const imgbbResponse = await fetch(
+        `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,
+        {
+          method: 'POST',
+          body: formData
+        }
+      )
+      
+      const imgbbData = await imgbbResponse.json()
+      
+      if (imgbbData.success && imgbbData.data?.url) {
+        console.log('[Upload Image] Successfully uploaded to imgbb:', imgbbData.data.url)
+        return NextResponse.json({ 
+          imageUrl: imgbbData.data.url,
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type
+        })
+      }
+      
+      console.error('[Upload Image] imgbb upload failed:', imgbbData)
+    } catch (imgbbError) {
+      console.error('[Upload Image] imgbb error:', imgbbError)
+    }
+    
+    // Fallback: use temporary storage
+    const dataUrl = `data:${file.type};base64,${base64}`
     const imageId = `${Date.now()}-${Math.random().toString(36).substring(7)}`
     
-    // Store the image temporarily
     const storeResponse = await fetch(
       `${request.nextUrl.origin}/api/sora/temp-image/${imageId}`,
       {
@@ -55,7 +86,6 @@ export async function POST(request: NextRequest) {
     
     if (!storeResponse.ok) {
       console.error('[Upload Image] Failed to store image temporarily')
-      // Fall back to data URL if storage fails
       return NextResponse.json({ 
         imageUrl: dataUrl,
         fileName: file.name,
@@ -64,7 +94,6 @@ export async function POST(request: NextRequest) {
       })
     }
     
-    // Return the public URL
     const publicUrl = `${request.nextUrl.origin}/api/sora/temp-image/${imageId}`
     
     return NextResponse.json({ 
