@@ -237,9 +237,12 @@ async function handler(request: AuthenticatedRequest) {
         )
       }
 
+      console.log('[Sora API] Waiting 2 seconds for global CDN propagation...')
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
       const taskId = await createSoraTask(
         {
-          prompt,  // Required field comes first
+          prompt,
           image_urls: [cleanImageUrl],
           aspect_ratio: aspect_ratio || 'landscape',
           quality: quality || 'standard'

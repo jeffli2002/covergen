@@ -117,17 +117,19 @@ export async function POST(request: NextRequest) {
         const cloudinaryData = await cloudinaryResponse.json()
         
         if (cloudinaryData.secure_url) {
-          const imageUrl = cloudinaryData.secure_url.trim() // Remove any whitespace
+          const imageUrl = cloudinaryData.secure_url.trim()
           console.log('[Upload Image] Successfully uploaded to Cloudinary:', imageUrl)
           
-          // Validate the URL is immediately accessible with retry (prevents Sora API errors later)
+          console.log('[Upload Image] Waiting 3 seconds for CDN propagation...')
+          await new Promise(resolve => setTimeout(resolve, 3000))
+          
           let validated = false
-          for (let attempt = 1; attempt <= 3; attempt++) {
+          for (let attempt = 1; attempt <= 5; attempt++) {
             try {
               const validationResponse = await fetch(imageUrl, { 
                 method: 'GET',
                 headers: { 'Range': 'bytes=0-1023' },
-                signal: AbortSignal.timeout(10000)
+                signal: AbortSignal.timeout(15000)
               })
               
               if (validationResponse.ok || validationResponse.status === 206) {
@@ -141,7 +143,7 @@ export async function POST(request: NextRequest) {
               console.warn(`[Upload Image] Cloudinary URL validation error attempt ${attempt}:`, validationError)
             }
             
-            if (attempt < 3) {
+            if (attempt < 5) {
               await new Promise(resolve => setTimeout(resolve, attempt * 1000))
             }
           }
@@ -154,7 +156,11 @@ export async function POST(request: NextRequest) {
               fileType: file.type
             })
           } else {
-            console.error('[Upload Image] Cloudinary URL never became accessible, trying fallback...')
+            console.error('[Upload Image] Cloudinary URL never became accessible after 5 attempts')
+            return NextResponse.json(
+              { error: 'Image uploaded but not yet accessible. Please try again in a few seconds.' },
+              { status: 503 }
+            )
           }
         }
         
