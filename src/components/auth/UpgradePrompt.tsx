@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Sparkles, Zap, Shield, Check } from 'lucide-react'
 import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
+import { getPlanByType } from '@/lib/subscription-plans'
 import { usePathname } from 'next/navigation'
 
 interface UpgradePromptProps {
@@ -28,6 +29,11 @@ export default function UpgradePrompt({
 }: UpgradePromptProps) {
   // Get subscription configuration
   const config = getClientSubscriptionConfig()
+  
+  // Get Pro plan pricing
+  const proPlan = getPlanByType('pro')
+  const proPrice = proPlan?.price || 16.99
+  const proPriceDisplay = proPlan?.priceDisplay || `$${proPrice}/mo`
   
   // Get current locale from pathname
   const pathname = usePathname()
@@ -89,10 +95,9 @@ export default function UpgradePrompt({
               Upgrade to Pro
             </h3>
             <div className="flex items-center justify-center gap-2">
-              <span className="text-3xl font-bold text-purple-600">$9.99</span>
-              <span className="text-gray-600">/month</span>
+              <span className="text-3xl font-bold text-purple-600">{proPriceDisplay}</span>
             </div>
-            <Badge className="mt-2 bg-purple-500">SPECIAL OFFER</Badge>
+            {proPrice < 20 && <Badge className="mt-2 bg-purple-500">SPECIAL OFFER</Badge>}
           </div>
 
           <div className="space-y-3">
