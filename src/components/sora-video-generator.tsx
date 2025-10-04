@@ -87,7 +87,11 @@ export default function SoraVideoGenerator() {
       let imageUrl = ''
 
       // Upload image if in image-to-video mode
-      if (mode === 'image-to-video' && imageFile) {
+      if (mode === 'image-to-video') {
+        if (!imageFile) {
+          throw new Error('Please select an image for image-to-video generation')
+        }
+
         setIsUploading(true)
         const uploadFormData = new FormData()
         uploadFormData.append('image', imageFile)
@@ -121,13 +125,22 @@ export default function SoraVideoGenerator() {
 
       if (mode === 'text-to-video') {
         requestBody.prompt = prompt.trim()
+        console.log('[Sora] text-to-video request:', { prompt: prompt.trim().substring(0, 50) + '...' })
       } else {
+        if (!imageUrl) {
+          throw new Error('Image URL is missing after upload')
+        }
         requestBody.image_url = imageUrl
-        console.log('Sending image_url to API:', imageUrl)
+        console.log('[Sora] image-to-video request:', { 
+          imageUrl: imageUrl.substring(0, 50) + '...',
+          hasPrompt: !!prompt.trim()
+        })
         if (prompt.trim()) {
           requestBody.prompt = prompt.trim()
         }
       }
+
+      console.log('[Sora] Creating task with body:', { ...requestBody, image_url: requestBody.image_url ? 'SET' : 'MISSING' })
 
       const createResponse = await fetch('/api/sora/create', {
         method: 'POST',

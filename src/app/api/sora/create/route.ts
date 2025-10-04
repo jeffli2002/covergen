@@ -38,8 +38,9 @@ export async function POST(request: NextRequest) {
     } else if (generationMode === 'image-to-video') {
       // Image-to-video validation
       if (!image_url || typeof image_url !== 'string') {
+        console.error('[Sora API] image-to-video validation failed:', { image_url, type: typeof image_url })
         return NextResponse.json(
-          { error: 'Image URL is required for image-to-video' },
+          { error: 'image_url is required for image-to-video generation' },
           { status: 400 }
         )
       }
