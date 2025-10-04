@@ -96,17 +96,54 @@ export default function SoraVideoGenerator() {
 
       // Upload image if in image-to-video mode
       if (mode === 'image-to-video') {
+        setIsUploading(true)
+        
         // Check if using a local Next.js path (example images)
         if (imagePreview && imagePreview.startsWith('/')) {
-          // Convert local path to full public URL
-          const fullUrl = `${window.location.origin}${imagePreview}`
-          console.log('[Sora] Converting local path to full URL:', { imagePreview, fullUrl })
-          imageUrl = fullUrl
+          console.log('[Sora] Example image detected, fetching and uploading:', imagePreview)
+          
+          try {
+            // Fetch the example image from server
+            const imageResponse = await fetch(imagePreview)
+            if (!imageResponse.ok) {
+              throw new Error(`Failed to fetch example image: ${imageResponse.status}`)
+            }
+            
+            // Convert to blob
+            const blob = await imageResponse.blob()
+            
+            // Upload to Cloudinary
+            const uploadFormData = new FormData()
+            uploadFormData.append('image', blob, 'example-image.jpg')
+
+            const uploadResponse = await fetch('/api/sora/upload-image', {
+              method: 'POST',
+              body: uploadFormData
+            })
+
+            const uploadData = await uploadResponse.json()
+            console.log('[Sora] Example image upload response:', { ok: uploadResponse.ok, data: uploadData })
+
+            if (!uploadResponse.ok) {
+              throw new Error(uploadData.error || 'Failed to upload example image')
+            }
+
+            if (!uploadData.imageUrl) {
+              throw new Error('Upload succeeded but no image URL returned')
+            }
+
+            imageUrl = uploadData.imageUrl
+            console.log('[Sora] Example image uploaded to Cloudinary:', imageUrl)
+          } catch (error) {
+            console.error('[Sora] Failed to process example image:', error)
+            setIsUploading(false)
+            throw new Error(`Failed to process example image: ${error instanceof Error ? error.message : 'Unknown error'}`)
+          }
         } else if (!imageFile) {
+          setIsUploading(false)
           throw new Error('Please select an image for image-to-video generation')
         } else {
           // Upload user-selected image
-          setIsUploading(true)
           const uploadFormData = new FormData()
           uploadFormData.append('image', imageFile)
 
@@ -120,18 +157,21 @@ export default function SoraVideoGenerator() {
 
           if (!uploadResponse.ok) {
             console.error('[Sora] Upload failed:', uploadData)
+            setIsUploading(false)
             throw new Error(uploadData.error || 'Failed to upload image')
           }
 
           if (!uploadData.imageUrl) {
             console.error('[Sora] Upload response missing imageUrl:', uploadData)
+            setIsUploading(false)
             throw new Error('Upload succeeded but no image URL returned')
           }
 
           imageUrl = uploadData.imageUrl
           console.log('[Sora] Image uploaded successfully, URL length:', imageUrl.length)
-          setIsUploading(false)
         }
+        
+        setIsUploading(false)
       }
 
       // Create video generation task
