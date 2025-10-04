@@ -319,9 +319,9 @@ export default function SoraVideoGenerator() {
             <Video className="w-4 h-4 mr-2" />
             Text to Video
           </TabsTrigger>
-          <TabsTrigger value="image-to-video" className="font-light" disabled>
+          <TabsTrigger value="image-to-video" className="font-light">
             <ImageIcon className="w-4 h-4 mr-2" />
-            Image to Video (Coming Soon)
+            Image to Video
           </TabsTrigger>
         </TabsList>
 
@@ -388,7 +388,7 @@ export default function SoraVideoGenerator() {
 
               <div className="space-y-2">
                 <label className="text-sm font-light text-gray-700">
-                  Motion Prompt <span className="text-gray-400">(Optional)</span>
+                  Motion Prompt <span className="text-red-500">*</span>
                 </label>
                 <Textarea
                   placeholder={imageDefaultPrompt}
