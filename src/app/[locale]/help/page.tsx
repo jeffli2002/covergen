@@ -108,6 +108,10 @@ const faqCategories = [
       {
         question: 'What makes Sora 2 different from other AI video tools?',
         answer: 'Sora 2 offers superior video quality with realistic motion, better physics understanding, and consistent character/scene coherence. It creates longer, more complex videos with professional-grade output suitable for content creators and businesses.'
+      },
+      {
+        question: 'What images are allowed for image-to-video generation?',
+        answer: '⚠️ IMPORTANT: OpenAI has strict copyright detection. Your images WILL BE REJECTED if they contain: copyrighted material, logos/trademarks, recognizable people/celebrities, or professionally produced content. ✓ Use ONLY: your own original photos, AI-generated images, or properly licensed stock images. Avoid any content that appears similar to copyrighted work.'
       }
     ]
   },

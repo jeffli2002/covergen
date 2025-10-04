@@ -1323,6 +1323,26 @@ Sora 2 interprets prompts with remarkable sophistication:
 - Add finishing touches if needed
 - Publish to target platforms
 
+### ⚠️ Critical: Image Requirements for Image-to-Video
+
+**OpenAI Copyright Detection**
+
+OpenAI's Sora 2 has extremely strict copyright detection for image-to-video generation. Your images WILL BE REJECTED if they contain:
+
+- **Copyrighted material** - Any professionally produced images, stock photos without licenses, or content that appears copyrighted
+- **Logos and trademarks** - Brand logos, product packaging, or trademarked designs
+- **Recognizable people** - Celebrities, public figures, or identifiable individuals
+- **Professional photography** - Images that look like they were professionally shot or edited
+
+**What Images Work:**
+- ✓ Your own original photos taken with your phone/camera
+- ✓ AI-generated images from tools like DALL-E, Midjourney
+- ✓ Stock images with proper commercial licenses
+- ✓ Simple graphics and illustrations you created
+- ✓ Nature/landscape photos without people
+
+**Pro Tip:** When OpenAI flags your image as "potentially similar to copyrighted material," it's not a bug—it's their safety filter being very cautious. Always use images you have full rights to, and avoid anything that could be confused with copyrighted content.
+
 ### Resource Recommendations
 
 **Learning Materials**
