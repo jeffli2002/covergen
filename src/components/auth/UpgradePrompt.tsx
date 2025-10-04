@@ -32,6 +32,7 @@ export default function UpgradePrompt({
   
   // Get Pro plan pricing
   const proPlan = getPlanByType('pro')
+  const freePlan = getPlanByType('free')
   const proPrice = proPlan?.price || 16.99
   const proPriceDisplay = proPlan?.priceDisplay || `$${proPrice}/mo`
   
@@ -48,8 +49,15 @@ export default function UpgradePrompt({
   const proVideoLimit = proPlan?.limits.videos.monthly || 30
   const proPlusVideoLimit = proPlusPlan?.limits.videos.monthly || 60
   
+  // Get free tier limits for display
+  const freeVideoDaily = freePlan?.limits.videos.daily || 1
+  const freeVideoMonthly = freePlan?.limits.videos.monthly || 5
+  const freeImageDaily = freePlan?.limits.images.daily || 3
+  const freeImageMonthly = freePlan?.limits.images.monthly || 10
+  
   const features = type === 'video' 
     ? [
+        { icon: Zap, text: `${proImageLimit} images/month (Pro) or ${proPlusImageLimit}/month (Pro+)` },
         { icon: Zap, text: `${proVideoLimit} videos/month (Pro) or ${proPlusVideoLimit}/month (Pro+)` },
         { icon: Sparkles, text: 'Sora 2 AI video generation' },
         { icon: Shield, text: 'Commercial usage rights' },
@@ -83,7 +91,7 @@ export default function UpgradePrompt({
           </div>
           <p className="text-gray-600 text-sm mt-2">
             {!isAuthenticated 
-              ? `Please sign in to generate ${contentType}. Free users get ${dailyLimit} ${contentType} per day!`
+              ? `Please sign in to generate ${contentType}. Free users get ${type === 'video' ? freeVideoDaily : freeImageDaily} ${contentType}/day and ${type === 'video' ? freeVideoMonthly : freeImageMonthly} ${contentType}/month!`
               : isTrial 
               ? `You've used all ${dailyLimit} ${contentType} for today during your ${config.trialDays}-day free trial.`
               : `You've used all ${dailyLimit} free ${contentType} for today.`

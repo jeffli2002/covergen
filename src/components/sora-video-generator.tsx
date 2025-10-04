@@ -600,7 +600,7 @@ export default function SoraVideoGenerator() {
         <UpgradePrompt 
           onClose={() => setShowUpgradeModal(false)}
           dailyCount={limitInfo?.usage || 0}
-          dailyLimit={limitInfo?.limit || 0}
+          dailyLimit={limitInfo?.limit || 1}
           type="video"
           isAuthenticated={!!user}
         />
