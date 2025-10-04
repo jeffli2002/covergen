@@ -82,6 +82,13 @@ export async function createSoraTask(
     ...(callBackUrl && { callBackUrl })
   }
 
+  console.log('[Sora API] Creating task:', {
+    model,
+    inputKeys: Object.keys(input),
+    hasImageUrl: 'image_url' in input,
+    imageUrlLength: 'image_url' in input ? (input as any).image_url?.length : 0
+  })
+
   const response = await fetch(`${API_BASE_URL}/createTask`, {
     method: 'POST',
     headers: {
@@ -92,8 +99,15 @@ export async function createSoraTask(
   })
 
   const data: SoraCreateTaskResponse = await response.json()
+  
+  console.log('[Sora API] API response:', {
+    code: data.code,
+    msg: data.msg,
+    hasData: !!data.data
+  })
 
   if (data.code !== 200) {
+    console.error('[Sora API] API error response:', data)
     throw new SoraApiError(
       data.code,
       data.msg || 'Failed to create task',

@@ -72,17 +72,29 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('Sora create task error:', error)
-
+    console.error('[Sora API] Create task error:', error)
+    
     if (error instanceof SoraApiError) {
+      console.error('[Sora API] SoraApiError details:', {
+        code: error.code,
+        message: error.message,
+        details: error.details
+      })
       return NextResponse.json(
-        { error: error.message, code: error.code },
+        { error: error.message, code: error.code, details: error.details },
         { status: error.code >= 500 ? 500 : 400 }
       )
     }
 
+    // Log full error for debugging
+    console.error('[Sora API] Unexpected error:', {
+      name: (error as Error).name,
+      message: (error as Error).message,
+      stack: (error as Error).stack
+    })
+
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: (error as Error).message || 'Internal server error' },
       { status: 500 }
     )
   }
