@@ -1056,7 +1056,7 @@ export const db = {
           return 0
         }
         
-        return data?.[column] || 0
+        return (data as any)?.[column] || 0
       } catch (err) {
         console.error(`Error getting ${type} usage today:`, err)
         return 0
@@ -1081,7 +1081,7 @@ export const db = {
           return 0
         }
         
-        const total = (data || []).reduce((sum, row) => sum + (row[column] || 0), 0)
+        const total = (data || []).reduce((sum, row) => sum + ((row as any)[column] || 0), 0)
         return total
       } catch (err) {
         console.error(`Error getting monthly ${type} usage:`, err)
@@ -1112,7 +1112,7 @@ export const db = {
           .eq('date', today)
           .single()
         
-        return data?.[column] || amount
+        return (data as any)?.[column] || amount
       } catch (err) {
         console.error(`Error incrementing ${type} usage:`, err)
         return 0
