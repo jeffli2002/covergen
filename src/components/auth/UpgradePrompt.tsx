@@ -40,16 +40,24 @@ export default function UpgradePrompt({
   const locale = pathname.split('/')[1] || 'en' // Extract locale from path
   
   const contentType = type === 'video' ? 'videos' : 'images'
+  
+  // Get plan limits from subscription plans
+  const proPlusPlan = getPlanByType('pro_plus')
+  const proImageLimit = proPlan?.limits.images.monthly || 100
+  const proPlusImageLimit = proPlusPlan?.limits.images.monthly || 200
+  const proVideoLimit = proPlan?.limits.videos.monthly || 30
+  const proPlusVideoLimit = proPlusPlan?.limits.videos.monthly || 60
+  
   const features = type === 'video' 
     ? [
-        { icon: Zap, text: '30 videos/month (Pro) or 60/month (Pro+)' },
+        { icon: Zap, text: `${proVideoLimit} videos/month (Pro) or ${proPlusVideoLimit}/month (Pro+)` },
         { icon: Sparkles, text: 'Sora 2 AI video generation' },
         { icon: Shield, text: 'Commercial usage rights' },
         { icon: Check, text: 'HD quality exports' },
       ]
     : [
-        { icon: Zap, text: 'Unlimited daily generations' },
-        { icon: Sparkles, text: 'Priority AI processing' },
+        { icon: Zap, text: `${proImageLimit} images/month (Pro) or ${proPlusImageLimit}/month (Pro+)` },
+        { icon: Sparkles, text: 'Gemini 2.5 Flash AI generation' },
         { icon: Shield, text: 'Commercial usage rights' },
         { icon: Check, text: 'All platform sizes included' },
       ]
