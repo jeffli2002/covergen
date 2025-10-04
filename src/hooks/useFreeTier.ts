@@ -15,6 +15,15 @@ export function useFreeTier() {
       if (user) {
         setIsLoading(true)
         try {
+          const localUsage = getLocalUsage()
+          
+          if (localUsage > 0) {
+            for (let i = 0; i < localUsage; i++) {
+              await incrementUsage()
+            }
+            localStorage.removeItem('coverimage_usage')
+          }
+          
           const usage = await getUserUsageToday()
           setUsageToday(usage)
         } catch (error) {

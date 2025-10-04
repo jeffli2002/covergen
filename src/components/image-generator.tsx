@@ -65,10 +65,8 @@ export default function ImageGenerator() {
       return
     }
     
-    // Check free tier limits
+    // Check quota limits for both authenticated and unauthenticated users
     if (!canGenerate()) {
-      // Always show upgrade modal when hitting usage limit
-      // It will show "Try Again Tomorrow" option for both logged in and guest users
       setShowUpgradeModal(true)
       return
     }
@@ -170,13 +168,13 @@ export default function ImageGenerator() {
         if (response.status === 413) {
           throw new Error('Images are too large. Our compression reduced them but they\'re still too big. Please use smaller source images (under 5MB each).')
         } else if (response.status === 429) {
-          // Check if it's a daily limit error
+          // All 429 errors should show upgrade modal
+          // Both usage limits and rate limits can be resolved by upgrading tiers
+          setShowUpgradeModal(true)
           if (errorData?.limit_reached) {
-            // Show upgrade modal for limit reached
-            setShowUpgradeModal(true)
-            throw new Error(errorData.error || 'Daily generation limit reached. Please try it tomorrow or upgrade to Pro plan.')
+            throw new Error(errorData.error || 'Daily generation limit reached. Please try again tomorrow or upgrade to Pro plan.')
           }
-          throw new Error('Rate limit exceeded. Please wait a few minutes before trying again.')
+          throw new Error('Rate limit exceeded. Please wait a few minutes or upgrade for higher rate limits.')
         } else if (response.status === 401) {
           throw new Error('API authentication failed. Please contact support.')
         }
@@ -328,13 +326,17 @@ export default function ImageGenerator() {
         />
       )}
 
-      {/* Upgrade Modal */}
+      {/* Upgrade Modal - Only for 429 rate limit errors */}
       {showUpgradeModal && (
         <UpgradePrompt 
           onClose={() => setShowUpgradeModal(false)}
+          onSignIn={() => {
+            setShowUpgradeModal(false)
+            setShowAuthModal(true)
+          }}
           dailyCount={usageToday}
           dailyLimit={freeTierLimit}
-          // Don't pass onUpgrade - let UpgradePrompt handle the pricing redirect
+          isAuthenticated={!!user}
         />
       )}
     </div>
