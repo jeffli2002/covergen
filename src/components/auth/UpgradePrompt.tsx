@@ -11,6 +11,7 @@ import { usePathname } from 'next/navigation'
 interface UpgradePromptProps {
   onClose?: () => void
   onUpgrade?: () => void
+  onSignIn?: () => void
   dailyCount?: number
   dailyLimit?: number
   isTrial?: boolean
@@ -20,7 +21,8 @@ interface UpgradePromptProps {
 
 export default function UpgradePrompt({ 
   onClose, 
-  onUpgrade, 
+  onUpgrade,
+  onSignIn, 
   dailyCount = 3, 
   dailyLimit = 3, 
   isTrial = false,
@@ -132,14 +134,26 @@ export default function UpgradePrompt({
               <>
                 <Button 
                   className="w-full bg-purple-600 hover:bg-purple-700"
-                  onClick={() => window.location.href = `/${locale}?auth=signin`}
+                  onClick={() => {
+                    if (onSignIn) {
+                      onSignIn()
+                    } else {
+                      window.location.href = `/${locale}?auth=signin`
+                    }
+                  }}
                 >
                   Sign In
                 </Button>
                 <Button 
                   variant="outline" 
                   className="w-full"
-                  onClick={() => window.location.href = `/${locale}?auth=signup`}
+                  onClick={() => {
+                    if (onSignIn) {
+                      onSignIn()
+                    } else {
+                      window.location.href = `/${locale}?auth=signup`
+                    }
+                  }}
                 >
                   Create Free Account
                 </Button>

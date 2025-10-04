@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Loader2, Video, Download, AlertCircle, Share2, Upload, ImageIcon, X } from 'lucide-react'
 import UpgradePrompt from '@/components/auth/UpgradePrompt'
+import AuthForm from '@/components/auth/AuthForm'
 import { useBestAuth } from '@/hooks/useBestAuth'
 
 interface GenerationResult {
@@ -32,6 +33,7 @@ export default function SoraVideoGenerator() {
   const [isUploading, setIsUploading] = useState(false)
   const [result, setResult] = useState<GenerationResult | null>(null)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [showAuthModal, setShowAuthModal] = useState(false)
   const [limitInfo, setLimitInfo] = useState<{ usage: number; limit: number } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -78,8 +80,8 @@ export default function SoraVideoGenerator() {
     
     // Check authentication FIRST before any validation
     if (!user) {
-      console.log('[Sora] User not authenticated, showing sign-in prompt')
-      setShowUpgradeModal(true)
+      console.log('[Sora] User not authenticated, showing auth modal')
+      setShowAuthModal(true)
       return
     }
     
@@ -379,6 +381,10 @@ export default function SoraVideoGenerator() {
     }
   }
 
+  const handleAuthSuccess = () => {
+    setShowAuthModal(false)
+  }
+
   const canGenerate = mode === 'text-to-video' 
     ? prompt.trim().length > 0 
     : imageFile !== null
@@ -595,10 +601,22 @@ export default function SoraVideoGenerator() {
         </div>
       </Tabs>
 
-      {/* Upgrade Modal */}
+      {/* Auth Modal - for unauthenticated users */}
+      {showAuthModal && (
+        <AuthForm 
+          onClose={() => setShowAuthModal(false)}
+          onAuthSuccess={handleAuthSuccess}
+        />
+      )}
+
+      {/* Upgrade Modal - for rate limit scenarios */}
       {showUpgradeModal && (
         <UpgradePrompt 
           onClose={() => setShowUpgradeModal(false)}
+          onSignIn={() => {
+            setShowUpgradeModal(false)
+            setShowAuthModal(true)
+          }}
           dailyCount={limitInfo?.usage || 0}
           dailyLimit={limitInfo?.limit || 1}
           type="video"
