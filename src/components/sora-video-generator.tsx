@@ -82,7 +82,7 @@ export default function SoraVideoGenerator() {
       return
     }
 
-    if (mode === 'image-to-video' && !imageFile) {
+    if (mode === 'image-to-video' && !imageFile && !imagePreview) {
       console.error('[Sora] Validation failed: No image file in image-to-video mode')
       alert('Please upload an image for image-to-video generation')
       return
@@ -96,35 +96,42 @@ export default function SoraVideoGenerator() {
 
       // Upload image if in image-to-video mode
       if (mode === 'image-to-video') {
-        if (!imageFile) {
+        // Check if using a local Next.js path (example images)
+        if (imagePreview && imagePreview.startsWith('/')) {
+          // Convert local path to full public URL
+          const fullUrl = `${window.location.origin}${imagePreview}`
+          console.log('[Sora] Converting local path to full URL:', { imagePreview, fullUrl })
+          imageUrl = fullUrl
+        } else if (!imageFile) {
           throw new Error('Please select an image for image-to-video generation')
+        } else {
+          // Upload user-selected image
+          setIsUploading(true)
+          const uploadFormData = new FormData()
+          uploadFormData.append('image', imageFile)
+
+          const uploadResponse = await fetch('/api/sora/upload-image', {
+            method: 'POST',
+            body: uploadFormData
+          })
+
+          const uploadData = await uploadResponse.json()
+          console.log('[Sora] Upload response:', { ok: uploadResponse.ok, status: uploadResponse.status, data: uploadData })
+
+          if (!uploadResponse.ok) {
+            console.error('[Sora] Upload failed:', uploadData)
+            throw new Error(uploadData.error || 'Failed to upload image')
+          }
+
+          if (!uploadData.imageUrl) {
+            console.error('[Sora] Upload response missing imageUrl:', uploadData)
+            throw new Error('Upload succeeded but no image URL returned')
+          }
+
+          imageUrl = uploadData.imageUrl
+          console.log('[Sora] Image uploaded successfully, URL length:', imageUrl.length)
+          setIsUploading(false)
         }
-
-        setIsUploading(true)
-        const uploadFormData = new FormData()
-        uploadFormData.append('image', imageFile)
-
-        const uploadResponse = await fetch('/api/sora/upload-image', {
-          method: 'POST',
-          body: uploadFormData
-        })
-
-        const uploadData = await uploadResponse.json()
-        console.log('[Sora] Upload response:', { ok: uploadResponse.ok, status: uploadResponse.status, data: uploadData })
-
-        if (!uploadResponse.ok) {
-          console.error('[Sora] Upload failed:', uploadData)
-          throw new Error(uploadData.error || 'Failed to upload image')
-        }
-
-        if (!uploadData.imageUrl) {
-          console.error('[Sora] Upload response missing imageUrl:', uploadData)
-          throw new Error('Upload succeeded but no image URL returned')
-        }
-
-        imageUrl = uploadData.imageUrl
-        console.log('[Sora] Image uploaded successfully, URL length:', imageUrl.length)
-        setIsUploading(false)
       }
 
       // Create video generation task
