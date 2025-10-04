@@ -136,14 +136,19 @@ export default function SoraVideoGenerator() {
         if (!imageUrl) {
           throw new Error('Image URL is missing after upload')
         }
+        
+        if (!prompt.trim()) {
+          throw new Error('Prompt is required for image-to-video')
+        }
+        
         requestBody.image_url = imageUrl
+        requestBody.prompt = prompt.trim()
+        
         console.log('[Sora] image-to-video request:', { 
           imageUrl: imageUrl.substring(0, 50) + '...',
-          hasPrompt: !!prompt.trim()
+          prompt: prompt.trim().substring(0, 30) + '...',
+          aspectRatio
         })
-        if (prompt.trim()) {
-          requestBody.prompt = prompt.trim()
-        }
       }
 
       console.log('[Sora] Creating task with body:', { ...requestBody, image_url: requestBody.image_url ? 'SET' : 'MISSING' })
@@ -293,9 +298,9 @@ export default function SoraVideoGenerator() {
             <Video className="w-4 h-4 mr-2" />
             Text to Video
           </TabsTrigger>
-          <TabsTrigger value="image-to-video" className="font-light">
+          <TabsTrigger value="image-to-video" className="font-light" disabled>
             <ImageIcon className="w-4 h-4 mr-2" />
-            Image to Video
+            Image to Video (Coming Soon)
           </TabsTrigger>
         </TabsList>
 
