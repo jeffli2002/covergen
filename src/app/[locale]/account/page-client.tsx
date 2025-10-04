@@ -20,6 +20,7 @@ import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
 import ActivationConfirmDialog from '@/components/subscription/ActivationConfirmDialog'
 import { useBestAuth } from '@/hooks/useBestAuth'
 import { authEvents } from '@/lib/events/auth-events'
+import { getPlanByType } from '@/lib/subscription-plans'
 
 // Simple date formatter to avoid date-fns dependency
 const formatDate = (date: Date) => {
@@ -491,34 +492,42 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   const isTrialing = subscription?.status === 'trialing'
   const config = getClientSubscriptionConfig()
   
-  // Get plan details using client-safe configuration
+  // Get plan details using subscription plans
+  const freePlan = getPlanByType('free')
+  const proPlan = getPlanByType('pro')
+  const proPlusPlan = getPlanByType('pro_plus')
+  
   const planDetailsMap = {
     free: {
       name: 'Free',
       price: 0,
       features: [
-        `${config.limits.free.monthly} covers per month`,
-        'No watermark',
+        `${freePlan?.limits.images.monthly || 10} images/month`,
+        `${freePlan?.limits.videos.monthly || 5} videos/month`,
+        'No watermark for images',
         'Basic platform sizes',
         'Email support'
       ]
     },
     pro: {
       name: 'Pro',
-      price: 900,
+      price: 1699,
       features: [
-        `${config.limits.pro.monthly} covers per month`,
-        'No watermark',
+        `${proPlan?.limits.images.monthly || 100} images/month`,
+        `${proPlan?.limits.videos.monthly || 30} videos/month`,
+        'No watermark for images',
         'All platform sizes',
-        'Priority support'
+        'Priority support',
+        'Commercial usage rights'
       ]
     },
     pro_plus: {
       name: 'Pro+',
-      price: 1900,
+      price: 2999,
       features: [
-        `${config.limits.pro_plus.monthly} covers per month`,
-        'No watermark',
+        `${proPlusPlan?.limits.images.monthly || 200} images/month`,
+        `${proPlusPlan?.limits.videos.monthly || 60} videos/month`,
+        'No watermark for images',
         'All platform sizes',
         'Advanced customization',
         'Commercial usage license',
@@ -543,9 +552,10 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   let usagePeriod: string
   
   if (isPaidUser) {
-    // Paid users: show monthly usage
+    // Paid users: show monthly usage (images + videos combined)
     currentUsage = usage?.thisMonth || 0
-    usageLimit = config.limits[currentPlan as keyof typeof config.limits].monthly
+    const plan = currentPlan === 'pro' ? proPlan : currentPlan === 'pro_plus' ? proPlusPlan : freePlan
+    usageLimit = (plan?.limits.images.monthly || 0) + (plan?.limits.videos.monthly || 0)
     usagePeriod = 'This Month'
   } else if (isTrialing) {
     // Trial users: show daily usage with trial limits
@@ -846,12 +856,24 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                 <div className="flex justify-between mb-2">
                   <span className="text-ui-sm text-gray-600">Image Covers Generated</span>
                   <span className="text-ui-sm">
-                    {currentUsage} / {usageLimit}
+                    {isPaidUser 
+                      ? `${usage?.images_this_month || 0} / ${currentPlan === 'pro' ? (proPlan?.limits.images.monthly || 100) : (proPlusPlan?.limits.images.monthly || 200)}`
+                      : `${usage?.images_today || 0} / ${freePlan?.limits.images.daily || 3}`
+                    }
                   </span>
                 </div>
-                <Progress value={usagePercentage} className="h-2" />
+                <Progress 
+                  value={isPaidUser 
+                    ? ((usage?.images_this_month || 0) / (currentPlan === 'pro' ? (proPlan?.limits.images.monthly || 100) : (proPlusPlan?.limits.images.monthly || 200))) * 100
+                    : ((usage?.images_today || 0) / (freePlan?.limits.images.daily || 3)) * 100
+                  } 
+                  className="h-2" 
+                />
                 <p className="text-ui-sm text-gray-600 mt-2">
-                  {usageLimit - currentUsage} images remaining {usagePeriod.toLowerCase()}
+                  {isPaidUser 
+                    ? `${(currentPlan === 'pro' ? (proPlan?.limits.images.monthly || 100) : (proPlusPlan?.limits.images.monthly || 200)) - (usage?.images_this_month || 0)} images remaining this month`
+                    : `${(freePlan?.limits.images.daily || 3) - (usage?.images_today || 0)} images remaining today`
+                  }
                 </p>
               </div>
 
@@ -860,15 +882,24 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                 <div className="flex justify-between mb-2">
                   <span className="text-ui-sm text-gray-600">Sora Videos Generated</span>
                   <span className="text-ui-sm">
-                    {usage?.videos_today || 0} / {currentPlan === 'pro_plus' ? 10 : currentPlan === 'pro' ? 3 : 1}
+                    {isPaidUser 
+                      ? `${usage?.videos_this_month || 0} / ${currentPlan === 'pro' ? (proPlan?.limits.videos.monthly || 30) : (proPlusPlan?.limits.videos.monthly || 60)}`
+                      : `${usage?.videos_today || 0} / ${freePlan?.limits.videos.daily || 1}`
+                    }
                   </span>
                 </div>
                 <Progress 
-                  value={((usage?.videos_today || 0) / (currentPlan === 'pro_plus' ? 10 : currentPlan === 'pro' ? 3 : 1)) * 100} 
+                  value={isPaidUser 
+                    ? ((usage?.videos_this_month || 0) / (currentPlan === 'pro' ? (proPlan?.limits.videos.monthly || 30) : (proPlusPlan?.limits.videos.monthly || 60))) * 100
+                    : ((usage?.videos_today || 0) / (freePlan?.limits.videos.daily || 1)) * 100
+                  } 
                   className="h-2" 
                 />
                 <p className="text-ui-sm text-gray-600 mt-2">
-                  {(currentPlan === 'pro_plus' ? 10 : currentPlan === 'pro' ? 3 : 1) - (usage?.videos_today || 0)} videos remaining today
+                  {isPaidUser 
+                    ? `${(currentPlan === 'pro' ? (proPlan?.limits.videos.monthly || 30) : (proPlusPlan?.limits.videos.monthly || 60)) - (usage?.videos_this_month || 0)} videos remaining this month`
+                    : `${(freePlan?.limits.videos.daily || 1) - (usage?.videos_today || 0)} videos remaining today`
+                  }
                 </p>
               </div>
 
