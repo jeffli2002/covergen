@@ -190,6 +190,10 @@ export default function SoraVideoGenerator() {
             const errorMessage = `${statusData.failMsg || 'Generation failed'}${statusData.failCode ? ` (Code: ${statusData.failCode})` : ''}`
             console.error('[Sora] Generation failed:', { failCode: statusData.failCode, failMsg: statusData.failMsg, param: statusData.param })
             
+            // Show detailed error for debugging
+            const debugInfo = `Error: ${errorMessage}\n\nRequest params:\n${statusData.param || 'N/A'}`
+            alert(debugInfo)
+            
             setResult({
               taskId,
               status: 'failed',
