@@ -62,13 +62,31 @@ export async function POST(request: NextRequest) {
         })
         
         if (imgbbData.success && imgbbData.data?.url) {
-          console.log('[Upload Image] Successfully uploaded to imgbb:', imgbbData.data.url)
-          return NextResponse.json({ 
-            imageUrl: imgbbData.data.url,
-            fileName: file.name,
-            fileSize: file.size,
-            fileType: file.type
-          })
+          const imgbbUrl = imgbbData.data.url
+          console.log('[Upload Image] Successfully uploaded to imgbb:', imgbbUrl)
+          
+          // Validate URL is accessible before returning (critical for Sora API)
+          try {
+            const validationResponse = await fetch(imgbbUrl, {
+              method: 'GET',
+              headers: { 'Range': 'bytes=0-1023' },
+              signal: AbortSignal.timeout(10000)
+            })
+            
+            if (validationResponse.ok || validationResponse.status === 206) {
+              console.log('[Upload Image] ImgBB URL validation passed')
+              return NextResponse.json({ 
+                imageUrl: imgbbUrl,
+                fileName: file.name,
+                fileSize: file.size,
+                fileType: file.type
+              })
+            } else {
+              console.warn('[Upload Image] ImgBB URL validation failed, trying Cloudinary...')
+            }
+          } catch (validationError) {
+            console.warn('[Upload Image] ImgBB URL validation error, trying Cloudinary:', validationError)
+          }
         }
         
         console.error('[Upload Image] imgbb upload failed:', imgbbData)
@@ -102,29 +120,42 @@ export async function POST(request: NextRequest) {
           const imageUrl = cloudinaryData.secure_url.trim() // Remove any whitespace
           console.log('[Upload Image] Successfully uploaded to Cloudinary:', imageUrl)
           
-          // Validate the URL is immediately accessible (prevents Sora API errors later)
-          try {
-            const validationResponse = await fetch(imageUrl, { 
-              method: 'HEAD',
-              signal: AbortSignal.timeout(8000)
-            })
-            
-            if (!validationResponse.ok) {
-              console.warn('[Upload Image] Cloudinary URL not immediately accessible:', validationResponse.status)
-              // Don't fail, but log for debugging
-            } else {
-              console.log('[Upload Image] Cloudinary URL validation passed')
+          // Validate the URL is immediately accessible with retry (prevents Sora API errors later)
+          let validated = false
+          for (let attempt = 1; attempt <= 3; attempt++) {
+            try {
+              const validationResponse = await fetch(imageUrl, { 
+                method: 'GET',
+                headers: { 'Range': 'bytes=0-1023' },
+                signal: AbortSignal.timeout(10000)
+              })
+              
+              if (validationResponse.ok || validationResponse.status === 206) {
+                console.log(`[Upload Image] Cloudinary URL validation passed (attempt ${attempt})`)
+                validated = true
+                break
+              } else {
+                console.warn(`[Upload Image] Cloudinary URL validation failed attempt ${attempt}:`, validationResponse.status)
+              }
+            } catch (validationError) {
+              console.warn(`[Upload Image] Cloudinary URL validation error attempt ${attempt}:`, validationError)
             }
-          } catch (validationError) {
-            console.warn('[Upload Image] Cloudinary URL validation failed (will still return URL):', validationError)
+            
+            if (attempt < 3) {
+              await new Promise(resolve => setTimeout(resolve, attempt * 1000))
+            }
           }
           
-          return NextResponse.json({ 
-            imageUrl,
-            fileName: file.name,
-            fileSize: file.size,
-            fileType: file.type
-          })
+          if (validated) {
+            return NextResponse.json({ 
+              imageUrl,
+              fileName: file.name,
+              fileSize: file.size,
+              fileType: file.type
+            })
+          } else {
+            console.error('[Upload Image] Cloudinary URL never became accessible, trying fallback...')
+          }
         }
         
         console.error('[Upload Image] Cloudinary upload failed:', cloudinaryData)
