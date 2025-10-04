@@ -164,6 +164,23 @@ export default function SoraVideoGenerator() {
 
       if (!createResponse.ok) {
         console.error('[Sora] Create task failed:', createData)
+        
+        // Handle limit reached with upgrade prompt
+        if (createResponse.status === 429 && createData.limitReached) {
+          const tier = createData.currentTier || 'free'
+          const upgradeUrl = tier === 'free' ? '/payment' : tier === 'pro' ? '/payment?plan=pro_plus' : null
+          
+          const message = createData.error || 'Video generation limit reached'
+          const confirmUpgrade = upgradeUrl && confirm(
+            `${message}\n\nWould you like to upgrade now?`
+          )
+          
+          if (confirmUpgrade && upgradeUrl) {
+            window.location.href = upgradeUrl
+            return
+          }
+        }
+        
         throw new Error(createData.error || createData.details?.msg || 'Failed to create task')
       }
 

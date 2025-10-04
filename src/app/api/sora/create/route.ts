@@ -1,12 +1,55 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSoraTask, SoraApiError } from '@/lib/sora-api'
+import { withAuth, AuthenticatedRequest } from '@/app/api/middleware/withAuth'
+import { authConfig } from '@/config/auth.config'
+import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 
-export async function POST(request: NextRequest) {
+async function handler(request: AuthenticatedRequest) {
   try {
     const body = await request.json()
     const { mode, prompt, image_url, aspect_ratio, quality } = body
 
     const generationMode = mode || 'text-to-video'
+    
+    // Get authenticated user
+    const user = request.user
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Authentication required for video generation' },
+        { status: 401 }
+      )
+    }
+
+    // Check video generation limits
+    if (authConfig.USE_BESTAUTH) {
+      const canGenerate = await bestAuthSubscriptionService.canUserGenerateVideo(user.id)
+      const subscription = await bestAuthSubscriptionService.getUserSubscription(user.id)
+      const videoUsageToday = await bestAuthSubscriptionService.getUserVideoUsageToday(user.id)
+      
+      if (!canGenerate) {
+        const limits = subscription 
+          ? bestAuthSubscriptionService.getSubscriptionLimits(subscription.tier as 'free' | 'pro' | 'pro_plus', subscription.is_trialing)
+          : { videos: { daily: 1, monthly: 30 } }
+        
+        const tier = subscription?.tier || 'free'
+        const upgradeMessage = tier === 'free' 
+          ? 'Upgrade to Pro for 3 videos/day or Pro+ for 10 videos/day.'
+          : tier === 'pro'
+          ? 'Upgrade to Pro+ for 10 videos/day.'
+          : 'You have reached your daily video limit.'
+        
+        return NextResponse.json(
+          { 
+            error: `Daily video generation limit reached (${videoUsageToday}/${limits.videos.daily} today). ${upgradeMessage} Or try again tomorrow.`,
+            limitReached: true,
+            currentTier: tier,
+            usage: videoUsageToday,
+            limit: limits.videos.daily
+          },
+          { status: 429 }
+        )
+      }
+    }
 
     if (generationMode === 'text-to-video') {
       // Text-to-video validation
@@ -32,6 +75,11 @@ export async function POST(request: NextRequest) {
         },
         'text-to-video'
       )
+      
+      // Increment video usage count
+      if (authConfig.USE_BESTAUTH && user) {
+        await bestAuthSubscriptionService.incrementUserVideoUsage(user.id)
+      }
 
       return NextResponse.json({ taskId })
 
@@ -72,6 +120,11 @@ export async function POST(request: NextRequest) {
         },
         'image-to-video'
       )
+      
+      // Increment video usage count
+      if (authConfig.USE_BESTAUTH && user) {
+        await bestAuthSubscriptionService.incrementUserVideoUsage(user.id)
+      }
 
       return NextResponse.json({ taskId })
 
@@ -110,3 +163,5 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+export const POST = withAuth(handler)

@@ -131,6 +131,25 @@ export class BestAuthSubscriptionService {
       return 0
     }
   }
+  
+  /**
+   * Increment user's video usage count
+   */
+  async incrementUserVideoUsage(userId: string, amount: number = 1): Promise<{ success: boolean; newCount?: number }> {
+    try {
+      const canGenerate = await this.canUserGenerateVideo(userId)
+      
+      if (!canGenerate) {
+        return { success: false }
+      }
+      
+      const newCount = await db.usage.incrementByType(userId, 'video', amount)
+      return { success: true, newCount }
+    } catch (error) {
+      console.error('Error incrementing video usage:', error)
+      return { success: false }
+    }
+  }
 
   /**
    * Increment user's usage count
