@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Loader2, Video, Download, AlertCircle, Share2, Upload, ImageIcon, X } from 'lucide-react'
 import UpgradePrompt from '@/components/auth/UpgradePrompt'
-import { useAuth } from '@/hooks/useAuth'
+import { useBestAuth } from '@/hooks/useBestAuth'
 
 interface GenerationResult {
   taskId: string
@@ -21,7 +21,7 @@ interface GenerationResult {
 type GenerationMode = 'text-to-video' | 'image-to-video'
 
 export default function SoraVideoGenerator() {
-  const { user } = useAuth()
+  const { user } = useBestAuth()
   const [mode, setMode] = useState<GenerationMode>('text-to-video')
   const [prompt, setPrompt] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
