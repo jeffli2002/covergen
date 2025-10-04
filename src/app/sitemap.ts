@@ -169,6 +169,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
         languages: generateLanguageAlternates('/platforms'),
       },
     },
+    {
+      url: `${baseUrl}/en/sora`,
+      lastModified: currentDate,
+      changeFrequency: 'daily' as const,
+      priority: 0.9,
+      alternates: {
+        languages: generateLanguageAlternates('/sora'),
+      },
+    },
   ]
   
   // Platform-specific pages with proper priorities and keywords focus

@@ -1,6 +1,7 @@
 # robots.txt for CoverGen Pro
-# Last updated: 2025-01-29
+# Last updated: 2025-10-04
 # AI-powered cover and thumbnail generator for content creators
+# Features: Sora 2 video generation, nano banana AI covers
 
 # Default - Allow all crawlers with content prioritization
 User-agent: *
@@ -19,6 +20,7 @@ Allow: /en/feedback
 Allow: /en/status
 Allow: /en/payment
 Allow: /en/account
+Allow: /en/sora
 
 # Explicitly allow popular platform pages (high-priority SEO targets)
 Allow: /en/platforms/youtube
