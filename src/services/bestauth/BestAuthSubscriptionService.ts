@@ -205,6 +205,8 @@ export class BestAuthSubscriptionService {
 
   /**
    * Check if user can generate image (hasn't hit image limits)
+   * For free users: Check BOTH daily and monthly limits
+   * For paid users: Check ONLY monthly limit (daily is set equal to monthly as placeholder)
    */
   async canUserGenerateImage(userId: string): Promise<boolean> {
     try {
@@ -212,10 +214,19 @@ export class BestAuthSubscriptionService {
       if (!subscription) return false
       
       const limits = this.getSubscriptionLimits(subscription.tier, subscription.is_trialing)
-      const usageToday = await db.usage.getTodayByType(userId, 'image')
+      const tier = subscription.tier
+      const isTrialing = subscription.is_trialing
+      
       const usageThisMonth = await db.usage.getMonthlyUsageByType(userId, 'image')
       
-      return usageToday < limits.images.daily && usageThisMonth < limits.images.monthly
+      // For free users or trial users, check both daily and monthly
+      if (tier === 'free' || isTrialing) {
+        const usageToday = await db.usage.getTodayByType(userId, 'image')
+        return usageToday < limits.images.daily && usageThisMonth < limits.images.monthly
+      }
+      
+      // For paid users (Pro/Pro+), only check monthly
+      return usageThisMonth < limits.images.monthly
     } catch (error) {
       console.error('Error checking image generation limit:', error)
       return false
@@ -224,6 +235,8 @@ export class BestAuthSubscriptionService {
 
   /**
    * Check if user can generate video (hasn't hit video limits)
+   * For free users: Check BOTH daily and monthly limits
+   * For paid users: Check ONLY monthly limit (daily is set equal to monthly as placeholder)
    */
   async canUserGenerateVideo(userId: string): Promise<boolean> {
     try {
@@ -231,10 +244,19 @@ export class BestAuthSubscriptionService {
       if (!subscription) return false
       
       const limits = this.getSubscriptionLimits(subscription.tier, subscription.is_trialing)
-      const usageToday = await db.usage.getTodayByType(userId, 'video')
+      const tier = subscription.tier
+      const isTrialing = subscription.is_trialing
+      
       const usageThisMonth = await db.usage.getMonthlyUsageByType(userId, 'video')
       
-      return usageToday < limits.videos.daily && usageThisMonth < limits.videos.monthly
+      // For free users or trial users, check both daily and monthly
+      if (tier === 'free' || isTrialing) {
+        const usageToday = await db.usage.getTodayByType(userId, 'video')
+        return usageToday < limits.videos.daily && usageThisMonth < limits.videos.monthly
+      }
+      
+      // For paid users (Pro/Pro+), only check monthly
+      return usageThisMonth < limits.videos.monthly
     } catch (error) {
       console.error('Error checking video generation limit:', error)
       return false

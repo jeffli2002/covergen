@@ -241,33 +241,49 @@ async function handler(request: AuthenticatedRequest) {
       
       // If user has reached their limit, return error
       if (!limitStatus.can_generate) {
-        // Determine which limit was hit
-        const dailyLimitHit = limitStatus.daily_usage >= limitStatus.daily_limit
-        const monthlyLimitHit = limitStatus.monthly_usage >= limitStatus.monthly_limit
-        
         let errorMessage = ''
         let limitType = ''
         
+        const tier = limitStatus.subscription_tier
+        const isPaidUser = tier === 'pro' || tier === 'pro_plus'
+        
         if (limitStatus.is_trial) {
-          errorMessage = `Trial limit reached (${limitStatus.trial_usage}/${limitStatus.trial_limit} images used). Upgrade to Pro plan to continue creating amazing covers!`
-          limitType = 'trial'
-        } else if (dailyLimitHit && monthlyLimitHit) {
-          // Both limits hit
-          errorMessage = limitStatus.subscription_tier === 'free'
-            ? `Daily limit reached (${limitStatus.daily_usage}/${limitStatus.daily_limit} today). Upgrade to Pro for ${limitStatus.daily_limit * 30} images/month or try again tomorrow.`
-            : `Both daily (${limitStatus.daily_usage}/${limitStatus.daily_limit}) and monthly (${limitStatus.monthly_usage}/${limitStatus.monthly_limit}) limits reached. ${limitStatus.subscription_tier === 'pro' ? 'Upgrade to Pro+ for more images.' : 'Try again tomorrow or next month.'}`
-          limitType = 'both'
-        } else if (dailyLimitHit) {
-          // Daily limit hit
-          errorMessage = `Daily limit reached (${limitStatus.daily_usage}/${limitStatus.daily_limit} images today). ${limitStatus.subscription_tier === 'free' ? 'Upgrade to Pro for more images or' : ''} Try again tomorrow.`
-          limitType = 'daily'
-        } else if (monthlyLimitHit) {
-          // Monthly limit hit
-          errorMessage = `Monthly limit reached (${limitStatus.monthly_usage}/${limitStatus.monthly_limit} images this month). ${limitStatus.subscription_tier === 'pro' ? 'Upgrade to Pro+ for more images.' : 'Try again next month.'}`
+          // Trial users
+          const dailyLimitHit = limitStatus.daily_usage >= limitStatus.daily_limit
+          const trialLimitHit = limitStatus.trial_usage >= limitStatus.trial_limit
+          
+          if (dailyLimitHit) {
+            errorMessage = `Daily trial limit reached (${limitStatus.daily_usage}/${limitStatus.daily_limit} images today). Try again tomorrow or upgrade to Pro plan!`
+            limitType = 'daily'
+          } else if (trialLimitHit) {
+            errorMessage = `Trial limit reached (${limitStatus.trial_usage}/${limitStatus.trial_limit} images used). Upgrade to Pro plan to continue!`
+            limitType = 'trial'
+          } else {
+            errorMessage = `Trial limit reached. Upgrade to Pro plan to continue!`
+            limitType = 'trial'
+          }
+        } else if (isPaidUser) {
+          // Paid users (Pro/Pro+) - ONLY check monthly limit
+          errorMessage = `Monthly limit reached (${limitStatus.monthly_usage}/${limitStatus.monthly_limit} images this month). ${tier === 'pro' ? 'Upgrade to Pro+ for 200 images/month.' : 'Try again next month.'}`
           limitType = 'monthly'
         } else {
-          errorMessage = `Generation limit reached. Please try again later or upgrade for more images.`
-          limitType = 'unknown'
+          // Free users - check both daily and monthly
+          const dailyLimitHit = limitStatus.daily_usage >= limitStatus.daily_limit
+          const monthlyLimitHit = limitStatus.monthly_usage >= limitStatus.monthly_limit
+          
+          if (dailyLimitHit && monthlyLimitHit) {
+            errorMessage = `Both daily (${limitStatus.daily_usage}/${limitStatus.daily_limit}) and monthly (${limitStatus.monthly_usage}/${limitStatus.monthly_limit}) limits reached. Upgrade to Pro for 100 images/month or try again tomorrow.`
+            limitType = 'both'
+          } else if (dailyLimitHit) {
+            errorMessage = `Daily limit reached (${limitStatus.daily_usage}/${limitStatus.daily_limit} images today). Upgrade to Pro for 100 images/month or try again tomorrow.`
+            limitType = 'daily'
+          } else if (monthlyLimitHit) {
+            errorMessage = `Monthly limit reached (${limitStatus.monthly_usage}/${limitStatus.monthly_limit} images this month). Upgrade to Pro for 100 images/month or try again next month.`
+            limitType = 'monthly'
+          } else {
+            errorMessage = `Generation limit reached. Upgrade to Pro for more images.`
+            limitType = 'unknown'
+          }
         }
           
         return NextResponse.json(

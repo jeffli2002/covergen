@@ -40,47 +40,44 @@ async function handler(request: AuthenticatedRequest) {
       if (!canGenerate) {
         const limits = subscription 
           ? bestAuthSubscriptionService.getSubscriptionLimits(subscription.tier as 'free' | 'pro' | 'pro_plus', subscription.is_trialing)
-          : { videos: { daily: 1, monthly: 30 } }
+          : { videos: { daily: 1, monthly: 5 } }
         
         const tier = subscription?.tier || 'free'
-        
-        // Determine which limit was hit
-        const dailyLimitHit = videoUsageToday >= limits.videos.daily
-        const monthlyLimitHit = videoUsageThisMonth >= limits.videos.monthly
+        const isTrialing = subscription?.is_trialing || false
+        const isPaidUser = tier === 'pro' || tier === 'pro_plus'
         
         let errorMessage = ''
         let limitType = ''
         
-        if (dailyLimitHit && monthlyLimitHit) {
-          // Both limits hit
-          const upgradeMessage = tier === 'free' 
-            ? 'Upgrade to Pro for 3 videos/day or Pro+ for 10 videos/day.'
-            : tier === 'pro'
-            ? 'Upgrade to Pro+ for 10 videos/day and higher monthly limits.'
-            : 'Try again tomorrow or next month.'
-          errorMessage = `Both daily (${videoUsageToday}/${limits.videos.daily}) and monthly (${videoUsageThisMonth}/${limits.videos.monthly}) video limits reached. ${upgradeMessage}`
-          limitType = 'both'
-        } else if (dailyLimitHit) {
-          // Daily limit hit
-          const upgradeMessage = tier === 'free' 
-            ? 'Upgrade to Pro for 3 videos/day or Pro+ for 10 videos/day.'
-            : tier === 'pro'
-            ? 'Upgrade to Pro+ for 10 videos/day.'
-            : ''
-          errorMessage = `Daily video limit reached (${videoUsageToday}/${limits.videos.daily} today). ${upgradeMessage} ${upgradeMessage ? 'Or try' : 'Try'} again tomorrow.`
-          limitType = 'daily'
-        } else if (monthlyLimitHit) {
-          // Monthly limit hit
-          const upgradeMessage = tier === 'pro' 
-            ? 'Upgrade to Pro+ for higher monthly limits.'
-            : tier === 'free'
-            ? 'Upgrade to Pro or Pro+ for more videos.'
-            : ''
-          errorMessage = `Monthly video limit reached (${videoUsageThisMonth}/${limits.videos.monthly} this month). ${upgradeMessage} ${upgradeMessage ? 'Or try' : 'Try'} again next month.`
+        if (isTrialing) {
+          // Trial users - check both daily and total trial limits
+          const dailyLimitHit = videoUsageToday >= limits.videos.daily
+          errorMessage = dailyLimitHit
+            ? `Daily trial video limit reached (${videoUsageToday}/${limits.videos.daily} videos today). Try again tomorrow or upgrade to Pro plan!`
+            : `Trial video limit reached (${videoUsageThisMonth}/${limits.videos.monthly} videos used). Upgrade to Pro plan to continue!`
+          limitType = dailyLimitHit ? 'daily' : 'trial'
+        } else if (isPaidUser) {
+          // Paid users (Pro/Pro+) - ONLY check monthly limit
+          errorMessage = `Monthly video limit reached (${videoUsageThisMonth}/${limits.videos.monthly} videos this month). ${tier === 'pro' ? 'Upgrade to Pro+ for 60 videos/month.' : 'Try again next month.'}`
           limitType = 'monthly'
         } else {
-          errorMessage = `Video generation limit reached. Please try again later or upgrade for more videos.`
-          limitType = 'unknown'
+          // Free users - check both daily and monthly
+          const dailyLimitHit = videoUsageToday >= limits.videos.daily
+          const monthlyLimitHit = videoUsageThisMonth >= limits.videos.monthly
+          
+          if (dailyLimitHit && monthlyLimitHit) {
+            errorMessage = `Both daily (${videoUsageToday}/${limits.videos.daily}) and monthly (${videoUsageThisMonth}/${limits.videos.monthly}) video limits reached. Upgrade to Pro for 30 videos/month or try again tomorrow.`
+            limitType = 'both'
+          } else if (dailyLimitHit) {
+            errorMessage = `Daily video limit reached (${videoUsageToday}/${limits.videos.daily} videos today). Upgrade to Pro for 30 videos/month or try again tomorrow.`
+            limitType = 'daily'
+          } else if (monthlyLimitHit) {
+            errorMessage = `Monthly video limit reached (${videoUsageThisMonth}/${limits.videos.monthly} videos this month). Upgrade to Pro for 30 videos/month or try again next month.`
+            limitType = 'monthly'
+          } else {
+            errorMessage = `Video generation limit reached. Upgrade to Pro for more videos.`
+            limitType = 'unknown'
+          }
         }
         
         return NextResponse.json(
