@@ -37,8 +37,38 @@ export async function POST(request: NextRequest) {
     const base64 = buffer.toString('base64')
     const dataUrl = `data:${file.type};base64,${base64}`
 
+    // Generate a unique ID for this image
+    const imageId = `${Date.now()}-${Math.random().toString(36).substring(7)}`
+    
+    // Store the image temporarily
+    const storeResponse = await fetch(
+      `${request.nextUrl.origin}/api/sora/temp-image/${imageId}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data: dataUrl,
+          contentType: file.type
+        })
+      }
+    )
+    
+    if (!storeResponse.ok) {
+      console.error('[Upload Image] Failed to store image temporarily')
+      // Fall back to data URL if storage fails
+      return NextResponse.json({ 
+        imageUrl: dataUrl,
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type
+      })
+    }
+    
+    // Return the public URL
+    const publicUrl = `${request.nextUrl.origin}/api/sora/temp-image/${imageId}`
+    
     return NextResponse.json({ 
-      imageUrl: dataUrl,
+      imageUrl: publicUrl,
       fileName: file.name,
       fileSize: file.size,
       fileType: file.type

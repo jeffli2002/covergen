@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
 
       const taskId = await createSoraTask(
         {
-          image_url,
+          image_urls: [image_url],  // Convert to array as required by API
           ...(prompt && { prompt }),
           aspect_ratio: aspect_ratio || 'landscape',
           quality: quality || 'standard'

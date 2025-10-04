@@ -6,7 +6,7 @@ export interface SoraTextToVideoInput {
 
 export interface SoraImageToVideoInput {
   prompt?: string
-  image_url: string
+  image_urls: string[]  // Changed from image_url to image_urls (array)
   aspect_ratio?: 'portrait' | 'landscape'
   quality?: 'standard' | 'hd'
 }
