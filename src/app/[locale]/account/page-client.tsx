@@ -496,7 +496,6 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
     free: {
       name: 'Free',
       price: 0,
-      credits: config.limits.free.monthly,
       features: [
         `${config.limits.free.monthly} covers per month`,
         'No watermark',
@@ -507,7 +506,6 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
     pro: {
       name: 'Pro',
       price: 900,
-      credits: config.limits.pro.monthly,
       features: [
         `${config.limits.pro.monthly} covers per month`,
         'No watermark',
@@ -518,7 +516,6 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
     pro_plus: {
       name: 'Pro+',
       price: 1900,
-      credits: config.limits.pro_plus.monthly,
       features: [
         `${config.limits.pro_plus.monthly} covers per month`,
         'No watermark',
@@ -533,7 +530,6 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   const planDetails = planDetailsMap[currentPlan as keyof typeof planDetailsMap] || {
     name: 'Free',
     price: 0,
-    credits: config.limits.free.monthly,
     features: []
   }
   
@@ -549,7 +545,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   if (isPaidUser) {
     // Paid users: show monthly usage
     currentUsage = usage?.thisMonth || 0
-    usageLimit = planDetails?.credits || config.limits[currentPlan as keyof typeof config.limits].monthly
+    usageLimit = config.limits[currentPlan as keyof typeof config.limits].monthly
     usagePeriod = 'This Month'
   } else if (isTrialing) {
     // Trial users: show daily usage with trial limits
@@ -855,7 +851,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                 </div>
                 <Progress value={usagePercentage} className="h-2" />
                 <p className="text-ui-sm text-gray-600 mt-2">
-                  {usageLimit - currentUsage} image credits remaining {usagePeriod.toLowerCase()}
+                  {usageLimit - currentUsage} images remaining {usagePeriod.toLowerCase()}
                 </p>
               </div>
 
@@ -872,7 +868,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                   className="h-2" 
                 />
                 <p className="text-ui-sm text-gray-600 mt-2">
-                  {(currentPlan === 'pro_plus' ? 10 : currentPlan === 'pro' ? 3 : 1) - (usage?.videos_today || 0)} video credits remaining today
+                  {(currentPlan === 'pro_plus' ? 10 : currentPlan === 'pro' ? 3 : 1) - (usage?.videos_today || 0)} videos remaining today
                 </p>
               </div>
 
@@ -880,7 +876,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                 <Alert className="border-orange-200 bg-orange-50">
                   <AlertCircle className="h-4 w-4 text-orange-600" />
                   <AlertDescription className="text-orange-800">
-                    You're running low on credits. {isTrialing ? 'Activate your plan' : 'Consider upgrading'} for more.
+                    You're running low on images. {isTrialing ? 'Activate your plan' : 'Consider upgrading'} for more.
                   </AlertDescription>
                 </Alert>
               )}

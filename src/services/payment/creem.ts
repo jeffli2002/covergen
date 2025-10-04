@@ -109,7 +109,6 @@ const getSubscriptionPlansWithConfig = () => {
       name: 'Free',
       price: 0,
       priceId: '', // No Creem price ID for free tier
-      credits: config.limits.free.monthly,
       features: [
         `${config.limits.free.monthly} covers per month`,
         'No watermark',
@@ -122,7 +121,6 @@ const getSubscriptionPlansWithConfig = () => {
       name: 'Pro',
       price: 1699, // $16.99 in cents
       priceId: CREEM_PRODUCTS.pro,
-      credits: config.limits.pro.monthly,
       features: [
         '100 images/month',
         '30 videos/month',
@@ -137,7 +135,6 @@ const getSubscriptionPlansWithConfig = () => {
       name: 'Pro+',
       price: 2999, // $29.99 in cents
       priceId: CREEM_PRODUCTS.pro_plus,
-      credits: config.limits.pro_plus.monthly,
       features: [
         '200 images/month',
         '60 videos/month',

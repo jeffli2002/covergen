@@ -64,9 +64,6 @@ export default function PlanSelector({
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-center text-sm text-gray-600 mb-2">
-                  {plan.credits || 10} credits/month
-                </p>
                 {isCurrentPlan && (
                   <Badge className="w-full justify-center">Current</Badge>
                 )}
@@ -106,9 +103,6 @@ export default function PlanSelector({
                 ${plan.price / 100}
                 <span className="text-sm font-normal text-gray-500">/month</span>
               </div>
-              <CardDescription>
-                {plan.credits || 10} credits per month
-              </CardDescription>
             </CardHeader>
 
             <CardContent className="space-y-4">

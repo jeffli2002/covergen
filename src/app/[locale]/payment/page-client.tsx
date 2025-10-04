@@ -565,13 +565,6 @@ export default function PaymentPageClient({
                 </CardHeader>
 
                 <CardContent className="space-y-4">
-                  <div className="text-center py-2 bg-gray-50 rounded-lg">
-                    <span className={`text-heading-4 ${plan.popular ? 'text-orange-600' : 'text-gray-700'}`}>
-                      {plan.credits}
-                    </span>
-                    <span className="text-gray-600 ml-1">credits/month</span>
-                  </div>
-
                   <ul className="space-y-3">
                     {plan.features.map((feature, index) => (
                       <li key={index} className="flex items-start gap-3">

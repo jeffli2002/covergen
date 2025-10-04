@@ -109,7 +109,6 @@ export default function PaymentSuccessClient({ locale, sessionId }: PaymentSucce
       case 'pro':
         return {
           name: 'Pro',
-          credits: 120,
           features: [
             'All platform sizes unlocked',
             'Priority support',
@@ -119,7 +118,6 @@ export default function PaymentSuccessClient({ locale, sessionId }: PaymentSucce
       case 'pro_plus':
         return {
           name: 'Pro+',
-          credits: 300,
           features: [
             'Everything in Pro',
             'Commercial license',
@@ -160,15 +158,6 @@ export default function PaymentSuccessClient({ locale, sessionId }: PaymentSucce
               </div>
             ) : planDetails ? (
               <>
-                {/* Credits Info */}
-                <div className="bg-gradient-to-r from-orange-100 to-red-100 rounded-lg p-6 text-center">
-                  <Sparkles className="w-8 h-8 text-orange-600 mx-auto mb-3" />
-                  <p className="text-2xl font-bold text-gray-900">
-                    {planDetails.credits} Credits
-                  </p>
-                  <p className="text-gray-600 mt-1">Available every month</p>
-                </div>
-
                 {/* Features */}
                 <div className="space-y-3">
                   <h3 className="font-semibold text-gray-900">What's included:</h3>
@@ -186,7 +175,7 @@ export default function PaymentSuccessClient({ locale, sessionId }: PaymentSucce
                 <div className="bg-blue-50 rounded-lg p-6">
                   <h3 className="font-semibold text-gray-900 mb-3">Next Steps:</h3>
                   <ol className="space-y-2 text-sm text-gray-700">
-                    <li>1. Start creating amazing covers with your new credits</li>
+                    <li>1. Start creating amazing covers with your subscription</li>
                     <li>2. Explore all platform sizes now available to you</li>
                     <li>3. Check out the batch generation feature</li>
                     <li>4. Contact support if you need any help</li>

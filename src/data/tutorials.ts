@@ -668,16 +668,16 @@ export const tutorialCategories: TutorialCategory[] = [
             description: 'Analyze which days and times you generate most covers to plan bulk creation sessions.'
           },
           {
-            title: 'Optimize Credit Usage',
+            title: 'Optimize Usage',
             description: 'Use draft mode for testing, and only generate final quality for approved concepts.'
           },
           {
-            title: 'Understand Rollover Policy',
-            description: 'Unused credits dont roll over, so plan your creation schedule throughout the month.'
+            title: 'Understand Limits',
+            description: 'Each plan has monthly limits for images and daily limits for videos. Plan your creation schedule accordingly.'
           },
           {
-            title: 'Purchase Additional Credits',
-            description: 'Buy one-time credit packs if you need extra covers without upgrading your plan.'
+            title: 'Upgrade When Needed',
+            description: 'If you need more images or videos, consider upgrading to Pro or Pro+ for higher monthly limits.'
           }
         ]
       }
