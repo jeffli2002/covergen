@@ -42,7 +42,7 @@ export default function PaymentCancelClient({ locale }: PaymentCancelClientProps
                 <h4 className="font-medium text-gray-900">Free Plan Includes:</h4>
                 <ul className="text-sm text-gray-600 space-y-1">
                   <li>• 10 covers per month</li>
-                  <li>• No watermarks</li>
+                  <li>• No watermarks for images</li>
                   <li>• Basic platform sizes</li>
                   <li>• Email support</li>
                 </ul>

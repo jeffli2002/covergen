@@ -103,6 +103,12 @@ export const CREEM_PRODUCTS = {
 // Note: To avoid circular dependencies, we'll use a getter function for dynamic values
 const getSubscriptionPlansWithConfig = () => {
   const config = getSubscriptionConfig()
+  
+  // Import subscription plans to get the actual limits
+  const { getPlanByType } = require('@/lib/subscription-plans')
+  const proPlan = getPlanByType('pro')
+  const proPlusPlan = getPlanByType('pro_plus')
+  
   return {
     free: {
       id: 'free',
@@ -111,7 +117,7 @@ const getSubscriptionPlansWithConfig = () => {
       priceId: '', // No Creem price ID for free tier
       features: [
         `${config.limits.free.monthly} covers per month`,
-        'No watermark',
+        'No watermark for images',
         'Basic platform sizes',
         'Email support'
       ]
@@ -122,9 +128,9 @@ const getSubscriptionPlansWithConfig = () => {
       price: 1699, // $16.99 in cents
       priceId: CREEM_PRODUCTS.pro,
       features: [
-        '100 images/month',
-        '30 videos/month',
-        'No watermark',
+        `${proPlan?.limits.images.monthly || 100} images/month`,
+        `${proPlan?.limits.videos.monthly || 30} videos/month`,
+        'No watermark for images',
         'All platform sizes',
         'Priority support',
         'Commercial usage rights'
@@ -136,9 +142,9 @@ const getSubscriptionPlansWithConfig = () => {
       price: 2999, // $29.99 in cents
       priceId: CREEM_PRODUCTS.pro_plus,
       features: [
-        '200 images/month',
-        '60 videos/month',
-        'No watermark',
+        `${proPlusPlan?.limits.images.monthly || 200} images/month`,
+        `${proPlusPlan?.limits.videos.monthly || 60} videos/month`,
+        'No watermark for images',
         'All platform sizes',
         'Advanced customization',
         'Commercial usage license',
