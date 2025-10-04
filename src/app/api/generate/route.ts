@@ -264,21 +264,26 @@ async function handler(request: AuthenticatedRequest) {
           }
         } else if (isPaidUser) {
           // Paid users (Pro/Pro+) - ONLY check monthly limit
-          errorMessage = `Monthly limit reached (${limitStatus.monthly_usage}/${limitStatus.monthly_limit} images this month). ${tier === 'pro' ? 'Upgrade to Pro+ for 200 images/month.' : 'Try again next month.'}`
+          const config = getSubscriptionConfig()
+          const upgradeMessage = tier === 'pro' 
+            ? `Upgrade to Pro+ for ${config.limits.pro_plus.monthly} images/month.` 
+            : 'Try again next month.'
+          errorMessage = `Monthly limit reached (${limitStatus.monthly_usage}/${limitStatus.monthly_limit} images this month). ${upgradeMessage}`
           limitType = 'monthly'
         } else {
           // Free users - check both daily and monthly
+          const config = getSubscriptionConfig()
           const dailyLimitHit = limitStatus.daily_usage >= limitStatus.daily_limit
           const monthlyLimitHit = limitStatus.monthly_usage >= limitStatus.monthly_limit
           
           if (dailyLimitHit && monthlyLimitHit) {
-            errorMessage = `Both daily (${limitStatus.daily_usage}/${limitStatus.daily_limit}) and monthly (${limitStatus.monthly_usage}/${limitStatus.monthly_limit}) limits reached. Upgrade to Pro for 100 images/month or try again tomorrow.`
+            errorMessage = `Both daily (${limitStatus.daily_usage}/${limitStatus.daily_limit}) and monthly (${limitStatus.monthly_usage}/${limitStatus.monthly_limit}) limits reached. Upgrade to Pro for ${config.limits.pro.monthly} images/month or try again tomorrow.`
             limitType = 'both'
           } else if (dailyLimitHit) {
-            errorMessage = `Daily limit reached (${limitStatus.daily_usage}/${limitStatus.daily_limit} images today). Upgrade to Pro for 100 images/month or try again tomorrow.`
+            errorMessage = `Daily limit reached (${limitStatus.daily_usage}/${limitStatus.daily_limit} images today). Upgrade to Pro for ${config.limits.pro.monthly} images/month or try again tomorrow.`
             limitType = 'daily'
           } else if (monthlyLimitHit) {
-            errorMessage = `Monthly limit reached (${limitStatus.monthly_usage}/${limitStatus.monthly_limit} images this month). Upgrade to Pro for 100 images/month or try again next month.`
+            errorMessage = `Monthly limit reached (${limitStatus.monthly_usage}/${limitStatus.monthly_limit} images this month). Upgrade to Pro for ${config.limits.pro.monthly} images/month or try again next month.`
             limitType = 'monthly'
           } else {
             errorMessage = `Generation limit reached. Upgrade to Pro for more images.`
