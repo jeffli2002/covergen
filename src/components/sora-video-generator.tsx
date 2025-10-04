@@ -103,7 +103,12 @@ export default function SoraVideoGenerator() {
           throw new Error(uploadData.error || 'Failed to upload image')
         }
 
+        if (!uploadData.imageUrl) {
+          throw new Error('Upload succeeded but no image URL returned')
+        }
+
         imageUrl = uploadData.imageUrl
+        console.log('Image uploaded successfully:', imageUrl)
         setIsUploading(false)
       }
 
@@ -118,6 +123,7 @@ export default function SoraVideoGenerator() {
         requestBody.prompt = prompt.trim()
       } else {
         requestBody.image_url = imageUrl
+        console.log('Sending image_url to API:', imageUrl)
         if (prompt.trim()) {
           requestBody.prompt = prompt.trim()
         }
