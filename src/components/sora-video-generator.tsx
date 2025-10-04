@@ -76,6 +76,13 @@ export default function SoraVideoGenerator() {
   const handleGenerate = async () => {
     console.log('[Sora] handleGenerate called:', { mode, hasImageFile: !!imageFile, hasPrompt: !!prompt })
     
+    // Check authentication FIRST before any validation
+    if (!user) {
+      console.log('[Sora] User not authenticated, showing sign-in prompt')
+      setShowUpgradeModal(true)
+      return
+    }
+    
     // Validation
     if (mode === 'text-to-video' && !prompt.trim()) {
       alert('Please enter a prompt for text-to-video generation')
