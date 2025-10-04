@@ -103,6 +103,36 @@ export async function GET(request: NextRequest) {
     })
     console.log('[BestAuth Account API] Video usage today fetch complete:', videosToday)
     
+    const imagesToday = await withTimeout(
+      bestAuthSubscriptionService.getUserImageUsageToday(userId),
+      5,
+      'Image usage today fetch'
+    ).catch(err => {
+      console.error('[BestAuth Account API] Error fetching image usage today:', err)
+      return 0
+    })
+    console.log('[BestAuth Account API] Image usage today fetch complete:', imagesToday)
+    
+    const videosThisMonth = await withTimeout(
+      bestAuthSubscriptionService.getUserVideoUsageThisMonth(userId),
+      5,
+      'Video usage this month fetch'
+    ).catch(err => {
+      console.error('[BestAuth Account API] Error fetching video usage this month:', err)
+      return 0
+    })
+    console.log('[BestAuth Account API] Video usage this month fetch complete:', videosThisMonth)
+    
+    const imagesThisMonth = await withTimeout(
+      bestAuthSubscriptionService.getUserImageUsageThisMonth(userId),
+      5,
+      'Image usage this month fetch'
+    ).catch(err => {
+      console.error('[BestAuth Account API] Error fetching image usage this month:', err)
+      return 0
+    })
+    console.log('[BestAuth Account API] Image usage this month fetch complete:', imagesThisMonth)
+    
     console.log('[BestAuth Account API] Step 5: Fetching payments...')
     const payments = await withTimeout(
       bestAuthSubscriptionService.getPaymentHistory(userId, 5), 
@@ -149,7 +179,10 @@ export async function GET(request: NextRequest) {
       usage: subscription ? {
         today: usageToday,
         thisMonth: usageThisMonth,
+        images_today: imagesToday,
         videos_today: videosToday,
+        images_this_month: imagesThisMonth,
+        videos_this_month: videosThisMonth,
         limits: {
           daily: subscription.daily_limit,
           monthly: subscription.monthly_limit
@@ -157,7 +190,10 @@ export async function GET(request: NextRequest) {
       } : {
         today: usageToday,
         thisMonth: usageThisMonth,
+        images_today: imagesToday,
         videos_today: videosToday,
+        images_this_month: imagesThisMonth,
+        videos_this_month: videosThisMonth,
         limits: { daily: 3, monthly: 90 }
       }
     }

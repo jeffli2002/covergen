@@ -133,6 +133,42 @@ export class BestAuthSubscriptionService {
   }
   
   /**
+   * Get user's image usage for today
+   */
+  async getUserImageUsageToday(userId: string): Promise<number> {
+    try {
+      return await db.usage.getTodayByType(userId, 'image')
+    } catch (error) {
+      console.error('Error getting image usage today:', error)
+      return 0
+    }
+  }
+  
+  /**
+   * Get user's video usage for this month
+   */
+  async getUserVideoUsageThisMonth(userId: string): Promise<number> {
+    try {
+      return await db.usage.getMonthlyUsageByType(userId, 'video')
+    } catch (error) {
+      console.error('Error getting video usage this month:', error)
+      return 0
+    }
+  }
+  
+  /**
+   * Get user's image usage for this month
+   */
+  async getUserImageUsageThisMonth(userId: string): Promise<number> {
+    try {
+      return await db.usage.getMonthlyUsageByType(userId, 'image')
+    } catch (error) {
+      console.error('Error getting image usage this month:', error)
+      return 0
+    }
+  }
+  
+  /**
    * Increment user's video usage count
    */
   async incrementUserVideoUsage(userId: string, amount: number = 1): Promise<{ success: boolean; newCount?: number }> {
