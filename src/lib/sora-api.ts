@@ -85,8 +85,10 @@ export async function createSoraTask(
   console.log('[Sora API] Creating task:', {
     model,
     inputKeys: Object.keys(input),
-    hasImageUrl: 'image_url' in input,
-    imageUrlLength: 'image_url' in input ? (input as any).image_url?.length : 0
+    hasImageUrls: 'image_urls' in input,
+    imageUrlsLength: 'image_urls' in input ? (input as any).image_urls?.length : 0,
+    firstImageUrl: 'image_urls' in input ? (input as any).image_urls?.[0] : null,
+    fullRequest: JSON.stringify(request, null, 2)
   })
 
   const response = await fetch(`${API_BASE_URL}/createTask`, {
@@ -98,12 +100,24 @@ export async function createSoraTask(
     body: JSON.stringify(request)
   })
 
-  const data: SoraCreateTaskResponse = await response.json()
+  console.log('[Sora API] HTTP response status:', response.status)
+  
+  const responseText = await response.text()
+  console.log('[Sora API] Raw response:', responseText)
+  
+  let data: SoraCreateTaskResponse
+  try {
+    data = JSON.parse(responseText)
+  } catch (e) {
+    console.error('[Sora API] Failed to parse response as JSON:', responseText)
+    throw new SoraApiError(500, 'Invalid API response format', { responseText })
+  }
   
   console.log('[Sora API] API response:', {
     code: data.code,
     msg: data.msg,
-    hasData: !!data.data
+    hasData: !!data.data,
+    fullResponse: data
   })
 
   if (data.code !== 200) {

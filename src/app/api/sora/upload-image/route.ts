@@ -36,39 +36,82 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes)
     const base64 = buffer.toString('base64')
 
-    // Upload to imgbb (free image hosting)
-    const IMGBB_API_KEY = process.env.IMGBB_API_KEY || '3e3e77bd5f717c60d470c01d0dd2e402' // Free public API key
+    // Try multiple image hosting services
     
-    try {
-      // imgbb expects URL-encoded form data, not multipart
-      const imgbbResponse = await fetch(
-        `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: `image=${encodeURIComponent(base64)}`
-        }
-      )
-      
-      const imgbbData = await imgbbResponse.json()
-      
-      console.log('[Upload Image] imgbb response:', { success: imgbbData.success, hasUrl: !!imgbbData.data?.url })
-      
-      if (imgbbData.success && imgbbData.data?.url) {
-        console.log('[Upload Image] Successfully uploaded to imgbb:', imgbbData.data.url)
-        return NextResponse.json({ 
-          imageUrl: imgbbData.data.url,
-          fileName: file.name,
-          fileSize: file.size,
-          fileType: file.type
+    // 1. Try ImgBB first
+    const IMGBB_API_KEY = process.env.IMGBB_API_KEY
+    if (IMGBB_API_KEY) {
+      try {
+        const imgbbFormData = new FormData()
+        imgbbFormData.append('image', base64)
+        
+        const imgbbResponse = await fetch(
+          `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,
+          {
+            method: 'POST',
+            body: imgbbFormData
+          }
+        )
+        
+        const imgbbData = await imgbbResponse.json()
+        
+        console.log('[Upload Image] imgbb response:', { 
+          success: imgbbData.success, 
+          hasUrl: !!imgbbData.data?.url,
+          error: imgbbData.error 
         })
+        
+        if (imgbbData.success && imgbbData.data?.url) {
+          console.log('[Upload Image] Successfully uploaded to imgbb:', imgbbData.data.url)
+          return NextResponse.json({ 
+            imageUrl: imgbbData.data.url,
+            fileName: file.name,
+            fileSize: file.size,
+            fileType: file.type
+          })
+        }
+        
+        console.error('[Upload Image] imgbb upload failed:', imgbbData)
+      } catch (imgbbError) {
+        console.error('[Upload Image] imgbb error:', imgbbError)
       }
-      
-      console.error('[Upload Image] imgbb upload failed:', imgbbData)
-    } catch (imgbbError) {
-      console.error('[Upload Image] imgbb error:', imgbbError)
+    }
+    
+    // 2. Try Cloudinary (free tier - requires env vars)
+    const CLOUDINARY_URL = process.env.CLOUDINARY_URL
+    const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME
+    const CLOUDINARY_UPLOAD_PRESET = process.env.CLOUDINARY_UPLOAD_PRESET
+    
+    if (CLOUDINARY_CLOUD_NAME && CLOUDINARY_UPLOAD_PRESET) {
+      try {
+        const cloudinaryFormData = new FormData()
+        cloudinaryFormData.append('file', `data:${file.type};base64,${base64}`)
+        cloudinaryFormData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
+        
+        const cloudinaryResponse = await fetch(
+          `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+          {
+            method: 'POST',
+            body: cloudinaryFormData
+          }
+        )
+        
+        const cloudinaryData = await cloudinaryResponse.json()
+        
+        if (cloudinaryData.secure_url) {
+          console.log('[Upload Image] Successfully uploaded to Cloudinary:', cloudinaryData.secure_url)
+          return NextResponse.json({ 
+            imageUrl: cloudinaryData.secure_url,
+            fileName: file.name,
+            fileSize: file.size,
+            fileType: file.type
+          })
+        }
+        
+        console.error('[Upload Image] Cloudinary upload failed:', cloudinaryData)
+      } catch (cloudinaryError) {
+        console.error('[Upload Image] Cloudinary error:', cloudinaryError)
+      }
     }
     
     // Fallback: use temporary storage
