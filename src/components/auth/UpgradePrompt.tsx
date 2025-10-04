@@ -13,6 +13,8 @@ interface UpgradePromptProps {
   dailyCount?: number
   dailyLimit?: number
   isTrial?: boolean
+  type?: 'image' | 'video'
+  isAuthenticated?: boolean
 }
 
 export default function UpgradePrompt({ 
@@ -20,7 +22,9 @@ export default function UpgradePrompt({
   onUpgrade, 
   dailyCount = 3, 
   dailyLimit = 3, 
-  isTrial = false 
+  isTrial = false,
+  type = 'image',
+  isAuthenticated = true
 }: UpgradePromptProps) {
   // Get subscription configuration
   const config = getClientSubscriptionConfig()
@@ -29,19 +33,29 @@ export default function UpgradePrompt({
   const pathname = usePathname()
   const locale = pathname.split('/')[1] || 'en' // Extract locale from path
   
-  const features = [
-    { icon: Zap, text: 'Unlimited daily generations' },
-    { icon: Sparkles, text: 'Priority AI processing' },
-    { icon: Shield, text: 'Commercial usage rights' },
-    { icon: Check, text: 'All platform sizes included' },
-  ]
+  const contentType = type === 'video' ? 'videos' : 'images'
+  const features = type === 'video' 
+    ? [
+        { icon: Zap, text: '30 videos/month (Pro) or 60/month (Pro+)' },
+        { icon: Sparkles, text: 'Sora 2 AI video generation' },
+        { icon: Shield, text: 'Commercial usage rights' },
+        { icon: Check, text: 'HD quality exports' },
+      ]
+    : [
+        { icon: Zap, text: 'Unlimited daily generations' },
+        { icon: Sparkles, text: 'Priority AI processing' },
+        { icon: Shield, text: 'Commercial usage rights' },
+        { icon: Check, text: 'All platform sizes included' },
+      ]
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <Card className="w-full max-w-md">
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle className="text-xl">Daily Limit Reached</CardTitle>
+            <CardTitle className="text-xl">
+              {!isAuthenticated ? 'Sign In Required' : 'Daily Limit Reached'}
+            </CardTitle>
             {onClose && (
               <Button
                 variant="ghost"
@@ -54,16 +68,20 @@ export default function UpgradePrompt({
             )}
           </div>
           <p className="text-gray-600 text-sm mt-2">
-            {isTrial 
-              ? `You've used all ${dailyLimit} generations for today during your ${config.trialDays}-day free trial.`
-              : `You've used all ${dailyLimit} free generations for today.`
+            {!isAuthenticated 
+              ? `Please sign in to generate ${contentType}. Free users get ${dailyLimit} ${contentType} per day!`
+              : isTrial 
+              ? `You've used all ${dailyLimit} ${contentType} for today during your ${config.trialDays}-day free trial.`
+              : `You've used all ${dailyLimit} free ${contentType} for today.`
             }
           </p>
-          <div className="mt-2 text-center">
-            <Badge variant="outline" className="text-xs">
-              Used {dailyCount} / {dailyLimit} generations today
-            </Badge>
-          </div>
+          {isAuthenticated && (
+            <div className="mt-2 text-center">
+              <Badge variant="outline" className="text-xs">
+                Used {dailyCount} / {dailyLimit} {contentType} today
+              </Badge>
+            </div>
+          )}
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="text-center py-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg">
@@ -89,20 +107,40 @@ export default function UpgradePrompt({
           </div>
 
           <div className="space-y-3">
-            <Button 
-              className="w-full bg-purple-600 hover:bg-purple-700"
-              onClick={onUpgrade || (() => window.location.href = `/${locale}/pricing`)}
-            >
-              Upgrade to Pro
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              className="w-full"
-              onClick={onClose}
-            >
-              Try Again Tomorrow
-            </Button>
+            {!isAuthenticated ? (
+              <>
+                <Button 
+                  className="w-full bg-purple-600 hover:bg-purple-700"
+                  onClick={() => window.location.href = `/${locale}?auth=signin`}
+                >
+                  Sign In
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => window.location.href = `/${locale}?auth=signup`}
+                >
+                  Create Free Account
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button 
+                  className="w-full bg-purple-600 hover:bg-purple-700"
+                  onClick={onUpgrade || (() => window.location.href = `/${locale}/pricing`)}
+                >
+                  Upgrade to Pro
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={onClose}
+                >
+                  Try Again Tomorrow
+                </Button>
+              </>
+            )}
           </div>
 
           <div className="text-center text-sm text-gray-500 space-y-1">

@@ -8,6 +8,8 @@ import { Card } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Loader2, Video, Download, AlertCircle, Share2, Upload, ImageIcon, X } from 'lucide-react'
+import UpgradePrompt from '@/components/auth/UpgradePrompt'
+import { useAuth } from '@/hooks/useAuth'
 
 interface GenerationResult {
   taskId: string
@@ -19,6 +21,7 @@ interface GenerationResult {
 type GenerationMode = 'text-to-video' | 'image-to-video'
 
 export default function SoraVideoGenerator() {
+  const { user } = useAuth()
   const [mode, setMode] = useState<GenerationMode>('text-to-video')
   const [prompt, setPrompt] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
@@ -28,6 +31,8 @@ export default function SoraVideoGenerator() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [result, setResult] = useState<GenerationResult | null>(null)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [limitInfo, setLimitInfo] = useState<{ usage: number; limit: number } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const maxPromptLength = 5000
@@ -165,20 +170,19 @@ export default function SoraVideoGenerator() {
       if (!createResponse.ok) {
         console.error('[Sora] Create task failed:', createData)
         
-        // Handle limit reached with upgrade prompt
+        // Handle limit reached with upgrade modal
         if (createResponse.status === 429 && createData.limitReached) {
-          const tier = createData.currentTier || 'free'
-          const upgradeUrl = tier === 'free' ? '/payment' : tier === 'pro' ? '/payment?plan=pro_plus' : null
-          
-          const message = createData.error || 'Video generation limit reached'
-          const confirmUpgrade = upgradeUrl && confirm(
-            `${message}\n\nWould you like to upgrade now?`
-          )
-          
-          if (confirmUpgrade && upgradeUrl) {
-            window.location.href = upgradeUrl
-            return
-          }
+          setLimitInfo({
+            usage: createData.dailyUsage || createData.monthlyUsage || 0,
+            limit: createData.dailyLimit || createData.monthlyLimit || 0
+          })
+          setShowUpgradeModal(true)
+          throw new Error(createData.error || 'Video generation limit reached')
+        }
+        
+        // Handle authentication required
+        if (createResponse.status === 401) {
+          throw new Error('Please sign in to generate videos')
         }
         
         throw new Error(createData.error || createData.details?.msg || 'Failed to create task')
@@ -518,6 +522,17 @@ export default function SoraVideoGenerator() {
           </div>
         </div>
       </Tabs>
+
+      {/* Upgrade Modal */}
+      {showUpgradeModal && (
+        <UpgradePrompt 
+          onClose={() => setShowUpgradeModal(false)}
+          dailyCount={limitInfo?.usage || 0}
+          dailyLimit={limitInfo?.limit || 0}
+          type="video"
+          isAuthenticated={!!user}
+        />
+      )}
     </div>
   )
 }
