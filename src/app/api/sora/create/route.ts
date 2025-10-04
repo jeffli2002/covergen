@@ -230,6 +230,45 @@ async function handler(request: AuthenticatedRequest) {
         )
       }
 
+      // COPYRIGHT VALIDATION - Prevent API charges for doomed-to-fail requests
+      // This is critical because Sora/OpenAI blocks images with faces, logos, watermarks
+      console.log('[Sora API] Running copyright validation to prevent API failures')
+      
+      try {
+        const { validateCopyright } = await import('@/lib/validation/validators/copyright-validator')
+        const { getValidationConfig } = await import('@/lib/validation/config')
+        
+        // Get validation config based on user's subscription tier
+        const subscription = await bestAuthSubscriptionService.getUserSubscription(user.id)
+        const validationConfig = getValidationConfig(subscription?.tier || 'free')
+        
+        // Only run if copyright validation is enabled
+        if (validationConfig.enabled && validationConfig.layers.copyright) {
+          const copyrightResult = await validateCopyright(cleanImageUrl, validationConfig)
+          
+          if (!copyrightResult.valid) {
+            console.error('[Sora API] Copyright validation FAILED:', copyrightResult.code)
+            return NextResponse.json(
+              { 
+                error: copyrightResult.error,
+                details: copyrightResult.details,
+                suggestion: copyrightResult.suggestion,
+                code: copyrightResult.code,
+                validationFailed: true, // Flag for analytics
+              },
+              { status: 400 }
+            )
+          }
+          
+          console.log('[Sora API] ✅ Copyright validation passed')
+        } else {
+          console.log('[Sora API] Copyright validation disabled, skipping')
+        }
+      } catch (validationError) {
+        console.error('[Sora API] Validation error (allowing request to proceed):', validationError)
+        // On validation error, allow request to proceed (fail-safe)
+      }
+
       // Prompt is required for image-to-video according to API docs
       if (!prompt || typeof prompt !== 'string') {
         return NextResponse.json(
