@@ -396,9 +396,17 @@ export default function PaymentPageClient({
                 return 'You\'re on our highest tier with all premium features and maximum cover generation.'
               }
               if (currentSubscription?.tier === 'free') {
-                return 'Start creating stunning Sora-powered videos and professional AI covers. Upgrade from the free plan for more exports and advanced features.'
+                return (
+                  <>
+                    Start creating stunning <span className="font-semibold text-purple-600">Sora 2</span> powered videos and <span className="font-semibold text-orange-600">nano banana</span> powered AI covers. Upgrade from the free plan for more exports and advanced features.
+                  </>
+                )
               }
-              return 'Start creating stunning Sora-powered videos and professional AI covers. All plans include watermark-free images.'
+              return (
+                <>
+                  Start creating stunning <span className="font-semibold text-purple-600">Sora 2</span> powered videos and <span className="font-semibold text-orange-600">nano banana</span> powered AI covers. All plans include watermark-free images.
+                </>
+              )
             })()}
           </p>
           
