@@ -24,7 +24,10 @@ export async function GET(
     const id = params.id
     const image = tempImages.get(id)
     
+    console.log('[Temp Image GET]:', { id, found: !!image, totalImages: tempImages.size })
+    
     if (!image) {
+      console.error('[Temp Image GET] Image not found:', id)
       return NextResponse.json(
         { error: 'Image not found or expired' },
         { status: 404 }
@@ -59,7 +62,10 @@ export async function POST(
   try {
     const { data, contentType } = await request.json()
     
+    console.log('[Temp Image POST]:', { id: params.id, hasData: !!data, contentType, dataLength: data?.length })
+    
     if (!data || !contentType) {
+      console.error('[Temp Image POST] Missing data or contentType')
       return NextResponse.json(
         { error: 'Missing data or contentType' },
         { status: 400 }
@@ -74,6 +80,8 @@ export async function POST(
       contentType,
       timestamp: Date.now()
     })
+    
+    console.log('[Temp Image POST] Stored successfully, total images:', tempImages.size)
     
     return NextResponse.json({ success: true })
   } catch (error) {

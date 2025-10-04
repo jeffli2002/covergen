@@ -155,9 +155,11 @@ export default function SoraVideoGenerator() {
       })
 
       const createData = await createResponse.json()
+      console.log('[Sora] Create response:', { ok: createResponse.ok, status: createResponse.status, data: createData })
 
       if (!createResponse.ok) {
-        throw new Error(createData.error || 'Failed to create task')
+        console.error('[Sora] Create task failed:', createData)
+        throw new Error(createData.error || createData.details?.msg || 'Failed to create task')
       }
 
       const taskId = createData.taskId
@@ -168,6 +170,7 @@ export default function SoraVideoGenerator() {
         try {
           const statusResponse = await fetch(`/api/sora/query?taskId=${taskId}`)
           const statusData = await statusResponse.json()
+          console.log('[Sora] Poll response:', { state: statusData.state, failMsg: statusData.failMsg })
 
           if (!statusResponse.ok) {
             throw new Error(statusData.error || 'Failed to query task')
@@ -184,10 +187,11 @@ export default function SoraVideoGenerator() {
             setIsGenerating(false)
           } else if (statusData.state === 'fail') {
             clearInterval(pollInterval)
+            console.error('[Sora] Generation failed:', { failCode: statusData.failCode, failMsg: statusData.failMsg, param: statusData.param })
             setResult({
               taskId,
               status: 'failed',
-              error: statusData.failMsg || 'Generation failed'
+              error: `${statusData.failMsg || 'Generation failed'}${statusData.failCode ? ` (Code: ${statusData.failCode})` : ''}`
             })
             setIsGenerating(false)
           }
