@@ -93,6 +93,16 @@ export async function GET(request: NextRequest) {
     })
     console.log('[BestAuth Account API] Usage this month fetch complete:', usageThisMonth)
     
+    const videosToday = await withTimeout(
+      bestAuthSubscriptionService.getUserVideoUsageToday(userId),
+      5,
+      'Video usage today fetch'
+    ).catch(err => {
+      console.error('[BestAuth Account API] Error fetching video usage today:', err)
+      return 0
+    })
+    console.log('[BestAuth Account API] Video usage today fetch complete:', videosToday)
+    
     console.log('[BestAuth Account API] Step 5: Fetching payments...')
     const payments = await withTimeout(
       bestAuthSubscriptionService.getPaymentHistory(userId, 5), 
@@ -139,6 +149,7 @@ export async function GET(request: NextRequest) {
       usage: subscription ? {
         today: usageToday,
         thisMonth: usageThisMonth,
+        videos_today: videosToday,
         limits: {
           daily: subscription.daily_limit,
           monthly: subscription.monthly_limit
@@ -146,6 +157,7 @@ export async function GET(request: NextRequest) {
       } : {
         today: usageToday,
         thisMonth: usageThisMonth,
+        videos_today: videosToday,
         limits: { daily: 3, monthly: 90 }
       }
     }

@@ -119,6 +119,18 @@ export class BestAuthSubscriptionService {
       return 0
     }
   }
+  
+  /**
+   * Get user's video usage for today
+   */
+  async getUserVideoUsageToday(userId: string): Promise<number> {
+    try {
+      return await db.usage.getTodayByType(userId, 'video')
+    } catch (error) {
+      console.error('Error getting video usage today:', error)
+      return 0
+    }
+  }
 
   /**
    * Increment user's usage count
