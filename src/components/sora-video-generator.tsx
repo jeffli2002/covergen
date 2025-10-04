@@ -213,12 +213,34 @@ export default function SoraVideoGenerator() {
             setIsGenerating(false)
           } else if (statusData.state === 'fail') {
             clearInterval(pollInterval)
-            const errorMessage = `${statusData.failMsg || 'Generation failed'}${statusData.failCode ? ` (Code: ${statusData.failCode})` : ''}`
+            let errorMessage = statusData.failMsg || 'Generation failed'
+            
+            // Provide user-friendly error messages for common issues
+            if (errorMessage.includes('policy') || errorMessage.includes('违反') || statusData.failCode === '500') {
+              errorMessage = 'Generation failed: Image may not be accessible or compatible.\n\n' +
+                'Common causes:\n' +
+                '• Image URL became inaccessible after upload\n' +
+                '• Network connectivity issues\n' +
+                '• Image format/size incompatibility\n\n' +
+                'Solutions:\n' +
+                '• Try uploading a different image\n' +
+                '• Ensure stable internet connection\n' +
+                '• Use JPEG or PNG format, under 10MB'
+            }
+            
+            if (statusData.failCode) {
+              errorMessage += `\n\n(Error Code: ${statusData.failCode})`
+            }
+            
             console.error('[Sora] Generation failed:', { failCode: statusData.failCode, failMsg: statusData.failMsg, param: statusData.param })
             
-            // Show detailed error for debugging
-            const debugInfo = `Error: ${errorMessage}\n\nRequest params:\n${statusData.param || 'N/A'}`
-            alert(debugInfo)
+            // Show detailed error for debugging in development mode
+            if (process.env.NODE_ENV === 'development') {
+              const debugInfo = `${errorMessage}\n\n=== DEBUG INFO ===\nOriginal Error: ${statusData.failMsg}\nRequest params:\n${statusData.param || 'N/A'}`
+              alert(debugInfo)
+            } else {
+              alert(errorMessage)
+            }
             
             setResult({
               taskId,

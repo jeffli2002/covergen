@@ -151,6 +151,56 @@ async function handler(request: AuthenticatedRequest) {
       
       // Trim whitespace from URL
       const cleanImageUrl = image_url.trim()
+      
+      // Validate image URL is accessible before sending to Sora API
+      // This prevents generic "policy violation" errors when image is not accessible
+      try {
+        console.log('[Sora API] Validating image URL accessibility:', cleanImageUrl)
+        const imageCheckResponse = await fetch(cleanImageUrl, { 
+          method: 'HEAD',
+          signal: AbortSignal.timeout(10000) // 10 second timeout
+        })
+        
+        if (!imageCheckResponse.ok) {
+          console.error('[Sora API] Image URL not accessible:', imageCheckResponse.status)
+          return NextResponse.json(
+            { 
+              error: `Image URL is not accessible (HTTP ${imageCheckResponse.status}). Please ensure the image is publicly available and try again.`,
+              details: 'The Sora API requires images to be hosted at publicly accessible URLs'
+            },
+            { status: 400 }
+          )
+        }
+        
+        const contentType = imageCheckResponse.headers.get('content-type')
+        if (contentType && !contentType.startsWith('image/')) {
+          console.error('[Sora API] Invalid content type:', contentType)
+          return NextResponse.json(
+            { error: `URL does not point to an image (Content-Type: ${contentType})` },
+            { status: 400 }
+          )
+        }
+        
+        console.log('[Sora API] Image URL validation passed')
+      } catch (error) {
+        console.error('[Sora API] Image URL validation failed:', error)
+        if (error instanceof Error && error.name === 'TimeoutError') {
+          return NextResponse.json(
+            { 
+              error: 'Image URL validation timeout. The image server is not responding quickly enough. Please try a different image hosting service or try again later.',
+              details: 'Image must be accessible within 10 seconds'
+            },
+            { status: 400 }
+          )
+        }
+        return NextResponse.json(
+          { 
+            error: 'Failed to validate image URL accessibility. Please ensure the image is publicly accessible.',
+            details: error instanceof Error ? error.message : 'Unknown error'
+          },
+          { status: 400 }
+        )
+      }
 
       // Prompt is required for image-to-video according to API docs
       if (!prompt || typeof prompt !== 'string') {

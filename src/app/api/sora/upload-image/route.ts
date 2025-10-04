@@ -101,6 +101,24 @@ export async function POST(request: NextRequest) {
         if (cloudinaryData.secure_url) {
           const imageUrl = cloudinaryData.secure_url.trim() // Remove any whitespace
           console.log('[Upload Image] Successfully uploaded to Cloudinary:', imageUrl)
+          
+          // Validate the URL is immediately accessible (prevents Sora API errors later)
+          try {
+            const validationResponse = await fetch(imageUrl, { 
+              method: 'HEAD',
+              signal: AbortSignal.timeout(8000)
+            })
+            
+            if (!validationResponse.ok) {
+              console.warn('[Upload Image] Cloudinary URL not immediately accessible:', validationResponse.status)
+              // Don't fail, but log for debugging
+            } else {
+              console.log('[Upload Image] Cloudinary URL validation passed')
+            }
+          } catch (validationError) {
+            console.warn('[Upload Image] Cloudinary URL validation failed (will still return URL):', validationError)
+          }
+          
           return NextResponse.json({ 
             imageUrl,
             fileName: file.name,
