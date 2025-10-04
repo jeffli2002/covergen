@@ -69,6 +69,8 @@ export default function SoraVideoGenerator() {
   }
 
   const handleGenerate = async () => {
+    console.log('[Sora] handleGenerate called:', { mode, hasImageFile: !!imageFile, hasPrompt: !!prompt })
+    
     // Validation
     if (mode === 'text-to-video' && !prompt.trim()) {
       alert('Please enter a prompt for text-to-video generation')
@@ -76,6 +78,7 @@ export default function SoraVideoGenerator() {
     }
 
     if (mode === 'image-to-video' && !imageFile) {
+      console.error('[Sora] Validation failed: No image file in image-to-video mode')
       alert('Please upload an image for image-to-video generation')
       return
     }
@@ -102,17 +105,20 @@ export default function SoraVideoGenerator() {
         })
 
         const uploadData = await uploadResponse.json()
+        console.log('[Sora] Upload response:', { ok: uploadResponse.ok, status: uploadResponse.status, data: uploadData })
 
         if (!uploadResponse.ok) {
+          console.error('[Sora] Upload failed:', uploadData)
           throw new Error(uploadData.error || 'Failed to upload image')
         }
 
         if (!uploadData.imageUrl) {
+          console.error('[Sora] Upload response missing imageUrl:', uploadData)
           throw new Error('Upload succeeded but no image URL returned')
         }
 
         imageUrl = uploadData.imageUrl
-        console.log('Image uploaded successfully:', imageUrl)
+        console.log('[Sora] Image uploaded successfully, URL length:', imageUrl.length)
         setIsUploading(false)
       }
 
