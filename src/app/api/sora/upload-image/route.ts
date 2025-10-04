@@ -40,18 +40,21 @@ export async function POST(request: NextRequest) {
     const IMGBB_API_KEY = process.env.IMGBB_API_KEY || '3e3e77bd5f717c60d470c01d0dd2e402' // Free public API key
     
     try {
-      const formData = new FormData()
-      formData.append('image', base64)
-      
+      // imgbb expects URL-encoded form data, not multipart
       const imgbbResponse = await fetch(
         `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,
         {
           method: 'POST',
-          body: formData
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: `image=${encodeURIComponent(base64)}`
         }
       )
       
       const imgbbData = await imgbbResponse.json()
+      
+      console.log('[Upload Image] imgbb response:', { success: imgbbData.success, hasUrl: !!imgbbData.data?.url })
       
       if (imgbbData.success && imgbbData.data?.url) {
         console.log('[Upload Image] Successfully uploaded to imgbb:', imgbbData.data.url)
