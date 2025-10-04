@@ -48,7 +48,15 @@ export async function POST(request: NextRequest) {
       // Trim whitespace from URL
       const cleanImageUrl = image_url.trim()
 
-      if (prompt && prompt.length > 5000) {
+      // Prompt is required for image-to-video according to API docs
+      if (!prompt || typeof prompt !== 'string') {
+        return NextResponse.json(
+          { error: 'Prompt is required for image-to-video generation' },
+          { status: 400 }
+        )
+      }
+
+      if (prompt.length > 5000) {
         return NextResponse.json(
           { error: 'Prompt must be 5000 characters or less' },
           { status: 400 }
@@ -57,8 +65,8 @@ export async function POST(request: NextRequest) {
 
       const taskId = await createSoraTask(
         {
-          image_urls: [cleanImageUrl],  // Use cleaned URL
-          ...(prompt && { prompt }),
+          prompt,  // Required field comes first
+          image_urls: [cleanImageUrl],
           aspect_ratio: aspect_ratio || 'landscape',
           quality: quality || 'standard'
         },
