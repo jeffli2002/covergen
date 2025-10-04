@@ -154,49 +154,69 @@ async function handler(request: AuthenticatedRequest) {
       
       // Validate image URL is accessible before sending to Sora API
       // This prevents generic "policy violation" errors when image is not accessible
-      try {
-        console.log('[Sora API] Validating image URL accessibility:', cleanImageUrl)
-        const imageCheckResponse = await fetch(cleanImageUrl, { 
-          method: 'HEAD',
-          signal: AbortSignal.timeout(10000) // 10 second timeout
-        })
+      // Use retry logic to handle transient Cloudinary issues
+      let validationSuccess = false
+      let lastError: Error | null = null
+      
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          console.log(`[Sora API] Validating image URL (attempt ${attempt}/3):`, cleanImageUrl)
+          
+          // Use GET with range to actually fetch some bytes (more reliable than HEAD)
+          const imageCheckResponse = await fetch(cleanImageUrl, { 
+            method: 'GET',
+            headers: {
+              'Range': 'bytes=0-1023' // Fetch first 1KB to verify it's really accessible
+            },
+            signal: AbortSignal.timeout(15000) // 15 second timeout
+          })
+          
+          if (!imageCheckResponse.ok && imageCheckResponse.status !== 206) {
+            throw new Error(`HTTP ${imageCheckResponse.status}`)
+          }
+          
+          const contentType = imageCheckResponse.headers.get('content-type')
+          if (contentType && !contentType.startsWith('image/')) {
+            throw new Error(`Invalid content type: ${contentType}`)
+          }
+          
+          // Verify we got actual data
+          const buffer = await imageCheckResponse.arrayBuffer()
+          if (buffer.byteLength === 0) {
+            throw new Error('Empty response')
+          }
+          
+          console.log(`[Sora API] Image URL validation passed (${buffer.byteLength} bytes verified)`)
+          validationSuccess = true
+          break
+        } catch (error) {
+          lastError = error instanceof Error ? error : new Error(String(error))
+          console.error(`[Sora API] Validation attempt ${attempt} failed:`, lastError.message)
+          
+          if (attempt < 3) {
+            // Wait before retry (exponential backoff)
+            await new Promise(resolve => setTimeout(resolve, attempt * 1000))
+          }
+        }
+      }
+      
+      if (!validationSuccess) {
+        console.error('[Sora API] Image URL validation failed after 3 attempts:', lastError)
         
-        if (!imageCheckResponse.ok) {
-          console.error('[Sora API] Image URL not accessible:', imageCheckResponse.status)
+        if (lastError?.name === 'TimeoutError' || lastError?.message.includes('timeout')) {
           return NextResponse.json(
             { 
-              error: `Image URL is not accessible (HTTP ${imageCheckResponse.status}). Please ensure the image is publicly available and try again.`,
-              details: 'The Sora API requires images to be hosted at publicly accessible URLs'
+              error: 'Image URL validation timeout after 3 attempts. The image hosting service is too slow or unreliable. Please try uploading the image again or use a different image.',
+              details: 'Image must be accessible and respond within 15 seconds'
             },
             { status: 400 }
           )
         }
         
-        const contentType = imageCheckResponse.headers.get('content-type')
-        if (contentType && !contentType.startsWith('image/')) {
-          console.error('[Sora API] Invalid content type:', contentType)
-          return NextResponse.json(
-            { error: `URL does not point to an image (Content-Type: ${contentType})` },
-            { status: 400 }
-          )
-        }
-        
-        console.log('[Sora API] Image URL validation passed')
-      } catch (error) {
-        console.error('[Sora API] Image URL validation failed:', error)
-        if (error instanceof Error && error.name === 'TimeoutError') {
-          return NextResponse.json(
-            { 
-              error: 'Image URL validation timeout. The image server is not responding quickly enough. Please try a different image hosting service or try again later.',
-              details: 'Image must be accessible within 10 seconds'
-            },
-            { status: 400 }
-          )
-        }
         return NextResponse.json(
           { 
-            error: 'Failed to validate image URL accessibility. Please ensure the image is publicly accessible.',
-            details: error instanceof Error ? error.message : 'Unknown error'
+            error: `Image URL is not accessible: ${lastError?.message || 'Unknown error'}. Please ensure the image is publicly available and try again.`,
+            details: 'The Sora API requires images to be hosted at publicly accessible URLs'
           },
           { status: 400 }
         )
