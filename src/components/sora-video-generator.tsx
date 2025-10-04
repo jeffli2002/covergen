@@ -262,17 +262,12 @@ export default function SoraVideoGenerator() {
             clearInterval(pollInterval)
             let errorMessage = statusData.failMsg || 'Generation failed'
             
-            // Provide user-friendly error messages for common issues
-            if (errorMessage.includes('policy') || errorMessage.includes('违反') || statusData.failCode === '500') {
-              errorMessage = 'Generation failed: Image may not be accessible or compatible.\n\n' +
-                'Common causes:\n' +
-                '• Image URL became inaccessible after upload\n' +
-                '• Network connectivity issues\n' +
-                '• Image format/size incompatibility\n\n' +
-                'Solutions:\n' +
-                '• Try uploading a different image\n' +
-                '• Ensure stable internet connection\n' +
-                '• Use JPEG or PNG format, under 10MB'
+            // Only show generic message for actual policy violations or content filtering
+            if (errorMessage.includes('policy') || errorMessage.includes('违反') || errorMessage.includes('content')) {
+              errorMessage = 'Generation failed: Content may violate usage policies.\n\n' +
+                'Please try:\n' +
+                '• Using a different image or prompt\n' +
+                '• Ensuring content follows community guidelines'
             }
             
             if (statusData.failCode) {

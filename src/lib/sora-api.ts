@@ -101,6 +101,7 @@ export async function createSoraTask(
   })
 
   console.log('[Sora API] HTTP response status:', response.status)
+  console.log('[Sora API] HTTP response headers:', Object.fromEntries(response.headers.entries()))
   
   const responseText = await response.text()
   console.log('[Sora API] Raw response:', responseText)
@@ -117,29 +118,28 @@ export async function createSoraTask(
     code: data.code,
     msg: data.msg,
     hasData: !!data.data,
-    fullResponse: data
+    fullResponse: JSON.stringify(data, null, 2)
   })
 
   if (data.code !== 200) {
-    console.error('[Sora API] API error response:', data)
+    console.error('[Sora API] ❌ API ERROR - Full details:', JSON.stringify(data, null, 2))
+    console.error('[Sora API] ❌ Error code:', data.code)
+    console.error('[Sora API] ❌ Error message:', data.msg)
+    console.error('[Sora API] ❌ Request that failed:', JSON.stringify(request, null, 2))
     
-    // Provide more helpful error messages for common issues
-    let errorMessage = data.msg || 'Failed to create task'
-    
-    // Generic policy error often means image URL is not accessible
-    if (errorMessage.includes('policy') || errorMessage.includes('违反') || data.code === 500) {
-      errorMessage = `API Error (${data.code}): ${errorMessage}\n\n` +
-        'Common causes:\n' +
-        '1. Image URL is not publicly accessible or timed out\n' +
-        '2. Image format/size does not meet requirements\n' +
-        '3. Network connectivity issues\n\n' +
-        'Please try uploading a different image or check that your image URL is publicly accessible.'
-    }
+    // Return the actual Sora API error message without modification
+    // This helps developers debug the real issue
+    const errorMessage = `Sora API Error (${data.code}): ${data.msg || 'Unknown error'}`
     
     throw new SoraApiError(
       data.code,
       errorMessage,
-      data
+      {
+        soraErrorCode: data.code,
+        soraErrorMsg: data.msg,
+        fullResponse: data,
+        requestSent: request
+      }
     )
   }
 

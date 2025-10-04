@@ -149,8 +149,18 @@ async function handler(request: AuthenticatedRequest) {
         )
       }
       
-      // Trim whitespace from URL
+      // Clean and normalize the image URL
       const cleanImageUrl = image_url.trim()
+      
+      console.log('[Sora API] Received image URL:', {
+        original: image_url,
+        cleaned: cleanImageUrl,
+        length: cleanImageUrl.length,
+        hasWhitespace: cleanImageUrl !== image_url,
+        protocol: cleanImageUrl.substring(0, 8),
+        domain: new URL(cleanImageUrl).hostname,
+        fullParsedUrl: new URL(cleanImageUrl)
+      })
       
       // Validate image URL is accessible before sending to Sora API
       // This prevents generic "policy violation" errors when image is not accessible

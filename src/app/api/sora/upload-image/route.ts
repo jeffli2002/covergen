@@ -105,6 +105,13 @@ export async function POST(request: NextRequest) {
         const cloudinaryFormData = new FormData()
         cloudinaryFormData.append('file', `data:${file.type};base64,${base64}`)
         cloudinaryFormData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
+        // Set folder for organization (helps with URL cleanliness)
+        cloudinaryFormData.append('folder', 'sora-inputs')
+        // Ensure public access (critical for Sora API to fetch the image)
+        cloudinaryFormData.append('resource_type', 'image')
+        cloudinaryFormData.append('type', 'upload')
+        // Set access mode to public
+        cloudinaryFormData.append('access_mode', 'public')
         
         const cloudinaryResponse = await fetch(
           `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
@@ -119,6 +126,15 @@ export async function POST(request: NextRequest) {
         if (cloudinaryData.secure_url) {
           const imageUrl = cloudinaryData.secure_url.trim()
           console.log('[Upload Image] Successfully uploaded to Cloudinary:', imageUrl)
+          console.log('[Upload Image] Cloudinary full response:', JSON.stringify({
+            secure_url: cloudinaryData.secure_url,
+            url: cloudinaryData.url,
+            format: cloudinaryData.format,
+            width: cloudinaryData.width,
+            height: cloudinaryData.height,
+            bytes: cloudinaryData.bytes,
+            resource_type: cloudinaryData.resource_type
+          }, null, 2))
           
           console.log('[Upload Image] Waiting 3 seconds for CDN propagation...')
           await new Promise(resolve => setTimeout(resolve, 3000))
