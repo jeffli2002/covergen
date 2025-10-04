@@ -99,9 +99,10 @@ export async function POST(request: NextRequest) {
         const cloudinaryData = await cloudinaryResponse.json()
         
         if (cloudinaryData.secure_url) {
-          console.log('[Upload Image] Successfully uploaded to Cloudinary:', cloudinaryData.secure_url)
+          const imageUrl = cloudinaryData.secure_url.trim() // Remove any whitespace
+          console.log('[Upload Image] Successfully uploaded to Cloudinary:', imageUrl)
           return NextResponse.json({ 
-            imageUrl: cloudinaryData.secure_url,
+            imageUrl,
             fileName: file.name,
             fileSize: file.size,
             fileType: file.type

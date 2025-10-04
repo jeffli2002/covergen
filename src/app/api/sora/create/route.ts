@@ -44,6 +44,9 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         )
       }
+      
+      // Trim whitespace from URL
+      const cleanImageUrl = image_url.trim()
 
       if (prompt && prompt.length > 5000) {
         return NextResponse.json(
@@ -54,7 +57,7 @@ export async function POST(request: NextRequest) {
 
       const taskId = await createSoraTask(
         {
-          image_urls: [image_url],  // Convert to array as required by API
+          image_urls: [cleanImageUrl],  // Use cleaned URL
           ...(prompt && { prompt }),
           aspect_ratio: aspect_ratio || 'landscape',
           quality: quality || 'standard'
