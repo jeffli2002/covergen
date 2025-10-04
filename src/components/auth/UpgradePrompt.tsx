@@ -132,7 +132,7 @@ export default function UpgradePrompt({
               <>
                 <Button 
                   className="w-full bg-purple-600 hover:bg-purple-700"
-                  onClick={onUpgrade || (() => window.location.href = `/${locale}/pricing`)}
+                  onClick={() => window.location.href = `/${locale}/payment`}
                 >
                   Upgrade to Pro
                 </Button>
