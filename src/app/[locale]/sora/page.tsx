@@ -50,10 +50,10 @@ export default function SoraPage({
               </div>
 
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <div className="text-4xl mb-4">⚙️</div>
-                <h3 className="text-lg font-medium mb-2">2. Choose Settings</h3>
+                <div className="text-4xl mb-4">🖼️</div>
+                <h3 className="text-lg font-medium mb-2">2. Upload Image (Optional)</h3>
                 <p className="text-gray-600">
-                  Select aspect ratio (landscape/portrait) and quality (standard/HD) for your video.
+                  For image-to-video, upload your own original photos or licensed stock images. Avoid copyrighted content.
                 </p>
               </div>
 
@@ -61,7 +61,7 @@ export default function SoraPage({
                 <div className="text-4xl mb-4">🎥</div>
                 <h3 className="text-lg font-medium mb-2">3. Generate Video</h3>
                 <p className="text-gray-600">
-                  Click generate and watch as AI creates your professional video in minutes.
+                  Select settings and generate. AI creates your professional video in minutes.
                 </p>
               </div>
             </div>
@@ -108,6 +108,33 @@ export default function SoraPage({
                   <span>Use HD quality for professional or commercial projects</span>
                 </li>
               </ul>
+            </div>
+
+            <div className="bg-red-50 rounded-2xl p-8 border border-red-200">
+              <h3 className="text-xl font-medium mb-4 text-gray-900 flex items-center gap-2">
+                <span className="text-2xl">⚠️</span>
+                Image Requirements (Important)
+              </h3>
+              <p className="text-gray-700 mb-4">
+                OpenAI has strict copyright detection for image-to-video generation. Your images will be rejected if they:
+              </p>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600">✗</span>
+                  <span>Contain copyrighted material, logos, or trademarks</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600">✗</span>
+                  <span>Include recognizable people, celebrities, or public figures</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600">✗</span>
+                  <span>Appear similar to professionally produced content</span>
+                </li>
+              </ul>
+              <p className="text-gray-700 mt-4 font-medium">
+                ✓ Use your own original photos, AI-generated images, or properly licensed stock images
+              </p>
             </div>
           </div>
         </div>

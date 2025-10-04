@@ -262,9 +262,16 @@ export default function SoraVideoGenerator() {
             clearInterval(pollInterval)
             let errorMessage = statusData.failMsg || 'Generation failed'
             
-            // Only show generic message for actual policy violations or content filtering
-            if (errorMessage.includes('policy') || errorMessage.includes('违反') || errorMessage.includes('content')) {
-              errorMessage = 'Generation failed: Content may violate usage policies.\n\n' +
+            // Show specific copyright/safety filter messages
+            if (errorMessage.includes('copyrighted material')) {
+              errorMessage = 'Generation blocked by copyright detection.\n\n' +
+                'OpenAI detected this image may contain copyrighted content.\n\n' +
+                'Please try:\n' +
+                '• Using your own original photos\n' +
+                '• Using stock images with commercial licenses\n' +
+                '• Avoiding images with logos, brands, or recognizable people'
+            } else if (errorMessage.includes('safety') || errorMessage.includes('policy') || errorMessage.includes('违反')) {
+              errorMessage = 'Generation failed: Content policy violation.\n\n' +
                 'Please try:\n' +
                 '• Using a different image or prompt\n' +
                 '• Ensuring content follows community guidelines'
@@ -276,13 +283,7 @@ export default function SoraVideoGenerator() {
             
             console.error('[Sora] Generation failed:', { failCode: statusData.failCode, failMsg: statusData.failMsg, param: statusData.param })
             
-            // Show detailed error for debugging in development mode
-            if (process.env.NODE_ENV === 'development') {
-              const debugInfo = `${errorMessage}\n\n=== DEBUG INFO ===\nOriginal Error: ${statusData.failMsg}\nRequest params:\n${statusData.param || 'N/A'}`
-              alert(debugInfo)
-            } else {
-              alert(errorMessage)
-            }
+            alert(errorMessage)
             
             setResult({
               taskId,
