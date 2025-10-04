@@ -57,8 +57,8 @@ async function handler(request: AuthenticatedRequest) {
       if (authConfig.USE_BESTAUTH) {
         console.log('[Generate API] Checking BestAuth limits for user:', user.id)
         
-        // Check if user can generate
-        const canGenerate = await bestAuthSubscriptionService.canUserGenerate(user.id)
+        // Check if user can generate (checks BOTH daily AND monthly limits)
+        const canGenerate = await bestAuthSubscriptionService.canUserGenerateImage(user.id)
         const subscription = await bestAuthSubscriptionService.getUserSubscription(user.id)
         const usageToday = await bestAuthSubscriptionService.getUserUsageToday(user.id)
         const usageThisMonth = await bestAuthSubscriptionService.getUserUsageThisMonth(user.id)
@@ -241,16 +241,40 @@ async function handler(request: AuthenticatedRequest) {
       
       // If user has reached their limit, return error
       if (!limitStatus.can_generate) {
-        const errorMessage = limitStatus.is_trial 
-          ? `Trial limit reached (${limitStatus.trial_usage}/${limitStatus.trial_limit} covers used). Upgrade to Pro plan to continue creating amazing covers!`
-          : limitStatus.subscription_tier === 'free'
-          ? `Daily generation limit reached (${limitStatus.daily_usage}/${limitStatus.daily_limit} today). Please try it tomorrow or upgrade to Pro plan for more daily generations.`
-          : `Monthly generation limit reached (${limitStatus.monthly_usage}/${limitStatus.monthly_limit} this month). Upgrade to Pro+ for unlimited generations!`
+        // Determine which limit was hit
+        const dailyLimitHit = limitStatus.daily_usage >= limitStatus.daily_limit
+        const monthlyLimitHit = limitStatus.monthly_usage >= limitStatus.monthly_limit
+        
+        let errorMessage = ''
+        let limitType = ''
+        
+        if (limitStatus.is_trial) {
+          errorMessage = `Trial limit reached (${limitStatus.trial_usage}/${limitStatus.trial_limit} images used). Upgrade to Pro plan to continue creating amazing covers!`
+          limitType = 'trial'
+        } else if (dailyLimitHit && monthlyLimitHit) {
+          // Both limits hit
+          errorMessage = limitStatus.subscription_tier === 'free'
+            ? `Daily limit reached (${limitStatus.daily_usage}/${limitStatus.daily_limit} today). Upgrade to Pro for ${limitStatus.daily_limit * 30} images/month or try again tomorrow.`
+            : `Both daily (${limitStatus.daily_usage}/${limitStatus.daily_limit}) and monthly (${limitStatus.monthly_usage}/${limitStatus.monthly_limit}) limits reached. ${limitStatus.subscription_tier === 'pro' ? 'Upgrade to Pro+ for more images.' : 'Try again tomorrow or next month.'}`
+          limitType = 'both'
+        } else if (dailyLimitHit) {
+          // Daily limit hit
+          errorMessage = `Daily limit reached (${limitStatus.daily_usage}/${limitStatus.daily_limit} images today). ${limitStatus.subscription_tier === 'free' ? 'Upgrade to Pro for more images or' : ''} Try again tomorrow.`
+          limitType = 'daily'
+        } else if (monthlyLimitHit) {
+          // Monthly limit hit
+          errorMessage = `Monthly limit reached (${limitStatus.monthly_usage}/${limitStatus.monthly_limit} images this month). ${limitStatus.subscription_tier === 'pro' ? 'Upgrade to Pro+ for more images.' : 'Try again next month.'}`
+          limitType = 'monthly'
+        } else {
+          errorMessage = `Generation limit reached. Please try again later or upgrade for more images.`
+          limitType = 'unknown'
+        }
           
         return NextResponse.json(
           { 
             error: errorMessage,
             limit_reached: true,
+            limit_type: limitType,
             daily_usage: limitStatus.daily_usage,
             daily_limit: limitStatus.daily_limit,
             monthly_usage: limitStatus.monthly_usage,
@@ -260,7 +284,8 @@ async function handler(request: AuthenticatedRequest) {
             subscription_tier: limitStatus.subscription_tier,
             is_trial: limitStatus.is_trial,
             trial_ends_at: limitStatus.trial_ends_at,
-            remaining_daily: limitStatus.remaining_daily
+            remaining_daily: limitStatus.remaining_daily,
+            remaining_monthly: limitStatus.remaining_monthly
           },
           { status: 429 }
         )

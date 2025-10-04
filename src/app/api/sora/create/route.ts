@@ -26,25 +26,73 @@ async function handler(request: AuthenticatedRequest) {
       const subscription = await bestAuthSubscriptionService.getUserSubscription(user.id)
       const videoUsageToday = await bestAuthSubscriptionService.getUserVideoUsageToday(user.id)
       
+      // Get monthly video usage
+      const videoUsageThisMonth = await (async () => {
+        try {
+          const db = (await import('@/lib/bestauth/db')).db
+          return await db.usage.getMonthlyUsageByType(user.id, 'video')
+        } catch (error) {
+          console.error('Error getting monthly video usage:', error)
+          return 0
+        }
+      })()
+      
       if (!canGenerate) {
         const limits = subscription 
           ? bestAuthSubscriptionService.getSubscriptionLimits(subscription.tier as 'free' | 'pro' | 'pro_plus', subscription.is_trialing)
           : { videos: { daily: 1, monthly: 30 } }
         
         const tier = subscription?.tier || 'free'
-        const upgradeMessage = tier === 'free' 
-          ? 'Upgrade to Pro for 3 videos/day or Pro+ for 10 videos/day.'
-          : tier === 'pro'
-          ? 'Upgrade to Pro+ for 10 videos/day.'
-          : 'You have reached your daily video limit.'
+        
+        // Determine which limit was hit
+        const dailyLimitHit = videoUsageToday >= limits.videos.daily
+        const monthlyLimitHit = videoUsageThisMonth >= limits.videos.monthly
+        
+        let errorMessage = ''
+        let limitType = ''
+        
+        if (dailyLimitHit && monthlyLimitHit) {
+          // Both limits hit
+          const upgradeMessage = tier === 'free' 
+            ? 'Upgrade to Pro for 3 videos/day or Pro+ for 10 videos/day.'
+            : tier === 'pro'
+            ? 'Upgrade to Pro+ for 10 videos/day and higher monthly limits.'
+            : 'Try again tomorrow or next month.'
+          errorMessage = `Both daily (${videoUsageToday}/${limits.videos.daily}) and monthly (${videoUsageThisMonth}/${limits.videos.monthly}) video limits reached. ${upgradeMessage}`
+          limitType = 'both'
+        } else if (dailyLimitHit) {
+          // Daily limit hit
+          const upgradeMessage = tier === 'free' 
+            ? 'Upgrade to Pro for 3 videos/day or Pro+ for 10 videos/day.'
+            : tier === 'pro'
+            ? 'Upgrade to Pro+ for 10 videos/day.'
+            : ''
+          errorMessage = `Daily video limit reached (${videoUsageToday}/${limits.videos.daily} today). ${upgradeMessage} ${upgradeMessage ? 'Or try' : 'Try'} again tomorrow.`
+          limitType = 'daily'
+        } else if (monthlyLimitHit) {
+          // Monthly limit hit
+          const upgradeMessage = tier === 'pro' 
+            ? 'Upgrade to Pro+ for higher monthly limits.'
+            : tier === 'free'
+            ? 'Upgrade to Pro or Pro+ for more videos.'
+            : ''
+          errorMessage = `Monthly video limit reached (${videoUsageThisMonth}/${limits.videos.monthly} this month). ${upgradeMessage} ${upgradeMessage ? 'Or try' : 'Try'} again next month.`
+          limitType = 'monthly'
+        } else {
+          errorMessage = `Video generation limit reached. Please try again later or upgrade for more videos.`
+          limitType = 'unknown'
+        }
         
         return NextResponse.json(
           { 
-            error: `Daily video generation limit reached (${videoUsageToday}/${limits.videos.daily} today). ${upgradeMessage} Or try again tomorrow.`,
+            error: errorMessage,
             limitReached: true,
+            limitType: limitType,
             currentTier: tier,
-            usage: videoUsageToday,
-            limit: limits.videos.daily
+            dailyUsage: videoUsageToday,
+            dailyLimit: limits.videos.daily,
+            monthlyUsage: videoUsageThisMonth,
+            monthlyLimit: limits.videos.monthly
           },
           { status: 429 }
         )
