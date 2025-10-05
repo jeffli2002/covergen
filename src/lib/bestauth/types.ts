@@ -8,6 +8,7 @@ export interface User {
   avatarUrl?: string
   createdAt: Date
   updatedAt: Date
+  lastSignInAt?: Date
 }
 
 export interface Session {

@@ -33,6 +33,7 @@ export const db = {
           avatarUrl: data.avatar_url,
           createdAt: new Date(data.created_at),
           updatedAt: new Date(data.updated_at),
+          lastSignInAt: data.last_sign_in_at ? new Date(data.last_sign_in_at) : undefined,
         }
       } catch (error) {
         console.error('Error finding user by email:', error)
@@ -112,6 +113,17 @@ export const db = {
         avatarUrl: data.avatar_url,
         createdAt: new Date(data.created_at),
         updatedAt: new Date(data.updated_at),
+      }
+    },
+
+    async updateLastSignIn(id: string): Promise<void> {
+      const { error } = await getDb()
+        .from('bestauth_users')
+        .update({ last_sign_in_at: new Date().toISOString() })
+        .eq('id', id)
+      
+      if (error) {
+        console.error('Error updating last sign-in:', error)
       }
     },
   },

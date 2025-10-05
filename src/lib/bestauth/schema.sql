@@ -11,11 +11,13 @@ CREATE TABLE IF NOT EXISTS bestauth.users (
   name TEXT,
   avatar_url TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  last_sign_in_at TIMESTAMPTZ
 );
 
 CREATE INDEX idx_bestauth_users_email ON bestauth.users(email);
 CREATE INDEX idx_bestauth_users_created_at ON bestauth.users(created_at);
+CREATE INDEX idx_bestauth_users_last_sign_in ON bestauth.users(last_sign_in_at DESC);
 
 -- Password credentials table
 CREATE TABLE IF NOT EXISTS bestauth.credentials (

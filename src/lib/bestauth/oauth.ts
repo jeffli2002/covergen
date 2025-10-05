@@ -231,6 +231,9 @@ export async function handleOAuthCallback(
       }
     }
 
+    // Update last sign-in timestamp
+    await db.users.updateLastSignIn(user.id)
+
     // Create session
     const session = await createSession(user, metadata)
 

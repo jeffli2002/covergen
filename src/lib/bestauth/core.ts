@@ -191,6 +191,9 @@ export async function signIn({
       }
     }
 
+    // Update last sign-in timestamp
+    await db.users.updateLastSignIn(user.id)
+
     // Create session
     const session = await createSession(user)
 
@@ -358,6 +361,9 @@ export async function verifyMagicLink(token: string): Promise<AuthResult<AuthSes
       // Mark email as verified
       await db.users.update(user.id, { emailVerified: true })
     }
+
+    // Update last sign-in timestamp
+    await db.users.updateLastSignIn(user.id)
 
     // Create session
     const session = await createSession(user)

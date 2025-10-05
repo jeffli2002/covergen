@@ -245,7 +245,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         <section className="py-20 bg-white relative overflow-hidden">
           <div className="container mx-auto px-4 relative">
             <div className="max-w-5xl mx-auto text-center">
-              <h1 className="text-2xl md:text-3xl lg:text-5xl font-thin tracking-tight mb-6 md:mb-8 text-gray-900 leading-relaxed">
+              <h1 className="text-2xl md:text-3xl lg:text-5xl font-thin tracking-tight mb-6 md:mb-8 text-gray-900 leading-[4rem]">
                 Next-Gen Storytelling: Videos with{' '}
                 <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent font-semibold">Sora 2</span>
                 , Images with{' '}
