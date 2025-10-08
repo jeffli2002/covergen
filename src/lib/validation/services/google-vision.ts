@@ -38,11 +38,19 @@ export class GoogleVisionService {
     
     try {
       console.log('[GoogleVision] Detecting faces in image:', imageUrl.substring(0, 100))
+      console.log('[GoogleVision] Confidence threshold:', confidenceThreshold)
       
       const [result] = await this.client.faceDetection(imageUrl)
       const faces = result.faceAnnotations || []
       
-      console.log(`[GoogleVision] Detected ${faces.length} faces`)
+      console.log(`[GoogleVision] Raw API response - Total faces found: ${faces.length}`)
+      
+      // Log all faces with their confidence scores
+      if (faces.length > 0) {
+        faces.forEach((face, i) => {
+          console.log(`[GoogleVision] Face ${i + 1}: confidence ${(face.detectionConfidence || 0).toFixed(3)}`)
+        })
+      }
       
       // Check if any face meets confidence threshold
       const highConfidenceFaces = faces.filter(

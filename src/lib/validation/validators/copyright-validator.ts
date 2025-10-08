@@ -7,19 +7,23 @@ export async function validateCopyright(
   imageUrl: string,
   config: ValidationConfig
 ): Promise<CopyrightValidationResult> {
-  console.log('[CopyrightValidator] Starting validation for:', imageUrl.substring(0, 100))
+  console.log('[CopyrightValidator] ===== STARTING COPYRIGHT VALIDATION =====')
+  console.log('[CopyrightValidator] Image URL:', imageUrl.substring(0, 100))
+  console.log('[CopyrightValidator] Config:', JSON.stringify(config, null, 2))
   
   const visionService = getGoogleVisionService()
   
   // Skip validation if service not available (no API key)
   if (!visionService.isAvailable()) {
-    console.warn('[CopyrightValidator] Google Vision not available, skipping validation')
+    console.error('[CopyrightValidator] ❌ Google Vision NOT AVAILABLE - API key missing or client init failed')
     return {
       valid: true, // Allow if service unavailable (graceful degradation)
       code: 'COPYRIGHT_VALIDATION_SKIPPED',
       details: 'Copyright validation service unavailable',
     }
   }
+  
+  console.log('[CopyrightValidator] ✅ Google Vision service available')
   
   try {
     // Run all copyright checks in parallel
@@ -28,9 +32,20 @@ export async function validateCopyright(
       logoThreshold: config.thresholds.logoConfidence,
     })
     
+    console.log('[CopyrightValidator] Validation results:', {
+      facesDetected: faces.detected,
+      faceCount: faces.faceCount,
+      faceConfidence: faces.confidence,
+      logosDetected: logos.detected,
+      logoCount: logos.logos?.length || 0,
+      textDetected: text.detected,
+      hasCopyright: text.hasCopyright,
+      hasWatermark: text.hasWatermark
+    })
+    
     // CRITICAL: Block if faces detected (Sora/OpenAI restriction)
     if (faces.detected && faces.faceCount > 0) {
-      console.warn(`[CopyrightValidator] BLOCKED: ${faces.faceCount} face(s) detected`)
+      console.error(`[CopyrightValidator] ❌ BLOCKED: ${faces.faceCount} face(s) detected with confidence ${(faces.confidence * 100).toFixed(1)}%`)
       return {
         valid: false,
         error: 'Image contains people or faces',
