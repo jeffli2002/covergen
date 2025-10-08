@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { validateCopyright, getValidationConfig } from '@/lib/validation'
+
+// CRITICAL: Use Node.js runtime for @google-cloud/vision compatibility
+export const runtime = 'nodejs'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg']
@@ -165,6 +169,36 @@ export async function POST(request: NextRequest) {
           }
           
           if (validated) {
+            // EARLY COPYRIGHT VALIDATION - Check immediately after upload
+            console.log('[Upload Image] Running early copyright validation...')
+            const validationConfig = getValidationConfig()
+            
+            if (validationConfig.enabled && validationConfig.layers.copyright) {
+              try {
+                const copyrightResult = await validateCopyright(imageUrl, validationConfig)
+                
+                if (!copyrightResult.valid) {
+                  console.error('[Upload Image] Early copyright validation failed:', copyrightResult)
+                  return NextResponse.json(
+                    { 
+                      error: copyrightResult.error || 'Image failed copyright validation',
+                      details: copyrightResult.details,
+                      suggestion: copyrightResult.suggestion,
+                      code: copyrightResult.code,
+                      validationFailed: true
+                    },
+                    { status: 400 }
+                  )
+                }
+                
+                console.log('[Upload Image] ✅ Early copyright validation passed')
+              } catch (validationError) {
+                console.error('[Upload Image] Early copyright validation error:', validationError)
+                // On error, continue with warning (graceful degradation)
+                console.warn('[Upload Image] ⚠️ Continuing despite validation error')
+              }
+            }
+            
             return NextResponse.json({ 
               imageUrl,
               fileName: file.name,

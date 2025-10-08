@@ -3,6 +3,10 @@ import { createSoraTask, SoraApiError } from '@/lib/sora-api'
 import { withAuth, AuthenticatedRequest } from '@/app/api/middleware/withAuth'
 import { authConfig } from '@/config/auth.config'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
+import { validateCopyright, getValidationConfig } from '@/lib/validation'
+
+// CRITICAL: Use Node.js runtime for @google-cloud/vision compatibility
+export const runtime = 'nodejs'
 
 async function handler(request: AuthenticatedRequest) {
   try {
@@ -230,10 +234,38 @@ async function handler(request: AuthenticatedRequest) {
         )
       }
 
-      // COPYRIGHT VALIDATION - Temporarily disabled
-      // TODO: Re-enable once @google-cloud/vision package is properly configured for Edge runtime
-      // The validation prevents API charges for images with faces, logos, watermarks
-      console.log('[Sora API] Copyright validation temporarily disabled')
+      // COPYRIGHT VALIDATION - Prevent API charges for images with faces, logos, watermarks
+      console.log('[Sora API] Starting copyright validation...')
+      
+      const validationConfig = getValidationConfig()
+      
+      if (validationConfig.enabled && validationConfig.layers.copyright) {
+        try {
+          const copyrightResult = await validateCopyright(cleanImageUrl, validationConfig)
+          
+          if (!copyrightResult.valid) {
+            console.error('[Sora API] Copyright validation failed:', copyrightResult)
+            return NextResponse.json(
+              { 
+                error: copyrightResult.error || 'Image failed copyright validation',
+                details: copyrightResult.details,
+                suggestion: copyrightResult.suggestion,
+                code: copyrightResult.code,
+                validationFailed: true
+              },
+              { status: 400 }
+            )
+          }
+          
+          console.log('[Sora API] ✅ Copyright validation passed')
+        } catch (validationError) {
+          console.error('[Sora API] Copyright validation error:', validationError)
+          // On error, continue with warning (graceful degradation)
+          console.warn('[Sora API] ⚠️ Continuing despite validation error')
+        }
+      } else {
+        console.log('[Sora API] Copyright validation disabled in config')
+      }
 
       // Prompt is required for image-to-video according to API docs
       if (!prompt || typeof prompt !== 'string') {

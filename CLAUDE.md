@@ -526,3 +526,44 @@ BESTAUTH_GOOGLE_CLIENT_SECRET=...
 - All new features should use BestAuth
 - User IDs may differ between systems - use mapping table
 - Test both auth flows during development
+
+## Copyright Validation (Re-enabled 2025-10-08)
+
+### Overview
+Google Vision API is now **ACTIVE** and validates all uploaded images for:
+- **Face detection** - Blocks images with identifiable people (Sora policy requirement)
+- **Logo detection** - Blocks images with brand logos/trademarks
+- **Watermark detection** - Blocks stock photos with copyright marks
+
+### Validation Points
+1. **Upload endpoint** (`/api/sora/upload-image`) - Early detection immediately after upload
+2. **Create endpoint** (`/api/sora/create`) - Final check before Sora API call
+
+### Critical Configuration
+Both endpoints require Node.js runtime (not Edge) for @google-cloud/vision compatibility:
+```typescript
+export const runtime = 'nodejs'
+```
+
+### Environment Variables
+```bash
+GOOGLE_CLOUD_VISION_API_KEY=AIzaSy...  # Required
+VALIDATION_ENABLED=true
+VALIDATION_LAYER_COPYRIGHT=true
+VALIDATION_FACE_CONFIDENCE=0.7  # Threshold for face detection
+```
+
+### Error Response
+When validation fails, API returns:
+```json
+{
+  "error": "Image contains people or faces",
+  "details": "Detected 2 people with 87% confidence",
+  "suggestion": "Use landscape/nature photos without people...",
+  "code": "COPYRIGHT_FACE_DETECTED",
+  "validationFailed": true
+}
+```
+
+### Documentation
+See `COPYRIGHT_VALIDATION_ENABLED.md` for complete implementation details, testing, and troubleshooting.
