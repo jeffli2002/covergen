@@ -426,6 +426,25 @@ export default function SoraVideoGenerator() {
               <div className="space-y-2">
                 <label className="text-sm font-light text-gray-700">Source Image</label>
                 
+                <div className="mb-3 p-4 bg-amber-50 border border-amber-200 rounded-lg space-y-2">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-amber-900 mb-1">
+                        Sora 2 Image Requirements
+                      </p>
+                      <p className="text-xs font-light text-amber-800 leading-relaxed">
+                        Sora 2 has strict requirements for uploaded images. <strong>Images containing people or faces are not supported</strong> and will be automatically rejected. Please use images with landscapes, objects, or scenes without any people.
+                      </p>
+                      <p className="text-xs font-light text-amber-700 mt-2">
+                        ✓ Allowed: Landscapes, nature, objects, abstract art, patterns
+                        <br />
+                        ✗ Not allowed: People, faces, brand logos, watermarks
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
                 {!imagePreview ? (
                   <div
                     onClick={() => fileInputRef.current?.click()}
