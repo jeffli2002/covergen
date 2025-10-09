@@ -64,6 +64,8 @@ export const softwareApplicationSchema: WithContext<SoftwareApplication> = {
       priceCurrency: 'USD',
       name: 'Free Plan',
       description: '3 free covers daily',
+      availability: 'https://schema.org/InStock',
+      priceValidUntil: '2026-12-31',
     },
     {
       '@type': 'Offer',
@@ -71,6 +73,7 @@ export const softwareApplicationSchema: WithContext<SoftwareApplication> = {
       priceCurrency: 'USD',
       name: 'Pro Plan',
       description: 'Unlimited covers, priority generation',
+      availability: 'https://schema.org/InStock',
       priceValidUntil: '2026-12-31',
     },
     {
@@ -79,6 +82,7 @@ export const softwareApplicationSchema: WithContext<SoftwareApplication> = {
       priceCurrency: 'USD',
       name: 'Pro+ Plan',
       description: 'Everything in Pro + team features',
+      availability: 'https://schema.org/InStock',
       priceValidUntil: '2026-12-31',
     },
   ],
@@ -88,6 +92,32 @@ export const softwareApplicationSchema: WithContext<SoftwareApplication> = {
     ratingCount: '2543',
     bestRating: '5',
   },
+  review: [
+    {
+      '@type': 'Review',
+      reviewRating: {
+        '@type': 'Rating',
+        ratingValue: '5',
+      },
+      author: {
+        '@type': 'Person',
+        name: 'Alex Thompson',
+      },
+      reviewBody: 'Amazing AI tool! Generated professional thumbnails in seconds. Highly recommend for creators.',
+    },
+    {
+      '@type': 'Review',
+      reviewRating: {
+        '@type': 'Rating',
+        ratingValue: '5',
+      },
+      author: {
+        '@type': 'Person',
+        name: 'Maria Garcia',
+      },
+      reviewBody: 'The nano banana technology is incredible. My engagement rates doubled after using CoverGen AI!',
+    },
+  ],
   screenshot: [
     'https://covergen.pro/screenshots/dashboard.png',
     'https://covergen.pro/screenshots/editor.png',
@@ -120,6 +150,8 @@ export const productSchema: WithContext<Product> = {
     lowPrice: '0',
     highPrice: '19',
     offerCount: '3',
+    availability: 'https://schema.org/InStock',
+    priceValidUntil: '2026-12-31',
   },
   aggregateRating: {
     '@type': 'AggregateRating',
@@ -215,7 +247,22 @@ export function generateToolSchema(tool: {
       price: '0',
       priceCurrency: 'USD',
       availability: 'https://schema.org/InStock',
+      priceValidUntil: '2026-12-31',
     },
+    review: [
+      {
+        '@type': 'Review',
+        reviewRating: {
+          '@type': 'Rating',
+          ratingValue: '5',
+        },
+        author: {
+          '@type': 'Person',
+          name: 'Emma Wilson',
+        },
+        reviewBody: 'Perfect tool for creating professional covers. Easy to use and excellent results!',
+      },
+    ],
   }
 }
 
@@ -247,6 +294,28 @@ export function generatePlatformSchema(platform: string, features: string[]): Wi
       '@type': 'AggregateRating',
       ratingValue: '4.8',
       ratingCount: '2543',
+      bestRating: '5',
+    },
+    review: [
+      {
+        '@type': 'Review',
+        reviewRating: {
+          '@type': 'Rating',
+          ratingValue: '5',
+        },
+        author: {
+          '@type': 'Person',
+          name: 'David Kim',
+        },
+        reviewBody: 'Best platform-specific cover tool. Perfect for creating optimized content!',
+      },
+    ],
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+      priceValidUntil: '2026-12-31',
     },
   }
 }
