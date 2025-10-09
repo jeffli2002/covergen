@@ -37,17 +37,17 @@ const tiers = [
     description: 'Perfect for trying out our AI generator',
     icon: Sparkles,
     features: [
-      '3 images/day + 1 video/day',
-      '10 images/month + 5 videos/month',
+      '3 nano-banana images/day + 1 sora 2 video/day',
+      '10 nano-banana images/mo + 5 sora 2 videos/mo',
       'Basic templates',
-      'No watermark on images',
+      'Watermark-free images & videos',
       'All platform sizes',
       'Email support',
       'Personal use only'
     ],
     limitations: [
-      'Daily: 3 images + 1 video',
-      'Monthly: 10 images + 5 videos',
+      'Daily: 3 nano-banana images + 1 sora 2 video',
+      'Monthly: 10 nano-banana images + 5 sora 2 videos',
       'No commercial usage'
     ],
     cta: 'Get Started',
@@ -58,12 +58,12 @@ const tiers = [
     id: 'pro',
     name: 'Pro',
     price: '$16.99',
-    period: 'per month',
+    period: 'per mo',
     description: 'Ideal for regular content creators',
     icon: Zap,
     features: [
-      '100 images/month',
-      '30 videos/month',
+      '100 nano-banana images/mo',
+      '30 sora 2 videos/mo (watermark-free)',
       'All templates',
       'High resolution exports',
       'Priority support',
@@ -78,12 +78,12 @@ const tiers = [
     id: 'pro_plus',
     name: 'Pro+',
     price: '$29.99',
-    period: 'per month',
+    period: 'per mo',
     description: 'For professional creators and teams',
     icon: Crown,
     features: [
-      '200 images/month',
-      '60 videos/month',
+      '200 nano-banana images/mo',
+      '60 sora 2 videos/mo (watermark-free)',
       'Everything in Pro',
       'Bulk generation',
       'Custom templates',
@@ -448,7 +448,7 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
         {/* Additional info */}
         <div className="text-center mt-12 space-y-4">
           <p className="text-sm text-gray-600">
-            All plans include watermark-free images for professional use (videos may include watermarks).
+            All plans include watermark-free nano-banana images and sora 2 videos for professional use.
           </p>
           <div className="flex justify-center gap-8 text-sm text-gray-600">
             <span>✓ Cancel anytime</span>

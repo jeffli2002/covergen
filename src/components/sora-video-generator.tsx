@@ -75,6 +75,39 @@ export default function SoraVideoGenerator() {
     }
   }
 
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    const files = e.dataTransfer.files
+    if (files && files.length > 0) {
+      const file = files[0]
+      
+      if (!['image/jpeg', 'image/png', 'image/webp', 'image/jpg'].includes(file.type)) {
+        alert('Please select a valid image file (JPEG, PNG, or WebP)')
+        return
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        alert('Image file must be less than 10MB')
+        return
+      }
+
+      setImageFile(file)
+      
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
   const handleGenerate = async () => {
     console.log('[Sora] handleGenerate called:', { mode, hasImageFile: !!imageFile, hasPrompt: !!prompt })
     
@@ -448,6 +481,8 @@ export default function SoraVideoGenerator() {
                 {!imagePreview ? (
                   <div
                     onClick={() => fileInputRef.current?.click()}
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
                     className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-purple-400 hover:bg-purple-50/50 transition-colors"
                   >
                     <Upload className="w-12 h-12 mx-auto text-gray-400 mb-3" />

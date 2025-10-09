@@ -398,13 +398,13 @@ export default function PaymentPageClient({
               if (currentSubscription?.tier === 'free') {
                 return (
                   <>
-                    Start creating stunning <span className="font-semibold text-purple-600">Sora 2</span> powered videos and <span className="font-semibold text-orange-600">nano banana</span> powered AI covers. Upgrade from the free plan for more exports and advanced features.
+                    Start creating stunning watermark-free <span className="font-semibold text-purple-600">Sora 2</span> powered videos and <span className="font-semibold text-orange-600">nano banana</span> powered AI covers. Upgrade from the free plan for more exports and advanced features.
                   </>
                 )
               }
               return (
                 <>
-                  Start creating stunning <span className="font-semibold text-purple-600">Sora 2</span> powered videos and <span className="font-semibold text-orange-600">nano banana</span> powered AI covers. All plans include watermark-free images.
+                  Start creating stunning watermark-free <span className="font-semibold text-purple-600">Sora 2</span> powered videos and <span className="font-semibold text-orange-600">nano banana</span> powered AI covers. All plans include watermark-free images and videos.
                 </>
               )
             })()}
@@ -546,7 +546,7 @@ export default function PaymentPageClient({
                   
                   <div className="mt-4">
                     <span className="text-heading-2">${plan.price / 100}</span>
-                    <span className="text-gray-600">/month</span>
+                    <span className="text-gray-600">/mo</span>
                   </div>
                   
                   

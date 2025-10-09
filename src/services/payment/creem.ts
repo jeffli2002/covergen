@@ -128,9 +128,9 @@ const getSubscriptionPlansWithConfig = () => {
       price: 1699, // $16.99 in cents
       priceId: CREEM_PRODUCTS.pro,
       features: [
-        `${proPlan?.limits.images.monthly || 100} images/month`,
-        `${proPlan?.limits.videos.monthly || 30} videos/month`,
-        'No watermark for images',
+        `${proPlan?.limits.images.monthly || 100} nano-banana images/mo`,
+        `${proPlan?.limits.videos.monthly || 30} sora 2 videos/mo (watermark-free)`,
+        'Watermark-free for all content',
         'All platform sizes',
         'Priority support',
         'Commercial usage rights'
@@ -142,9 +142,9 @@ const getSubscriptionPlansWithConfig = () => {
       price: 2999, // $29.99 in cents
       priceId: CREEM_PRODUCTS.pro_plus,
       features: [
-        `${proPlusPlan?.limits.images.monthly || 200} images/month`,
-        `${proPlusPlan?.limits.videos.monthly || 60} videos/month`,
-        'No watermark for images',
+        `${proPlusPlan?.limits.images.monthly || 200} nano-banana images/mo`,
+        `${proPlusPlan?.limits.videos.monthly || 60} sora 2 videos/mo (watermark-free)`,
+        'Watermark-free for all content',
         'All platform sizes',
         'Advanced customization',
         'Commercial usage license',
