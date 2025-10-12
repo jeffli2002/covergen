@@ -1,15 +1,44 @@
 // Platform-specific keywords for SEO optimization
 export const PLATFORM_KEYWORDS = {
-  // Core keywords from user request
+  // Core keywords from user request (2025-10-12 update)
   core: [
+    // Primary AI tools
+    'ai image generator',
+    'ai video generator', 
+    'nano banana',
+    'sora 2',
+    'gemini 2.5 flash image',
+    'ai image generation',
+    'ai video generation',
+    'ai thumbnail generator',
+    'ai poster generator',
+    'ai cover generator',
+    'ai ad creator',
+    'ai design tool',
+    'ai content creation',
+    'ai creative tool',
+    'ai art generator',
+    'ai marketing visuals',
+    'ai video maker',
+    'ai social media design',
+    'free ai generator',
+    'ai for content creators',
+    'ai image and video tool',
+    'ai graphic generator',
+    'ai animation',
+    'ai poster design',
+    'ai youtube thumbnail',
+    'ai tiktok cover',
+    'ai twitter banner',
+    'ai linkedin post image',
+    
+    // Legacy core keywords
     'cover',
     'cover image',
     'cover maker',
     'cover image generator',
     'thumbnail',
     'thumbnail maker',
-    'thumbnail maker',
-    'youtube thumbnail maker',
     'youtube thumbnail maker',
     'youtube cover maker',
     'poster',
@@ -17,18 +46,16 @@ export const PLATFORM_KEYWORDS = {
     'poster image maker',
     'poster image generator',
     'tiktok thumbnail maker',
+    
     // Sora 2 keywords
-    'sora 2',
     'sora2',
     'openai sora 2',
     'sora 2 ai',
     'sora 2 video generator',
     'sora 2 video ai',
     'sora 2 model',
-    'ai video generator',
     'text to video ai',
     'ai video creation',
-    'ai video maker',
     'video generation ai',
     'ai video cover',
     'ai video thumbnail',
@@ -854,6 +881,9 @@ export function getAllKeywords(): string[] {
   
   return Array.from(new Set(allKeywords)); // Remove duplicates
 }
+
+
+
 
 
 
