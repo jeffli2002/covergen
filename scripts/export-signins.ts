@@ -89,13 +89,20 @@ async function querySignInsForRange(supabase: ReturnType<typeof createClient>, d
 
     const typedSessions = sessions as SessionRow[]
     const userIds = Array.from(new Set(typedSessions.map(s => s.user_id)))
+    
+    type UserRow = {
+      id: string
+      email: string | null
+    }
+    
     const { data: users, error: userErr } = await supabase
       .from(usersTable)
       .select('id, email')
       .in('id', userIds)
 
     if (userErr) throw userErr
-    const userById = new Map<string, any>((users || []).map(u => [u.id, u]))
+    const typedUsers = (users || []) as UserRow[]
+    const userById = new Map<string, UserRow>(typedUsers.map(u => [u.id, u]))
 
     const label = new Date(dayStart).toISOString().slice(0,10)
     const rows: SignInRow[] = typedSessions.map((s) => ({
