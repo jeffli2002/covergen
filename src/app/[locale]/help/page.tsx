@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Search, HelpCircle, MessageCircle, BookOpen, Video, Image, Settings, Zap } from 'lucide-react'
 import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
+import { PRICING_CONFIG } from '@/config/pricing.config'
 
 // Get configuration for use in the FAQ content
 const config = getClientSubscriptionConfig()
@@ -27,7 +28,7 @@ const faqCategories = [
       },
       {
         question: 'How many images and videos can I generate?',
-        answer: 'Free: 10 images + 5 videos/month (3 images + 1 video daily). Pro ($16.99): 100 images + 30 videos/month. Pro+ ($29.99): 200 images + 60 videos/month. Pro/Pro+ have no fixed daily limits.'
+        answer: `Free: ${PRICING_CONFIG.plans[0].credits.onSignup} credits on signup (up to ${Math.floor(PRICING_CONFIG.plans[0].credits.onSignup! / PRICING_CONFIG.generationCosts.nanoBananaImage)} images, ${PRICING_CONFIG.plans[0].features.find(f => f.text.includes('images per day'))?.text.split(' ')[0]} per day limit). Pro ($${PRICING_CONFIG.plans[1].price.monthly.toFixed(1)}/month): ${PRICING_CONFIG.plans[1].credits.monthly} credits/month (up to ${Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or ${Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} videos). Pro+ ($${PRICING_CONFIG.plans[2].price.monthly.toFixed(1)}/month): ${PRICING_CONFIG.plans[2].credits.monthly} credits/month (up to ${Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or ${Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} videos).`
       }
     ]
   },
@@ -87,7 +88,7 @@ const faqCategories = [
       },
       {
         question: 'What are the video generation limits?',
-        answer: `Free plan: 5 videos/month with 1 video daily limit. Pro plan ($16.99/month): 30 videos/month. Pro+ plan ($29.99/month): 60 videos/month. Pro and Pro+ users have no fixed daily limits.`
+        answer: `Credits-based system: Sora 2 videos cost ${PRICING_CONFIG.generationCosts.sora2Video} credits each, Pro videos cost ${PRICING_CONFIG.generationCosts.sora2ProVideo} credits. Free users don't have video access. Pro plan ($${PRICING_CONFIG.plans[1].price.monthly.toFixed(1)}/month): ${PRICING_CONFIG.plans[1].credits.monthly} credits/month (up to ${Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} Sora 2 videos). Pro+ plan ($${PRICING_CONFIG.plans[2].price.monthly.toFixed(1)}/month): ${PRICING_CONFIG.plans[2].credits.monthly} credits/month (up to ${Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} Sora 2 videos or ${Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.sora2ProVideo)} Pro videos).`
       },
       {
         question: 'How long does video generation take?',
@@ -135,7 +136,7 @@ const faqCategories = [
       },
       {
         question: 'What\'s included in Pro and Pro+ plans?',
-        answer: 'Pro ($16.99/month): 100 images + 30 videos, all features, commercial rights. Pro+ ($29.99/month): 200 images + 60 videos, priority generation, enhanced features, full commercial license for teams and client work.'
+        answer: `Pro ($${PRICING_CONFIG.plans[1].price.monthly.toFixed(1)}/month): ${PRICING_CONFIG.plans[1].credits.monthly} credits/month, watermark-free images and Sora 2 videos, commercial rights. Pro+ ($${PRICING_CONFIG.plans[2].price.monthly.toFixed(1)}/month): ${PRICING_CONFIG.plans[2].credits.monthly} credits/month, Sora 2 Pro quality, priority generation, full commercial license for teams and client work.`
       },
       {
         question: 'How do I reset my password?',

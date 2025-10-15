@@ -1179,10 +1179,10 @@ Sora 2 interprets prompts with remarkable sophistication:
 - Total: $2000-$20000+ per video
 
 **Sora 2 Production**
-- Free tier: $0 (5 videos/month)
-- Pro tier: $16.99/month (30 videos)
-- Pro+ tier: $29.99/month (60 videos)
-- Cost per video: $0.50-$5.00
+- Free tier: $0 (no video access, 30 credits for images)
+- Pro tier: $14.9/month (800 credits = up to 40 Sora 2 videos)
+- Pro+ tier: $26.9/month (1,600 credits = up to 80 Sora 2 videos)
+- Cost per video: 20 credits (Sora 2) or 80 credits (Sora 2 Pro)
 
 ### Time Investment
 

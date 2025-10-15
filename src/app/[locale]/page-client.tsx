@@ -29,6 +29,7 @@ import {
 } from 'lucide-react'
 import { TikTokIcon, SpotifyIcon, TwitterXIcon, FacebookIcon } from '@/components/icons/brand-icons'
 import { Locale } from '@/lib/i18n/config'
+import { PRICING_CONFIG } from '@/config/pricing.config'
 
 interface HomePageClientProps {
   locale: Locale
@@ -503,9 +504,9 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                   What's the difference between free and Pro plans?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Free users get 10 images + 5 videos per month (3 images + 1 video daily max) for personal use only. 
-                  Pro ($16.99/month) includes 100 images + 30 videos per month with commercial rights. 
-                  Pro+ ($29.99/month) includes 200 images + 60 videos per month with full commercial license for teams and enterprises.
+                  Free users get {PRICING_CONFIG.plans[0].credits.onSignup} credits on signup (up to {Math.floor(PRICING_CONFIG.plans[0].credits.onSignup! / PRICING_CONFIG.generationCosts.nanoBananaImage)} Nano Banana images) for personal use only, with a daily limit of {PRICING_CONFIG.plans[0].features.find(f => f.text.includes('images per day'))?.text.split(' ')[0]} images. 
+                  Pro (${PRICING_CONFIG.plans[1].price.monthly.toFixed(1)}/month or ${PRICING_CONFIG.plans[1].price.yearly.toFixed(2)}/year) includes {PRICING_CONFIG.plans[1].credits.monthly.toLocaleString()} credits/month ({PRICING_CONFIG.plans[1].credits.yearly.toLocaleString()}/year) for up to {Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or {Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} Sora 2 videos per month with commercial rights. 
+                  Pro+ (${PRICING_CONFIG.plans[2].price.monthly.toFixed(1)}/month or ${PRICING_CONFIG.plans[2].price.yearly.toFixed(2)}/year) includes {PRICING_CONFIG.plans[2].credits.monthly.toLocaleString()} credits/month ({PRICING_CONFIG.plans[2].credits.yearly.toLocaleString()}/year) for up to {Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or {Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} Sora 2 videos per month, plus Sora 2 Pro quality.
                 </p>
               </div>
 
@@ -514,8 +515,9 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                   Can I use the generated images commercially?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Free plan is for personal use only. Pro plan includes commercial usage rights for small businesses 
-                  and content creators. Pro+ plan offers full commercial license with team and enterprise usage rights.
+                  All plans include watermark-free images! Free plan is for personal use only. 
+                  Pro and Pro+ plans include commercial usage rights for businesses, content creators, and client work. 
+                  Both paid plans also include watermark-free Sora 2 videos.
                 </p>
               </div>
 
@@ -579,13 +581,13 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
 
               <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-8 shadow-sm border border-purple-200 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer">
                 <h3 className="text-lg font-medium mb-4 text-gray-900">
-                  How are video limits different from image limits?
+                  How do credits work for images vs videos?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Videos and images have separate generation limits. Free users get 1 video per day (5 per month) and 
-                  3 images per day (10 per month). Pro users ($16.99/month) get 30 videos and 100 images per month. 
-                  Pro+ users ($29.99/month) get 60 videos and 200 images per month. Video generation consumes more 
-                  computational resources, which is why limits are lower than images.
+                  Credits are used for all generation types. Nano Banana images cost {PRICING_CONFIG.generationCosts.nanoBananaImage} credits each, Sora 2 videos cost {PRICING_CONFIG.generationCosts.sora2Video} credits, 
+                  and Sora 2 Pro videos cost {PRICING_CONFIG.generationCosts.sora2ProVideo} credits. Free users get {PRICING_CONFIG.plans[0].credits.onSignup} signup bonus credits (up to {Math.floor(PRICING_CONFIG.plans[0].credits.onSignup! / PRICING_CONFIG.generationCosts.nanoBananaImage)} images, no video access). 
+                  Pro users get {PRICING_CONFIG.plans[1].credits.monthly.toLocaleString()} credits/month (up to {Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or {Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} videos). Pro+ users get {PRICING_CONFIG.plans[2].credits.monthly.toLocaleString()} credits/month 
+                  (up to {Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or {Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} videos) with access to Sora 2 Pro quality.
                 </p>
               </div>
 
@@ -607,9 +609,9 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                   Can I use Sora 2 videos commercially?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Free plan videos are for personal use only. Pro plan ($16.99/month) includes commercial usage rights 
+                  Free plan videos are for personal use only. Pro plan (${PRICING_CONFIG.plans[1].price.monthly.toFixed(1)}/month) includes commercial usage rights 
                   for small businesses and content creators, perfect for social media content, YouTube videos, and 
-                  marketing materials. Pro+ plan ($29.99/month) offers full commercial license with team and enterprise 
+                  marketing materials. Pro+ plan (${PRICING_CONFIG.plans[2].price.monthly.toFixed(1)}/month) offers full commercial license with team and enterprise 
                   usage rights, ideal for agencies and larger organizations.
                 </p>
               </div>

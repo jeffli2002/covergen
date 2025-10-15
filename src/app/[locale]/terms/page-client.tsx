@@ -3,6 +3,7 @@
 import { FileText, CheckCircle2, AlertCircle, Globe, Shield, CreditCard, Scale, Mail, MapPin } from 'lucide-react'
 import { Locale } from '@/lib/i18n/config'
 import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
+import { PRICING_CONFIG } from '@/config/pricing.config'
 
 interface TermsPageClientProps {
   locale: Locale
@@ -152,33 +153,33 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                     <h4 className="text-ui-lg text-gray-900 mb-2">Free Plan</h4>
                     <p className="text-sm font-medium text-gray-900 mb-2">$0/forever</p>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ 10 images + 5 videos per month</li>
-                      <li>✓ 3 images + 1 video per day max</li>
-                      <li>✓ No watermark on images</li>
-                      <li>✓ All platform sizes</li>
-                      <li>✓ Email support</li>
+                      <li>✓ {PRICING_CONFIG.plans[0].credits.onSignup} credits on signup</li>
+                      <li>✓ Up to {Math.floor(PRICING_CONFIG.plans[0].credits.onSignup! / PRICING_CONFIG.generationCosts.nanoBananaImage)} images</li>
+                      <li>✓ {PRICING_CONFIG.plans[0].features.find(f => f.text.includes('images per day'))?.text.split(' ')[0]} images per day max</li>
+                      <li>✓ Watermark-free images</li>
                       <li>✓ Personal use only</li>
                     </ul>
                   </div>
                   <div className="border border-blue-200 bg-blue-50 rounded-lg p-4">
                     <h4 className="text-ui-lg text-gray-900 mb-2">Pro Plan</h4>
-                    <p className="text-sm font-medium text-gray-900 mb-2">$16.99/month</p>
+                    <p className="text-sm font-medium text-gray-900 mb-2">${PRICING_CONFIG.plans[1].price.monthly.toFixed(1)}/month</p>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ 100 images + 30 videos per month</li>
-                      <li>✓ No watermark on images</li>
-                      <li>✓ All platform sizes</li>
+                      <li>✓ {PRICING_CONFIG.plans[1].credits.monthly} credits/month</li>
+                      <li>✓ Up to {Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or {Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} videos</li>
+                      <li>✓ Watermark-free images & Sora 2 videos</li>
                       <li>✓ Priority support</li>
                       <li>✓ Commercial usage rights</li>
                     </ul>
                   </div>
                   <div className="border border-purple-200 bg-purple-50 rounded-lg p-4">
                     <h4 className="text-ui-lg text-gray-900 mb-2">Pro+ Plan</h4>
-                    <p className="text-sm font-medium text-gray-900 mb-2">$29.99/month</p>
+                    <p className="text-sm font-medium text-gray-900 mb-2">${PRICING_CONFIG.plans[2].price.monthly.toFixed(1)}/month</p>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ 200 images + 60 videos per month</li>
-                      <li>✓ No watermark on images</li>
+                      <li>✓ {PRICING_CONFIG.plans[2].credits.monthly} credits/month</li>
+                      <li>✓ Up to {Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or {Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} videos</li>
+                      <li>✓ Sora 2 Pro quality</li>
+                      <li>✓ Watermark-free images & videos</li>
                       <li>✓ Full commercial license</li>
-                      <li>✓ Custom brand templates</li>
                       <li>✓ Dedicated support</li>
                     </ul>
                   </div>

@@ -479,7 +479,6 @@ export default function GenerationForm() {
           }}
           dailyCount={dailyLimitStatus.daily_count}
           dailyLimit={dailyLimitStatus.daily_limit}
-          isTrial={dailyLimitStatus.is_trial}
         />
       )}
     </Card>

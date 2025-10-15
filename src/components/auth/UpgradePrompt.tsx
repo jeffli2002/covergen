@@ -7,6 +7,7 @@ import { Sparkles, Zap, Shield, Check } from 'lucide-react'
 import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
 import { getPlanByType } from '@/lib/subscription-plans'
 import { usePathname } from 'next/navigation'
+import { PRICING_CONFIG } from '@/config/pricing.config'
 
 interface UpgradePromptProps {
   onClose?: () => void
@@ -14,7 +15,6 @@ interface UpgradePromptProps {
   onSignIn?: () => void
   dailyCount?: number
   dailyLimit?: number
-  isTrial?: boolean
   type?: 'image' | 'video'
   isAuthenticated?: boolean
 }
@@ -25,18 +25,17 @@ export default function UpgradePrompt({
   onSignIn, 
   dailyCount = 3, 
   dailyLimit = 3, 
-  isTrial = false,
   type = 'image',
   isAuthenticated = true
 }: UpgradePromptProps) {
   // Get subscription configuration
   const config = getClientSubscriptionConfig()
   
-  // Get Pro plan pricing
+  // Get Pro plan pricing from PRICING_CONFIG
   const proPlan = getPlanByType('pro')
   const freePlan = getPlanByType('free')
-  const proPrice = proPlan?.price || 16.99
-  const proPriceDisplay = proPlan?.priceDisplay || `$${proPrice}/mo`
+  const proPrice = PRICING_CONFIG.plans[1].price.monthly
+  const proPriceDisplay = `$${proPrice.toFixed(1)}/mo`
   
   // Get current locale from pathname
   const pathname = usePathname()
@@ -44,32 +43,32 @@ export default function UpgradePrompt({
   
   const contentType = type === 'video' ? 'videos' : 'images'
   
-  // Get plan limits from subscription plans
-  const proPlusPlan = getPlanByType('pro_plus')
-  const proImageLimit = proPlan?.limits.images.monthly || 100
-  const proPlusImageLimit = proPlusPlan?.limits.images.monthly || 200
-  const proVideoLimit = proPlan?.limits.videos.monthly || 30
-  const proPlusVideoLimit = proPlusPlan?.limits.videos.monthly || 60
+  // Get plan limits from PRICING_CONFIG (credit-based)
+  const proCredits = PRICING_CONFIG.plans[1].credits.monthly
+  const proPlusCredits = PRICING_CONFIG.plans[2].credits.monthly
+  const proImageLimit = Math.floor(proCredits / PRICING_CONFIG.generationCosts.nanoBananaImage)
+  const proPlusImageLimit = Math.floor(proPlusCredits / PRICING_CONFIG.generationCosts.nanoBananaImage)
+  const proVideoLimit = Math.floor(proCredits / PRICING_CONFIG.generationCosts.sora2Video)
+  const proPlusVideoLimit = Math.floor(proPlusCredits / PRICING_CONFIG.generationCosts.sora2Video)
   
-  // Get free tier limits for display
-  const freeVideoDaily = freePlan?.limits.videos.daily || 1
-  const freeVideoMonthly = freePlan?.limits.videos.monthly || 5
-  const freeImageDaily = freePlan?.limits.images.daily || 3
-  const freeImageMonthly = freePlan?.limits.images.monthly || 10
+  // Get free tier limits for display (from subscription config)
+  const freeSignupBonus = PRICING_CONFIG.plans[0].credits.onSignup! // 30 credits
+  const freeDailyLimit = 3 // SUBSCRIPTION_CONFIG.free.dailyImageLimit
+  const freeMonthlyLimit = 10 // SUBSCRIPTION_CONFIG.free.monthlyImageLimit
   
   const features = type === 'video' 
     ? [
-        { icon: Zap, text: `${proImageLimit} images/month (Pro) or ${proPlusImageLimit}/month (Pro+)` },
-        { icon: Zap, text: `${proVideoLimit} videos/month (Pro) or ${proPlusVideoLimit}/month (Pro+)` },
+        { icon: Zap, text: `${proCredits} credits/month (Pro) or ${proPlusCredits}/month (Pro+)` },
+        { icon: Zap, text: `Up to ${proVideoLimit} videos/month (Pro) or ${proPlusVideoLimit}/month (Pro+)` },
         { icon: Sparkles, text: 'Sora 2 AI video generation' },
         { icon: Shield, text: 'Commercial usage rights' },
         { icon: Check, text: 'HD quality exports' },
       ]
     : [
-        { icon: Zap, text: `${proImageLimit} images/month (Pro) or ${proPlusImageLimit}/month (Pro+)` },
+        { icon: Zap, text: `${proCredits} credits/month (Pro) or ${proPlusCredits}/month (Pro+)` },
+        { icon: Zap, text: `Up to ${proImageLimit} images/month (Pro) or ${proPlusImageLimit}/month (Pro+)` },
         { icon: Sparkles, text: 'Gemini 2.5 Flash AI generation' },
         { icon: Shield, text: 'Commercial usage rights' },
-        { icon: Check, text: 'All platform sizes included' },
       ]
 
   return (
@@ -93,10 +92,10 @@ export default function UpgradePrompt({
           </div>
           <p className="text-gray-600 text-sm mt-2">
             {!isAuthenticated 
-              ? `Please sign in to generate ${contentType}. Free users get ${type === 'video' ? freeVideoDaily : freeImageDaily} ${contentType}/day and ${type === 'video' ? freeVideoMonthly : freeImageMonthly} ${contentType}/month!`
-              : isTrial 
-              ? `You've used all ${dailyLimit} ${contentType} for today during your ${config.trialDays}-day free trial.`
-              : `You've used all ${dailyLimit} free ${contentType} for today.`
+              ? type === 'video'
+                ? `Please sign in to generate videos. Free users don't have video access. Sign up to get one-time signup bonus for images!`
+                : `Please sign in to generate images. Free tier has daily and monthly limits. Sign up for one-time signup bonus!`
+              : `You've reached your daily limit for ${contentType}.`
             }
           </p>
           {isAuthenticated && (
@@ -180,11 +179,6 @@ export default function UpgradePrompt({
 
           <div className="text-center text-sm text-gray-500 space-y-1">
             <p>Your daily limit resets at midnight UTC</p>
-            {isTrial && (
-              <p className="font-medium text-purple-600">
-                You have {3} days left in your free trial
-              </p>
-            )}
           </div>
         </CardContent>
       </Card>

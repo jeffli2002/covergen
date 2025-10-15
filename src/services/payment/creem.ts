@@ -1,5 +1,6 @@
 import { Creem } from 'creem'
 import { getSubscriptionConfig, isTrialEnabled, calculateTrialEndDate } from '@/lib/subscription-config'
+import { PRICING_CONFIG } from '@/config/pricing.config'
 
 // Use lazy evaluation for all environment variables to handle edge runtime
 const getCreemTestMode = () => {
@@ -125,11 +126,11 @@ const getSubscriptionPlansWithConfig = () => {
     pro: {
       id: 'pro',
       name: 'Pro',
-      price: 1699, // $16.99 in cents
+      price: Math.round(PRICING_CONFIG.plans[1].price.monthly * 100), // $14.9 in cents
       priceId: CREEM_PRODUCTS.pro,
       features: [
-        `${proPlan?.limits.images.monthly || 100} nano-banana images/mo`,
-        `${proPlan?.limits.videos.monthly || 30} sora 2 videos/mo (watermark-free)`,
+        `${PRICING_CONFIG.plans[1].credits.monthly} credits/month`,
+        `Up to ${Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or ${Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} videos`,
         'Watermark-free for all content',
         'All platform sizes',
         'Priority support',
@@ -139,11 +140,11 @@ const getSubscriptionPlansWithConfig = () => {
     pro_plus: {
       id: 'pro_plus',
       name: 'Pro+',
-      price: 2999, // $29.99 in cents
+      price: Math.round(PRICING_CONFIG.plans[2].price.monthly * 100), // $26.9 in cents
       priceId: CREEM_PRODUCTS.pro_plus,
       features: [
-        `${proPlusPlan?.limits.images.monthly || 200} nano-banana images/mo`,
-        `${proPlusPlan?.limits.videos.monthly || 60} sora 2 videos/mo (watermark-free)`,
+        `${PRICING_CONFIG.plans[2].credits.monthly} credits/month`,
+        `Up to ${Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or ${Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} videos`,
         'Watermark-free for all content',
         'All platform sizes',
         'Advanced customization',
@@ -859,6 +860,10 @@ class CreemPaymentService {
       case 'dispute.created':
         return this.handleDisputeCreated(eventData)
       
+      case 'checkout.completed':
+        // Check if this is a one-time payment (points pack) vs subscription
+        return this.handleCheckoutComplete(eventData)
+      
       default:
         console.log(`Unhandled webhook event type: ${eventType}`)
         return { success: true }
@@ -917,6 +922,20 @@ class CreemPaymentService {
       order: order,
       trial_period_days: trial_period_days
     })
+    
+    // Check if this is a one-time payment (points pack) or subscription
+    const isOneTimePayment = metadata?.type === 'points_pack' || !subscription
+    
+    if (isOneTimePayment) {
+      console.log('[Creem Webhook] Processing as one-time payment (points pack)')
+      return {
+        type: 'one_time_payment_success',
+        metadata: metadata,
+        paymentId: checkout.id || order?.id,
+        amount: order?.amount || 0,
+        customerId: customer?.id,
+      }
+    }
     
     // Extract user ID from metadata or customer external ID
     const userId = metadata?.internal_customer_id || metadata?.userId || customer?.external_id

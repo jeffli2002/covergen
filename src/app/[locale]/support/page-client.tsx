@@ -5,6 +5,7 @@ import { Mail, MessageSquare, FileQuestion, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Locale } from '@/lib/i18n/config'
 import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
+import { PRICING_CONFIG } from '@/config/pricing.config'
 
 interface SupportPageClientProps {
   locale: Locale
@@ -97,7 +98,7 @@ export default function SupportPageClient({ locale, translations: t }: SupportPa
             <div className="border-l-4 border-blue-500 pl-4">
               <h4 className="text-heading-5 text-gray-900">How many images and videos can I generate?</h4>
               <p className="text-body-md text-gray-600 mt-1">
-                Free: 10 images + 5 videos/month (3 images + 1 video daily). Pro ($16.99): 100 images + 30 videos/month. Pro+ ($29.99): 200 images + 60 videos/month. Pro/Pro+ users have no fixed daily limits.
+                Free: {PRICING_CONFIG.plans[0].credits.onSignup} credits on signup (up to {Math.floor(PRICING_CONFIG.plans[0].credits.onSignup! / PRICING_CONFIG.generationCosts.nanoBananaImage)} images, {PRICING_CONFIG.plans[0].features.find(f => f.text.includes('images per day'))?.text.split(' ')[0]} per day). Pro (${PRICING_CONFIG.plans[1].price.monthly.toFixed(1)}/month): {PRICING_CONFIG.plans[1].credits.monthly} credits/month (up to {Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or {Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} videos). Pro+ (${PRICING_CONFIG.plans[2].price.monthly.toFixed(1)}/month): {PRICING_CONFIG.plans[2].credits.monthly} credits/month (up to {Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or {Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} videos).
               </p>
             </div>
             <div className="border-l-4 border-blue-500 pl-4">
@@ -113,9 +114,9 @@ export default function SupportPageClient({ locale, translations: t }: SupportPa
               </p>
             </div>
             <div className="border-l-4 border-blue-500 pl-4">
-              <h4 className="text-heading-5 text-gray-900">What happens when I reach my limit?</h4>
+              <h4 className="text-heading-5 text-gray-900">What happens when I run out of credits?</h4>
               <p className="text-body-md text-gray-600 mt-1">
-                When you reach your image or video limit, you'll see an upgrade prompt. Pro/Pro+ users can use their monthly quota anytime. Free users need to wait for daily/monthly reset.
+                When you run out of credits, you'll see an upgrade prompt. You can upgrade to Pro/Pro+ for monthly credits, or purchase one-time credit packs that never expire. Pro/Pro+ credits refresh monthly. Free users get {PRICING_CONFIG.plans[0].credits.onSignup} credits on signup with a daily limit of {PRICING_CONFIG.plans[0].features.find(f => f.text.includes('images per day'))?.text.split(' ')[0]} images.
               </p>
             </div>
             <div className="border-l-4 border-blue-500 pl-4">

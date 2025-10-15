@@ -1,3 +1,5 @@
+import { PRICING_CONFIG } from '@/config/pricing.config'
+
 export type PlanType = 'free' | 'pro' | 'pro_plus'
 
 export interface SubscriptionPlan {
@@ -16,6 +18,10 @@ export interface SubscriptionPlan {
       daily: number
     }
   }
+  credits?: {
+    monthly: number
+    onSignup?: number
+  }
   popular?: boolean
 }
 
@@ -26,72 +32,82 @@ const plans: Record<PlanType, SubscriptionPlan> = {
     price: 0,
     priceDisplay: '$0',
     features: [
-      '10 images/month',
-      '5 videos/month',
-      '3 images/day',
-      '1 video/day',
+      `${PRICING_CONFIG.plans[0].credits.onSignup} credits on signup`,
+      `Up to ${Math.floor(PRICING_CONFIG.plans[0].credits.onSignup! / PRICING_CONFIG.generationCosts.nanoBananaImage)} images`,
+      '6 images per day max',
+      'No video access',
       'Basic templates',
-      'Standard resolution'
+      'Personal use only'
     ],
     limits: {
       images: {
-        monthly: 10,
-        daily: 3
+        monthly: Math.floor(PRICING_CONFIG.plans[0].credits.onSignup! / PRICING_CONFIG.generationCosts.nanoBananaImage),
+        daily: 6
       },
       videos: {
-        monthly: 5,
-        daily: 1
+        monthly: 0,
+        daily: 0
       }
+    },
+    credits: {
+      onSignup: PRICING_CONFIG.plans[0].credits.onSignup!,
+      monthly: 0
     }
   },
   pro: {
     id: 'pro',
     name: 'Pro',
-    price: 16.99,
-    priceDisplay: '$16.99/mo',
+    price: PRICING_CONFIG.plans[1].price.monthly,
+    priceDisplay: `$${PRICING_CONFIG.plans[1].price.monthly.toFixed(1)}/mo`,
     features: [
-      '100 images/month',
-      '30 videos/month',
+      `${PRICING_CONFIG.plans[1].credits.monthly} credits/month`,
+      `Up to ${Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or ${Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} videos`,
       'All templates',
-      'High resolution exports',
+      'Watermark-free images & Sora 2 videos',
       'Priority support',
-      'Advanced editing tools'
+      'Commercial usage rights'
     ],
     limits: {
       images: {
-        monthly: 100,
-        daily: 100
+        monthly: Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage),
+        daily: 999
       },
       videos: {
-        monthly: 30,
-        daily: 30
+        monthly: Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video),
+        daily: 999
       }
+    },
+    credits: {
+      monthly: PRICING_CONFIG.plans[1].credits.monthly
     },
     popular: true
   },
   pro_plus: {
     id: 'pro_plus',
     name: 'Pro+',
-    price: 29.99,
-    priceDisplay: '$29.99/mo',
+    price: PRICING_CONFIG.plans[2].price.monthly,
+    priceDisplay: `$${PRICING_CONFIG.plans[2].price.monthly.toFixed(1)}/mo`,
     features: [
-      '200 images/month',
-      '60 videos/month',
+      `${PRICING_CONFIG.plans[2].credits.monthly} credits/month`,
+      `Up to ${Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or ${Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} videos`,
       'Everything in Pro',
+      'Sora 2 Pro quality',
       'Bulk generation',
-      'Custom templates',
-      'Dedicated support',
-      'Commercial license'
+      'Priority generation',
+      'Full commercial license'
     ],
     limits: {
       images: {
-        monthly: 200,
-        daily: 200
+        monthly: Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage),
+        daily: 999
       },
       videos: {
-        monthly: 60,
-        daily: 60
+        monthly: Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video),
+        daily: 999
       }
+    },
+    credits: {
+      monthly: PRICING_CONFIG.plans[2].credits.monthly
     }
   }
 }
