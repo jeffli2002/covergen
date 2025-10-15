@@ -1,7 +1,6 @@
 // BestAuth Subscription Service
 import { db } from '@/lib/bestauth/db-wrapper'
 import { getSubscriptionConfig } from '@/lib/subscription-config'
-import { createPointsService } from '@/lib/services/points-service'
 import type { GenerationType } from '@/config/subscription'
 
 export interface SubscriptionStatus {
@@ -389,30 +388,9 @@ export class BestAuthSubscriptionService {
         resultStatus: result?.status
       })
 
-      if (data.tier && data.tier !== 'free' && data.status === 'active' && result?.id) {
-        try {
-          const { createClient } = await import('@/lib/supabase/server')
-          const supabase = await createClient()
-          const pointsService = createPointsService(supabase)
-          const cycle = data.billingCycle || 'monthly'
-          await pointsService.grantSubscriptionPoints(
-            data.userId,
-            data.tier,
-            cycle,
-            result.id
-          )
-          console.log(`[BestAuthSubscriptionService] Granted ${data.tier} ${cycle} points to user ${data.userId}`)
-        } catch (pointsError: any) {
-          // Don't fail the upgrade if points granting fails - log and continue
-          console.error('[BestAuthSubscriptionService] Failed to grant subscription points:', {
-            error: pointsError,
-            message: pointsError?.message,
-            userId: data.userId,
-            tier: data.tier
-          })
-          console.warn('[BestAuthSubscriptionService] Subscription upgrade succeeded but points were not granted - user may need manual points adjustment')
-        }
-      }
+      // NOTE: BestAuth uses usage-based tracking (generation_count), not a points/credits system
+      // Usage limits are enforced via bestauth_usage_tracking table and generation count functions
+      // No points granting needed - limits are based on subscription tier
 
       return result
     } catch (error) {
