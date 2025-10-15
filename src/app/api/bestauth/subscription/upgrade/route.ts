@@ -4,6 +4,9 @@ import { validateSessionFromRequest } from '@/lib/bestauth'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 import { creemService, SUBSCRIPTION_PLANS } from '@/services/payment/creem'
 
+// Force Node.js runtime for Creem SDK compatibility
+export const runtime = 'nodejs'
+
 // POST /api/bestauth/subscription/upgrade - Upgrade a subscription tier (including trial upgrades)
 export async function POST(request: NextRequest) {
   console.log('='.repeat(80))
@@ -162,6 +165,7 @@ export async function POST(request: NextRequest) {
       console.log('[Upgrade] Paid user upgrading with immediate proration')
       
       if (!currentSubscription.stripe_subscription_id) {
+        console.error('[Upgrade] No Creem subscription ID found in database')
         return NextResponse.json(
           { error: 'No Creem subscription ID found' },
           { status: 400 }
@@ -172,14 +176,37 @@ export async function POST(request: NextRequest) {
       const billingCycle = currentSubscription.billing_cycle || 'monthly'
       const previousTier = currentSubscription.tier
       
+      console.log('[Upgrade] Calling Creem to upgrade subscription:', {
+        subscriptionId: currentSubscription.stripe_subscription_id,
+        targetTier,
+        billingCycle
+      })
+      
       // Call Creem to upgrade with immediate proration
-      const upgradeResult = await creemService.upgradeSubscription(
-        currentSubscription.stripe_subscription_id,
-        targetTier as 'pro' | 'pro_plus',
-        billingCycle as 'monthly' | 'yearly'
-      )
+      let upgradeResult
+      try {
+        upgradeResult = await creemService.upgradeSubscription(
+          currentSubscription.stripe_subscription_id,
+          targetTier as 'pro' | 'pro_plus',
+          billingCycle as 'monthly' | 'yearly'
+        )
+      } catch (creemError: any) {
+        console.error('[Upgrade] Creem upgrade call threw exception:', {
+          error: creemError,
+          message: creemError?.message,
+          stack: creemError?.stack
+        })
+        throw new Error(`Creem API error: ${creemError?.message || 'Unknown error'}`)
+      }
+      
+      console.log('[Upgrade] Creem upgrade result received:', {
+        success: upgradeResult.success,
+        hasSubscription: !!upgradeResult.subscription,
+        error: upgradeResult.error
+      })
       
       if (!upgradeResult.success) {
+        console.error('[Upgrade] Creem upgrade failed:', upgradeResult.error)
         throw new Error(upgradeResult.error || 'Failed to upgrade subscription with Creem')
       }
       
@@ -217,30 +244,45 @@ export async function POST(request: NextRequest) {
         prorationAmount: prorationAmount
       })
       
-      const updateResult = await bestAuthSubscriptionService.createOrUpdateSubscription({
-        userId,
-        tier: targetTier,
-        previousTier: previousTier,
-        billingCycle: billingCycle,
-        status: 'active',
-        prorationAmount: prorationAmount,
-        lastProrationDate: prorationDate,
-        upgradeHistory: upgradeHistory,
-        metadata: {
-          ...currentSubscription.metadata,
-          upgraded_at: new Date().toISOString(),
-          upgraded_from: previousTier,
-          upgrade_type: 'immediate_proration',
-          previous_billing_cycle: currentSubscription.billing_cycle,
-          proration_charged: prorationAmount
-        }
-      })
+      let updateResult
+      try {
+        updateResult = await bestAuthSubscriptionService.createOrUpdateSubscription({
+          userId,
+          tier: targetTier,
+          previousTier: previousTier,
+          billingCycle: billingCycle,
+          status: 'active',
+          prorationAmount: prorationAmount,
+          lastProrationDate: prorationDate,
+          upgradeHistory: upgradeHistory,
+          metadata: {
+            ...currentSubscription.metadata,
+            upgraded_at: new Date().toISOString(),
+            upgraded_from: previousTier,
+            upgrade_type: 'immediate_proration',
+            previous_billing_cycle: currentSubscription.billing_cycle,
+            proration_charged: prorationAmount
+          }
+        })
+      } catch (dbError: any) {
+        console.error('[Upgrade] Database update failed:', {
+          error: dbError,
+          message: dbError?.message,
+          stack: dbError?.stack
+        })
+        throw new Error(`Database update failed: ${dbError?.message || 'Unknown error'}`)
+      }
       
       console.log('[Upgrade] Database update result:', {
         success: !!updateResult,
         tier: updateResult?.tier,
         status: updateResult?.status
       })
+      
+      if (!updateResult) {
+        console.error('[Upgrade] Database update returned null/undefined')
+        throw new Error('Database update failed - no result returned')
+      }
       
       const planName = targetTier === 'pro_plus' ? 'Pro+' : 'Pro'
       const currentPlanName = currentSubscription.tier === 'pro' ? 'Pro' : 'Pro+'

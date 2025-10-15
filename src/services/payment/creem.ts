@@ -1231,10 +1231,10 @@ class CreemPaymentService {
       
       let result
       try {
-        result = await (creem as any).subscriptions.upgrade({
+        result = await creem.upgradeSubscription({
           id: subscriptionId,
           xApiKey: CREEM_API_KEY,
-          upgradeSubscriptionRequestBody: {
+          upgradeSubscriptionRequestEntity: {
             productId: productId,
             updateBehavior: 'proration-charge-immediately'
           }
@@ -1251,31 +1251,31 @@ class CreemPaymentService {
       }
 
       console.log('[Creem] Upgrade result:', {
-        success: !!result.object,
-        subscriptionId: result.object?.id,
-        status: result.object?.status,
-        hasProration: !!result.object?.latestInvoice
+        success: !!result,
+        subscriptionId: result?.id,
+        status: result?.status,
+        hasLatestInvoice: !!result?.latestInvoice
       })
 
-      if (!result.object) {
-        console.error('[Creem] No subscription object in result:', result)
+      if (!result) {
+        console.error('[Creem] No subscription returned from upgrade')
         throw new Error('No subscription returned from upgrade')
       }
 
       // Extract proration amount from the latest invoice
-      const prorationAmount = result.object?.latestInvoice?.prorationAmount || 
-                               result.object?.latestInvoice?.total || 
+      const prorationAmount = result?.latestInvoice?.prorationAmount || 
+                               result?.latestInvoice?.total || 
                                null
       
       console.log('[Creem] Proration details:', {
         amount: prorationAmount,
-        hasInvoice: !!result.object?.latestInvoice,
-        invoiceTotal: result.object?.latestInvoice?.total
+        hasInvoice: !!result?.latestInvoice,
+        invoiceTotal: result?.latestInvoice?.total
       })
 
       return {
         success: true,
-        subscription: result.object,
+        subscription: result,
         prorationAmount: prorationAmount,
         message: 'Subscription upgraded successfully with immediate proration'
       }
