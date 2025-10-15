@@ -604,6 +604,14 @@ export const db = {
     },
 
     async upsert(subscriptionData: any): Promise<any> {
+      console.log('[db.subscriptions.upsert] Upserting subscription:', {
+        user_id: subscriptionData.user_id,
+        tier: subscriptionData.tier,
+        status: subscriptionData.status,
+        billing_cycle: subscriptionData.billing_cycle,
+        previous_tier: subscriptionData.previous_tier
+      })
+      
       const { data, error } = await getDb()
         .from('bestauth_subscriptions')
         .upsert(subscriptionData, {
@@ -612,7 +620,17 @@ export const db = {
         .select()
         .single()
       
-      if (error) throw error
+      if (error) {
+        console.error('[db.subscriptions.upsert] Error:', error)
+        throw error
+      }
+      
+      console.log('[db.subscriptions.upsert] Result:', {
+        id: data?.id,
+        tier: data?.tier,
+        status: data?.status,
+        billing_cycle: data?.billing_cycle
+      })
       
       return data
     },

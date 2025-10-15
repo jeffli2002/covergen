@@ -196,7 +196,16 @@ export async function POST(request: NextRequest) {
       const upgradeHistory = [...existingHistory, upgradeHistoryEntry]
       
       // Update local database with new tier and complete tracking
-      await bestAuthSubscriptionService.createOrUpdateSubscription({
+      console.log('[Upgrade] Updating database with:', {
+        userId,
+        tier: targetTier,
+        previousTier: previousTier,
+        billingCycle: billingCycle,
+        status: 'active',
+        prorationAmount: prorationAmount
+      })
+      
+      const updateResult = await bestAuthSubscriptionService.createOrUpdateSubscription({
         userId,
         tier: targetTier,
         previousTier: previousTier,
@@ -213,6 +222,12 @@ export async function POST(request: NextRequest) {
           previous_billing_cycle: currentSubscription.billing_cycle,
           proration_charged: prorationAmount
         }
+      })
+      
+      console.log('[Upgrade] Database update result:', {
+        success: !!updateResult,
+        tier: updateResult?.tier,
+        status: updateResult?.status
       })
       
       const planName = targetTier === 'pro_plus' ? 'Pro+' : 'Pro'
