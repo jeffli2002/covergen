@@ -337,6 +337,7 @@ export async function POST(request: NextRequest) {
       
       let updateResult
       try {
+        console.log('[Upgrade] Calling bestAuthSubscriptionService.createOrUpdateSubscription...')
         updateResult = await bestAuthSubscriptionService.createOrUpdateSubscription({
           userId,
           tier: targetTier,
@@ -355,11 +356,14 @@ export async function POST(request: NextRequest) {
             proration_charged: prorationAmount
           }
         })
+        console.log('[Upgrade] Database update completed successfully')
       } catch (dbError: any) {
         console.error('[Upgrade] Database update failed:', {
           error: dbError,
           message: dbError?.message,
-          stack: dbError?.stack
+          stack: dbError?.stack,
+          name: dbError?.name,
+          code: dbError?.code
         })
         throw new Error(`Database update failed: ${dbError?.message || 'Unknown error'}`)
       }
@@ -379,7 +383,7 @@ export async function POST(request: NextRequest) {
       const currentPlanName = currentSubscription.tier === 'pro' ? 'Pro' : 'Pro+'
       
       console.log('='.repeat(80))
-      console.log('[Upgrade API] SUCCESS - Returning response')
+      console.log('[Upgrade API] SUCCESS - Preparing response')
       console.log('[Upgrade API] User should now be on tier:', targetTier)
       console.log('[Upgrade API] Database update confirmed tier:', updateResult?.tier)
       console.log('='.repeat(80))
@@ -397,17 +401,29 @@ export async function POST(request: NextRequest) {
       const redirectUrl = `${origin}/${locale}/account?upgraded=true`
       console.log('[Upgrade API] Generated redirect URL:', redirectUrl)
       
-      return NextResponse.json({
+      // Build response object with explicit null/undefined handling
+      const responseData = {
         success: true,
         upgraded: true,
         immediate: true,
-        currentTier: targetTier,
-        previousTier: previousTier,
-        prorationAmount: prorationAmount,
-        redirectUrl: redirectUrl,
+        currentTier: String(targetTier), // Ensure string
+        previousTier: String(previousTier), // Ensure string
+        prorationAmount: prorationAmount ?? null, // Convert undefined to null
+        redirectUrl: String(redirectUrl), // Ensure string
         message: `Successfully upgraded from ${currentPlanName} to ${planName}!`,
         note: `You now have immediate access to ${planName} features. Prorated charges have been applied to your account.`
+      }
+      
+      console.log('[Upgrade API] Response data prepared:', {
+        ...responseData,
+        responseDataKeys: Object.keys(responseData),
+        responseDataTypes: Object.entries(responseData).map(([k, v]) => [k, typeof v])
       })
+      
+      console.log('[Upgrade API] Returning NextResponse.json...')
+      const response = NextResponse.json(responseData)
+      console.log('[Upgrade API] NextResponse.json created successfully')
+      return response
     }
     
     // Default case - create checkout

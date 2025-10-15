@@ -390,17 +390,28 @@ export class BestAuthSubscriptionService {
       })
 
       if (data.tier && data.tier !== 'free' && data.status === 'active' && result?.id) {
-        const { createClient } = await import('@/lib/supabase/server')
-        const supabase = await createClient()
-        const pointsService = createPointsService(supabase)
-        const cycle = data.billingCycle || 'monthly'
-        await pointsService.grantSubscriptionPoints(
-          data.userId,
-          data.tier,
-          cycle,
-          result.id
-        )
-        console.log(`[BestAuthSubscriptionService] Granted ${data.tier} ${cycle} points to user ${data.userId}`)
+        try {
+          const { createClient } = await import('@/lib/supabase/server')
+          const supabase = await createClient()
+          const pointsService = createPointsService(supabase)
+          const cycle = data.billingCycle || 'monthly'
+          await pointsService.grantSubscriptionPoints(
+            data.userId,
+            data.tier,
+            cycle,
+            result.id
+          )
+          console.log(`[BestAuthSubscriptionService] Granted ${data.tier} ${cycle} points to user ${data.userId}`)
+        } catch (pointsError: any) {
+          // Don't fail the upgrade if points granting fails - log and continue
+          console.error('[BestAuthSubscriptionService] Failed to grant subscription points:', {
+            error: pointsError,
+            message: pointsError?.message,
+            userId: data.userId,
+            tier: data.tier
+          })
+          console.warn('[BestAuthSubscriptionService] Subscription upgrade succeeded but points were not granted - user may need manual points adjustment')
+        }
       }
 
       return result
