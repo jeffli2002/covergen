@@ -33,6 +33,7 @@ interface PaymentPageProps {
   }
   searchParams: {
     plan?: string
+    billing?: string
     upgrade?: string
     activate?: string
     redirect?: string
@@ -45,6 +46,7 @@ export default function PaymentPage({ params, searchParams }: PaymentPageProps) 
       <PaymentPageClient 
     locale={params.locale} 
     initialPlan={searchParams.plan}
+    initialBilling={searchParams.billing as 'monthly' | 'yearly' | undefined}
     isUpgrade={searchParams.upgrade === 'true'}
     isActivation={searchParams.activate === 'true'}
     redirectUrl={searchParams.redirect}

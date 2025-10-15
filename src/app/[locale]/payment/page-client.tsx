@@ -18,6 +18,7 @@ import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
 interface PaymentPageClientProps {
   locale: string
   initialPlan?: string
+  initialBilling?: 'monthly' | 'yearly'
   isUpgrade?: boolean
   isActivation?: boolean
   redirectUrl?: string
@@ -25,7 +26,8 @@ interface PaymentPageClientProps {
 
 export default function PaymentPageClient({ 
   locale, 
-  initialPlan = 'pro', 
+  initialPlan = 'pro',
+  initialBilling = 'monthly',
   isUpgrade = false,
   isActivation = false,
   redirectUrl 
@@ -38,6 +40,7 @@ export default function PaymentPageClient({
     // Pre-select target plan for upgrade scenarios
     isUpgrade && initialPlan ? initialPlan as 'pro' | 'pro_plus' : null
   )
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>(initialBilling)
   const [isTestMode, setIsTestMode] = useState(false)
   // Remove the local interface - use the actual subscription data structure
   type Subscription = any
@@ -248,6 +251,7 @@ export default function PaymentPageClient({
           userId: authUser.id,
           userEmail: authUser.email,
           planId,
+          billingCycle,
           successUrl: `${window.location.origin}/${locale}/payment/success?session_id={CHECKOUT_SESSION_ID}&${isActivation ? 'activate=true' : 'upgrade=true'}`,
           cancelUrl: `${window.location.origin}/${locale}/payment/cancel`,
           currentPlan: currentSubscription?.tier || 'free'
@@ -267,6 +271,7 @@ export default function PaymentPageClient({
           userId: authUser.id,
           userEmail: authUser.email,
           planId,
+          billingCycle,
           successUrl: `${window.location.origin}/${locale}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
           cancelUrl: `${window.location.origin}/${locale}/payment/cancel`,
           currentPlan: currentSubscription?.tier || 'free'
@@ -397,6 +402,34 @@ export default function PaymentPageClient({
           )}
         </div>
 
+        {/* Billing Cycle Toggle */}
+        <div className="flex justify-center items-center gap-4 mb-8">
+          <span className={`text-sm font-medium ${billingCycle === 'monthly' ? 'text-gray-900' : 'text-gray-500'}`}>
+            Monthly
+          </span>
+          <button
+            onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'yearly' : 'monthly')}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              billingCycle === 'yearly' ? 'bg-orange-500' : 'bg-gray-300'
+            }`}
+            disabled={loading}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                billingCycle === 'yearly' ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+          <span className={`text-sm font-medium ${billingCycle === 'yearly' ? 'text-gray-900' : 'text-gray-500'}`}>
+            Yearly
+          </span>
+          {billingCycle === 'yearly' && (
+            <Badge variant="secondary" className="bg-green-100 text-green-700">
+              Save 20%
+            </Badge>
+          )}
+        </div>
+
         {/* Pricing Cards */}
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
           {plans.map((plan) => {
@@ -515,8 +548,12 @@ export default function PaymentPageClient({
                   <CardTitle className="text-heading-4">{plan.name}</CardTitle>
                   
                   <div className="mt-4">
-                    <span className="text-heading-2">${plan.price / 100}</span>
-                    <span className="text-gray-600">/mo</span>
+                    <span className="text-heading-2">
+                      ${billingCycle === 'yearly' ? (plan.price / 100 * 12 * 0.8).toFixed(2) : plan.price / 100}
+                    </span>
+                    <span className="text-gray-600">
+                      {billingCycle === 'yearly' ? '/yr' : '/mo'}
+                    </span>
                   </div>
                   
                   {plan.savings && (

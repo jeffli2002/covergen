@@ -96,6 +96,11 @@ export const CREEM_TEST_CARDS = {
 // Product IDs for subscription tiers (from Creem dashboard)
 // Same product IDs are used for both test and production modes
 export const CREEM_PRODUCTS = {
+  pro_monthly: process.env.NEXT_PUBLIC_PRICE_ID_PRO_MONTHLY || process.env.CREEM_PRO_PLAN_ID || '',
+  pro_yearly: process.env.NEXT_PUBLIC_PRICE_ID_PRO_YEARLY || '',
+  pro_plus_monthly: process.env.NEXT_PUBLIC_PRICE_ID_PROPLUS_MONTHLY || process.env.CREEM_PRO_PLUS_PLAN_ID || '',
+  pro_plus_yearly: process.env.NEXT_PUBLIC_PRICE_ID_PROPLUS_YEARLY || '',
+  // Legacy support
   pro: process.env.NEXT_PUBLIC_PRICE_ID_PRO_MONTHLY || process.env.CREEM_PRO_PLAN_ID || '',
   pro_plus: process.env.NEXT_PUBLIC_PRICE_ID_PROPLUS_MONTHLY || process.env.CREEM_PRO_PLUS_PLAN_ID || ''
 }
@@ -168,6 +173,7 @@ export interface CreateCheckoutSessionParams {
   userId: string
   userEmail: string
   planId: 'pro' | 'pro_plus'
+  billingCycle?: 'monthly' | 'yearly'
   successUrl: string
   cancelUrl: string
   currentPlan?: 'free' | 'pro' | 'pro_plus'
@@ -196,6 +202,7 @@ class CreemPaymentService {
     userId,
     userEmail,
     planId,
+    billingCycle = 'monthly',
     successUrl,
     cancelUrl,
     currentPlan = 'free'
@@ -289,6 +296,7 @@ class CreemPaymentService {
           credentials,
           body: JSON.stringify({
             planId,
+            billingCycle,
             successUrl,
             cancelUrl
           })
@@ -334,16 +342,26 @@ class CreemPaymentService {
         throw new Error('Creem API key not configured')
       }
 
-      const productId = CREEM_PRODUCTS[planId as keyof typeof CREEM_PRODUCTS]
+      // Get product ID based on plan and billing cycle
+      const productKey = `${planId}_${billingCycle}` as keyof typeof CREEM_PRODUCTS
+      let productId = CREEM_PRODUCTS[productKey]
+      
+      // Fallback to legacy key for backward compatibility
+      if (!productId) {
+        productId = CREEM_PRODUCTS[planId as keyof typeof CREEM_PRODUCTS]
+      }
       
       if (!productId) {
-        console.error('[Creem] Product ID not found for plan:', planId)
+        console.error('[Creem] Product ID not found for plan:', planId, 'cycle:', billingCycle)
+        console.error('[Creem] Tried keys:', productKey, planId)
         console.error('[Creem] Available products:', CREEM_PRODUCTS)
         console.error('[Creem] Environment variables:', {
-          CREEM_PRO_PLAN_ID: process.env.CREEM_PRO_PLAN_ID || 'NOT SET',
-          CREEM_PRO_PLUS_PLAN_ID: process.env.CREEM_PRO_PLUS_PLAN_ID || 'NOT SET'
+          NEXT_PUBLIC_PRICE_ID_PRO_MONTHLY: process.env.NEXT_PUBLIC_PRICE_ID_PRO_MONTHLY || 'NOT SET',
+          NEXT_PUBLIC_PRICE_ID_PRO_YEARLY: process.env.NEXT_PUBLIC_PRICE_ID_PRO_YEARLY || 'NOT SET',
+          NEXT_PUBLIC_PRICE_ID_PROPLUS_MONTHLY: process.env.NEXT_PUBLIC_PRICE_ID_PROPLUS_MONTHLY || 'NOT SET',
+          NEXT_PUBLIC_PRICE_ID_PROPLUS_YEARLY: process.env.NEXT_PUBLIC_PRICE_ID_PROPLUS_YEARLY || 'NOT SET'
         })
-        throw new Error(`Product ID not configured for plan: ${planId}. Please check environment variables.`)
+        throw new Error(`Product ID not configured for plan: ${planId} (${billingCycle}). Please check environment variables.`)
       }
       
       console.log('[Creem] Creating checkout with:', {
@@ -410,6 +428,7 @@ class CreemPaymentService {
             userId: userId,
             userEmail: userEmail,
             planId: planId,
+            billingCycle: billingCycle,
             currentPlan: currentPlan,
           },
           customer: {
