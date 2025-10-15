@@ -21,6 +21,7 @@ import ActivationConfirmDialog from '@/components/subscription/ActivationConfirm
 import { useBestAuth } from '@/hooks/useBestAuth'
 import { authEvents } from '@/lib/events/auth-events'
 import { getPlanByType } from '@/lib/subscription-plans'
+import { PRICING_CONFIG } from '@/config/pricing.config'
 
 // Simple date formatter to avoid date-fns dependency
 const formatDate = (date: Date) => {
@@ -43,22 +44,7 @@ interface AccountPageClientProps {
   locale: string
 }
 
-// Get trial limits configuration from environment variables
-const getTrialLimits = () => {
-  const config = getClientSubscriptionConfig()
-  return {
-    pro: {
-      daily: config.limits.pro.trial_daily,
-      total: config.limits.pro.trial_total,
-      days: config.trialDays
-    },
-    pro_plus: {
-      daily: config.limits.pro_plus.trial_daily,
-      total: config.limits.pro_plus.trial_total,
-      days: config.trialDays
-    }
-  }
-}
+// Trial functionality removed - no free trials offered
 
 export default function AccountPageClient({ locale }: AccountPageClientProps) {
   const router = useRouter()
@@ -72,8 +58,6 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   const [usage, setUsage] = useState<any>(null)
   const [cancelling, setCancelling] = useState(false)
   const [resuming, setResuming] = useState(false)
-  const [activating, setActivating] = useState(false)
-  const [showActivationConfirm, setShowActivationConfirm] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
 
   // Track if we've already loaded data to prevent re-fetching
@@ -489,87 +473,51 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   }
 
   const currentPlan = subscription?.tier || 'free'
-  const isTrialing = subscription?.status === 'trialing'
   const config = getClientSubscriptionConfig()
   
-  // Get plan details using subscription plans
-  const freePlan = getPlanByType('free')
-  const proPlan = getPlanByType('pro')
-  const proPlusPlan = getPlanByType('pro_plus')
+  // Get plan details from PRICING_CONFIG
+  const freePlanConfig = PRICING_CONFIG.plans[0] // Free
+  const proPlanConfig = PRICING_CONFIG.plans[1]  // Pro
+  const proPlusPlanConfig = PRICING_CONFIG.plans[2] // Pro+
   
   const planDetailsMap = {
     free: {
-      name: 'Free',
+      name: freePlanConfig.name,
       price: 0,
-      features: [
-        `${freePlan?.limits.images.monthly || 10} images/month`,
-        `${freePlan?.limits.videos.monthly || 5} videos/month`,
-        'No watermark for images',
-        'Basic platform sizes',
-        'Email support'
-      ]
+      credits: freePlanConfig.credits,
+      features: freePlanConfig.features.filter(f => f.included).map(f => f.text)
     },
     pro: {
-      name: 'Pro',
-      price: 1699,
-      features: [
-        `${proPlan?.limits.images.monthly || 100} images/month`,
-        `${proPlan?.limits.videos.monthly || 30} videos/month`,
-        'No watermark for images',
-        'All platform sizes',
-        'Priority support',
-        'Commercial usage rights'
-      ]
+      name: proPlanConfig.name,
+      price: Math.round(proPlanConfig.price.monthly * 100), // Convert to cents
+      credits: proPlanConfig.credits,
+      features: proPlanConfig.features.filter(f => f.included).map(f => f.text)
     },
     pro_plus: {
-      name: 'Pro+',
-      price: 2999,
-      features: [
-        `${proPlusPlan?.limits.images.monthly || 200} images/month`,
-        `${proPlusPlan?.limits.videos.monthly || 60} videos/month`,
-        'No watermark for images',
-        'All platform sizes',
-        'Advanced customization',
-        'Commercial usage license',
-        'Dedicated support'
-      ]
+      name: proPlusPlanConfig.name,
+      price: Math.round(proPlusPlanConfig.price.monthly * 100), // Convert to cents
+      credits: proPlusPlanConfig.credits,
+      features: proPlusPlanConfig.features.filter(f => f.included).map(f => f.text)
     }
   }
   
   const planDetails = planDetailsMap[currentPlan as keyof typeof planDetailsMap] || {
     name: 'Free',
     price: 0,
+    credits: { monthly: 0, yearly: 0, onSubscribe: 0 },
     features: []
   }
   
-  const TRIAL_LIMITS = getTrialLimits()
-  const trialLimits = isTrialing ? TRIAL_LIMITS[currentPlan as keyof typeof TRIAL_LIMITS] : null
+  // Calculate credits and usage
+  const isPaidUser = (currentPlan === 'pro' || currentPlan === 'pro_plus')
   
-  // Calculate usage based on subscription type and trial status
-  const isPaidUser = !isTrialing && (currentPlan === 'pro' || currentPlan === 'pro_plus')
-  let currentUsage: number
-  let usageLimit: number
-  let usagePeriod: string
+  // Get credits balance from usage data (assuming API returns this)
+  const creditsBalance = usage?.credits_balance || 0
+  const creditsUsed = usage?.credits_used_this_month || 0
+  const creditsMonthly = planDetails.credits.monthly
   
-  if (isPaidUser) {
-    // Paid users: show monthly usage (images + videos combined)
-    currentUsage = usage?.thisMonth || 0
-    const plan = currentPlan === 'pro' ? proPlan : currentPlan === 'pro_plus' ? proPlusPlan : freePlan
-    usageLimit = (plan?.limits.images.monthly || 0) + (plan?.limits.videos.monthly || 0)
-    usagePeriod = 'This Month'
-  } else if (isTrialing) {
-    // Trial users: show daily usage with trial limits
-    currentUsage = usage?.today || 0
-    usageLimit = trialLimits?.daily || config.limits.free.daily
-    usagePeriod = 'Today'
-  } else {
-    // Free users: show daily usage
-    currentUsage = usage?.today || 0
-    usageLimit = config.limits.free.daily
-    usagePeriod = 'Today'
-  }
-  
-  const usagePercentage = (currentUsage / usageLimit) * 100
+  // For display purposes
+  const usagePeriod = isPaidUser ? 'This Month' : 'Today'
 
   // Show loading state while checking auth or loading data
   if (loading || authLoading || initialAuthCheck) {
@@ -664,17 +612,9 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                 <div>
                   <h3 className="text-heading-4 flex items-center gap-3">
                     {planDetails?.name}
-                    {isTrialing && (
-                      <Badge className="bg-blue-100 text-blue-800 border-blue-200">
-                        <Sparkles className="w-3 h-3 mr-1" />
-                        Trial
-                      </Badge>
-                    )}
                   </h3>
                   <p className="text-body-md text-gray-600 mt-1">
-                    {isTrialing ? (
-                      <>Free {trialLimits?.days || 7}-day trial</>
-                    ) : currentPlan === 'free' ? (
+                    {currentPlan === 'free' ? (
                       'Free forever'
                     ) : (
                       `$${planDetails?.price ? planDetails.price / 100 : 0}/month`
@@ -691,40 +631,8 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                 </Badge>
               </div>
 
-              {/* Trial Information */}
-              {isTrialing && trialLimits && (
-                <Alert className="border-blue-200 bg-blue-50">
-                  <Sparkles className="h-4 w-4 text-blue-600" />
-                  <AlertDescription className="text-blue-800">
-                    <div className="space-y-2">
-                      <p className="text-ui-md">Trial Limits:</p>
-                      <ul className="space-y-1 text-ui-sm">
-                        <li>• {trialLimits.daily} covers per day</li>
-                        <li>• {trialLimits.total} total covers during trial</li>
-                        <li>• {trialLimits.days} days trial period</li>
-                      </ul>
-                      {subscription.trial_ends_at && (
-                        <p className="text-ui-sm mt-2">
-                          <Clock className="inline w-4 h-4 mr-1" />
-                          Trial ends on {formatDateTime(new Date(subscription.trial_ends_at))}
-                        </p>
-                      )}
-                      {subscription.stripe_subscription_id ? (
-                        <p className="text-ui-sm mt-2 text-blue-900">
-                          ✓ Your subscription will automatically activate when the trial ends
-                        </p>
-                      ) : (
-                        <p className="text-ui-sm mt-2 text-blue-800">
-                          ⚠️ Please add a payment method to continue after trial
-                        </p>
-                      )}
-                    </div>
-                  </AlertDescription>
-                </Alert>
-              )}
-
               {/* Subscription Dates */}
-              {subscription && !isTrialing && currentPlan !== 'free' && (
+              {subscription && currentPlan !== 'free' && (
                 <div className="space-y-2 text-ui-sm text-gray-600">
                   {subscription.current_period_end && (
                     <p>
@@ -767,26 +675,6 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                     <Crown className="mr-2 h-4 w-4" />
                     Upgrade to Pro
                   </Button>
-                ) : isTrialing ? (
-                  <>
-                    {/* Show trial info instead of activation button */}
-                    <div className="flex items-center gap-3">
-                      <Badge className="bg-blue-100 text-blue-800 border-blue-200 px-4 py-2">
-                        <Sparkles className="w-4 h-4 mr-2" />
-                        {planDetails?.name} Trial Active
-                      </Badge>
-                      {!subscription?.stripe_subscription_id && (
-                        <Button 
-                          variant="outline"
-                          onClick={() => router.push(`/${locale}/payment?plan=${currentPlan}&activate=true`)}
-                          className="text-ui-sm"
-                        >
-                          <CreditCard className="mr-2 h-4 w-4" />
-                          Add Payment Method
-                        </Button>
-                      )}
-                    </div>
-                  </>
                 ) : (
                   <>
                     <Button
@@ -839,75 +727,104 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
             </CardContent>
           </Card>
 
-          {/* Usage */}
+          {/* Usage & Credits */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-heading-5">
-                <History className="w-5 h-5" />
-                Usage {usagePeriod}
+                <Sparkles className="w-5 h-5" />
+                Credits & Usage
               </CardTitle>
               <CardDescription className="text-ui-sm text-gray-600">
-                Track your cover and video generation usage
+                Track your credits balance and generation usage
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Image Covers Usage */}
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-ui-sm text-gray-600">Image Covers Generated</span>
-                  <span className="text-ui-sm">
-                    {isPaidUser 
-                      ? `${usage?.images_this_month || 0} / ${currentPlan === 'pro' ? (proPlan?.limits.images.monthly || 100) : (proPlusPlan?.limits.images.monthly || 200)}`
-                      : `${usage?.images_today || 0} / ${freePlan?.limits.images.daily || 3}`
-                    }
-                  </span>
+            <CardContent className="space-y-6">
+              {/* Credits Balance */}
+              {isPaidUser && (
+                <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-ui-md font-medium text-gray-900">Credits Balance</span>
+                    <span className="text-heading-4 font-bold text-purple-600">
+                      {creditsBalance.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-ui-sm text-gray-600">
+                    <span>Monthly Allocation</span>
+                    <span className="font-medium">{creditsMonthly.toLocaleString()} credits</span>
+                  </div>
+                  <div className="flex justify-between text-ui-sm text-gray-600 mt-1">
+                    <span>Used This Month</span>
+                    <span className="font-medium">{creditsUsed.toLocaleString()} credits</span>
+                  </div>
+                  <Progress 
+                    value={creditsMonthly > 0 ? (creditsUsed / creditsMonthly) * 100 : 0}
+                    className="h-2 mt-3" 
+                  />
                 </div>
-                <Progress 
-                  value={isPaidUser 
-                    ? ((usage?.images_this_month || 0) / (currentPlan === 'pro' ? (proPlan?.limits.images.monthly || 100) : (proPlusPlan?.limits.images.monthly || 200))) * 100
-                    : ((usage?.images_today || 0) / (freePlan?.limits.images.daily || 3)) * 100
-                  } 
-                  className="h-2" 
-                />
-                <p className="text-ui-sm text-gray-600 mt-2">
-                  {isPaidUser 
-                    ? `${(currentPlan === 'pro' ? (proPlan?.limits.images.monthly || 100) : (proPlusPlan?.limits.images.monthly || 200)) - (usage?.images_this_month || 0)} images remaining this month`
-                    : `${(freePlan?.limits.images.daily || 3) - (usage?.images_today || 0)} images remaining today`
-                  }
-                </p>
-              </div>
+              )}
 
-              {/* Video Usage */}
+              {/* Free Tier Credits */}
+              {!isPaidUser && currentPlan === 'free' && (
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-ui-md font-medium text-gray-900">Credits Balance</span>
+                    <span className="text-heading-5 font-bold text-gray-700">
+                      {creditsBalance.toLocaleString()}
+                    </span>
+                  </div>
+                  <p className="text-ui-sm text-gray-600">
+                    {freePlanConfig.features.find(f => f.text.includes('images per day'))?.text}, {freePlanConfig.features.find(f => f.text.includes('images per month'))?.text}
+                  </p>
+                  {freePlanConfig.credits.onSignup && (
+                    <p className="text-ui-sm text-gray-600 mt-1">
+                      {freePlanConfig.features.find(f => f.text.includes('credits on signup'))?.text}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Generation Costs Reference */}
               <div className="pt-3 border-t">
-                <div className="flex justify-between mb-2">
-                  <span className="text-ui-sm text-gray-600">Sora Videos Generated</span>
-                  <span className="text-ui-sm">
-                    {isPaidUser 
-                      ? `${usage?.videos_this_month || 0} / ${currentPlan === 'pro' ? (proPlan?.limits.videos.monthly || 30) : (proPlusPlan?.limits.videos.monthly || 60)}`
-                      : `${usage?.videos_today || 0} / ${freePlan?.limits.videos.daily || 1}`
-                    }
-                  </span>
+                <h4 className="text-ui-sm font-medium text-gray-700 mb-3">Generation Costs</h4>
+                <div className="grid grid-cols-1 gap-2">
+                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <span className="text-ui-sm text-gray-600">Nano Banana Image</span>
+                    <Badge variant="secondary">{PRICING_CONFIG.generationCosts.nanoBananaImage} credits</Badge>
+                  </div>
+                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <span className="text-ui-sm text-gray-600">Sora 2 Video</span>
+                    <Badge variant="secondary">{PRICING_CONFIG.generationCosts.sora2Video} credits</Badge>
+                  </div>
+                  {currentPlan === 'pro_plus' && (
+                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      <span className="text-ui-sm text-gray-600">Sora 2 Pro Video</span>
+                      <Badge variant="secondary">{PRICING_CONFIG.generationCosts.sora2ProVideo} credits</Badge>
+                    </div>
+                  )}
                 </div>
-                <Progress 
-                  value={isPaidUser 
-                    ? ((usage?.videos_this_month || 0) / (currentPlan === 'pro' ? (proPlan?.limits.videos.monthly || 30) : (proPlusPlan?.limits.videos.monthly || 60))) * 100
-                    : ((usage?.videos_today || 0) / (freePlan?.limits.videos.daily || 1)) * 100
-                  } 
-                  className="h-2" 
-                />
-                <p className="text-ui-sm text-gray-600 mt-2">
-                  {isPaidUser 
-                    ? `${(currentPlan === 'pro' ? (proPlan?.limits.videos.monthly || 30) : (proPlusPlan?.limits.videos.monthly || 60)) - (usage?.videos_this_month || 0)} videos remaining this month`
-                    : `${(freePlan?.limits.videos.daily || 1) - (usage?.videos_today || 0)} videos remaining today`
-                  }
-                </p>
               </div>
 
-              {usagePercentage >= 80 && currentPlan !== 'pro_plus' && (
+              {/* Usage Statistics */}
+              <div className="pt-3 border-t">
+                <h4 className="text-ui-sm font-medium text-gray-700 mb-3">Usage Statistics {usagePeriod}</h4>
+                <div className="space-y-3">
+                  <div className="flex justify-between text-ui-sm">
+                    <span className="text-gray-600">Images Generated</span>
+                    <span className="font-medium">{isPaidUser ? (usage?.images_this_month || 0) : (usage?.images_today || 0)}</span>
+                  </div>
+                  <div className="flex justify-between text-ui-sm">
+                    <span className="text-gray-600">Videos Generated</span>
+                    <span className="font-medium">{isPaidUser ? (usage?.videos_this_month || 0) : (usage?.videos_today || 0)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Low Credits Warning */}
+              {isPaidUser && creditsBalance > 0 && creditsBalance < 100 && (
                 <Alert className="border-orange-200 bg-orange-50">
                   <AlertCircle className="h-4 w-4 text-orange-600" />
                   <AlertDescription className="text-orange-800">
-                    You're running low on images. {isTrialing ? 'Activate your plan' : 'Consider upgrading'} for more.
+                    You're running low on credits. {currentPlan === 'pro' ? 'Consider upgrading to Pro+ for more credits' : 'Your credits will refresh next month'}.
                   </AlertDescription>
                 </Alert>
               )}
@@ -976,18 +893,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
         </div>
       </div>
       
-      {/* Activation Confirmation Dialog */}
-      {isTrialing && planDetails && (
-        <ActivationConfirmDialog
-          open={showActivationConfirm}
-          onClose={() => setShowActivationConfirm(false)}
-          onConfirm={handleActivateSubscription}
-          planName={planDetails.name}
-          planPrice={planDetails.price / 100}
-          planFeatures={planDetails.features}
-          isActivating={activating}
-        />
-      )}
+      {/* Activation Confirmation Dialog - Removed (no trials) */}
     </div>
   )
 }

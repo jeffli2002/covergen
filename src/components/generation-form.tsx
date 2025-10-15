@@ -20,7 +20,6 @@ interface DailyLimitStatus {
   daily_count: number
   daily_limit: number
   can_generate: boolean
-  is_trial: boolean
   subscription_tier: string
   remaining?: number
 }
@@ -131,7 +130,6 @@ export default function GenerationForm() {
             daily_count: data.daily_count,
             daily_limit: data.daily_limit,
             can_generate: false,
-            is_trial: data.is_trial,
             subscription_tier: data.subscription_tier
           })
           setShowUpgradeModal(true)
@@ -432,7 +430,7 @@ export default function GenerationForm() {
             <div className="text-sm">
               <span className="font-medium">Daily Generations:</span> {dailyLimitStatus.daily_count}/{dailyLimitStatus.daily_limit}
               <span className="text-muted-foreground ml-1">
-                {dailyLimitStatus.is_trial ? `(${config.trialDays}-day free trial)` : `(${dailyLimitStatus.subscription_tier} tier)`}
+                ({dailyLimitStatus.subscription_tier} tier)
               </span>
             </div>
             {!dailyLimitStatus.can_generate && (
