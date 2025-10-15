@@ -347,7 +347,18 @@ export class BestAuthSubscriptionService {
     metadata?: any
   }): Promise<any> {
     try {
-      const result = await db.subscriptions.upsert({
+      console.log('[BestAuthSubscriptionService.createOrUpdateSubscription] Starting upsert with data:', {
+        userId: data.userId,
+        tier: data.tier,
+        status: data.status,
+        previousTier: data.previousTier,
+        billingCycle: data.billingCycle,
+        hasUpgradeHistory: !!data.upgradeHistory,
+        upgradeHistoryLength: data.upgradeHistory?.length,
+        prorationAmount: data.prorationAmount
+      })
+      
+      const upsertData = {
         user_id: data.userId,
         tier: data.tier,
         status: data.status,
@@ -367,6 +378,15 @@ export class BestAuthSubscriptionService {
         last_proration_date: data.lastProrationDate?.toISOString(),
         last_renewed_at: data.lastRenewedAt?.toISOString(),
         metadata: data.metadata
+      }
+      
+      console.log('[BestAuthSubscriptionService.createOrUpdateSubscription] Calling db.subscriptions.upsert')
+      const result = await db.subscriptions.upsert(upsertData)
+      console.log('[BestAuthSubscriptionService.createOrUpdateSubscription] Upsert completed:', {
+        success: !!result,
+        resultId: result?.id,
+        resultTier: result?.tier,
+        resultStatus: result?.status
       })
 
       if (data.tier && data.tier !== 'free' && data.status === 'active' && result?.id) {

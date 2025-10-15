@@ -164,10 +164,32 @@ export async function POST(request: NextRequest) {
     if (currentSubscription.status === 'active' && currentSubscription.tier !== 'free') {
       console.log('[Upgrade] Paid user upgrading with immediate proration')
       
+      // Comprehensive validation before attempting upgrade
       if (!currentSubscription.stripe_subscription_id) {
         console.error('[Upgrade] No Creem subscription ID found in database')
         return NextResponse.json(
-          { error: 'No Creem subscription ID found' },
+          { 
+            error: 'No Creem subscription ID found',
+            details: 'Your subscription is not linked to a payment provider. Please contact support.',
+            subscriptionInfo: {
+              tier: currentSubscription.tier,
+              status: currentSubscription.status,
+              hasStripeId: false
+            }
+          },
+          { status: 400 }
+        )
+      }
+      
+      // Validate subscription ID format
+      if (!currentSubscription.stripe_subscription_id.startsWith('sub_')) {
+        console.error('[Upgrade] Invalid Creem subscription ID format:', currentSubscription.stripe_subscription_id)
+        return NextResponse.json(
+          { 
+            error: 'Invalid subscription ID format',
+            details: 'Subscription ID should start with "sub_"',
+            subscriptionId: currentSubscription.stripe_subscription_id.substring(0, 10) + '...'
+          },
           { status: 400 }
         )
       }
@@ -185,16 +207,33 @@ export async function POST(request: NextRequest) {
       // Call Creem to upgrade with immediate proration
       let upgradeResult
       try {
+        console.log('[Upgrade] About to call Creem upgradeSubscription')
+        console.log('[Upgrade] Parameters:', {
+          subscriptionId: currentSubscription.stripe_subscription_id,
+          targetTier,
+          billingCycle,
+          subscriptionIdType: typeof currentSubscription.stripe_subscription_id,
+          subscriptionIdLength: currentSubscription.stripe_subscription_id?.length
+        })
+        
         upgradeResult = await creemService.upgradeSubscription(
           currentSubscription.stripe_subscription_id,
           targetTier as 'pro' | 'pro_plus',
           billingCycle as 'monthly' | 'yearly'
         )
+        
+        console.log('[Upgrade] Creem call completed successfully')
       } catch (creemError: any) {
         console.error('[Upgrade] Creem upgrade call threw exception:', {
           error: creemError,
+          errorType: typeof creemError,
+          errorConstructor: creemError?.constructor?.name,
           message: creemError?.message,
-          stack: creemError?.stack
+          stack: creemError?.stack,
+          code: creemError?.code,
+          statusCode: creemError?.statusCode,
+          response: creemError?.response,
+          data: creemError?.data
         })
         throw new Error(`Creem API error: ${creemError?.message || 'Unknown error'}`)
       }
@@ -313,14 +352,41 @@ export async function POST(request: NextRequest) {
     })
     
   } catch (error) {
-    console.error('[Upgrade API] Error:', error)
+    console.error('='.repeat(80))
+    console.error('[Upgrade API] FATAL ERROR')
+    console.error('='.repeat(80))
+    console.error('[Upgrade API] Error object:', error)
+    console.error('[Upgrade API] Error type:', typeof error)
+    console.error('[Upgrade API] Error constructor:', error?.constructor?.name)
     console.error('[Upgrade API] Error stack:', error instanceof Error ? error.stack : 'No stack trace')
     console.error('[Upgrade API] Error message:', error instanceof Error ? error.message : String(error))
+    
+    // Extract detailed error information
+    let errorDetails: any = {
+      message: error instanceof Error ? error.message : String(error),
+      type: error?.constructor?.name || typeof error,
+      stack: error instanceof Error ? error.stack : undefined
+    }
+    
+    // Check for common error types
+    if (error && typeof error === 'object') {
+      const err = error as any
+      if (err.code) errorDetails.code = err.code
+      if (err.statusCode) errorDetails.statusCode = err.statusCode
+      if (err.response) errorDetails.response = err.response
+      if (err.data) errorDetails.data = err.data
+      if (err.cause) errorDetails.cause = err.cause
+    }
+    
+    console.error('[Upgrade API] Full error details:', JSON.stringify(errorDetails, null, 2))
+    console.error('='.repeat(80))
     
     return NextResponse.json(
       { 
         error: 'Failed to process upgrade',
-        details: error instanceof Error ? error.message : String(error)
+        details: error instanceof Error ? error.message : String(error),
+        debugInfo: errorDetails,
+        timestamp: new Date().toISOString()
       },
       { status: 500 }
     )
