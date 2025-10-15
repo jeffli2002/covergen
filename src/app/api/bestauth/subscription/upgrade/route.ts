@@ -384,9 +384,18 @@ export async function POST(request: NextRequest) {
       console.log('[Upgrade API] Database update confirmed tier:', updateResult?.tier)
       console.log('='.repeat(80))
       
-      // Get locale from headers for redirect
+      // Get locale from headers for redirect with validation
       const locale = request.headers.get('x-locale') || 'en'
-      const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_SITE_URL || ''
+      let origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_SITE_URL || ''
+      
+      // Validate origin URL format - ensure it starts with http/https
+      if (!origin || !origin.startsWith('http')) {
+        console.warn('[Upgrade API] Invalid or missing origin header:', origin)
+        origin = 'https://covergen.pro' // Fallback to production domain
+      }
+      
+      const redirectUrl = `${origin}/${locale}/account?upgraded=true`
+      console.log('[Upgrade API] Generated redirect URL:', redirectUrl)
       
       return NextResponse.json({
         success: true,
@@ -395,7 +404,7 @@ export async function POST(request: NextRequest) {
         currentTier: targetTier,
         previousTier: previousTier,
         prorationAmount: prorationAmount,
-        redirectUrl: `${origin}/${locale}/account?upgraded=true`,
+        redirectUrl: redirectUrl,
         message: `Successfully upgraded from ${currentPlanName} to ${planName}!`,
         note: `You now have immediate access to ${planName} features. Prorated charges have been applied to your account.`
       })
