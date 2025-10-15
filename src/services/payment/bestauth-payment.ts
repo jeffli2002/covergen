@@ -6,6 +6,7 @@ interface CreateCheckoutSessionParams {
   userId: string
   userEmail: string
   planId: PlanId
+  billingCycle?: 'monthly' | 'yearly'
   successUrl: string
   cancelUrl: string
   currentPlan?: PlanId
@@ -16,6 +17,7 @@ export class BestAuthPaymentService {
     userId,
     userEmail,
     planId,
+    billingCycle = 'monthly',
     successUrl,
     cancelUrl,
     currentPlan = 'free'
@@ -41,6 +43,7 @@ export class BestAuthPaymentService {
           credentials: 'include', // Include cookies for BestAuth
           body: JSON.stringify({
             planId,
+            billingCycle,
             successUrl,
             cancelUrl
           })
