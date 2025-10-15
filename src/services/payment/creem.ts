@@ -1227,7 +1227,8 @@ class CreemPaymentService {
       })
 
       // Use Creem SDK to upgrade subscription with immediate proration
-      const result = await getCreemClient().subscriptions.upgrade({
+      const creem = getCreemClient()
+      const result = await (creem as any).subscriptions.upgrade({
         id: subscriptionId,
         xApiKey: CREEM_API_KEY,
         upgradeSubscriptionRequestBody: {

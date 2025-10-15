@@ -25,6 +25,14 @@ export interface SubscriptionStatus {
   // Cancellation fields
   cancel_at_period_end?: boolean
   cancelled_at?: Date | null
+  // Billing cycle
+  billing_cycle?: 'monthly' | 'yearly'
+  // Upgrade tracking fields
+  previous_tier?: 'free' | 'pro' | 'pro_plus'
+  upgrade_history?: any[]
+  proration_amount?: number | null
+  last_proration_date?: Date | null
+  last_renewed_at?: Date | null
   // Metadata
   metadata?: any
 }
