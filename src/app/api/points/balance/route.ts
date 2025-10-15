@@ -13,9 +13,24 @@ async function handler(request: AuthenticatedRequest) {
 
     const supabase = await createClient()
     const pointsService = createPointsService(supabase)
-    const balance = await pointsService.getBalance(user.id)
+    
+    // Gracefully handle points table not existing yet
+    try {
+      const balance = await pointsService.getBalance(user.id)
 
-    if (!balance) {
+      if (!balance) {
+        return NextResponse.json({
+          balance: 0,
+          lifetime_earned: 0,
+          lifetime_spent: 0,
+          tier: 'free',
+        })
+      }
+
+      return NextResponse.json(balance)
+    } catch (pointsError: any) {
+      console.warn('[Points Balance API] Points table may not exist yet:', pointsError.message)
+      // Return default balance if points system not set up
       return NextResponse.json({
         balance: 0,
         lifetime_earned: 0,
@@ -23,14 +38,15 @@ async function handler(request: AuthenticatedRequest) {
         tier: 'free',
       })
     }
-
-    return NextResponse.json(balance)
   } catch (error) {
     console.error('[Points Balance API] Error:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch points balance' },
-      { status: 500 }
-    )
+    // Return default balance instead of error to prevent UI blocking
+    return NextResponse.json({
+      balance: 0,
+      lifetime_earned: 0,
+      lifetime_spent: 0,
+      tier: 'free',
+    })
   }
 }
 
