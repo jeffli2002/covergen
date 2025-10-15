@@ -1250,11 +1250,14 @@ class CreemPaymentService {
         throw new Error(`Creem API error: ${creemError.message || 'Unknown error'}`)
       }
 
+      // Cast result to access latestInvoice (not in type but exists in API response)
+      const upgradeResult = result as any
+      
       console.log('[Creem] Upgrade result:', {
         success: !!result,
         subscriptionId: result?.id,
         status: result?.status,
-        hasLatestInvoice: !!result?.latestInvoice
+        hasLatestInvoice: !!upgradeResult?.latestInvoice
       })
 
       if (!result) {
@@ -1263,14 +1266,14 @@ class CreemPaymentService {
       }
 
       // Extract proration amount from the latest invoice
-      const prorationAmount = result?.latestInvoice?.prorationAmount || 
-                               result?.latestInvoice?.total || 
+      const prorationAmount = upgradeResult?.latestInvoice?.prorationAmount || 
+                               upgradeResult?.latestInvoice?.total || 
                                null
       
       console.log('[Creem] Proration details:', {
         amount: prorationAmount,
-        hasInvoice: !!result?.latestInvoice,
-        invoiceTotal: result?.latestInvoice?.total
+        hasInvoice: !!upgradeResult?.latestInvoice,
+        invoiceTotal: upgradeResult?.latestInvoice?.total
       })
 
       return {
