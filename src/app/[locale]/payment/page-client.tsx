@@ -211,6 +211,49 @@ export default function PaymentPageClient({
     setLoading(true)
     
     try {
+      // For paid users upgrading (Pro → Pro+)
+      if (isUpgrade && currentSubscription?.status === 'active' && currentSubscription?.tier !== 'free') {
+        console.log('[PaymentPage] Processing paid user upgrade:', { 
+          from: currentSubscription.tier, 
+          to: planId,
+          hasSubscriptionId: !!currentSubscription?.stripe_subscription_id
+        })
+        
+        if (!session?.token) {
+          throw new Error('Authentication required')
+        }
+        
+        const response = await fetch('/api/bestauth/subscription/upgrade', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.token}`
+          },
+          body: JSON.stringify({ targetTier: planId })
+        })
+        
+        const data = await response.json()
+        
+        if (response.ok && data.success) {
+          if (data.upgraded) {
+            // Instant upgrade successful!
+            toast.success(data.message || 'Subscription upgraded successfully!')
+            
+            // Redirect to account page after a short delay
+            setTimeout(() => {
+              router.push(`/${locale}/account?upgraded=true`)
+            }, 1500)
+            return
+          } else if (data.checkoutUrl) {
+            // Need to complete checkout (fallback)
+            window.location.href = data.checkoutUrl
+            return
+          }
+        } else {
+          throw new Error(data.error || 'Failed to upgrade subscription')
+        }
+      }
+      
       // For trial users upgrading or activating with payment method
       if ((isUpgrade || isActivation) && currentSubscription?.status === 'trialing' && currentSubscription?.stripe_subscription_id) {
         console.log('[PaymentPage] Processing trial', isActivation ? 'activation' : 'upgrade', 'for user with payment method')
