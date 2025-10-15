@@ -1,46 +1,39 @@
 import { Metadata } from 'next'
-import PricingSection from '@/components/pricing-section'
+import PricingPage from '@/components/pricing/PricingPage'
 import { Locale } from '@/lib/i18n/config'
-import { getStaticSubscriptionConfig, getStaticTrialPeriodText, isStaticTrialEnabled } from '@/lib/subscription-config-static'
-import ClientBoundary from '@/components/client-boundary'
 import { generateMetadata as generateSeoMetadata } from '@/lib/seo/metadata'
+import { SUBSCRIPTION_CONFIG } from '@/config/subscription'
 
 // Get configuration at build time
-const config = getStaticSubscriptionConfig()
-const trialText = getStaticTrialPeriodText()
-const hasTrials = isStaticTrialEnabled()
+const config = SUBSCRIPTION_CONFIG
 
 export async function generateMetadata({
-  params: { locale },
+  params,
   searchParams,
 }: {
-  params: { locale: Locale }
+  params: Promise<{ locale: Locale }>
   searchParams: Record<string, string | string[] | undefined>
 }): Promise<Metadata> {
-  const title = hasTrials 
-    ? 'Pricing - AI Cover Generation Plans with Free Trial | CoverGen Pro'
-    : 'Pricing - AI Cover Generation Plans | CoverGen Pro'
-    
-  const description = hasTrials
-    ? `Start free with ${config.limits.free.monthly} covers/month or try Pro plans with ${trialText}. Pro at $9/month (${config.limits.pro.monthly} covers), Pro+ at $19/month (${config.limits.pro_plus.monthly} covers).`
-    : `Start free with ${config.limits.free.monthly} covers/month. Pro at $9/month (${config.limits.pro.monthly} covers), Pro+ at $19/month (${config.limits.pro_plus.monthly} covers).`
+  const { locale } = await params
+  const title = 'Pricing - Credits-Based AI Generation Plans | CoverGen Pro'
+  const description = `Flexible credits-based pricing for Nano Banana images and Sora 2 videos. Pro at $${config.pro.price.monthly}/month (${config.pro.points.monthly} credits), Pro+ at $${config.proPlus.price.monthly}/month (${config.proPlus.points.monthly} credits). Get ${config.free.signupBonusPoints} free credits on signup!`
     
   return generateSeoMetadata({
     title,
     description,
     keywords: [
       'CoverGen AI pricing',
-      'cover generator pricing',
-      'AI design tool cost',
-      'thumbnail maker pricing',
+      'credits-based pricing',
+      'AI generation credits',
+      'Sora 2 video pricing',
+      'Nano Banana pricing',
+      'flexible AI pricing',
+      'pay as you go AI',
       'content creator tools pricing',
-      'affordable cover generator',
-      hasTrials ? `${trialText}` : 'pro plans',
-      'pro cover generation',
-      'monthly cover quotas',
-      'free cover maker',
-      'premium cover generator',
-      'cover generation plans'
+      'affordable AI generator',
+      'pro AI plans',
+      'video generation pricing',
+      'image generation pricing'
     ],
     path: '/pricing',
     locale,
@@ -49,21 +42,22 @@ export async function generateMetadata({
       url: 'https://covergen.pro/pricing-og.jpg',
       width: 1200,
       height: 630,
-      alt: 'CoverGen Pro Pricing Plans',
+      alt: 'CoverGen Pro Credits-Based Pricing Plans',
     }],
   })
 }
 
-export default function PricingPage({
-  params: { locale },
+export default async function PricingPageRoute({
+  params,
 }: {
-  params: { locale: Locale }
+  params: Promise<{ locale: Locale }>
 }) {
+  const { locale } = await params
   const pricingSchema = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: 'CoverGen AI',
-    description: 'AI-powered cover and thumbnail generator for content creators',
+    description: 'AI-powered image and video generator with flexible credits-based pricing',
     brand: {
       '@type': 'Brand',
       name: 'CoverGen AI'
@@ -74,41 +68,35 @@ export default function PricingPage({
         name: 'Free Plan',
         price: '0',
         priceCurrency: 'USD',
-        description: `${config.limits.free.monthly} covers per month, ${config.limits.free.daily} per day max, personal use only`
+        description: `${config.free.signupBonusPoints} credits on signup, ${config.free.dailyImageLimit} images per day max`
       },
       {
         '@type': 'Offer',
         name: 'Pro Plan',
-        price: '9',
+        price: config.pro.price.monthly.toString(),
         priceCurrency: 'USD',
         priceSpecification: {
           '@type': 'UnitPriceSpecification',
-          price: '9',
+          price: config.pro.price.monthly.toString(),
           priceCurrency: 'USD',
           billingIncrement: 1,
-          billingDuration: 'P1M',
-          ...(hasTrials ? { trialDuration: `P${config.trialDays}D` } : {})
+          billingDuration: 'P1M'
         },
-        description: hasTrials 
-          ? `${trialText}, ${config.limits.pro.monthly} covers per month, commercial use, all features`
-          : `${config.limits.pro.monthly} covers per month, commercial use, all features`
+        description: `${config.pro.points.monthly} credits per month, Sora 2 video generation, commercial use`
       },
       {
         '@type': 'Offer',
         name: 'Pro+ Plan',
-        price: '19',
+        price: config.proPlus.price.monthly.toString(),
         priceCurrency: 'USD',
         priceSpecification: {
           '@type': 'UnitPriceSpecification',
-          price: '19',
+          price: config.proPlus.price.monthly.toString(),
           priceCurrency: 'USD',
           billingIncrement: 1,
-          billingDuration: 'P1M',
-          ...(hasTrials ? { trialDuration: `P${config.trialDays}D` } : {})
+          billingDuration: 'P1M'
         },
-        description: hasTrials
-          ? `${trialText}, ${config.limits.pro_plus.monthly} covers per month, full commercial license`
-          : `${config.limits.pro_plus.monthly} covers per month, full commercial license`
+        description: `${config.proPlus.points.monthly} credits per month, Sora 2 Pro video quality, full commercial license`
       }
     ]
   }
@@ -120,94 +108,7 @@ export default function PricingPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingSchema) }}
       />
       
-      <div className="min-h-screen bg-background">
-        <section className="py-20">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h1 className="text-5xl md:text-6xl font-bold mb-6">
-                Simple, Transparent Pricing
-              </h1>
-              <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto">
-                {hasTrials
-                  ? `Start free with ${config.limits.free.monthly} covers/month or try Pro plans with a ${trialText}.`
-                  : `Start free with ${config.limits.free.monthly} covers/month or upgrade to Pro for more.`
-                }
-              </p>
-            </div>
-            
-            <PricingSection locale={locale} />
-            
-            {/* FAQ Section */}
-            <div className="max-w-4xl mx-auto mt-20">
-              <h2 className="text-3xl font-bold text-center mb-12">
-                Frequently Asked Questions
-              </h2>
-              
-              <div className="space-y-6">
-                <div className="bg-white rounded-2xl p-6 shadow-sm">
-                  <h3 className="text-xl font-semibold mb-3">
-                    Can I switch plans anytime?
-                  </h3>
-                  <p className="text-gray-600">
-                    Yes! You can upgrade or downgrade your plan at any time. Changes take effect 
-                    immediately, and we'll prorate any payments.
-                  </p>
-                </div>
-                
-                <div className="bg-white rounded-2xl p-6 shadow-sm">
-                  <h3 className="text-xl font-semibold mb-3">
-                    What payment methods do you accept?
-                  </h3>
-                  <p className="text-gray-600">
-                    We accept all major credit cards via Stripe, PayPal, and in select regions, 
-                    Alipay and WeChat Pay.
-                  </p>
-                </div>
-                
-                <div className="bg-white rounded-2xl p-6 shadow-sm">
-                  <h3 className="text-xl font-semibold mb-3">
-                    {hasTrials ? 'How does the Pro/Pro+ trial work?' : 'How do Pro/Pro+ plans work?'}
-                  </h3>
-                  <p className="text-gray-600">
-                    {hasTrials ? (
-                      `Pro and Pro+ plans include a ${trialText}. During the trial, Pro users get ${config.limits.pro.trial_total} covers 
-                      (${config.limits.pro.trial_daily}/day) and Pro+ users get ${config.limits.pro_plus.trial_total} covers (${config.limits.pro_plus.trial_daily}/day). Trial usage doesn't count against your 
-                      first paid month - you'll get the full monthly quota when your subscription begins.`
-                    ) : (
-                      `Pro plans offer ${config.limits.pro.monthly} covers per month and Pro+ plans offer ${config.limits.pro_plus.monthly} covers per month. 
-                      You can use your monthly quota anytime without daily restrictions.`
-                    )}
-                  </p>
-                </div>
-                
-                <div className="bg-white rounded-2xl p-6 shadow-sm">
-                  <h3 className="text-xl font-semibold mb-3">
-                    What happens when I reach my limit?
-                  </h3>
-                  <p className="text-gray-600">
-                    Free users can generate {config.limits.free.daily} covers per day ({config.limits.free.monthly}/month max). Pro/Pro+ users have monthly quotas 
-                    with no fixed daily limit - you can use your remaining monthly balance anytime. When you reach 
-                    your limit, you'll see an upgrade prompt or need to wait for the next billing cycle.
-                  </p>
-                </div>
-                
-                {hasTrials && (
-                  <div className="bg-white rounded-2xl p-6 shadow-sm">
-                    <h3 className="text-xl font-semibold mb-3">
-                      What happens after my trial ends?
-                    </h3>
-                    <p className="text-gray-600">
-                      After your {trialText}, your Pro or Pro+ subscription will automatically begin unless you 
-                      cancel. You'll receive the full monthly quota ({config.limits.pro.monthly} for Pro, {config.limits.pro_plus.monthly} for Pro+) starting fresh - 
-                      trial usage doesn't deduct from your paid month.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
+      <PricingPage locale={locale} />
     </>
   )
 }

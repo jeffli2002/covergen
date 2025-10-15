@@ -3,16 +3,20 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Check, Crown, Sparkles, Zap } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Switch } from '@/components/ui/switch'
+import { Check, Crown, Sparkles, Zap, X } from 'lucide-react'
 import { useBestAuth } from '@/hooks/useBestAuth'
 import { useRouter } from 'next/navigation'
 import AuthForm from '@/components/auth/AuthForm'
-import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
 import { useAppStore } from '@/lib/store'
+import { PRICING_CONFIG } from '@/config/pricing.config'
+import Link from 'next/link'
 
 interface SubscriptionInfo {
   status: string
   plan: string
+  tier: string
   isActive: boolean
   isTrialing: boolean
   trialDaysRemaining: number | null
@@ -25,85 +29,25 @@ interface SubscriptionInfo {
   isManualTrial?: boolean
 }
 
-// Get dynamic configuration
-const config = getClientSubscriptionConfig()
-
-const tiers = [
-  {
-    id: 'free',
-    name: 'Free',
-    price: '$0',
-    period: 'forever',
-    description: 'Perfect for trying out our AI generator',
-    icon: Sparkles,
-    features: [
-      '3 nano-banana images/day + 1 sora 2 video/day',
-      '10 nano-banana images/mo + 5 sora 2 videos/mo',
-      'Basic templates',
-      'Watermark-free images & videos',
-      'All platform sizes',
-      'Email support',
-      'Personal use only'
-    ],
-    limitations: [
-      'Daily: 3 nano-banana images + 1 sora 2 video',
-      'Monthly: 10 nano-banana images + 5 sora 2 videos',
-      'No commercial usage'
-    ],
-    cta: 'Get Started',
-    popular: false,
-    badge: null
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    price: '$16.99',
-    period: 'per mo',
-    description: 'Ideal for regular content creators',
-    icon: Zap,
-    features: [
-      '100 nano-banana images/mo',
-      '30 sora 2 videos/mo (watermark-free)',
-      'All templates',
-      'High resolution exports',
-      'Priority support',
-      'Commercial usage rights'
-    ],
-    limitations: [],
-    cta: 'Get Started',
-    popular: true,
-    badge: null
-  },
-  {
-    id: 'pro_plus',
-    name: 'Pro+',
-    price: '$29.99',
-    period: 'per mo',
-    description: 'For professional creators and teams',
-    icon: Crown,
-    features: [
-      '200 nano-banana images/mo',
-      '60 sora 2 videos/mo (watermark-free)',
-      'Everything in Pro',
-      'Bulk generation',
-      'Custom templates',
-      'Dedicated support',
-      'Commercial license'
-    ],
-    limitations: [],
-    cta: 'Get Started',
-    popular: false,
-    badge: null
-  }
-]
-
 interface PricingSectionProps {
   locale?: string
+  showToggle?: boolean
+  showViewAllLink?: boolean
 }
 
 const PENDING_PLAN_KEY = 'covergen_pending_plan'
 
-export default function PricingSection({ locale = 'en' }: PricingSectionProps = {}) {
+const planIcons = {
+  free: Sparkles,
+  pro: Zap,
+  pro_plus: Crown,
+}
+
+export default function PricingSection({ 
+  locale = 'en', 
+  showToggle = true,
+  showViewAllLink = true 
+}: PricingSectionProps = {}) {
   const { user: authUser, session } = useBestAuth()
   const router = useRouter()
   const { subscriptionRefreshTrigger } = useAppStore()
@@ -111,14 +55,13 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
   const [pendingPlan, setPendingPlan] = useState<string | null>(null)
   const [subscriptionInfo, setSubscriptionInfo] = useState<SubscriptionInfo | null>(null)
   const [loadingSubscription, setLoadingSubscription] = useState(false)
+  const [isYearly, setIsYearly] = useState(true) // Default to yearly to show savings
   
   // Fetch subscription info when component mounts or auth changes
   useEffect(() => {
     if (authUser && session) {
-      console.log('[PricingSection] User authenticated, fetching subscription info for:', authUser.email, 'trigger:', subscriptionRefreshTrigger)
       fetchSubscriptionInfo()
     } else {
-      console.log('[PricingSection] No authenticated user, clearing subscription info')
       setSubscriptionInfo(null)
     }
   }, [authUser, session, subscriptionRefreshTrigger])
@@ -127,7 +70,6 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
     setLoadingSubscription(true)
     try {
       if (!session?.token) {
-        console.log('[PricingSection] No session token available')
         setLoadingSubscription(false)
         return
       }
@@ -138,49 +80,28 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
           'Content-Type': 'application/json'
         }
       })
+      
       if (response.ok) {
         const data = await response.json()
-        console.log('[PricingSection] Subscription data received:', {
-          plan: data.plan,
-          tier: data.tier,
-          status: data.status,
-          isTrialing: data.isTrialing,
-          user: authUser?.email,
-          fullData: data
-        })
-        // Ensure we have both plan and tier fields for compatibility
         const normalizedData = {
           ...data,
-          plan: data.plan || data.tier, // Ensure plan field exists
-          tier: data.tier || data.plan  // Ensure tier field exists
+          plan: data.plan || data.tier,
+          tier: data.tier || data.plan
         }
         setSubscriptionInfo(normalizedData)
         
-        // Update store's user object with the correct tier
+        // Update store
         const tier = normalizedData.tier || normalizedData.plan || 'free'
         const currentStoreUser = useAppStore.getState().user
         if (authUser && (!currentStoreUser || currentStoreUser.tier !== tier)) {
-          console.log('[PricingSection] Updating store user tier:', { 
-            oldTier: currentStoreUser?.tier, 
-            newTier: tier 
-          })
-          const quotaLimits = {
-            free: 10,
-            pro: 120,
-            pro_plus: 300
-          }
           useAppStore.getState().setUser({
             id: authUser.id,
             email: authUser.email,
             tier: tier as 'free' | 'pro' | 'pro_plus',
-            quotaLimit: quotaLimits[tier as keyof typeof quotaLimits] || 10,
+            quotaLimit: 10,
             quotaUsed: currentStoreUser?.quotaUsed || 0
           })
         }
-      } else {
-        console.error('[PricingSection] Subscription API error:', response.status)
-        const errorText = await response.text()
-        console.error('[PricingSection] Error details:', errorText)
       }
     } catch (error) {
       console.error('Error fetching subscription:', error)
@@ -189,22 +110,20 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
     }
   }
   
-  // Check for pending plan on mount and after auth
+  // Check for pending plan on mount
   useEffect(() => {
     if (authUser) {
       const storedPlan = localStorage.getItem(PENDING_PLAN_KEY)
       if (storedPlan && storedPlan !== 'free') {
-        console.log('[PricingSection] Found pending plan after auth:', storedPlan)
         localStorage.removeItem(PENDING_PLAN_KEY)
-        // Redirect to payment page with the plan
         router.push(`/${locale}/payment?plan=${storedPlan}`)
       }
     }
   }, [authUser, router, locale])
 
-  const handleSubscribe = (tierKey: string) => {
-    // For free tier, just navigate to generator
-    if (tierKey === 'free') {
+  const handleSubscribe = (planId: string) => {
+    // For free tier, scroll to generator
+    if (planId === 'free') {
       const generatorSection = document.getElementById('generator')
       if (generatorSection) {
         generatorSection.scrollIntoView({ behavior: 'smooth' })
@@ -216,38 +135,25 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
 
     // For paid tiers, check authentication
     if (!authUser) {
-      // Store the plan they want to subscribe to
-      setPendingPlan(tierKey)
-      // Also store in localStorage for OAuth flow
-      localStorage.setItem(PENDING_PLAN_KEY, tierKey)
-      // Show sign-in modal
+      setPendingPlan(planId)
+      localStorage.setItem(PENDING_PLAN_KEY, planId)
       setShowAuthModal(true)
       return
     }
 
-    // If authenticated, navigate to payment page with appropriate params
-    let paymentUrl = `/${locale}/payment?plan=${tierKey}`
+    // Navigate to payment page
+    let paymentUrl = `/${locale}/payment?plan=${planId}&billing=${isYearly ? 'yearly' : 'monthly'}`
     
     if (subscriptionInfo) {
-      // For trial users clicking on their current plan (activation)
-      const isActivating = subscriptionInfo.isTrialing && 
-                          subscriptionInfo.requiresPaymentSetup && 
-                          subscriptionInfo.plan === tierKey
-      
-      // For any user upgrading to a higher tier
-      const isUpgrading = (subscriptionInfo.plan === 'free' && (tierKey === 'pro' || tierKey === 'pro_plus')) ||
-                         (subscriptionInfo.plan === 'pro' && tierKey === 'pro_plus')
-      
-      // For paid users clicking on their current plan, go to account page instead
-      if (subscriptionInfo.plan === tierKey && !subscriptionInfo.isTrialing) {
+      // For paid users on current plan, go to account
+      if (subscriptionInfo.plan === planId && !subscriptionInfo.isTrialing) {
         router.push(`/${locale}/account`)
         return
       }
       
-      if (isActivating) {
-        paymentUrl = `/${locale}/payment?plan=${tierKey}&activate=true`
-      } else if (isUpgrading) {
-        paymentUrl = `/${locale}/payment?plan=${tierKey}&upgrade=true`
+      // For trial activation
+      if (subscriptionInfo.isTrialing && subscriptionInfo.requiresPaymentSetup && subscriptionInfo.plan === planId) {
+        paymentUrl = `/${locale}/payment?plan=${planId}&activate=true&billing=${isYearly ? 'yearly' : 'monthly'}`
       }
     }
     
@@ -255,222 +161,393 @@ export default function PricingSection({ locale = 'en' }: PricingSectionProps = 
   }
 
   const handleAuthSuccess = (authenticatedUser: any) => {
-    console.log('[PricingSection] Auth success, pending plan:', pendingPlan)
     setShowAuthModal(false)
     
-    // After successful sign-in, redirect to payment with the pending plan
     if (pendingPlan && pendingPlan !== 'free') {
-      // Small delay to ensure auth state is fully updated
       setTimeout(() => {
-        console.log('[PricingSection] Redirecting to payment page for plan:', pendingPlan)
-        router.push(`/${locale}/payment?plan=${pendingPlan}`)
+        router.push(`/${locale}/payment?plan=${pendingPlan}&billing=${isYearly ? 'yearly' : 'monthly'}`)
         setPendingPlan(null)
       }, 100)
     }
   }
 
+  const getCredits = (plan: typeof PRICING_CONFIG.plans[0]) => {
+    return isYearly ? plan.credits.yearly : plan.credits.monthly
+  }
+
+  const getPrice = (plan: typeof PRICING_CONFIG.plans[0]) => {
+    const price = isYearly ? plan.price.yearly : plan.price.monthly
+    return price === 0 ? 'Free' : `$${price.toFixed(2)}`
+  }
+
+  const getMonthlyEquivalent = (plan: typeof PRICING_CONFIG.plans[0]) => {
+    return isYearly ? (plan.price.yearly / 12).toFixed(1) : plan.price.monthly.toFixed(1)
+  }
+
+  const getButtonText = (plan: typeof PRICING_CONFIG.plans[0]) => {
+    if (loadingSubscription) return 'Loading...'
+    
+    const isCurrentPlan = subscriptionInfo?.plan === plan.id
+    
+    if (isCurrentPlan) {
+      if (subscriptionInfo?.isTrialing && subscriptionInfo?.requiresPaymentSetup) {
+        return 'Activate Plan'
+      }
+      return 'Current Plan'
+    }
+
+    if (plan.id === 'free') return 'Get Started Free'
+    
+    if (subscriptionInfo && subscriptionInfo.plan !== 'free') {
+      if (plan.id === 'pro_plus' && subscriptionInfo.plan === 'pro') {
+        return 'Upgrade to Pro+'
+      }
+    }
+
+    return `Start ${plan.name}`
+  }
+
+  const isButtonDisabled = (plan: typeof PRICING_CONFIG.plans[0]) => {
+    if (loadingSubscription || plan.comingSoon) return true
+    
+    const isCurrentPlan = subscriptionInfo?.plan === plan.id
+    if (isCurrentPlan && !subscriptionInfo?.isTrialing) return true
+
+    // Disable downgrade to free
+    if (plan.id === 'free' && subscriptionInfo && subscriptionInfo.plan !== 'free') {
+      return true
+    }
+
+    return false
+  }
+
   return (
     <>
-    <section className="py-16 bg-white">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-2xl font-light mb-4 text-gray-900">Choose Your Plan</h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Choose the plan that works best for you. All generated images are watermark-free.
-          </p>
-        </div>
+      <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
+              Simple, Credits-Based Pricing
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Flexible pricing with credits that give you full control over your usage
+            </p>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto px-4">
-          {tiers.map((tier) => {
-            const Icon = tier.icon
-            // Check if this is the user's current tier
-            // Only show current tier when user is authenticated and has subscription info
-            const isCurrentTier = !!(authUser && subscriptionInfo?.plan === tier.id)
-            
-            // Debug logging for all tiers when user is logged in
-            if (authUser?.email) {
-              console.log(`[PricingSection] Tier comparison for ${tier.id}:`, {
-                tierId: tier.id,
-                subscriptionPlan: subscriptionInfo?.plan,
-                isCurrentTier,
-                hasSubscriptionInfo: !!subscriptionInfo,
-                subscriptionData: subscriptionInfo
-              })
-            }
-            
-            return (
-              <Card 
-                key={tier.id} 
-                className={`relative transition-all duration-300 hover:scale-105 hover:-translate-y-2 ${
-                  tier.popular ? 'border-orange-500 shadow-xl scale-105' : 'border-gray-200'
-                } ${isCurrentTier ? 'ring-2 ring-orange-500' : ''} bg-white hover:shadow-2xl`}
-              >
-                {tier.popular && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-1 rounded-full text-sm font-medium shadow-lg">
-                      Most Popular
-                    </span>
-                  </div>
-                )}
-                
-                {tier.badge && !tier.popular && (
-                  <div className="absolute -top-3 right-4">
-                    <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg">
-                      {tier.badge}
-                    </span>
-                  </div>
-                )}
-                
-                <CardHeader className="text-center pb-2">
-                  <div className="flex justify-center mb-4">
-                    <div className={`p-3 rounded-2xl transition-all duration-300 group-hover:scale-110 ${
-                      tier.popular ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white' : 'bg-gray-100 text-gray-600'
-                    }`}>
-                      <Icon className="w-6 h-6" />
+          {/* Yearly/Monthly Toggle */}
+          {showToggle && (
+            <div className="flex items-center justify-center gap-4 mb-12">
+              <div className="flex items-center gap-4 bg-gray-100 p-2 rounded-2xl">
+                <span className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
+                  !isYearly ? 'bg-white shadow-sm font-semibold text-gray-900' : 'text-gray-500'
+                }`} onClick={() => setIsYearly(false)}>
+                  Monthly
+                </span>
+                <Switch 
+                  checked={isYearly} 
+                  onCheckedChange={setIsYearly}
+                  className="data-[state=checked]:bg-orange-500"
+                />
+                <span className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
+                  isYearly ? 'bg-white shadow-sm font-semibold text-gray-900' : 'text-gray-500'
+                }`} onClick={() => setIsYearly(true)}>
+                  Yearly
+                </span>
+              </div>
+              {isYearly && (
+                <Badge className="bg-green-100 text-green-800 hover:bg-green-100 px-3 py-1 text-sm font-medium">
+                  Save 20%
+                </Badge>
+              )}
+            </div>
+          )}
+
+          {/* Pricing Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto">
+            {PRICING_CONFIG.plans.map((plan) => {
+              const Icon = planIcons[plan.id]
+              const isCurrentPlan = subscriptionInfo?.plan === plan.id
+              const credits = getCredits(plan)
+
+              return (
+                <Card 
+                  key={plan.id} 
+                  className={`relative transition-all duration-300 hover:scale-105 hover:-translate-y-2 ${
+                    plan.popular ? 'border-orange-500 shadow-xl scale-105 ring-2 ring-orange-200' : 'border-gray-200'
+                  } ${isCurrentPlan ? 'ring-2 ring-blue-500' : ''} bg-white hover:shadow-2xl`}
+                >
+                  {plan.popular && (
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                      <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-1 shadow-lg">
+                        Most Popular
+                      </Badge>
                     </div>
-                  </div>
-                  
-                  <CardTitle className="text-xl text-gray-900">{tier.name}</CardTitle>
-                  
-                  <div className="text-2xl font-medium text-gray-900">
-                    {tier.price}
-                    <span className="text-sm font-normal text-gray-500">
-                      /{tier.period}
-                    </span>
-                  </div>
-                  
-                  
-                  <CardDescription className="text-base text-gray-600">
-                    {tier.description}
-                  </CardDescription>
-                </CardHeader>
+                  )}
 
-                <CardContent className="space-y-6">
-                  {/* Features */}
-                  <div>
-                    <h4 className="font-medium mb-3 text-gray-900">Features included:</h4>
-                    <ul className="space-y-2">
-                      {tier.features.map((feature, index) => (
-                        <li key={index} className="flex items-start gap-2">
-                          <Check className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-gray-700">{feature}</span>
+                  {isCurrentPlan && (
+                    <div className="absolute -top-3 right-4">
+                      <Badge className="bg-blue-500 text-white px-3 py-1 shadow-lg">
+                        Current Plan
+                      </Badge>
+                    </div>
+                  )}
+
+                  <CardHeader className="text-center pb-4">
+                    <div className="flex justify-center mb-4">
+                      <div className={`p-3 rounded-2xl ${
+                        plan.popular ? 'bg-gradient-to-r from-orange-500 to-red-500' : 'bg-gray-100'
+                      }`}>
+                        <Icon className={`w-6 h-6 ${plan.popular ? 'text-white' : 'text-gray-600'}`} />
+                      </div>
+                    </div>
+
+                    <CardTitle className="text-2xl text-gray-900">{plan.name}</CardTitle>
+                    <CardDescription className="text-base text-gray-600 min-h-[3rem] flex items-center justify-center">
+                      {plan.description}
+                    </CardDescription>
+
+                    {/* Credits Display */}
+                    {credits > 0 && (
+                      <div className="flex flex-wrap gap-2 justify-center mt-4">
+                        <Badge variant="secondary" className="bg-blue-100 text-blue-800 px-3 py-1">
+                          {credits.toLocaleString()} credits{isYearly ? '/year' : '/mo'}
+                        </Badge>
+                      </div>
+                    )}
+
+                    {plan.credits.onSignup && plan.credits.onSignup > 0 && (
+                      <Badge variant="outline" className="border-purple-200 text-purple-700 px-3 py-1 mt-2">
+                        {plan.credits.onSignup} free credits on signup
+                      </Badge>
+                    )}
+
+                    {/* Price Display */}
+                    <div className="mt-4">
+                      <div className="flex items-baseline justify-center gap-2">
+                        <span className="text-4xl font-bold text-gray-900">
+                          ${plan.price.monthly === 0 ? '0' : getMonthlyEquivalent(plan)}
+                        </span>
+                        <span className="text-xl text-gray-600">/mo</span>
+                        {plan.price.monthly > 0 && isYearly && (
+                          <span className="text-lg text-gray-400 line-through ml-2">
+                            ${plan.price.monthly.toFixed(1)}
+                          </span>
+                        )}
+                      </div>
+                      {plan.price.monthly > 0 && isYearly && (
+                        <p className="text-sm text-gray-500 mt-2">
+                          ${plan.price.yearly.toFixed(2)} billed annually
+                        </p>
+                      )}
+                    </div>
+                  </CardHeader>
+
+                  <CardContent>
+                    <div className="border-t pt-4 mb-4"></div>
+
+                    {/* Key Features */}
+                    <ul className="space-y-2.5 mb-6">
+                      {/* Credits Info */}
+                      {credits > 0 ? (
+                        <li className="flex items-start gap-2">
+                          <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-orange-500" />
+                          <span className="text-sm font-semibold text-gray-900">
+                            {credits.toLocaleString()} credits{isYearly ? '/year' : '/month'}
+                          </span>
                         </li>
-                      ))}
-                    </ul>
-                  </div>
+                      ) : (
+                        <li className="flex items-start gap-2">
+                          <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-orange-500" />
+                          <span className="text-sm font-semibold text-gray-900">
+                            {plan.credits.onSignup} credits on signup
+                          </span>
+                        </li>
+                      )}
 
-                  {/* Limitations */}
-                  {tier.limitations.length > 0 && (
-                    <div>
-                      <h4 className="font-medium mb-3 text-gray-500 text-sm">Limitations:</h4>
-                      <ul className="space-y-1">
-                        {tier.limitations.map((limitation, index) => (
-                          <li key={index} className="text-sm text-gray-500">
-                            • {limitation}
+                      {/* Generation Capacity */}
+                      {credits > 0 && (
+                        <>
+                          <li className="flex items-start gap-2">
+                            <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-green-500" />
+                            <span className="text-sm text-gray-700">
+                              Up to {Math.floor(credits / PRICING_CONFIG.generationCosts.nanoBananaImage)} Nano Banana images
+                            </span>
                           </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                          {plan.id !== 'free' && (
+                            <li className="flex items-start gap-2">
+                              <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-green-500" />
+                              <span className="text-sm text-gray-700">
+                                Up to {Math.floor(credits / PRICING_CONFIG.generationCosts.sora2Video)} Sora 2 videos
+                              </span>
+                            </li>
+                          )}
+                        </>
+                      )}
 
-                  {/* CTA Button */}
-                  {tier.id === 'free' ? (
-                    <Button 
-                      className="w-full transition-all duration-300 bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300"
-                      variant="outline"
-                      disabled={isCurrentTier}
-                      onClick={() => handleSubscribe(tier.id)}
-                    >
-                      {isCurrentTier ? 'Current Plan' : tier.cta}
-                    </Button>
-                  ) : (
-                    <Button 
-                      className={`w-full transition-all duration-300 ${
-                        tier.popular 
-                          ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white hover:shadow-lg' 
-                          : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'
+                      {plan.id === 'free' && (
+                        <li className="flex items-start gap-2">
+                          <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-green-500" />
+                          <span className="text-sm text-gray-700">
+                            Up to {PRICING_CONFIG.plans[0].features.find(f => f.text.includes('images per day'))?.text.split(' ')[0]} images per day
+                          </span>
+                        </li>
+                      )}
+
+                      {/* Watermark-free */}
+                      <li className="flex items-start gap-2">
+                        <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-green-500" />
+                        <span className="text-sm text-gray-700">
+                          Watermark-free images
+                        </span>
+                      </li>
+                      {plan.id !== 'free' && (
+                        <li className="flex items-start gap-2">
+                          <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-green-500" />
+                          <span className="text-sm text-gray-700">
+                            Watermark-free <span className="font-semibold">Sora 2</span> videos
+                          </span>
+                        </li>
+                      )}
+
+                      {/* AI Tools */}
+                      <li className="flex items-start gap-2">
+                        <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-green-500" />
+                        <span className="text-sm text-gray-700">
+                          AI thumbnail maker
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-green-500" />
+                        <span className="text-sm text-gray-700">
+                          AI event poster maker
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-green-500" />
+                        <span className="text-sm text-gray-700">
+                          AI anime poster maker
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-green-500" />
+                        <span className="text-sm text-gray-700">
+                          AI album cover maker
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-green-500" />
+                        <span className="text-sm text-gray-700">
+                          AI game cover maker
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-green-500" />
+                        <span className="text-sm text-gray-700">
+                          AI book cover maker
+                        </span>
+                      </li>
+
+                      {/* Usage Rights */}
+                      {plan.id === 'free' && (
+                        <li className="flex items-start gap-2">
+                          <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-green-500" />
+                          <span className="text-sm text-gray-700">
+                            Personal use only
+                          </span>
+                        </li>
+                      )}
+                      {plan.id !== 'free' && (
+                        <li className="flex items-start gap-2">
+                          <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-green-500" />
+                          <span className="text-sm text-gray-700">
+                            Commercial usage rights
+                          </span>
+                        </li>
+                      )}
+
+                      {/* No Ads */}
+                      {plan.id !== 'free' && (
+                        <li className="flex items-start gap-2">
+                          <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-green-500" />
+                          <span className="text-sm text-gray-700">
+                            No ads
+                          </span>
+                        </li>
+                      )}
+                    </ul>
+
+                    {/* CTA Button */}
+                    <Button
+                      className={`w-full ${
+                        plan.popular
+                          ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white'
+                          : plan.id === 'free'
+                          ? 'border-gray-300 hover:bg-gray-50'
+                          : 'bg-gray-900 hover:bg-gray-800 text-white'
                       }`}
-                      variant={tier.popular ? "default" : "outline"}
-                      disabled={
-                        loadingSubscription || 
-                        // Disable current plan for paid users (unless trial needing payment setup)
-                        (isCurrentTier && !(subscriptionInfo?.isTrialing && subscriptionInfo?.requiresPaymentSetup)) ||
-                        // Disable downgrade options for paid users
-                        (subscriptionInfo !== null && !subscriptionInfo.isTrialing && subscriptionInfo.plan !== 'free' && 
-                          ((subscriptionInfo.plan === 'pro_plus' && tier.id === 'pro') || 
-                           (subscriptionInfo.plan === 'pro' && tier.id === 'free')))
-                      }
-                      onClick={() => handleSubscribe(tier.id)}
+                      variant={plan.id === 'free' ? 'outline' : 'default'}
+                      size="lg"
+                      disabled={isButtonDisabled(plan)}
+                      onClick={() => handleSubscribe(plan.id)}
                     >
-                      {(() => {
-                        if (loadingSubscription) return 'Loading...'
-                        
-                        // For trial users on their current plan who need payment setup
-                        if (isCurrentTier && subscriptionInfo?.isTrialing && subscriptionInfo?.requiresPaymentSetup) {
-                          return 'Activate Plan'
-                        }
-                        
-                        // For paid users on their current plan
-                        if (isCurrentTier) return 'Current Plan'
-                        
-                        // If user is on a trial
-                        if (subscriptionInfo?.isTrialing) {
-                          // If trying to upgrade from free trial to a paid plan
-                          if (subscriptionInfo.plan === 'free') return 'Upgrade'
-                          // If on Pro trial looking at Pro+ 
-                          if (subscriptionInfo.plan === 'pro' && tier.id === 'pro_plus') return 'Upgrade'
-                          // For any other case during trial (like downgrade), show regular CTA
-                          return tier.cta
-                        }
-                        
-                        // For paid users (not on trial)
-                        if (subscriptionInfo && !subscriptionInfo.isTrialing && subscriptionInfo.plan !== 'free') {
-                          // Pro users can upgrade to Pro+
-                          if (subscriptionInfo.plan === 'pro' && tier.id === 'pro_plus') return 'Upgrade Now'
-                          // Don't show downgrade options for paid users
-                          if ((subscriptionInfo.plan === 'pro_plus' && tier.id === 'pro') || 
-                              (subscriptionInfo.plan === 'pro' && tier.id === 'free')) {
-                            return 'Downgrade'
-                          }
-                        }
-                        
-                        // Default case - show the tier's CTA
-                        return tier.cta
-                      })()}
+                      {getButtonText(plan)}
                     </Button>
-                  )}
-                </CardContent>
-              </Card>
-            )
-          })}
-        </div>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
 
-        {/* Additional info */}
-        <div className="text-center mt-12 space-y-4">
-          <p className="text-sm text-gray-600">
-            All plans include watermark-free nano-banana images and sora 2 videos for professional use.
-          </p>
-          <div className="flex justify-center gap-8 text-sm text-gray-600">
-            <span>✓ Cancel anytime</span>
-            <span>✓ No setup fees</span>
-            <span>✓ 24/7 support</span>
+          {/* View All Plans Link */}
+          {showViewAllLink && (
+            <div className="text-center mt-12">
+              <Link href={`/${locale}/pricing`}>
+                <Button variant="outline" size="lg" className="group">
+                  View All Features & FAQ
+                  <Sparkles className="w-4 h-4 ml-2 group-hover:text-orange-500 transition-colors" />
+                </Button>
+              </Link>
+            </div>
+          )}
+
+          {/* Trust Indicators */}
+          <div className="text-center mt-8 space-y-4">
+            <p className="text-sm text-gray-600">
+              All plans include watermark-free content for professional use
+            </p>
+            <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
+              <span className="flex items-center gap-1">
+                <Check className="w-4 h-4 text-green-500" />
+                Cancel anytime
+              </span>
+              <span className="flex items-center gap-1">
+                <Check className="w-4 h-4 text-green-500" />
+                14-day money back
+              </span>
+              <span className="flex items-center gap-1">
+                <Check className="w-4 h-4 text-green-500" />
+                No setup fees
+              </span>
+              <span className="flex items-center gap-1">
+                <Check className="w-4 h-4 text-green-500" />
+                24/7 support
+              </span>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    {/* Auth Modal */}
-    {showAuthModal && (
-      <AuthForm 
-        onClose={() => {
-          setShowAuthModal(false)
-          setPendingPlan(null)
-          // Clear pending plan from localStorage on close
-          localStorage.removeItem(PENDING_PLAN_KEY)
-        }}
-        onAuthSuccess={handleAuthSuccess}
-      />
-    )}
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <AuthForm 
+          onClose={() => {
+            setShowAuthModal(false)
+            setPendingPlan(null)
+            localStorage.removeItem(PENDING_PLAN_KEY)
+          }}
+          onAuthSuccess={handleAuthSuccess}
+        />
+      )}
     </>
   )
 }
