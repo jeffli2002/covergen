@@ -208,22 +208,35 @@ async function handleSubscriptionCreated(data: any) {
 }
 
 async function handleSubscriptionUpdate(data: any) {
-  const { customerId, status, userId, planId, currentPeriodEnd, cancelAtPeriodEnd } = data
+  const { customerId, status, userId, planId, currentPeriodEnd, cancelAtPeriodEnd, billingInterval, priceId } = data
 
   try {
     // Find user by customer ID if userId not provided
     let actualUserId = userId
+    let currentSubscription = null
+    
     if (!actualUserId && customerId) {
       const subscription = await db.subscriptions.findByCustomerId(customerId)
       if (subscription) {
         actualUserId = subscription.user_id
+        currentSubscription = subscription
       }
+    } else if (actualUserId) {
+      currentSubscription = await db.subscriptions.findByUserId(actualUserId)
     }
 
     if (!actualUserId) {
       console.error('[BestAuth Webhook] Could not find user for customer:', customerId)
       return
     }
+
+    console.log('[BestAuth Webhook] Processing subscription update:', {
+      userId: actualUserId,
+      oldTier: currentSubscription?.tier,
+      newTier: planId,
+      status,
+      billingInterval
+    })
 
     // Update subscription status
     const updateData: any = {
@@ -233,8 +246,35 @@ async function handleSubscriptionUpdate(data: any) {
       cancelAtPeriodEnd: cancelAtPeriodEnd
     }
 
-    if (planId) {
+    // Detect tier change (upgrade/downgrade from Creem webhook)
+    if (planId && currentSubscription && planId !== currentSubscription.tier) {
+      console.log(`[BestAuth Webhook] Tier change detected: ${currentSubscription.tier} → ${planId}`)
+      
       updateData.tier = planId
+      updateData.previousTier = currentSubscription.tier
+      
+      // Add to upgrade history
+      const existingHistory = currentSubscription.upgrade_history || []
+      const upgradeHistoryEntry = {
+        from_tier: currentSubscription.tier,
+        to_tier: planId,
+        upgraded_at: new Date().toISOString(),
+        upgrade_type: 'webhook_sync',
+        source: 'creem_webhook'
+      }
+      updateData.upgradeHistory = [...existingHistory, upgradeHistoryEntry]
+    } else if (planId) {
+      updateData.tier = planId
+    }
+    
+    // Sync billing cycle from Creem
+    if (billingInterval) {
+      updateData.billingCycle = billingInterval === 'year' ? 'yearly' : 'monthly'
+    }
+    
+    // Sync Stripe price ID
+    if (priceId) {
+      updateData.stripePriceId = priceId
     }
 
     // Handle status transitions
@@ -248,7 +288,11 @@ async function handleSubscriptionUpdate(data: any) {
 
     await bestAuthSubscriptionService.createOrUpdateSubscription(updateData)
 
-    console.log(`[BestAuth Webhook] Updated subscription for user ${actualUserId}`)
+    console.log(`[BestAuth Webhook] Updated subscription for user ${actualUserId}`, {
+      tier: updateData.tier,
+      previousTier: updateData.previousTier,
+      billingCycle: updateData.billingCycle
+    })
   } catch (error) {
     console.error('[BestAuth Webhook] Error in handleSubscriptionUpdate:', error)
     throw error
