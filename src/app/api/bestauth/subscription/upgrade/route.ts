@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { validateSessionFromRequest } from '@/lib/bestauth'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 import { creemService, SUBSCRIPTION_PLANS } from '@/services/payment/creem'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 
 // Force Node.js runtime for Creem SDK compatibility
 export const runtime = 'nodejs'
@@ -15,16 +17,51 @@ export async function POST(request: NextRequest) {
   
   try {
     console.log('[Upgrade API] Step 1: Validating session...')
-    const session = await validateSessionFromRequest(request)
-    console.log('[Upgrade API] Session validation result:', { success: session.success, hasData: !!session.data })
     
-    if (!session.success || !session.data) {
-      console.log('[Upgrade API] Unauthorized - no valid session')
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Try BestAuth first
+    let userId: string | undefined
+    let userEmail: string | undefined
+    
+    const bestAuthSession = await validateSessionFromRequest(request)
+    console.log('[Upgrade API] BestAuth validation result:', { success: bestAuthSession.success, hasData: !!bestAuthSession.data })
+    
+    if (bestAuthSession.success && bestAuthSession.data) {
+      userId = bestAuthSession.data.user.id
+      userEmail = bestAuthSession.data.user.email
+      console.log('[Upgrade API] ✅ Authenticated via BestAuth')
+    } else {
+      // Fallback to Supabase auth
+      console.log('[Upgrade API] BestAuth failed, trying Supabase...')
+      
+      const cookieStore = await cookies()
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            get(name: string) {
+              return cookieStore.get(name)?.value
+            },
+            set() {},
+            remove() {}
+          }
+        }
+      )
+      
+      const { data: { user }, error } = await supabase.auth.getUser()
+      console.log('[Upgrade API] Supabase auth result:', { hasUser: !!user, error: error?.message })
+      
+      if (user) {
+        userId = user.id
+        userEmail = user.email
+        console.log('[Upgrade API] ✅ Authenticated via Supabase')
+      }
     }
     
-    const userId = session.data.user.id
-    const userEmail = session.data.user.email
+    if (!userId || !userEmail) {
+      console.log('[Upgrade API] ❌ No valid session from either BestAuth or Supabase')
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     
     console.log('[Upgrade API] Step 2: Parsing request body...')
     const body = await request.json()
