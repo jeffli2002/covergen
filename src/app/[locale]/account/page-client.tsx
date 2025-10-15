@@ -59,6 +59,8 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   const [cancelling, setCancelling] = useState(false)
   const [resuming, setResuming] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [showActivationConfirm, setShowActivationConfirm] = useState(false)
+  const [activating, setActivating] = useState(false)
 
   // Track if we've already loaded data to prevent re-fetching
   const [hasLoadedData, setHasLoadedData] = useState(false)
