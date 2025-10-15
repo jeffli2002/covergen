@@ -1228,14 +1228,27 @@ class CreemPaymentService {
 
       // Use Creem SDK to upgrade subscription with immediate proration
       const creem = getCreemClient()
-      const result = await (creem as any).subscriptions.upgrade({
-        id: subscriptionId,
-        xApiKey: CREEM_API_KEY,
-        upgradeSubscriptionRequestBody: {
-          productId: productId,
-          updateBehavior: 'proration-charge-immediately'
-        }
-      })
+      
+      let result
+      try {
+        result = await (creem as any).subscriptions.upgrade({
+          id: subscriptionId,
+          xApiKey: CREEM_API_KEY,
+          upgradeSubscriptionRequestBody: {
+            productId: productId,
+            updateBehavior: 'proration-charge-immediately'
+          }
+        })
+      } catch (creemError: any) {
+        console.error('[Creem] Upgrade API call failed:', creemError)
+        console.error('[Creem] Error details:', {
+          message: creemError.message,
+          status: creemError.status,
+          response: creemError.response,
+          body: creemError.body
+        })
+        throw new Error(`Creem API error: ${creemError.message || 'Unknown error'}`)
+      }
 
       console.log('[Creem] Upgrade result:', {
         success: !!result.object,
@@ -1245,6 +1258,7 @@ class CreemPaymentService {
       })
 
       if (!result.object) {
+        console.error('[Creem] No subscription object in result:', result)
         throw new Error('No subscription returned from upgrade')
       }
 

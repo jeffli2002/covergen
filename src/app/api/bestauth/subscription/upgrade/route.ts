@@ -271,9 +271,15 @@ export async function POST(request: NextRequest) {
     })
     
   } catch (error) {
-    console.error('Upgrade error:', error)
+    console.error('[Upgrade API] Error:', error)
+    console.error('[Upgrade API] Error stack:', error instanceof Error ? error.stack : 'No stack trace')
+    console.error('[Upgrade API] Error message:', error instanceof Error ? error.message : String(error))
+    
     return NextResponse.json(
-      { error: 'Failed to process upgrade' },
+      { 
+        error: 'Failed to process upgrade',
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     )
   }
