@@ -70,7 +70,13 @@ export async function GET(request: NextRequest) {
       console.error('[BestAuth Account API] Error fetching subscription:', err)
       return null
     })
-    console.log('[BestAuth Account API] Subscription fetch complete:', !!subscription)
+    console.log('[BestAuth Account API] Subscription fetch complete:', {
+      hasSubscription: !!subscription,
+      tier: subscription?.tier,
+      status: subscription?.status,
+      billing_cycle: subscription?.billing_cycle,
+      previous_tier: subscription?.previous_tier
+    })
     
     console.log('[BestAuth Account API] Step 4: Fetching usage data...')
     const usageToday = await withTimeout(

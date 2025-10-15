@@ -6,10 +6,15 @@ import { creemService, SUBSCRIPTION_PLANS } from '@/services/payment/creem'
 
 // POST /api/bestauth/subscription/upgrade - Upgrade a subscription tier (including trial upgrades)
 export async function POST(request: NextRequest) {
+  console.log('='.repeat(80))
+  console.log('[Upgrade API] Starting upgrade request')
+  console.log('='.repeat(80))
+  
   try {
     const session = await validateSessionFromRequest(request)
     
     if (!session.success || !session.data) {
+      console.log('[Upgrade API] Unauthorized - no valid session')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
@@ -17,6 +22,13 @@ export async function POST(request: NextRequest) {
     const userEmail = session.data.user.email
     const body = await request.json()
     const { targetTier } = body
+    
+    console.log('[Upgrade API] Request details:', {
+      userId,
+      userEmail,
+      targetTier,
+      timestamp: new Date().toISOString()
+    })
     
     // Validate target tier
     if (!targetTier || !['pro', 'pro_plus'].includes(targetTier)) {
@@ -232,6 +244,12 @@ export async function POST(request: NextRequest) {
       
       const planName = targetTier === 'pro_plus' ? 'Pro+' : 'Pro'
       const currentPlanName = currentSubscription.tier === 'pro' ? 'Pro' : 'Pro+'
+      
+      console.log('='.repeat(80))
+      console.log('[Upgrade API] SUCCESS - Returning response')
+      console.log('[Upgrade API] User should now be on tier:', targetTier)
+      console.log('[Upgrade API] Database update confirmed tier:', updateResult?.tier)
+      console.log('='.repeat(80))
       
       return NextResponse.json({
         success: true,

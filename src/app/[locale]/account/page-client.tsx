@@ -150,12 +150,17 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
         // Load account data from BestAuth API
         console.log('[Account] Fetching account data with token:', session.token ? 'Present' : 'Missing')
         
-        const response = await fetch('/api/bestauth/account', {
+        // Force fresh data by adding cache-busting timestamp
+        const cacheBuster = justUpgraded || justActivated ? `?t=${Date.now()}` : ''
+        console.log('[Account] Fetching account data...', { justUpgraded, justActivated, cacheBuster })
+        
+        const response = await fetch(`/api/bestauth/account${cacheBuster}`, {
           headers: {
             'Authorization': `Bearer ${session.token}`,
             'Content-Type': 'application/json'
           },
-          // Add timeout to fetch
+          // Add timeout to fetch and disable cache
+          cache: 'no-store',
           signal: AbortSignal.timeout(10000)
         }).catch(err => {
           console.error('[Account] Fetch error:', err)
@@ -173,7 +178,11 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
         
         const data = await response.json()
         clearTimeout(loadTimeout)
-        console.log('[Account] Data loaded successfully')
+        console.log('[Account] Data loaded successfully:', {
+          subscriptionTier: data?.subscription?.tier,
+          subscriptionStatus: data?.subscription?.status,
+          userId: data?.user?.id
+        })
         
         setAccountData(data)
         setSubscription(data.subscription)
