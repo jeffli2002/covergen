@@ -72,6 +72,14 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   const [hasLoadedData, setHasLoadedData] = useState(false)
 
   useEffect(() => {
+    // Force reload if user just upgraded (to get fresh subscription data)
+    if (justUpgraded || justActivated) {
+      console.log('[Account] User just upgraded, forcing data reload')
+      setHasLoadedData(false)
+    }
+  }, [justUpgraded, justActivated])
+
+  useEffect(() => {
     // Only run auth check if we haven't loaded data yet
     if (hasLoadedData) {
       return
