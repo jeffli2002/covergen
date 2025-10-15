@@ -442,17 +442,39 @@ class CreemPaymentService {
           console.log(`[Creem] Adding ${config.trialDays} day trial period to checkout`)
         }
         
-        checkout = await getCreemClient().createCheckout({
+        const checkoutResult = await getCreemClient().createCheckout({
           xApiKey: CREEM_API_KEY,
           createCheckoutRequest: checkoutRequest
         })
         
+        // CRITICAL: Creem SDK v0.3.37 returns Result<T, E> type - must check .ok field
+        console.log('[Creem] SDK checkout result:', {
+          hasResult: !!checkoutResult,
+          isOk: (checkoutResult as any)?.ok,
+          hasError: !!(checkoutResult as any)?.error
+        })
+        
+        if (!checkoutResult || !(checkoutResult as any).ok) {
+          const error = (checkoutResult as any)?.error
+          console.error('[Creem] Checkout failed - Result.ok is false:', {
+            error: error,
+            errorMessage: error?.message || error?.detail || error?.title,
+            errorCode: error?.code || error?.status
+          })
+          
+          const errorMessage = error?.message || error?.detail || error?.title || 'Unknown error from Creem API'
+          throw new Error(`Creem SDK Error: ${errorMessage}`)
+        }
+        
+        // Extract the actual checkout from Result.value
+        checkout = (checkoutResult as any).value
+        
         console.log('[Creem] SDK checkout response:', {
-          id: checkout.id,
-          status: checkout.status,
-          checkoutUrl: checkout.checkoutUrl,
-          product: checkout.product,
-          mode: checkout.mode
+          id: checkout?.id,
+          status: checkout?.status,
+          checkoutUrl: checkout?.checkoutUrl,
+          product: checkout?.product,
+          mode: checkout?.mode
         })
       } catch (sdkError: any) {
         console.error('[Creem] SDK Error Details:', {
@@ -603,20 +625,29 @@ class CreemPaymentService {
         }
       })
 
+      // CRITICAL: Creem SDK v0.3.37 returns Result<T, E> type - must check .ok field
+      if (!result || !(result as any).ok) {
+        const error = (result as any)?.error
+        const errorMessage = error?.message || error?.detail || error?.title || 'Unknown error from Creem API'
+        throw new Error(`Creem API error: ${errorMessage}`)
+      }
+      
+      const customerLinks = (result as any).value
+
       console.log('[Creem] Portal session result:', {
-        success: !!result?.customerPortalLink,
-        hasUrl: !!result?.customerPortalLink,
+        success: !!customerLinks?.customerPortalLink,
+        hasUrl: !!customerLinks?.customerPortalLink,
         customerId,
-        result: result
+        result: customerLinks
       })
 
-      if (!result?.customerPortalLink) {
+      if (!customerLinks?.customerPortalLink) {
         throw new Error('Failed to create customer portal session')
       }
 
       return {
         success: true,
-        url: result.customerPortalLink
+        url: customerLinks.customerPortalLink
       }
     } catch (error: any) {
       console.error('Creem portal session error:', error)
@@ -657,11 +688,20 @@ class CreemPaymentService {
         xApiKey: CREEM_API_KEY
       })
 
-      console.log('[Creem] Subscription cancelled:', result)
+      // CRITICAL: Creem SDK v0.3.37 returns Result<T, E> type - must check .ok field
+      if (!result || !(result as any).ok) {
+        const error = (result as any)?.error
+        const errorMessage = error?.message || error?.detail || error?.title || 'Unknown error from Creem API'
+        throw new Error(`Creem API error: ${errorMessage}`)
+      }
+      
+      const subscription = (result as any).value
+
+      console.log('[Creem] Subscription cancelled:', subscription)
       
       return {
         success: true,
-        subscription: result
+        subscription: subscription
       }
     } catch (error: any) {
       console.error('[Creem] Cancel subscription error:', {
@@ -762,11 +802,20 @@ class CreemPaymentService {
         }
       })
 
-      console.log('[Creem] Subscription update result:', result)
+      // CRITICAL: Creem SDK v0.3.37 returns Result<T, E> type - must check .ok field
+      if (!result || !(result as any).ok) {
+        const error = (result as any)?.error
+        const errorMessage = error?.message || error?.detail || error?.title || 'Unknown error from Creem API'
+        throw new Error(`Creem API error: ${errorMessage}`)
+      }
+      
+      const subscription = (result as any).value
+
+      console.log('[Creem] Subscription update result:', subscription)
 
       return {
         success: true,
-        subscription: result
+        subscription: subscription
       }
     } catch (error: any) {
       console.error('Creem update subscription error:', error)
@@ -799,11 +848,20 @@ class CreemPaymentService {
         xApiKey: CREEM_API_KEY
       })
 
-      console.log('[Creem] Retrieved subscription:', result)
+      // CRITICAL: Creem SDK v0.3.37 returns Result<T, E> type - must check .ok field
+      if (!result || !(result as any).ok) {
+        const error = (result as any)?.error
+        const errorMessage = error?.message || error?.detail || error?.title || 'Unknown error from Creem API'
+        throw new Error(`Creem API error: ${errorMessage}`)
+      }
+      
+      const subscription = (result as any).value
+
+      console.log('[Creem] Retrieved subscription:', subscription)
 
       return {
         success: true,
-        subscription: result
+        subscription: subscription
       }
     } catch (error: any) {
       console.error('Creem get subscription error:', error)
@@ -1250,20 +1308,49 @@ class CreemPaymentService {
         throw new Error(`Creem API error: ${creemError.message || 'Unknown error'}`)
       }
 
-      // Cast result to access latestInvoice (not in type but exists in API response)
-      const upgradeResult = result as any
-      
-      console.log('[Creem] Upgrade result:', {
-        success: !!result,
-        subscriptionId: result?.id,
-        status: result?.status,
-        hasLatestInvoice: !!upgradeResult?.latestInvoice
+      // CRITICAL: Creem SDK v0.3.37 returns Result<T, E> type - must check .ok field
+      console.log('[Creem] Upgrade result received:', {
+        hasResult: !!result,
+        isOk: result?.ok,
+        hasError: !!(result as any)?.error
       })
 
-      if (!result) {
-        console.error('[Creem] No subscription returned from upgrade')
+      // Check if the Result is an error
+      if (!result || !(result as any).ok) {
+        const error = (result as any)?.error
+        console.error('[Creem] Upgrade failed - Result.ok is false:', {
+          error: error,
+          errorMessage: error?.message || error?.detail || error?.title,
+          errorCode: error?.code || error?.status,
+          errorType: error?.constructor?.name
+        })
+        
+        const errorMessage = error?.message || error?.detail || error?.title || 'Unknown error from Creem API'
+        throw new Error(`Creem API error: ${errorMessage}`)
+      }
+
+      // Extract the actual subscription from the Result.value
+      const subscription = (result as any).value
+      
+      console.log('[Creem] Upgrade successful, extracting data:', {
+        hasSubscription: !!subscription,
+        subscriptionId: subscription?.id,
+        status: subscription?.status
+      })
+
+      if (!subscription) {
+        console.error('[Creem] No subscription in Result.value')
         throw new Error('No subscription returned from upgrade')
       }
+
+      // Cast to access latestInvoice (not in type but exists in API response)
+      const upgradeResult = subscription as any
+      
+      console.log('[Creem] Subscription details:', {
+        id: subscription.id,
+        status: subscription.status,
+        hasLatestInvoice: !!upgradeResult?.latestInvoice
+      })
 
       // Extract proration amount from the latest invoice
       const prorationAmount = upgradeResult?.latestInvoice?.prorationAmount || 
@@ -1278,7 +1365,7 @@ class CreemPaymentService {
 
       return {
         success: true,
-        subscription: result,
+        subscription: subscription,
         prorationAmount: prorationAmount,
         message: 'Subscription upgraded successfully with immediate proration'
       }
