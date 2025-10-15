@@ -239,9 +239,12 @@ export default function PaymentPageClient({
             // Instant upgrade successful!
             toast.success(data.message || 'Subscription upgraded successfully!')
             
-            // Redirect to account page after a short delay
+            // Use redirectUrl from API response or fallback to account page
+            const redirectUrl = data.redirectUrl || `/${locale}/account?upgraded=true`
+            
+            // Force full page reload to clear all caches
             setTimeout(() => {
-              router.push(`/${locale}/account?upgraded=true`)
+              window.location.href = redirectUrl
             }, 1500)
             return
           } else if (data.checkoutUrl) {
@@ -282,9 +285,12 @@ export default function PaymentPageClient({
             // Instant upgrade/activation successful!
             toast.success(data.message || (isActivation ? 'Plan activated successfully!' : 'Subscription upgraded successfully!'))
             
-            // Redirect to account page after a short delay
+            // Use redirectUrl from API response or fallback to account page
+            const redirectUrl = data.redirectUrl || `/${locale}/account?${isActivation ? 'activated' : 'upgraded'}=true`
+            
+            // Force full page reload to clear all caches
             setTimeout(() => {
-              router.push(`/${locale}/account?${isActivation ? 'activated' : 'upgraded'}=true`)
+              window.location.href = redirectUrl
             }, 1500)
           } else if (data.checkoutUrl) {
             // Need to complete checkout (no payment method on file)

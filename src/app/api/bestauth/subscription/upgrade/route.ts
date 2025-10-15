@@ -384,6 +384,10 @@ export async function POST(request: NextRequest) {
       console.log('[Upgrade API] Database update confirmed tier:', updateResult?.tier)
       console.log('='.repeat(80))
       
+      // Get locale from headers for redirect
+      const locale = request.headers.get('x-locale') || 'en'
+      const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_SITE_URL || ''
+      
       return NextResponse.json({
         success: true,
         upgraded: true,
@@ -391,6 +395,7 @@ export async function POST(request: NextRequest) {
         currentTier: targetTier,
         previousTier: previousTier,
         prorationAmount: prorationAmount,
+        redirectUrl: `${origin}/${locale}/account?upgraded=true`,
         message: `Successfully upgraded from ${currentPlanName} to ${planName}!`,
         note: `You now have immediate access to ${planName} features. Prorated charges have been applied to your account.`
       })

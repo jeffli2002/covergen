@@ -205,7 +205,13 @@ export async function GET(request: NextRequest) {
     }
     
     console.log('[BestAuth Account API] Returning response successfully')
-    return NextResponse.json(response)
+    return NextResponse.json(response, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    })
   } catch (error) {
     console.error('Account API error:', error)
     return NextResponse.json(

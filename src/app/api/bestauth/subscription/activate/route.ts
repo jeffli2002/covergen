@@ -74,9 +74,13 @@ export async function POST(request: NextRequest) {
           trialEndsAt: new Date() // End trial immediately
         })
         
+        const locale = request.headers.get('x-locale') || 'en'
+        const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_SITE_URL || ''
+        
         return NextResponse.json({
           success: true,
           activated: true,
+          redirectUrl: `${origin}/${locale}/account?activated=true`,
           message: 'Your trial has been converted to a paid subscription!',
           subscription: updated,
           note: 'Your payment method has been charged for the current billing period.'
@@ -92,9 +96,13 @@ export async function POST(request: NextRequest) {
           trialEndsAt: new Date()
         })
         
+        const locale = request.headers.get('x-locale') || 'en'
+        const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_SITE_URL || ''
+        
         return NextResponse.json({
           success: true,
           activated: true,
+          redirectUrl: `${origin}/${locale}/account?activated=true`,
           message: 'Trial marked as active. Billing will be processed shortly.',
           subscription: updated,
           note: 'Your subscription is now active.'
