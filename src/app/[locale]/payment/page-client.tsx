@@ -262,9 +262,16 @@ export default function PaymentPageClient({
         const endpoint = isActivation ? '/api/bestauth/subscription/activate' : '/api/bestauth/subscription/upgrade'
         const body = isActivation ? {} : { targetTier: planId }
         
+        if (!session?.token) {
+          throw new Error('Authentication required')
+        }
+        
         const response = await fetch(endpoint, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.token}`
+          },
           body: JSON.stringify(body)
         })
         
