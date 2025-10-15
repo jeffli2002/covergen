@@ -3,6 +3,8 @@ import { creemService, WebhookEvent } from '@/services/payment/creem'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 import { db } from '@/lib/bestauth/db-wrapper'
 import { getSubscriptionConfig, calculateTrialEndDate } from '@/lib/subscription-config'
+import { createPointsService } from '@/lib/services/points-service'
+import { createClient } from '@/utils/supabase/server'
 
 // Disable body parsing to get raw body for signature verification
 export const dynamic = 'force-dynamic'
@@ -81,6 +83,10 @@ export async function POST(req: NextRequest) {
       case 'refund_created':
         await handleRefundCreated(result)
         break
+
+      case 'one_time_payment_success':
+        await handleOneTimePaymentSuccess(result)
+        break
     }
 
     return NextResponse.json({ received: true })
@@ -94,14 +100,15 @@ export async function POST(req: NextRequest) {
 }
 
 async function handleCheckoutComplete(data: any) {
-  const { userId, customerId, subscriptionId, planId, trialEnd } = data
+  const { userId, customerId, subscriptionId, planId, trialEnd, billingCycle, paymentIntentId } = data
 
   console.log('[BestAuth Webhook] Checkout complete data:', { 
     userId, 
     customerId, 
     subscriptionId, 
     planId, 
-    hasSubscriptionId: !!subscriptionId 
+    hasSubscriptionId: !!subscriptionId,
+    billingCycle
   })
 
   if (!userId || !planId) {
@@ -125,8 +132,10 @@ async function handleCheckoutComplete(data: any) {
       console.log('[BestAuth Webhook] Checkout complete without trial info, waiting for subscription.created webhook')
     }
 
-    // Create or update subscription in BestAuth
-    await bestAuthSubscriptionService.createOrUpdateSubscription({
+    const cycle = billingCycle || 'monthly'
+    
+    // Create or update subscription in BestAuth (this will grant points automatically)
+    const result = await bestAuthSubscriptionService.createOrUpdateSubscription({
       userId,
       tier: planId,
       status: isTrialSubscription ? 'trialing' : 'active',
@@ -135,13 +144,16 @@ async function handleCheckoutComplete(data: any) {
       trialEndsAt: isTrialSubscription ? new Date(trialEndsAt!) : undefined,
       currentPeriodStart: new Date(),
       currentPeriodEnd: isTrialSubscription ? new Date(trialEndsAt!) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      billingCycle: cycle,
       metadata: {
         checkout_completed_at: new Date().toISOString(),
-        initial_plan: planId
+        initial_plan: planId,
+        billing_cycle: cycle
       }
     })
     
     console.log(`[BestAuth Webhook] Successfully activated ${planId} ${isTrialSubscription ? 'TRIAL' : 'PAID'} subscription for user ${userId}`)
+    console.log(`[BestAuth Webhook] Points granted via subscription creation`)
     if (isTrialSubscription) {
       console.log(`[BestAuth Webhook] Trial ends at: ${trialEndsAt}`)
     }
@@ -437,6 +449,40 @@ async function handleRefundCreated(data: any) {
     console.log(`[BestAuth Webhook] Recorded refund of ${amount/100} ${currency} for customer ${customerId}`)
   } catch (error) {
     console.error('[BestAuth Webhook] Error in handleRefundCreated:', error)
+    throw error
+  }
+}
+
+async function handleOneTimePaymentSuccess(data: any) {
+  const { metadata, paymentId, amount } = data
+
+  if (!metadata || metadata.type !== 'points_pack') {
+    console.log('[BestAuth Webhook] Not a points pack purchase, skipping')
+    return
+  }
+
+  const { pack_id, user_id, points, bonus_points } = metadata
+
+  if (!pack_id || !user_id || !points) {
+    console.error('[BestAuth Webhook] Missing required metadata for points pack:', metadata)
+    return
+  }
+
+  try {
+    const supabase = await createClient()
+    const pointsService = createPointsService(supabase)
+    
+    await pointsService.purchasePointsPack(
+      user_id,
+      pack_id,
+      paymentId
+    )
+
+    console.log(
+      `[BestAuth Webhook] Successfully granted ${points} points (+ ${bonus_points || 0} bonus) to user ${user_id}`
+    )
+  } catch (error) {
+    console.error('[BestAuth Webhook] Error granting points pack:', error)
     throw error
   }
 }

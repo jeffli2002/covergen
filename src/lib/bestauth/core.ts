@@ -127,8 +127,18 @@ export async function signUp({
         }
       } catch (mergeError) {
         console.error('[BestAuth] Failed to merge session usage:', mergeError)
-        // Don't fail signup if merge fails
       }
+    }
+
+    try {
+      const { createPointsService } = await import('@/lib/services/points-service')
+      const { createClient } = await import('@/utils/supabase/server')
+      const supabase = await createClient()
+      const pointsService = createPointsService(supabase)
+      await pointsService.grantSignupBonus(user.id)
+      console.log('[BestAuth] Granted signup bonus points to new user:', user.id)
+    } catch (pointsError) {
+      console.error('[BestAuth] Failed to grant signup bonus:', pointsError)
     }
 
     // Create session

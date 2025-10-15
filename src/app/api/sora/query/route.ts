@@ -3,11 +3,15 @@ import { querySoraTask, SoraApiError } from '@/lib/sora-api'
 import { authConfig } from '@/config/auth.config'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 import { getUserFromRequest } from '@/lib/bestauth/middleware'
+import { deductPointsForGeneration } from '@/lib/middleware/points-check'
+import { createClient } from '@/utils/supabase/server'
+import type { GenerationType } from '@/config/subscription'
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const taskId = searchParams.get('taskId')
+    const quality = searchParams.get('quality') || 'standard'
 
     if (!taskId) {
       return NextResponse.json(
@@ -28,6 +32,19 @@ export async function GET(request: NextRequest) {
           const existingUsage = await db.videoTasks.findByTaskId(taskId)
           
           if (!existingUsage) {
+            const generationType: GenerationType = quality === 'pro' ? 'sora2ProVideo' : 'sora2Video'
+            const supabase = await createClient()
+            
+            const pointsDeduction = await deductPointsForGeneration(user.id, generationType, supabase, {
+              taskId,
+              quality,
+              mode: taskInfo.model || 'text-to-video',
+            })
+            
+            if (pointsDeduction.success && pointsDeduction.transaction) {
+              console.log('[Sora Query] Deducted points for video generation:', pointsDeduction.transaction)
+            }
+
             // First time seeing this successful task - increment usage
             await bestAuthSubscriptionService.incrementUserVideoUsage(user.id)
             // Mark this task as counted to prevent double-charging

@@ -7,9 +7,13 @@ import { withAuth, AuthenticatedRequest, getAuthenticatedUser } from '@/app/api/
 import { authConfig } from '@/config/auth.config'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 import { getOrCreateSessionId } from '@/lib/session-utils'
+import { checkPointsForGeneration, deductPointsForGeneration } from '@/lib/middleware/points-check'
 
 // Image generation endpoint handler
 async function handler(request: AuthenticatedRequest) {
+  // Create Supabase client early for use throughout the handler
+  const supabase = await createClient()
+  
   try {
     // Check request size before parsing
     const contentLength = request.headers.get('content-length')
@@ -129,7 +133,6 @@ async function handler(request: AuthenticatedRequest) {
               const monthKey = today.toISOString().substring(0, 7)
               
               // Try to get usage data directly
-              const supabase = await createClient()
               const { data: usageData, error: usageError } = await supabase
                 .from('user_usage')
                 .select('*')
@@ -397,6 +400,22 @@ async function handler(request: AuthenticatedRequest) {
       }
     }
 
+    if (user) {
+      const pointsCheck = await checkPointsForGeneration(user.id, 'nanoBananaImage', supabase)
+      if (pointsCheck.usesPoints && !pointsCheck.canProceed) {
+        return NextResponse.json(
+          {
+            error: pointsCheck.error,
+            insufficientPoints: true,
+            currentBalance: pointsCheck.details?.currentBalance,
+            requiredPoints: pointsCheck.details?.requiredPoints,
+            shortfall: pointsCheck.details?.shortfall,
+          },
+          { status: 402 }
+        )
+      }
+    }
+
     // Generate image using OpenRouter with Gemini 2.5 Flash
     const result = await generateImage({
       prompt,
@@ -509,6 +528,16 @@ async function handler(request: AuthenticatedRequest) {
     if (user) {
       // Increment for authenticated users
       try {
+        const pointsDeduction = await deductPointsForGeneration(user.id, 'nanoBananaImage', supabase, {
+          prompt: prompt?.substring(0, 100),
+          mode,
+          platform,
+        })
+        
+        if (pointsDeduction.success && pointsDeduction.transaction) {
+          console.log('[Generate API] Deducted points for image generation:', pointsDeduction.transaction)
+        }
+
         // Use BestAuth increment if enabled, otherwise fallback to Supabase
         if (authConfig.USE_BESTAUTH) {
           console.log('[Generate API] Incrementing usage for BestAuth user:', user.id)

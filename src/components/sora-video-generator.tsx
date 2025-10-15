@@ -8,9 +8,10 @@ import { Card } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Loader2, Video, Download, AlertCircle, Share2, Upload, ImageIcon, X } from 'lucide-react'
-import UpgradePrompt from '@/components/auth/UpgradePrompt'
+import { UpgradePrompt } from '@/components/pricing/UpgradePrompt'
 import AuthForm from '@/components/auth/AuthForm'
 import { useBestAuth } from '@/hooks/useBestAuth'
+import { PRICING_CONFIG } from '@/config/pricing.config'
 
 interface GenerationResult {
   taskId: string
@@ -34,7 +35,9 @@ export default function SoraVideoGenerator() {
   const [result, setResult] = useState<GenerationResult | null>(null)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
-  const [limitInfo, setLimitInfo] = useState<{ usage: number; limit: number } | null>(null)
+  const [upgradeReason, setUpgradeReason] = useState<'credits' | 'daily_limit' | 'monthly_limit' | 'video_limit' | 'pro_feature'>('credits')
+  const [currentCredits, setCurrentCredits] = useState(0)
+  const [requiredCredits, setRequiredCredits] = useState(20)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const maxPromptLength = 5000
@@ -259,14 +262,34 @@ export default function SoraVideoGenerator() {
       if (!createResponse.ok) {
         console.error('[Sora] Create task failed:', createData)
         
+        // Handle insufficient credits
+        if (createResponse.status === 402 || (createData.error && createData.error.includes('credits'))) {
+          const cost = quality === 'hd' ? PRICING_CONFIG.generationCosts.sora2ProVideo : PRICING_CONFIG.generationCosts.sora2Video
+          setRequiredCredits(cost)
+          setCurrentCredits(createData.currentCredits || 0)
+          setUpgradeReason('credits')
+          setShowUpgradeModal(true)
+          throw new Error(createData.error || 'Insufficient credits for video generation')
+        }
+        
         // Handle limit reached with upgrade modal
         if (createResponse.status === 429 && createData.limitReached) {
-          setLimitInfo({
-            usage: createData.dailyUsage || createData.monthlyUsage || 0,
-            limit: createData.dailyLimit || createData.monthlyLimit || 0
-          })
+          if (createData.dailyLimit) {
+            setUpgradeReason('daily_limit')
+          } else if (createData.monthlyLimit) {
+            setUpgradeReason('monthly_limit')
+          } else {
+            setUpgradeReason('video_limit')
+          }
           setShowUpgradeModal(true)
           throw new Error(createData.error || 'Video generation limit reached')
+        }
+        
+        // Handle free tier video generation restriction
+        if (createResponse.status === 403 && createData.error?.includes('Pro')) {
+          setUpgradeReason('video_limit')
+          setShowUpgradeModal(true)
+          throw new Error(createData.error || 'Sora 2 video generation requires a Pro plan')
         }
         
         // Handle authentication required
@@ -663,20 +686,15 @@ export default function SoraVideoGenerator() {
         />
       )}
 
-      {/* Upgrade Modal - for rate limit scenarios */}
-      {showUpgradeModal && (
-        <UpgradePrompt 
-          onClose={() => setShowUpgradeModal(false)}
-          onSignIn={() => {
-            setShowUpgradeModal(false)
-            setShowAuthModal(true)
-          }}
-          dailyCount={limitInfo?.usage || 0}
-          dailyLimit={limitInfo?.limit || 1}
-          type="video"
-          isAuthenticated={!!user}
-        />
-      )}
+      {/* Upgrade Modal - for credits/limits scenarios */}
+      <UpgradePrompt 
+        open={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        reason={upgradeReason}
+        currentCredits={currentCredits}
+        requiredCredits={requiredCredits}
+        generationType={quality === 'hd' ? 'sora2ProVideo' : 'sora2Video'}
+      />
     </div>
   )
 }

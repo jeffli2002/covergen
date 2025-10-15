@@ -4,41 +4,46 @@ import { PaymentAuthWrapper } from '@/services/payment/auth-wrapper'
 
 export async function GET(request: NextRequest) {
   try {
-    // Get auth context
-    const authContext = await PaymentAuthWrapper.getAuthContext()
+    // Check if userId is provided in query params (for internal API calls)
+    const { searchParams } = new URL(request.url)
+    const queryUserId = searchParams.get('userId')
     
-    if (!authContext.isAuthenticated || !authContext.userId) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      )
+    let userId: string
+    
+    if (queryUserId) {
+      // Use the provided userId
+      userId = queryUserId
+    } else {
+      // Get auth context from headers
+      const authContext = await PaymentAuthWrapper.getAuthContext()
+      
+      if (!authContext.isAuthenticated || !authContext.userId) {
+        return NextResponse.json(
+          { error: 'Authentication required' },
+          { status: 401 }
+        )
+      }
+      userId = authContext.userId
     }
 
-    // Get subscription from database
-    const supabase = await createClient()
-    const { data: subscription, error } = await supabase
-      .from('subscriptions')
-      .select('*')
-      .eq('user_id', authContext.userId)
-      .single()
+    // Import the service dynamically to avoid client-side imports
+    const { bestAuthSubscriptionService } = await import('@/services/bestauth/BestAuthSubscriptionService')
+    const subscription = await bestAuthSubscriptionService.getUserSubscription(userId)
 
-    if (error || !subscription) {
+    if (!subscription) {
       // If no subscription found, return a default free subscription
       return NextResponse.json({
-        subscription: {
-          user_id: authContext.userId,
-          plan: 'free',
-          status: 'active',
-          current_period_start: new Date().toISOString(),
-          current_period_end: null,
-          cancel_at_period_end: false,
-          stripe_customer_id: null,
-          stripe_subscription_id: null
-        }
+        user_id: userId,
+        tier: 'free',
+        status: 'active',
+        can_generate: true,
+        usage_today: 0,
+        daily_limit: 3,
+        monthly_limit: 10
       })
     }
 
-    return NextResponse.json({ subscription })
+    return NextResponse.json(subscription)
   } catch (error) {
     console.error('[GetSubscription] Error:', error)
     return NextResponse.json(

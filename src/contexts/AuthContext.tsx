@@ -33,14 +33,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 // BestAuth implementation
 function BestAuthProvider({ children }: { children: React.ReactNode }) {
   const bestAuth = useBestAuth()
-  const [subscriptionService, setSubscriptionService] = useState<any>(null)
-
-  // Load subscription service
-  useEffect(() => {
-    import('@/services/bestauth/BestAuthSubscriptionService').then(({ bestAuthSubscriptionService }) => {
-      setSubscriptionService(bestAuthSubscriptionService)
-    })
-  }, [])
 
   // Map BestAuth methods to AuthContext interface
   const authContextValue: AuthContextType = {
@@ -62,13 +54,21 @@ function BestAuthProvider({ children }: { children: React.ReactNode }) {
 
       const result = await bestAuth.signUp({ email, password, sessionId, ...metadata })
       
-      // Create default subscription for new users
-      if (result.success && bestAuth.user && subscriptionService) {
-        await subscriptionService.createOrUpdateSubscription({
-          userId: bestAuth.user.id,
-          tier: 'free',
-          status: 'active'
-        })
+      // Create default subscription for new users via API
+      if (result.success && bestAuth.user) {
+        try {
+          await fetch('/api/subscription/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: bestAuth.user.id,
+              tier: 'free',
+              status: 'active'
+            })
+          })
+        } catch (error) {
+          console.error('[AuthContext] Failed to create subscription:', error)
+        }
       }
       
       return result
@@ -88,41 +88,56 @@ function BestAuthProvider({ children }: { children: React.ReactNode }) {
       return result
     },
     updatePassword: async (newPassword: string) => {
-      if (!bestAuth.user || !subscriptionService) {
+      if (!bestAuth.user) {
         return { success: false, error: 'Not authenticated' }
       }
       
       try {
-        // Hash password
-        const bcrypt = await import('bcryptjs')
-        const passwordHash = await bcrypt.hash(newPassword, 10)
+        const response = await fetch('/api/auth/update-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ newPassword })
+        })
         
-        // Update password
-        await subscriptionService.updatePassword(bestAuth.user.id, passwordHash)
-        
-        return { success: true, message: 'Password updated successfully' }
+        const result = await response.json()
+        return result
       } catch (error) {
         console.error('Error updating password:', error)
         return { success: false, error: 'Failed to update password' }
       }
     },
     getUserUsageToday: async () => {
-      if (!bestAuth.user || !subscriptionService) return 0
-      return await subscriptionService.getUserUsageToday(bestAuth.user.id)
+      if (!bestAuth.user) return 0
+      try {
+        const response = await fetch(`/api/usage/today?userId=${bestAuth.user.id}`)
+        const data = await response.json()
+        return data.usage || 0
+      } catch (error) {
+        console.error('Error getting usage:', error)
+        return 0
+      }
     },
     incrementUsage: async () => {
-      if (!bestAuth.user || !subscriptionService) {
+      if (!bestAuth.user) {
         return { success: false, error: 'Not authenticated' }
       }
       
-      const result = await subscriptionService.incrementUsage(bestAuth.user.id)
-      return result
+      try {
+        const response = await fetch('/api/usage/increment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: bestAuth.user.id })
+        })
+        return await response.json()
+      } catch (error) {
+        console.error('Error incrementing usage:', error)
+        return { success: false, error: 'Failed to increment usage' }
+      }
     },
     getUserSubscription: async () => {
       console.log('[AuthContext] getUserSubscription called', {
         hasUser: !!bestAuth.user,
-        userId: bestAuth.user?.id,
-        hasService: !!subscriptionService
+        userId: bestAuth.user?.id
       })
       
       if (!bestAuth.user) {
@@ -130,16 +145,15 @@ function BestAuthProvider({ children }: { children: React.ReactNode }) {
         return null
       }
       
-      if (!subscriptionService) {
-        console.log('[AuthContext] Subscription service not loaded yet, waiting...')
-        // Wait for service to load if not ready
-        const { bestAuthSubscriptionService } = await import('@/services/bestauth/BestAuthSubscriptionService')
-        return await bestAuthSubscriptionService.getUserSubscription(bestAuth.user.id)
+      try {
+        const response = await fetch(`/api/subscription?userId=${bestAuth.user.id}`)
+        const subscription = await response.json()
+        console.log('[AuthContext] Subscription loaded:', subscription)
+        return subscription
+      } catch (error) {
+        console.error('[AuthContext] Failed to get subscription:', error)
+        return null
       }
-      
-      const subscription = await subscriptionService.getUserSubscription(bestAuth.user.id)
-      console.log('[AuthContext] Subscription loaded:', subscription)
-      return subscription
     }
   }
 

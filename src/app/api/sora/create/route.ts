@@ -4,6 +4,7 @@ import { withAuth, AuthenticatedRequest } from '@/app/api/middleware/withAuth'
 import { authConfig } from '@/config/auth.config'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 import { validateCopyright, getValidationConfig } from '@/lib/validation'
+import { checkPointsForGeneration } from '@/lib/middleware/points-check'
 
 // CRITICAL: Use Node.js runtime for @google-cloud/vision compatibility
 export const runtime = 'nodejs'
@@ -111,6 +112,22 @@ async function handler(request: AuthenticatedRequest) {
       }
     }
 
+    const generationType = quality === 'pro' ? 'sora2ProVideo' : 'sora2Video'
+    const pointsCheck = await checkPointsForGeneration(user.id, generationType)
+    
+    if (pointsCheck.usesPoints && !pointsCheck.canProceed) {
+      return NextResponse.json(
+        {
+          error: pointsCheck.error,
+          insufficientPoints: true,
+          currentBalance: pointsCheck.details?.currentBalance,
+          requiredPoints: pointsCheck.details?.requiredPoints,
+          shortfall: pointsCheck.details?.shortfall,
+        },
+        { status: 402 }
+      )
+    }
+
     if (generationMode === 'text-to-video') {
       // Text-to-video validation
       if (!prompt || typeof prompt !== 'string') {
@@ -136,10 +153,10 @@ async function handler(request: AuthenticatedRequest) {
         'text-to-video'
       )
       
-      // Note: Usage tracking moved to query endpoint on successful completion
+      // Note: Usage tracking and points deduction moved to query endpoint on successful completion
       // This ensures users are only charged for successful video generations
 
-      return NextResponse.json({ taskId, userId: user.id })
+      return NextResponse.json({ taskId, userId: user.id, generationType })
 
     } else if (generationMode === 'image-to-video') {
       // Image-to-video validation

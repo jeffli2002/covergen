@@ -5,12 +5,13 @@ import { Metadata } from 'next'
 import { generateMetadata as createMetadata } from '@/lib/seo/metadata'
 
 export async function generateMetadata({
-  params: { locale },
+  params,
   searchParams,
 }: {
-  params: { locale: Locale }
+  params: Promise<{ locale: Locale }>
   searchParams: Record<string, string | string[] | undefined>
 }): Promise<Metadata> {
+  const { locale } = await params
   const metadata = createMetadata({
     title: 'CoverGen.pro | AI Image & Video Generator – Nano Banana & Sora 2',
     description: 'Create AI images, posters, covers & videos instantly. Powered by Nano Banana & Sora 2. Free, no login. Perfect for creators, brands & marketers.',
@@ -86,13 +87,14 @@ export async function generateMetadata({
 export default async function HomePage({
   params,
 }: {
-  params: { locale: Locale }
+  params: Promise<{ locale: Locale }>
 }) {
-  const dict = await getDictionary(params.locale)
+  const { locale } = await params
+  const dict = await getDictionary(locale)
   
   return (
     <HomePageClient 
-      locale={params.locale} 
+      locale={locale} 
       translations={dict}
     />
   )

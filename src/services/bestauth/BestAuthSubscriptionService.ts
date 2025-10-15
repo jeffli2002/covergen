@@ -1,6 +1,8 @@
 // BestAuth Subscription Service
 import { db } from '@/lib/bestauth/db-wrapper'
 import { getSubscriptionConfig } from '@/lib/subscription-config'
+import { createPointsService } from '@/lib/services/points-service'
+import type { GenerationType } from '@/config/subscription'
 
 export interface SubscriptionStatus {
   subscription_id?: string
@@ -313,6 +315,7 @@ export class BestAuthSubscriptionService {
 
   /**
    * Create or update a subscription
+   * If upgrading to Pro/Pro+, automatically grants points
    */
   async createOrUpdateSubscription(data: {
     userId: string
@@ -327,10 +330,11 @@ export class BestAuthSubscriptionService {
     currentPeriodEnd?: Date
     cancelAtPeriodEnd?: boolean
     cancelledAt?: Date
+    billingCycle?: 'monthly' | 'yearly'
     metadata?: any
   }): Promise<any> {
     try {
-      return await db.subscriptions.upsert({
+      const result = await db.subscriptions.upsert({
         user_id: data.userId,
         tier: data.tier,
         status: data.status,
@@ -345,6 +349,22 @@ export class BestAuthSubscriptionService {
         cancelled_at: data.cancelledAt?.toISOString(),
         metadata: data.metadata
       })
+
+      if (data.tier && data.tier !== 'free' && data.status === 'active' && result?.id) {
+        const { createClient } = await import('@/lib/supabase/server')
+        const supabase = await createClient()
+        const pointsService = createPointsService(supabase)
+        const cycle = data.billingCycle || 'monthly'
+        await pointsService.grantSubscriptionPoints(
+          data.userId,
+          data.tier,
+          cycle,
+          result.id
+        )
+        console.log(`[BestAuthSubscriptionService] Granted ${data.tier} ${cycle} points to user ${data.userId}`)
+      }
+
+      return result
     } catch (error) {
       console.error('Error creating/updating subscription:', error)
       throw error

@@ -43,7 +43,6 @@ export default function PaymentPageClient({
   type Subscription = any
   
   const [currentSubscription, setCurrentSubscription] = useState<Subscription | null>(null)
-  const [proratedAmount, setProratedAmount] = useState<number | null>(null)
   const [isLoadingSubscription, setIsLoadingSubscription] = useState(true)
 
   useEffect(() => {
@@ -144,11 +143,6 @@ export default function PaymentPageClient({
         })
       }
       
-      // Calculate prorated amount if upgrading
-      if (subscription && subscription.tier === 'pro' && initialPlan === 'pro_plus' && isUpgrade) {
-        calculateProratedAmount(subscription)
-      }
-      
       // Check if this is a new user
       if (!subscription && initialPlan && initialPlan !== 'free' && authUser) {
         console.log('[PaymentPage] No subscription found, user needs to select a plan')
@@ -190,30 +184,6 @@ export default function PaymentPageClient({
       })
     } finally {
       setIsLoadingSubscription(false)
-    }
-  }
-  
-  // Removed createTrialSubscription - all trials must go through checkout
-
-  const calculateProratedAmount = (subscription: any) => {
-    if (!subscription.current_period_end) return
-    
-    const now = new Date()
-    const periodEnd = new Date(subscription.current_period_end)
-    const daysRemaining = Math.max(0, Math.ceil((periodEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
-    
-    if (daysRemaining > 0) {
-      // Calculate unused Pro credit
-      const proPricePerDay = SUBSCRIPTION_PLANS.pro.price / 30
-      const unusedCredit = proPricePerDay * daysRemaining
-      
-      // Calculate Pro+ cost for remaining days
-      const proPlusPricePerDay = SUBSCRIPTION_PLANS.pro_plus.price / 30
-      const proPlusCost = proPlusPricePerDay * daysRemaining
-      
-      // Prorated amount is the difference
-      const prorated = Math.max(0, proPlusCost - unusedCredit)
-      setProratedAmount(prorated)
     }
   }
 
@@ -548,15 +518,6 @@ export default function PaymentPageClient({
                     <span className="text-heading-2">${plan.price / 100}</span>
                     <span className="text-gray-600">/mo</span>
                   </div>
-                  
-                  
-                  {/* Show prorated amount for upgrades */}
-                  {isUpgrade && currentSubscription?.tier === 'pro' && plan.id === 'pro_plus' && proratedAmount !== null && (
-                    <div className="mt-2 text-sm text-gray-600">
-                      <p>Prorated amount: ${(proratedAmount / 100).toFixed(2)}</p>
-                      <p className="text-xs">Credit for unused Pro time applied</p>
-                    </div>
-                  )}
                   
                   {plan.savings && (
                     <Badge variant="secondary" className="mt-2">

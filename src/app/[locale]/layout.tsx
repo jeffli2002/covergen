@@ -16,9 +16,10 @@ export default async function LocaleLayout({
   params,
 }: {
   children: React.ReactNode
-  params: { locale: Locale }
+  params: Promise<{ locale: Locale }>
 }) {
-  const dict = await getDictionary(params.locale)
+  const { locale } = await params
+  const dict = await getDictionary(locale)
   
   return (
     <ErrorBoundary>
@@ -28,7 +29,7 @@ export default async function LocaleLayout({
           <AuthModalHandler />
           
           {/* Desktop Header */}
-          <Header locale={params.locale} translations={dict} />
+          <Header locale={locale} translations={dict} />
           
           {/* Mobile Header */}
           <MobileHeader />
@@ -43,7 +44,7 @@ export default async function LocaleLayout({
           
           {/* Footer Container - estimated height to prevent jump */}
           <div className="min-h-[20rem]">
-            <Footer locale={params.locale} translations={dict} />
+            <Footer locale={locale} translations={dict} />
           </div>
         </div>
       </Providers>

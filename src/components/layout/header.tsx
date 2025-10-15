@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import ActivationConfirmDialog from '@/components/subscription/ActivationConfirmDialog'
 import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
+import { PointsBalance } from '@/components/points/PointsBalance'
 
 interface HeaderProps {
   locale: Locale
@@ -552,6 +553,8 @@ export default function Header({ locale, translations: t }: HeaderProps) {
               <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
             ) : user && user.email ? (
               <>
+                {/* Points Balance */}
+                <PointsBalance variant="compact" />
                 
                 {/* Upgrade/Account button */}
                 {(() => {
