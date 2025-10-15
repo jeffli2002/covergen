@@ -69,6 +69,14 @@ async function querySignInsForRange(supabase: ReturnType<typeof createClient>, d
 
   // Helper: run a RPC-like join using two queries due to Supabase limitations
   async function runDirect(table: string, usersTable: string) {
+    type SessionRow = {
+      id: string
+      user_id: string
+      ip_address: string | null
+      user_agent: string | null
+      created_at: string
+    }
+    
     const { data: sessions, error } = await supabase
       .from(table)
       .select('id, user_id, ip_address, user_agent, created_at')
@@ -79,7 +87,8 @@ async function querySignInsForRange(supabase: ReturnType<typeof createClient>, d
     if (error) throw error
     if (!sessions || sessions.length === 0) return []
 
-    const userIds = Array.from(new Set(sessions.map(s => s.user_id)))
+    const typedSessions = sessions as SessionRow[]
+    const userIds = Array.from(new Set(typedSessions.map(s => s.user_id)))
     const { data: users, error: userErr } = await supabase
       .from(usersTable)
       .select('id, email')
@@ -89,7 +98,7 @@ async function querySignInsForRange(supabase: ReturnType<typeof createClient>, d
     const userById = new Map<string, any>((users || []).map(u => [u.id, u]))
 
     const label = new Date(dayStart).toISOString().slice(0,10)
-    const rows: SignInRow[] = sessions.map((s: any) => ({
+    const rows: SignInRow[] = typedSessions.map((s) => ({
       date: label,
       user_id: s.user_id,
       email: userById.get(s.user_id)?.email ?? null,
