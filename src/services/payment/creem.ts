@@ -1197,7 +1197,7 @@ class CreemPaymentService {
   /**
    * Upgrade subscription to a higher tier
    */
-  async upgradeSubscription(subscriptionId: string, newPlanId: 'pro' | 'pro_plus') {
+  async upgradeSubscription(subscriptionId: string, newPlanId: 'pro' | 'pro_plus', billingCycle: 'monthly' | 'yearly' = 'monthly') {
     try {
       if (typeof window !== 'undefined') {
         throw new Error('This method must be called from server-side')
@@ -1208,12 +1208,48 @@ class CreemPaymentService {
         throw new Error('Creem API key not configured')
       }
 
-      // TODO: Fix Creem SDK integration for subscription upgrades
-      console.log(`[Creem] Would upgrade subscription ${subscriptionId} to ${newPlanId}`)
+      // Get the product ID for the new plan and billing cycle
+      const productKey = `${newPlanId}_${billingCycle}` as keyof typeof CREEM_PRODUCTS
+      let productId = CREEM_PRODUCTS[productKey]
+      
+      // Fallback to legacy key
+      if (!productId) {
+        productId = CREEM_PRODUCTS[newPlanId as keyof typeof CREEM_PRODUCTS]
+      }
+      
+      if (!productId) {
+        throw new Error(`Product ID not found for ${newPlanId} (${billingCycle})`)
+      }
+
+      console.log(`[Creem] Upgrading subscription ${subscriptionId} to ${newPlanId} (${billingCycle})`, {
+        productId,
+        updateBehavior: 'proration-charge-immediately'
+      })
+
+      // Use Creem SDK to upgrade subscription with immediate proration
+      const result = await getCreemClient().subscriptions.upgrade({
+        id: subscriptionId,
+        xApiKey: CREEM_API_KEY,
+        upgradeSubscriptionRequestBody: {
+          productId: productId,
+          updateBehavior: 'proration-charge-immediately'
+        }
+      })
+
+      console.log('[Creem] Upgrade result:', {
+        success: !!result.object,
+        subscriptionId: result.object?.id,
+        status: result.object?.status
+      })
+
+      if (!result.object) {
+        throw new Error('No subscription returned from upgrade')
+      }
 
       return {
         success: true,
-        subscription: { id: subscriptionId, status: 'active', plan: newPlanId }
+        subscription: result.object,
+        message: 'Subscription upgraded successfully with immediate proration'
       }
     } catch (error: any) {
       console.error('Creem upgrade subscription error:', error)

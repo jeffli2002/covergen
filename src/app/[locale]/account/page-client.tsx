@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -11,7 +11,7 @@ import {
   User, CreditCard, History, Settings, LogOut, 
   Loader2, Crown, Zap, AlertCircle, ExternalLink,
   Calendar, RefreshCw, Shield, Sparkles, Clock,
-  ChevronRight
+  ChevronRight, CheckCircle
 } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
 import { creemService } from '@/services/payment/creem'
@@ -48,6 +48,7 @@ interface AccountPageClientProps {
 
 export default function AccountPageClient({ locale }: AccountPageClientProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user: appStoreUser, setUser } = useAppStore()
   const { user: authUser, session, loading: authLoading, signOut } = useBestAuth()
   const [loading, setLoading] = useState(true)
@@ -61,6 +62,11 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   const [loadError, setLoadError] = useState<string | null>(null)
   const [showActivationConfirm, setShowActivationConfirm] = useState(false)
   const [activating, setActivating] = useState(false)
+  
+  // Check for upgrade/activation success from query params
+  const justUpgraded = searchParams?.get('upgraded') === 'true'
+  const justActivated = searchParams?.get('activated') === 'true'
+  const [showUpgradeSuccess, setShowUpgradeSuccess] = useState(justUpgraded || justActivated)
 
   // Track if we've already loaded data to prevent re-fetching
   const [hasLoadedData, setHasLoadedData] = useState(false)
@@ -572,6 +578,30 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="container max-w-4xl mx-auto px-4">
+        {/* Upgrade Success Banner */}
+        {showUpgradeSuccess && subscription && (
+          <Alert className="mb-6 border-green-200 bg-green-50">
+            <CheckCircle className="h-5 h-5 text-green-600" />
+            <AlertDescription className="text-green-800">
+              <p className="font-semibold mb-1">
+                {justActivated ? 'Subscription Activated!' : 'Upgrade Successful!'}
+              </p>
+              <p className="text-sm">
+                You now have immediate access to all {subscription.tier === 'pro' ? 'Pro' : 'Pro+'} features. 
+                {!justActivated && ' Prorated charges have been applied to your account.'}
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mt-2 text-green-700 hover:text-green-900"
+                onClick={() => setShowUpgradeSuccess(false)}
+              >
+                Dismiss
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <div className="mb-8">
           <h1 className="text-hero-title text-gray-900">My Account</h1>
           <p className="text-body-lg text-gray-600 mt-2">Manage your subscription and account settings</p>

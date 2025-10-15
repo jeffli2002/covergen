@@ -123,33 +123,53 @@ export async function POST(request: NextRequest) {
       })
     }
     
-    // Handle paid users upgrading
+    // Handle paid users upgrading - immediate with proration
     if (currentSubscription.status === 'active' && currentSubscription.tier !== 'free') {
-      console.log('[Upgrade] Paid user upgrading, creating checkout session for proration')
+      console.log('[Upgrade] Paid user upgrading with immediate proration')
       
-      // For paid users, we need to create a new checkout session
-      // Creem will handle proration automatically
-      const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_SITE_URL || ''
-      const locale = request.headers.get('x-locale') || 'en'
+      if (!currentSubscription.stripe_subscription_id) {
+        return NextResponse.json(
+          { error: 'No Creem subscription ID found' },
+          { status: 400 }
+        )
+      }
       
-      const result = await creemService.createCheckoutSession({
+      // Get billing cycle from subscription or default to monthly
+      const billingCycle = currentSubscription.billing_cycle || 'monthly'
+      
+      // Call Creem to upgrade with immediate proration
+      const upgradeResult = await creemService.upgradeSubscription(
+        currentSubscription.stripe_subscription_id,
+        targetTier as 'pro' | 'pro_plus',
+        billingCycle as 'monthly' | 'yearly'
+      )
+      
+      if (!upgradeResult.success) {
+        throw new Error(upgradeResult.error || 'Failed to upgrade subscription with Creem')
+      }
+      
+      // Update local database with new tier
+      await bestAuthSubscriptionService.createOrUpdateSubscription({
         userId,
-        userEmail,
-        planId: targetTier as 'pro' | 'pro_plus',
-        successUrl: `${origin}/${locale}/payment/success?session_id={CHECKOUT_SESSION_ID}&upgrade=true`,
-        cancelUrl: `${origin}/${locale}/payment/cancel`,
-        currentPlan: currentSubscription.tier
+        tier: targetTier,
+        status: 'active',
+        metadata: {
+          upgraded_at: new Date().toISOString(),
+          upgrade_type: 'immediate_proration'
+        }
       })
       
-      if (!result.success || !result.url) {
-        throw new Error(result.error || 'Failed to create upgrade checkout session')
-      }
+      const planName = targetTier === 'pro_plus' ? 'Pro+' : 'Pro'
+      const currentPlanName = currentSubscription.tier === 'pro' ? 'Pro' : 'Pro+'
       
       return NextResponse.json({
         success: true,
-        upgraded: false,
-        checkoutUrl: result.url,
-        message: 'Please complete checkout to upgrade your plan'
+        upgraded: true,
+        immediate: true,
+        currentTier: targetTier, // Now active
+        previousTier: currentSubscription.tier,
+        message: `Successfully upgraded from ${currentPlanName} to ${planName}!`,
+        note: `You now have immediate access to ${planName} features. Prorated charges have been applied to your account.`
       })
     }
     

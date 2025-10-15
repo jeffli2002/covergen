@@ -143,11 +143,13 @@ export default function PaymentSuccessClient({ locale, sessionId }: PaymentSucce
             </div>
             
             <CardTitle className="text-3xl mb-2">
-              Welcome to {planDetails?.name || 'Pro'}! 🎉
+              {subscription?.tier === planDetails?.name?.toLowerCase().replace('+', '_plus') 
+                ? `Welcome to ${planDetails?.name}!` 
+                : `Upgraded to ${planDetails?.name}!`} 🎉
             </CardTitle>
             
             <CardDescription className="text-lg">
-              Your subscription has been activated successfully
+              You now have immediate access to all {planDetails?.name} features
             </CardDescription>
           </CardHeader>
 
@@ -171,12 +173,23 @@ export default function PaymentSuccessClient({ locale, sessionId }: PaymentSucce
                   </ul>
                 </div>
 
+                {/* Proration Notice */}
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div className="text-sm text-green-800">
+                      <p className="font-medium mb-1">Instant Activation</p>
+                      <p>Your upgrade is active immediately. Prorated charges have been applied to your account based on your current billing cycle.</p>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Next Steps */}
                 <div className="bg-blue-50 rounded-lg p-6">
                   <h3 className="font-semibold text-gray-900 mb-3">Next Steps:</h3>
                   <ol className="space-y-2 text-sm text-gray-700">
-                    <li>1. Start creating amazing covers with your subscription</li>
-                    <li>2. Explore all platform sizes now available to you</li>
+                    <li>1. Start creating amazing covers with your new subscription</li>
+                    <li>2. Explore all {planDetails?.name} features now available</li>
                     <li>3. Check out the batch generation feature</li>
                     <li>4. Contact support if you need any help</li>
                   </ol>
@@ -210,9 +223,9 @@ export default function PaymentSuccessClient({ locale, sessionId }: PaymentSucce
                 </p>
                 <Button
                   variant="outline"
-                  onClick={() => router.push(`/${locale}?from_payment=true`)}
+                  onClick={() => router.push(`/${locale}/account`)}
                 >
-                  Go to Dashboard
+                  Go to Account
                 </Button>
               </div>
             )}
