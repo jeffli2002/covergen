@@ -61,7 +61,7 @@ function toCSV(rows: SignInRow[]): string {
   return lines.join('\n') + '\n'
 }
 
-async function querySignInsForRange(supabase: ReturnType<typeof createClient>, dayStart: Date, dayEnd: Date): Promise<SignInRow[]> {
+async function querySignInsForRange(supabase: any, dayStart: Date, dayEnd: Date): Promise<SignInRow[]> {
   // Try schema version first
   const selectColumns = `sessions:bestauth.sessions(id, user_id, ip_address, user_agent, created_at), users:bestauth.users(id, email)`
   const fromSchema = `bestauth.sessions`

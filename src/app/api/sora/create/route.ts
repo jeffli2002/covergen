@@ -5,6 +5,7 @@ import { authConfig } from '@/config/auth.config'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 import { validateCopyright, getValidationConfig } from '@/lib/validation'
 import { checkPointsForGeneration } from '@/lib/middleware/points-check'
+import { createClient } from '@/utils/supabase/server'
 
 // CRITICAL: Use Node.js runtime for @google-cloud/vision compatibility
 export const runtime = 'nodejs'
@@ -113,7 +114,8 @@ async function handler(request: AuthenticatedRequest) {
     }
 
     const generationType = quality === 'pro' ? 'sora2ProVideo' : 'sora2Video'
-    const pointsCheck = await checkPointsForGeneration(user.id, generationType)
+    const supabase = await createClient()
+    const pointsCheck = await checkPointsForGeneration(user.id, generationType, supabase)
     
     if (pointsCheck.usesPoints && !pointsCheck.canProceed) {
       return NextResponse.json(
