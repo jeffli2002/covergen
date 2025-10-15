@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Upgrade API</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .error { color: red; }
+        .success { color: green; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Test Upgrade API</h1>
+    
+    <h2>1. Check Diagnostic Endpoint</h2>
+    <button onclick="checkDiagnostic()">Check Upgrade Readiness</button>
+    <pre id="diagnostic-result"></pre>
+    
+    <h2>2. Test Actual Upgrade</h2>
+    <button onclick="testUpgrade()">Attempt Upgrade</button>
+    <pre id="upgrade-result"></pre>
+
+    <script>
+        const API_BASE = 'https://covergen-git-credits-jeff-lees-projects-92a56a05.vercel.app';
+        
+        async function checkDiagnostic() {
+            const result = document.getElementById('diagnostic-result');
+            result.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/debug/upgrade-test`, {
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                result.textContent = JSON.stringify(data, null, 2);
+                result.className = response.ok ? 'success' : 'error';
+            } catch (error) {
+                result.textContent = `Error: ${error.message}`;
+                result.className = 'error';
+            }
+        }
+        
+        async function testUpgrade() {
+            const result = document.getElementById('upgrade-result');
+            result.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/bestauth/subscription/upgrade`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ targetTier: 'pro_plus' })
+                });
+                
+                const data = await response.json();
+                result.textContent = `Status: ${response.status}\n\n${JSON.stringify(data, null, 2)}`;
+                result.className = response.ok ? 'success' : 'error';
+            } catch (error) {
+                result.textContent = `Error: ${error.message}`;
+                result.className = 'error';
+            }
+        }
+    </script>
+</body>
+</html>

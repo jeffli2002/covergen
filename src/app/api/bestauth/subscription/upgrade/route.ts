@@ -14,7 +14,9 @@ export async function POST(request: NextRequest) {
   console.log('='.repeat(80))
   
   try {
+    console.log('[Upgrade API] Step 1: Validating session...')
     const session = await validateSessionFromRequest(request)
+    console.log('[Upgrade API] Session validation result:', { success: session.success, hasData: !!session.data })
     
     if (!session.success || !session.data) {
       console.log('[Upgrade API] Unauthorized - no valid session')
@@ -23,7 +25,11 @@ export async function POST(request: NextRequest) {
     
     const userId = session.data.user.id
     const userEmail = session.data.user.email
+    
+    console.log('[Upgrade API] Step 2: Parsing request body...')
     const body = await request.json()
+    console.log('[Upgrade API] Request body received:', body)
+    
     const { targetTier } = body
     
     console.log('[Upgrade API] Request details:', {
@@ -34,15 +40,24 @@ export async function POST(request: NextRequest) {
     })
     
     // Validate target tier
+    console.log('[Upgrade API] Step 3: Validating target tier...')
     if (!targetTier || !['pro', 'pro_plus'].includes(targetTier)) {
+      console.error('[Upgrade API] Invalid target tier:', targetTier)
       return NextResponse.json(
         { error: 'Invalid target tier' },
         { status: 400 }
       )
     }
+    console.log('[Upgrade API] Target tier validated:', targetTier)
     
     // Get current subscription
+    console.log('[Upgrade API] Step 4: Fetching current subscription...')
     const currentSubscription = await bestAuthSubscriptionService.getUserSubscription(userId)
+    console.log('[Upgrade API] Current subscription:', currentSubscription ? {
+      tier: currentSubscription.tier,
+      status: currentSubscription.status,
+      hasStripeId: !!currentSubscription.stripe_subscription_id
+    } : 'null')
     
     if (!currentSubscription) {
       return NextResponse.json(
