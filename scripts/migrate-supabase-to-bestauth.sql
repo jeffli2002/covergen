@@ -170,62 +170,94 @@ WHERE NOT EXISTS (
 -- STEP 3: Migrate Credits/Points Data
 -- ============================================================================
 
--- Update bestauth_subscriptions with points balance from subscriptions_consolidated
-UPDATE bestauth_subscriptions bs
-SET
-    points_balance = COALESCE(sc.points_balance, bs.points_balance, 0),
-    points_lifetime_earned = COALESCE(sc.points_lifetime_earned, bs.points_lifetime_earned, 0),
-    points_lifetime_spent = COALESCE(sc.points_lifetime_spent, bs.points_lifetime_spent, 0),
-    updated_at = NOW()
-FROM subscriptions_consolidated sc
-INNER JOIN user_mapping um ON sc.user_id = um.supabase_user_id
-WHERE bs.user_id = um.bestauth_user_id
-AND (
-    sc.points_balance IS NOT NULL OR 
-    sc.points_lifetime_earned IS NOT NULL OR 
-    sc.points_lifetime_spent IS NOT NULL
-);
+-- NOTE: subscriptions_consolidated does NOT have points columns by default
+-- They are only added if you run: supabase/migrations/20251014_add_points_system.sql
+-- This step will be skipped if those columns don't exist
+
+-- Check if points columns exist, and migrate if they do
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'subscriptions_consolidated' 
+        AND column_name = 'points_balance'
+    ) THEN
+        RAISE NOTICE 'Points columns found in subscriptions_consolidated - migrating...';
+        
+        -- Update bestauth_subscriptions with points balance from subscriptions_consolidated
+        UPDATE bestauth_subscriptions bs
+        SET
+            points_balance = COALESCE(sc.points_balance, bs.points_balance, 0),
+            points_lifetime_earned = COALESCE(sc.points_lifetime_earned, bs.points_lifetime_earned, 0),
+            points_lifetime_spent = COALESCE(sc.points_lifetime_spent, bs.points_lifetime_spent, 0),
+            updated_at = NOW()
+        FROM subscriptions_consolidated sc
+        INNER JOIN user_mapping um ON sc.user_id = um.supabase_user_id
+        WHERE bs.user_id = um.bestauth_user_id;
+    ELSE
+        RAISE NOTICE 'Points columns NOT found in subscriptions_consolidated - skipping points migration';
+        RAISE NOTICE 'This is normal if you have not run: supabase/migrations/20251014_add_points_system.sql';
+        RAISE NOTICE 'All users will start with 0 credits in BestAuth (will be granted on next subscription event)';
+    END IF;
+END $$;
 
 -- ============================================================================
 -- STEP 4: Migrate Points Transaction History
 -- ============================================================================
 
--- Insert points transactions from Supabase to BestAuth
-INSERT INTO bestauth_points_transactions (
-    user_id,
-    amount,
-    balance_after,
-    transaction_type,
-    subscription_id,
-    generation_type,
-    stripe_payment_intent_id,
-    description,
-    metadata,
-    created_at
-)
-SELECT 
-    um.bestauth_user_id,
-    pt.amount,
-    pt.balance_after,
-    pt.transaction_type,
-    bs.id, -- Map to BestAuth subscription ID
-    pt.generation_type,
-    pt.stripe_payment_intent_id,
-    pt.description,
-    pt.metadata,
-    pt.created_at
-FROM points_transactions pt
-INNER JOIN user_mapping um ON pt.user_id = um.supabase_user_id
-LEFT JOIN bestauth_subscriptions bs ON bs.user_id = um.bestauth_user_id
-WHERE NOT EXISTS (
-    -- Avoid duplicates by checking if similar transaction already exists
-    SELECT 1 FROM bestauth_points_transactions bpt
-    WHERE bpt.user_id = um.bestauth_user_id
-    AND bpt.amount = pt.amount
-    AND bpt.transaction_type = pt.transaction_type
-    AND bpt.created_at = pt.created_at
-)
-ORDER BY pt.created_at ASC; -- Maintain chronological order
+-- NOTE: points_transactions table may not exist
+-- Only migrate if the table exists
+
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.tables 
+        WHERE table_name = 'points_transactions'
+        AND table_schema = 'public'
+    ) THEN
+        RAISE NOTICE 'points_transactions table found - migrating transaction history...';
+        
+        -- Insert points transactions from Supabase to BestAuth
+        INSERT INTO bestauth_points_transactions (
+            user_id,
+            amount,
+            balance_after,
+            transaction_type,
+            subscription_id,
+            generation_type,
+            stripe_payment_intent_id,
+            description,
+            metadata,
+            created_at
+        )
+        SELECT 
+            um.bestauth_user_id,
+            pt.amount,
+            pt.balance_after,
+            pt.transaction_type,
+            bs.id, -- Map to BestAuth subscription ID
+            pt.generation_type,
+            pt.stripe_payment_intent_id,
+            pt.description,
+            pt.metadata,
+            pt.created_at
+        FROM points_transactions pt
+        INNER JOIN user_mapping um ON pt.user_id = um.supabase_user_id
+        LEFT JOIN bestauth_subscriptions bs ON bs.user_id = um.bestauth_user_id
+        WHERE NOT EXISTS (
+            -- Avoid duplicates by checking if similar transaction already exists
+            SELECT 1 FROM bestauth_points_transactions bpt
+            WHERE bpt.user_id = um.bestauth_user_id
+            AND bpt.amount = pt.amount
+            AND bpt.transaction_type = pt.transaction_type
+            AND bpt.created_at = pt.created_at
+        )
+        ORDER BY pt.created_at ASC; -- Maintain chronological order
+    ELSE
+        RAISE NOTICE 'points_transactions table NOT found - skipping transaction history migration';
+        RAISE NOTICE 'This is normal if you have not run: supabase/migrations/20251014_add_points_system.sql';
+    END IF;
+END $$;
 
 -- ============================================================================
 -- STEP 5: Migration Summary Report

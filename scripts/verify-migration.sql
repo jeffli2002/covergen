@@ -28,16 +28,10 @@ FROM subscriptions_consolidated
 UNION ALL
 
 SELECT 
-    'Total Points Balance',
-    COALESCE(SUM(points_balance), 0)
-FROM subscriptions_consolidated
-
-UNION ALL
-
-SELECT 
-    'Total Points Transactions',
+    'Total Subscriptions with Data',
     COUNT(*)
-FROM points_transactions;
+FROM subscriptions_consolidated
+WHERE tier IS NOT NULL;
 
 \echo ''
 \echo '================================================'
@@ -143,16 +137,11 @@ SELECT
     bs.tier::text as bestauth_tier,
     sc.status as supabase_status,
     bs.status::text as bestauth_status,
-    sc.points_balance as supabase_points,
-    bs.points_balance as bestauth_points,
+    bs.points_balance as bestauth_credits,
     CASE 
         WHEN sc.tier::text = bs.tier::text THEN '✓ Match'
         ELSE '✗ Mismatch'
-    END as tier_match,
-    CASE 
-        WHEN COALESCE(sc.points_balance, 0) = COALESCE(bs.points_balance, 0) THEN '✓ Match'
-        ELSE '✗ Mismatch'
-    END as points_match
+    END as tier_match
 FROM user_mapping um
 LEFT JOIN subscriptions_consolidated sc ON sc.user_id = um.supabase_user_id
 LEFT JOIN bestauth_subscriptions bs ON bs.user_id = um.bestauth_user_id
@@ -169,41 +158,26 @@ LIMIT 50;
 \echo 'CREDITS/POINTS BALANCE CHECK'
 \echo '================================================'
 
-WITH user_mapping AS (
-    SELECT 
-        au.id as supabase_user_id,
-        bu.id as bestauth_user_id,
-        au.email
-    FROM auth.users au
-    INNER JOIN bestauth_users bu ON LOWER(TRIM(au.email)) = LOWER(TRIM(bu.email))
-)
 SELECT 
-    'Users with credits in Supabase' as metric,
+    'Users with credits in BestAuth' as metric,
     COUNT(*) as count
-FROM subscriptions_consolidated
-WHERE points_balance > 0
-
-UNION ALL
-
-SELECT 
-    'Users with credits in BestAuth',
-    COUNT(*)
 FROM bestauth_subscriptions
 WHERE points_balance > 0
 
 UNION ALL
 
 SELECT 
-    'Total credits in Supabase',
+    'Total credits in BestAuth',
     COALESCE(SUM(points_balance), 0)
-FROM subscriptions_consolidated
+FROM bestauth_subscriptions
 
 UNION ALL
 
 SELECT 
-    'Total credits in BestAuth',
-    COALESCE(SUM(points_balance), 0)
-FROM bestauth_subscriptions;
+    'Users with Pro tier',
+    COUNT(*)
+FROM bestauth_subscriptions
+WHERE tier IN ('pro', 'pro_plus');
 
 -- ============================================================================
 -- FIND DISCREPANCIES
@@ -230,19 +204,6 @@ FROM user_mapping um
 INNER JOIN subscriptions_consolidated sc ON sc.user_id = um.supabase_user_id
 INNER JOIN bestauth_subscriptions bs ON bs.user_id = um.bestauth_user_id
 WHERE sc.tier::text != bs.tier::text
-
-UNION ALL
-
-SELECT 
-    um.email,
-    'Credits Mismatch',
-    COALESCE(sc.points_balance, 0)::text || ' (Supabase) vs ' || 
-    COALESCE(bs.points_balance, 0)::text || ' (BestAuth)'
-FROM user_mapping um
-INNER JOIN subscriptions_consolidated sc ON sc.user_id = um.supabase_user_id
-INNER JOIN bestauth_subscriptions bs ON bs.user_id = um.bestauth_user_id
-WHERE COALESCE(sc.points_balance, 0) != COALESCE(bs.points_balance, 0)
-AND COALESCE(sc.points_balance, 0) > 0 -- Only show if Supabase has credits
 
 UNION ALL
 
@@ -309,14 +270,6 @@ SELECT
     bs.tier::text
 FROM user_mapping um
 LEFT JOIN bestauth_subscriptions bs ON bs.user_id = um.bestauth_user_id
-
-UNION ALL
-
-SELECT 
-    'Supabase Credits',
-    COALESCE(sc.points_balance, 0)::text
-FROM user_mapping um
-LEFT JOIN subscriptions_consolidated sc ON sc.user_id = um.supabase_user_id
 
 UNION ALL
 
