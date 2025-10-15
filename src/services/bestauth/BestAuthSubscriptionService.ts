@@ -388,9 +388,48 @@ export class BestAuthSubscriptionService {
         resultStatus: result?.status
       })
 
-      // NOTE: BestAuth uses usage-based tracking (generation_count), not a points/credits system
-      // Usage limits are enforced via bestauth_usage_tracking table and generation count functions
-      // No points granting needed - limits are based on subscription tier
+      // Grant credits for Pro/Pro+ subscriptions (not for free tier)
+      // Free users use rate limits (bestauth_usage_tracking), paid users get credits
+      if (data.tier && data.tier !== 'free' && data.status === 'active' && result?.id) {
+        try {
+          const { SUBSCRIPTION_CONFIG } = await import('@/config/subscription')
+          const cycle = data.billingCycle || 'monthly'
+          const tierConfig = data.tier === 'pro' ? SUBSCRIPTION_CONFIG.pro : SUBSCRIPTION_CONFIG.proPlus
+          const credits = tierConfig.points[cycle]
+
+          console.log(`[BestAuthSubscriptionService] Granting ${credits} credits for ${data.tier} ${cycle}`)
+
+          // Use BestAuth database function to add credits
+          const { getBestAuthSupabaseClient } = await import('@/lib/bestauth/db-client')
+          const supabase = getBestAuthSupabaseClient()
+          
+          if (supabase) {
+            const { data: creditsResult, error: creditsError } = await supabase.rpc('bestauth.add_points', {
+              p_user_id: data.userId,
+              p_amount: credits,
+              p_transaction_type: 'subscription_grant',
+              p_description: `${tierConfig.name} ${cycle} subscription: ${credits} credits`,
+              p_subscription_id: result.id,
+              p_metadata: { tier: data.tier, cycle, source: 'subscription' }
+            })
+
+            if (creditsError) {
+              console.error('[BestAuthSubscriptionService] Failed to grant credits:', creditsError)
+              // Don't fail the subscription update - log and continue
+              console.warn('[BestAuthSubscriptionService] Subscription succeeded but credits were not granted - may need manual adjustment')
+            } else {
+              console.log(`[BestAuthSubscriptionService] Successfully granted ${credits} credits to user ${data.userId}`)
+              console.log('[BestAuthSubscriptionService] Credits result:', creditsResult)
+            }
+          } else {
+            console.error('[BestAuthSubscriptionService] Cannot grant credits - BestAuth database client not available')
+          }
+        } catch (creditsError: any) {
+          console.error('[BestAuthSubscriptionService] Exception while granting credits:', creditsError)
+          // Don't fail the subscription update
+          console.warn('[BestAuthSubscriptionService] Subscription succeeded but credits were not granted - may need manual adjustment')
+        }
+      }
 
       return result
     } catch (error) {
