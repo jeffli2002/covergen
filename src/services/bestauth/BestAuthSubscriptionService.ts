@@ -331,6 +331,11 @@ export class BestAuthSubscriptionService {
     cancelAtPeriodEnd?: boolean
     cancelledAt?: Date
     billingCycle?: 'monthly' | 'yearly'
+    previousTier?: 'free' | 'pro' | 'pro_plus'
+    upgradeHistory?: any[]
+    prorationAmount?: number | null
+    lastProrationDate?: Date | null
+    lastRenewedAt?: Date | null
     metadata?: any
   }): Promise<any> {
     try {
@@ -347,6 +352,12 @@ export class BestAuthSubscriptionService {
         current_period_end: data.currentPeriodEnd?.toISOString(),
         cancel_at_period_end: data.cancelAtPeriodEnd,
         cancelled_at: data.cancelledAt?.toISOString(),
+        billing_cycle: data.billingCycle,
+        previous_tier: data.previousTier,
+        upgrade_history: data.upgradeHistory,
+        proration_amount: data.prorationAmount,
+        last_proration_date: data.lastProrationDate?.toISOString(),
+        last_renewed_at: data.lastRenewedAt?.toISOString(),
         metadata: data.metadata
       })
 

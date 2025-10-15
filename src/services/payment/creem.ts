@@ -1239,16 +1239,29 @@ class CreemPaymentService {
       console.log('[Creem] Upgrade result:', {
         success: !!result.object,
         subscriptionId: result.object?.id,
-        status: result.object?.status
+        status: result.object?.status,
+        hasProration: !!result.object?.latestInvoice
       })
 
       if (!result.object) {
         throw new Error('No subscription returned from upgrade')
       }
 
+      // Extract proration amount from the latest invoice
+      const prorationAmount = result.object?.latestInvoice?.prorationAmount || 
+                               result.object?.latestInvoice?.total || 
+                               null
+      
+      console.log('[Creem] Proration details:', {
+        amount: prorationAmount,
+        hasInvoice: !!result.object?.latestInvoice,
+        invoiceTotal: result.object?.latestInvoice?.total
+      })
+
       return {
         success: true,
         subscription: result.object,
+        prorationAmount: prorationAmount,
         message: 'Subscription upgraded successfully with immediate proration'
       }
     } catch (error: any) {

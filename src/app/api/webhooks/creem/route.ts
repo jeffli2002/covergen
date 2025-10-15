@@ -281,7 +281,7 @@ async function handleSubscriptionDeleted(data: any) {
 }
 
 async function handlePaymentSuccess(data: any) {
-  const { paymentIntentId, amount, currency, customerId, invoiceId } = data
+  const { paymentIntentId, amount, currency, customerId, invoiceId, currentPeriodStart } = data
 
   if (!customerId || !amount) {
     console.error('[BestAuth Webhook] Missing payment data')
@@ -308,6 +308,35 @@ async function handlePaymentSuccess(data: any) {
     })
 
     console.log(`[BestAuth Webhook] Recorded payment of ${amount/100} ${currency} for customer ${customerId}`)
+    
+    // Check if this is a renewal (not the first payment)
+    const isRenewal = subscription.paid_started_at && 
+                     subscription.status === 'active' &&
+                     currentPeriodStart && 
+                     new Date(currentPeriodStart) > new Date(subscription.current_period_start || 0)
+    
+    if (isRenewal) {
+      console.log(`[BestAuth Webhook] Detected renewal for customer ${customerId}`)
+      
+      // Get existing renewal count from metadata
+      const renewalCount = (subscription.metadata?.renewal_count || 0) + 1
+      
+      // Update subscription with renewal tracking
+      await bestAuthSubscriptionService.createOrUpdateSubscription({
+        userId: subscription.user_id,
+        lastRenewedAt: new Date(),
+        metadata: {
+          ...subscription.metadata,
+          renewal_count: renewalCount,
+          last_renewal_amount: amount,
+          last_renewal_date: new Date().toISOString()
+        }
+      })
+      
+      console.log(`[BestAuth Webhook] Renewal #${renewalCount} tracked for customer ${customerId}`)
+    } else {
+      console.log(`[BestAuth Webhook] First payment or non-renewal for customer ${customerId}`)
+    }
   } catch (error) {
     console.error('[BestAuth Webhook] Error in handlePaymentSuccess:', error)
     throw error

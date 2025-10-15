@@ -70,14 +70,36 @@ export async function POST(request: NextRequest) {
       // that the upgrade will take effect immediately but billing
       // will be adjusted on the next cycle
       
+      const billingCycle = currentSubscription.billing_cycle || 'monthly'
+      const previousTier = currentSubscription.tier
+      
+      // Build upgrade history entry
+      const upgradeHistoryEntry = {
+        from_tier: previousTier,
+        to_tier: targetTier,
+        upgraded_at: new Date().toISOString(),
+        upgrade_type: 'trial_upgrade',
+        billing_cycle: billingCycle
+      }
+      
+      // Get existing upgrade history and append new entry
+      const existingHistory = currentSubscription.metadata?.upgrade_history || []
+      const upgradeHistory = [...existingHistory, upgradeHistoryEntry]
+      
       const updated = await bestAuthSubscriptionService.createOrUpdateSubscription({
         userId,
         tier: targetTier,
+        previousTier: previousTier,
+        billingCycle: billingCycle,
         // Keep trial status but with new tier
         status: 'trialing',
+        upgradeHistory: upgradeHistory,
         metadata: {
+          ...currentSubscription.metadata,
           upgraded_at: new Date().toISOString(),
-          upgraded_during_trial: true
+          upgraded_from: previousTier,
+          upgraded_during_trial: true,
+          previous_billing_cycle: currentSubscription.billing_cycle
         }
       })
       
@@ -136,6 +158,7 @@ export async function POST(request: NextRequest) {
       
       // Get billing cycle from subscription or default to monthly
       const billingCycle = currentSubscription.billing_cycle || 'monthly'
+      const previousTier = currentSubscription.tier
       
       // Call Creem to upgrade with immediate proration
       const upgradeResult = await creemService.upgradeSubscription(
@@ -148,14 +171,47 @@ export async function POST(request: NextRequest) {
         throw new Error(upgradeResult.error || 'Failed to upgrade subscription with Creem')
       }
       
-      // Update local database with new tier
+      console.log('[Upgrade] Creem upgrade result:', {
+        success: upgradeResult.success,
+        hasSubscription: !!upgradeResult.subscription,
+        prorationAmount: upgradeResult.prorationAmount
+      })
+      
+      // Extract proration details from Creem response
+      const prorationAmount = upgradeResult.prorationAmount || null
+      const prorationDate = prorationAmount ? new Date() : null
+      
+      // Build upgrade history entry
+      const upgradeHistoryEntry = {
+        from_tier: previousTier,
+        to_tier: targetTier,
+        upgraded_at: new Date().toISOString(),
+        upgrade_type: 'immediate_proration',
+        billing_cycle: billingCycle,
+        proration_amount: prorationAmount
+      }
+      
+      // Get existing upgrade history and append new entry
+      const existingHistory = currentSubscription.metadata?.upgrade_history || []
+      const upgradeHistory = [...existingHistory, upgradeHistoryEntry]
+      
+      // Update local database with new tier and complete tracking
       await bestAuthSubscriptionService.createOrUpdateSubscription({
         userId,
         tier: targetTier,
+        previousTier: previousTier,
+        billingCycle: billingCycle,
         status: 'active',
+        prorationAmount: prorationAmount,
+        lastProrationDate: prorationDate,
+        upgradeHistory: upgradeHistory,
         metadata: {
+          ...currentSubscription.metadata,
           upgraded_at: new Date().toISOString(),
-          upgrade_type: 'immediate_proration'
+          upgraded_from: previousTier,
+          upgrade_type: 'immediate_proration',
+          previous_billing_cycle: currentSubscription.billing_cycle,
+          proration_charged: prorationAmount
         }
       })
       
@@ -166,8 +222,9 @@ export async function POST(request: NextRequest) {
         success: true,
         upgraded: true,
         immediate: true,
-        currentTier: targetTier, // Now active
-        previousTier: currentSubscription.tier,
+        currentTier: targetTier,
+        previousTier: previousTier,
+        prorationAmount: prorationAmount,
         message: `Successfully upgraded from ${currentPlanName} to ${planName}!`,
         note: `You now have immediate access to ${planName} features. Prorated charges have been applied to your account.`
       })
