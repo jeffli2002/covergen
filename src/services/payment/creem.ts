@@ -1311,7 +1311,7 @@ class CreemPaymentService {
       // CRITICAL: Creem SDK v0.3.37 returns Result<T, E> type - must check .ok field
       console.log('[Creem] Upgrade result received:', {
         hasResult: !!result,
-        isOk: result?.ok,
+        isOk: (result as any)?.ok,
         hasError: !!(result as any)?.error
       })
 
