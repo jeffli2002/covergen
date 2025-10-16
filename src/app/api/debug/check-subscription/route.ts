@@ -52,10 +52,10 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       found: true,
-      user: user ? {
-        id: user.id,
-        email: user.email || email
-      } : { id: userId, email },
+      user: {
+        id: user?.id || userId || 'unknown',
+        email: user?.email || email || 'unknown'
+      },
       subscription: {
         id: subscription.id,
         tier: subscription.tier,
