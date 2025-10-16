@@ -15,6 +15,14 @@ export async function POST(req: NextRequest) {
     const rawBody = await req.text()
     const signature = req.headers.get('creem-signature') || ''
 
+    console.log('[BestAuth Webhook] === WEBHOOK REQUEST START ===')
+    console.log('[BestAuth Webhook] Timestamp:', new Date().toISOString())
+    console.log('[BestAuth Webhook] Headers:', {
+      'creem-signature': signature ? 'present' : 'missing',
+      'content-type': req.headers.get('content-type'),
+      'user-agent': req.headers.get('user-agent')
+    })
+
     // Verify webhook signature
     if (process.env.CREEM_WEBHOOK_SECRET) {
       const isValid = creemService.verifyWebhookSignature(rawBody, signature)
@@ -24,6 +32,7 @@ export async function POST(req: NextRequest) {
         console.error('Received signature:', signature ? 'present' : 'missing')
         return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
       }
+      console.log('[BestAuth Webhook] Signature verified successfully')
     } else if (process.env.NODE_ENV === 'production') {
       console.warn('[BestAuth Webhook] CREEM_WEBHOOK_SECRET not configured - webhook verification disabled')
     }
@@ -32,6 +41,7 @@ export async function POST(req: NextRequest) {
     const event = JSON.parse(rawBody)
     const eventType = event.eventType || event.type
     console.log(`[BestAuth Webhook] Received event: ${eventType}`, event.id)
+    console.log('[BestAuth Webhook] Full event payload:', JSON.stringify(event, null, 2))
 
     // Handle the webhook event
     const result = await creemService.handleWebhookEvent(event)
@@ -100,15 +110,21 @@ export async function POST(req: NextRequest) {
 }
 
 async function handleCheckoutComplete(data: any) {
+  console.log('[BestAuth Webhook] ===  CHECKOUT COMPLETE HANDLER START ===')
+  console.log('[BestAuth Webhook] Raw data received:', JSON.stringify(data, null, 2))
+  
   const { userId, customerId, subscriptionId, planId, trialEnd, billingCycle, paymentIntentId } = data
 
-  console.log('[BestAuth Webhook] Checkout complete data:', { 
+  console.log('[BestAuth Webhook] Extracted checkout complete data:', { 
     userId, 
     customerId, 
     subscriptionId, 
     planId, 
     hasSubscriptionId: !!subscriptionId,
-    billingCycle
+    billingCycle,
+    trialEnd,
+    hasUserId: !!userId,
+    hasPlanId: !!planId
   })
 
   if (!userId || !planId) {

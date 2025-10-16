@@ -8,9 +8,9 @@
 -- PRE-MIGRATION: Data Inventory
 -- ============================================================================
 
-\echo '================================================'
-\echo 'SUPABASE AUTH SYSTEM - CURRENT DATA'
-\echo '================================================'
+-- ================================================
+-- SUPABASE AUTH SYSTEM - CURRENT DATA
+-- ================================================
 
 SELECT 
     'Total Users' as metric,
@@ -33,10 +33,9 @@ SELECT
 FROM subscriptions_consolidated
 WHERE tier IS NOT NULL;
 
-\echo ''
-\echo '================================================'
-\echo 'BESTAUTH SYSTEM - CURRENT DATA'
-\echo '================================================'
+-- ================================================
+-- BESTAUTH SYSTEM - CURRENT DATA
+-- ================================================
 
 SELECT 
     'Total Users' as metric,
@@ -69,10 +68,9 @@ FROM bestauth_points_transactions;
 -- USER MAPPING CHECK
 -- ============================================================================
 
-\echo ''
-\echo '================================================'
-\echo 'USER MAPPING ANALYSIS'
-\echo '================================================'
+-- ================================================
+-- USER MAPPING ANALYSIS
+-- ================================================
 
 WITH user_mapping AS (
     SELECT 
@@ -118,10 +116,9 @@ AND NOT EXISTS (
 -- SUBSCRIPTION COMPARISON
 -- ============================================================================
 
-\echo ''
-\echo '================================================'
-\echo 'SUBSCRIPTION DATA COMPARISON'
-\echo '================================================'
+-- ================================================
+-- SUBSCRIPTION DATA COMPARISON
+-- ================================================
 
 WITH user_mapping AS (
     SELECT 
@@ -153,10 +150,9 @@ LIMIT 50;
 -- POINTS BALANCE VERIFICATION
 -- ============================================================================
 
-\echo ''
-\echo '================================================'
-\echo 'CREDITS/POINTS BALANCE CHECK'
-\echo '================================================'
+-- ================================================
+-- CREDITS/POINTS BALANCE CHECK
+-- ================================================
 
 SELECT 
     'Users with credits in BestAuth' as metric,
@@ -183,10 +179,9 @@ WHERE tier IN ('pro', 'pro_plus');
 -- FIND DISCREPANCIES
 -- ============================================================================
 
-\echo ''
-\echo '================================================'
-\echo 'DATA DISCREPANCIES (Need Attention)'
-\echo '================================================'
+-- ================================================
+-- DATA DISCREPANCIES (Need Attention)
+-- ================================================
 
 WITH user_mapping AS (
     SELECT 
@@ -222,10 +217,9 @@ WHERE NOT EXISTS (
 -- SPECIFIC USER LOOKUP
 -- ============================================================================
 
-\echo ''
-\echo '================================================'
-\echo 'SPECIFIC USER CHECK: jefflee2002@gmail.com'
-\echo '================================================'
+-- ================================================
+-- SPECIFIC USER CHECK: jefflee2002@gmail.com
+-- ================================================
 
 WITH user_mapping AS (
     SELECT 
@@ -279,7 +273,6 @@ SELECT
 FROM user_mapping um
 LEFT JOIN bestauth_subscriptions bs ON bs.user_id = um.bestauth_user_id;
 
-\echo ''
-\echo '================================================'
-\echo 'Verification complete!'
-\echo '================================================'
+-- ================================================
+-- Verification complete!
+-- ================================================

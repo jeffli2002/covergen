@@ -307,7 +307,6 @@ SELECT
     um.email,
     sc.tier as supabase_tier,
     bs.tier::text as bestauth_tier,
-    sc.points_balance as supabase_points,
     bs.points_balance as bestauth_points,
     sc.status as supabase_status,
     bs.status::text as bestauth_status

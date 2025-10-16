@@ -952,6 +952,9 @@ class CreemPaymentService {
   }
 
   private async handleCheckoutComplete(checkout: any) {
+    console.log('[Creem Service] === PROCESSING CHECKOUT.COMPLETED EVENT ===')
+    console.log('[Creem Service] Full checkout object:', JSON.stringify(checkout, null, 2))
+    
     const { customer, subscription, metadata, order, trial_period_days } = checkout
     
     // Log the full checkout payload for debugging
@@ -962,6 +965,7 @@ class CreemPaymentService {
       subscriptionId: subscription?.id,
       subscriptionData: subscription,
       metadata: metadata,
+      metadataKeys: metadata ? Object.keys(metadata) : [],
       order: order,
       trial_period_days: trial_period_days
     })
@@ -981,8 +985,25 @@ class CreemPaymentService {
     }
     
     // Extract user ID from metadata or customer external ID
+    console.log('[Creem Service] Extracting userId from:', {
+      'metadata.internal_customer_id': metadata?.internal_customer_id,
+      'metadata.userId': metadata?.userId,
+      'customer.external_id': customer?.external_id
+    })
     const userId = metadata?.internal_customer_id || metadata?.userId || customer?.external_id
+    
+    console.log('[Creem Service] Extracting planId from:', {
+      'metadata.planId': metadata?.planId,
+      'order.product': order?.product,
+      'subscription.product.id': subscription?.product?.id
+    })
     const planId = metadata?.planId || this.getPlanFromProduct(order?.product)
+    
+    console.log('[Creem Service] Extracted values:', {
+      userId,
+      planId,
+      'planId is valid': planId !== 'free'
+    })
     
     // Calculate trial end date if applicable
     let trialEnd = null
@@ -1002,7 +1023,7 @@ class CreemPaymentService {
       console.warn('[Creem Webhook] No subscription ID found in checkout.completed webhook!')
     }
     
-    return {
+    const result = {
       type: 'checkout_complete',
       userId: userId,
       customerId: customer?.id,
@@ -1010,14 +1031,35 @@ class CreemPaymentService {
       planId: planId,
       trialEnd: trialEnd
     }
+    
+    console.log('[Creem Service] Returning result:', JSON.stringify(result, null, 2))
+    return result
   }
 
   private async handleSubscriptionUpdate(subscription: any) {
+    console.log('[Creem Service] === PROCESSING SUBSCRIPTION.UPDATE EVENT ===')
+    console.log('[Creem Service] Full subscription object:', JSON.stringify(subscription, null, 2))
+    
     const { customer, status, metadata, current_period_end_date, canceled_at, product, cancel_at_period_end } = subscription
+    
+    console.log('[Creem Service] Extracting subscription update userId from:', {
+      'metadata.internal_customer_id': metadata?.internal_customer_id,
+      'metadata.userId': metadata?.userId,
+      'metadata.planId': metadata?.planId,
+      'product.id': product?.id
+    })
     
     const customerId = typeof customer === 'string' ? customer : customer?.id
     const userId = metadata?.internal_customer_id || metadata?.userId
     const planId = metadata?.planId || this.getPlanFromProduct(product?.id)
+    
+    console.log('[Creem Service] Extracted subscription update values:', {
+      customerId,
+      userId,
+      planId,
+      status,
+      'planId is valid': planId !== 'free'
+    })
     
     // Map Creem status to our expected status
     let mappedStatus = status
@@ -1027,7 +1069,7 @@ class CreemPaymentService {
       mappedStatus = 'active' // Still active but will cancel at period end
     }
     
-    return {
+    const result = {
       type: 'subscription_update',
       customerId: customerId,
       status: mappedStatus,
@@ -1036,6 +1078,9 @@ class CreemPaymentService {
       currentPeriodEnd: current_period_end_date ? new Date(current_period_end_date) : undefined,
       cancelAtPeriodEnd: cancel_at_period_end || !!canceled_at
     }
+    
+    console.log('[Creem Service] Returning subscription update result:', JSON.stringify(result, null, 2))
+    return result
   }
 
   private async handleSubscriptionDeleted(subscription: any) {
@@ -1159,14 +1204,25 @@ class CreemPaymentService {
    * Helper to extract plan ID from product ID
    */
   private getPlanFromProduct(productId: string): string {
-    if (!productId) return 'free'
+    console.log('[Creem Service] getPlanFromProduct called with:', productId)
     
-    if (productId.includes('pro_plus') || productId.includes('proplus')) {
+    if (!productId) {
+      console.warn('[Creem Service] getPlanFromProduct: productId is empty, returning "free"')
+      return 'free'
+    }
+    
+    // Convert to lowercase for case-insensitive matching
+    const productIdLower = productId.toLowerCase()
+    
+    if (productIdLower.includes('pro_plus') || productIdLower.includes('proplus') || productIdLower.includes('pro-plus')) {
+      console.log('[Creem Service] getPlanFromProduct: matched pro_plus')
       return 'pro_plus'
-    } else if (productId.includes('pro')) {
+    } else if (productIdLower.includes('pro')) {
+      console.log('[Creem Service] getPlanFromProduct: matched pro')
       return 'pro'
     }
     
+    console.warn('[Creem Service] getPlanFromProduct: No match found, returning "free" for productId:', productId)
     return 'free'
   }
 
