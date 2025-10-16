@@ -48,14 +48,14 @@ export async function GET(req: NextRequest) {
     }
 
     // Get subscription status
-    const status = await db.subscriptions.getStatus(user.id)
+    const status = user ? await db.subscriptions.getStatus(user.id) : null
 
     return NextResponse.json({
       found: true,
-      user: {
+      user: user ? {
         id: user.id,
         email: user.email || email
-      },
+      } : { id: userId, email },
       subscription: {
         id: subscription.id,
         tier: subscription.tier,
