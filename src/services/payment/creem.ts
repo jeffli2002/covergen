@@ -2,6 +2,7 @@ import { Creem } from 'creem'
 import { getSubscriptionConfig, isTrialEnabled, calculateTrialEndDate } from '@/lib/subscription-config'
 import { PRICING_CONFIG } from '@/config/pricing.config'
 import { env, isTestMode as envIsTestMode } from '@/env'
+import { getPlanByType } from '@/lib/subscription-plans'
 
 // Use lazy evaluation for all environment variables to handle edge runtime
 const getCreemTestMode = () => {
@@ -108,8 +109,6 @@ export const CREEM_PRODUCTS = {
 const getSubscriptionPlansWithConfig = () => {
   const config = getSubscriptionConfig()
   
-  // Import subscription plans to get the actual limits
-  const { getPlanByType } = require('@/lib/subscription-plans')
   const proPlan = getPlanByType('pro')
   const proPlusPlan = getPlanByType('pro_plus')
   
@@ -192,6 +191,24 @@ export interface WebhookEvent {
 }
 
 class CreemPaymentService {
+  private _creemClient: any = null
+
+  constructor() {
+    if (typeof window === 'undefined') {
+      this._creemClient = getCreemClient()
+    }
+  }
+
+  get creem() {
+    if (!this._creemClient) {
+      this._creemClient = getCreemClient()
+    }
+    return this._creemClient
+  }
+
+  set creem(client: any) {
+    this._creemClient = client
+  }
   /**
    * Create a checkout session for subscription
    * This is called from the client side and delegates to the API route
@@ -439,7 +456,7 @@ class CreemPaymentService {
           console.log(`[Creem] Adding ${config.trialDays} day trial period to checkout`)
         }
         
-        const checkoutResult = await getCreemClient().createCheckout({
+        const checkoutResult = await this.creem.createCheckout({
           xApiKey: CREEM_API_KEY,
           createCheckoutRequest: checkoutRequest
         })
@@ -615,7 +632,7 @@ class CreemPaymentService {
       })
 
       // Generate customer links using Creem SDK
-      const creem = getCreemClient()
+      const creem = this.creem
       const result = await creem.generateCustomerLinks({
         xApiKey: CREEM_API_KEY,
         createCustomerPortalLinkRequestEntity: {
@@ -673,7 +690,7 @@ class CreemPaymentService {
 
       // Use the Creem SDK to cancel subscription
       // Note: Creem API doesn't support cancelAtPeriodEnd parameter directly
-      const result = await getCreemClient().cancelSubscription({
+      const result = await this.creem.cancelSubscription({
         id: subscriptionId,
         xApiKey: CREEM_API_KEY
       })
@@ -772,7 +789,7 @@ class CreemPaymentService {
       console.log(`[Creem] Updating subscription ${subscriptionId}`)
       
       // Use the Creem SDK to update subscription
-      const result = await getCreemClient().updateSubscription({
+      const result = await this.creem.updateSubscription({
         id: subscriptionId,
         xApiKey: CREEM_API_KEY,
         updateSubscriptionRequestEntity: {
@@ -817,7 +834,7 @@ class CreemPaymentService {
       }
 
       // Use the Creem SDK to retrieve subscription
-      const result = await getCreemClient().retrieveSubscription({
+      const result = await this.creem.retrieveSubscription({
         subscriptionId: subscriptionId,
         xApiKey: CREEM_API_KEY
       })
@@ -1338,7 +1355,7 @@ class CreemPaymentService {
       })
 
       // Use Creem SDK to upgrade subscription with immediate proration
-      const creem = getCreemClient()
+      const creem = this.creem
       
       let result
       try {
@@ -1519,7 +1536,7 @@ class CreemPaymentService {
       console.log('[Creem] Creating products in', testMode ? 'TEST' : 'PRODUCTION', 'mode')
 
       // Create Pro product
-      const proProduct = await getCreemClient().createProduct({
+      const proProduct = await this.creem.createProduct({
         xApiKey: getCreemApiKey(),
         createProductRequestEntity: {
           name: 'CoverGen Pro',
@@ -1532,7 +1549,7 @@ class CreemPaymentService {
       })
 
       // Create Pro+ product
-      const proPlusProduct = await getCreemClient().createProduct({
+      const proPlusProduct = await this.creem.createProduct({
         xApiKey: getCreemApiKey(),
         createProductRequestEntity: {
           name: 'CoverGen Pro+',
@@ -1593,6 +1610,8 @@ class CreemPaymentService {
     return products
   }
 }
+
+export class CreemService extends CreemPaymentService {}
 
 export const creemService = new CreemPaymentService()
 

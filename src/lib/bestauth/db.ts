@@ -2,6 +2,7 @@
 import { getBestAuthSupabaseClient } from './db-client'
 import type { User, Session, OAuthAccount } from './types'
 import { getSubscriptionConfig } from '@/lib/subscription-config'
+import { normalizeSubscriptionTier } from '@/lib/subscription-tier'
 
 // Helper to get database client with error handling
 function getDb() {
@@ -703,12 +704,23 @@ export const db = {
           usageToday = 0
         }
         
+        const subscriptionCycle = (data.billing_cycle === 'monthly' || data.billing_cycle === 'yearly')
+          ? data.billing_cycle
+          : undefined
+
+        const normalizedTier = normalizeSubscriptionTier(data.tier, subscriptionCycle)
+        const normalizedPreviousTier = normalizeSubscriptionTier(data.previous_tier)
+        const effectiveTier = normalizedTier.tier ?? 'free'
+        const effectiveCycle = normalizedTier.billingCycle ?? subscriptionCycle
+
         // Return data in the expected format
         const result = {
           subscription_id: data.id,
           user_id: data.user_id,
-          tier: data.tier || 'free',
+          tier: effectiveTier,
           status: data.status || 'active',
+          billing_cycle: effectiveCycle,
+          previous_tier: normalizedPreviousTier.tier ?? undefined,
           is_trialing: data.status === 'trialing',
           trial_days_remaining: data.trial_ends_at ? 
             Math.max(0, Math.ceil((new Date(data.trial_ends_at).getTime() - Date.now()) / (24 * 60 * 60 * 1000))) : 0,
@@ -716,27 +728,29 @@ export const db = {
           usage_today: usageToday,
           daily_limit: (() => {
             const config = getSubscriptionConfig()
-            const tier = data.tier || 'free'
             const isTrialing = data.status === 'trialing'
             
-            if (tier === 'free') {
+            if (effectiveTier === 'free') {
               return config.limits.free.daily
-            } else if (tier === 'pro') {
+            }
+            if (effectiveTier === 'pro') {
               return isTrialing ? config.limits.pro.trial_daily : config.limits.pro.monthly
-            } else if (tier === 'pro_plus') {
+            }
+            if (effectiveTier === 'pro_plus') {
               return isTrialing ? config.limits.pro_plus.trial_daily : config.limits.pro_plus.monthly
             }
             return config.limits.free.daily
           })(),
           monthly_limit: (() => {
             const config = getSubscriptionConfig()
-            const tier = data.tier || 'free'
             
-            if (tier === 'free') {
+            if (effectiveTier === 'free') {
               return config.limits.free.monthly
-            } else if (tier === 'pro') {
+            }
+            if (effectiveTier === 'pro') {
               return config.limits.pro.monthly
-            } else if (tier === 'pro_plus') {
+            }
+            if (effectiveTier === 'pro_plus') {
               return config.limits.pro_plus.monthly
             }
             return config.limits.free.monthly
@@ -757,6 +771,8 @@ export const db = {
           userId,
           tier: result.tier,
           status: result.status,
+          billing_cycle: result.billing_cycle,
+          previous_tier: result.previous_tier,
           has_payment_method: result.has_payment_method
         })
         

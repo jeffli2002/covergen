@@ -1,7 +1,9 @@
 import { defineConfig } from 'vitest/config';
-import { resolve } from 'path';
+import { resolve, join } from 'path';
+import { tmpdir } from 'os';
 
 export default defineConfig({
+  cacheDir: join(tmpdir(), 'coverimage-vitest-cache'),
   test: {
     globals: true,
     environment: 'node',

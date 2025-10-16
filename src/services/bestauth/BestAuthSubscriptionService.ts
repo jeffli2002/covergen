@@ -2,6 +2,7 @@
 import { db } from '@/lib/bestauth/db-wrapper'
 import { getSubscriptionConfig } from '@/lib/subscription-config'
 import type { GenerationType } from '@/config/subscription'
+import { normalizeSubscriptionTier } from '@/lib/subscription-tier'
 
 export interface SubscriptionStatus {
   subscription_id?: string
@@ -75,15 +76,22 @@ export class BestAuthSubscriptionService {
         } : null
       }
       
+      const normalizedTier = normalizeSubscriptionTier(status.tier, status.billing_cycle)
+      const normalizedPreviousTier = normalizeSubscriptionTier(status.previous_tier)
+
       const result = {
         ...status,
+        tier: normalizedTier.tier ?? status.tier ?? 'free',
+        billing_cycle: normalizedTier.billingCycle ?? status.billing_cycle,
+        previous_tier: normalizedPreviousTier.tier ?? status.previous_tier,
         next_billing_date: status.next_billing_date ? new Date(status.next_billing_date) : undefined
       }
       
       console.log('[BestAuthSubscriptionService.getUserSubscription] Returning subscription:', {
         tier: result.tier,
         status: result.status,
-        plan: result.plan
+        billing_cycle: result.billing_cycle,
+        previous_tier: result.previous_tier
       })
       
       return result
@@ -356,10 +364,31 @@ export class BestAuthSubscriptionService {
         upgradeHistoryLength: data.upgradeHistory?.length,
         prorationAmount: data.prorationAmount
       })
+
+      const normalizedTier = normalizeSubscriptionTier(data.tier, data.billingCycle)
+      const normalizedPreviousTier = normalizeSubscriptionTier(data.previousTier)
+      const resolvedTier = normalizedTier.tier ?? data.tier
+      const resolvedBillingCycle = normalizedTier.billingCycle ?? data.billingCycle
+      const resolvedPreviousTier = normalizedPreviousTier.tier ?? data.previousTier
+
+      if (normalizedTier.wasNormalized) {
+        console.log('[BestAuthSubscriptionService.createOrUpdateSubscription] Normalized tier value:', {
+          original: data.tier,
+          normalized: resolvedTier,
+          billingCycle: resolvedBillingCycle
+        })
+      }
+
+      if (normalizedPreviousTier.wasNormalized) {
+        console.log('[BestAuthSubscriptionService.createOrUpdateSubscription] Normalized previous tier value:', {
+          original: data.previousTier,
+          normalized: resolvedPreviousTier
+        })
+      }
       
       const upsertData = {
         user_id: data.userId,
-        tier: data.tier,
+        tier: resolvedTier,
         status: data.status,
         stripe_customer_id: data.stripeCustomerId,
         stripe_subscription_id: data.stripeSubscriptionId,
@@ -370,8 +399,8 @@ export class BestAuthSubscriptionService {
         current_period_end: data.currentPeriodEnd?.toISOString(),
         cancel_at_period_end: data.cancelAtPeriodEnd,
         cancelled_at: data.cancelledAt?.toISOString(),
-        billing_cycle: data.billingCycle,
-        previous_tier: data.previousTier,
+        billing_cycle: resolvedBillingCycle,
+        previous_tier: resolvedPreviousTier,
         upgrade_history: data.upgradeHistory,
         proration_amount: data.prorationAmount,
         last_proration_date: data.lastProrationDate?.toISOString(),
@@ -390,14 +419,16 @@ export class BestAuthSubscriptionService {
 
       // Grant credits for Pro/Pro+ subscriptions (not for free tier)
       // Free users use rate limits (bestauth_usage_tracking), paid users get credits
-      if (data.tier && data.tier !== 'free' && data.status === 'active' && result?.id) {
+      const grantTier = resolvedTier ?? data.tier ?? 'free'
+
+      if (grantTier !== 'free' && data.status === 'active' && result?.id) {
         try {
           const { SUBSCRIPTION_CONFIG } = await import('@/config/subscription')
-          const cycle = data.billingCycle || 'monthly'
-          const tierConfig = data.tier === 'pro' ? SUBSCRIPTION_CONFIG.pro : SUBSCRIPTION_CONFIG.proPlus
+          const cycle = resolvedBillingCycle || data.billingCycle || 'monthly'
+          const tierConfig = grantTier === 'pro' ? SUBSCRIPTION_CONFIG.pro : SUBSCRIPTION_CONFIG.proPlus
           const credits = tierConfig.points[cycle]
 
-          console.log(`[BestAuthSubscriptionService] Granting ${credits} credits for ${data.tier} ${cycle}`)
+          console.log(`[BestAuthSubscriptionService] Granting ${credits} credits for ${grantTier} ${cycle}`)
 
           // Use BestAuth database function to add credits
           const { getBestAuthSupabaseClient } = await import('@/lib/bestauth/db-client')
@@ -410,7 +441,7 @@ export class BestAuthSubscriptionService {
               p_transaction_type: 'subscription_grant',
               p_description: `${tierConfig.name} ${cycle} subscription: ${credits} credits`,
               p_subscription_id: result.id,
-              p_metadata: { tier: data.tier, cycle, source: 'subscription' }
+              p_metadata: { tier: grantTier, cycle, source: 'subscription' }
             })
 
             if (creditsError) {

@@ -1,554 +1,267 @@
-import { describe, it, expect, beforeEach, afterEach, vi, Mock } from 'vitest';
-import { CreemService } from '@/services/payment/creem';
-import { createClient } from '@supabase/supabase-js';
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { CreemService } from '@/services/payment/creem'
 
-// Mock Supabase
-vi.mock('@supabase/supabase-js', () => ({
-  createClient: vi.fn(() => ({
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          single: vi.fn()
-        }))
-      })),
-      insert: vi.fn(() => ({
-        select: vi.fn(() => ({
-          single: vi.fn()
-        }))
-      })),
-      update: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          select: vi.fn(() => ({
-            single: vi.fn()
-          }))
-        }))
-      }))
-    }))
-  }))
-}));
+const mockEnv = vi.hoisted(() => ({
+  CREEM_SECRET_KEY: 'creem_test_sk_123',
+  CREEM_API_KEY: 'creem_test_sk_123',
+  CREEM_WEBHOOK_SECRET: 'whsec_test_123',
+  NEXT_PUBLIC_CREEM_TEST_MODE: 'true',
+  NEXT_PUBLIC_PRICE_ID_PRO_MONTHLY: 'price_pro_monthly',
+  NEXT_PUBLIC_PRICE_ID_PRO_YEARLY: 'price_pro_yearly',
+  NEXT_PUBLIC_PRICE_ID_PROPLUS_MONTHLY: 'price_proplus_monthly',
+  NEXT_PUBLIC_PRICE_ID_PROPLUS_YEARLY: 'price_proplus_yearly',
+  NODE_ENV: 'test'
+}))
 
-// Mock Creem SDK
+vi.mock('@/env', () => ({
+  env: mockEnv,
+  isTestMode: () => true,
+  isDevelopment: () => false,
+  isProduction: () => false
+}))
+
+const mockCreemClient = vi.hoisted(() => ({
+  createCheckout: vi.fn(),
+  cancelSubscription: vi.fn(),
+  updateSubscription: vi.fn(),
+  retrieveSubscription: vi.fn(),
+  upgradeSubscription: vi.fn(),
+  createProduct: vi.fn(),
+  generateCustomerLinks: vi.fn()
+}))
+
 vi.mock('creem', () => ({
-  Creem: vi.fn().mockImplementation(() => ({
-    checkout: {
-      sessions: {
-        create: vi.fn(),
-        retrieve: vi.fn()
-      }
-    },
-    customers: {
-      create: vi.fn(),
-      retrieve: vi.fn(),
-      update: vi.fn()
-    },
-    subscriptions: {
-      create: vi.fn(),
-      retrieve: vi.fn(),
-      update: vi.fn(),
-      cancel: vi.fn(),
-      reactivate: vi.fn()
-    },
-    licenses: {
-      create: vi.fn(),
-      retrieve: vi.fn(),
-      validate: vi.fn()
-    },
-    billingPortal: {
-      sessions: {
-        create: vi.fn()
-      }
-    },
-    webhooks: {
-      constructEvent: vi.fn()
-    }
-  }))
-}));
+  Creem: vi.fn(() => mockCreemClient)
+}))
 
 describe('CreemService', () => {
-  let creemService: CreemService;
-  let mockSupabase: any;
+  let service: CreemService
 
   beforeEach(() => {
-    // Clear all mocks
-    vi.clearAllMocks();
-    
-    // Setup environment variables
-    process.env.CREEM_SECRET_KEY = 'sk_test_123';
-    process.env.CREEM_WEBHOOK_SECRET = 'whsec_test_123';
-    process.env.NEXT_PUBLIC_CREEM_PUBLIC_KEY = 'pk_test_123';
-    process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
-    
-    mockSupabase = createClient('', '');
-    creemService = new CreemService();
-  });
-
-  afterEach(() => {
-    vi.resetAllMocks();
-  });
+    Object.values(mockCreemClient).forEach(fn => fn.mockReset())
+    service = new CreemService()
+    ;(service as unknown as { creem: typeof mockCreemClient }).creem = mockCreemClient
+  })
 
   describe('createCheckoutSession', () => {
-    it('should create a checkout session for new Pro subscription', async () => {
-      const userId = 'user_123';
-      const email = 'test@example.com';
-      const plan = 'pro';
-      
-      // Mock Creem checkout session creation
-      const mockSession = {
-        id: 'cs_test_123',
-        url: 'https://checkout.creem.io/pay/cs_test_123',
-        customer: 'cus_test_123',
-        payment_status: 'unpaid',
+    it('returns success when checkout is created', async () => {
+      mockCreemClient.createCheckout.mockResolvedValueOnce({
+        id: 'chk_123',
+        checkoutUrl: 'https://pay.creem.dev/checkout/chk_123',
         status: 'open'
-      };
-      
-      (creemService as any).creem.checkout.sessions.create.mockResolvedValue(mockSession);
+      })
 
-      const result = await creemService.createCheckoutSession({
-        userId,
-        email,
-        plan,
-        successUrl: '/payment/success',
-        cancelUrl: '/payment/cancel'
-      });
+      const result = await service.createCheckoutSession({
+        userId: 'user_123',
+        userEmail: 'test@example.com',
+        planId: 'pro',
+        successUrl: 'https://covergen.pro/success',
+        cancelUrl: 'https://covergen.pro/cancel',
+        currentPlan: 'free'
+      })
 
       expect(result).toEqual({
-        sessionId: mockSession.id,
-        url: mockSession.url
-      });
+        success: true,
+        sessionId: 'chk_123',
+        url: 'https://pay.creem.dev/checkout/chk_123'
+      })
 
-      expect((creemService as any).creem.checkout.sessions.create).toHaveBeenCalledWith({
-        mode: 'subscription',
-        line_items: [
-          {
-            price: expect.stringContaining('price_'),
-            quantity: 1
-          }
-        ],
-        success_url: expect.stringContaining('/payment/success'),
-        cancel_url: expect.stringContaining('/payment/cancel'),
-        customer_email: email,
-        metadata: {
-          userId,
-          plan
-        },
-        subscription_data: {
-          metadata: {
-            userId,
-            plan
-          }
-        },
-        allow_promotion_codes: true
-      });
-    });
-
-    it('should create a checkout session for Pro+ subscription', async () => {
-      const userId = 'user_123';
-      const email = 'test@example.com';
-      const plan = 'pro_plus';
-      
-      const mockSession = {
-        id: 'cs_test_456',
-        url: 'https://checkout.creem.io/pay/cs_test_456',
-        customer: 'cus_test_456',
-        payment_status: 'unpaid',
-        status: 'open'
-      };
-      
-      (creemService as any).creem.checkout.sessions.create.mockResolvedValue(mockSession);
-
-      const result = await creemService.createCheckoutSession({
-        userId,
-        email,
-        plan,
-        successUrl: '/payment/success',
-        cancelUrl: '/payment/cancel'
-      });
-
-      expect(result.sessionId).toBe(mockSession.id);
-      expect((creemService as any).creem.checkout.sessions.create).toHaveBeenCalledWith(
+      expect(mockCreemClient.createCheckout).toHaveBeenCalledTimes(1)
+      expect(mockCreemClient.createCheckout).toHaveBeenCalledWith(
         expect.objectContaining({
-          line_items: [
-            {
-              price: expect.stringContaining('price_'),
-              quantity: 1
-            }
-          ],
-          metadata: {
-            userId,
-            plan
-          }
+          xApiKey: mockEnv.CREEM_SECRET_KEY,
+          createCheckoutRequest: expect.objectContaining({
+            metadata: expect.objectContaining({
+              userId: 'user_123',
+              planId: 'pro'
+            })
+          })
         })
-      );
-    });
+      )
+    })
 
-    it('should handle checkout session creation errors', async () => {
-      const error = new Error('Payment provider error');
-      (creemService as any).creem.checkout.sessions.create.mockRejectedValue(error);
+    it('returns error information when checkout creation fails', async () => {
+      mockCreemClient.createCheckout.mockRejectedValueOnce(new Error('provider unavailable'))
 
-      await expect(
-        creemService.createCheckoutSession({
-          userId: 'user_123',
-          email: 'test@example.com',
-          plan: 'pro',
-          successUrl: '/success',
-          cancelUrl: '/cancel'
-        })
-      ).rejects.toThrow('Payment provider error');
-    });
-  });
+      const result = await service.createCheckoutSession({
+        userId: 'user_123',
+        userEmail: 'test@example.com',
+        planId: 'pro',
+        successUrl: 'https://covergen.pro/success',
+        cancelUrl: 'https://covergen.pro/cancel',
+        currentPlan: 'free'
+      })
+
+      expect(result.success).toBe(false)
+      expect(result.error).toContain('provider unavailable')
+    })
+  })
 
   describe('cancelSubscription', () => {
-    it('should cancel a subscription at period end', async () => {
-      const subscriptionId = 'sub_test_123';
-      
-      const mockCancelledSubscription = {
-        id: subscriptionId,
-        status: 'active',
-        cancel_at_period_end: true,
-        current_period_end: new Date('2025-10-01').toISOString()
-      };
-      
-      (creemService as any).creem.subscriptions.update.mockResolvedValue(mockCancelledSubscription);
+    it('wraps Creem cancellation success', async () => {
+      mockCreemClient.cancelSubscription.mockResolvedValueOnce({
+        id: 'sub_123',
+        status: 'canceled'
+      })
 
-      const result = await creemService.cancelSubscription(subscriptionId);
+      const result = await service.cancelSubscription('sub_123')
 
-      expect(result).toEqual(mockCancelledSubscription);
-      expect((creemService as any).creem.subscriptions.update).toHaveBeenCalledWith(
-        subscriptionId,
-        {
-          cancel_at_period_end: true
+      expect(result).toEqual({
+        success: true,
+        subscription: {
+          id: 'sub_123',
+          status: 'canceled'
         }
-      );
-    });
+      })
+    })
 
-    it('should handle cancellation errors', async () => {
-      const error = new Error('Subscription not found');
-      (creemService as any).creem.subscriptions.update.mockRejectedValue(error);
+    it('returns failure payload when cancellation fails', async () => {
+      mockCreemClient.cancelSubscription.mockRejectedValueOnce(new Error('not found'))
 
-      await expect(
-        creemService.cancelSubscription('sub_invalid')
-      ).rejects.toThrow('Subscription not found');
-    });
-  });
+      const result = await service.cancelSubscription('sub_missing')
 
-  describe('resumeSubscription', () => {
-    it('should resume a cancelled subscription', async () => {
-      const subscriptionId = 'sub_test_123';
-      
-      const mockResumedSubscription = {
-        id: subscriptionId,
-        status: 'active',
-        cancel_at_period_end: false,
-        current_period_end: new Date('2025-10-01').toISOString()
-      };
-      
-      (creemService as any).creem.subscriptions.update.mockResolvedValue(mockResumedSubscription);
-
-      const result = await creemService.resumeSubscription(subscriptionId);
-
-      expect(result).toEqual(mockResumedSubscription);
-      expect((creemService as any).creem.subscriptions.update).toHaveBeenCalledWith(
-        subscriptionId,
-        {
-          cancel_at_period_end: false
-        }
-      );
-    });
-  });
+      expect(result.success).toBe(false)
+      expect(result.error).toContain('not found')
+    })
+  })
 
   describe('upgradeSubscription', () => {
-    it('should upgrade from Pro to Pro+ with proration', async () => {
-      const subscriptionId = 'sub_test_123';
-      const newPlan = 'pro_plus';
-      
-      // Mock subscription retrieval
-      const mockSubscription = {
-        id: subscriptionId,
+    it('returns success when upgrade completes', async () => {
+      mockCreemClient.upgradeSubscription.mockResolvedValueOnce({
+        id: 'sub_123',
         status: 'active',
-        items: {
-          data: [
-            {
-              id: 'si_test_123',
-              price: {
-                id: 'price_pro_monthly'
-              }
-            }
-          ]
+        latestInvoice: {
+          prorationAmount: 599
         }
-      };
-      
-      (creemService as any).creem.subscriptions.retrieve.mockResolvedValue(mockSubscription);
-      
-      const mockUpdatedSubscription = {
-        ...mockSubscription,
-        items: {
-          data: [
-            {
-              id: 'si_test_123',
-              price: {
-                id: 'price_pro_plus_monthly'
-              }
-            }
-          ]
-        }
-      };
-      
-      (creemService as any).creem.subscriptions.update.mockResolvedValue(mockUpdatedSubscription);
+      })
 
-      const result = await creemService.upgradeSubscription(subscriptionId, newPlan);
-
-      expect(result).toEqual(mockUpdatedSubscription);
-      expect((creemService as any).creem.subscriptions.update).toHaveBeenCalledWith(
-        subscriptionId,
-        {
-          items: [
-            {
-              id: 'si_test_123',
-              price: expect.stringContaining('price_')
-            }
-          ],
-          proration_behavior: 'create_prorations'
-        }
-      );
-    });
-  });
-
-  describe('validateLicense', () => {
-    it('should validate an API license for Pro+ users', async () => {
-      const licenseKey = 'lic_test_123';
-      
-      const mockLicense = {
-        id: licenseKey,
-        status: 'active',
-        valid: true,
-        metadata: {
-          userId: 'user_123',
-          plan: 'pro_plus'
-        }
-      };
-      
-      (creemService as any).creem.licenses.validate.mockResolvedValue(mockLicense);
-
-      const result = await creemService.validateLicense(licenseKey);
+      const result = await service.upgradeSubscription('sub_123', 'pro_plus')
 
       expect(result).toEqual({
-        valid: true,
-        userId: 'user_123',
-        plan: 'pro_plus'
-      });
-    });
+        success: true,
+        subscription: expect.objectContaining({ id: 'sub_123' }),
+        prorationAmount: 599,
+        message: expect.stringContaining('successfully')
+      })
+    })
 
-    it('should return invalid for expired licenses', async () => {
-      const licenseKey = 'lic_test_expired';
-      
-      const mockLicense = {
-        id: licenseKey,
-        status: 'expired',
-        valid: false
-      };
-      
-      (creemService as any).creem.licenses.validate.mockResolvedValue(mockLicense);
+    it('returns failure information when upgrade fails', async () => {
+      mockCreemClient.upgradeSubscription.mockRejectedValueOnce(new Error('plan mismatch'))
 
-      const result = await creemService.validateLicense(licenseKey);
+      const result = await service.upgradeSubscription('sub_123', 'pro_plus')
 
-      expect(result).toEqual({
-        valid: false,
-        userId: null,
-        plan: null
-      });
-    });
-  });
-
-  describe('handleWebhook', () => {
-    it('should handle checkout.session.completed event', async () => {
-      const webhookPayload = {
-        type: 'checkout.session.completed',
-        data: {
-          object: {
-            id: 'cs_test_123',
-            payment_status: 'paid',
-            customer: 'cus_test_123',
-            subscription: 'sub_test_123',
-            metadata: {
-              userId: 'user_123',
-              plan: 'pro'
-            }
-          }
-        }
-      };
-      
-      const signature = 'test_signature';
-      
-      (creemService as any).creem.webhooks.constructEvent.mockReturnValue(webhookPayload);
-      
-      // Mock Supabase operations
-      mockSupabase.from().update().eq().select().single.mockResolvedValue({
-        data: { id: 'user_123', subscription_tier: 'pro' },
-        error: null
-      });
-      
-      mockSupabase.from().insert().select().single.mockResolvedValue({
-        data: { id: 'sub_123' },
-        error: null
-      });
-
-      const result = await creemService.handleWebhook(
-        JSON.stringify(webhookPayload),
-        signature
-      );
-
-      expect(result).toEqual({ received: true });
-      expect((creemService as any).creem.webhooks.constructEvent).toHaveBeenCalledWith(
-        JSON.stringify(webhookPayload),
-        signature,
-        process.env.CREEM_WEBHOOK_SECRET
-      );
-    });
-
-    it('should handle subscription.updated event', async () => {
-      const webhookPayload = {
-        type: 'customer.subscription.updated',
-        data: {
-          object: {
-            id: 'sub_test_123',
-            customer: 'cus_test_123',
-            status: 'active',
-            cancel_at_period_end: true,
-            current_period_end: new Date('2025-10-01').toISOString(),
-            metadata: {
-              userId: 'user_123',
-              plan: 'pro'
-            }
-          }
-        }
-      };
-      
-      (creemService as any).creem.webhooks.constructEvent.mockReturnValue(webhookPayload);
-      
-      mockSupabase.from().update().eq().select().single.mockResolvedValue({
-        data: { id: 'sub_123', status: 'active' },
-        error: null
-      });
-
-      const result = await creemService.handleWebhook(
-        JSON.stringify(webhookPayload),
-        signature
-      );
-
-      expect(result).toEqual({ received: true });
-    });
-
-    it('should handle invalid webhook signatures', async () => {
-      const webhookPayload = { type: 'test', data: {} };
-      const invalidSignature = 'invalid_signature';
-      
-      (creemService as any).creem.webhooks.constructEvent.mockImplementation(() => {
-        throw new Error('Webhook signature verification failed');
-      });
-
-      await expect(
-        creemService.handleWebhook(JSON.stringify(webhookPayload), invalidSignature)
-      ).rejects.toThrow('Webhook signature verification failed');
-    });
-
-    it('should handle payment_intent.succeeded for one-time payments', async () => {
-      const webhookPayload = {
-        type: 'payment_intent.succeeded',
-        data: {
-          object: {
-            id: 'pi_test_123',
-            amount: 1900,
-            currency: 'usd',
-            customer: 'cus_test_123',
-            metadata: {
-              userId: 'user_123',
-              type: 'one_time_upgrade'
-            }
-          }
-        }
-      };
-      
-      (creemService as any).creem.webhooks.constructEvent.mockReturnValue(webhookPayload);
-      
-      mockSupabase.from().insert().select().single.mockResolvedValue({
-        data: { id: 'payment_123' },
-        error: null
-      });
-
-      const result = await creemService.handleWebhook(
-        JSON.stringify(webhookPayload),
-        signature
-      );
-
-      expect(result).toEqual({ received: true });
-    });
-  });
+      expect(result.success).toBe(false)
+      expect(result.error).toContain('plan mismatch')
+    })
+  })
 
   describe('createPortalSession', () => {
-    it('should create a customer portal session', async () => {
-      const customerId = 'cus_test_123';
-      const returnUrl = 'http://localhost:3000/account';
-      
-      const mockPortalSession = {
-        id: 'bps_test_123',
-        url: 'https://billing.creem.io/portal/bps_test_123'
-      };
-      
-      (creemService as any).creem.billingPortal.sessions.create.mockResolvedValue(mockPortalSession);
+    it('returns portal link from Creem', async () => {
+      mockCreemClient.generateCustomerLinks.mockResolvedValueOnce({
+        customerPortalLink: 'https://portal.creem.dev/cust_123'
+      })
 
-      const result = await creemService.createPortalSession(customerId, returnUrl);
+      const result = await service.createPortalSession({
+        customerId: 'cus_123',
+        returnUrl: 'https://covergen.pro/account'
+      })
 
       expect(result).toEqual({
-        sessionId: mockPortalSession.id,
-        url: mockPortalSession.url
-      });
+        success: true,
+        url: 'https://portal.creem.dev/cust_123'
+      })
+    })
 
-      expect((creemService as any).creem.billingPortal.sessions.create).toHaveBeenCalledWith({
-        customer: customerId,
-        return_url: returnUrl
-      });
-    });
-  });
+    it('returns error when portal link fails', async () => {
+      mockCreemClient.generateCustomerLinks.mockRejectedValueOnce(new Error('link disabled'))
 
-  describe('getPriceId', () => {
-    it('should return correct price ID for each plan', () => {
-      expect(creemService.getPriceId('pro')).toMatch(/price_.*_pro_/);
-      expect(creemService.getPriceId('pro_plus')).toMatch(/price_.*_proplus_/);
-    });
+      const result = await service.createPortalSession({
+        customerId: 'cus_123',
+        returnUrl: 'https://covergen.pro/account'
+      })
 
-    it('should throw error for invalid plan', () => {
-      expect(() => creemService.getPriceId('invalid_plan' as any)).toThrow('Invalid plan');
-    });
-  });
+      expect(result.success).toBe(false)
+      expect(result.error).toContain('link disabled')
+    })
+  })
 
-  describe('Error Handling', () => {
-    it('should handle network errors gracefully', async () => {
-      const networkError = new Error('Network error');
-      networkError.name = 'NetworkError';
-      
-      (creemService as any).creem.checkout.sessions.create.mockRejectedValue(networkError);
+  describe('getSubscription', () => {
+    it('retrieves subscription details', async () => {
+      mockCreemClient.retrieveSubscription.mockResolvedValueOnce({
+        id: 'sub_123',
+        status: 'active'
+      })
 
-      await expect(
-        creemService.createCheckoutSession({
+      const result = await service.getSubscription('sub_123')
+
+      expect(result).toEqual({
+        success: true,
+        subscription: {
+          id: 'sub_123',
+          status: 'active'
+        }
+      })
+    })
+  })
+
+  describe('handleWebhookEvent', () => {
+    it('normalizes checkout completion event', async () => {
+      const event = {
+        eventType: 'checkout.completed',
+        object: {
+          id: 'chk_123',
+          customer: {
+            id: 'cus_123',
+            external_id: 'user_123'
+          },
+          subscription: {
+            id: 'sub_123',
+            product: { id: mockEnv.NEXT_PUBLIC_PRICE_ID_PRO_MONTHLY }
+          },
+          metadata: {
+            planId: 'pro',
+            billingCycle: 'monthly',
+            internal_customer_id: 'user_123'
+          }
+        }
+      }
+
+      const result = await service.handleWebhookEvent(event)
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          type: 'checkout_complete',
           userId: 'user_123',
-          email: 'test@example.com',
-          plan: 'pro',
-          successUrl: '/success',
-          cancelUrl: '/cancel'
+          planId: 'pro'
         })
-      ).rejects.toThrow('Network error');
-    });
+      )
+    })
 
-    it('should handle rate limit errors', async () => {
-      const rateLimitError: any = new Error('Too many requests');
-      rateLimitError.statusCode = 429;
-      rateLimitError.headers = { 'retry-after': '60' };
-      
-      (creemService as any).creem.subscriptions.retrieve.mockRejectedValue(rateLimitError);
+    it('maps subscription updates to expected payload', async () => {
+      const event = {
+        eventType: 'subscription.update',
+        object: {
+          customer: { id: 'cus_123' },
+          status: 'active',
+          metadata: {
+            planId: 'pro_plus',
+            internal_customer_id: 'user_123'
+          },
+          product: { id: mockEnv.NEXT_PUBLIC_PRICE_ID_PROPLUS_MONTHLY },
+          current_period_end_date: '2025-11-01T00:00:00.000Z'
+        }
+      }
 
-      await expect(
-        creemService.getSubscription('sub_test_123')
-      ).rejects.toThrow('Too many requests');
-    });
-  });
-});
+      const result = await service.handleWebhookEvent(event)
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          type: 'subscription_update',
+          customerId: 'cus_123',
+          planId: 'pro_plus',
+          status: 'active'
+        })
+      )
+    })
+  })
+})
