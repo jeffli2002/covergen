@@ -13,12 +13,16 @@ export async function POST(req: NextRequest) {
   try {
     // Get raw body for signature verification
     const rawBody = await req.text()
-    const signature = req.headers.get('creem-signature') || ''
+    const signature =
+      req.headers.get('creem-signature') ||
+      req.headers.get('x-creem-signature') ||
+      ''
 
     console.log('[BestAuth Webhook] === WEBHOOK REQUEST START ===')
     console.log('[BestAuth Webhook] Timestamp:', new Date().toISOString())
     console.log('[BestAuth Webhook] Headers:', {
-      'creem-signature': signature ? 'present' : 'missing',
+      'creem-signature': req.headers.get('creem-signature') ? 'present' : 'missing',
+      'x-creem-signature': req.headers.get('x-creem-signature') ? 'present' : 'missing',
       'content-type': req.headers.get('content-type'),
       'user-agent': req.headers.get('user-agent')
     })
