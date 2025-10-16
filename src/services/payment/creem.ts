@@ -1223,54 +1223,100 @@ class CreemPaymentService {
   }
 
   /**
-   * Helper to extract plan ID from product ID
-   * Creem sends actual product IDs like "prod_7aQWgvmz1JHGafTEGZtz9g" in webhooks
+   * Collect the configured Creem product/price identifiers for each tier.
+   * There are multiple env var naming conventions in the project/Vercel dashboards,
+   * so we consolidate everything in one place before matching.
+   */
+  private getConfiguredProductIds() {
+    const collect = (...values: Array<string | undefined | null>) =>
+      values
+        .map(value => value?.trim() ?? '')
+        .filter(value => value.length > 0)
+
+    const proIds = collect(
+      env.NEXT_PUBLIC_PRICE_ID_PRO_MONTHLY,
+      env.NEXT_PUBLIC_PRICE_ID_PRO_YEARLY,
+      process.env.CREEM_PRO_PLAN_ID,
+      process.env.CREEM_PRO_PLAN_ID_MONTHLY,
+      process.env.CREEM_PRO_PLAN_ID_YEARLY,
+      process.env.CREEM_PRO_PRODUCT_ID,
+      process.env.CREEM_PROD_PRO_PRODUCT_ID,
+      process.env.CREEM_TEST_PRO_PRODUCT_ID,
+      process.env.CREEM_TEST_PRO_PLAN_ID,
+      process.env.CREEM_PRICE_ID_PRO_MONTHLY,
+      process.env.CREEM_PRICE_ID_PRO_YEARLY
+    )
+
+    const proPlusIds = collect(
+      env.NEXT_PUBLIC_PRICE_ID_PROPLUS_MONTHLY,
+      env.NEXT_PUBLIC_PRICE_ID_PROPLUS_YEARLY,
+      process.env.CREEM_PRO_PLUS_PLAN_ID,
+      process.env.CREEM_PRO_PLUS_PLAN_ID_MONTHLY,
+      process.env.CREEM_PRO_PLUS_PLAN_ID_YEARLY,
+      process.env.CREEM_PRO_PLUS_PRODUCT_ID,
+      process.env.CREEM_PROD_PRO_PLUS_PRODUCT_ID,
+      process.env.CREEM_TEST_PRO_PLUS_PRODUCT_ID,
+      process.env.CREEM_TEST_PRO_PLUS_PLAN_ID,
+      process.env.CREEM_PRICE_ID_PROPLUS_MONTHLY,
+      process.env.CREEM_PRICE_ID_PROPLUS_YEARLY
+    )
+
+    return {
+      pro: {
+        raw: proIds,
+        normalized: proIds.map(id => id.toLowerCase())
+      },
+      proPlus: {
+        raw: proPlusIds,
+        normalized: proPlusIds.map(id => id.toLowerCase())
+      }
+    }
+  }
+
+  /**
+   * Helper to extract plan ID from product/price identifiers supplied by Creem webhooks.
+   * Creem may send actual product IDs (prod_xxx) or price IDs (price_xxx) depending on configuration.
    */
   private getPlanFromProduct(productId: string): string {
     console.log('[Creem Service] getPlanFromProduct called with:', productId)
     
     if (!productId) {
-      console.warn('[Creem Service] getPlanFromProduct: productId is empty, returning "free"')
+      console.warn('[Creem Service] getPlanFromProduct: productId is empty, returning \"free\"')
       return 'free'
     }
+
+    const trimmedId = productId.trim()
+    const normalizedId = trimmedId.toLowerCase()
+    const configuredIds = this.getConfiguredProductIds()
     
-    // Match against actual Creem product IDs from environment
-    const proMonthly = env.NEXT_PUBLIC_PRICE_ID_PRO_MONTHLY
-    const proYearly = env.NEXT_PUBLIC_PRICE_ID_PRO_YEARLY
-    const proPlusMonthly = env.NEXT_PUBLIC_PRICE_ID_PROPLUS_MONTHLY
-    const proPlusYearly = env.NEXT_PUBLIC_PRICE_ID_PROPLUS_YEARLY
-    
-    console.log('[Creem Service] Matching against product IDs:', {
-      productId,
-      proMonthly,
-      proYearly,
-      proPlusMonthly,
-      proPlusYearly
+    console.log('[Creem Service] Matching against configured product IDs:', {
+      incoming: trimmedId,
+      pro: configuredIds.pro.raw,
+      proPlus: configuredIds.proPlus.raw
     })
     
-    // Exact match against configured product IDs
-    if (productId === proPlusMonthly || productId === proPlusYearly) {
-      console.log('[Creem Service] getPlanFromProduct: matched pro_plus via exact product ID')
+    if (configuredIds.proPlus.normalized.includes(normalizedId)) {
+      console.log('[Creem Service] getPlanFromProduct: matched pro_plus via configured IDs')
       return 'pro_plus'
     }
     
-    if (productId === proMonthly || productId === proYearly) {
-      console.log('[Creem Service] getPlanFromProduct: matched pro via exact product ID')
+    if (configuredIds.pro.normalized.includes(normalizedId)) {
+      console.log('[Creem Service] getPlanFromProduct: matched pro via configured IDs')
       return 'pro'
     }
     
     // Fallback to string matching for backward compatibility
-    const productIdLower = productId.toLowerCase()
-    
-    if (productIdLower.includes('pro_plus') || productIdLower.includes('proplus') || productIdLower.includes('pro-plus')) {
+    if (normalizedId.includes('pro_plus') || normalizedId.includes('proplus') || normalizedId.includes('pro-plus')) {
       console.log('[Creem Service] getPlanFromProduct: matched pro_plus via string matching')
       return 'pro_plus'
-    } else if (productIdLower.includes('pro')) {
+    }
+    
+    if (normalizedId.includes('pro')) {
       console.log('[Creem Service] getPlanFromProduct: matched pro via string matching')
       return 'pro'
     }
     
-    console.warn('[Creem Service] getPlanFromProduct: No match found, returning "free" for productId:', productId)
+    console.warn('[Creem Service] getPlanFromProduct: No match found, returning \"free\" for productId:', trimmedId)
     return 'free'
   }
 
