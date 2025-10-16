@@ -25,17 +25,16 @@ export async function GET(req: NextRequest) {
 
     // Find by email first
     if (email) {
-      const users = await db.query(
-        'SELECT id, email, created_at FROM users WHERE email = $1',
-        [email]
-      )
+      // Use BestAuth users API
+      const foundUser = await db.users.findByEmail(email)
       
-      if (users.rows.length > 0) {
-        user = users.rows[0]
-        subscription = await db.subscriptions.findByUserId(user.id)
+      if (foundUser) {
+        user = foundUser
+        subscription = await db.subscriptions.findByUserId(foundUser.id)
       }
     } else if (userId) {
-      user = { id: userId }
+      const foundUser = await db.users.findById(userId)
+      user = foundUser || { id: userId }
       subscription = await db.subscriptions.findByUserId(userId)
     }
 
