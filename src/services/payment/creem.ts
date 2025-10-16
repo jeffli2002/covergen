@@ -1244,7 +1244,9 @@ class CreemPaymentService {
       process.env.CREEM_TEST_PRO_PRODUCT_ID,
       process.env.CREEM_TEST_PRO_PLAN_ID,
       process.env.CREEM_PRICE_ID_PRO_MONTHLY,
-      process.env.CREEM_PRICE_ID_PRO_YEARLY
+      process.env.CREEM_PRICE_ID_PRO_YEARLY,
+      env.CREEM_PRO_PLAN_PRODUCT_KEY_MONTHLY,
+      env.CREEM_PRO_PLAN_PRODUCT_KEY_YEARLY
     )
 
     const proPlusIds = collect(
@@ -1258,7 +1260,9 @@ class CreemPaymentService {
       process.env.CREEM_TEST_PRO_PLUS_PRODUCT_ID,
       process.env.CREEM_TEST_PRO_PLUS_PLAN_ID,
       process.env.CREEM_PRICE_ID_PROPLUS_MONTHLY,
-      process.env.CREEM_PRICE_ID_PROPLUS_YEARLY
+      process.env.CREEM_PRICE_ID_PROPLUS_YEARLY,
+      env.CREEM_PROPLUS_PLAN_PRODUCT_KEY_MONTHLY,
+      env.CREEM_PROPLUS_PLAN_PRODUCT_KEY_YEARLY
     )
 
     return {

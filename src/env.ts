@@ -35,6 +35,10 @@ const envSchema = z.object({
     CREEM_API_KEY: z.string().min(1).optional(),
     CREEM_SECRET_KEY: z.string().min(1).optional(),
     CREEM_WEBHOOK_SECRET: z.string().min(1).optional(),
+    CREEM_PRO_PLAN_PRODUCT_KEY_MONTHLY: z.string().optional(),
+    CREEM_PRO_PLAN_PRODUCT_KEY_YEARLY: z.string().optional(),
+    CREEM_PROPLUS_PLAN_PRODUCT_KEY_MONTHLY: z.string().optional(),
+    CREEM_PROPLUS_PLAN_PRODUCT_KEY_YEARLY: z.string().optional(),
     
     // KIE API
     KIE_API_KEY: z.string().min(1).optional(),
@@ -81,6 +85,10 @@ function createEnv() {
     CREEM_API_KEY: process.env.CREEM_API_KEY,
     CREEM_SECRET_KEY: process.env.CREEM_SECRET_KEY,
     CREEM_WEBHOOK_SECRET: process.env.CREEM_WEBHOOK_SECRET,
+    CREEM_PRO_PLAN_PRODUCT_KEY_MONTHLY: process.env.CREEM_PRO_PLAN_PRODUCT_KEY_MONTHLY,
+    CREEM_PRO_PLAN_PRODUCT_KEY_YEARLY: process.env.CREEM_PRO_PLAN_PRODUCT_KEY_YEARLY,
+    CREEM_PROPLUS_PLAN_PRODUCT_KEY_MONTHLY: process.env.CREEM_PROPLUS_PLAN_PRODUCT_KEY_MONTHLY,
+    CREEM_PROPLUS_PLAN_PRODUCT_KEY_YEARLY: process.env.CREEM_PROPLUS_PLAN_PRODUCT_KEY_YEARLY,
     KIE_API_KEY: process.env.KIE_API_KEY,
     NODE_ENV: process.env.NODE_ENV as 'development' | 'production' | 'test' | undefined,
   };
