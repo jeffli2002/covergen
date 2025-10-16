@@ -1,19 +1,20 @@
 import { Creem } from 'creem'
 import { getSubscriptionConfig, isTrialEnabled, calculateTrialEndDate } from '@/lib/subscription-config'
 import { PRICING_CONFIG } from '@/config/pricing.config'
+import { env, isTestMode as envIsTestMode } from '@/env'
 
 // Use lazy evaluation for all environment variables to handle edge runtime
 const getCreemTestMode = () => {
   // Check multiple conditions for test mode
-  const isTestMode = process.env.NEXT_PUBLIC_CREEM_TEST_MODE === 'true'
+  const isTestMode = env.NEXT_PUBLIC_CREEM_TEST_MODE === 'true'
   const isVercelPreview = process.env.VERCEL_ENV === 'preview'
-  const isDevEnvironment = process.env.NODE_ENV === 'development'
+  const isDevEnvironment = env.NODE_ENV === 'development'
   
   // Log the decision for debugging
   if (typeof window === 'undefined') {
     console.log('[Creem] Test mode check:', {
-      NEXT_PUBLIC_CREEM_TEST_MODE: process.env.NEXT_PUBLIC_CREEM_TEST_MODE,
-      NODE_ENV: process.env.NODE_ENV,
+      NEXT_PUBLIC_CREEM_TEST_MODE: env.NEXT_PUBLIC_CREEM_TEST_MODE,
+      NODE_ENV: env.NODE_ENV,
       VERCEL_ENV: process.env.VERCEL_ENV,
       isTestMode,
       isVercelPreview,
@@ -28,15 +29,13 @@ const getCreemTestMode = () => {
 // Use lazy evaluation for API keys to handle edge runtime
 const getCreemApiKey = () => {
   // Try multiple possible environment variable names
-  let key = process.env.CREEM_SECRET_KEY || 
-            process.env.CREEM_API_KEY || 
-            process.env.NEXT_PUBLIC_CREEM_SECRET_KEY || // Sometimes mistakenly made public
-            process.env.CREEM_TEST_API_KEY || // Alternative test key name
+  let key = env.CREEM_SECRET_KEY || 
+            env.CREEM_API_KEY || 
             ''
   
   // Fix for Vercel environment variable misconfiguration
   // If the value contains "CREEM_SECRET_KEY=" at the start, extract the actual key
-  if (key.startsWith('CREEM_SECRET_KEY=')) {
+  if (key && key.startsWith('CREEM_SECRET_KEY=')) {
     console.warn('[Creem] Detected misconfigured environment variable, extracting actual key')
     key = key.substring('CREEM_SECRET_KEY='.length)
   }
@@ -45,22 +44,20 @@ const getCreemApiKey = () => {
   if (typeof window === 'undefined') {
     console.log('[Creem] API key retrieval:', {
       found: !!key,
-      length: key.length,
+      length: key?.length || 0,
       prefix: key ? key.substring(0, 15) + '...' : 'NONE',
-      isTestKey: key.startsWith('creem_test_'),
+      isTestKey: key?.startsWith('creem_test_') || false,
       checkedVars: {
-        CREEM_SECRET_KEY: process.env.CREEM_SECRET_KEY ? 'SET' : 'NOT SET',
-        CREEM_API_KEY: process.env.CREEM_API_KEY ? 'SET' : 'NOT SET',
-        NEXT_PUBLIC_CREEM_SECRET_KEY: process.env.NEXT_PUBLIC_CREEM_SECRET_KEY ? 'SET' : 'NOT SET',
-        CREEM_TEST_API_KEY: process.env.CREEM_TEST_API_KEY ? 'SET' : 'NOT SET'
+        CREEM_SECRET_KEY: env.CREEM_SECRET_KEY ? 'SET' : 'NOT SET',
+        CREEM_API_KEY: env.CREEM_API_KEY ? 'SET' : 'NOT SET',
       }
     })
   }
-  return key
+  return key || ''
 }
 
 const getCreemWebhookSecret = () => {
-  return process.env.CREEM_WEBHOOK_SECRET || ''
+  return env.CREEM_WEBHOOK_SECRET || ''
 }
 
 // Lazy initialization of Creem client
@@ -95,14 +92,15 @@ export const CREEM_TEST_CARDS = {
 
 // Product IDs for subscription tiers (from Creem dashboard)
 // Same product IDs are used for both test and production modes
+// Using env object ensures values are available at module load time
 export const CREEM_PRODUCTS = {
-  pro_monthly: process.env.NEXT_PUBLIC_PRICE_ID_PRO_MONTHLY || process.env.CREEM_PRO_PLAN_ID || '',
-  pro_yearly: process.env.NEXT_PUBLIC_PRICE_ID_PRO_YEARLY || '',
-  pro_plus_monthly: process.env.NEXT_PUBLIC_PRICE_ID_PROPLUS_MONTHLY || process.env.CREEM_PRO_PLUS_PLAN_ID || '',
-  pro_plus_yearly: process.env.NEXT_PUBLIC_PRICE_ID_PROPLUS_YEARLY || '',
+  pro_monthly: env.NEXT_PUBLIC_PRICE_ID_PRO_MONTHLY || '',
+  pro_yearly: env.NEXT_PUBLIC_PRICE_ID_PRO_YEARLY || '',
+  pro_plus_monthly: env.NEXT_PUBLIC_PRICE_ID_PROPLUS_MONTHLY || '',
+  pro_plus_yearly: env.NEXT_PUBLIC_PRICE_ID_PROPLUS_YEARLY || '',
   // Legacy support
-  pro: process.env.NEXT_PUBLIC_PRICE_ID_PRO_MONTHLY || process.env.CREEM_PRO_PLAN_ID || '',
-  pro_plus: process.env.NEXT_PUBLIC_PRICE_ID_PROPLUS_MONTHLY || process.env.CREEM_PRO_PLUS_PLAN_ID || ''
+  pro: env.NEXT_PUBLIC_PRICE_ID_PRO_MONTHLY || '',
+  pro_plus: env.NEXT_PUBLIC_PRICE_ID_PROPLUS_MONTHLY || ''
 }
 
 // Subscription Plans
@@ -356,10 +354,10 @@ class CreemPaymentService {
         console.error('[Creem] Tried keys:', productKey, planId)
         console.error('[Creem] Available products:', CREEM_PRODUCTS)
         console.error('[Creem] Environment variables:', {
-          NEXT_PUBLIC_PRICE_ID_PRO_MONTHLY: process.env.NEXT_PUBLIC_PRICE_ID_PRO_MONTHLY || 'NOT SET',
-          NEXT_PUBLIC_PRICE_ID_PRO_YEARLY: process.env.NEXT_PUBLIC_PRICE_ID_PRO_YEARLY || 'NOT SET',
-          NEXT_PUBLIC_PRICE_ID_PROPLUS_MONTHLY: process.env.NEXT_PUBLIC_PRICE_ID_PROPLUS_MONTHLY || 'NOT SET',
-          NEXT_PUBLIC_PRICE_ID_PROPLUS_YEARLY: process.env.NEXT_PUBLIC_PRICE_ID_PROPLUS_YEARLY || 'NOT SET'
+          NEXT_PUBLIC_PRICE_ID_PRO_MONTHLY: env.NEXT_PUBLIC_PRICE_ID_PRO_MONTHLY || 'NOT SET',
+          NEXT_PUBLIC_PRICE_ID_PRO_YEARLY: env.NEXT_PUBLIC_PRICE_ID_PRO_YEARLY || 'NOT SET',
+          NEXT_PUBLIC_PRICE_ID_PROPLUS_MONTHLY: env.NEXT_PUBLIC_PRICE_ID_PROPLUS_MONTHLY || 'NOT SET',
+          NEXT_PUBLIC_PRICE_ID_PROPLUS_YEARLY: env.NEXT_PUBLIC_PRICE_ID_PROPLUS_YEARLY || 'NOT SET'
         })
         throw new Error(`Product ID not configured for plan: ${planId} (${billingCycle}). Please check environment variables.`)
       }
@@ -381,10 +379,9 @@ class CreemPaymentService {
       if (CREEM_API_KEY === '') {
         console.error('[Creem] ERROR: API key is empty!')
         console.error('[Creem] Environment check:', {
-          CREEM_SECRET_KEY: process.env.CREEM_SECRET_KEY ? `SET (${process.env.CREEM_SECRET_KEY.substring(0, 15)}...)` : 'NOT SET',
-          CREEM_API_KEY: process.env.CREEM_API_KEY ? 'SET' : 'NOT SET',
-          NEXT_PUBLIC_CREEM_SECRET_KEY: process.env.NEXT_PUBLIC_CREEM_SECRET_KEY ? 'SET (WARNING: Should not be public!)' : 'NOT SET',
-          NODE_ENV: process.env.NODE_ENV,
+          CREEM_SECRET_KEY: env.CREEM_SECRET_KEY ? `SET (${env.CREEM_SECRET_KEY.substring(0, 15)}...)` : 'NOT SET',
+          CREEM_API_KEY: env.CREEM_API_KEY ? 'SET' : 'NOT SET',
+          NODE_ENV: env.NODE_ENV,
           VERCEL: process.env.VERCEL,
           VERCEL_ENV: process.env.VERCEL_ENV
         })
@@ -447,34 +444,28 @@ class CreemPaymentService {
           createCheckoutRequest: checkoutRequest
         })
         
-        // CRITICAL: Creem SDK v0.3.37 returns Result<T, E> type - must check .ok field
+        // Creem SDK returns the checkout object directly (not wrapped in Result<T, E>)
         console.log('[Creem] SDK checkout result:', {
           hasResult: !!checkoutResult,
-          isOk: (checkoutResult as any)?.ok,
-          hasError: !!(checkoutResult as any)?.error,
+          hasCheckoutUrl: !!(checkoutResult as any)?.checkoutUrl,
+          status: (checkoutResult as any)?.status,
           resultKeys: checkoutResult ? Object.keys(checkoutResult) : [],
           resultType: typeof checkoutResult
         })
         
-        if (!checkoutResult || !(checkoutResult as any).ok) {
-          const error = (checkoutResult as any)?.error
-          console.error('[Creem] Checkout failed - Result.ok is false:', {
-            error: error,
-            errorType: typeof error,
-            errorKeys: error ? Object.keys(error) : [],
-            errorString: JSON.stringify(error, null, 2),
-            errorMessage: error?.message || error?.detail || error?.title,
-            errorCode: error?.code || error?.status,
+        // Validate response has required fields
+        if (!checkoutResult || !(checkoutResult as any).checkoutUrl) {
+          console.error('[Creem] Checkout failed - missing checkoutUrl:', {
+            hasResult: !!checkoutResult,
+            resultKeys: checkoutResult ? Object.keys(checkoutResult) : [],
             fullResult: JSON.stringify(checkoutResult, null, 2)
           })
           
-          const errorMessage = error?.message || error?.detail || error?.title || 
-                               (typeof error === 'string' ? error : 'Unknown error from Creem API')
-          throw new Error(`Creem SDK Error: ${errorMessage}`)
+          throw new Error('Creem API error: No checkout URL in response')
         }
         
-        // Extract the actual checkout from Result.value
-        checkout = (checkoutResult as any).value
+        // Use the checkout object directly
+        checkout = checkoutResult as any
         
         console.log('[Creem] SDK checkout response:', {
           id: checkout?.id,
@@ -632,29 +623,21 @@ class CreemPaymentService {
         }
       })
 
-      // CRITICAL: Creem SDK v0.3.37 returns Result<T, E> type - must check .ok field
-      if (!result || !(result as any).ok) {
-        const error = (result as any)?.error
-        const errorMessage = error?.message || error?.detail || error?.title || 'Unknown error from Creem API'
-        throw new Error(`Creem API error: ${errorMessage}`)
-      }
-      
-      const customerLinks = (result as any).value
-
+      // Creem SDK returns response directly (not wrapped in Result<T, E>)
       console.log('[Creem] Portal session result:', {
-        success: !!customerLinks?.customerPortalLink,
-        hasUrl: !!customerLinks?.customerPortalLink,
+        success: !!result?.customerPortalLink,
+        hasUrl: !!result?.customerPortalLink,
         customerId,
-        result: customerLinks
+        result: result
       })
 
-      if (!customerLinks?.customerPortalLink) {
+      if (!result?.customerPortalLink) {
         throw new Error('Failed to create customer portal session')
       }
 
       return {
         success: true,
-        url: customerLinks.customerPortalLink
+        url: result.customerPortalLink
       }
     } catch (error: any) {
       console.error('Creem portal session error:', error)
@@ -695,20 +678,12 @@ class CreemPaymentService {
         xApiKey: CREEM_API_KEY
       })
 
-      // CRITICAL: Creem SDK v0.3.37 returns Result<T, E> type - must check .ok field
-      if (!result || !(result as any).ok) {
-        const error = (result as any)?.error
-        const errorMessage = error?.message || error?.detail || error?.title || 'Unknown error from Creem API'
-        throw new Error(`Creem API error: ${errorMessage}`)
-      }
-      
-      const subscription = (result as any).value
-
-      console.log('[Creem] Subscription cancelled:', subscription)
+      // Creem SDK returns response directly (not wrapped in Result<T, E>)
+      console.log('[Creem] Subscription cancelled:', result)
       
       return {
         success: true,
-        subscription: subscription
+        subscription: result
       }
     } catch (error: any) {
       console.error('[Creem] Cancel subscription error:', {
@@ -809,20 +784,12 @@ class CreemPaymentService {
         }
       })
 
-      // CRITICAL: Creem SDK v0.3.37 returns Result<T, E> type - must check .ok field
-      if (!result || !(result as any).ok) {
-        const error = (result as any)?.error
-        const errorMessage = error?.message || error?.detail || error?.title || 'Unknown error from Creem API'
-        throw new Error(`Creem API error: ${errorMessage}`)
-      }
-      
-      const subscription = (result as any).value
-
-      console.log('[Creem] Subscription update result:', subscription)
+      // Creem SDK returns response directly (not wrapped in Result<T, E>)
+      console.log('[Creem] Subscription update result:', result)
 
       return {
         success: true,
-        subscription: subscription
+        subscription: result
       }
     } catch (error: any) {
       console.error('Creem update subscription error:', error)
@@ -855,20 +822,12 @@ class CreemPaymentService {
         xApiKey: CREEM_API_KEY
       })
 
-      // CRITICAL: Creem SDK v0.3.37 returns Result<T, E> type - must check .ok field
-      if (!result || !(result as any).ok) {
-        const error = (result as any)?.error
-        const errorMessage = error?.message || error?.detail || error?.title || 'Unknown error from Creem API'
-        throw new Error(`Creem API error: ${errorMessage}`)
-      }
-      
-      const subscription = (result as any).value
-
-      console.log('[Creem] Retrieved subscription:', subscription)
+      // Creem SDK returns response directly (not wrapped in Result<T, E>)
+      console.log('[Creem] Retrieved subscription:', result)
 
       return {
         success: true,
-        subscription: subscription
+        subscription: result
       }
     } catch (error: any) {
       console.error('Creem get subscription error:', error)
@@ -1315,47 +1274,24 @@ class CreemPaymentService {
         throw new Error(`Creem API error: ${creemError.message || 'Unknown error'}`)
       }
 
-      // CRITICAL: Creem SDK v0.3.37 returns Result<T, E> type - must check .ok field
+      // Creem SDK returns response directly (not wrapped in Result<T, E>)
       console.log('[Creem] Upgrade result received:', {
         hasResult: !!result,
-        isOk: (result as any)?.ok,
-        hasError: !!(result as any)?.error
+        hasId: !!result?.id,
+        status: result?.status
       })
 
-      // Check if the Result is an error
-      if (!result || !(result as any).ok) {
-        const error = (result as any)?.error
-        console.error('[Creem] Upgrade failed - Result.ok is false:', {
-          error: error,
-          errorMessage: error?.message || error?.detail || error?.title,
-          errorCode: error?.code || error?.status,
-          errorType: error?.constructor?.name
-        })
-        
-        const errorMessage = error?.message || error?.detail || error?.title || 'Unknown error from Creem API'
-        throw new Error(`Creem API error: ${errorMessage}`)
-      }
-
-      // Extract the actual subscription from the Result.value
-      const subscription = (result as any).value
-      
-      console.log('[Creem] Upgrade successful, extracting data:', {
-        hasSubscription: !!subscription,
-        subscriptionId: subscription?.id,
-        status: subscription?.status
-      })
-
-      if (!subscription) {
-        console.error('[Creem] No subscription in Result.value')
+      if (!result || !result.id) {
+        console.error('[Creem] Upgrade failed - no subscription returned')
         throw new Error('No subscription returned from upgrade')
       }
 
       // Cast to access latestInvoice (not in type but exists in API response)
-      const upgradeResult = subscription as any
+      const upgradeResult = result as any
       
       console.log('[Creem] Subscription details:', {
-        id: subscription.id,
-        status: subscription.status,
+        id: result.id,
+        status: result.status,
         hasLatestInvoice: !!upgradeResult?.latestInvoice
       })
 
@@ -1372,7 +1308,7 @@ class CreemPaymentService {
 
       return {
         success: true,
-        subscription: subscription,
+        subscription: result,
         prorationAmount: prorationAmount,
         message: 'Subscription upgraded successfully with immediate proration'
       }
