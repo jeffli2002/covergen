@@ -451,18 +451,25 @@ class CreemPaymentService {
         console.log('[Creem] SDK checkout result:', {
           hasResult: !!checkoutResult,
           isOk: (checkoutResult as any)?.ok,
-          hasError: !!(checkoutResult as any)?.error
+          hasError: !!(checkoutResult as any)?.error,
+          resultKeys: checkoutResult ? Object.keys(checkoutResult) : [],
+          resultType: typeof checkoutResult
         })
         
         if (!checkoutResult || !(checkoutResult as any).ok) {
           const error = (checkoutResult as any)?.error
           console.error('[Creem] Checkout failed - Result.ok is false:', {
             error: error,
+            errorType: typeof error,
+            errorKeys: error ? Object.keys(error) : [],
+            errorString: JSON.stringify(error, null, 2),
             errorMessage: error?.message || error?.detail || error?.title,
-            errorCode: error?.code || error?.status
+            errorCode: error?.code || error?.status,
+            fullResult: JSON.stringify(checkoutResult, null, 2)
           })
           
-          const errorMessage = error?.message || error?.detail || error?.title || 'Unknown error from Creem API'
+          const errorMessage = error?.message || error?.detail || error?.title || 
+                               (typeof error === 'string' ? error : 'Unknown error from Creem API')
           throw new Error(`Creem SDK Error: ${errorMessage}`)
         }
         
