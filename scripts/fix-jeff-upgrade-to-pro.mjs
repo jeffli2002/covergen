@@ -47,15 +47,16 @@ if (userError || !user) {
 
 console.log('✅ User found:', user.id)
 
-// 2. Get current subscription
+// 2. Get current subscription from public.bestauth_subscriptions
 const { data: currentSub, error: subError } = await supabase
   .from('bestauth_subscriptions')
   .select('*')
   .eq('user_id', user.id)
-  .single()
+  .maybeSingle()
 
 if (subError) {
   console.error('❌ Error fetching subscription:', subError.message)
+  console.error('Details:', subError)
   process.exit(1)
 }
 

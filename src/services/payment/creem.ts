@@ -994,14 +994,18 @@ class CreemPaymentService {
     
     console.log('[Creem Service] Extracting planId from:', {
       'metadata.planId': metadata?.planId,
+      'metadata.billingCycle': metadata?.billingCycle,
       'order.product': order?.product,
-      'subscription.product.id': subscription?.product?.id
+      'subscription.product.id': subscription?.product?.id,
+      'subscription.product': subscription?.product
     })
-    const planId = metadata?.planId || this.getPlanFromProduct(order?.product)
+    const planId = metadata?.planId || this.getPlanFromProduct(order?.product || subscription?.product?.id || subscription?.product)
+    const billingCycle = metadata?.billingCycle || 'monthly'
     
     console.log('[Creem Service] Extracted values:', {
       userId,
       planId,
+      billingCycle,
       'planId is valid': planId !== 'free'
     })
     
@@ -1029,6 +1033,7 @@ class CreemPaymentService {
       customerId: customer?.id,
       subscriptionId: subscriptionId,
       planId: planId,
+      billingCycle: billingCycle,
       trialEnd: trialEnd
     }
     
@@ -1202,6 +1207,7 @@ class CreemPaymentService {
 
   /**
    * Helper to extract plan ID from product ID
+   * Creem sends actual product IDs like "prod_7aQWgvmz1JHGafTEGZtz9g" in webhooks
    */
   private getPlanFromProduct(productId: string): string {
     console.log('[Creem Service] getPlanFromProduct called with:', productId)
@@ -1211,14 +1217,39 @@ class CreemPaymentService {
       return 'free'
     }
     
-    // Convert to lowercase for case-insensitive matching
+    // Match against actual Creem product IDs from environment
+    const proMonthly = env.NEXT_PUBLIC_PRICE_ID_PRO_MONTHLY
+    const proYearly = env.NEXT_PUBLIC_PRICE_ID_PRO_YEARLY
+    const proPlusMonthly = env.NEXT_PUBLIC_PRICE_ID_PROPLUS_MONTHLY
+    const proPlusYearly = env.NEXT_PUBLIC_PRICE_ID_PROPLUS_YEARLY
+    
+    console.log('[Creem Service] Matching against product IDs:', {
+      productId,
+      proMonthly,
+      proYearly,
+      proPlusMonthly,
+      proPlusYearly
+    })
+    
+    // Exact match against configured product IDs
+    if (productId === proPlusMonthly || productId === proPlusYearly) {
+      console.log('[Creem Service] getPlanFromProduct: matched pro_plus via exact product ID')
+      return 'pro_plus'
+    }
+    
+    if (productId === proMonthly || productId === proYearly) {
+      console.log('[Creem Service] getPlanFromProduct: matched pro via exact product ID')
+      return 'pro'
+    }
+    
+    // Fallback to string matching for backward compatibility
     const productIdLower = productId.toLowerCase()
     
     if (productIdLower.includes('pro_plus') || productIdLower.includes('proplus') || productIdLower.includes('pro-plus')) {
-      console.log('[Creem Service] getPlanFromProduct: matched pro_plus')
+      console.log('[Creem Service] getPlanFromProduct: matched pro_plus via string matching')
       return 'pro_plus'
     } else if (productIdLower.includes('pro')) {
-      console.log('[Creem Service] getPlanFromProduct: matched pro')
+      console.log('[Creem Service] getPlanFromProduct: matched pro via string matching')
       return 'pro'
     }
     
