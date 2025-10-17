@@ -16,7 +16,6 @@ export async function generateMetadata({
     title: 'CoverGen.pro | AI Image & Video Generator – Nano Banana & Sora 2',
     description: 'Create AI images, posters, covers & videos instantly. Powered by Nano Banana & Sora 2. Free, no login. Perfect for creators, brands & marketers.',
     keywords: [
-      // NEW: Primary keywords from user request (2025-10-12)
       'ai image generator',
       'ai video generator',
       'nano banana',
@@ -31,44 +30,7 @@ export async function generateMetadata({
       'free ai generator',
       'ai image video tool',
       'ai art creator',
-      'ai marketing visuals',
-      
-      // EXISTING: Primary keywords
-      'ai cover generator',
-      'free thumbnail maker',
-      'cover generator',
-      'thumbnail generator',
-      'ai thumbnail maker',
-      'free cover maker',
-      'thumbnail maker no watermark',
-      'ai design tool',
-      
-      // EXISTING: Platform-specific
-      'youtube thumbnail maker',
-      'tiktok cover generator',
-      'spotify cover maker',
-      'instagram post maker',
-      'twitch thumbnail creator',
-      
-      // EXISTING: Feature keywords
-      'cover maker free',
-      'online cover generator',
-      'ai poster maker',
-      'social media cover maker',
-      'professional cover design',
-      'instant cover generator',
-      
-      // EXISTING: Brand keywords
-      'covergen pro',
-      'covergen ai',
-      'cover generation tool',
-      
-      // EXISTING: Sora 2 keywords
-      'sora 2 cover generator',
-      'sora 2 thumbnail maker',
-      'sora 2 ai integration',
-      'sora 2 video covers',
-      'sora 2 content creation'
+      'ai marketing visuals'
     ],
     path: '/',
     locale,
