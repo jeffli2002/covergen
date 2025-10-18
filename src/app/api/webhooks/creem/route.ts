@@ -917,22 +917,29 @@ async function handleOneTimePaymentSuccess(data: any) {
 function createAdminSupabaseClient() {
   throw new Error('This webhook handler uses BestAuth - Supabase client not needed')
 }
-function serializeError(error: unknown) {
+type SerializedError = Record<string, unknown>
+
+function serializeError(error: unknown): SerializedError {
   if (error instanceof Error) {
     return {
       name: error.name,
       message: error.message,
       stack: error.stack,
-      cause: error.cause instanceof Error ? serializeError(error.cause) : error.cause,
+      cause:
+        error.cause instanceof Error
+          ? serializeError(error.cause)
+          : typeof error.cause === 'object' && error.cause !== null
+            ? serializeError(error.cause)
+            : error.cause,
     }
   }
 
   if (typeof error === 'object' && error !== null) {
     try {
-      return JSON.parse(JSON.stringify(error))
+      return JSON.parse(JSON.stringify(error)) as SerializedError
     } catch {
-      return Object.entries(error as Record<string, unknown>).reduce<Record<string, string>>((acc, [key, value]) => {
-        acc[key] = typeof value === 'object' ? '[object]' : String(value)
+      return Object.entries(error as Record<string, unknown>).reduce<SerializedError>((acc, [key, value]) => {
+        acc[key] = typeof value === 'object' && value !== null ? '[object]' : String(value)
         return acc
       }, {})
     }
