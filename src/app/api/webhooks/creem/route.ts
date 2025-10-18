@@ -925,12 +925,7 @@ function serializeError(error: unknown): SerializedError {
       name: error.name,
       message: error.message,
       stack: error.stack,
-      cause:
-        error.cause instanceof Error
-          ? serializeError(error.cause)
-          : typeof error.cause === 'object' && error.cause !== null
-            ? serializeError(error.cause)
-            : error.cause,
+      cause: serializeUnknownCause((error as { cause?: unknown }).cause),
     }
   }
 
@@ -946,4 +941,20 @@ function serializeError(error: unknown): SerializedError {
   }
 
   return { value: String(error) }
+}
+
+function serializeUnknownCause(cause: unknown): unknown {
+  if (!cause) {
+    return cause
+  }
+
+  if (cause instanceof Error) {
+    return serializeError(cause)
+  }
+
+  if (typeof cause === 'object') {
+    return serializeError(cause)
+  }
+
+  return cause
 }
