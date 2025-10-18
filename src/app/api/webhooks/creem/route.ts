@@ -31,16 +31,28 @@ export async function POST(req: NextRequest) {
 
     // Verify webhook signature
     if (process.env.CREEM_WEBHOOK_SECRET) {
-      const isValid = creemService.verifyWebhookSignature(rawBody, signature)
-      if (!isValid) {
+      const verification = creemService.verifyWebhookSignature(rawBody, signature)
+      if (!verification.valid) {
         console.error('[BestAuth Webhook] Invalid webhook signature')
         console.error('Expected header: creem-signature')
         console.error('Received signature:', signature ? 'present' : 'missing')
         console.error('[BestAuth Webhook] Signature mismatch details:', {
           signaturePreview: signature ? signature.substring(0, 32) + '...' : 'none',
-          payloadSha256: crypto.createHash('sha256').update(rawBody).digest('hex')
+          payloadSha256: crypto.createHash('sha256').update(rawBody).digest('hex'),
+          reason: verification.reason,
+          normalizedSignature: verification.normalizedSignature?.substring(0, 64),
+          expectedHexPreview: verification.expectedHex?.substring(0, 32),
+          providedHexPreview: verification.providedHex?.substring(0, 32)
         })
-        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+        const debugInfo = {
+          error: 'Invalid signature',
+          reason: verification.reason,
+          signature: verification.rawSignature,
+          normalizedSignature: verification.normalizedSignature,
+          expectedHexPreview: verification.expectedHex?.substring(0, 64),
+          providedHexPreview: verification.providedHex?.substring(0, 64)
+        }
+        return NextResponse.json(debugInfo, { status: 401 })
       }
       console.log('[BestAuth Webhook] Signature verified successfully')
     } else if (process.env.NODE_ENV === 'production') {
