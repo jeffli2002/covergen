@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
     // Verify webhook signature
     if (process.env.CREEM_WEBHOOK_SECRET) {
       console.log('[BestAuth Webhook] Using secret prefix:', process.env.CREEM_WEBHOOK_SECRET.slice(0, 6), 'len:', process.env.CREEM_WEBHOOK_SECRET.length)
+      console.log('[BestAuth Webhook] Raw request for signature check:', rawBody)
       const verification = creemService.verifyWebhookSignature(rawBody, signature)
       if (!verification.valid) {
         console.error('[BestAuth Webhook] Invalid webhook signature')
