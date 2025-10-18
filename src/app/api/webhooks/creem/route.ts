@@ -7,7 +7,6 @@ import { getSubscriptionConfig, calculateTrialEndDate } from '@/lib/subscription
 import { createPointsService } from '@/lib/services/points-service'
 import { createClient } from '@/utils/supabase/server'
 import { getBestAuthSupabaseClient } from '@/lib/bestauth/db-client'
-import { userSyncService } from '@/services/sync/UserSyncService'
 
 // Disable body parsing to get raw body for signature verification
 export const dynamic = 'force-dynamic'
@@ -21,21 +20,14 @@ interface ResolvedUser {
 }
 
 async function resolveUserId(possibleUserId?: string | null, email?: string | null): Promise<ResolvedUser | null> {
-  if (possibleUserId) {
-    try {
-      const bestAuthUser = await db.users.findById(possibleUserId)
-      if (bestAuthUser) {
-        return { userId: possibleUserId, source: 'payload' }
-      }
-      console.warn(`[BestAuth Webhook] Provided userId ${possibleUserId} not found in BestAuth users table`)
-    } catch (error) {
-      console.error('[BestAuth Webhook] Error checking BestAuth user by provided userId:', error)
-    }
-  }
-
   const adminClient = getBestAuthSupabaseClient()
 
-  if (possibleUserId && adminClient) {
+  if (!adminClient) {
+    console.error('[BestAuth Webhook] Service role Supabase client unavailable')
+    return null
+  }
+
+  if (possibleUserId) {
     try {
       const { data, error } = await adminClient.auth.admin.getUserById(possibleUserId)
       if (data?.user) {
@@ -43,7 +35,7 @@ async function resolveUserId(possibleUserId?: string | null, email?: string | nu
       }
       if (error?.status && error.status !== 404) {
         console.error('[BestAuth Webhook] Error fetching user by provided userId:', error)
-      } else if (!email) {
+      } else {
         console.warn(`[BestAuth Webhook] Provided userId ${possibleUserId} not found in auth.users`)
       }
     } catch (error) {
@@ -51,58 +43,25 @@ async function resolveUserId(possibleUserId?: string | null, email?: string | nu
     }
   }
 
-  if (email && adminClient) {
+  if (email) {
     try {
-      const perPage = 200
+      const { data, error } = await adminClient.auth.admin.listUsers({ email })
+      const matchedUser = data?.users?.find(user => user.email?.toLowerCase() === email.toLowerCase())
 
-      for (let page = 1; page <= 5; page++) {
-        const { data, error } = await adminClient.auth.admin.listUsers({ page, perPage })
+      if (matchedUser) {
+        console.log(`[BestAuth Webhook] Resolved user by email ${email} -> ${matchedUser.id}`)
+        return { userId: matchedUser.id, source: 'email' }
+      }
 
-        if (error) {
-          console.error('[BestAuth Webhook] Error fetching user by email:', error)
-          break
-        }
-
-        const matchedUser = data?.users?.find(user => user.email?.toLowerCase() === email.toLowerCase())
-
-        if (matchedUser) {
-          console.log(`[BestAuth Webhook] Resolved Supabase user by email ${email} -> ${matchedUser.id}`)
-
-          try {
-            const existingMapping = await userSyncService.getUserMapping(matchedUser.id)
-            if (existingMapping) {
-              console.log(`[BestAuth Webhook] Using existing BestAuth user mapping ${existingMapping} for Supabase user ${matchedUser.id}`)
-              return { userId: existingMapping, source: 'email' }
-            }
-
-            console.log(`[BestAuth Webhook] Mapping Supabase user ${matchedUser.id} to BestAuth via sync service`)
-            const syncResult = await userSyncService.syncUser(matchedUser.id)
-
-            if (syncResult.success && syncResult.userId) {
-              console.log(`[BestAuth Webhook] Synced Supabase user ${matchedUser.id} to BestAuth user ${syncResult.userId}`)
-              return { userId: syncResult.userId, source: 'email' }
-            }
-
-            console.error('[BestAuth Webhook] Failed to sync Supabase user to BestAuth:', syncResult.error)
-          } catch (syncError) {
-            console.error('[BestAuth Webhook] Error mapping Supabase user to BestAuth:', syncError)
-          }
-        }
-
-        if (!data?.users?.length || data.users.length < perPage) {
-          break
-        }
+      if (error) {
+        console.error('[BestAuth Webhook] Error fetching user by email:', error)
+        return null
       }
 
       console.warn(`[BestAuth Webhook] No user found for email ${email}`)
     } catch (error) {
       console.error('[BestAuth Webhook] Exception fetching user by email:', error)
     }
-  }
-
-  if (possibleUserId) {
-    console.warn('[BestAuth Webhook] Falling back to provided userId despite lookup failures')
-    return { userId: possibleUserId, source: 'payload' }
   }
 
   return null
