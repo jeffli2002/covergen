@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { creemService, WebhookEvent } from '@/services/payment/creem'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 import { db } from '@/lib/bestauth/db-wrapper'
@@ -7,12 +8,13 @@ import { getSubscriptionConfig, calculateTrialEndDate } from '@/lib/subscription
 import { createPointsService } from '@/lib/services/points-service'
 import { createClient } from '@/utils/supabase/server'
 import { getBestAuthSupabaseClient } from '@/lib/bestauth/db-client'
+import { userSyncService } from '@/services/sync/UserSyncService'
 
 // Disable body parsing to get raw body for signature verification
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-type UserResolutionSource = 'payload' | 'email'
+type UserResolutionSource = 'payload' | 'email' | 'mapping' | 'sync'
 
 interface ResolvedUser {
   userId: string
@@ -22,49 +24,140 @@ interface ResolvedUser {
 async function resolveUserId(possibleUserId?: string | null, email?: string | null): Promise<ResolvedUser | null> {
   const adminClient = getBestAuthSupabaseClient()
 
-  if (!adminClient) {
-    console.error('[BestAuth Webhook] Service role Supabase client unavailable')
+  // Step 1: trust payload when it already matches a BestAuth user
+  if (possibleUserId) {
+    try {
+      const bestAuthUser = await db.users.findById(possibleUserId)
+      if (bestAuthUser) {
+        return { userId: bestAuthUser.id, source: 'payload' }
+      }
+    } catch (error) {
+      console.error('[BestAuth Webhook] Error checking BestAuth user id from payload:', error)
+    }
+  }
+
+  // Step 2: if payload looks like a Supabase user id, map/sync it into BestAuth
+  if (possibleUserId && adminClient) {
+    const mappedUser = await resolveSupabaseUserId(possibleUserId, adminClient)
+    if (mappedUser) {
+      return mappedUser
+    }
+  }
+
+  // Step 3: resolve by email using existing BestAuth records
+  if (email) {
+    try {
+      const bestAuthByEmail = await db.users.findByEmail(email)
+      if (bestAuthByEmail) {
+        return { userId: bestAuthByEmail.id, source: 'email' }
+      }
+    } catch (error) {
+      console.error('[BestAuth Webhook] Error looking up BestAuth user by email:', error)
+    }
+  }
+
+  // Step 4: resolve by Supabase email and create mapping as needed
+  if (email && adminClient) {
+    const supabaseUserIds = await findSupabaseUserIdsByEmail(email, adminClient)
+    for (const supabaseUserId of supabaseUserIds) {
+      const mappedUser = await resolveSupabaseUserId(supabaseUserId, adminClient)
+      if (mappedUser) {
+        return mappedUser.source === 'payload'
+          ? { userId: mappedUser.userId, source: 'email' }
+          : mappedUser
+      }
+    }
+  }
+
+  console.error('[BestAuth Webhook] Unable to resolve user from webhook payload', {
+    possibleUserId,
+    email
+  })
+
+  return null
+}
+
+async function resolveSupabaseUserId(supabaseUserId: string, adminClient: ReturnType<typeof getBestAuthSupabaseClient> | null): Promise<ResolvedUser | null> {
+  if (!supabaseUserId) {
     return null
   }
 
-  if (possibleUserId) {
+  try {
+    const existingMapping = await userSyncService.getUserMapping(supabaseUserId)
+    if (existingMapping) {
+      console.log(`[BestAuth Webhook] Found BestAuth user ${existingMapping} mapped to Supabase user ${supabaseUserId}`)
+      return { userId: existingMapping, source: 'mapping' }
+    }
+  } catch (error) {
+    console.error('[BestAuth Webhook] Error retrieving Supabase→BestAuth user mapping:', error)
+  }
+
+  // Ensure Supabase user exists before attempting to sync
+  if (adminClient) {
     try {
-      const { data, error } = await adminClient.auth.admin.getUserById(possibleUserId)
-      if (data?.user) {
-        return { userId: possibleUserId, source: 'payload' }
-      }
-      if (error?.status && error.status !== 404) {
-        console.error('[BestAuth Webhook] Error fetching user by provided userId:', error)
-      } else {
-        console.warn(`[BestAuth Webhook] Provided userId ${possibleUserId} not found in auth.users`)
+      const { data, error } = await adminClient.auth.admin.getUserById(supabaseUserId)
+      if (error?.status === 404 || !data?.user) {
+        console.warn(`[BestAuth Webhook] Supabase user ${supabaseUserId} not found while resolving webhook user`)
+        return null
       }
     } catch (error) {
-      console.error('[BestAuth Webhook] Exception verifying provided userId:', error)
+      console.error('[BestAuth Webhook] Error fetching Supabase user while resolving webhook user:', error)
     }
   }
 
-  if (email) {
-    try {
-      const { data, error } = await adminClient.auth.admin.listUsers({ email })
-      const matchedUser = data?.users?.find(user => user.email?.toLowerCase() === email.toLowerCase())
-
-      if (matchedUser) {
-        console.log(`[BestAuth Webhook] Resolved user by email ${email} -> ${matchedUser.id}`)
-        return { userId: matchedUser.id, source: 'email' }
-      }
-
-      if (error) {
-        console.error('[BestAuth Webhook] Error fetching user by email:', error)
-        return null
-      }
-
-      console.warn(`[BestAuth Webhook] No user found for email ${email}`)
-    } catch (error) {
-      console.error('[BestAuth Webhook] Exception fetching user by email:', error)
+  try {
+    const syncResult = await userSyncService.syncUser(supabaseUserId)
+    if (syncResult.success && syncResult.userId) {
+      console.log(`[BestAuth Webhook] Synced Supabase user ${supabaseUserId} -> BestAuth user ${syncResult.userId}`)
+      return { userId: syncResult.userId, source: 'sync' }
     }
+    console.error('[BestAuth Webhook] Failed to sync Supabase user into BestAuth:', syncResult.error)
+  } catch (error) {
+    console.error('[BestAuth Webhook] Exception while syncing Supabase user into BestAuth:', error)
   }
 
   return null
+}
+
+async function findSupabaseUserIdsByEmail(email: string, adminClient: ReturnType<typeof getBestAuthSupabaseClient> | null): Promise<string[]> {
+  if (!adminClient) {
+    return []
+  }
+
+  const normalizedEmail = email.toLowerCase()
+  const perPage = 200
+  const maxPages = 5
+  const matchedIds: string[] = []
+
+  for (let page = 1; page <= maxPages; page++) {
+    try {
+      const { data, error } = await adminClient.auth.admin.listUsers({ page, perPage })
+      if (error) {
+        console.error('[BestAuth Webhook] Error listing Supabase users while resolving email:', error)
+        break
+      }
+
+      const users = data?.users || []
+      for (const user of users) {
+        if (user.email?.toLowerCase() === normalizedEmail) {
+          matchedIds.push(user.id)
+        }
+      }
+
+      if (users.length < perPage) {
+        break
+      }
+    } catch (error) {
+      console.error('[BestAuth Webhook] Exception while listing Supabase users for email resolution:', error)
+      break
+    }
+  }
+
+  if (!matchedIds.length) {
+    console.warn(`[BestAuth Webhook] No Supabase auth users found for email ${email}`)
+  }
+
+  return matchedIds
 }
 
 export async function POST(req: NextRequest) {
