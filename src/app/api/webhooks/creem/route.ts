@@ -12,7 +12,14 @@ import { getBestAuthSupabaseClient } from '@/lib/bestauth/db-client'
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-async function resolveUserId(possibleUserId?: string | null, email?: string | null): Promise<string | null> {
+type UserResolutionSource = 'payload' | 'email'
+
+interface ResolvedUser {
+  userId: string
+  source: UserResolutionSource
+}
+
+async function resolveUserId(possibleUserId?: string | null, email?: string | null): Promise<ResolvedUser | null> {
   const adminClient = getBestAuthSupabaseClient()
 
   if (!adminClient) {
@@ -24,7 +31,7 @@ async function resolveUserId(possibleUserId?: string | null, email?: string | nu
     try {
       const { data, error } = await adminClient.auth.admin.getUserById(possibleUserId)
       if (data?.user) {
-        return possibleUserId
+        return { userId: possibleUserId, source: 'payload' }
       }
       if (error?.status && error.status !== 404) {
         console.error('[BestAuth Webhook] Error fetching user by provided userId:', error)
@@ -38,12 +45,15 @@ async function resolveUserId(possibleUserId?: string | null, email?: string | nu
 
   if (email) {
     try {
-      const { data, error } = await adminClient.auth.admin.getUserByEmail(email)
-      if (data?.user) {
-        console.log(`[BestAuth Webhook] Resolved user by email ${email} -> ${data.user.id}`)
-        return data.user.id
+      const { data, error } = await adminClient.auth.admin.listUsers({ email })
+      const matchedUser = data?.users?.find(user => user.email?.toLowerCase() === email.toLowerCase())
+
+      if (matchedUser) {
+        console.log(`[BestAuth Webhook] Resolved user by email ${email} -> ${matchedUser.id}`)
+        return { userId: matchedUser.id, source: 'email' }
       }
-      if (error?.status && error.status !== 404) {
+
+      if (error) {
         console.error('[BestAuth Webhook] Error fetching user by email:', error)
       } else {
         console.warn(`[BestAuth Webhook] No user found for email ${email}`)
@@ -197,7 +207,24 @@ async function handleCheckoutComplete(data: any) {
     customerEmail
   })
 
-  const actualUserId = await resolveUserId(userId, customerEmail)
+  const resolvedUser = await resolveUserId(userId, customerEmail)
+  let actualUserId = resolvedUser?.userId || null
+  let userResolutionStrategy: UserResolutionSource | 'customer_lookup' | null = resolvedUser?.source || null
+
+  if (!actualUserId && customerId) {
+    try {
+      const existingSubscription = await db.subscriptions.findByCustomerId(customerId)
+      if (existingSubscription?.user_id) {
+        actualUserId = existingSubscription.user_id
+        userResolutionStrategy = 'customer_lookup'
+        console.log(
+          `[BestAuth Webhook] Resolved user via existing subscription customerId ${customerId} -> ${actualUserId}`
+        )
+      }
+    } catch (lookupError) {
+      console.error('[BestAuth Webhook] Failed to resolve user by customerId lookup:', lookupError)
+    }
+  }
 
   if (!actualUserId || !planId) {
     console.error('[BestAuth Webhook] Missing required data for checkout complete:', { actualUserId, planId, customerEmail, originalUserId: userId })
@@ -238,7 +265,8 @@ async function handleCheckoutComplete(data: any) {
         initial_plan: planId,
         billing_cycle: cycle,
         original_userId: userId,  // Keep original for debugging
-        customer_email: customerEmail
+        customer_email: customerEmail,
+        user_resolution_strategy: userResolutionStrategy
       }
     })
     
