@@ -45,28 +45,16 @@ async function resolveUserId(possibleUserId?: string | null, email?: string | nu
 
   if (email) {
     try {
-      const { data, error } = await adminClient.auth.admin.getUserByEmail(email)
-
-      if (data?.user) {
-        console.log(`[BestAuth Webhook] Resolved user by email ${email} -> ${data.user.id}`)
-        return { userId: data.user.id, source: 'email' }
-      }
-
-      if (error && error.status !== 404) {
-        console.error('[BestAuth Webhook] Error fetching user by email:', error)
-        return null
-      }
-
-      const { data: listData, error: listError } = await adminClient.auth.admin.listUsers({ email })
-      const matchedUser = listData?.users?.find(user => user.email?.toLowerCase() === email.toLowerCase())
+      const { data, error } = await adminClient.auth.admin.listUsers({ email })
+      const matchedUser = data?.users?.find(user => user.email?.toLowerCase() === email.toLowerCase())
 
       if (matchedUser) {
         console.log(`[BestAuth Webhook] Resolved user by email ${email} -> ${matchedUser.id}`)
         return { userId: matchedUser.id, source: 'email' }
       }
 
-      if (listError) {
-        console.error('[BestAuth Webhook] Error fetching user by email via listUsers:', listError)
+      if (error) {
+        console.error('[BestAuth Webhook] Error fetching user by email:', error)
         return null
       }
 
