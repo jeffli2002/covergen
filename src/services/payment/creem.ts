@@ -860,17 +860,61 @@ class CreemPaymentService {
    */
   verifyWebhookSignature(payload: string, signature: string): boolean {
     const CREEM_WEBHOOK_SECRET = getCreemWebhookSecret()
-    // In test mode, skip signature verification if no webhook secret
-    if (getCreemTestMode() && !CREEM_WEBHOOK_SECRET) {
-      console.warn('Webhook signature verification skipped in test mode')
-      return true
+    const inTestMode = getCreemTestMode()
+
+    if (!CREEM_WEBHOOK_SECRET) {
+      if (inTestMode) {
+        console.warn('[Creem] Webhook secret not set - skipping signature verification in test mode')
+        return true
+      }
+      console.error('[Creem] Webhook secret is missing - rejecting webhook')
+      return false
+    }
+
+    if (!signature) {
+      console.error('[Creem] Missing webhook signature header')
+      return false
     }
 
     try {
       const crypto = require('crypto')
-      const hmac = crypto.createHmac('sha256', CREEM_WEBHOOK_SECRET)
-      const digest = hmac.update(payload).digest('hex')
-      return digest === signature
+      const expected = crypto.createHmac('sha256', CREEM_WEBHOOK_SECRET).update(payload).digest()
+
+      // Creem sends either raw hex, base64, or strings prefixed with "sha256="
+      const stripped = signature.trim().replace(/^sha256=/i, '')
+
+      let provided: Buffer | null = null
+      const isHex = /^[0-9a-f]+$/i.test(stripped)
+
+      if (isHex) {
+        if (stripped.length % 2 !== 0) {
+          console.error('[Creem] Invalid hex signature length')
+          return false
+        }
+        provided = Buffer.from(stripped, 'hex')
+      } else {
+        try {
+          provided = Buffer.from(stripped, 'base64')
+        } catch (err) {
+          console.error('[Creem] Failed to decode base64 webhook signature:', err)
+          return false
+        }
+      }
+
+      if (!provided || provided.length === 0) {
+        console.error('[Creem] Webhook signature decoding produced empty buffer')
+        return false
+      }
+
+      if (provided.length !== expected.length) {
+        console.error('[Creem] Webhook signature length mismatch', {
+          expectedLength: expected.length,
+          providedLength: provided.length
+        })
+        return false
+      }
+
+      return crypto.timingSafeEqual(expected, provided)
     } catch (error) {
       console.error('Webhook signature verification error:', error)
       return false
