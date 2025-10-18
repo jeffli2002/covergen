@@ -407,10 +407,16 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ received: true })
   } catch (error) {
-    console.error('[BestAuth Webhook] Error processing webhook:', error)
-    const message = error instanceof Error ? error.message : String(error)
+    const serialized = serializeError(error)
+    console.error('[BestAuth Webhook] Error processing webhook:', serialized)
+    const message =
+      typeof serialized === 'object' && serialized !== null && 'message' in serialized
+        ? (serialized as any).message
+        : typeof error === 'string'
+          ? error
+          : 'Unexpected error'
     return NextResponse.json(
-      { error: 'Webhook processing failed', message },
+      { error: 'Webhook processing failed', message, details: serialized },
       { status: 500 }
     )
   }
@@ -910,4 +916,27 @@ async function handleOneTimePaymentSuccess(data: any) {
 // Helper function to create admin Supabase client (no longer needed for BestAuth)
 function createAdminSupabaseClient() {
   throw new Error('This webhook handler uses BestAuth - Supabase client not needed')
+}
+function serializeError(error: unknown) {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      cause: error.cause instanceof Error ? serializeError(error.cause) : error.cause,
+    }
+  }
+
+  if (typeof error === 'object' && error !== null) {
+    try {
+      return JSON.parse(JSON.stringify(error))
+    } catch {
+      return Object.entries(error as Record<string, unknown>).reduce<Record<string, string>>((acc, [key, value]) => {
+        acc[key] = typeof value === 'object' ? '[object]' : String(value)
+        return acc
+      }, {})
+    }
+  }
+
+  return { value: String(error) }
 }
