@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { validateSessionFromRequest } from '@/lib/bestauth'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 
+export const runtime = 'nodejs'
+
 export async function GET(request: NextRequest) {
   try {
     // Check if this is a debug request
