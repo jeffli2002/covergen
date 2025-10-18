@@ -4,6 +4,8 @@ import { validateSessionFromRequest } from '@/lib/bestauth'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 import { db } from '@/lib/bestauth/db'
 
+export const runtime = 'nodejs'
+
 // GET /api/bestauth/account - Get account information
 export async function GET(request: NextRequest) {
   console.log('[BestAuth Account API] Request received')
