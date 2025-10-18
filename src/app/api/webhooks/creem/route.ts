@@ -45,17 +45,26 @@ async function resolveUserId(possibleUserId?: string | null, email?: string | nu
 
   if (email) {
     try {
-      const { data, error } = await adminClient.auth.admin.listUsers({ email })
-      const matchedUser = data?.users?.find(user => user.email?.toLowerCase() === email.toLowerCase())
+      const perPage = 200
 
-      if (matchedUser) {
-        console.log(`[BestAuth Webhook] Resolved user by email ${email} -> ${matchedUser.id}`)
-        return { userId: matchedUser.id, source: 'email' }
-      }
+      for (let page = 1; page <= 5; page++) {
+        const { data, error } = await adminClient.auth.admin.listUsers({ page, perPage })
 
-      if (error) {
-        console.error('[BestAuth Webhook] Error fetching user by email:', error)
-        return null
+        if (error) {
+          console.error('[BestAuth Webhook] Error fetching user by email:', error)
+          return null
+        }
+
+        const matchedUser = data?.users?.find(user => user.email?.toLowerCase() === email.toLowerCase())
+
+        if (matchedUser) {
+          console.log(`[BestAuth Webhook] Resolved user by email ${email} -> ${matchedUser.id}`)
+          return { userId: matchedUser.id, source: 'email' }
+        }
+
+        if (!data?.users?.length || data.users.length < perPage) {
+          break
+        }
       }
 
       console.warn(`[BestAuth Webhook] No user found for email ${email}`)
