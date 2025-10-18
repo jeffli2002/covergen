@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import crypto from 'crypto'
 import { creemService, WebhookEvent } from '@/services/payment/creem'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 import { db } from '@/lib/bestauth/db-wrapper'
@@ -8,6 +9,7 @@ import { createClient } from '@/utils/supabase/server'
 
 // Disable body parsing to get raw body for signature verification
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,6 +36,10 @@ export async function POST(req: NextRequest) {
         console.error('[BestAuth Webhook] Invalid webhook signature')
         console.error('Expected header: creem-signature')
         console.error('Received signature:', signature ? 'present' : 'missing')
+        console.error('[BestAuth Webhook] Signature mismatch details:', {
+          signaturePreview: signature ? signature.substring(0, 32) + '...' : 'none',
+          payloadSha256: crypto.createHash('sha256').update(rawBody).digest('hex')
+        })
         return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
       }
       console.log('[BestAuth Webhook] Signature verified successfully')

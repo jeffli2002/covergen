@@ -914,7 +914,14 @@ class CreemPaymentService {
         return false
       }
 
-      return crypto.timingSafeEqual(expected, provided)
+      const matches = crypto.timingSafeEqual(expected, provided)
+      if (!matches) {
+        console.error('[Creem] Webhook signature mismatch', {
+          expectedPreview: expected.toString('hex').substring(0, 16) + '...',
+          providedPreview: provided.toString('hex').substring(0, 16) + '...'
+        })
+      }
+      return matches
     } catch (error) {
       console.error('Webhook signature verification error:', error)
       return false
