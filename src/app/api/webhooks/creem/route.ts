@@ -24,6 +24,10 @@ async function resolveUserId(possibleUserId?: string | null, email?: string | nu
 
   if (!adminClient) {
     console.error('[BestAuth Webhook] Service role Supabase client unavailable')
+    if (possibleUserId) {
+      console.warn('[BestAuth Webhook] Falling back to provided userId due to missing admin client')
+      return { userId: possibleUserId, source: 'payload' }
+    }
     return null
   }
 
@@ -35,7 +39,7 @@ async function resolveUserId(possibleUserId?: string | null, email?: string | nu
       }
       if (error?.status && error.status !== 404) {
         console.error('[BestAuth Webhook] Error fetching user by provided userId:', error)
-      } else {
+      } else if (!email) {
         console.warn(`[BestAuth Webhook] Provided userId ${possibleUserId} not found in auth.users`)
       }
     } catch (error) {
@@ -52,7 +56,7 @@ async function resolveUserId(possibleUserId?: string | null, email?: string | nu
 
         if (error) {
           console.error('[BestAuth Webhook] Error fetching user by email:', error)
-          return null
+          break
         }
 
         const matchedUser = data?.users?.find(user => user.email?.toLowerCase() === email.toLowerCase())
@@ -71,6 +75,11 @@ async function resolveUserId(possibleUserId?: string | null, email?: string | nu
     } catch (error) {
       console.error('[BestAuth Webhook] Exception fetching user by email:', error)
     }
+  }
+
+  if (possibleUserId) {
+    console.warn('[BestAuth Webhook] Returning provided userId as fallback resolution')
+    return { userId: possibleUserId, source: 'payload' }
   }
 
   return null
