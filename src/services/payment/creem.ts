@@ -1142,6 +1142,7 @@ class CreemPaymentService {
     const result = {
       type: 'checkout_complete',
       userId: userId,
+      customerEmail: customer?.email,  // Add customer email for user lookup
       customerId: customer?.id,
       subscriptionId: subscriptionId,
       planId: planId,

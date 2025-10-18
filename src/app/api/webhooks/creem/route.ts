@@ -6,10 +6,55 @@ import { db } from '@/lib/bestauth/db-wrapper'
 import { getSubscriptionConfig, calculateTrialEndDate } from '@/lib/subscription-config'
 import { createPointsService } from '@/lib/services/points-service'
 import { createClient } from '@/utils/supabase/server'
+import { getBestAuthSupabaseClient } from '@/lib/bestauth/db-client'
 
 // Disable body parsing to get raw body for signature verification
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
+
+async function resolveUserId(possibleUserId?: string | null, email?: string | null): Promise<string | null> {
+  const adminClient = getBestAuthSupabaseClient()
+
+  if (!adminClient) {
+    console.error('[BestAuth Webhook] Service role Supabase client unavailable')
+    return null
+  }
+
+  if (possibleUserId) {
+    try {
+      const { data, error } = await adminClient.auth.admin.getUserById(possibleUserId)
+      if (data?.user) {
+        return possibleUserId
+      }
+      if (error?.status && error.status !== 404) {
+        console.error('[BestAuth Webhook] Error fetching user by provided userId:', error)
+      } else {
+        console.warn(`[BestAuth Webhook] Provided userId ${possibleUserId} not found in auth.users`)
+      }
+    } catch (error) {
+      console.error('[BestAuth Webhook] Exception verifying provided userId:', error)
+    }
+  }
+
+  if (email) {
+    try {
+      const { data, error } = await adminClient.auth.admin.getUserByEmail(email)
+      if (data?.user) {
+        console.log(`[BestAuth Webhook] Resolved user by email ${email} -> ${data.user.id}`)
+        return data.user.id
+      }
+      if (error?.status && error.status !== 404) {
+        console.error('[BestAuth Webhook] Error fetching user by email:', error)
+      } else {
+        console.warn(`[BestAuth Webhook] No user found for email ${email}`)
+      }
+    } catch (error) {
+      console.error('[BestAuth Webhook] Exception fetching user by email:', error)
+    }
+  }
+
+  return null
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -137,7 +182,7 @@ async function handleCheckoutComplete(data: any) {
   console.log('[BestAuth Webhook] ===  CHECKOUT COMPLETE HANDLER START ===')
   console.log('[BestAuth Webhook] Raw data received:', JSON.stringify(data, null, 2))
   
-  const { userId, customerId, subscriptionId, planId, trialEnd, billingCycle, paymentIntentId } = data
+  const { userId, customerId, subscriptionId, planId, trialEnd, billingCycle, paymentIntentId, customerEmail } = data
 
   console.log('[BestAuth Webhook] Extracted checkout complete data:', { 
     userId, 
@@ -148,12 +193,15 @@ async function handleCheckoutComplete(data: any) {
     billingCycle,
     trialEnd,
     hasUserId: !!userId,
-    hasPlanId: !!planId
+    hasPlanId: !!planId,
+    customerEmail
   })
 
-  if (!userId || !planId) {
-    console.error('[BestAuth Webhook] Missing required data for checkout complete')
-    return
+  const actualUserId = await resolveUserId(userId, customerEmail)
+
+  if (!actualUserId || !planId) {
+    console.error('[BestAuth Webhook] Missing required data for checkout complete:', { actualUserId, planId, customerEmail, originalUserId: userId })
+    throw new Error('Missing required user ID or plan ID')
   }
 
   try {
@@ -176,7 +224,7 @@ async function handleCheckoutComplete(data: any) {
     
     // Create or update subscription in BestAuth (this will grant points automatically)
     const result = await bestAuthSubscriptionService.createOrUpdateSubscription({
-      userId,
+      userId: actualUserId,  // Use the verified actual user ID
       tier: planId,
       status: isTrialSubscription ? 'trialing' : 'active',
       stripeCustomerId: customerId,
@@ -188,11 +236,14 @@ async function handleCheckoutComplete(data: any) {
       metadata: {
         checkout_completed_at: new Date().toISOString(),
         initial_plan: planId,
-        billing_cycle: cycle
+        billing_cycle: cycle,
+        original_userId: userId,  // Keep original for debugging
+        customer_email: customerEmail
       }
     })
     
-    console.log(`[BestAuth Webhook] Successfully activated ${planId} ${isTrialSubscription ? 'TRIAL' : 'PAID'} subscription for user ${userId}`)
+    console.log(`[BestAuth Webhook] Successfully activated ${planId} ${isTrialSubscription ? 'TRIAL' : 'PAID'} subscription for user ${actualUserId}`)
+    console.log(`[BestAuth Webhook] Original userId from webhook: ${userId}, Actual userId: ${actualUserId}`)
     console.log(`[BestAuth Webhook] Points granted via subscription creation`)
     if (isTrialSubscription) {
       console.log(`[BestAuth Webhook] Trial ends at: ${trialEndsAt}`)
