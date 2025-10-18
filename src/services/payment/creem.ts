@@ -902,14 +902,17 @@ class CreemPaymentService {
       }
 
       if (!provided || provided.length === 0) {
-        console.error('[Creem] Webhook signature decoding produced empty buffer')
+        console.error('[Creem] Webhook signature decoding produced empty buffer', {
+          rawSignature: signature
+        })
         return false
       }
 
       if (provided.length !== expected.length) {
         console.error('[Creem] Webhook signature length mismatch', {
           expectedLength: expected.length,
-          providedLength: provided.length
+          providedLength: provided.length,
+          rawSignature: signature
         })
         return false
       }
@@ -917,6 +920,7 @@ class CreemPaymentService {
       const matches = crypto.timingSafeEqual(expected, provided)
       if (!matches) {
         console.error('[Creem] Webhook signature mismatch', {
+          rawSignature: signature,
           expectedPreview: expected.toString('hex').substring(0, 16) + '...',
           providedPreview: provided.toString('hex').substring(0, 16) + '...'
         })
