@@ -441,18 +441,15 @@ export class BestAuthSubscriptionService {
           
           if (supabase) {
             const metadata = typeof data.metadata === 'object' && data.metadata ? data.metadata : {}
-            let pointsUserId: string | null = null
-            let mappingSupabaseId: string | null = null
-
             const metadataSupabaseCandidates = [
               metadata.resolved_supabase_user_id,
-              metadata.supabase_user_id
+              metadata.supabase_user_id,
+              metadata.original_payload_user_id,
+              metadata.original_userId
             ].filter(isValidUuid)
 
-            if (metadataSupabaseCandidates.length > 0) {
-              pointsUserId = metadataSupabaseCandidates[0]!
-              console.log('[BestAuthSubscriptionService] Using Supabase user id from metadata for points grant:', pointsUserId)
-            }
+            let pointsUserId: string | null = metadataSupabaseCandidates[0] || null
+            let mappedSupabaseId: string | null = null
 
             try {
               const { data: mapping, error: mappingError } = await supabase
@@ -466,26 +463,16 @@ export class BestAuthSubscriptionService {
               }
 
               if (mapping?.supabase_user_id && isValidUuid(mapping.supabase_user_id)) {
-                mappingSupabaseId = mapping.supabase_user_id
-                if (!pointsUserId) {
-                  pointsUserId = mappingSupabaseId
-                }
-                console.log(`[BestAuthSubscriptionService] Found Supabase mapping for user ${data.userId} -> ${mappingSupabaseId}`)
+                mappedSupabaseId = mapping.supabase_user_id
+                pointsUserId = mapping.supabase_user_id
+                console.log(`[BestAuthSubscriptionService] Found Supabase mapping for user ${data.userId} -> ${mapping.supabase_user_id}`)
               }
             } catch (mappingException) {
               console.error('[BestAuthSubscriptionService] Failed to resolve Supabase user mapping for points grant:', mappingException)
             }
 
-            if (!pointsUserId) {
-              const legacyMetadataUserId =
-                (typeof metadata.original_payload_user_id === 'string' && metadata.original_payload_user_id) ||
-                (typeof metadata.original_userId === 'string' && metadata.original_userId) ||
-                null
-
-              if (isValidUuid(legacyMetadataUserId)) {
-                pointsUserId = legacyMetadataUserId
-                console.log('[BestAuthSubscriptionService] Using Supabase user id from legacy metadata fallback for points grant:', pointsUserId)
-              }
+            if (!pointsUserId && isValidUuid(data.stripeCustomerId || '')) {
+              console.warn('[BestAuthSubscriptionService] Stripe customer id looked like UUID, but skipping as Supabase user id')
             }
 
             if (!pointsUserId) {
@@ -493,13 +480,13 @@ export class BestAuthSubscriptionService {
                 bestAuthUserId: data.userId
               })
             } else {
-              if (!mappingSupabaseId || mappingSupabaseId !== pointsUserId) {
+              if (!mappedSupabaseId || mappedSupabaseId !== pointsUserId) {
                 try {
                   await userSyncService.createUserMapping(pointsUserId, data.userId)
                   console.log('[BestAuthSubscriptionService] Ensured Supabase↔BestAuth user mapping during points grant')
                 } catch (mappingCreateError: any) {
                   if (mappingCreateError?.code === '23505') {
-                    console.warn('[BestAuthSubscriptionService] Mapping already exists while ensuring user mapping during points grant')
+                    console.warn('[BestAuthSubscriptionService] Mapping already existed while ensuring user mapping during points grant')
                   } else {
                     console.error('[BestAuthSubscriptionService] Failed to create user mapping during points grant:', mappingCreateError)
                   }
@@ -517,8 +504,7 @@ export class BestAuthSubscriptionService {
                   cycle,
                   source: 'subscription',
                   bestauth_user_id: data.userId,
-                  resolved_supabase_user_id: pointsUserId,
-                  original_payload_user_id: metadata?.original_payload_user_id ?? null
+                  resolved_supabase_user_id: pointsUserId
                 }
               })
 

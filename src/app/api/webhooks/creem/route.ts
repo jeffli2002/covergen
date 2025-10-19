@@ -50,25 +50,25 @@ async function resolveUserId(possibleUserId?: string | null, email?: string | nu
     try {
       const bestAuthByEmail = await db.users.findByEmail(email)
       if (bestAuthByEmail) {
-        if (adminClient) {
-          let supabaseUserIdForMapping: string | null = null
+        let supabaseUserIdForMapping: string | null = null
 
+        if (adminClient) {
           try {
-            const { data: existingMapping, error: mappingLookupError } = await adminClient
+            const { data: existingMapping, error: mappingError } = await adminClient
               .from('user_id_mapping')
               .select('supabase_user_id')
               .eq('bestauth_user_id', bestAuthByEmail.id)
               .maybeSingle()
 
-            if (mappingLookupError && mappingLookupError.code !== 'PGRST116') {
-              console.error('[BestAuth Webhook] Error checking existing mapping for BestAuth user:', mappingLookupError)
+            if (mappingError && mappingError.code !== 'PGRST116') {
+              console.error('[BestAuth Webhook] Error checking mapping for BestAuth user resolved by email:', mappingError)
             }
 
             if (existingMapping?.supabase_user_id) {
               supabaseUserIdForMapping = existingMapping.supabase_user_id
             }
-          } catch (mappingLookupException) {
-            console.error('[BestAuth Webhook] Exception checking existing mapping for BestAuth user:', mappingLookupException)
+          } catch (mappingLookupError) {
+            console.error('[BestAuth Webhook] Exception checking mapping for BestAuth user resolved by email:', mappingLookupError)
           }
 
           if (!supabaseUserIdForMapping) {
@@ -78,8 +78,6 @@ async function resolveUserId(possibleUserId?: string | null, email?: string | nu
 
           if (supabaseUserIdForMapping) {
             await ensureUserMappingExists(supabaseUserIdForMapping, bestAuthByEmail.id)
-          } else {
-            console.warn(`[BestAuth Webhook] No Supabase auth user found to map for BestAuth user resolved by email ${email}`)
           }
         }
 
@@ -495,6 +493,29 @@ async function handleCheckoutComplete(data: any) {
     }
   }
 
+  if (!resolvedSupabaseUserId && actualUserId) {
+    try {
+      const adminClient = getBestAuthSupabaseClient()
+      if (adminClient) {
+        const { data: mapping, error: mappingError } = await adminClient
+          .from('user_id_mapping')
+          .select('supabase_user_id')
+          .eq('bestauth_user_id', actualUserId)
+          .maybeSingle()
+
+        if (mappingError && mappingError.code !== 'PGRST116') {
+          console.error('[BestAuth Webhook] Error fetching Supabase mapping for resolved user:', mappingError)
+        }
+
+        if (mapping?.supabase_user_id) {
+          resolvedSupabaseUserId = mapping.supabase_user_id
+        }
+      }
+    } catch (mappingLookupError) {
+      console.error('[BestAuth Webhook] Exception determining Supabase user id for resolved user:', mappingLookupError)
+    }
+  }
+
   if (!actualUserId || !planId) {
     console.error('[BestAuth Webhook] Missing required data for checkout complete:', { actualUserId, planId, customerEmail, originalUserId: userId })
     throw new Error('Missing required user ID or plan ID')
@@ -533,7 +554,8 @@ async function handleCheckoutComplete(data: any) {
         checkout_completed_at: new Date().toISOString(),
         initial_plan: planId,
         billing_cycle: cycle,
-        original_payload_user_id: userId,  // Keep original for debugging
+        original_payload_user_id: userId,  // Preserve original payload id for debugging
+        original_userId: userId,
         resolved_supabase_user_id: resolvedSupabaseUserId,
         customer_email: customerEmail,
         user_resolution_strategy: userResolutionStrategy
