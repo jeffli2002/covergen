@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuth, AuthenticatedRequest } from '@/app/api/middleware/withAuth'
 import { createPointsService } from '@/lib/services/points-service'
-import { createClient } from '@/utils/supabase/server'
+import { getBestAuthSupabaseClient } from '@/lib/bestauth/db-client'
 
 async function handler(request: AuthenticatedRequest) {
   try {
@@ -15,7 +15,14 @@ async function handler(request: AuthenticatedRequest) {
     const limit = parseInt(searchParams.get('limit') || '50', 10)
     const offset = parseInt(searchParams.get('offset') || '0', 10)
 
-    const supabase = await createClient()
+    const supabase = getBestAuthSupabaseClient()
+    if (!supabase) {
+      console.error('[Points History API] Service role Supabase client unavailable')
+      return NextResponse.json(
+        { error: 'Unable to fetch points history' },
+        { status: 500 }
+      )
+    }
     const pointsService = createPointsService(supabase)
     const transactions = await pointsService.getTransactionHistory(user.id, limit, offset)
 

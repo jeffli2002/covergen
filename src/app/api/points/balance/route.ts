@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { withAuth, AuthenticatedRequest } from '@/app/api/middleware/withAuth'
 import { createPointsService } from '@/lib/services/points-service'
-import { createClient } from '@/utils/supabase/server'
+import { getBestAuthSupabaseClient } from '@/lib/bestauth/db-client'
 
 async function handler(request: AuthenticatedRequest) {
   try {
@@ -11,7 +11,14 @@ async function handler(request: AuthenticatedRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const supabase = await createClient()
+    const supabase = getBestAuthSupabaseClient()
+    if (!supabase) {
+      console.error('[Points Balance API] Service role Supabase client unavailable')
+      return NextResponse.json(
+        { error: 'Unable to fetch points balance' },
+        { status: 500 }
+      )
+    }
     const pointsService = createPointsService(supabase)
     
     // Gracefully handle points table not existing yet
