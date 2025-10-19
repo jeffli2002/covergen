@@ -462,7 +462,7 @@ export class BestAuthSubscriptionService {
               p_amount: credits,
               p_transaction_type: 'subscription_grant',
               p_description: `${tierConfig.name} ${cycle} subscription: ${credits} credits`,
-              p_subscription_id: result.id,
+              p_subscription_id: null,
               p_metadata: {
                 tier: grantTier,
                 cycle,
