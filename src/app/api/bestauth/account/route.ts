@@ -207,20 +207,9 @@ export async function GET(request: NextRequest) {
     }
 
     const normalizedBalanceForAllowance = Math.min(creditsBalance, creditsMonthlyAllowance)
-    let creditsUsedThisMonth = creditsMonthlyAllowance > 0
+    const creditsUsedThisMonth = creditsMonthlyAllowance > 0
       ? Math.max(0, creditsMonthlyAllowance - normalizedBalanceForAllowance)
       : 0
-
-    if (
-      subscription &&
-      creditsMonthlyAllowance > 0 &&
-      creditsBalance === 0 &&
-      creditsUsedThisMonth === creditsMonthlyAllowance
-    ) {
-      console.warn('[BestAuth Account API] No points data found; defaulting to full allowance for new subscription')
-      creditsBalance = creditsMonthlyAllowance
-      creditsUsedThisMonth = 0
-    }
 
     console.log('[BestAuth Account API] Step 7: Fetching payments...')
     const payments = await withTimeout(
@@ -293,7 +282,7 @@ export async function GET(request: NextRequest) {
         credits_monthly_allowance: creditsMonthlyAllowance,
         credits_lifetime_earned: creditsLifetimeEarned,
         credits_lifetime_spent: creditsLifetimeSpent,
-        limits: { daily: 3, monthly: 90 }
+        limits: { daily: SUBSCRIPTION_CONFIG.free.dailyImageLimit, monthly: SUBSCRIPTION_CONFIG.free.monthlyImageLimit }
       }
     }
     
