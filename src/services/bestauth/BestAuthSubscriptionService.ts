@@ -3,6 +3,11 @@ import { db } from '@/lib/bestauth/db-wrapper'
 import { getSubscriptionConfig } from '@/lib/subscription-config'
 import type { GenerationType } from '@/config/subscription'
 import { normalizeSubscriptionTier } from '@/lib/subscription-tier'
+import { userSyncService } from '@/services/sync/UserSyncService'
+
+const isValidUuid = (value: unknown): value is string =>
+  typeof value === 'string' &&
+  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(value)
 
 export interface SubscriptionStatus {
   subscription_id?: string
@@ -435,50 +440,96 @@ export class BestAuthSubscriptionService {
           const supabase = getBestAuthSupabaseClient()
           
           if (supabase) {
-            let pointsUserId = data.userId
+            const metadata = typeof data.metadata === 'object' && data.metadata ? data.metadata : {}
+            let pointsUserId: string | null = null
+            let mappingSupabaseId: string | null = null
+
+            const metadataSupabaseCandidates = [
+              metadata.resolved_supabase_user_id,
+              metadata.supabase_user_id
+            ].filter(isValidUuid)
+
+            if (metadataSupabaseCandidates.length > 0) {
+              pointsUserId = metadataSupabaseCandidates[0]!
+              console.log('[BestAuthSubscriptionService] Using Supabase user id from metadata for points grant:', pointsUserId)
+            }
 
             try {
-              const { data: mapping } = await supabase
+              const { data: mapping, error: mappingError } = await supabase
                 .from('user_id_mapping')
                 .select('supabase_user_id')
                 .eq('bestauth_user_id', data.userId)
                 .maybeSingle()
 
-              if (mapping?.supabase_user_id) {
-                pointsUserId = mapping.supabase_user_id
-                console.log(`[BestAuthSubscriptionService] Found Supabase mapping for user ${data.userId} -> ${pointsUserId}`)
-              } else if (typeof data.metadata === 'object' && data.metadata?.original_userId) {
-                pointsUserId = data.metadata.original_userId
-                console.log(`[BestAuthSubscriptionService] Using original Supabase userId from metadata: ${pointsUserId}`)
-              } else {
-                console.warn('[BestAuthSubscriptionService] No Supabase mapping found for user. Using BestAuth userId for points grant.')
+              if (mappingError && mappingError.code !== 'PGRST116') {
+                console.error('[BestAuthSubscriptionService] Error querying user_id_mapping during points grant:', mappingError)
               }
-            } catch (mappingError) {
-              console.error('[BestAuthSubscriptionService] Failed to resolve Supabase user mapping for points grant:', mappingError)
+
+              if (mapping?.supabase_user_id && isValidUuid(mapping.supabase_user_id)) {
+                mappingSupabaseId = mapping.supabase_user_id
+                if (!pointsUserId) {
+                  pointsUserId = mappingSupabaseId
+                }
+                console.log(`[BestAuthSubscriptionService] Found Supabase mapping for user ${data.userId} -> ${mappingSupabaseId}`)
+              }
+            } catch (mappingException) {
+              console.error('[BestAuthSubscriptionService] Failed to resolve Supabase user mapping for points grant:', mappingException)
             }
 
-            const { data: creditsResult, error: creditsError } = await supabase.rpc('add_points', {
-              p_user_id: pointsUserId,
-              p_amount: credits,
-              p_transaction_type: 'subscription_grant',
-              p_description: `${tierConfig.name} ${cycle} subscription: ${credits} credits`,
-              p_subscription_id: null,
-              p_metadata: {
-                tier: grantTier,
-                cycle,
-                source: 'subscription',
-                bestauth_user_id: data.userId,
-                original_user_id: typeof data.metadata === 'object' ? data.metadata?.original_userId ?? null : null,
-              }
-            })
+            if (!pointsUserId) {
+              const legacyMetadataUserId =
+                (typeof metadata.original_payload_user_id === 'string' && metadata.original_payload_user_id) ||
+                (typeof metadata.original_userId === 'string' && metadata.original_userId) ||
+                null
 
-            if (creditsError) {
-              console.error('[BestAuthSubscriptionService] Failed to grant credits:', creditsError)
-              // Don't fail the subscription update - log and continue
-              console.warn('[BestAuthSubscriptionService] Subscription succeeded but credits were not granted - may need manual adjustment')
+              if (isValidUuid(legacyMetadataUserId)) {
+                pointsUserId = legacyMetadataUserId
+                console.log('[BestAuthSubscriptionService] Using Supabase user id from legacy metadata fallback for points grant:', pointsUserId)
+              }
+            }
+
+            if (!pointsUserId) {
+              console.error('[BestAuthSubscriptionService] Unable to determine Supabase user id for points grant', {
+                bestAuthUserId: data.userId
+              })
             } else {
-              console.log(`[BestAuthSubscriptionService] Successfully granted ${credits} credits to user ${data.userId}`)
-              console.log('[BestAuthSubscriptionService] Credits result:', creditsResult)
+              if (!mappingSupabaseId || mappingSupabaseId !== pointsUserId) {
+                try {
+                  await userSyncService.createUserMapping(pointsUserId, data.userId)
+                  console.log('[BestAuthSubscriptionService] Ensured Supabase↔BestAuth user mapping during points grant')
+                } catch (mappingCreateError: any) {
+                  if (mappingCreateError?.code === '23505') {
+                    console.warn('[BestAuthSubscriptionService] Mapping already exists while ensuring user mapping during points grant')
+                  } else {
+                    console.error('[BestAuthSubscriptionService] Failed to create user mapping during points grant:', mappingCreateError)
+                  }
+                }
+              }
+
+              const { data: creditsResult, error: creditsError } = await supabase.rpc('add_points', {
+                p_user_id: pointsUserId,
+                p_amount: credits,
+                p_transaction_type: 'subscription_grant',
+                p_description: `${tierConfig.name} ${cycle} subscription: ${credits} credits`,
+                p_subscription_id: result.id,
+                p_metadata: {
+                  tier: grantTier,
+                  cycle,
+                  source: 'subscription',
+                  bestauth_user_id: data.userId,
+                  resolved_supabase_user_id: pointsUserId,
+                  original_payload_user_id: metadata?.original_payload_user_id ?? null
+                }
+              })
+
+              if (creditsError) {
+                console.error('[BestAuthSubscriptionService] Failed to grant credits:', creditsError)
+                // Don't fail the subscription update - log and continue
+                console.warn('[BestAuthSubscriptionService] Subscription succeeded but credits were not granted - may need manual adjustment')
+              } else {
+                console.log(`[BestAuthSubscriptionService] Successfully granted ${credits} credits to user ${data.userId}`)
+                console.log('[BestAuthSubscriptionService] Credits result:', creditsResult)
+              }
             }
           } else {
             console.error('[BestAuthSubscriptionService] Cannot grant credits - BestAuth database client not available')

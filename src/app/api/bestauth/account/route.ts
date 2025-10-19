@@ -282,7 +282,7 @@ export async function GET(request: NextRequest) {
         credits_monthly_allowance: creditsMonthlyAllowance,
         credits_lifetime_earned: creditsLifetimeEarned,
         credits_lifetime_spent: creditsLifetimeSpent,
-        limits: { daily: 3, monthly: 90 }
+        limits: { daily: SUBSCRIPTION_CONFIG.free.dailyImageLimit, monthly: SUBSCRIPTION_CONFIG.free.monthlyImageLimit }
       }
     }
     
