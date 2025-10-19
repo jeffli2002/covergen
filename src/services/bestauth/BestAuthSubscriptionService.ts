@@ -443,8 +443,9 @@ export class BestAuthSubscriptionService {
             const metadata = typeof data.metadata === 'object' && data.metadata ? data.metadata : {}
             const metadataSupabaseCandidates = [
               metadata.resolved_supabase_user_id,
-              metadata.original_userId,
-              metadata.supabase_user_id
+              metadata.supabase_user_id,
+              metadata.original_payload_user_id,
+              metadata.original_userId
             ].filter(isValidUuid)
 
             let pointsUserId: string | null = metadataSupabaseCandidates[0] || null
@@ -497,7 +498,7 @@ export class BestAuthSubscriptionService {
                 p_amount: credits,
                 p_transaction_type: 'subscription_grant',
                 p_description: `${tierConfig.name} ${cycle} subscription: ${credits} credits`,
-                p_subscription_id: result.id,
+                p_subscription_id: null,
                 p_metadata: {
                   tier: grantTier,
                   cycle,
