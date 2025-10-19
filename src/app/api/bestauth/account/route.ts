@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { validateSessionFromRequest } from '@/lib/bestauth'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 import { db } from '@/lib/bestauth/db'
+import { getBestAuthSupabaseClient } from '@/lib/bestauth/db-client'
+import { createPointsService } from '@/lib/services/points-service'
+import { SUBSCRIPTION_CONFIG } from '@/config/subscription'
 
 export const runtime = 'nodejs'
 
@@ -141,7 +144,71 @@ export async function GET(request: NextRequest) {
     })
     console.log('[BestAuth Account API] Image usage this month fetch complete:', imagesThisMonth)
     
-    console.log('[BestAuth Account API] Step 5: Fetching payments...')
+    console.log('[BestAuth Account API] Step 5: Resolving Supabase user mapping for points...')
+    let supabaseUserId = userId
+    let creditsBalance = 0
+    let creditsLifetimeEarned = 0
+    let creditsLifetimeSpent = 0
+    try {
+      const supabaseAdmin = getBestAuthSupabaseClient()
+      if (supabaseAdmin) {
+        const { data: mapping, error: mappingError } = await supabaseAdmin
+          .from('user_id_mapping')
+          .select('supabase_user_id')
+          .eq('bestauth_user_id', userId)
+          .maybeSingle()
+
+        if (mappingError) {
+          console.error('[BestAuth Account API] Error fetching user mapping:', mappingError)
+        }
+
+        if (mapping?.supabase_user_id) {
+          supabaseUserId = mapping.supabase_user_id
+          console.log('[BestAuth Account API] Supabase user mapping found:', supabaseUserId)
+        } else {
+          console.warn('[BestAuth Account API] No Supabase mapping found for BestAuth user. Falling back to BestAuth user ID for points.')
+        }
+
+        try {
+          const pointsService = createPointsService(supabaseAdmin)
+          const pointsBalance = await pointsService.getBalance(supabaseUserId)
+          if (pointsBalance) {
+            creditsBalance = pointsBalance.balance ?? 0
+            creditsLifetimeEarned = pointsBalance.lifetime_earned ?? 0
+            creditsLifetimeSpent = pointsBalance.lifetime_spent ?? 0
+          }
+          console.log('[BestAuth Account API] Points balance fetched:', {
+            supabaseUserId,
+            creditsBalance,
+            creditsLifetimeEarned,
+            creditsLifetimeSpent
+          })
+        } catch (pointsError) {
+          console.error('[BestAuth Account API] Error fetching points balance:', pointsError)
+        }
+      } else {
+        console.error('[BestAuth Account API] Supabase admin client unavailable - cannot fetch points balance')
+      }
+    } catch (pointsOuterError) {
+      console.error('[BestAuth Account API] Unexpected error resolving points balance:', pointsOuterError)
+    }
+
+    console.log('[BestAuth Account API] Determining credit allowances...')
+    let creditsMonthlyAllowance = 0
+    if (subscription?.tier === 'pro') {
+      creditsMonthlyAllowance = SUBSCRIPTION_CONFIG.pro.points.monthly
+    } else if (subscription?.tier === 'pro_plus') {
+      creditsMonthlyAllowance = SUBSCRIPTION_CONFIG.proPlus.points.monthly
+    } else {
+      creditsMonthlyAllowance = SUBSCRIPTION_CONFIG.free.points.monthly
+    }
+
+    const normalizedBalanceForAllowance = Math.min(creditsBalance, creditsMonthlyAllowance)
+    const creditsUsedThisMonth = creditsMonthlyAllowance > 0
+      ? Math.max(0, creditsMonthlyAllowance - normalizedBalanceForAllowance)
+      : 0
+
+    console.log('[BestAuth Account API] Step 7: Fetching payments...')
     const payments = await withTimeout(
       bestAuthSubscriptionService.getPaymentHistory(userId, 5), 
       5, 
@@ -191,6 +258,11 @@ export async function GET(request: NextRequest) {
         videos_today: videosToday,
         images_this_month: imagesThisMonth,
         videos_this_month: videosThisMonth,
+        credits_balance: creditsBalance,
+        credits_used_this_month: creditsUsedThisMonth,
+        credits_monthly_allowance: creditsMonthlyAllowance,
+        credits_lifetime_earned: creditsLifetimeEarned,
+        credits_lifetime_spent: creditsLifetimeSpent,
         limits: {
           daily: subscription.daily_limit,
           monthly: subscription.monthly_limit
@@ -202,6 +274,11 @@ export async function GET(request: NextRequest) {
         videos_today: videosToday,
         images_this_month: imagesThisMonth,
         videos_this_month: videosThisMonth,
+        credits_balance: creditsBalance,
+        credits_used_this_month: creditsUsedThisMonth,
+        credits_monthly_allowance: creditsMonthlyAllowance,
+        credits_lifetime_earned: creditsLifetimeEarned,
+        credits_lifetime_spent: creditsLifetimeSpent,
         limits: { daily: 3, monthly: 90 }
       }
     }
