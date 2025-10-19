@@ -3,6 +3,7 @@ import { db } from '@/lib/bestauth/db-wrapper'
 import { getSubscriptionConfig } from '@/lib/subscription-config'
 import type { GenerationType } from '@/config/subscription'
 import { normalizeSubscriptionTier } from '@/lib/subscription-tier'
+import { userSyncService } from '@/services/sync/UserSyncService'
 
 export interface SubscriptionStatus {
   subscription_id?: string
@@ -450,6 +451,12 @@ export class BestAuthSubscriptionService {
               } else if (typeof data.metadata === 'object' && data.metadata?.original_userId) {
                 pointsUserId = data.metadata.original_userId
                 console.log(`[BestAuthSubscriptionService] Using original Supabase userId from metadata: ${pointsUserId}`)
+                try {
+                  await userSyncService.createUserMapping(pointsUserId, data.userId)
+                  console.log('[BestAuthSubscriptionService] Created user mapping during points grant')
+                } catch (mappingCreateError) {
+                  console.error('[BestAuthSubscriptionService] Failed to create user mapping during points grant:', mappingCreateError)
+                }
               } else {
                 console.warn('[BestAuthSubscriptionService] No Supabase mapping found for user. Using BestAuth userId for points grant.')
               }
