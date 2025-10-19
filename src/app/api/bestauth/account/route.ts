@@ -165,6 +165,9 @@ export async function GET(request: NextRequest) {
         if (mapping?.supabase_user_id) {
           supabaseUserId = mapping.supabase_user_id
           console.log('[BestAuth Account API] Supabase user mapping found:', supabaseUserId)
+        } else if (subscription?.metadata && typeof subscription.metadata === 'object' && subscription.metadata.original_userId) {
+          supabaseUserId = subscription.metadata.original_userId
+          console.log('[BestAuth Account API] Using Supabase user id from subscription metadata:', supabaseUserId)
         } else {
           console.warn('[BestAuth Account API] No Supabase mapping found for BestAuth user. Falling back to BestAuth user ID for points.')
         }
