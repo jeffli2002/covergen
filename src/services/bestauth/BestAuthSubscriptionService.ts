@@ -435,7 +435,7 @@ export class BestAuthSubscriptionService {
           const supabase = getBestAuthSupabaseClient()
           
           if (supabase) {
-            const { data: creditsResult, error: creditsError } = await supabase.rpc('bestauth.add_points', {
+            const { data: creditsResult, error: creditsError } = await supabase.rpc('add_points', {
               p_user_id: data.userId,
               p_amount: credits,
               p_transaction_type: 'subscription_grant',
