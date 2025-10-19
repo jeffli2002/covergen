@@ -468,6 +468,7 @@ export class BestAuthSubscriptionService {
                 cycle,
                 source: 'subscription',
                 bestauth_user_id: data.userId,
+                original_user_id: typeof data.metadata === 'object' ? data.metadata?.original_userId ?? null : null,
               }
             })
 
