@@ -554,9 +554,10 @@ async function handleCheckoutComplete(data: any) {
         checkout_completed_at: new Date().toISOString(),
         initial_plan: planId,
         billing_cycle: cycle,
+        bestauth_user_id: actualUserId,
         original_payload_user_id: userId,  // Preserve original payload id for debugging
-        original_userId: userId,
         resolved_supabase_user_id: resolvedSupabaseUserId,
+        original_userId: resolvedSupabaseUserId ?? null,
         customer_email: customerEmail,
         user_resolution_strategy: userResolutionStrategy
       }

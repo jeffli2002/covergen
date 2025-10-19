@@ -443,9 +443,8 @@ export class BestAuthSubscriptionService {
             const metadata = typeof data.metadata === 'object' && data.metadata ? data.metadata : {}
             const metadataSupabaseCandidates = [
               metadata.resolved_supabase_user_id,
-              metadata.supabase_user_id,
-              metadata.original_payload_user_id,
-              metadata.original_userId
+              metadata.original_userId,
+              metadata.supabase_user_id
             ].filter(isValidUuid)
 
             let pointsUserId: string | null = metadataSupabaseCandidates[0] || null
