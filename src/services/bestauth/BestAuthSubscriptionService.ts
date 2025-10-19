@@ -435,13 +435,40 @@ export class BestAuthSubscriptionService {
           const supabase = getBestAuthSupabaseClient()
           
           if (supabase) {
+            let pointsUserId = data.userId
+
+            try {
+              const { data: mapping } = await supabase
+                .from('user_id_mapping')
+                .select('supabase_user_id')
+                .eq('bestauth_user_id', data.userId)
+                .maybeSingle()
+
+              if (mapping?.supabase_user_id) {
+                pointsUserId = mapping.supabase_user_id
+                console.log(`[BestAuthSubscriptionService] Found Supabase mapping for user ${data.userId} -> ${pointsUserId}`)
+              } else if (typeof data.metadata === 'object' && data.metadata?.original_userId) {
+                pointsUserId = data.metadata.original_userId
+                console.log(`[BestAuthSubscriptionService] Using original Supabase userId from metadata: ${pointsUserId}`)
+              } else {
+                console.warn('[BestAuthSubscriptionService] No Supabase mapping found for user. Using BestAuth userId for points grant.')
+              }
+            } catch (mappingError) {
+              console.error('[BestAuthSubscriptionService] Failed to resolve Supabase user mapping for points grant:', mappingError)
+            }
+
             const { data: creditsResult, error: creditsError } = await supabase.rpc('add_points', {
-              p_user_id: data.userId,
+              p_user_id: pointsUserId,
               p_amount: credits,
               p_transaction_type: 'subscription_grant',
               p_description: `${tierConfig.name} ${cycle} subscription: ${credits} credits`,
               p_subscription_id: result.id,
-              p_metadata: { tier: grantTier, cycle, source: 'subscription' }
+              p_metadata: {
+                tier: grantTier,
+                cycle,
+                source: 'subscription',
+                bestauth_user_id: data.userId,
+              }
             })
 
             if (creditsError) {
