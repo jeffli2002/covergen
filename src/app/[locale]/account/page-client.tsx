@@ -966,26 +966,6 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
             </CardContent>
           </Card>
 
-          {/* Plan Features */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-heading-5">
-                <Shield className="w-5 h-5" />
-                Plan Features
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
-                {planDetails?.features.map((feature, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <Shield className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-body-md text-gray-700">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-
           {/* Account Actions */}
           <Card>
             <CardHeader>
