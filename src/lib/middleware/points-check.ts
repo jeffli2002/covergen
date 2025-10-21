@@ -25,9 +25,55 @@ export async function checkPointsForGeneration(
   generationType: GenerationType,
   supabase: any
 ): Promise<PointsCheckResult> {
-  const pointsService = createPointsService(supabase)
-
   try {
+    // PRIORITY 1: Check BestAuth subscriptions table first
+    const { data: subscription } = await supabase
+      .from('bestauth_subscriptions')
+      .select('points_balance, tier')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (subscription && typeof subscription.points_balance === 'number') {
+      // User has credits in BestAuth system
+      const creditCost = SUBSCRIPTION_CONFIG.generationCosts[generationType]
+      const currentBalance = subscription.points_balance
+
+      console.log(`[PointsCheck] BestAuth user:`, {
+        userId,
+        generationType,
+        creditCost,
+        currentBalance,
+        tier: subscription.tier,
+        canAfford: currentBalance >= creditCost
+      })
+
+      if (currentBalance < creditCost) {
+        return {
+          canProceed: false,
+          usesPoints: true,
+          error: `Insufficient credits. You need ${creditCost} credits but only have ${currentBalance} credits.`,
+          details: {
+            currentBalance,
+            requiredPoints: creditCost,
+            shortfall: creditCost - currentBalance,
+          },
+        }
+      }
+
+      return {
+        canProceed: true,
+        usesPoints: true,
+        details: {
+          currentBalance,
+          requiredPoints: creditCost,
+          shortfall: 0,
+        },
+      }
+    }
+
+    // FALLBACK: Check legacy points system for Supabase users
+    console.log('[PointsCheck] No BestAuth subscription found, trying legacy points system')
+    const pointsService = createPointsService(supabase)
     const balance = await pointsService.getBalance(userId)
 
     if (!balance || balance.balance === 0) {
@@ -82,9 +128,80 @@ export async function deductPointsForGeneration(
   error?: string
   transaction?: any
 }> {
-  const pointsService = createPointsService(supabase)
-
   try {
+    // PRIORITY 1: Try BestAuth subscriptions table first
+    const { data: subscription } = await supabase
+      .from('bestauth_subscriptions')
+      .select('points_balance, points_lifetime_spent, tier')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (subscription && typeof subscription.points_balance === 'number') {
+      // User has credits in BestAuth system - deduct directly
+      const creditCost = SUBSCRIPTION_CONFIG.generationCosts[generationType]
+      const currentBalance = subscription.points_balance
+      const currentSpent = subscription.points_lifetime_spent ?? 0
+
+      console.log(`[PointsDeduct] BestAuth user credit check:`, {
+        userId,
+        generationType,
+        creditCost,
+        currentBalance,
+        tier: subscription.tier
+      })
+
+      // Check if user has enough credits
+      if (currentBalance < creditCost) {
+        console.error(`[PointsDeduct] Insufficient credits: need ${creditCost}, have ${currentBalance}`)
+        return {
+          success: false,
+          error: `Insufficient credits. You need ${creditCost} credits but only have ${currentBalance} credits.`,
+        }
+      }
+
+      // Deduct credits from bestauth_subscriptions
+      const newBalance = currentBalance - creditCost
+      const newSpent = currentSpent + creditCost
+
+      const { error: updateError } = await supabase
+        .from('bestauth_subscriptions')
+        .update({
+          points_balance: newBalance,
+          points_lifetime_spent: newSpent,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId)
+
+      if (updateError) {
+        console.error('[PointsDeduct] Failed to deduct credits from BestAuth subscription:', updateError)
+        return {
+          success: false,
+          error: 'Failed to deduct credits',
+        }
+      }
+
+      console.log(`[PointsDeduct] ✅ Successfully deducted ${creditCost} credits from BestAuth user`)
+      console.log(`[PointsDeduct]    Previous balance: ${currentBalance}`)
+      console.log(`[PointsDeduct]    New balance: ${newBalance}`)
+      console.log(`[PointsDeduct]    Lifetime spent: ${newSpent}`)
+
+      return {
+        success: true,
+        transaction: {
+          user_id: userId,
+          amount: -creditCost,
+          balance_before: currentBalance,
+          balance_after: newBalance,
+          transaction_type: 'generation_deduction',
+          description: `${generationType} generation`,
+          metadata
+        },
+      }
+    }
+
+    // FALLBACK: Try legacy points system for Supabase users
+    console.log('[PointsDeduct] No BestAuth subscription found, trying legacy points system')
+    const pointsService = createPointsService(supabase)
     const result = await pointsService.deductPointsForGeneration(userId, generationType, metadata)
 
     if (!result.success && result.error === 'insufficient_points') {
