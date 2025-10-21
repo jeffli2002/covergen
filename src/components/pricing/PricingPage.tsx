@@ -206,6 +206,11 @@ export default function PricingPage({ locale = 'en' }: PricingPageProps = {}) {
       return true
     }
 
+    // Disable downgrade from Pro+ to Pro
+    if (plan.id === 'pro' && subscriptionInfo?.plan === 'pro_plus') {
+      return true
+    }
+
     // Note: Allow switching billing cycles (Pro Monthly -> Pro Yearly)
     // This is handled by showing "Switch to Yearly/Monthly" button text
 
