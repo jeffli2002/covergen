@@ -156,29 +156,78 @@ export async function GET(request: NextRequest) {
     let creditsBalance = 0
     let creditsLifetimeEarned = 0
     let creditsLifetimeSpent = 0
+
+    function isUuid(value: unknown): value is string {
+      return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+    }
+
+    function extractSupabaseIdFromMetadata(metadata: any): string | null {
+      if (!metadata || typeof metadata !== 'object') {
+        return null
+      }
+
+      const candidates = [
+        metadata.resolved_supabase_user_id,
+        metadata.supabase_user_id,
+        metadata.original_payload_user_id,
+        metadata.original_userId
+      ]
+
+      return candidates.find(isUuid) ?? null
+    }
+
     try {
       const supabaseAdmin = getBestAuthSupabaseClient()
       if (supabaseAdmin) {
+        // Step 1: Try user_id_mapping table
         const { data: mapping, error: mappingError } = await supabaseAdmin
           .from('user_id_mapping')
           .select('supabase_user_id')
           .eq('bestauth_user_id', userId)
           .maybeSingle()
 
-        if (mappingError) {
+        if (mappingError && mappingError.code !== 'PGRST116') {
           console.error('[BestAuth Account API] Error fetching user mapping:', mappingError)
         }
 
-        if (mapping?.supabase_user_id) {
+        if (mapping?.supabase_user_id && isUuid(mapping.supabase_user_id)) {
           supabaseUserId = mapping.supabase_user_id
           console.log('[BestAuth Account API] Supabase user mapping found:', supabaseUserId)
-        } else if (subscription?.metadata && typeof subscription.metadata === 'object' && subscription.metadata.original_userId) {
-          supabaseUserId = subscription.metadata.original_userId
-          console.log('[BestAuth Account API] Using Supabase user id from subscription metadata:', supabaseUserId)
         } else {
-          console.warn('[BestAuth Account API] No Supabase mapping found for BestAuth user. Falling back to BestAuth user ID for points.')
+          // Step 2: Fallback to subscription metadata
+          const { data: subscriptionData } = await supabaseAdmin
+            .from('bestauth_subscriptions')
+            .select('metadata')
+            .eq('user_id', userId)
+            .maybeSingle()
+
+          const metadataSupabaseId = extractSupabaseIdFromMetadata(subscriptionData?.metadata)
+
+          if (metadataSupabaseId) {
+            supabaseUserId = metadataSupabaseId
+            console.log('[BestAuth Account API] Using Supabase user id from subscription metadata:', supabaseUserId)
+            
+            // Create mapping for future use
+            try {
+              const { userSyncService } = await import('@/services/sync/UserSyncService')
+              await userSyncService.createUserMapping(metadataSupabaseId, userId)
+              console.log('[BestAuth Account API] Created user mapping from metadata')
+            } catch (createMappingError: any) {
+              if (createMappingError?.code !== '23505') {
+                console.error('[BestAuth Account API] Failed to create mapping:', createMappingError)
+              }
+            }
+          } else {
+            console.error('[BestAuth Account API] CRITICAL: Unable to resolve Supabase user id for BestAuth user', { 
+              bestauthUserId: userId,
+              hasMapping: !!mapping,
+              hasSubscription: !!subscriptionData,
+              metadata: subscriptionData?.metadata 
+            })
+          }
         }
 
+        // Step 3: Fetch points balance with correct Supabase user ID
         try {
           const pointsService = createPointsService(supabaseAdmin)
           const pointsBalance = await pointsService.getBalance(supabaseUserId)
