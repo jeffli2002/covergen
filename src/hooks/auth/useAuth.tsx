@@ -189,14 +189,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [router])
 
   const signInWithOAuth = useCallback(async (provider: 'google' | 'github') => {
-    // Use the working Supabase OAuth implementation directly
-    const authService = (await import('@/services/authService')).default
-    if (provider === 'google') {
-      await authService.signInWithGoogle()
-    } else {
-      // For now, only Google is implemented
-      console.error('GitHub OAuth not yet implemented')
-    }
+    // Use BestAuth OAuth implementation
+    const redirectUri = `${window.location.origin}/api/auth/callback/${provider}`
+    
+    // Generate OAuth state
+    const state = crypto.randomUUID()
+    
+    // Store state in cookie for verification
+    document.cookie = `oauth_state=${state}; path=/; max-age=600; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`
+    
+    // Import OAuth helper
+    const { getOAuthAuthorizationUrl } = await import('@/lib/bestauth/oauth')
+    
+    // Get authorization URL
+    const authUrl = getOAuthAuthorizationUrl(provider, state, redirectUri)
+    
+    console.log('[useAuth] Initiating OAuth flow:', { provider, redirectUri, authUrl })
+    
+    // Redirect to OAuth provider
+    window.location.href = authUrl
   }, [])
 
   const sendMagicLink = useCallback(async (email: string) => {
