@@ -8,6 +8,61 @@ import { authConfig } from '@/config/auth.config'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 import { getOrCreateSessionId } from '@/lib/session-utils'
 import { checkPointsForGeneration, deductPointsForGeneration } from '@/lib/middleware/points-check'
+import { getBestAuthSupabaseClient } from '@/lib/bestauth/db-client'
+
+/**
+ * Resolve BestAuth user ID to Supabase user ID for points system
+ * Points are stored in Supabase with Supabase user IDs
+ */
+async function resolveSupabaseUserId(bestAuthUserId: string): Promise<string> {
+  try {
+    const supabaseAdmin = getBestAuthSupabaseClient()
+    if (!supabaseAdmin) {
+      console.error('[Generate API] No Supabase admin client available')
+      return bestAuthUserId // Fallback to BestAuth ID
+    }
+
+    // Try user_id_mapping table first
+    const { data: mapping } = await supabaseAdmin
+      .from('user_id_mapping')
+      .select('supabase_user_id')
+      .eq('bestauth_user_id', bestAuthUserId)
+      .maybeSingle()
+
+    if (mapping?.supabase_user_id) {
+      console.log('[Generate API] Resolved Supabase user ID from mapping:', mapping.supabase_user_id)
+      return mapping.supabase_user_id
+    }
+
+    // Fallback to subscription metadata
+    const { data: subscription } = await supabaseAdmin
+      .from('bestauth_subscriptions')
+      .select('metadata')
+      .eq('user_id', bestAuthUserId)
+      .maybeSingle()
+
+    const isUuid = (val: unknown): val is string =>
+      typeof val === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(val)
+
+    const candidates = [
+      subscription?.metadata?.resolved_supabase_user_id,
+      subscription?.metadata?.supabase_user_id,
+      subscription?.metadata?.original_payload_user_id,
+    ]
+
+    const resolvedId = candidates.find(isUuid)
+    if (resolvedId) {
+      console.log('[Generate API] Resolved Supabase user ID from metadata:', resolvedId)
+      return resolvedId
+    }
+
+    console.error('[Generate API] CRITICAL: Unable to resolve Supabase user ID for BestAuth user:', bestAuthUserId)
+    return bestAuthUserId // Fallback to BestAuth ID
+  } catch (error) {
+    console.error('[Generate API] Error resolving Supabase user ID:', error)
+    return bestAuthUserId // Fallback
+  }
+}
 
 // Image generation endpoint handler
 async function handler(request: AuthenticatedRequest) {
@@ -401,7 +456,11 @@ async function handler(request: AuthenticatedRequest) {
     }
 
     if (user) {
-      const pointsCheck = await checkPointsForGeneration(user.id, 'nanoBananaImage', supabase)
+      // CRITICAL FIX: Resolve BestAuth user ID to Supabase user ID for points system
+      const supabaseUserId = await resolveSupabaseUserId(user.id)
+      console.log('[Generate API] User ID resolution for points check:', { bestAuthId: user.id, supabaseId: supabaseUserId })
+      
+      const pointsCheck = await checkPointsForGeneration(supabaseUserId, 'nanoBananaImage', supabase)
       if (pointsCheck.usesPoints && !pointsCheck.canProceed) {
         return NextResponse.json(
           {
@@ -528,7 +587,11 @@ async function handler(request: AuthenticatedRequest) {
     if (user) {
       // Increment for authenticated users
       try {
-        const pointsDeduction = await deductPointsForGeneration(user.id, 'nanoBananaImage', supabase, {
+        // CRITICAL FIX: Resolve BestAuth user ID to Supabase user ID for points system
+        const supabaseUserId = await resolveSupabaseUserId(user.id)
+        console.log('[Generate API] User ID resolution for points deduction:', { bestAuthId: user.id, supabaseId: supabaseUserId })
+        
+        const pointsDeduction = await deductPointsForGeneration(supabaseUserId, 'nanoBananaImage', supabase, {
           prompt: prompt?.substring(0, 100),
           mode,
           platform,
@@ -536,6 +599,8 @@ async function handler(request: AuthenticatedRequest) {
         
         if (pointsDeduction.success && pointsDeduction.transaction) {
           console.log('[Generate API] Deducted points for image generation:', pointsDeduction.transaction)
+        } else if (!pointsDeduction.success) {
+          console.error('[Generate API] Failed to deduct points:', pointsDeduction.error)
         }
 
         // Use BestAuth increment if enabled, otherwise fallback to Supabase
