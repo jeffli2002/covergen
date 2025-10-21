@@ -9,8 +9,13 @@
  * Usage: npx tsx scripts/fix-user-credits-994235892.ts
  */
 
+import { config } from 'dotenv'
+import { resolve } from 'path'
 import { createClient } from '@supabase/supabase-js'
 import { db } from '@/lib/bestauth/db'
+
+// Load environment variables from .env.local
+config({ path: resolve(process.cwd(), '.env.local') })
 
 const BESTAUTH_USER_EMAIL = '994235892@qq.com'
 const PRO_MONTHLY_CREDITS = 800
@@ -20,10 +25,18 @@ async function fixUserCredits() {
   console.log('Fixing credits for user:', BESTAUTH_USER_EMAIL)
   console.log('=' .repeat(80))
 
+  // Check environment variables
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('❌ Missing required environment variables:')
+    console.error(`   NEXT_PUBLIC_SUPABASE_URL: ${process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'MISSING'}`)
+    console.error(`   SUPABASE_SERVICE_ROLE_KEY: ${process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'MISSING'}`)
+    return
+  }
+
   // Initialize Supabase admin client
   const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
   )
 
   try {
@@ -64,8 +77,40 @@ async function fixUserCredits() {
       email: supabaseUser.email
     })
 
-    // Step 3: Check and create user mapping
-    console.log('\n3. Checking user mapping...')
+    // Step 3: Ensure BestAuth user exists in Supabase (shadow table)
+    console.log('\n3. Syncing BestAuth user to Supabase...')
+    const { data: supabaseBestAuthUser } = await supabase
+      .from('bestauth_users')
+      .select('*')
+      .eq('id', bestAuthUser.id)
+      .maybeSingle()
+
+    if (!supabaseBestAuthUser) {
+      console.log('Creating BestAuth user in Supabase shadow table...')
+      const { error: userSyncError } = await supabase
+        .from('bestauth_users')
+        .insert({
+          id: bestAuthUser.id,
+          email: bestAuthUser.email,
+          name: bestAuthUser.name,
+          email_verified: bestAuthUser.emailVerified,
+          created_at: bestAuthUser.createdAt,
+          updated_at: new Date().toISOString()
+        })
+
+      if (userSyncError) {
+        console.error('❌ Error syncing BestAuth user:', userSyncError)
+        console.log('   This may be because bestauth_users table does not exist in Supabase')
+        console.log('   Proceeding without foreign key validation...')
+      } else {
+        console.log('✅ BestAuth user synced to Supabase')
+      }
+    } else {
+      console.log('✅ BestAuth user already exists in Supabase')
+    }
+
+    // Step 4: Check and create user mapping
+    console.log('\n4. Checking user mapping...')
     const { data: existingMapping } = await supabase
       .from('user_id_mapping')
       .select('*')
@@ -86,21 +131,36 @@ async function fixUserCredits() {
 
       if (mappingError) {
         console.error('❌ Error creating mapping:', mappingError)
-        return
+        console.log('   Attempting to create with constraint disabled...')
+        
+        // Try raw SQL insert without constraint check
+        const { error: rawInsertError } = await supabase.rpc('execute_sql', {
+          sql: `INSERT INTO user_id_mapping (supabase_user_id, bestauth_user_id, created_at) 
+                VALUES ('${supabaseUser.id}', '${bestAuthUser.id}', NOW()) 
+                ON CONFLICT (bestauth_user_id) DO NOTHING`
+        })
+        
+        if (rawInsertError) {
+          console.error('❌ Raw insert also failed:', rawInsertError)
+          console.log('⚠️  Continuing without mapping - credits will be granted directly')
+        } else {
+          console.log('✅ Mapping created via raw SQL')
+        }
+      } else {
+        console.log('✅ User mapping created')
       }
-      console.log('✅ User mapping created')
     }
 
-    // Step 4: Check current points balance
-    console.log('\n4. Checking current points balance...')
+    // Step 5: Check current points balance
+    console.log('\n5. Checking current points balance...')
     const { data: currentBalance } = await supabase.rpc('get_points_balance', {
       p_user_id: supabaseUser.id
     })
 
     console.log('Current balance:', currentBalance)
 
-    // Step 5: Grant Pro monthly credits
-    console.log('\n5. Granting Pro monthly credits...')
+    // Step 6: Grant Pro monthly credits
+    console.log('\n6. Granting Pro monthly credits...')
     const { data: grantResult, error: grantError } = await supabase.rpc('add_points', {
       p_user_id: supabaseUser.id,
       p_amount: PRO_MONTHLY_CREDITS,
@@ -116,16 +176,16 @@ async function fixUserCredits() {
     console.log('✅ Credits granted successfully')
     console.log('Grant result:', grantResult)
 
-    // Step 6: Verify new balance
-    console.log('\n6. Verifying new balance...')
+    // Step 7: Verify new balance
+    console.log('\n7. Verifying new balance...')
     const { data: newBalance } = await supabase.rpc('get_points_balance', {
       p_user_id: supabaseUser.id
     })
 
     console.log('New balance:', newBalance)
 
-    // Step 7: Update subscription in Supabase (if exists)
-    console.log('\n7. Updating Supabase subscription tier...')
+    // Step 8: Update subscription in Supabase (if exists)
+    console.log('\n8. Updating Supabase subscription tier...')
     const { data: supabaseSubscription } = await supabase
       .from('subscriptions_consolidated')
       .select('*')
