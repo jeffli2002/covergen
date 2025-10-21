@@ -435,6 +435,55 @@ export class BestAuthSubscriptionService {
           const credits = tierConfig.points[cycle]
 
           console.log(`[BestAuthSubscriptionService] Granting ${credits} credits for ${grantTier} ${cycle}`)
+          
+          // For BestAuth users, update bestauth_subscriptions.points_balance directly
+          const { getBestAuthSupabaseClient } = await import('@/lib/bestauth/db-client')
+          const supabase = getBestAuthSupabaseClient()
+          
+          if (supabase) {
+            // Get current balance
+            const { data: currentSub } = await supabase
+              .from('bestauth_subscriptions')
+              .select('points_balance, points_lifetime_earned')
+              .eq('user_id', data.userId)
+              .single()
+            
+            const currentBalance = currentSub?.points_balance ?? 0
+            const currentLifetimeEarned = currentSub?.points_lifetime_earned ?? 0
+            const newBalance = currentBalance + credits
+            const newLifetimeEarned = currentLifetimeEarned + credits
+            
+            // Update bestauth_subscriptions with new balance
+            const { error: updateError } = await supabase
+              .from('bestauth_subscriptions')
+              .update({
+                points_balance: newBalance,
+                points_lifetime_earned: newLifetimeEarned,
+                updated_at: new Date().toISOString()
+              })
+              .eq('user_id', data.userId)
+            
+            if (updateError) {
+              console.error('[BestAuthSubscriptionService] CRITICAL: Failed to grant credits:', updateError)
+              console.error('[BestAuthSubscriptionService] User details:', {
+                bestAuthUserId: data.userId,
+                tier: grantTier,
+                cycle,
+                credits,
+                currentBalance,
+                newBalance
+              })
+            } else {
+              console.log(`[BestAuthSubscriptionService] ✅ Successfully granted ${credits} credits to user ${data.userId}`)
+              console.log(`[BestAuthSubscriptionService]    Previous balance: ${currentBalance}`)
+              console.log(`[BestAuthSubscriptionService]    New balance: ${newBalance}`)
+            }
+          } else {
+            console.error('[BestAuthSubscriptionService] Cannot grant credits - BestAuth database client not available')
+          }
+          
+          // Legacy code below is kept for Supabase users with mapping (no longer executed for BestAuth-only users)
+          /*
 
           // Use BestAuth database function to add credits
           const { getBestAuthSupabaseClient } = await import('@/lib/bestauth/db-client')
@@ -548,6 +597,7 @@ export class BestAuthSubscriptionService {
           } else {
             console.error('[BestAuthSubscriptionService] Cannot grant credits - BestAuth database client not available')
           }
+          */
         } catch (creditsError: any) {
           console.error('[BestAuthSubscriptionService] Exception while granting credits:', creditsError)
           // Don't fail the subscription update
