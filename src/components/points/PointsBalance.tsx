@@ -9,7 +9,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { Coins, TrendingUp, TrendingDown, Plus, ExternalLink } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import { PRICING_CONFIG } from '@/config/pricing.config'
 import Link from 'next/link'
 
@@ -20,6 +20,8 @@ interface PointsBalanceProps {
 
 export function PointsBalance({ variant = 'header', showDetails = false }: PointsBalanceProps) {
   const router = useRouter()
+  const params = useParams()
+  const locale = (params?.locale as string) || 'en'
   const [balance, setBalance] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [tier, setTier] = useState<string>('free')
@@ -154,7 +156,7 @@ export function PointsBalance({ variant = 'header', showDetails = false }: Point
 
             <div className="flex gap-2">
               <Button variant="outline" size="sm" className="flex-1" asChild>
-                <Link href="/account#usage">
+                <Link href={`/${locale}/account#usage`}>
                   View History
                   <ExternalLink className="w-3 h-3 ml-1" />
                 </Link>
@@ -231,7 +233,7 @@ export function PointsBalance({ variant = 'header', showDetails = false }: Point
           className="flex-1"
           asChild
         >
-          <Link href="/account#usage">
+          <Link href={`/${locale}/account#usage`}>
             View History
           </Link>
         </Button>
