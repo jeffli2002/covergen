@@ -87,7 +87,35 @@ async function handler(request: AuthenticatedRequest) {
       console.error('[Points Balance API] Unexpected error resolving Supabase user id:', resolveError)
     }
     
-    // Gracefully handle points table not existing yet
+    // ALWAYS prefer bestauth_subscriptions.points_balance for BestAuth users
+    // This is the source of truth for credits
+    let balanceFromSubscription: any = null
+    try {
+      const { data: subscription } = await supabase
+        .from('bestauth_subscriptions')
+        .select('points_balance, points_lifetime_earned, points_lifetime_spent, tier')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (subscription && typeof subscription.points_balance === 'number') {
+        balanceFromSubscription = {
+          balance: subscription.points_balance,
+          lifetime_earned: subscription.points_lifetime_earned ?? 0,
+          lifetime_spent: subscription.points_lifetime_spent ?? 0,
+          tier: subscription.tier || 'free',
+        }
+        console.log('[Points Balance API] Using balance from bestauth_subscriptions (BestAuth user):', balanceFromSubscription)
+      }
+    } catch (subError) {
+      console.error('[Points Balance API] Error fetching subscription balance:', subError)
+    }
+
+    // If we have balance from subscription, use it
+    if (balanceFromSubscription) {
+      return NextResponse.json(balanceFromSubscription)
+    }
+
+    // Fallback: Try points_balances table (for legacy Supabase users)
     try {
       const balance = await pointsService.getBalance(supabaseUserId)
 
@@ -100,6 +128,7 @@ async function handler(request: AuthenticatedRequest) {
         })
       }
 
+      console.log('[Points Balance API] Using balance from points_balances (legacy user):', balance)
       return NextResponse.json(balance)
     } catch (pointsError: any) {
       console.warn('[Points Balance API] Points table may not exist yet:', pointsError.message)
