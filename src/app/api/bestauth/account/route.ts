@@ -6,6 +6,13 @@ import { db } from '@/lib/bestauth/db'
 import { getBestAuthSupabaseClient } from '@/lib/bestauth/db-client'
 import { createPointsService } from '@/lib/services/points-service'
 import { SUBSCRIPTION_CONFIG } from '@/config/subscription'
+import type { SubscriptionStatus } from '@/services/bestauth/BestAuthSubscriptionService'
+
+type SubscriptionWithPoints = SubscriptionStatus & {
+  points_balance?: number | null
+  points_lifetime_earned?: number | null
+  points_lifetime_spent?: number | null
+}
 
 export const runtime = 'nodejs'
 
@@ -194,6 +201,23 @@ export async function GET(request: NextRequest) {
       }
     } catch (pointsOuterError) {
       console.error('[BestAuth Account API] Unexpected error resolving points balance:', pointsOuterError)
+    }
+
+    const subscriptionWithPoints = subscription as SubscriptionWithPoints | null
+
+    if (
+      (!creditsBalance || Number.isNaN(creditsBalance)) &&
+      subscriptionWithPoints &&
+      typeof subscriptionWithPoints.points_balance === 'number'
+    ) {
+      creditsBalance = subscriptionWithPoints.points_balance ?? 0
+      creditsLifetimeEarned = subscriptionWithPoints.points_lifetime_earned ?? creditsLifetimeEarned
+      creditsLifetimeSpent = subscriptionWithPoints.points_lifetime_spent ?? creditsLifetimeSpent
+      console.log('[BestAuth Account API] Using points balance from subscription fallback:', {
+        creditsBalance,
+        creditsLifetimeEarned,
+        creditsLifetimeSpent,
+      })
     }
 
     console.log('[BestAuth Account API] Determining credit allowances...')
