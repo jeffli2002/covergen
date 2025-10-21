@@ -188,7 +188,7 @@ async function completeFix() {
       .eq('user_id', BESTAUTH_USER_ID)
       .single()
 
-    const hasResolvedId = subscription.metadata?.resolved_supabase_user_id === SUPABASE_USER_ID
+    const hasResolvedId = subscription?.metadata?.resolved_supabase_user_id === SUPABASE_USER_ID
     
     if (hasResolvedId) {
       console.log('✅ Subscription metadata contains correct resolved_supabase_user_id')
