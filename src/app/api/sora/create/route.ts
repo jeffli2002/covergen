@@ -5,62 +5,7 @@ import { authConfig } from '@/config/auth.config'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 import { validateCopyright, getValidationConfig } from '@/lib/validation'
 import { checkPointsForGeneration } from '@/lib/middleware/points-check'
-import { createClient } from '@/utils/supabase/server'
 import { getBestAuthSupabaseClient } from '@/lib/bestauth/db-client'
-
-/**
- * Resolve BestAuth user ID to Supabase user ID for points system
- * Points are stored in Supabase with Supabase user IDs
- */
-async function resolveSupabaseUserId(bestAuthUserId: string): Promise<string> {
-  try {
-    const supabaseAdmin = getBestAuthSupabaseClient()
-    if (!supabaseAdmin) {
-      console.error('[Sora Create] No Supabase admin client available')
-      return bestAuthUserId // Fallback to BestAuth ID
-    }
-
-    // Try user_id_mapping table first
-    const { data: mapping } = await supabaseAdmin
-      .from('user_id_mapping')
-      .select('supabase_user_id')
-      .eq('bestauth_user_id', bestAuthUserId)
-      .maybeSingle()
-
-    if (mapping?.supabase_user_id) {
-      console.log('[Sora Create] Resolved Supabase user ID from mapping:', mapping.supabase_user_id)
-      return mapping.supabase_user_id
-    }
-
-    // Fallback to subscription metadata
-    const { data: subscription } = await supabaseAdmin
-      .from('bestauth_subscriptions')
-      .select('metadata')
-      .eq('user_id', bestAuthUserId)
-      .maybeSingle()
-
-    const isUuid = (val: unknown): val is string =>
-      typeof val === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(val)
-
-    const candidates = [
-      subscription?.metadata?.resolved_supabase_user_id,
-      subscription?.metadata?.supabase_user_id,
-      subscription?.metadata?.original_payload_user_id,
-    ]
-
-    const resolvedId = candidates.find(isUuid)
-    if (resolvedId) {
-      console.log('[Sora Create] Resolved Supabase user ID from metadata:', resolvedId)
-      return resolvedId
-    }
-
-    console.error('[Sora Create] CRITICAL: Unable to resolve Supabase user ID for BestAuth user:', bestAuthUserId)
-    return bestAuthUserId // Fallback to BestAuth ID
-  } catch (error) {
-    console.error('[Sora Create] Error resolving Supabase user ID:', error)
-    return bestAuthUserId // Fallback
-  }
-}
 
 // CRITICAL: Use Node.js runtime for @google-cloud/vision compatibility
 export const runtime = 'nodejs'
@@ -169,13 +114,20 @@ async function handler(request: AuthenticatedRequest) {
     }
 
     const generationType = quality === 'pro' ? 'sora2ProVideo' : 'sora2Video'
-    const supabase = await createClient()
+    // CRITICAL FIX: Use service role client for checking credits in bestauth_subscriptions
+    // The anon key client doesn't have permission to read bestauth_subscriptions
+    const supabaseAdmin = getBestAuthSupabaseClient()
     
-    // CRITICAL FIX: Resolve BestAuth user ID to Supabase user ID for points system
-    const supabaseUserId = await resolveSupabaseUserId(user.id)
-    console.log('[Sora Create] User ID resolution:', { bestAuthId: user.id, supabaseId: supabaseUserId })
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Internal server error - database connection unavailable' },
+        { status: 500 }
+      )
+    }
     
-    const pointsCheck = await checkPointsForGeneration(supabaseUserId, generationType, supabase)
+    // For BestAuth users, use the BestAuth user ID directly (no need to resolve to Supabase ID)
+    console.log('[Sora Create] Checking credits for BestAuth user:', user.id)
+    const pointsCheck = await checkPointsForGeneration(user.id, generationType, supabaseAdmin)
     
     if (pointsCheck.usesPoints && !pointsCheck.canProceed) {
       return NextResponse.json(
