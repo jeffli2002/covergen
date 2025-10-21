@@ -231,6 +231,34 @@ export async function handleOAuthCallback(
       }
     }
 
+    // Sync to Supabase for points system compatibility
+    // This ensures every BestAuth user has:
+    // 1. A Supabase auth.users record
+    // 2. A user_id_mapping entry
+    // 3. A points balance (created on first access)
+    try {
+      const { userSyncService } = await import('@/services/sync/UserSyncService')
+      const syncResult = await userSyncService.syncBestAuthUserToSupabase(user.id)
+      
+      if (!syncResult.success) {
+        console.warn('[OAuth] Failed to sync BestAuth user to Supabase:', {
+          userId: user.id,
+          email: user.email,
+          error: syncResult.error
+        })
+        // Don't fail the OAuth flow, but log the error
+      } else {
+        console.log('[OAuth] Successfully synced BestAuth user to Supabase:', {
+          userId: user.id,
+          email: user.email,
+          supabaseUserId: syncResult.supabaseUserId
+        })
+      }
+    } catch (syncError) {
+      console.error('[OAuth] Error during Supabase sync:', syncError)
+      // Don't fail the OAuth flow - user can still sign in
+    }
+
     // Update last sign-in timestamp
     await db.users.updateLastSignIn(user.id)
 
