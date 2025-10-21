@@ -284,6 +284,7 @@ export async function GET(request: NextRequest) {
 
     // Calculate actual usage from transactions this month (from bestauth_points_transactions table)
     let creditsUsedThisMonth = 0
+    let creditsGrantedThisMonth = 0
     try {
       const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
       const supabaseClient = getBestAuthSupabaseClient()
@@ -292,16 +293,25 @@ export async function GET(request: NextRequest) {
         // Query bestauth_points_transactions (not points_transactions)
         const { data: monthlyTransactions } = await supabaseClient
           .from('bestauth_points_transactions')
-          .select('amount')
+          .select('amount, transaction_type')
           .eq('user_id', userId) // Use BestAuth user ID, not Supabase user ID
-          .eq('transaction_type', 'generation_deduction')
           .gte('created_at', firstDayOfMonth)
 
-        creditsUsedThisMonth = monthlyTransactions?.reduce((sum: number, t: any) => sum + Math.abs(t.amount), 0) || 0
+        // Calculate deductions (usage)
+        creditsUsedThisMonth = monthlyTransactions
+          ?.filter((t: any) => t.transaction_type === 'generation_deduction')
+          .reduce((sum: number, t: any) => sum + Math.abs(t.amount), 0) || 0
+        
+        // Calculate grants (subscription_grant) received this month
+        creditsGrantedThisMonth = monthlyTransactions
+          ?.filter((t: any) => t.transaction_type === 'subscription_grant')
+          .reduce((sum: number, t: any) => sum + t.amount, 0) || 0
+        
         console.log('[BestAuth Account API] Monthly usage from bestauth_points_transactions:', {
           userId: userId,
           transactionCount: monthlyTransactions?.length || 0,
-          totalUsed: creditsUsedThisMonth
+          totalUsed: creditsUsedThisMonth,
+          totalGranted: creditsGrantedThisMonth
         })
       }
     } catch (usageError) {
@@ -309,6 +319,7 @@ export async function GET(request: NextRequest) {
       // Fallback: calculate based on lifetime_spent - this is NOT accurate for monthly
       // Better approach: return 0 and log error
       creditsUsedThisMonth = 0
+      creditsGrantedThisMonth = 0
       console.warn('[BestAuth Account API] Unable to calculate monthly usage, returning 0')
     }
 
@@ -364,6 +375,7 @@ export async function GET(request: NextRequest) {
         videos_this_month: videosThisMonth,
         credits_balance: creditsBalance,
         credits_used_this_month: creditsUsedThisMonth,
+        credits_granted_this_month: creditsGrantedThisMonth,
         credits_monthly_allowance: creditsMonthlyAllowance,
         credits_lifetime_earned: creditsLifetimeEarned,
         credits_lifetime_spent: creditsLifetimeSpent,
@@ -380,6 +392,7 @@ export async function GET(request: NextRequest) {
         videos_this_month: videosThisMonth,
         credits_balance: creditsBalance,
         credits_used_this_month: creditsUsedThisMonth,
+        credits_granted_this_month: creditsGrantedThisMonth,
         credits_monthly_allowance: creditsMonthlyAllowance,
         credits_lifetime_earned: creditsLifetimeEarned,
         credits_lifetime_spent: creditsLifetimeSpent,

@@ -574,6 +574,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   // Get credits balance from usage data (assuming API returns this)
   const creditsBalance = usage?.credits_balance || 0
   const creditsUsed = usage?.credits_used_this_month || 0
+  const creditsGranted = usage?.credits_granted_this_month || 0
   const creditsMonthly = planDetails.credits.monthly
   
   // For display purposes
@@ -834,14 +835,14 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                   </div>
                   <div className="flex justify-between text-ui-sm text-gray-600">
                     <span>Monthly Allocation</span>
-                    <span className="font-medium">{creditsMonthly.toLocaleString()} credits</span>
+                    <span className="font-medium">{creditsGranted > 0 ? creditsGranted.toLocaleString() : creditsMonthly.toLocaleString()} credits</span>
                   </div>
                   <div className="flex justify-between text-ui-sm text-gray-600 mt-1">
                     <span>Used This Month</span>
                     <span className="font-medium">{creditsUsed.toLocaleString()} credits</span>
                   </div>
                   <Progress 
-                    value={creditsMonthly > 0 ? (creditsUsed / creditsMonthly) * 100 : 0}
+                    value={(creditsGranted > 0 ? creditsGranted : creditsMonthly) > 0 ? (creditsUsed / (creditsGranted > 0 ? creditsGranted : creditsMonthly)) * 100 : 0}
                     className="h-2 mt-3" 
                   />
                 </div>
