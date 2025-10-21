@@ -1,4 +1,42 @@
 import { createClient } from '@supabase/supabase-js'
+import { OAUTH_NEXT_COOKIE_NAME, OAUTH_NEXT_STORAGE_KEY } from '@/config/auth.config'
+
+function persistNextRedirect(next: string) {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  try {
+    sessionStorage.setItem(OAUTH_NEXT_STORAGE_KEY, next)
+  } catch (error) {
+    console.warn('[OAuth Config] Failed to store redirect in sessionStorage:', error)
+  }
+
+  try {
+    localStorage.setItem(OAUTH_NEXT_STORAGE_KEY, next)
+  } catch (error) {
+    console.warn('[OAuth Config] Failed to store redirect in localStorage:', error)
+  }
+
+  try {
+    const cookieParts = [
+      `${OAUTH_NEXT_COOKIE_NAME}=${encodeURIComponent(next)}`,
+      'path=/',
+      'max-age=600',
+      'SameSite=Lax',
+    ]
+    if (window.location.protocol === 'https:') {
+      cookieParts.push('Secure')
+    }
+    document.cookie = cookieParts.join('; ')
+  } catch (error) {
+    console.warn('[OAuth Config] Failed to persist redirect cookie:', error)
+  }
+}
+
+export function persistOAuthRedirect(next: string) {
+  persistNextRedirect(next)
+}
 
 // Production OAuth configuration helper
 export function getOAuthConfig() {
@@ -81,9 +119,9 @@ export function getOAuthRedirectUrl(next?: string) {
   const baseUrl = `${siteUrl}/auth/callback`
   
   if (next) {
-    return `${baseUrl}?next=${encodeURIComponent(next)}`
+    persistNextRedirect(next)
   }
-  
+
   return baseUrl
 }
 

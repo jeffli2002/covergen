@@ -1,9 +1,9 @@
 'use server'
 
 import { createSupabaseClient } from '@/lib/supabase/server'
-import { headers } from 'next/headers'
+import { headers, cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { authConfig } from '@/config/auth.config'
+import { authConfig, OAUTH_NEXT_COOKIE_NAME } from '@/config/auth.config'
 
 export async function checkAuthSession() {
   // Use BestAuth implementation if enabled
@@ -45,12 +45,23 @@ export async function signInWithGoogleAction(currentPath?: string) {
   const supabase = await createSupabaseClient()
   const headersList = await headers()
   const origin = headersList.get('origin') || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const cookieStore = cookies()
   
   // Use the current path or default to the homepage
-  const nextPath = currentPath || '/'
-  const redirectTo = `${origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
+  const nextPath = currentPath && currentPath.startsWith('/') ? currentPath : '/'
+  const redirectTo = `${origin}/auth/callback`
+
+  // Persist desired redirect for callback resolution
+  cookieStore.set({
+    name: OAUTH_NEXT_COOKIE_NAME,
+    value: encodeURIComponent(nextPath),
+    path: '/',
+    maxAge: 600,
+    sameSite: 'lax',
+    secure: origin.startsWith('https'),
+  })
   
-  console.log('[Server Action] OAuth redirect URL:', redirectTo)
+  console.log('[Server Action] OAuth redirect URL:', redirectTo, 'nextPath:', nextPath)
   
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',

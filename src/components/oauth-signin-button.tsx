@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
+import { persistOAuthRedirect } from '@/lib/supabase-oauth-config'
 import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 
@@ -28,12 +29,13 @@ export function OAuthSignInButton({
 
     try {
       setIsLoading(true)
+      persistOAuthRedirect(redirectTo)
       
       // Use client-side OAuth which properly handles PKCE
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
+          redirectTo: `${window.location.origin}/auth/callback`,
           // Don't specify queryParams to use default flow
         }
       })
