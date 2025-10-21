@@ -130,13 +130,73 @@ export async function signUp({
       }
     }
 
+    // Grant signup bonus credits directly to BestAuth subscription
     try {
-      const { createPointsService } = await import('@/lib/services/points-service')
-      const { createClient } = await import('@/utils/supabase/server')
-      const supabase = await createClient()
-      const pointsService = createPointsService(supabase)
-      await pointsService.grantSignupBonus(user.id)
-      console.log('[BestAuth] Granted signup bonus points to new user:', user.id)
+      const { SUBSCRIPTION_CONFIG } = await import('@/config/subscription')
+      const signupBonus = SUBSCRIPTION_CONFIG.signupBonus.free
+      
+      if (signupBonus > 0) {
+        const { getBestAuthSupabaseClient } = await import('@/lib/bestauth/db-client')
+        const supabaseAdmin = getBestAuthSupabaseClient()
+        
+        if (supabaseAdmin) {
+          // Get user's subscription (should already exist from createSubscription)
+          const { data: subscription } = await supabaseAdmin
+            .from('bestauth_subscriptions')
+            .select('id, points_balance, points_lifetime_earned')
+            .eq('user_id', user.id)
+            .single()
+          
+          if (subscription) {
+            const currentBalance = subscription.points_balance ?? 0
+            const currentLifetimeEarned = subscription.points_lifetime_earned ?? 0
+            const newBalance = currentBalance + signupBonus
+            const newLifetimeEarned = currentLifetimeEarned + signupBonus
+            
+            // Update subscription with signup bonus
+            const { error: updateError } = await supabaseAdmin
+              .from('bestauth_subscriptions')
+              .update({
+                points_balance: newBalance,
+                points_lifetime_earned: newLifetimeEarned,
+                updated_at: new Date().toISOString()
+              })
+              .eq('user_id', user.id)
+            
+            if (updateError) {
+              console.error('[BestAuth] Failed to grant signup bonus:', updateError)
+            } else {
+              console.log(`[BestAuth] ✅ Granted ${signupBonus} signup bonus credits to new user ${user.id}`)
+              console.log(`[BestAuth]    Balance: ${currentBalance} → ${newBalance}`)
+              
+              // Create transaction record
+              const { error: txError } = await supabaseAdmin
+                .from('bestauth_points_transactions')
+                .insert({
+                  user_id: user.id,
+                  amount: signupBonus,
+                  balance_after: newBalance,
+                  transaction_type: 'signup_bonus',
+                  subscription_id: subscription.id,
+                  description: `Welcome bonus: ${signupBonus} credits`,
+                  metadata: {
+                    source: 'signup',
+                    bonus_type: 'welcome',
+                    method: 'email'
+                  }
+                })
+              
+              if (txError) {
+                console.error('[BestAuth] Failed to create signup bonus transaction:', txError)
+              } else {
+                console.log('[BestAuth] Signup bonus transaction record created')
+              }
+            }
+          } else {
+            console.error('[BestAuth] No subscription found for new user - cannot grant signup bonus')
+          }
+        }
+      }
     } catch (pointsError) {
       console.error('[BestAuth] Failed to grant signup bonus:', pointsError)
     }

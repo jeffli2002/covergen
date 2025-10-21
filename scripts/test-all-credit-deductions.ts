@@ -21,9 +21,9 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 const email = process.argv[2] || '994235892@qq.com'
 
 const GENERATION_TYPES = {
-  nanoBananaImage: { cost: 5, name: 'Image Generation' },
-  sora2Video: { cost: 20, name: 'Standard Video' },
-  sora2ProVideo: { cost: 80, name: 'Pro Video' },
+  nanoBananaImage: { cost: 5, name: 'Image Generation', description: 'Test NanoBanana image generation' },
+  sora2Video: { cost: 20, name: 'Sora 2 Video', description: 'Test Sora 2 video generation (standard quality)' },
+  sora2ProVideo: { cost: 80, name: 'Sora 2 Pro Video', description: 'Test Sora 2 Pro video generation (high quality)' },
 }
 
 async function testAllCreditDeductions() {
@@ -105,8 +105,8 @@ async function testAllCreditDeductions() {
         balance_after: newBalance,
         transaction_type: 'generation_deduction',
         generation_type: type,
-        description: `Test ${info.name}`,
-        metadata: { test: true }
+        description: info.description,
+        metadata: { test: true, cost: info.cost }
       })
     
     if (txError) {

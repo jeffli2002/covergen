@@ -187,6 +187,24 @@ export async function deductPointsForGeneration(
         .eq('user_id', userId)
         .single()
 
+      // Create human-readable description
+      const getGenerationDescription = (type: string, meta?: Record<string, any>) => {
+        const typeNames: Record<string, string> = {
+          nanoBananaImage: 'Image generation',
+          sora2Video: 'Sora 2 video generation',
+          sora2ProVideo: 'Sora 2 Pro video generation',
+        }
+        
+        const baseName = typeNames[type] || type
+        
+        if (meta?.prompt) {
+          const truncatedPrompt = meta.prompt.substring(0, 50)
+          return `${baseName}: "${truncatedPrompt}${meta.prompt.length > 50 ? '...' : ''}"`
+        }
+        
+        return baseName
+      }
+
       // Create transaction record for audit trail
       const { error: txError } = await supabase
         .from('bestauth_points_transactions')
@@ -197,9 +215,7 @@ export async function deductPointsForGeneration(
           transaction_type: 'generation_deduction',
           generation_type: generationType,
           subscription_id: subData?.id,
-          description: metadata?.prompt 
-            ? `${generationType} generation: "${metadata.prompt.substring(0, 50)}..."` 
-            : `${generationType} generation`,
+          description: getGenerationDescription(generationType, metadata),
           metadata
         })
 
