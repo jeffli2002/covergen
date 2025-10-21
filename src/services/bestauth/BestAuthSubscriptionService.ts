@@ -477,6 +477,31 @@ export class BestAuthSubscriptionService {
               console.log(`[BestAuthSubscriptionService] ✅ Successfully granted ${credits} credits to user ${data.userId}`)
               console.log(`[BestAuthSubscriptionService]    Previous balance: ${currentBalance}`)
               console.log(`[BestAuthSubscriptionService]    New balance: ${newBalance}`)
+
+              // Create transaction record for audit trail
+              const { error: txError } = await supabase
+                .from('bestauth_points_transactions')
+                .insert({
+                  user_id: data.userId,
+                  amount: credits,
+                  balance_after: newBalance,
+                  transaction_type: 'subscription_grant',
+                  subscription_id: result?.id,
+                  description: `${tierConfig.name} ${cycle} subscription: ${credits} credits`,
+                  metadata: {
+                    tier: grantTier,
+                    cycle,
+                    source: 'subscription',
+                    previous_tier: data.previousTier
+                  }
+                })
+
+              if (txError) {
+                console.error('[BestAuthSubscriptionService] Failed to create transaction record:', txError)
+                // Don't fail the grant if transaction record fails
+              } else {
+                console.log('[BestAuthSubscriptionService] Transaction record created')
+              }
             }
           } else {
             console.error('[BestAuthSubscriptionService] Cannot grant credits - BestAuth database client not available')

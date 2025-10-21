@@ -57,6 +57,8 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   const [accountData, setAccountData] = useState<any>(null)
   const [subscription, setSubscription] = useState<any>(null)
   const [usage, setUsage] = useState<any>(null)
+  const [transactions, setTransactions] = useState<any[]>([])
+  const [usageStats, setUsageStats] = useState<any>(null)
   const [cancelling, setCancelling] = useState(false)
   const [resuming, setResuming] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -210,6 +212,39 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
             quotaUsed: data.usage?.today || 0,
             quotaLimit: config.limits.free.daily
           })
+        }
+
+        // Fetch credit transactions and usage stats
+        try {
+          const [txResponse, statsResponse] = await Promise.all([
+            fetch(`/api/bestauth/transactions?limit=20`, {
+              headers: {
+                'Authorization': `Bearer ${session.token}`,
+                'Content-Type': 'application/json'
+              },
+              cache: 'no-store'
+            }),
+            fetch(`/api/bestauth/usage-stats`, {
+              headers: {
+                'Authorization': `Bearer ${session.token}`,
+                'Content-Type': 'application/json'
+              },
+              cache: 'no-store'
+            })
+          ])
+
+          if (txResponse.ok) {
+            const txData = await txResponse.json()
+            setTransactions(txData.transactions || [])
+          }
+
+          if (statsResponse.ok) {
+            const statsData = await statsResponse.json()
+            setUsageStats(statsData)
+          }
+        } catch (txError) {
+          console.error('[Account] Error loading transactions/stats:', txError)
+          // Don't fail the whole page if transactions fail
         }
       } catch (innerError) {
         clearTimeout(loadTimeout)
@@ -856,17 +891,67 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
               {/* Usage Statistics */}
               <div className="pt-3 border-t">
                 <h4 className="text-ui-sm font-medium text-gray-700 mb-3">Usage Statistics {usagePeriod}</h4>
-                <div className="space-y-3">
-                  <div className="flex justify-between text-ui-sm">
-                    <span className="text-gray-600">Images Generated</span>
-                    <span className="font-medium">{isPaidUser ? (usage?.images_this_month || 0) : (usage?.images_today || 0)}</span>
+                {usageStats ? (
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-ui-sm">
+                      <span className="text-gray-600">Images Generated</span>
+                      <span className="font-medium">{usageStats.generations.images.total} ({usageStats.generations.images.totalCredits} credits)</span>
+                    </div>
+                    <div className="flex justify-between text-ui-sm">
+                      <span className="text-gray-600">Videos Generated</span>
+                      <span className="font-medium">{usageStats.generations.videos.total} ({usageStats.generations.videos.totalCredits} credits)</span>
+                    </div>
+                    <div className="flex justify-between text-ui-sm pt-2 border-t">
+                      <span className="text-gray-600 font-medium">Total Credits Used</span>
+                      <span className="font-bold text-purple-600">{usageStats.credits.spent}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-ui-sm">
-                    <span className="text-gray-600">Videos Generated</span>
-                    <span className="font-medium">{isPaidUser ? (usage?.videos_this_month || 0) : (usage?.videos_today || 0)}</span>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-ui-sm">
+                      <span className="text-gray-600">Images Generated</span>
+                      <span className="font-medium">{isPaidUser ? (usage?.images_this_month || 0) : (usage?.images_today || 0)}</span>
+                    </div>
+                    <div className="flex justify-between text-ui-sm">
+                      <span className="text-gray-600">Videos Generated</span>
+                      <span className="font-medium">{isPaidUser ? (usage?.videos_this_month || 0) : (usage?.videos_today || 0)}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Credit Transaction History */}
+              {isPaidUser && transactions.length > 0 && (
+                <div className="pt-3 border-t">
+                  <h4 className="text-ui-sm font-medium text-gray-700 mb-3">Credit Usage History</h4>
+                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                    {transactions.map((tx: any) => (
+                      <div key={tx.id} className="flex justify-between items-start p-3 bg-gray-50 rounded text-ui-sm hover:bg-gray-100 transition-colors">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className={`font-medium ${tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {tx.amount > 0 ? '+' : ''}{tx.amount}
+                            </span>
+                            <span className="text-gray-700">{tx.description}</span>
+                          </div>
+                          <div className="text-ui-xs text-gray-500 mt-1">
+                            {new Date(tx.created_at).toLocaleString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-ui-xs text-gray-500">Balance</div>
+                          <div className="font-medium text-gray-700">{tx.balance_after}</div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Low Credits Warning */}
               {isPaidUser && creditsBalance > 0 && creditsBalance < 100 && (

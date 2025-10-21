@@ -180,6 +180,36 @@ export async function deductPointsForGeneration(
         }
       }
 
+      // Get subscription ID for transaction record
+      const { data: subData } = await supabase
+        .from('bestauth_subscriptions')
+        .select('id')
+        .eq('user_id', userId)
+        .single()
+
+      // Create transaction record for audit trail
+      const { error: txError } = await supabase
+        .from('bestauth_points_transactions')
+        .insert({
+          user_id: userId,
+          amount: -creditCost,
+          balance_after: newBalance,
+          transaction_type: 'generation_deduction',
+          generation_type: generationType,
+          subscription_id: subData?.id,
+          description: metadata?.prompt 
+            ? `${generationType} generation: "${metadata.prompt.substring(0, 50)}..."` 
+            : `${generationType} generation`,
+          metadata
+        })
+
+      if (txError) {
+        console.error('[PointsDeduct] Failed to create transaction record:', txError)
+        // Don't fail the deduction if transaction record fails
+      } else {
+        console.log('[PointsDeduct] Transaction record created')
+      }
+
       console.log(`[PointsDeduct] ✅ Successfully deducted ${creditCost} credits from BestAuth user`)
       console.log(`[PointsDeduct]    Previous balance: ${currentBalance}`)
       console.log(`[PointsDeduct]    New balance: ${newBalance}`)
