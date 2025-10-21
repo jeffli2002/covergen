@@ -434,13 +434,35 @@ export class BestAuthSubscriptionService {
           const tierConfig = grantTier === 'pro' ? SUBSCRIPTION_CONFIG.pro : SUBSCRIPTION_CONFIG.proPlus
           const credits = tierConfig.points[cycle]
 
-          console.log(`[BestAuthSubscriptionService] Granting ${credits} credits for ${grantTier} ${cycle}`)
+          console.log(`[BestAuthSubscriptionService] Checking if credits should be granted for ${grantTier} ${cycle}`)
           
           // For BestAuth users, update bestauth_subscriptions.points_balance directly
           const { getBestAuthSupabaseClient } = await import('@/lib/bestauth/db-client')
           const supabase = getBestAuthSupabaseClient()
           
           if (supabase) {
+            // IDEMPOTENCY CHECK: Check if credits were already granted for this subscription
+            const { data: existingGrant } = await supabase
+              .from('bestauth_points_transactions')
+              .select('id, amount, created_at')
+              .eq('user_id', data.userId)
+              .eq('transaction_type', 'subscription_grant')
+              .eq('subscription_id', result.id)
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .maybeSingle()
+            
+            if (existingGrant) {
+              const grantAge = Date.now() - new Date(existingGrant.created_at).getTime()
+              const grantAgeMinutes = Math.round(grantAge / 1000 / 60)
+              console.log(`[BestAuthSubscriptionService] ⚠️ Credits already granted for subscription ${result.id}`)
+              console.log(`[BestAuthSubscriptionService]    Previous grant: ${existingGrant.amount} credits (${grantAgeMinutes} minutes ago)`)
+              console.log(`[BestAuthSubscriptionService]    Skipping duplicate credit grant`)
+              return result
+            }
+            
+            console.log(`[BestAuthSubscriptionService] No existing grant found, proceeding to grant ${credits} credits`)
+            
             // Get current balance
             const { data: currentSub } = await supabase
               .from('bestauth_subscriptions')

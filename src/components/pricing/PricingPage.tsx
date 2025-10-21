@@ -19,6 +19,7 @@ interface SubscriptionInfo {
   isActive: boolean
   isTrialing: boolean
   cancelAtPeriodEnd: boolean
+  billing_cycle?: 'monthly' | 'yearly'
 }
 
 interface PricingPageProps {
@@ -83,11 +84,19 @@ export default function PricingPage({ locale = 'en' }: PricingPageProps = {}) {
   const getButtonText = (plan: PricingPlan) => {
     if (loadingSubscription) return 'Loading...'
     
-    const isCurrentPlan = subscriptionInfo?.plan === plan.id
+    // Check if this is the EXACT current plan (tier + billing cycle)
+    const currentBillingCycle = subscriptionInfo?.billing_cycle || 'monthly'
+    const selectedBillingCycle = isYearly ? 'yearly' : 'monthly'
+    const isExactCurrentPlan = subscriptionInfo?.plan === plan.id && currentBillingCycle === selectedBillingCycle
+    const isSameTierDifferentCycle = subscriptionInfo?.plan === plan.id && currentBillingCycle !== selectedBillingCycle
     
-    if (isCurrentPlan) {
+    if (isExactCurrentPlan) {
       if (subscriptionInfo?.isTrialing) return 'Activate Plan'
       return 'Current Plan'
+    }
+    
+    if (isSameTierDifferentCycle) {
+      return selectedBillingCycle === 'yearly' ? 'Switch to Yearly' : 'Switch to Monthly'
     }
 
     if (plan.id === 'free') return 'Get Started Free'
@@ -108,13 +117,21 @@ export default function PricingPage({ locale = 'en' }: PricingPageProps = {}) {
     if (loadingSubscription) return true
     if (plan.comingSoon) return true
     
-    const isCurrentPlan = subscriptionInfo?.plan === plan.id
-    if (isCurrentPlan && !subscriptionInfo?.isTrialing) return true
+    // PREVENT DUPLICATE: Check both tier AND billing cycle
+    const currentBillingCycle = subscriptionInfo?.billing_cycle || 'monthly'
+    const selectedBillingCycle = isYearly ? 'yearly' : 'monthly'
+    const isExactCurrentPlan = subscriptionInfo?.plan === plan.id && currentBillingCycle === selectedBillingCycle
+    
+    // Disable button if this is the exact current plan (same tier + same billing cycle)
+    if (isExactCurrentPlan && !subscriptionInfo?.isTrialing) return true
 
     // Disable downgrade to free for paid users
     if (plan.id === 'free' && subscriptionInfo && subscriptionInfo.plan !== 'free') {
       return true
     }
+
+    // Note: Allow switching billing cycles (Pro Monthly -> Pro Yearly)
+    // This is handled by showing "Switch to Yearly/Monthly" button text
 
     return false
   }

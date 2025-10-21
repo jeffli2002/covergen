@@ -282,33 +282,34 @@ export async function GET(request: NextRequest) {
       creditsMonthlyAllowance = SUBSCRIPTION_CONFIG.free.points.monthly
     }
 
-    // Calculate actual usage from transactions this month, not from balance difference
+    // Calculate actual usage from transactions this month (from bestauth_points_transactions table)
     let creditsUsedThisMonth = 0
     try {
       const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
       const supabaseClient = getBestAuthSupabaseClient()
       
       if (supabaseClient) {
+        // Query bestauth_points_transactions (not points_transactions)
         const { data: monthlyTransactions } = await supabaseClient
-          .from('points_transactions')
+          .from('bestauth_points_transactions')
           .select('amount')
-          .eq('user_id', supabaseUserId)
-          .eq('transaction_type', 'generation_cost')
+          .eq('user_id', userId) // Use BestAuth user ID, not Supabase user ID
+          .eq('transaction_type', 'generation_deduction')
           .gte('created_at', firstDayOfMonth)
 
         creditsUsedThisMonth = monthlyTransactions?.reduce((sum: number, t: any) => sum + Math.abs(t.amount), 0) || 0
-        console.log('[BestAuth Account API] Monthly usage from transactions:', {
+        console.log('[BestAuth Account API] Monthly usage from bestauth_points_transactions:', {
+          userId: userId,
           transactionCount: monthlyTransactions?.length || 0,
           totalUsed: creditsUsedThisMonth
         })
       }
     } catch (usageError) {
       console.error('[BestAuth Account API] Error calculating monthly usage:', usageError)
-      // Fallback to old calculation if transaction query fails
-      const normalizedBalanceForAllowance = Math.min(creditsBalance, creditsMonthlyAllowance)
-      creditsUsedThisMonth = creditsMonthlyAllowance > 0
-        ? Math.max(0, creditsMonthlyAllowance - normalizedBalanceForAllowance)
-        : 0
+      // Fallback: calculate based on lifetime_spent - this is NOT accurate for monthly
+      // Better approach: return 0 and log error
+      creditsUsedThisMonth = 0
+      console.warn('[BestAuth Account API] Unable to calculate monthly usage, returning 0')
     }
 
     console.log('[BestAuth Account API] Step 7: Fetching payments...')
