@@ -122,7 +122,29 @@ async function getBestAuthUser(emailAddress) {
   return data ?? null
 }
 
-async function updateBestAuthSubscription(bestAuthUserId) {
+async function upsertUserMapping(bestAuthUserId, supabaseUserId) {
+  const { error } = await supabase
+    .from('user_id_mapping')
+    .upsert(
+      {
+        bestauth_user_id: bestAuthUserId,
+        supabase_user_id: supabaseUserId,
+        email: email,
+        updated_at: nowIso(),
+      },
+      {
+        onConflict: 'bestauth_user_id',
+      }
+    )
+
+  if (error) {
+    throw new Error(`Failed to upsert user mapping: ${error.message}`)
+  }
+
+  console.log('✓ Ensured user_id_mapping entry exists')
+}
+
+async function updateBestAuthSubscription(bestAuthUserId, supabaseUserId) {
   const { data: existing, error: existingError } = await supabase
     .from('bestauth_subscriptions')
     .select('*')
@@ -141,6 +163,9 @@ async function updateBestAuthSubscription(bestAuthUserId) {
     ...(existing?.metadata ?? {}),
     manual_reset_at: nowIso(),
     manual_reset_reason: 'reset_to_free_with_30_credits',
+    supabase_user_id: supabaseUserId,
+    resolved_supabase_user_id: supabaseUserId,
+    original_userId: supabaseUserId,
   }
 
   const { error: upsertError } = await supabase
@@ -192,6 +217,12 @@ async function updateSupabaseSubscription(supabaseUserId, previousTier) {
     existing?.points_lifetime_spent ?? 0
   )
 
+  const metadata = {
+    ...(existing?.metadata ?? {}),
+    supabase_user_id: supabaseUserId,
+    resolved_supabase_user_id: supabaseUserId,
+  }
+
   const { data: upserted, error: upsertError } = await supabase
     .from('subscriptions_consolidated')
     .upsert(
@@ -214,7 +245,8 @@ async function updateSupabaseSubscription(supabaseUserId, previousTier) {
         trial_ended_at: null,
         trial_days: null,
         paid_started_at: null,
-        metadata: existing?.metadata ?? null,
+        metadata,
+        supabase_user_id: supabaseUserId,
         updated_at: nowIso(),
       },
       { onConflict: 'user_id' }
@@ -274,7 +306,9 @@ async function main() {
   }
   console.log(`✓ BestAuth user id: ${bestAuthUser.id}`)
 
-  const previousTier = await updateBestAuthSubscription(bestAuthUser.id)
+  await upsertUserMapping(bestAuthUser.id, authUser.id)
+
+  const previousTier = await updateBestAuthSubscription(bestAuthUser.id, authUser.id)
   console.log(`✓ BestAuth subscription set to free (previous: ${previousTier ?? 'unknown'})`)
 
   const { previousBalance } = await updateSupabaseSubscription(authUser.id, previousTier)
