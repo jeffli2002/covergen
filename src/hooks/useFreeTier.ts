@@ -6,15 +6,20 @@ import { useAuth } from '@/contexts/AuthContext'
 const FREE_TIER_LIMIT = 3
 
 export function useFreeTier() {
-  const { user, getUserUsageToday, incrementUsage } = useAuth()
+  const { user, getUserUsageToday, incrementUsage, getUserSubscription } = useAuth()
   const [usageToday, setUsageToday] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
+  const [subscription, setSubscription] = useState<any>(null)
 
   useEffect(() => {
     const checkUsage = async () => {
       if (user) {
         setIsLoading(true)
         try {
+          // Load subscription to check tier
+          const sub = await getUserSubscription()
+          setSubscription(sub)
+          
           const localUsage = getLocalUsage()
           
           if (localUsage > 0) {
@@ -47,6 +52,17 @@ export function useFreeTier() {
     if (process.env.NEXT_PUBLIC_BYPASS_USAGE_LIMIT === 'true') {
       return true
     }
+    
+    // Pro and Pro+ users have no daily limits (they use credits instead)
+    if (subscription) {
+      const tier = subscription.tier || subscription.subscription_tier || 'free'
+      if (tier === 'pro' || tier === 'pro_plus') {
+        console.log('[useFreeTier] Pro/Pro+ user - bypassing daily limit check')
+        return true // Let the backend check credits instead
+      }
+    }
+    
+    // Free tier users have daily limit
     return usageToday < FREE_TIER_LIMIT
   }
 
@@ -55,6 +71,16 @@ export function useFreeTier() {
     if (process.env.NEXT_PUBLIC_BYPASS_USAGE_LIMIT === 'true') {
       return 999
     }
+    
+    // Pro and Pro+ users have effectively unlimited daily generations
+    if (subscription) {
+      const tier = subscription.tier || subscription.subscription_tier || 'free'
+      if (tier === 'pro' || tier === 'pro_plus') {
+        return 999 // Effectively unlimited (limited by credits, not daily count)
+      }
+    }
+    
+    // Free tier users have daily limit
     return Math.max(0, FREE_TIER_LIMIT - usageToday)
   }
 
@@ -109,6 +135,7 @@ export function useFreeTier() {
     getRemainingGenerations,
     trackUsage,
     isLoading,
-    freeTierLimit: FREE_TIER_LIMIT
+    freeTierLimit: FREE_TIER_LIMIT,
+    subscription
   }
 }
