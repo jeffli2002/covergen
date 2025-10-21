@@ -279,10 +279,30 @@ export async function GET(request: NextRequest) {
       creditsMonthlyAllowance = SUBSCRIPTION_CONFIG.free.points.monthly
     }
 
-    const normalizedBalanceForAllowance = Math.min(creditsBalance, creditsMonthlyAllowance)
-    const creditsUsedThisMonth = creditsMonthlyAllowance > 0
-      ? Math.max(0, creditsMonthlyAllowance - normalizedBalanceForAllowance)
-      : 0
+    // Calculate actual usage from transactions this month, not from balance difference
+    let creditsUsedThisMonth = 0
+    try {
+      const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
+      const { data: monthlyTransactions } = await supabaseAdmin
+        .from('points_transactions')
+        .select('amount')
+        .eq('user_id', supabaseUserId)
+        .eq('transaction_type', 'generation_cost')
+        .gte('created_at', firstDayOfMonth)
+
+      creditsUsedThisMonth = monthlyTransactions?.reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0
+      console.log('[BestAuth Account API] Monthly usage from transactions:', {
+        transactionCount: monthlyTransactions?.length || 0,
+        totalUsed: creditsUsedThisMonth
+      })
+    } catch (usageError) {
+      console.error('[BestAuth Account API] Error calculating monthly usage:', usageError)
+      // Fallback to old calculation if transaction query fails
+      const normalizedBalanceForAllowance = Math.min(creditsBalance, creditsMonthlyAllowance)
+      creditsUsedThisMonth = creditsMonthlyAllowance > 0
+        ? Math.max(0, creditsMonthlyAllowance - normalizedBalanceForAllowance)
+        : 0
+    }
 
     console.log('[BestAuth Account API] Step 7: Fetching payments...')
     const payments = await withTimeout(
