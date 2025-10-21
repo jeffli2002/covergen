@@ -79,7 +79,7 @@ async function backfillMappings() {
         const syncResult = await userSyncService.syncBestAuthUserToSupabase(user.id)
 
         if (syncResult.success) {
-          console.log(`${progress} ✅ Created mapping for ${user.email} (Supabase ID: ${syncResult.supabaseUserId})`)
+          console.log(`${progress} ✅ Created mapping for ${user.email}`)
           created++
         } else {
           console.error(`${progress} ❌ Failed for ${user.email}: ${syncResult.error}`)
