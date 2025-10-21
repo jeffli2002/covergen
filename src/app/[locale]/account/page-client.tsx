@@ -273,28 +273,32 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   }
 
   const handleManageBilling = async () => {
-    if (!subscription?.stripe_customer_id) {
-      toast.error('No billing information found')
-      return
-    }
-
-    setLoading(true)
-    try {
-      const result = await creemService.createPortalSession({
-        customerId: subscription.stripe_customer_id,
-        returnUrl: `${window.location.origin}/${locale}/account`
-      })
-
-      if (result.success && result.url) {
-        window.open(result.url, '_blank', 'width=800,height=600')
-      } else {
-        throw new Error(result.error || 'Failed to open billing portal')
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to open billing portal')
-    } finally {
-      setLoading(false)
-    }
+    // For now, show a helpful message about managing billing
+    toast.info('To manage your billing, please contact support at support@covergen.pro', {
+      duration: 6000
+    })
+    
+    // TODO: Implement Creem customer portal integration
+    // if (!subscription?.stripe_customer_id) {
+    //   toast.error('No billing information found')
+    //   return
+    // }
+    // setLoading(true)
+    // try {
+    //   const result = await creemService.createPortalSession({
+    //     customerId: subscription.stripe_customer_id,
+    //     returnUrl: `${window.location.origin}/${locale}/account`
+    //   })
+    //   if (result.success && result.url) {
+    //     window.open(result.url, '_blank', 'width=800,height=600')
+    //   } else {
+    //     throw new Error(result.error || 'Failed to open billing portal')
+    //   }
+    // } catch (error: any) {
+    //   toast.error(error.message || 'Failed to open billing portal')
+    // } finally {
+    //   setLoading(false)
+    // }
   }
 
   const handleCancelSubscription = async () => {
