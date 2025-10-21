@@ -792,7 +792,11 @@ export const db = {
           stripe_payment_method_id: data.stripe_payment_method_id,
           cancel_at_period_end: data.cancel_at_period_end,
           cancelled_at: data.cancelled_at,
-          current_period_end: data.current_period_end
+          current_period_end: data.current_period_end,
+          // Include points/credits fields (CRITICAL for account page display)
+          points_balance: data.points_balance ?? 0,
+          points_lifetime_earned: data.points_lifetime_earned ?? 0,
+          points_lifetime_spent: data.points_lifetime_spent ?? 0
         }
         
         console.log('[db.getStatus] Returning subscription status:', {
@@ -801,7 +805,8 @@ export const db = {
           status: result.status,
           billing_cycle: result.billing_cycle,
           previous_tier: result.previous_tier,
-          has_payment_method: result.has_payment_method
+          has_payment_method: result.has_payment_method,
+          points_balance: result.points_balance
         })
         
         return result
