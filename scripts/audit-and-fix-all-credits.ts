@@ -168,9 +168,15 @@ async function auditAndFix(dryRun: boolean = true): Promise<AuditResult> {
     
     // 2d. Check points_balances (only for paid users)
     if (tier !== 'free' && status === 'active') {
-      const { data: balance } = await supabase.rpc('get_points_balance', {
-        p_user_id: resolvedId
-      }).catch(() => ({ data: null }))
+      let balance = null
+      try {
+        const result = await supabase.rpc('get_points_balance', {
+          p_user_id: resolvedId
+        })
+        balance = result.data
+      } catch (error) {
+        balance = null
+      }
       
       if (!balance || balance.balance === 0) {
         result.paidUsersWithoutBalance++
