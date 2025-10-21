@@ -44,10 +44,10 @@ async function checkHealth(): Promise<HealthCheck> {
   console.log('='.repeat(80))
   console.log(`Time: ${new Date().toLocaleString()}\n`)
   
-  // 1. Check for paid users with 0 balance
+  // 1. Check for paid users with 0 balance (PRIMARY SOURCE: bestauth_subscriptions)
   console.log('Check 1: Paid users with zero balance...')
   const { data: paidSubs } = await supabase
-    .from('subscriptions_consolidated')
+    .from('bestauth_subscriptions')
     .select('user_id, tier, status, points_balance')
     .in('tier', ['pro', 'pro_plus'])
     .eq('status', 'active')

@@ -115,9 +115,9 @@ async function auditAndFix(dryRun: boolean = true): Promise<AuditResult> {
       }
     }
     
-    // 2b. Check subscription
+    // 2b. Check subscription (PRIMARY SOURCE: bestauth_subscriptions)
     const { data: subscription } = await supabase
-      .from('subscriptions_consolidated')
+      .from('bestauth_subscriptions')
       .select('*')
       .eq('user_id', user.id)
       .maybeSingle()

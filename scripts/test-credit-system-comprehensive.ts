@@ -82,10 +82,10 @@ async function runTests(userEmail: string): Promise<TestResult[]> {
   
   const resolvedUserId = mapping?.supabase_user_id || user.id
   
-  // Test 3: Subscription exists
+  // Test 3: Subscription exists (PRIMARY SOURCE: bestauth_subscriptions)
   console.log('Test 3: Subscription exists...')
   const { data: subscription, error: subError } = await supabase
-    .from('subscriptions_consolidated')
+    .from('bestauth_subscriptions')
     .select('*')
     .eq('user_id', user.id)
     .maybeSingle()
