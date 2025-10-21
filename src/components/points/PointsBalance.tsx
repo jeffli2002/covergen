@@ -138,7 +138,8 @@ export function PointsBalance({ variant = 'header', showDetails = false }: Point
               </div>
             </div>
 
-            {isLowBalance && (
+            {/* Temporarily Hidden - Buy Credits */}
+            {/* {isLowBalance && (
               <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
                 <p className="text-sm text-orange-800 mb-2">
                   {balance === 0 ? 'You\'re out of credits!' : 'Running low on credits!'}
@@ -152,21 +153,22 @@ export function PointsBalance({ variant = 'header', showDetails = false }: Point
                   Buy Credits
                 </Button>
               </div>
-            )}
+            )} */
 
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="flex-1" asChild>
+              <Button variant="outline" size="sm" className="w-full" asChild>
                 <Link href={`/${locale}/account#usage`}>
                   View History
                   <ExternalLink className="w-3 h-3 ml-1" />
                 </Link>
               </Button>
-              {!isLowBalance && (
+              {/* Temporarily Hidden - Buy More */}
+              {/* {!isLowBalance && (
                 <Button size="sm" className="flex-1" onClick={handleBuyCredits}>
                   <Plus className="w-4 h-4 mr-1" />
                   Buy More
                 </Button>
-              )}
+              )} */}
             </div>
           </div>
         </PopoverContent>
@@ -230,23 +232,25 @@ export function PointsBalance({ variant = 'header', showDetails = false }: Point
       <div className="flex gap-2">
         <Button
           variant="outline"
-          className="flex-1"
+          className="w-full"
           asChild
         >
           <Link href={`/${locale}/account#usage`}>
             View History
           </Link>
         </Button>
-        <Button
+        {/* Temporarily Hidden - Buy Credits */}
+        {/* <Button
           className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
           onClick={handleBuyCredits}
         >
           <Plus className="w-4 h-4 mr-1" />
           Buy Credits
-        </Button>
+        </Button> */}
       </div>
 
-      {isLowBalance && (
+      {/* Temporarily Hidden - Low Balance Warning */}
+      {/* {isLowBalance && (
         <div className="mt-4 p-3 bg-orange-100 border border-orange-300 rounded-lg">
           <p className="text-sm text-orange-900">
             {balance === 0
@@ -254,7 +258,7 @@ export function PointsBalance({ variant = 'header', showDetails = false }: Point
               : '⚠️ Running low on credits. Consider buying more or upgrading your plan.'}
           </p>
         </div>
-      )}
+      )} */
     </div>
   )
 }

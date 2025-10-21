@@ -534,8 +534,8 @@ export default function PricingPage({ locale = 'en' }: PricingPageProps = {}) {
           })}
         </div>
 
-        {/* Credits Packs Section */}
-        <CreditsPacks locale={locale} />
+        {/* Credits Packs Section - Temporarily Hidden */}
+        {/* <CreditsPacks locale={locale} /> */}
 
         {/* Trust Indicators */}
         <div className="text-center mt-12 mb-16 space-y-4">
