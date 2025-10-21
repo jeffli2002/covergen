@@ -254,19 +254,22 @@ export async function GET(request: NextRequest) {
 
     const subscriptionWithPoints = subscription as SubscriptionWithPoints | null
 
+    // ALWAYS prefer subscription.points_balance for BestAuth users
+    // The points_transactions table is for Supabase users only
     if (
-      (!creditsBalance || Number.isNaN(creditsBalance)) &&
       subscriptionWithPoints &&
       typeof subscriptionWithPoints.points_balance === 'number'
     ) {
       creditsBalance = subscriptionWithPoints.points_balance ?? 0
       creditsLifetimeEarned = subscriptionWithPoints.points_lifetime_earned ?? creditsLifetimeEarned
       creditsLifetimeSpent = subscriptionWithPoints.points_lifetime_spent ?? creditsLifetimeSpent
-      console.log('[BestAuth Account API] Using points balance from subscription fallback:', {
+      console.log('[BestAuth Account API] Using points balance from subscription (BestAuth user):', {
         creditsBalance,
         creditsLifetimeEarned,
         creditsLifetimeSpent,
       })
+    } else if (!creditsBalance || Number.isNaN(creditsBalance)) {
+      console.warn('[BestAuth Account API] No points balance found in subscription or points table, defaulting to 0')
     }
 
     console.log('[BestAuth Account API] Determining credit allowances...')

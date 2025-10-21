@@ -633,6 +633,34 @@ export const db = {
         billing_cycle: data?.billing_cycle
       })
       
+      // Sync to subscriptions_consolidated for backward compatibility
+      try {
+        console.log('[db.subscriptions.upsert] Syncing to subscriptions_consolidated')
+        await getDb()
+          .from('subscriptions_consolidated')
+          .upsert({
+            user_id: data.user_id,
+            tier: data.tier,
+            status: data.status,
+            stripe_subscription_id: data.stripe_subscription_id,
+            stripe_customer_id: data.stripe_customer_id,
+            creem_subscription_id: data.creem_subscription_id,
+            current_period_start: data.current_period_start,
+            current_period_end: data.current_period_end,
+            cancel_at_period_end: data.cancel_at_period_end,
+            billing_cycle: data.billing_cycle,
+            previous_tier: data.previous_tier,
+            metadata: data.metadata,
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'user_id'
+          })
+        console.log('[db.subscriptions.upsert] Successfully synced to subscriptions_consolidated')
+      } catch (syncError) {
+        console.error('[db.subscriptions.upsert] Failed to sync to subscriptions_consolidated:', syncError)
+        // Don't throw - this is a non-critical sync operation
+      }
+      
       return data
     },
 

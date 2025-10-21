@@ -662,19 +662,36 @@ async function handleSubscriptionUpdate(data: any) {
     if (planId && currentSubscription && planId !== currentSubscription.tier) {
       console.log(`[BestAuth Webhook] Tier change detected: ${currentSubscription.tier} → ${planId}`)
       
-      updateData.tier = planId
-      updateData.previousTier = currentSubscription.tier
+      // Check if this is a recent upgrade (within last 2 minutes) to prevent overwriting
+      const recentlyUpdated = currentSubscription.updated_at && 
+        (Date.now() - new Date(currentSubscription.updated_at).getTime()) < 120000 // 2 minutes
       
-      // Add to upgrade history
-      const existingHistory = currentSubscription.upgrade_history || []
-      const upgradeHistoryEntry = {
-        from_tier: currentSubscription.tier,
-        to_tier: planId,
-        upgraded_at: new Date().toISOString(),
-        upgrade_type: 'webhook_sync',
-        source: 'creem_webhook'
+      // Check if current tier is "higher" than webhook tier (upgrade scenario)
+      const isUpgrade = (currentSubscription.tier === 'pro_plus' && planId === 'pro') ||
+                        (currentSubscription.tier === 'pro' && planId === 'free')
+      
+      if (recentlyUpdated && isUpgrade) {
+        console.log(`[BestAuth Webhook] ⚠️  Ignoring webhook tier change - recent upgrade detected`)
+        console.log(`[BestAuth Webhook]    Current tier: ${currentSubscription.tier} (updated ${Math.round((Date.now() - new Date(currentSubscription.updated_at).getTime()) / 1000)}s ago)`)
+        console.log(`[BestAuth Webhook]    Webhook tier: ${planId} (likely stale)`)
+        console.log(`[BestAuth Webhook]    Keeping current tier to prevent overwrite`)
+        // Don't update tier - keep the current upgraded tier
+      } else {
+        // This is a legitimate tier change from Creem
+        updateData.tier = planId
+        updateData.previousTier = currentSubscription.tier
+        
+        // Add to upgrade history
+        const existingHistory = currentSubscription.upgrade_history || []
+        const upgradeHistoryEntry = {
+          from_tier: currentSubscription.tier,
+          to_tier: planId,
+          upgraded_at: new Date().toISOString(),
+          upgrade_type: 'webhook_sync',
+          source: 'creem_webhook'
+        }
+        updateData.upgradeHistory = [...existingHistory, upgradeHistoryEntry]
       }
-      updateData.upgradeHistory = [...existingHistory, upgradeHistoryEntry]
     } else if (planId) {
       updateData.tier = planId
     }

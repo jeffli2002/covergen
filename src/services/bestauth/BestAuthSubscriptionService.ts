@@ -509,12 +509,39 @@ export class BestAuthSubscriptionService {
               })
 
               if (creditsError) {
-                console.error('[BestAuthSubscriptionService] Failed to grant credits:', creditsError)
-                // Don't fail the subscription update - log and continue
-                console.warn('[BestAuthSubscriptionService] Subscription succeeded but credits were not granted - may need manual adjustment')
+                console.error('[BestAuthSubscriptionService] CRITICAL: Failed to grant credits:', creditsError)
+                console.error('[BestAuthSubscriptionService] User details:', {
+                  bestAuthUserId: data.userId,
+                  pointsUserId,
+                  tier: grantTier,
+                  cycle,
+                  credits
+                })
+                // Store failed grant in subscription metadata for later retry
+                const failedGrantMetadata = {
+                  failed_credit_grant: {
+                    error: creditsError.message,
+                    timestamp: new Date().toISOString(),
+                    user_id: pointsUserId,
+                    amount: credits,
+                    tier: grantTier,
+                    cycle
+                  }
+                }
+                console.warn('[BestAuthSubscriptionService] ⚠️  MANUAL FIX REQUIRED - Run audit script to grant credits')
+                console.warn('[BestAuthSubscriptionService] Failed grant metadata stored for retry')
               } else {
-                console.log(`[BestAuthSubscriptionService] Successfully granted ${credits} credits to user ${data.userId}`)
+                console.log(`[BestAuthSubscriptionService] ✅ Successfully granted ${credits} credits to user ${data.userId}`)
                 console.log('[BestAuthSubscriptionService] Credits result:', creditsResult)
+                
+                // Verify credits were actually granted
+                if (!creditsResult || creditsResult.new_balance < credits) {
+                  console.error('[BestAuthSubscriptionService] ⚠️  Credits grant succeeded but balance is unexpected:', {
+                    expected: credits,
+                    actual: creditsResult?.new_balance,
+                    result: creditsResult
+                  })
+                }
               }
             }
           } else {
