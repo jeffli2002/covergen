@@ -283,18 +283,22 @@ export async function GET(request: NextRequest) {
     let creditsUsedThisMonth = 0
     try {
       const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
-      const { data: monthlyTransactions } = await supabaseAdmin
-        .from('points_transactions')
-        .select('amount')
-        .eq('user_id', supabaseUserId)
-        .eq('transaction_type', 'generation_cost')
-        .gte('created_at', firstDayOfMonth)
+      const supabaseClient = getBestAuthSupabaseClient()
+      
+      if (supabaseClient) {
+        const { data: monthlyTransactions } = await supabaseClient
+          .from('points_transactions')
+          .select('amount')
+          .eq('user_id', supabaseUserId)
+          .eq('transaction_type', 'generation_cost')
+          .gte('created_at', firstDayOfMonth)
 
-      creditsUsedThisMonth = monthlyTransactions?.reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0
-      console.log('[BestAuth Account API] Monthly usage from transactions:', {
-        transactionCount: monthlyTransactions?.length || 0,
-        totalUsed: creditsUsedThisMonth
-      })
+        creditsUsedThisMonth = monthlyTransactions?.reduce((sum: number, t: any) => sum + Math.abs(t.amount), 0) || 0
+        console.log('[BestAuth Account API] Monthly usage from transactions:', {
+          transactionCount: monthlyTransactions?.length || 0,
+          totalUsed: creditsUsedThisMonth
+        })
+      }
     } catch (usageError) {
       console.error('[BestAuth Account API] Error calculating monthly usage:', usageError)
       // Fallback to old calculation if transaction query fails

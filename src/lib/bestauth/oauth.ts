@@ -250,8 +250,7 @@ export async function handleOAuthCallback(
       } else {
         console.log('[OAuth] Successfully synced BestAuth user to Supabase:', {
           userId: user.id,
-          email: user.email,
-          supabaseUserId: syncResult.supabaseUserId
+          email: user.email
         })
       }
     } catch (syncError) {
