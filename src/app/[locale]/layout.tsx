@@ -6,6 +6,7 @@ import Footer from '@/components/layout/Footer'
 import MobileHeader from '@/components/mobile-header'
 import AuthModalHandler from '@/components/auth/AuthModalHandler'
 import { ErrorBoundary } from '@/components/error-boundary'
+import { Toaster } from '@/components/ui/toaster'
 
 export async function generateStaticParams() {
   return i18n.locales.map((locale) => ({ locale: locale.code }))
@@ -47,6 +48,9 @@ export default async function LocaleLayout({
             <Footer locale={locale} translations={dict} />
           </div>
         </div>
+        
+        {/* Toast Notifications */}
+        <Toaster />
       </Providers>
     </ErrorBoundary>
   )
