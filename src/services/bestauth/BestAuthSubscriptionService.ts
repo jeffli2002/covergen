@@ -404,7 +404,8 @@ export class BestAuthSubscriptionService {
         current_period_end: data.currentPeriodEnd?.toISOString(),
         cancel_at_period_end: data.cancelAtPeriodEnd,
         cancelled_at: data.cancelledAt?.toISOString(),
-        billing_cycle: resolvedBillingCycle,
+        // Free users should NEVER have billing_cycle set
+        billing_cycle: resolvedTier === 'free' ? null : resolvedBillingCycle,
         previous_tier: resolvedPreviousTier,
         upgrade_history: data.upgradeHistory,
         proration_amount: data.prorationAmount,

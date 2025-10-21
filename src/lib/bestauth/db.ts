@@ -642,9 +642,9 @@ export const db = {
             user_id: data.user_id,
             tier: data.tier,
             status: data.status,
+            // Note: stripe_subscription_id contains Creem subscription IDs (Creem is Stripe-compatible)
             stripe_subscription_id: data.stripe_subscription_id,
             stripe_customer_id: data.stripe_customer_id,
-            creem_subscription_id: data.creem_subscription_id,
             current_period_start: data.current_period_start,
             current_period_end: data.current_period_end,
             cancel_at_period_end: data.cancel_at_period_end,
