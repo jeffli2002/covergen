@@ -11,6 +11,8 @@ import { useRouter } from 'next/navigation'
 import { PRICING_CONFIG, type PricingPlan } from '@/config/pricing.config'
 import { CreditsPacks } from './CreditsPacks'
 import { PricingFAQ } from './PricingFAQ'
+import { UpgradeConfirmationDialog } from './UpgradeConfirmationDialog'
+import { toast } from '@/components/ui/use-toast'
 
 interface SubscriptionInfo {
   status: string
@@ -19,6 +21,7 @@ interface SubscriptionInfo {
   isActive: boolean
   isTrialing: boolean
   cancelAtPeriodEnd: boolean
+  billing_cycle?: 'monthly' | 'yearly'
 }
 
 interface PricingPageProps {
@@ -31,6 +34,12 @@ export default function PricingPage({ locale = 'en' }: PricingPageProps = {}) {
   const [isYearly, setIsYearly] = useState(true) // Default to yearly to show savings
   const [subscriptionInfo, setSubscriptionInfo] = useState<SubscriptionInfo | null>(null)
   const [loadingSubscription, setLoadingSubscription] = useState(false)
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false)
+  const [pendingUpgrade, setPendingUpgrade] = useState<{
+    planId: string
+    billingCycle: 'monthly' | 'yearly'
+  } | null>(null)
+  const [isUpgrading, setIsUpgrading] = useState(false)
 
   // Fetch subscription info on mount
   useEffect(() => {
@@ -77,17 +86,93 @@ export default function PricingPage({ locale = 'en' }: PricingPageProps = {}) {
       return
     }
 
-    router.push(`/${locale}/payment?plan=${planId}&billing=${isYearly ? 'yearly' : 'monthly'}`)
+    const billingCycle = isYearly ? 'yearly' : 'monthly'
+    const currentBillingCycle = subscriptionInfo?.billing_cycle || 'monthly'
+
+    // Check if this is an upgrade scenario (requires confirmation)
+    const isUpgrade = subscriptionInfo && subscriptionInfo.plan !== 'free' && (
+      // Tier upgrade (Pro -> Pro+)
+      (subscriptionInfo.plan === 'pro' && planId === 'pro_plus') ||
+      // Billing cycle change
+      (subscriptionInfo.plan === planId && currentBillingCycle !== billingCycle)
+    )
+
+    if (isUpgrade) {
+      // Show confirmation dialog for upgrades
+      setPendingUpgrade({ planId, billingCycle })
+      setShowUpgradeDialog(true)
+    } else {
+      // Direct to payment page for new subscriptions
+      router.push(`/${locale}/payment?plan=${planId}&billing=${billingCycle}`)
+    }
+  }
+
+  const handleConfirmUpgrade = async () => {
+    if (!pendingUpgrade || !session?.token) return
+
+    setIsUpgrading(true)
+    try {
+      const response = await fetch('/api/bestauth/subscription/upgrade', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.token}`
+        },
+        body: JSON.stringify({
+          targetTier: pendingUpgrade.planId,
+          billingCycle: pendingUpgrade.billingCycle
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        setShowUpgradeDialog(false)
+        
+        // Show success toast
+        const planName = pendingUpgrade.planId === 'pro' ? 'Pro' : 'Pro+'
+        toast({
+          title: 'Upgrade Successful!',
+          description: `Successfully upgraded to ${planName}. Redirecting to your account...`,
+        })
+
+        // Wait a moment for user to see the success message
+        setTimeout(() => {
+          const redirectUrl = data.redirectUrl || `/${locale}/account?upgraded=true`
+          window.location.href = redirectUrl
+        }, 2000)
+      } else if (data.checkoutUrl) {
+        // Need to complete checkout
+        window.location.href = data.checkoutUrl
+      } else {
+        throw new Error(data.error || 'Failed to upgrade subscription')
+      }
+    } catch (error: any) {
+      console.error('Upgrade error:', error)
+      toast({
+        title: 'Upgrade Failed',
+        description: error.message || 'Something went wrong. Please try again.',
+      })
+      setIsUpgrading(false)
+    }
   }
 
   const getButtonText = (plan: PricingPlan) => {
     if (loadingSubscription) return 'Loading...'
     
-    const isCurrentPlan = subscriptionInfo?.plan === plan.id
+    // Check if this is the EXACT current plan (tier + billing cycle)
+    const currentBillingCycle = subscriptionInfo?.billing_cycle || 'monthly'
+    const selectedBillingCycle = isYearly ? 'yearly' : 'monthly'
+    const isExactCurrentPlan = subscriptionInfo?.plan === plan.id && currentBillingCycle === selectedBillingCycle
+    const isSameTierDifferentCycle = subscriptionInfo?.plan === plan.id && currentBillingCycle !== selectedBillingCycle
     
-    if (isCurrentPlan) {
+    if (isExactCurrentPlan) {
       if (subscriptionInfo?.isTrialing) return 'Activate Plan'
       return 'Current Plan'
+    }
+    
+    if (isSameTierDifferentCycle) {
+      return selectedBillingCycle === 'yearly' ? 'Switch to Yearly' : 'Switch to Monthly'
     }
 
     if (plan.id === 'free') return 'Get Started Free'
@@ -108,13 +193,26 @@ export default function PricingPage({ locale = 'en' }: PricingPageProps = {}) {
     if (loadingSubscription) return true
     if (plan.comingSoon) return true
     
-    const isCurrentPlan = subscriptionInfo?.plan === plan.id
-    if (isCurrentPlan && !subscriptionInfo?.isTrialing) return true
+    // PREVENT DUPLICATE: Check both tier AND billing cycle
+    const currentBillingCycle = subscriptionInfo?.billing_cycle || 'monthly'
+    const selectedBillingCycle = isYearly ? 'yearly' : 'monthly'
+    const isExactCurrentPlan = subscriptionInfo?.plan === plan.id && currentBillingCycle === selectedBillingCycle
+    
+    // Disable button if this is the exact current plan (same tier + same billing cycle)
+    if (isExactCurrentPlan && !subscriptionInfo?.isTrialing) return true
 
     // Disable downgrade to free for paid users
     if (plan.id === 'free' && subscriptionInfo && subscriptionInfo.plan !== 'free') {
       return true
     }
+
+    // Disable downgrade from Pro+ to Pro
+    if (plan.id === 'pro' && subscriptionInfo?.plan === 'pro_plus') {
+      return true
+    }
+
+    // Note: Allow switching billing cycles (Pro Monthly -> Pro Yearly)
+    // This is handled by showing "Switch to Yearly/Monthly" button text
 
     return false
   }
@@ -441,8 +539,8 @@ export default function PricingPage({ locale = 'en' }: PricingPageProps = {}) {
           })}
         </div>
 
-        {/* Credits Packs Section */}
-        <CreditsPacks locale={locale} />
+        {/* Credits Packs Section - Temporarily Hidden */}
+        {/* <CreditsPacks locale={locale} /> */}
 
         {/* Trust Indicators */}
         <div className="text-center mt-12 mb-16 space-y-4">
@@ -472,6 +570,23 @@ export default function PricingPage({ locale = 'en' }: PricingPageProps = {}) {
         {/* FAQ Section */}
         <PricingFAQ />
       </div>
+
+      {/* Upgrade Confirmation Dialog */}
+      {pendingUpgrade && subscriptionInfo && (
+        <UpgradeConfirmationDialog
+          open={showUpgradeDialog}
+          onClose={() => {
+            setShowUpgradeDialog(false)
+            setPendingUpgrade(null)
+          }}
+          onConfirm={handleConfirmUpgrade}
+          currentTier={subscriptionInfo.tier as 'free' | 'pro' | 'pro_plus'}
+          targetTier={pendingUpgrade.planId as 'pro' | 'pro_plus'}
+          currentBillingCycle={subscriptionInfo.billing_cycle}
+          targetBillingCycle={pendingUpgrade.billingCycle}
+          isUpgrading={isUpgrading}
+        />
+      )}
     </div>
   )
 }

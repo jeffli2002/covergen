@@ -23,3 +23,7 @@ export const authConfig = {
 }
 
 export const useAuthProvider = () => authConfig.USE_BESTAUTH ? 'bestauth' : 'supabase'
+
+// OAuth redirect persistence helpers
+export const OAUTH_NEXT_COOKIE_NAME = 'covergen_oauth_next'
+export const OAUTH_NEXT_STORAGE_KEY = 'covergen_post_auth_redirect'

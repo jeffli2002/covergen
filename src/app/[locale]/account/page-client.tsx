@@ -57,6 +57,8 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   const [accountData, setAccountData] = useState<any>(null)
   const [subscription, setSubscription] = useState<any>(null)
   const [usage, setUsage] = useState<any>(null)
+  const [transactions, setTransactions] = useState<any[]>([])
+  const [usageStats, setUsageStats] = useState<any>(null)
   const [cancelling, setCancelling] = useState(false)
   const [resuming, setResuming] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -211,6 +213,39 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
             quotaLimit: config.limits.free.daily
           })
         }
+
+        // Fetch credit transactions and usage stats
+        try {
+          const [txResponse, statsResponse] = await Promise.all([
+            fetch(`/api/bestauth/transactions?limit=20`, {
+              headers: {
+                'Authorization': `Bearer ${session.token}`,
+                'Content-Type': 'application/json'
+              },
+              cache: 'no-store'
+            }),
+            fetch(`/api/bestauth/usage-stats`, {
+              headers: {
+                'Authorization': `Bearer ${session.token}`,
+                'Content-Type': 'application/json'
+              },
+              cache: 'no-store'
+            })
+          ])
+
+          if (txResponse.ok) {
+            const txData = await txResponse.json()
+            setTransactions(txData.transactions || [])
+          }
+
+          if (statsResponse.ok) {
+            const statsData = await statsResponse.json()
+            setUsageStats(statsData)
+          }
+        } catch (txError) {
+          console.error('[Account] Error loading transactions/stats:', txError)
+          // Don't fail the whole page if transactions fail
+        }
       } catch (innerError) {
         clearTimeout(loadTimeout)
         console.error('[Account] Inner error:', innerError)
@@ -238,28 +273,32 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   }
 
   const handleManageBilling = async () => {
-    if (!subscription?.stripe_customer_id) {
-      toast.error('No billing information found')
-      return
-    }
-
-    setLoading(true)
-    try {
-      const result = await creemService.createPortalSession({
-        customerId: subscription.stripe_customer_id,
-        returnUrl: `${window.location.origin}/${locale}/account`
-      })
-
-      if (result.success && result.url) {
-        window.open(result.url, '_blank', 'width=800,height=600')
-      } else {
-        throw new Error(result.error || 'Failed to open billing portal')
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to open billing portal')
-    } finally {
-      setLoading(false)
-    }
+    // For now, show a helpful message about managing billing
+    toast.info('To manage your billing, please contact support at support@covergen.pro', {
+      duration: 6000
+    })
+    
+    // TODO: Implement Creem customer portal integration
+    // if (!subscription?.stripe_customer_id) {
+    //   toast.error('No billing information found')
+    //   return
+    // }
+    // setLoading(true)
+    // try {
+    //   const result = await creemService.createPortalSession({
+    //     customerId: subscription.stripe_customer_id,
+    //     returnUrl: `${window.location.origin}/${locale}/account`
+    //   })
+    //   if (result.success && result.url) {
+    //     window.open(result.url, '_blank', 'width=800,height=600')
+    //   } else {
+    //     throw new Error(result.error || 'Failed to open billing portal')
+    //   }
+    // } catch (error: any) {
+    //   toast.error(error.message || 'Failed to open billing portal')
+    // } finally {
+    //   setLoading(false)
+    // }
   }
 
   const handleCancelSubscription = async () => {
@@ -539,6 +578,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
   // Get credits balance from usage data (assuming API returns this)
   const creditsBalance = usage?.credits_balance || 0
   const creditsUsed = usage?.credits_used_this_month || 0
+  const creditsGranted = usage?.credits_granted_this_month || 0
   const creditsMonthly = planDetails.credits.monthly
   
   // For display purposes
@@ -799,14 +839,14 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                   </div>
                   <div className="flex justify-between text-ui-sm text-gray-600">
                     <span>Monthly Allocation</span>
-                    <span className="font-medium">{creditsMonthly.toLocaleString()} credits</span>
+                    <span className="font-medium">{creditsGranted > 0 ? creditsGranted.toLocaleString() : creditsMonthly.toLocaleString()} credits</span>
                   </div>
                   <div className="flex justify-between text-ui-sm text-gray-600 mt-1">
                     <span>Used This Month</span>
                     <span className="font-medium">{creditsUsed.toLocaleString()} credits</span>
                   </div>
                   <Progress 
-                    value={creditsMonthly > 0 ? (creditsUsed / creditsMonthly) * 100 : 0}
+                    value={(creditsGranted > 0 ? creditsGranted : creditsMonthly) > 0 ? (creditsUsed / (creditsGranted > 0 ? creditsGranted : creditsMonthly)) * 100 : 0}
                     className="h-2 mt-3" 
                   />
                 </div>
@@ -856,17 +896,67 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
               {/* Usage Statistics */}
               <div className="pt-3 border-t">
                 <h4 className="text-ui-sm font-medium text-gray-700 mb-3">Usage Statistics {usagePeriod}</h4>
-                <div className="space-y-3">
-                  <div className="flex justify-between text-ui-sm">
-                    <span className="text-gray-600">Images Generated</span>
-                    <span className="font-medium">{isPaidUser ? (usage?.images_this_month || 0) : (usage?.images_today || 0)}</span>
+                {usageStats ? (
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-ui-sm">
+                      <span className="text-gray-600">Images Generated</span>
+                      <span className="font-medium">{usageStats.generations.images.total} ({usageStats.generations.images.totalCredits} credits)</span>
+                    </div>
+                    <div className="flex justify-between text-ui-sm">
+                      <span className="text-gray-600">Videos Generated</span>
+                      <span className="font-medium">{usageStats.generations.videos.total} ({usageStats.generations.videos.totalCredits} credits)</span>
+                    </div>
+                    <div className="flex justify-between text-ui-sm pt-2 border-t">
+                      <span className="text-gray-600 font-medium">Total Credits Used</span>
+                      <span className="font-bold text-purple-600">{usageStats.credits.spent}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-ui-sm">
-                    <span className="text-gray-600">Videos Generated</span>
-                    <span className="font-medium">{isPaidUser ? (usage?.videos_this_month || 0) : (usage?.videos_today || 0)}</span>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-ui-sm">
+                      <span className="text-gray-600">Images Generated</span>
+                      <span className="font-medium">{isPaidUser ? (usage?.images_this_month || 0) : (usage?.images_today || 0)}</span>
+                    </div>
+                    <div className="flex justify-between text-ui-sm">
+                      <span className="text-gray-600">Videos Generated</span>
+                      <span className="font-medium">{isPaidUser ? (usage?.videos_this_month || 0) : (usage?.videos_today || 0)}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Credit Transaction History */}
+              {isPaidUser && transactions.length > 0 && (
+                <div className="pt-3 border-t">
+                  <h4 className="text-ui-sm font-medium text-gray-700 mb-3">Credit Usage History</h4>
+                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                    {transactions.map((tx: any) => (
+                      <div key={tx.id} className="flex justify-between items-start p-3 bg-gray-50 rounded text-ui-sm hover:bg-gray-100 transition-colors">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className={`font-medium ${tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {tx.amount > 0 ? '+' : ''}{tx.amount}
+                            </span>
+                            <span className="text-gray-700">{tx.description}</span>
+                          </div>
+                          <div className="text-ui-xs text-gray-500 mt-1">
+                            {new Date(tx.created_at).toLocaleString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-ui-xs text-gray-500">Balance</div>
+                          <div className="font-medium text-gray-700">{tx.balance_after}</div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Low Credits Warning */}
               {isPaidUser && creditsBalance > 0 && creditsBalance < 100 && (
@@ -877,26 +967,6 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                   </AlertDescription>
                 </Alert>
               )}
-            </CardContent>
-          </Card>
-
-          {/* Plan Features */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-heading-5">
-                <Shield className="w-5 h-5" />
-                Plan Features
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
-                {planDetails?.features.map((feature, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <Shield className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-body-md text-gray-700">{feature}</span>
-                  </li>
-                ))}
-              </ul>
             </CardContent>
           </Card>
 

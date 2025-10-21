@@ -1,5 +1,7 @@
 import { createClient } from '@/utils/supabase/client'
 import * as gtag from '@/lib/gtag'
+import { OAUTH_NEXT_COOKIE_NAME, OAUTH_NEXT_STORAGE_KEY } from '@/config/auth.config'
+import { persistOAuthRedirect } from '@/lib/supabase-oauth-config'
 
 let authServiceInstance: AuthService | null = null
 
@@ -286,9 +288,32 @@ class AuthService {
 
       // Get the current pathname to preserve locale
       const currentPath = window.location.pathname || '/en'
+
+      // Persist desired redirect for callback handling
+      try {
+        persistOAuthRedirect(currentPath)
+      } catch (persistError) {
+        console.warn('[Auth] Failed to persist OAuth redirect path:', persistError)
+        try {
+          sessionStorage.setItem(OAUTH_NEXT_STORAGE_KEY, currentPath)
+          localStorage.setItem(OAUTH_NEXT_STORAGE_KEY, currentPath)
+          const cookieParts = [
+            `${OAUTH_NEXT_COOKIE_NAME}=${encodeURIComponent(currentPath)}`,
+            'path=/',
+            'max-age=600',
+            'SameSite=Lax',
+          ]
+          if (window.location.protocol === 'https:') {
+            cookieParts.push('Secure')
+          }
+          document.cookie = cookieParts.join('; ')
+        } catch (fallbackError) {
+          console.warn('[Auth] Unable to persist OAuth redirect via fallback mechanisms:', fallbackError)
+        }
+      }
       
-      // Use PKCE flow with callback route
-      const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
+      // Use PKCE flow with callback route (no query string for Google OAuth)
+      const redirectUrl = `${window.location.origin}/auth/callback`
 
       console.log('[Auth] Google sign in with redirect URL:', redirectUrl)
 

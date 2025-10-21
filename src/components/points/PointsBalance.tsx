@@ -9,7 +9,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { Coins, TrendingUp, TrendingDown, Plus, ExternalLink } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import { PRICING_CONFIG } from '@/config/pricing.config'
 import Link from 'next/link'
 
@@ -20,6 +20,8 @@ interface PointsBalanceProps {
 
 export function PointsBalance({ variant = 'header', showDetails = false }: PointsBalanceProps) {
   const router = useRouter()
+  const params = useParams()
+  const locale = (params?.locale as string) || 'en'
   const [balance, setBalance] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [tier, setTier] = useState<string>('free')
@@ -136,35 +138,15 @@ export function PointsBalance({ variant = 'header', showDetails = false }: Point
               </div>
             </div>
 
-            {isLowBalance && (
-              <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                <p className="text-sm text-orange-800 mb-2">
-                  {balance === 0 ? 'You\'re out of credits!' : 'Running low on credits!'}
-                </p>
-                <Button
-                  size="sm"
-                  className="w-full bg-orange-500 hover:bg-orange-600"
-                  onClick={handleBuyCredits}
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  Buy Credits
-                </Button>
-              </div>
-            )}
+            {/* Temporarily Hidden - Buy Credits button and low balance warning */}
 
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="flex-1" asChild>
-                <Link href="/account#usage">
+              <Button variant="outline" size="sm" className="w-full" asChild>
+                <Link href={`/${locale}/account#usage`}>
                   View History
                   <ExternalLink className="w-3 h-3 ml-1" />
                 </Link>
               </Button>
-              {!isLowBalance && (
-                <Button size="sm" className="flex-1" onClick={handleBuyCredits}>
-                  <Plus className="w-4 h-4 mr-1" />
-                  Buy More
-                </Button>
-              )}
             </div>
           </div>
         </PopoverContent>
@@ -228,31 +210,17 @@ export function PointsBalance({ variant = 'header', showDetails = false }: Point
       <div className="flex gap-2">
         <Button
           variant="outline"
-          className="flex-1"
+          className="w-full"
           asChild
         >
-          <Link href="/account#usage">
+          <Link href={`/${locale}/account#usage`}>
             View History
           </Link>
         </Button>
-        <Button
-          className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
-          onClick={handleBuyCredits}
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          Buy Credits
-        </Button>
+        {/* Temporarily Hidden - Buy Credits button */}
       </div>
 
-      {isLowBalance && (
-        <div className="mt-4 p-3 bg-orange-100 border border-orange-300 rounded-lg">
-          <p className="text-sm text-orange-900">
-            {balance === 0
-              ? '⚠️ You\'re out of credits! Purchase more to continue creating.'
-              : '⚠️ Running low on credits. Consider buying more or upgrading your plan.'}
-          </p>
-        </div>
-      )}
+      {/* Temporarily Hidden - Low balance warning */}
     </div>
   )
 }

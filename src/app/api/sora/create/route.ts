@@ -5,7 +5,7 @@ import { authConfig } from '@/config/auth.config'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 import { validateCopyright, getValidationConfig } from '@/lib/validation'
 import { checkPointsForGeneration } from '@/lib/middleware/points-check'
-import { createClient } from '@/utils/supabase/server'
+import { getBestAuthSupabaseClient } from '@/lib/bestauth/db-client'
 
 // CRITICAL: Use Node.js runtime for @google-cloud/vision compatibility
 export const runtime = 'nodejs'
@@ -114,8 +114,20 @@ async function handler(request: AuthenticatedRequest) {
     }
 
     const generationType = quality === 'pro' ? 'sora2ProVideo' : 'sora2Video'
-    const supabase = await createClient()
-    const pointsCheck = await checkPointsForGeneration(user.id, generationType, supabase)
+    // CRITICAL FIX: Use service role client for checking credits in bestauth_subscriptions
+    // The anon key client doesn't have permission to read bestauth_subscriptions
+    const supabaseAdmin = getBestAuthSupabaseClient()
+    
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Internal server error - database connection unavailable' },
+        { status: 500 }
+      )
+    }
+    
+    // For BestAuth users, use the BestAuth user ID directly (no need to resolve to Supabase ID)
+    console.log('[Sora Create] Checking credits for BestAuth user:', user.id)
+    const pointsCheck = await checkPointsForGeneration(user.id, generationType, supabaseAdmin)
     
     if (pointsCheck.usesPoints && !pointsCheck.canProceed) {
       return NextResponse.json(

@@ -858,22 +858,29 @@ class CreemPaymentService {
   /**
    * Verify webhook signature
    */
-  verifyWebhookSignature(payload: string, signature: string): boolean {
+  verifyWebhookSignature(payload: string, signature: string): {
+    valid: boolean
+    reason?: string
+    rawSignature?: string
+    normalizedSignature?: string
+    expectedHex?: string
+    providedHex?: string
+  } {
     const CREEM_WEBHOOK_SECRET = getCreemWebhookSecret()
     const inTestMode = getCreemTestMode()
 
     if (!CREEM_WEBHOOK_SECRET) {
       if (inTestMode) {
         console.warn('[Creem] Webhook secret not set - skipping signature verification in test mode')
-        return true
+        return { valid: true }
       }
       console.error('[Creem] Webhook secret is missing - rejecting webhook')
-      return false
+      return { valid: false, reason: 'missing_secret' }
     }
 
     if (!signature) {
       console.error('[Creem] Missing webhook signature header')
-      return false
+      return { valid: false, rawSignature: signature, reason: 'missing_header' }
     }
 
     try {
@@ -889,7 +896,12 @@ class CreemPaymentService {
       if (isHex) {
         if (stripped.length % 2 !== 0) {
           console.error('[Creem] Invalid hex signature length')
-          return false
+          return {
+            valid: false,
+            rawSignature: signature,
+            normalizedSignature: stripped,
+            reason: 'invalid_hex_length'
+          }
         }
         provided = Buffer.from(stripped, 'hex')
       } else {
@@ -897,34 +909,66 @@ class CreemPaymentService {
           provided = Buffer.from(stripped, 'base64')
         } catch (err) {
           console.error('[Creem] Failed to decode base64 webhook signature:', err)
-          return false
+          return {
+            valid: false,
+            rawSignature: signature,
+            normalizedSignature: stripped,
+            reason: 'invalid_base64'
+          }
         }
       }
 
       if (!provided || provided.length === 0) {
-        console.error('[Creem] Webhook signature decoding produced empty buffer')
-        return false
+        console.error('[Creem] Webhook signature decoding produced empty buffer', {
+          rawSignature: signature
+        })
+        return {
+          valid: false,
+          rawSignature: signature,
+          normalizedSignature: stripped,
+          reason: 'empty_buffer'
+        }
       }
 
       if (provided.length !== expected.length) {
         console.error('[Creem] Webhook signature length mismatch', {
           expectedLength: expected.length,
-          providedLength: provided.length
+          providedLength: provided.length,
+          rawSignature: signature
         })
-        return false
+        return {
+          valid: false,
+          rawSignature: signature,
+          normalizedSignature: stripped,
+          expectedHex: expected.toString('hex'),
+          providedHex: provided.toString('hex'),
+          reason: 'length_mismatch'
+        }
       }
 
       const matches = crypto.timingSafeEqual(expected, provided)
       if (!matches) {
         console.error('[Creem] Webhook signature mismatch', {
+          rawSignature: signature,
           expectedPreview: expected.toString('hex').substring(0, 16) + '...',
           providedPreview: provided.toString('hex').substring(0, 16) + '...'
         })
       }
-      return matches
+      return {
+        valid: matches,
+        rawSignature: signature,
+        normalizedSignature: stripped,
+        expectedHex: expected.toString('hex'),
+        providedHex: provided.toString('hex'),
+        reason: matches ? undefined : 'mismatch'
+      }
     } catch (error) {
       console.error('Webhook signature verification error:', error)
-      return false
+      return {
+        valid: false,
+        rawSignature: signature,
+        reason: 'exception'
+      }
     }
   }
 
@@ -1098,6 +1142,7 @@ class CreemPaymentService {
     const result = {
       type: 'checkout_complete',
       userId: userId,
+      customerEmail: customer?.email,  // Add customer email for user lookup
       customerId: customer?.id,
       subscriptionId: subscriptionId,
       planId: planId,

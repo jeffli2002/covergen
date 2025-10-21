@@ -3,6 +3,11 @@ import { db } from '@/lib/bestauth/db-wrapper'
 import { getSubscriptionConfig } from '@/lib/subscription-config'
 import type { GenerationType } from '@/config/subscription'
 import { normalizeSubscriptionTier } from '@/lib/subscription-tier'
+import { userSyncService } from '@/services/sync/UserSyncService'
+
+const isValidUuid = (value: unknown): value is string =>
+  typeof value === 'string' &&
+  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(value)
 
 export interface SubscriptionStatus {
   subscription_id?: string
@@ -399,7 +404,8 @@ export class BestAuthSubscriptionService {
         current_period_end: data.currentPeriodEnd?.toISOString(),
         cancel_at_period_end: data.cancelAtPeriodEnd,
         cancelled_at: data.cancelledAt?.toISOString(),
-        billing_cycle: resolvedBillingCycle,
+        // Free users should NEVER have billing_cycle set
+        billing_cycle: resolvedTier === 'free' ? null : resolvedBillingCycle,
         previous_tier: resolvedPreviousTier,
         upgrade_history: data.upgradeHistory,
         proration_amount: data.prorationAmount,
@@ -428,33 +434,217 @@ export class BestAuthSubscriptionService {
           const tierConfig = grantTier === 'pro' ? SUBSCRIPTION_CONFIG.pro : SUBSCRIPTION_CONFIG.proPlus
           const credits = tierConfig.points[cycle]
 
-          console.log(`[BestAuthSubscriptionService] Granting ${credits} credits for ${grantTier} ${cycle}`)
+          console.log(`[BestAuthSubscriptionService] Checking if credits should be granted for ${grantTier} ${cycle}`)
+          
+          // For BestAuth users, update bestauth_subscriptions.points_balance directly
+          const { getBestAuthSupabaseClient } = await import('@/lib/bestauth/db-client')
+          const supabase = getBestAuthSupabaseClient()
+          
+          if (supabase) {
+            // IDEMPOTENCY CHECK: Check if credits were already granted for this subscription
+            const { data: existingGrant } = await supabase
+              .from('bestauth_points_transactions')
+              .select('id, amount, created_at')
+              .eq('user_id', data.userId)
+              .eq('transaction_type', 'subscription_grant')
+              .eq('subscription_id', result.id)
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .maybeSingle()
+            
+            if (existingGrant) {
+              const grantAge = Date.now() - new Date(existingGrant.created_at).getTime()
+              const grantAgeMinutes = Math.round(grantAge / 1000 / 60)
+              console.log(`[BestAuthSubscriptionService] ⚠️ Credits already granted for subscription ${result.id}`)
+              console.log(`[BestAuthSubscriptionService]    Previous grant: ${existingGrant.amount} credits (${grantAgeMinutes} minutes ago)`)
+              console.log(`[BestAuthSubscriptionService]    Skipping duplicate credit grant`)
+              return result
+            }
+            
+            console.log(`[BestAuthSubscriptionService] No existing grant found, proceeding to grant ${credits} credits`)
+            
+            // Get current balance
+            const { data: currentSub } = await supabase
+              .from('bestauth_subscriptions')
+              .select('points_balance, points_lifetime_earned')
+              .eq('user_id', data.userId)
+              .single()
+            
+            const currentBalance = currentSub?.points_balance ?? 0
+            const currentLifetimeEarned = currentSub?.points_lifetime_earned ?? 0
+            const newBalance = currentBalance + credits
+            const newLifetimeEarned = currentLifetimeEarned + credits
+            
+            // Update bestauth_subscriptions with new balance
+            const { error: updateError } = await supabase
+              .from('bestauth_subscriptions')
+              .update({
+                points_balance: newBalance,
+                points_lifetime_earned: newLifetimeEarned,
+                updated_at: new Date().toISOString()
+              })
+              .eq('user_id', data.userId)
+            
+            if (updateError) {
+              console.error('[BestAuthSubscriptionService] CRITICAL: Failed to grant credits:', updateError)
+              console.error('[BestAuthSubscriptionService] User details:', {
+                bestAuthUserId: data.userId,
+                tier: grantTier,
+                cycle,
+                credits,
+                currentBalance,
+                newBalance
+              })
+            } else {
+              console.log(`[BestAuthSubscriptionService] ✅ Successfully granted ${credits} credits to user ${data.userId}`)
+              console.log(`[BestAuthSubscriptionService]    Previous balance: ${currentBalance}`)
+              console.log(`[BestAuthSubscriptionService]    New balance: ${newBalance}`)
+
+              // Create transaction record for audit trail
+              const { error: txError } = await supabase
+                .from('bestauth_points_transactions')
+                .insert({
+                  user_id: data.userId,
+                  amount: credits,
+                  balance_after: newBalance,
+                  transaction_type: 'subscription_grant',
+                  subscription_id: result?.id,
+                  description: `${tierConfig.name} ${cycle} subscription: ${credits} credits`,
+                  metadata: {
+                    tier: grantTier,
+                    cycle,
+                    source: 'subscription',
+                    previous_tier: data.previousTier
+                  }
+                })
+
+              if (txError) {
+                console.error('[BestAuthSubscriptionService] Failed to create transaction record:', txError)
+                // Don't fail the grant if transaction record fails
+              } else {
+                console.log('[BestAuthSubscriptionService] Transaction record created')
+              }
+            }
+          } else {
+            console.error('[BestAuthSubscriptionService] Cannot grant credits - BestAuth database client not available')
+          }
+          
+          // Legacy code below is kept for Supabase users with mapping (no longer executed for BestAuth-only users)
+          /*
 
           // Use BestAuth database function to add credits
           const { getBestAuthSupabaseClient } = await import('@/lib/bestauth/db-client')
           const supabase = getBestAuthSupabaseClient()
           
           if (supabase) {
-            const { data: creditsResult, error: creditsError } = await supabase.rpc('bestauth.add_points', {
-              p_user_id: data.userId,
-              p_amount: credits,
-              p_transaction_type: 'subscription_grant',
-              p_description: `${tierConfig.name} ${cycle} subscription: ${credits} credits`,
-              p_subscription_id: result.id,
-              p_metadata: { tier: grantTier, cycle, source: 'subscription' }
-            })
+            const metadata = typeof data.metadata === 'object' && data.metadata ? data.metadata : {}
+            const metadataSupabaseCandidates = [
+              metadata.resolved_supabase_user_id,
+              metadata.supabase_user_id,
+              metadata.original_payload_user_id,
+              metadata.original_userId
+            ].filter(isValidUuid)
 
-            if (creditsError) {
-              console.error('[BestAuthSubscriptionService] Failed to grant credits:', creditsError)
-              // Don't fail the subscription update - log and continue
-              console.warn('[BestAuthSubscriptionService] Subscription succeeded but credits were not granted - may need manual adjustment')
+            let pointsUserId: string | null = metadataSupabaseCandidates[0] || null
+            let mappedSupabaseId: string | null = null
+
+            try {
+              const { data: mapping, error: mappingError } = await supabase
+                .from('user_id_mapping')
+                .select('supabase_user_id')
+                .eq('bestauth_user_id', data.userId)
+                .maybeSingle()
+
+              if (mappingError && mappingError.code !== 'PGRST116') {
+                console.error('[BestAuthSubscriptionService] Error querying user_id_mapping during points grant:', mappingError)
+              }
+
+              if (mapping?.supabase_user_id && isValidUuid(mapping.supabase_user_id)) {
+                mappedSupabaseId = mapping.supabase_user_id
+                pointsUserId = mapping.supabase_user_id
+                console.log(`[BestAuthSubscriptionService] Found Supabase mapping for user ${data.userId} -> ${mapping.supabase_user_id}`)
+              }
+            } catch (mappingException) {
+              console.error('[BestAuthSubscriptionService] Failed to resolve Supabase user mapping for points grant:', mappingException)
+            }
+
+            if (!pointsUserId && isValidUuid(data.stripeCustomerId || '')) {
+              console.warn('[BestAuthSubscriptionService] Stripe customer id looked like UUID, but skipping as Supabase user id')
+            }
+
+            if (!pointsUserId) {
+              console.error('[BestAuthSubscriptionService] Unable to determine Supabase user id for points grant', {
+                bestAuthUserId: data.userId
+              })
             } else {
-              console.log(`[BestAuthSubscriptionService] Successfully granted ${credits} credits to user ${data.userId}`)
-              console.log('[BestAuthSubscriptionService] Credits result:', creditsResult)
+              if (!mappedSupabaseId || mappedSupabaseId !== pointsUserId) {
+                try {
+                  await userSyncService.createUserMapping(pointsUserId, data.userId)
+                  console.log('[BestAuthSubscriptionService] Ensured Supabase↔BestAuth user mapping during points grant')
+                } catch (mappingCreateError: any) {
+                  if (mappingCreateError?.code === '23505') {
+                    console.warn('[BestAuthSubscriptionService] Mapping already existed while ensuring user mapping during points grant')
+                  } else {
+                    console.error('[BestAuthSubscriptionService] Failed to create user mapping during points grant:', mappingCreateError)
+                  }
+                }
+              }
+
+              const { data: creditsResult, error: creditsError } = await supabase.rpc('add_points', {
+                p_user_id: pointsUserId,
+                p_amount: credits,
+                p_transaction_type: 'subscription_grant',
+                p_description: `${tierConfig.name} ${cycle} subscription: ${credits} credits`,
+                p_subscription_id: null,
+                p_metadata: {
+                  tier: grantTier,
+                  cycle,
+                  source: 'subscription',
+                  bestauth_user_id: data.userId,
+                  resolved_supabase_user_id: pointsUserId
+                }
+              })
+
+              if (creditsError) {
+                console.error('[BestAuthSubscriptionService] CRITICAL: Failed to grant credits:', creditsError)
+                console.error('[BestAuthSubscriptionService] User details:', {
+                  bestAuthUserId: data.userId,
+                  pointsUserId,
+                  tier: grantTier,
+                  cycle,
+                  credits
+                })
+                // Store failed grant in subscription metadata for later retry
+                const failedGrantMetadata = {
+                  failed_credit_grant: {
+                    error: creditsError.message,
+                    timestamp: new Date().toISOString(),
+                    user_id: pointsUserId,
+                    amount: credits,
+                    tier: grantTier,
+                    cycle
+                  }
+                }
+                console.warn('[BestAuthSubscriptionService] ⚠️  MANUAL FIX REQUIRED - Run audit script to grant credits')
+                console.warn('[BestAuthSubscriptionService] Failed grant metadata stored for retry')
+              } else {
+                console.log(`[BestAuthSubscriptionService] ✅ Successfully granted ${credits} credits to user ${data.userId}`)
+                console.log('[BestAuthSubscriptionService] Credits result:', creditsResult)
+                
+                // Verify credits were actually granted
+                if (!creditsResult || creditsResult.new_balance < credits) {
+                  console.error('[BestAuthSubscriptionService] ⚠️  Credits grant succeeded but balance is unexpected:', {
+                    expected: credits,
+                    actual: creditsResult?.new_balance,
+                    result: creditsResult
+                  })
+                }
+              }
             }
           } else {
             console.error('[BestAuthSubscriptionService] Cannot grant credits - BestAuth database client not available')
           }
+          */
         } catch (creditsError: any) {
           console.error('[BestAuthSubscriptionService] Exception while granting credits:', creditsError)
           // Don't fail the subscription update

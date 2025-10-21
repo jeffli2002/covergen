@@ -205,8 +205,8 @@ export function UpgradePrompt({
           </Button>
         </div>
 
-        {/* Alternative: Buy Credits Pack */}
-        {reason === 'credits' && currentPlan !== 'free' && (
+        {/* Alternative: Buy Credits Pack - Temporarily Hidden */}
+        {/* {reason === 'credits' && currentPlan !== 'free' && (
           <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-start gap-3">
               <Sparkles className="w-5 h-5 text-blue-600 mt-0.5" />
@@ -228,7 +228,7 @@ export function UpgradePrompt({
               </div>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Free Tier Info */}
         {currentPlan === 'free' && (

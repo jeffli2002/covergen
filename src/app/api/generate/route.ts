@@ -8,10 +8,11 @@ import { authConfig } from '@/config/auth.config'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 import { getOrCreateSessionId } from '@/lib/session-utils'
 import { checkPointsForGeneration, deductPointsForGeneration } from '@/lib/middleware/points-check'
+import { getBestAuthSupabaseClient } from '@/lib/bestauth/db-client'
 
 // Image generation endpoint handler
 async function handler(request: AuthenticatedRequest) {
-  // Create Supabase client early for use throughout the handler
+  // Create Supabase client for legacy user_usage table queries (requires user context)
   const supabase = await createClient()
   
   try {
@@ -401,7 +402,20 @@ async function handler(request: AuthenticatedRequest) {
     }
 
     if (user) {
-      const pointsCheck = await checkPointsForGeneration(user.id, 'nanoBananaImage', supabase)
+      // CRITICAL FIX: Use service role client for checking credits in bestauth_subscriptions
+      const supabaseAdmin = getBestAuthSupabaseClient()
+      
+      if (!supabaseAdmin) {
+        return NextResponse.json(
+          { error: 'Internal server error - database connection unavailable' },
+          { status: 500 }
+        )
+      }
+      
+      // For BestAuth users, use the BestAuth user ID directly (no need to resolve to Supabase ID)
+      console.log('[Generate API] Checking credits for BestAuth user:', user.id)
+      const pointsCheck = await checkPointsForGeneration(user.id, 'nanoBananaImage', supabaseAdmin)
+      
       if (pointsCheck.usesPoints && !pointsCheck.canProceed) {
         return NextResponse.json(
           {
@@ -528,14 +542,26 @@ async function handler(request: AuthenticatedRequest) {
     if (user) {
       // Increment for authenticated users
       try {
-        const pointsDeduction = await deductPointsForGeneration(user.id, 'nanoBananaImage', supabase, {
-          prompt: prompt?.substring(0, 100),
-          mode,
-          platform,
-        })
+        // CRITICAL FIX: Use service role client for deducting credits from bestauth_subscriptions
+        const supabaseAdmin = getBestAuthSupabaseClient()
         
-        if (pointsDeduction.success && pointsDeduction.transaction) {
-          console.log('[Generate API] Deducted points for image generation:', pointsDeduction.transaction)
+        if (!supabaseAdmin) {
+          console.error('[Generate API] CRITICAL: Cannot deduct credits - no admin client available')
+        } else {
+          // For BestAuth users, use the BestAuth user ID directly (no need to resolve to Supabase ID)
+          console.log('[Generate API] Deducting credits for BestAuth user:', user.id)
+          
+          const pointsDeduction = await deductPointsForGeneration(user.id, 'nanoBananaImage', supabaseAdmin, {
+            prompt: prompt?.substring(0, 100),
+            mode,
+            platform,
+          })
+          
+          if (pointsDeduction.success && pointsDeduction.transaction) {
+            console.log('[Generate API] Deducted points for image generation:', pointsDeduction.transaction)
+          } else if (!pointsDeduction.success) {
+            console.error('[Generate API] Failed to deduct points:', pointsDeduction.error)
+          }
         }
 
         // Use BestAuth increment if enabled, otherwise fallback to Supabase

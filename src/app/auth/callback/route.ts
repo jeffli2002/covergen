@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 import { getEnhancedCookieOptions, logCookieOperation } from '@/utils/supabase/cookie-config'
 import { userSyncService } from '@/services/sync/UserSyncService'
 import { sessionBridgeService } from '@/services/bridge/SessionBridgeService'
-import { authConfig } from '@/config/auth.config'
+import { authConfig, OAUTH_NEXT_COOKIE_NAME } from '@/config/auth.config'
 
 export async function GET(request: Request) {
   // Route to BestAuth callback if enabled
@@ -17,10 +17,27 @@ export async function GET(request: Request) {
   
   // Otherwise use Supabase implementation
   const { searchParams, origin } = new URL(request.url)
+  const cookieStore = cookies()
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/en'
+  const rawNext = searchParams.get('next')
   const error = searchParams.get('error')
   const errorDescription = searchParams.get('error_description')
+  const cookieNext = cookieStore.get(OAUTH_NEXT_COOKIE_NAME)?.value
+
+  const decodeNext = (value: string | undefined | null): string | null => {
+    if (!value) return null
+    try {
+      return decodeURIComponent(value)
+    } catch (decodeError) {
+      console.warn('[Auth Callback] Failed to decode next path:', decodeError)
+      return value
+    }
+  }
+
+  let next = decodeNext(rawNext) ?? decodeNext(cookieNext) ?? '/en'
+  if (!next.startsWith('/')) {
+    next = '/en'
+  }
 
   console.log('[Auth Callback] Processing OAuth callback:', {
     hasCode: !!code,
@@ -33,11 +50,17 @@ export async function GET(request: Request) {
 
   if (code) {
     try {
-      const cookieStore = cookies()
-      
       // Create response first to properly handle cookies
       // Redirect directly to the next page instead of auth-success
       const response = NextResponse.redirect(`${origin}${next}`)
+
+      // Clear the stored redirect cookie now that it's resolved
+      response.cookies.set({
+        name: OAUTH_NEXT_COOKIE_NAME,
+        value: '',
+        maxAge: 0,
+        path: '/',
+      })
       
       // Create Supabase client with cookie handling
       const supabase = createServerClient(

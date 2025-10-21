@@ -107,17 +107,67 @@ export async function POST(request: NextRequest) {
       tier: currentSubscription.tier,
       status: currentSubscription.status,
       isTrialing: currentSubscription.is_trialing,
-      hasPaymentMethod: currentSubscription.has_payment_method
+      hasPaymentMethod: currentSubscription.has_payment_method,
+      billingCycle: currentSubscription.billing_cycle
     })
     
+    // Extract target billing cycle from request
+    const targetBillingCycle = body.billingCycle || body.billing || currentSubscription.billing_cycle || 'monthly'
+    
     // Validate upgrade path
-    if (currentSubscription.tier === targetTier) {
+    // PREVENT DUPLICATE: Check both tier AND billing cycle
+    if (currentSubscription.tier === targetTier && currentSubscription.billing_cycle === targetBillingCycle) {
+      console.warn('[Upgrade] ⚠️ Duplicate subscription attempt prevented:', {
+        userId,
+        currentTier: currentSubscription.tier,
+        currentBillingCycle: currentSubscription.billing_cycle,
+        attemptedTier: targetTier,
+        attemptedBillingCycle: targetBillingCycle
+      })
       return NextResponse.json(
-        { error: 'Already on the selected plan' },
+        { 
+          error: 'Already on the selected plan',
+          details: `You are already subscribed to ${targetTier} ${targetBillingCycle}. No upgrade needed.`,
+          currentTier: currentSubscription.tier,
+          currentBillingCycle: currentSubscription.billing_cycle
+        },
         { status: 400 }
       )
     }
     
+    // POLICY: Allow tier UPGRADES with any billing cycle change
+    // Block only: DOWNGRADES with billing cycle change
+    const isTierChange = currentSubscription.tier !== targetTier
+    const isBillingCycleChange = currentSubscription.billing_cycle !== targetBillingCycle
+    const isTierUpgrade = 
+      (currentSubscription.tier === 'free' && ['pro', 'pro_plus'].includes(targetTier)) ||
+      (currentSubscription.tier === 'pro' && targetTier === 'pro_plus')
+    const isTierDowngrade = 
+      (currentSubscription.tier === 'pro' && targetTier === 'free') ||
+      (currentSubscription.tier === 'pro_plus' && ['pro', 'free'].includes(targetTier))
+    
+    // Block: Downgrade + billing cycle change simultaneously
+    if (isTierDowngrade && isBillingCycleChange) {
+      console.warn('[Upgrade] Downgrade with billing cycle change blocked:', {
+        userId,
+        currentTier: currentSubscription.tier,
+        currentBillingCycle: currentSubscription.billing_cycle,
+        attemptedTier: targetTier,
+        attemptedBillingCycle: targetBillingCycle
+      })
+      return NextResponse.json(
+        { 
+          error: 'Cannot downgrade and change billing cycle at once',
+          details: `Please downgrade first (${currentSubscription.tier} → ${targetTier}), then change billing cycle if needed.`,
+          currentTier: currentSubscription.tier,
+          currentBillingCycle: currentSubscription.billing_cycle,
+          suggestion: 'Please contact support for downgrades.'
+        },
+        { status: 400 }
+      )
+    }
+    
+    // Prevent downgrade (Pro+ -> Pro)
     if (currentSubscription.tier === 'pro_plus' && targetTier === 'pro') {
       return NextResponse.json(
         { error: 'Downgrading is not supported yet' },

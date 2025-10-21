@@ -143,9 +143,7 @@ export default function PaymentSuccessClient({ locale, sessionId }: PaymentSucce
             </div>
             
             <CardTitle className="text-3xl mb-2">
-              {subscription?.tier === planDetails?.name?.toLowerCase().replace('+', '_plus') 
-                ? `Welcome to ${planDetails?.name}!` 
-                : `Upgraded to ${planDetails?.name}!`} 🎉
+              Welcome to CoverGen {planDetails?.name}! 🎉
             </CardTitle>
             
             <CardDescription className="text-lg">

@@ -4,7 +4,7 @@ import { authConfig } from '@/config/auth.config'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 import { getUserFromRequest } from '@/lib/bestauth/middleware'
 import { deductPointsForGeneration } from '@/lib/middleware/points-check'
-import { createClient } from '@/utils/supabase/server'
+import { getBestAuthSupabaseClient } from '@/lib/bestauth/db-client'
 import type { GenerationType } from '@/config/subscription'
 
 export async function GET(request: NextRequest) {
@@ -33,16 +33,27 @@ export async function GET(request: NextRequest) {
           
           if (!existingUsage) {
             const generationType: GenerationType = quality === 'pro' ? 'sora2ProVideo' : 'sora2Video'
-            const supabase = await createClient()
+            // CRITICAL FIX: Use service role client for deducting credits from bestauth_subscriptions
+            // The anon key client doesn't have permission to update bestauth_subscriptions
+            const supabaseAdmin = getBestAuthSupabaseClient()
             
-            const pointsDeduction = await deductPointsForGeneration(user.id, generationType, supabase, {
-              taskId,
-              quality,
-              mode: taskInfo.model || 'text-to-video',
-            })
+            if (!supabaseAdmin) {
+              console.error('[Sora Query] CRITICAL: Cannot deduct credits - no admin client available')
+            } else {
+              // For BestAuth users, use the BestAuth user ID directly (no need to resolve to Supabase ID)
+              console.log('[Sora Query] Deducting credits for BestAuth user:', user.id)
+              
+              const pointsDeduction = await deductPointsForGeneration(user.id, generationType, supabaseAdmin, {
+                taskId,
+                quality,
+                mode: taskInfo.model || 'text-to-video',
+              })
             
-            if (pointsDeduction.success && pointsDeduction.transaction) {
-              console.log('[Sora Query] Deducted points for video generation:', pointsDeduction.transaction)
+              if (pointsDeduction.success && pointsDeduction.transaction) {
+                console.log('[Sora Query] Deducted points for video generation:', pointsDeduction.transaction)
+              } else if (!pointsDeduction.success) {
+                console.error('[Sora Query] Failed to deduct points:', pointsDeduction.error)
+              }
             }
 
             // First time seeing this successful task - increment usage

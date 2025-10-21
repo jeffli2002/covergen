@@ -633,6 +633,34 @@ export const db = {
         billing_cycle: data?.billing_cycle
       })
       
+      // Sync to subscriptions_consolidated for backward compatibility
+      try {
+        console.log('[db.subscriptions.upsert] Syncing to subscriptions_consolidated')
+        await getDb()
+          .from('subscriptions_consolidated')
+          .upsert({
+            user_id: data.user_id,
+            tier: data.tier,
+            status: data.status,
+            // Note: stripe_subscription_id contains Creem subscription IDs (Creem is Stripe-compatible)
+            stripe_subscription_id: data.stripe_subscription_id,
+            stripe_customer_id: data.stripe_customer_id,
+            current_period_start: data.current_period_start,
+            current_period_end: data.current_period_end,
+            cancel_at_period_end: data.cancel_at_period_end,
+            billing_cycle: data.billing_cycle,
+            previous_tier: data.previous_tier,
+            metadata: data.metadata,
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'user_id'
+          })
+        console.log('[db.subscriptions.upsert] Successfully synced to subscriptions_consolidated')
+      } catch (syncError) {
+        console.error('[db.subscriptions.upsert] Failed to sync to subscriptions_consolidated:', syncError)
+        // Don't throw - this is a non-critical sync operation
+      }
+      
       return data
     },
 
@@ -764,7 +792,11 @@ export const db = {
           stripe_payment_method_id: data.stripe_payment_method_id,
           cancel_at_period_end: data.cancel_at_period_end,
           cancelled_at: data.cancelled_at,
-          current_period_end: data.current_period_end
+          current_period_end: data.current_period_end,
+          // Include points/credits fields (CRITICAL for account page display)
+          points_balance: data.points_balance ?? 0,
+          points_lifetime_earned: data.points_lifetime_earned ?? 0,
+          points_lifetime_spent: data.points_lifetime_spent ?? 0
         }
         
         console.log('[db.getStatus] Returning subscription status:', {
@@ -773,7 +805,8 @@ export const db = {
           status: result.status,
           billing_cycle: result.billing_cycle,
           previous_tier: result.previous_tier,
-          has_payment_method: result.has_payment_method
+          has_payment_method: result.has_payment_method,
+          points_balance: result.points_balance
         })
         
         return result

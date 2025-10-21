@@ -3,6 +3,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { validateSessionFromRequest } from '@/lib/bestauth'
 import { bestAuthSubscriptionService } from '@/services/bestauth/BestAuthSubscriptionService'
 import { db } from '@/lib/bestauth/db'
+import { getBestAuthSupabaseClient } from '@/lib/bestauth/db-client'
+import { createPointsService } from '@/lib/services/points-service'
+import { SUBSCRIPTION_CONFIG } from '@/config/subscription'
+import type { SubscriptionStatus } from '@/services/bestauth/BestAuthSubscriptionService'
+
+type SubscriptionWithPoints = SubscriptionStatus & {
+  points_balance?: number | null
+  points_lifetime_earned?: number | null
+  points_lifetime_spent?: number | null
+}
 
 export const runtime = 'nodejs'
 
@@ -141,7 +151,179 @@ export async function GET(request: NextRequest) {
     })
     console.log('[BestAuth Account API] Image usage this month fetch complete:', imagesThisMonth)
     
-    console.log('[BestAuth Account API] Step 5: Fetching payments...')
+    console.log('[BestAuth Account API] Step 5: Resolving Supabase user mapping for points...')
+    let supabaseUserId = userId
+    let creditsBalance = 0
+    let creditsLifetimeEarned = 0
+    let creditsLifetimeSpent = 0
+
+    function isUuid(value: unknown): value is string {
+      return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+    }
+
+    function extractSupabaseIdFromMetadata(metadata: any): string | null {
+      if (!metadata || typeof metadata !== 'object') {
+        return null
+      }
+
+      const candidates = [
+        metadata.resolved_supabase_user_id,
+        metadata.supabase_user_id,
+        metadata.original_payload_user_id,
+        metadata.original_userId
+      ]
+
+      return candidates.find(isUuid) ?? null
+    }
+
+    try {
+      const supabaseAdmin = getBestAuthSupabaseClient()
+      if (supabaseAdmin) {
+        // Step 1: Try user_id_mapping table
+        const { data: mapping, error: mappingError } = await supabaseAdmin
+          .from('user_id_mapping')
+          .select('supabase_user_id')
+          .eq('bestauth_user_id', userId)
+          .maybeSingle()
+
+        if (mappingError && mappingError.code !== 'PGRST116') {
+          console.error('[BestAuth Account API] Error fetching user mapping:', mappingError)
+        }
+
+        if (mapping?.supabase_user_id && isUuid(mapping.supabase_user_id)) {
+          supabaseUserId = mapping.supabase_user_id
+          console.log('[BestAuth Account API] Supabase user mapping found:', supabaseUserId)
+        } else {
+          // Step 2: Fallback to subscription metadata
+          const { data: subscriptionData } = await supabaseAdmin
+            .from('bestauth_subscriptions')
+            .select('metadata')
+            .eq('user_id', userId)
+            .maybeSingle()
+
+          const metadataSupabaseId = extractSupabaseIdFromMetadata(subscriptionData?.metadata)
+
+          if (metadataSupabaseId) {
+            supabaseUserId = metadataSupabaseId
+            console.log('[BestAuth Account API] Using Supabase user id from subscription metadata:', supabaseUserId)
+            
+            // Create mapping for future use
+            try {
+              const { userSyncService } = await import('@/services/sync/UserSyncService')
+              await userSyncService.createUserMapping(metadataSupabaseId, userId)
+              console.log('[BestAuth Account API] Created user mapping from metadata')
+            } catch (createMappingError: any) {
+              if (createMappingError?.code !== '23505') {
+                console.error('[BestAuth Account API] Failed to create mapping:', createMappingError)
+              }
+            }
+          } else {
+            console.error('[BestAuth Account API] CRITICAL: Unable to resolve Supabase user id for BestAuth user', { 
+              bestauthUserId: userId,
+              hasMapping: !!mapping,
+              hasSubscription: !!subscriptionData,
+              metadata: subscriptionData?.metadata 
+            })
+          }
+        }
+
+        // Step 3: Fetch points balance with correct Supabase user ID
+        try {
+          const pointsService = createPointsService(supabaseAdmin)
+          const pointsBalance = await pointsService.getBalance(supabaseUserId)
+          if (pointsBalance) {
+            creditsBalance = pointsBalance.balance ?? 0
+            creditsLifetimeEarned = pointsBalance.lifetime_earned ?? 0
+            creditsLifetimeSpent = pointsBalance.lifetime_spent ?? 0
+          }
+          console.log('[BestAuth Account API] Points balance fetched:', {
+            supabaseUserId,
+            creditsBalance,
+            creditsLifetimeEarned,
+            creditsLifetimeSpent
+          })
+        } catch (pointsError) {
+          console.error('[BestAuth Account API] Error fetching points balance:', pointsError)
+        }
+      } else {
+        console.error('[BestAuth Account API] Supabase admin client unavailable - cannot fetch points balance')
+      }
+    } catch (pointsOuterError) {
+      console.error('[BestAuth Account API] Unexpected error resolving points balance:', pointsOuterError)
+    }
+
+    const subscriptionWithPoints = subscription as SubscriptionWithPoints | null
+
+    // ALWAYS prefer subscription.points_balance for BestAuth users
+    // The points_transactions table is for Supabase users only
+    if (
+      subscriptionWithPoints &&
+      typeof subscriptionWithPoints.points_balance === 'number'
+    ) {
+      creditsBalance = subscriptionWithPoints.points_balance ?? 0
+      creditsLifetimeEarned = subscriptionWithPoints.points_lifetime_earned ?? creditsLifetimeEarned
+      creditsLifetimeSpent = subscriptionWithPoints.points_lifetime_spent ?? creditsLifetimeSpent
+      console.log('[BestAuth Account API] Using points balance from subscription (BestAuth user):', {
+        creditsBalance,
+        creditsLifetimeEarned,
+        creditsLifetimeSpent,
+      })
+    } else if (!creditsBalance || Number.isNaN(creditsBalance)) {
+      console.warn('[BestAuth Account API] No points balance found in subscription or points table, defaulting to 0')
+    }
+
+    console.log('[BestAuth Account API] Determining credit allowances...')
+    let creditsMonthlyAllowance = 0
+    if (subscription?.tier === 'pro') {
+      creditsMonthlyAllowance = SUBSCRIPTION_CONFIG.pro.points.monthly
+    } else if (subscription?.tier === 'pro_plus') {
+      creditsMonthlyAllowance = SUBSCRIPTION_CONFIG.proPlus.points.monthly
+    } else {
+      creditsMonthlyAllowance = SUBSCRIPTION_CONFIG.free.points.monthly
+    }
+
+    // Calculate actual usage from transactions this month (from bestauth_points_transactions table)
+    let creditsUsedThisMonth = 0
+    let creditsGrantedThisMonth = 0
+    try {
+      const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
+      const supabaseClient = getBestAuthSupabaseClient()
+      
+      if (supabaseClient) {
+        // Query bestauth_points_transactions (not points_transactions)
+        const { data: monthlyTransactions } = await supabaseClient
+          .from('bestauth_points_transactions')
+          .select('amount, transaction_type')
+          .eq('user_id', userId) // Use BestAuth user ID, not Supabase user ID
+          .gte('created_at', firstDayOfMonth)
+
+        // Calculate deductions (usage)
+        creditsUsedThisMonth = monthlyTransactions
+          ?.filter((t: any) => t.transaction_type === 'generation_deduction')
+          .reduce((sum: number, t: any) => sum + Math.abs(t.amount), 0) || 0
+        
+        // Calculate grants (subscription_grant) received this month
+        creditsGrantedThisMonth = monthlyTransactions
+          ?.filter((t: any) => t.transaction_type === 'subscription_grant')
+          .reduce((sum: number, t: any) => sum + t.amount, 0) || 0
+        
+        console.log('[BestAuth Account API] Monthly usage from bestauth_points_transactions:', {
+          userId: userId,
+          transactionCount: monthlyTransactions?.length || 0,
+          totalUsed: creditsUsedThisMonth,
+          totalGranted: creditsGrantedThisMonth
+        })
+      }
+    } catch (usageError) {
+      console.error('[BestAuth Account API] Error calculating monthly usage:', usageError)
+      // Fallback: calculate based on lifetime_spent - this is NOT accurate for monthly
+      // Better approach: return 0 and log error
+      creditsUsedThisMonth = 0
+      creditsGrantedThisMonth = 0
+      console.warn('[BestAuth Account API] Unable to calculate monthly usage, returning 0')
+    }
+
+    console.log('[BestAuth Account API] Step 7: Fetching payments...')
     const payments = await withTimeout(
       bestAuthSubscriptionService.getPaymentHistory(userId, 5), 
       5, 
@@ -191,6 +373,12 @@ export async function GET(request: NextRequest) {
         videos_today: videosToday,
         images_this_month: imagesThisMonth,
         videos_this_month: videosThisMonth,
+        credits_balance: creditsBalance,
+        credits_used_this_month: creditsUsedThisMonth,
+        credits_granted_this_month: creditsGrantedThisMonth,
+        credits_monthly_allowance: creditsMonthlyAllowance,
+        credits_lifetime_earned: creditsLifetimeEarned,
+        credits_lifetime_spent: creditsLifetimeSpent,
         limits: {
           daily: subscription.daily_limit,
           monthly: subscription.monthly_limit
@@ -202,7 +390,13 @@ export async function GET(request: NextRequest) {
         videos_today: videosToday,
         images_this_month: imagesThisMonth,
         videos_this_month: videosThisMonth,
-        limits: { daily: 3, monthly: 90 }
+        credits_balance: creditsBalance,
+        credits_used_this_month: creditsUsedThisMonth,
+        credits_granted_this_month: creditsGrantedThisMonth,
+        credits_monthly_allowance: creditsMonthlyAllowance,
+        credits_lifetime_earned: creditsLifetimeEarned,
+        credits_lifetime_spent: creditsLifetimeSpent,
+        limits: { daily: SUBSCRIPTION_CONFIG.free.dailyImageLimit, monthly: SUBSCRIPTION_CONFIG.free.monthlyImageLimit }
       }
     }
     
