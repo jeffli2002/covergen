@@ -123,25 +123,31 @@ async function getBestAuthUser(emailAddress) {
 }
 
 async function upsertUserMapping(bestAuthUserId, supabaseUserId) {
-  const { error } = await supabase
-    .from('user_id_mapping')
-    .upsert(
-      {
-        bestauth_user_id: bestAuthUserId,
-        supabase_user_id: supabaseUserId,
-        email: email,
-        updated_at: nowIso(),
-      },
-      {
-        onConflict: 'bestauth_user_id',
-      }
+  try {
+    const { error } = await supabase
+      .from('user_id_mapping')
+      .upsert(
+        {
+          bestauth_user_id: bestAuthUserId,
+          supabase_user_id: supabaseUserId,
+          updated_at: nowIso(),
+        },
+        {
+          onConflict: 'bestauth_user_id',
+        }
+      )
+
+    if (error) {
+      throw error
+    }
+
+    console.log('✓ Ensured user_id_mapping entry exists')
+  } catch (mappingError) {
+    console.warn(
+      '[Reset Script] Skipping user_id_mapping upsert:',
+      mappingError?.message ?? mappingError
     )
-
-  if (error) {
-    throw new Error(`Failed to upsert user mapping: ${error.message}`)
   }
-
-  console.log('✓ Ensured user_id_mapping entry exists')
 }
 
 async function updateBestAuthSubscription(bestAuthUserId, supabaseUserId) {
@@ -246,7 +252,6 @@ async function updateSupabaseSubscription(supabaseUserId, previousTier) {
         trial_days: null,
         paid_started_at: null,
         metadata,
-        supabase_user_id: supabaseUserId,
         updated_at: nowIso(),
       },
       { onConflict: 'user_id' }
