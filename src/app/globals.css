@@ -1198,24 +1198,29 @@ details.bg-gray-50 summary {
   color: rgb(243 244 246) !important;
 }
 
-/* Scrollbar styling */
+/* Scrollbar styling - Simple and consistent */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background-color: rgb(243 244 246);
-}
-
-.dark ::-webkit-scrollbar-track {
-  background-color: rgb(55 65 81);
+  background-color: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-image: linear-gradient(to bottom, rgb(168 85 247), rgb(59 130 246));
+  background-color: rgb(209 213 219);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-image: linear-gradient(to bottom, rgb(147 51 234), rgb(37 99 235));
+  background-color: rgb(156 163 175);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: rgb(75 85 99);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(107 114 128);
 }
