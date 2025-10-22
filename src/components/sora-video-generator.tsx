@@ -26,6 +26,8 @@ export default function SoraVideoGenerator() {
   const { user } = useBestAuth()
   const [mode, setMode] = useState<GenerationMode>('text-to-video')
   const [prompt, setPrompt] = useState('')
+  const [enhancedPrompt, setEnhancedPrompt] = useState('')
+  const [isEnhancing, setIsEnhancing] = useState(false)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [aspectRatio, setAspectRatio] = useState<'landscape' | 'portrait'>('landscape')
@@ -108,6 +110,38 @@ export default function SoraVideoGenerator() {
         setImagePreview(reader.result as string)
       }
       reader.readAsDataURL(file)
+    }
+  }
+
+  const handleEnhancePrompt = async () => {
+    if (!prompt.trim()) {
+      alert('Please enter a prompt first')
+      return
+    }
+
+    setIsEnhancing(true)
+    try {
+      const response = await fetch('/api/enhance-prompt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: prompt.trim(),
+          context: 'video',
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to enhance prompt')
+      }
+
+      const data = await response.json()
+      setEnhancedPrompt(data.enhancedPrompt || '')
+    } catch (error) {
+      console.error('Enhancement error:', error)
+      alert(error instanceof Error ? error.message : 'Failed to enhance prompt')
+    } finally {
+      setIsEnhancing(false)
     }
   }
 
@@ -226,20 +260,23 @@ export default function SoraVideoGenerator() {
         quality
       }
 
+      // Use enhanced prompt if available, otherwise use regular prompt
+      const finalPrompt = enhancedPrompt || prompt.trim()
+
       if (mode === 'text-to-video') {
-        requestBody.prompt = prompt.trim()
-        console.log('[Sora] text-to-video request:', { prompt: prompt.trim().substring(0, 50) + '...' })
+        requestBody.prompt = finalPrompt
+        console.log('[Sora] text-to-video request:', { prompt: finalPrompt.substring(0, 50) + '...' })
       } else {
         if (!imageUrl) {
           throw new Error('Image URL is missing after upload')
         }
         
-        if (!prompt.trim()) {
+        if (!finalPrompt) {
           throw new Error('Prompt is required for image-to-video')
         }
         
         requestBody.image_url = imageUrl
-        requestBody.prompt = prompt.trim()
+        requestBody.prompt = finalPrompt
         
         console.log('[Sora] image-to-video request:', { 
           imageUrl: imageUrl.substring(0, 50) + '...',
@@ -465,16 +502,59 @@ export default function SoraVideoGenerator() {
             <TabsContent value="text-to-video" className="mt-0 space-y-6">
               <div className="space-y-2">
                 <label className="text-sm font-light text-gray-700">Video Description</label>
-                <Textarea
-                  placeholder={textDefaultPrompt}
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value.slice(0, maxPromptLength))}
-                  rows={8}
-                  className="resize-none border-gray-200 focus:border-purple-400 focus:ring-purple-400/20 font-light"
-                />
+                <div className="relative">
+                  <Textarea
+                    placeholder={textDefaultPrompt}
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value.slice(0, maxPromptLength))}
+                    rows={8}
+                    className="resize-none border-gray-200 focus:border-purple-400 focus:ring-purple-400/20 font-light pr-24 pb-12"
+                  />
+                  <Button
+                    onClick={handleEnhancePrompt}
+                    disabled={isEnhancing || !prompt.trim()}
+                    size="sm"
+                    variant="outline"
+                    className="absolute right-2 bottom-2 inline-flex items-center gap-2 rounded-lg border-2 border-purple-500 bg-purple-50 px-3 py-1.5 font-medium text-purple-700 text-sm shadow-sm transition-all duration-300 hover:bg-purple-100"
+                  >
+                    {isEnhancing ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-4 w-4" />
+                    )}
+                    {isEnhancing ? 'Enhancing...' : 'AI Enhance'}
+                  </Button>
+                </div>
                 <div className="text-xs text-gray-400 text-right font-light">
                   {prompt.length} / {maxPromptLength}
                 </div>
+                {enhancedPrompt && (
+                  <div className="mt-4 rounded-xl border border-purple-200 bg-purple-50 p-4 shadow-sm">
+                    <div className="mb-2 flex items-center justify-between">
+                      <h4 className="flex items-center gap-2 font-semibold text-purple-900 text-sm">
+                        <Sparkles className="h-4 w-4" />
+                        Enhanced Prompt
+                      </h4>
+                      <Button
+                        onClick={() => setEnhancedPrompt('')}
+                        size="sm"
+                        variant="ghost"
+                        className="h-6 w-6 p-0 text-gray-600 hover:text-gray-800"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <Textarea
+                      value={enhancedPrompt}
+                      onChange={(e) => setEnhancedPrompt(e.target.value.slice(0, maxPromptLength))}
+                      className="resize-none border border-purple-200 bg-white text-sm"
+                      rows={5}
+                    />
+                    <p className="mt-1 text-right text-purple-700 text-xs">
+                      {enhancedPrompt.length} / {maxPromptLength}
+                    </p>
+                  </div>
+                )}
               </div>
             </TabsContent>
 
@@ -545,16 +625,59 @@ export default function SoraVideoGenerator() {
                 <label className="text-sm font-light text-gray-700">
                   Motion Prompt <span className="text-red-500">*</span>
                 </label>
-                <Textarea
-                  placeholder={imageDefaultPrompt}
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value.slice(0, maxPromptLength))}
-                  rows={4}
-                  className="resize-none border-gray-200 focus:border-purple-400 focus:ring-purple-400/20 font-light"
-                />
+                <div className="relative">
+                  <Textarea
+                    placeholder={imageDefaultPrompt}
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value.slice(0, maxPromptLength))}
+                    rows={4}
+                    className="resize-none border-gray-200 focus:border-purple-400 focus:ring-purple-400/20 font-light pr-24 pb-12"
+                  />
+                  <Button
+                    onClick={handleEnhancePrompt}
+                    disabled={isEnhancing || !prompt.trim()}
+                    size="sm"
+                    variant="outline"
+                    className="absolute right-2 bottom-2 inline-flex items-center gap-2 rounded-lg border-2 border-purple-500 bg-purple-50 px-3 py-1.5 font-medium text-purple-700 text-sm shadow-sm transition-all duration-300 hover:bg-purple-100"
+                  >
+                    {isEnhancing ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-4 w-4" />
+                    )}
+                    {isEnhancing ? 'Enhancing...' : 'AI Enhance'}
+                  </Button>
+                </div>
                 <div className="text-xs text-gray-400 text-right font-light">
                   {prompt.length} / {maxPromptLength}
                 </div>
+                {enhancedPrompt && (
+                  <div className="mt-4 rounded-xl border border-purple-200 bg-purple-50 p-4 shadow-sm">
+                    <div className="mb-2 flex items-center justify-between">
+                      <h4 className="flex items-center gap-2 font-semibold text-purple-900 text-sm">
+                        <Sparkles className="h-4 w-4" />
+                        Enhanced Prompt
+                      </h4>
+                      <Button
+                        onClick={() => setEnhancedPrompt('')}
+                        size="sm"
+                        variant="ghost"
+                        className="h-6 w-6 p-0 text-gray-600 hover:text-gray-800"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <Textarea
+                      value={enhancedPrompt}
+                      onChange={(e) => setEnhancedPrompt(e.target.value.slice(0, maxPromptLength))}
+                      className="resize-none border border-purple-200 bg-white text-sm"
+                      rows={5}
+                    />
+                    <p className="mt-1 text-right text-purple-700 text-xs">
+                      {enhancedPrompt.length} / {maxPromptLength}
+                    </p>
+                  </div>
+                )}
               </div>
             </TabsContent>
 

@@ -6,8 +6,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useFreeTier } from '@/hooks/useFreeTier'
 import { generatePlatformPrompt } from '@/lib/platform-configs'
 import { resizeImages } from '@/lib/image-resizer'
-import ModeSelector from '@/components/mode-selector'
-import PromptConfigurator from '@/components/prompt-configurator'
+import InputPanel from '@/components/input-panel'
 import OutputGallery from '@/components/output-gallery'
 import AuthForm from '@/components/auth/AuthForm'
 import { UpgradePrompt } from '@/components/pricing/UpgradePrompt'
@@ -269,18 +268,14 @@ export default function ImageGenerator() {
   }
 
   return (
-    <div className="w-full max-w-[1800px] mx-auto">
+    <div className="w-full max-w-[1600px] mx-auto">
       {/* Mobile Layout - Stacked */}
-      <div className="lg:hidden space-y-4">
-        <ModeSelector 
+      <div className="lg:hidden space-y-6">
+        <InputPanel
           mode={mode}
           setMode={handleModeChange}
           referenceImages={referenceImages}
           setReferenceImages={setReferenceImages}
-          platform={platform}
-        />
-        
-        <PromptConfigurator
           title={title}
           setTitle={setTitle}
           platform={platform}
@@ -301,41 +296,45 @@ export default function ImageGenerator() {
           onDownload={handleDownload}
           onGenerateNew={() => setGeneratedImages([])}
           isGenerating={isGenerating}
+          platform={platform}
         />
       </div>
 
-      {/* Desktop Layout - 3 Columns */}
-      <div className="hidden lg:grid lg:grid-cols-3 gap-6 min-h-[600px]">
-        <ModeSelector 
-          mode={mode}
-          setMode={handleModeChange}
-          referenceImages={referenceImages}
-          setReferenceImages={setReferenceImages}
-          platform={platform}
-        />
+      {/* Desktop Layout - 2 Columns */}
+      <div className="hidden lg:grid lg:grid-cols-2 gap-8 min-h-[700px]">
+        {/* Left Column: Input Panel */}
+        <div className="flex flex-col">
+          <InputPanel
+            mode={mode}
+            setMode={handleModeChange}
+            referenceImages={referenceImages}
+            setReferenceImages={setReferenceImages}
+            title={title}
+            setTitle={setTitle}
+            platform={platform}
+            setPlatform={setPlatform}
+            prompt={prompt}
+            setPrompt={setPrompt}
+            showPromptDetails={showPromptDetails}
+            setShowPromptDetails={setShowPromptDetails}
+            isGenerating={isGenerating}
+            canGenerate={!!canGenerateButton}
+            onGenerate={handleGenerate}
+            error={error}
+          />
+        </div>
         
-        <PromptConfigurator
-          title={title}
-          setTitle={setTitle}
-          platform={platform}
-          setPlatform={setPlatform}
-          prompt={prompt}
-          setPrompt={setPrompt}
-          showPromptDetails={showPromptDetails}
-          setShowPromptDetails={setShowPromptDetails}
-          isGenerating={isGenerating}
-          canGenerate={!!canGenerateButton}
-          onGenerate={handleGenerate}
-          error={error}
-        />
-        
-        <OutputGallery
-          generatedImages={generatedImages}
-          downloadingId={downloadingId}
-          onDownload={handleDownload}
-          onGenerateNew={() => setGeneratedImages([])}
-          isGenerating={isGenerating}
-        />
+        {/* Right Column: Output Gallery */}
+        <div className="flex flex-col">
+          <OutputGallery
+            generatedImages={generatedImages}
+            downloadingId={downloadingId}
+            onDownload={handleDownload}
+            onGenerateNew={() => setGeneratedImages([])}
+            isGenerating={isGenerating}
+            platform={platform}
+          />
+        </div>
       </div>
 
       {/* Auth Modal */}

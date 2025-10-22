@@ -246,11 +246,11 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         <section className="py-20 bg-white relative overflow-hidden">
           <div className="container mx-auto px-4 relative">
             <div className="max-w-5xl mx-auto text-center">
-              <h1 className="text-base md:text-lg lg:text-xl text-gray-600 mb-4 max-w-4xl mx-auto px-4 font-light leading-relaxed">
-                Generate creative AI videos and professional thumbnails across all platforms.
+              <h1 className="text-xl md:text-2xl lg:text-3xl font-medium tracking-tight mb-4 text-gray-900 leading-tight">
+                Generate creative AI <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent font-bold">videos</span> and <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent font-bold">thumbnails</span> across all platforms
               </h1>
               
-              <p className="text-2xl md:text-3xl lg:text-5xl font-thin tracking-tight mb-6 md:mb-8 text-gray-900 leading-[4rem]">
+              <p className="text-base md:text-lg lg:text-xl text-gray-600 mb-6 md:mb-8 max-w-4xl mx-auto px-4 font-normal leading-relaxed">
                 Next-Gen Storytelling: Videos with{' '}
                 <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent font-semibold">Sora 2</span>
                 , Images with{' '}
