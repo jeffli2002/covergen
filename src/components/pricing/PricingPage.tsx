@@ -90,11 +90,12 @@ export default function PricingPage({ locale = 'en' }: PricingPageProps = {}) {
     const currentBillingCycle = subscriptionInfo?.billing_cycle || 'monthly'
 
     // Check if this is an upgrade scenario (requires confirmation)
-    const isUpgrade = subscriptionInfo && subscriptionInfo.plan !== 'free' && (
+    const currentTier = subscriptionInfo?.tier || subscriptionInfo?.plan || 'free'
+    const isUpgrade = subscriptionInfo && currentTier !== 'free' && (
       // Tier upgrade (Pro -> Pro+)
-      (subscriptionInfo.plan === 'pro' && planId === 'pro_plus') ||
+      (currentTier === 'pro' && planId === 'pro_plus') ||
       // Billing cycle change
-      (subscriptionInfo.plan === planId && currentBillingCycle !== billingCycle)
+      (currentTier === planId && currentBillingCycle !== billingCycle)
     )
 
     if (isUpgrade) {
@@ -163,8 +164,9 @@ export default function PricingPage({ locale = 'en' }: PricingPageProps = {}) {
     // Check if this is the EXACT current plan (tier + billing cycle)
     const currentBillingCycle = subscriptionInfo?.billing_cycle || 'monthly'
     const selectedBillingCycle = isYearly ? 'yearly' : 'monthly'
-    const isExactCurrentPlan = subscriptionInfo?.plan === plan.id && currentBillingCycle === selectedBillingCycle
-    const isSameTierDifferentCycle = subscriptionInfo?.plan === plan.id && currentBillingCycle !== selectedBillingCycle
+    const currentTier = subscriptionInfo?.tier || subscriptionInfo?.plan || 'free'
+    const isExactCurrentPlan = currentTier === plan.id && currentBillingCycle === selectedBillingCycle
+    const isSameTierDifferentCycle = currentTier === plan.id && currentBillingCycle !== selectedBillingCycle
     
     if (isExactCurrentPlan) {
       if (subscriptionInfo?.isTrialing) return 'Activate Plan'
@@ -177,12 +179,13 @@ export default function PricingPage({ locale = 'en' }: PricingPageProps = {}) {
 
     if (plan.id === 'free') return 'Get Started Free'
     
-    if (subscriptionInfo && subscriptionInfo.plan !== 'free') {
-      if (plan.id === 'pro_plus' && subscriptionInfo.plan === 'pro') {
+    const currentTier = subscriptionInfo?.tier || subscriptionInfo?.plan || 'free'
+    if (subscriptionInfo && currentTier !== 'free') {
+      if (plan.id === 'pro_plus' && currentTier === 'pro') {
         return 'Upgrade to Pro+'
       }
-      if (plan.id === 'pro' && subscriptionInfo.plan === 'pro_plus') {
-        return 'Downgrade'
+      if (plan.id === 'pro' && currentTier === 'pro_plus') {
+        return 'Not Available'
       }
     }
 
@@ -196,18 +199,19 @@ export default function PricingPage({ locale = 'en' }: PricingPageProps = {}) {
     // PREVENT DUPLICATE: Check both tier AND billing cycle
     const currentBillingCycle = subscriptionInfo?.billing_cycle || 'monthly'
     const selectedBillingCycle = isYearly ? 'yearly' : 'monthly'
-    const isExactCurrentPlan = subscriptionInfo?.plan === plan.id && currentBillingCycle === selectedBillingCycle
+    const currentTier = subscriptionInfo?.tier || subscriptionInfo?.plan || 'free'
+    const isExactCurrentPlan = currentTier === plan.id && currentBillingCycle === selectedBillingCycle
     
     // Disable button if this is the exact current plan (same tier + same billing cycle)
     if (isExactCurrentPlan && !subscriptionInfo?.isTrialing) return true
 
     // Disable downgrade to free for paid users
-    if (plan.id === 'free' && subscriptionInfo && subscriptionInfo.plan !== 'free') {
+    if (plan.id === 'free' && subscriptionInfo && currentTier !== 'free') {
       return true
     }
 
     // Disable downgrade from Pro+ to Pro
-    if (plan.id === 'pro' && subscriptionInfo?.plan === 'pro_plus') {
+    if (plan.id === 'pro' && currentTier === 'pro_plus') {
       return true
     }
 
@@ -274,7 +278,8 @@ export default function PricingPage({ locale = 'en' }: PricingPageProps = {}) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto mb-16">
           {PRICING_CONFIG.plans.map((plan, index) => {
             const Icon = planIcons[plan.id]
-            const isCurrentPlan = subscriptionInfo?.plan === plan.id
+            const currentTier = subscriptionInfo?.tier || subscriptionInfo?.plan || 'free'
+            const isCurrentPlan = currentTier === plan.id
             const credits = getCreditsAmount(plan)
 
             return (
