@@ -227,8 +227,7 @@ export default function PricingSection({
       console.error('Upgrade error:', error)
       toast({
         title: 'Upgrade Failed',
-        description: error.message || 'Something went wrong. Please try again.',
-        variant: 'destructive'
+        description: error.message || 'Something went wrong. Please try again.'
       })
       setIsUpgrading(false)
     }
