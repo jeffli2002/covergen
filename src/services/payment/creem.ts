@@ -217,7 +217,7 @@ class CreemPaymentService {
     userId,
     userEmail,
     planId,
-    billingCycle = 'monthly',
+    billingCycle = 'yearly',
     successUrl,
     cancelUrl,
     currentPlan = 'free'
@@ -1471,7 +1471,7 @@ class CreemPaymentService {
   /**
    * Upgrade subscription to a higher tier
    */
-  async upgradeSubscription(subscriptionId: string, newPlanId: 'pro' | 'pro_plus', billingCycle: 'monthly' | 'yearly' = 'monthly') {
+  async upgradeSubscription(subscriptionId: string, newPlanId: 'pro' | 'pro_plus', billingCycle: 'monthly' | 'yearly' = 'yearly') {
     try {
       if (typeof window !== 'undefined') {
         throw new Error('This method must be called from server-side')

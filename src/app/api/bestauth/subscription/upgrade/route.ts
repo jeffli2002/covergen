@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
     })
     
     // Extract target billing cycle from request
-    const targetBillingCycle = body.billingCycle || body.billing || currentSubscription.billing_cycle || 'monthly'
+    const targetBillingCycle = body.billingCycle || body.billing || currentSubscription.billing_cycle || 'yearly'
     
     // Validate upgrade path
     // PREVENT DUPLICATE: Check both tier AND billing cycle

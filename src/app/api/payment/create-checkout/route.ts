@@ -36,7 +36,7 @@ async function handler(req: AuthenticatedRequest) {
     const body = await req.json()
     console.log('Request body:', body)
     
-    const { planId, successUrl, cancelUrl } = body
+    const { planId, billingCycle = 'yearly', successUrl, cancelUrl } = body
 
     if (!planId || !successUrl || !cancelUrl) {
       return NextResponse.json(
@@ -169,6 +169,7 @@ async function handler(req: AuthenticatedRequest) {
       userId: user.id,
       userEmail: user.email!,
       planId: planId as 'pro' | 'pro_plus',
+      billingCycle: billingCycle as 'monthly' | 'yearly',
       successUrl,
       cancelUrl,
       currentPlan: subscription?.tier || 'free'
