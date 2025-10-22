@@ -10,8 +10,9 @@ import ModeSelector from '@/components/mode-selector'
 import PromptConfigurator from '@/components/prompt-configurator'
 import OutputGallery from '@/components/output-gallery'
 import AuthForm from '@/components/auth/AuthForm'
-import UpgradePrompt from '@/components/auth/UpgradePrompt'
+import { UpgradePrompt } from '@/components/pricing/UpgradePrompt'
 import { useAppStore } from '@/lib/store'
+import { PRICING_CONFIG } from '@/config/pricing.config'
 
 export default function ImageGenerator() {
   const [mode, setMode] = useState<'image' | 'text'>('image')
@@ -26,6 +27,9 @@ export default function ImageGenerator() {
   const [error, setError] = useState<string | null>(null)
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [upgradeReason, setUpgradeReason] = useState<'credits' | 'daily_limit' | 'monthly_limit'>('credits')
+  const [currentCredits, setCurrentCredits] = useState(0)
+  const [requiredCredits, setRequiredCredits] = useState(0)
   const triggerUsageRefresh = useAppStore(state => state.triggerUsageRefresh)
   
   // Custom setMode that also clears generated images
@@ -167,11 +171,27 @@ export default function ImageGenerator() {
         // Handle specific error cases
         if (response.status === 413) {
           throw new Error('Images are too large. Our compression reduced them but they\'re still too big. Please use smaller source images (under 5MB each).')
+        } else if (response.status === 402) {
+          // Handle insufficient credits - show upgrade modal with credit details
+          const cost = PRICING_CONFIG.generationCosts.nanoBananaImage
+          setRequiredCredits(cost)
+          setCurrentCredits(errorData.currentBalance || 0)
+          setUpgradeReason('credits')
+          setShowUpgradeModal(true)
+          throw new Error(errorData.error || 'Insufficient credits for image generation')
         } else if (response.status === 429) {
           // All 429 errors should show upgrade modal
           // Both usage limits and rate limits can be resolved by upgrading tiers
-          setShowUpgradeModal(true)
           if (errorData?.limit_reached) {
+            // Set appropriate upgrade reason based on limit type
+            if (errorData.limit_type === 'daily') {
+              setUpgradeReason('daily_limit')
+            } else if (errorData.limit_type === 'monthly') {
+              setUpgradeReason('monthly_limit')
+            } else {
+              setUpgradeReason('credits')
+            }
+            setShowUpgradeModal(true)
             throw new Error(errorData.error || 'Daily generation limit reached. Please try again tomorrow or upgrade to Pro plan.')
           }
           throw new Error('Rate limit exceeded. Please wait a few minutes or upgrade for higher rate limits.')
@@ -326,17 +346,15 @@ export default function ImageGenerator() {
         />
       )}
 
-      {/* Upgrade Modal - Only for 429 rate limit errors */}
+      {/* Upgrade Modal - For both credit and limit errors */}
       {showUpgradeModal && (
         <UpgradePrompt 
+          open={showUpgradeModal}
           onClose={() => setShowUpgradeModal(false)}
-          onSignIn={() => {
-            setShowUpgradeModal(false)
-            setShowAuthModal(true)
-          }}
-          dailyCount={usageToday}
-          dailyLimit={freeTierLimit}
-          isAuthenticated={!!user}
+          reason={upgradeReason}
+          currentCredits={currentCredits}
+          requiredCredits={requiredCredits}
+          generationType="nanoBananaImage"
         />
       )}
     </div>

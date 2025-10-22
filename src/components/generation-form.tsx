@@ -11,10 +11,11 @@ import { Upload, Sparkles, Info, CheckCircle, ChevronDown, ChevronUp } from 'luc
 import { platformSizes, styleTemplates, type Platform, type StyleTemplate } from '@/lib/utils'
 import { useAppStore } from '@/lib/store'
 import { platformIcons, platformGuidelines, platformEnhancements, generatePlatformPrompt } from '@/lib/platform-configs'
-import UpgradePrompt from '@/components/auth/UpgradePrompt'
+import { UpgradePrompt } from '@/components/pricing/UpgradePrompt'
 import authService from '@/services/authService'
 import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
 import { usePathname } from 'next/navigation'
+import { PRICING_CONFIG } from '@/config/pricing.config'
 
 interface DailyLimitStatus {
   daily_count: number
@@ -33,6 +34,9 @@ export default function GenerationForm() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [showPromptDetails, setShowPromptDetails] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [upgradeReason, setUpgradeReason] = useState<'credits' | 'daily_limit' | 'monthly_limit'>('credits')
+  const [currentCredits, setCurrentCredits] = useState(0)
+  const [requiredCredits, setRequiredCredits] = useState(0)
   const [dailyLimitStatus, setDailyLimitStatus] = useState<DailyLimitStatus | null>(null)
   
   // Get subscription configuration
@@ -124,8 +128,30 @@ export default function GenerationForm() {
       const data = await response.json()
 
       if (!response.ok) {
-        // Check if it's a rate limit error
+        // Handle insufficient credits (402 status)
+        if (response.status === 402) {
+          const cost = PRICING_CONFIG.generationCosts.nanoBananaImage
+          setRequiredCredits(cost)
+          setCurrentCredits(data.currentBalance || 0)
+          setUpgradeReason('credits')
+          setShowUpgradeModal(true)
+          useAppStore.getState().updateTask(task.id, {
+            status: 'failed',
+            results: []
+          })
+          return
+        }
+        
+        // Check if it's a rate limit error (429 status)
         if (response.status === 429 && data.limit_reached) {
+          // Set appropriate upgrade reason based on limit type
+          if (data.limit_type === 'daily') {
+            setUpgradeReason('daily_limit')
+          } else if (data.limit_type === 'monthly') {
+            setUpgradeReason('monthly_limit')
+          } else {
+            setUpgradeReason('credits')
+          }
           setDailyLimitStatus({
             daily_count: data.daily_count,
             daily_limit: data.daily_limit,
@@ -468,15 +494,14 @@ export default function GenerationForm() {
       </CardContent>
       
       {/* Upgrade Modal */}
-      {showUpgradeModal && dailyLimitStatus && (
+      {showUpgradeModal && (
         <UpgradePrompt
+          open={showUpgradeModal}
           onClose={() => setShowUpgradeModal(false)}
-          onUpgrade={() => {
-            setShowUpgradeModal(false)
-            window.location.href = `/${locale}/pricing`
-          }}
-          dailyCount={dailyLimitStatus.daily_count}
-          dailyLimit={dailyLimitStatus.daily_limit}
+          reason={upgradeReason}
+          currentCredits={currentCredits}
+          requiredCredits={requiredCredits}
+          generationType="nanoBananaImage"
         />
       )}
     </Card>
