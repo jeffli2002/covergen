@@ -179,7 +179,6 @@ export default function PricingPage({ locale = 'en' }: PricingPageProps = {}) {
 
     if (plan.id === 'free') return 'Get Started Free'
     
-    const currentTier = subscriptionInfo?.tier || subscriptionInfo?.plan || 'free'
     if (subscriptionInfo && currentTier !== 'free') {
       if (plan.id === 'pro_plus' && currentTier === 'pro') {
         return 'Upgrade to Pro+'

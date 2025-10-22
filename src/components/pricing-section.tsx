@@ -27,6 +27,7 @@ interface SubscriptionInfo {
   stripeSubscriptionId: string | null
   requiresPaymentSetup?: boolean
   isManualTrial?: boolean
+  billing_cycle?: 'monthly' | 'yearly'
 }
 
 interface PricingSectionProps {
@@ -187,13 +188,22 @@ export default function PricingSection({
   const getButtonText = (plan: typeof PRICING_CONFIG.plans[0]) => {
     if (loadingSubscription) return 'Loading...'
     
-    const isCurrentPlan = subscriptionInfo?.plan === plan.id
+    // Check if this is the EXACT current plan (tier + billing cycle)
+    const currentBillingCycle = subscriptionInfo?.billing_cycle || 'monthly'
+    const selectedBillingCycle = isYearly ? 'yearly' : 'monthly'
+    const currentTier = subscriptionInfo?.plan || 'free'
+    const isExactCurrentPlan = currentTier === plan.id && currentBillingCycle === selectedBillingCycle
+    const isSameTierDifferentCycle = currentTier === plan.id && currentBillingCycle !== selectedBillingCycle
     
-    if (isCurrentPlan) {
+    if (isExactCurrentPlan) {
       if (subscriptionInfo?.isTrialing && subscriptionInfo?.requiresPaymentSetup) {
         return 'Activate Plan'
       }
       return 'Current Plan'
+    }
+    
+    if (isSameTierDifferentCycle) {
+      return selectedBillingCycle === 'yearly' ? 'Switch to Yearly' : 'Switch to Monthly'
     }
 
     if (plan.id === 'free') return 'Get Started Free'
@@ -210,13 +220,22 @@ export default function PricingSection({
   const isButtonDisabled = (plan: typeof PRICING_CONFIG.plans[0]) => {
     if (loadingSubscription || plan.comingSoon) return true
     
-    const isCurrentPlan = subscriptionInfo?.plan === plan.id
-    if (isCurrentPlan && !subscriptionInfo?.isTrialing) return true
+    // Check both tier AND billing cycle to determine if this is the exact current plan
+    const currentBillingCycle = subscriptionInfo?.billing_cycle || 'monthly'
+    const selectedBillingCycle = isYearly ? 'yearly' : 'monthly'
+    const currentTier = subscriptionInfo?.plan || 'free'
+    const isExactCurrentPlan = currentTier === plan.id && currentBillingCycle === selectedBillingCycle
+    
+    // Only disable if this is the exact current plan (same tier + same billing cycle)
+    if (isExactCurrentPlan && !subscriptionInfo?.isTrialing) return true
 
     // Disable downgrade to free
     if (plan.id === 'free' && subscriptionInfo && subscriptionInfo.plan !== 'free') {
       return true
     }
+
+    // Note: Allow switching billing cycles (Pro+ Monthly -> Pro+ Yearly)
+    // This is handled by showing "Switch to Yearly/Monthly" button text
 
     return false
   }
@@ -266,7 +285,10 @@ export default function PricingSection({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto">
             {PRICING_CONFIG.plans.map((plan) => {
               const Icon = planIcons[plan.id]
-              const isCurrentPlan = subscriptionInfo?.plan === plan.id
+              const currentBillingCycle = subscriptionInfo?.billing_cycle || 'monthly'
+              const selectedBillingCycle = isYearly ? 'yearly' : 'monthly'
+              const currentTier = subscriptionInfo?.plan || 'free'
+              const isCurrentPlan = currentTier === plan.id && currentBillingCycle === selectedBillingCycle
               const credits = getCredits(plan)
 
               return (
