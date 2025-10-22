@@ -267,13 +267,12 @@ async function handler(request: AuthenticatedRequest) {
             limitType = 'trial'
           }
         } else if (isPaidUser) {
-          // Paid users (Pro/Pro+) - ONLY check monthly limit
-          const config = getSubscriptionConfig()
+          // Paid users (Pro/Pro+) - Use credit system (this shouldn't happen if credits are properly checked)
           const upgradeMessage = tier === 'pro' 
-            ? `Upgrade to Pro+ for ${config.limits.pro_plus.monthly} images/month.` 
-            : 'Try again next month.'
-          errorMessage = `Monthly limit reached (${limitStatus.monthly_usage}/${limitStatus.monthly_limit} images this month). ${upgradeMessage}`
-          limitType = 'monthly'
+            ? 'Upgrade to Pro+ for more credits or purchase a credits pack.' 
+            : 'Purchase a credits pack to continue generating images.'
+          errorMessage = `You've run out of credits. ${upgradeMessage}`
+          limitType = 'credits'
         } else {
           // Free users - check both daily and monthly
           const config = getSubscriptionConfig()

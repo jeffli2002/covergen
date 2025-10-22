@@ -63,15 +63,12 @@ async function handler(request: AuthenticatedRequest) {
             : `Trial video limit reached (${videoUsageThisMonth}/${limits.videos.monthly} videos used). Upgrade to Pro plan to continue!`
           limitType = dailyLimitHit ? 'daily' : 'trial'
         } else if (isPaidUser) {
-          // Paid users (Pro/Pro+) - ONLY check monthly limit
-          const { getSubscriptionPlans } = require('@/lib/subscription-plans')
-          const plans = getSubscriptionPlans()
-          const proPlusPlan = plans.find((p: any) => p.id === 'pro_plus')
-          const upgradeMessage = tier === 'pro' && proPlusPlan
-            ? `Upgrade to Pro+ for ${proPlusPlan.limits.videos.monthly} videos/month.` 
-            : 'Try again next month.'
-          errorMessage = `Monthly video limit reached (${videoUsageThisMonth}/${limits.videos.monthly} videos this month). ${upgradeMessage}`
-          limitType = 'monthly'
+          // Paid users (Pro/Pro+) - Use credit system (this shouldn't happen if credits are properly checked)
+          const upgradeMessage = tier === 'pro'
+            ? 'Upgrade to Pro+ for more credits or purchase a credits pack.' 
+            : 'Purchase a credits pack to continue generating videos.'
+          errorMessage = `You've run out of credits. ${upgradeMessage}`
+          limitType = 'credits'
         } else {
           // Free users - check both daily and monthly
           const { getSubscriptionPlans } = require('@/lib/subscription-plans')
