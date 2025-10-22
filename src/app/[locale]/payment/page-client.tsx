@@ -373,18 +373,46 @@ export default function PaymentPageClient({
     }
   }
 
+  // Generate dynamic features based on billing cycle
+  const getDynamicFeatures = (planId: 'pro' | 'pro_plus') => {
+    // Use SUBSCRIPTION_CONFIG directly for accurate pricing
+    const { SUBSCRIPTION_CONFIG } = require('@/config/subscription')
+    const planConfig = planId === 'pro' ? SUBSCRIPTION_CONFIG.plans.pro : SUBSCRIPTION_CONFIG.plans.pro_plus
+    const credits = billingCycle === 'yearly' ? planConfig.yearly.points : planConfig.monthly.points
+    const generationCosts = SUBSCRIPTION_CONFIG.generationCosts
+    
+    const commonFeatures = [
+      'Watermark-free for all content',
+      'All platform sizes',
+      planId === 'pro' ? 'Priority support' : 'Advanced customization',
+      planId === 'pro' ? 'Commercial usage rights' : 'Commercial usage license',
+    ]
+    
+    if (planId === 'pro_plus') {
+      commonFeatures.push('Dedicated support')
+    }
+    
+    return [
+      `${credits.toLocaleString()} credits/${billingCycle === 'yearly' ? 'year' : 'month'}`,
+      `Up to ${Math.floor(credits / generationCosts.nanoBananaImage).toLocaleString()} images or ${Math.floor(credits / generationCosts.sora2Video).toLocaleString()} videos`,
+      ...commonFeatures
+    ]
+  }
+
   const plans = [
     {
       ...SUBSCRIPTION_PLANS.pro,
       icon: Zap,
       popular: true,
-      savings: null
+      savings: null,
+      features: getDynamicFeatures('pro')
     },
     {
       ...SUBSCRIPTION_PLANS.pro_plus,
       icon: Crown,
       popular: false,
-      savings: null
+      savings: null,
+      features: getDynamicFeatures('pro_plus')
     }
   ]
 
