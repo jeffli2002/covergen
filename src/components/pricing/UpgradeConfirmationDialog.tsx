@@ -161,13 +161,6 @@ export function UpgradeConfirmationDialog({
               </div>
             </div>
 
-            {/* Arrow */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-              <div className="bg-white rounded-full p-3 shadow-lg border-2 border-orange-500">
-                <ArrowRight className="w-6 h-6 text-orange-600" />
-              </div>
-            </div>
-
             {/* New Plan */}
             <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-lg p-4 border-2 border-orange-500 relative">
               <div className="absolute -top-3 right-4">
@@ -222,13 +215,9 @@ export function UpgradeConfirmationDialog({
             <Alert className="border-green-200 bg-green-50">
               <Sparkles className="h-4 w-4 text-green-600" />
               <AlertDescription className="text-green-800">
-                <p className="font-semibold mb-1">Credit Increase</p>
-                <p className="text-sm">
-                  You'll get <strong>{(targetCredits - currentCredits).toLocaleString()} more credits</strong>{' '}
-                  {targetBillingCycle === 'yearly' ? 'per year' : 'per month'} - that's{' '}
-                  {Math.floor((targetCredits - currentCredits) / PRICING_CONFIG.generationCosts.nanoBananaImage)} more images
-                  {' or '}
-                  {Math.floor((targetCredits - currentCredits) / PRICING_CONFIG.generationCosts.sora2Video)} more Sora 2 videos!
+                <p className="font-semibold">
+                  +{(targetCredits - currentCredits).toLocaleString()} more credits{' '}
+                  {targetBillingCycle === 'yearly' ? 'per year' : 'per month'}
                 </p>
               </AlertDescription>
             </Alert>
@@ -293,33 +282,8 @@ export function UpgradeConfirmationDialog({
           {/* Important Information */}
           <Alert className="border-blue-200 bg-blue-50">
             <Info className="h-4 w-4 text-blue-600" />
-            <AlertDescription className="text-blue-800">
-              <ul className="space-y-1.5 text-sm">
-                <li className="flex items-start gap-2">
-                  <CreditCard className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  <span>
-                    <strong>Billing:</strong> You'll be charged a prorated amount based on your current billing cycle
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <TrendingUp className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  <span>
-                    <strong>Effective immediately:</strong> Changes take effect right away
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Sparkles className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  <span>
-                    <strong>Credits:</strong> Your new credit allocation will be available instantly
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  <span>
-                    <strong>Cancel anytime:</strong> No long-term commitment required
-                  </span>
-                </li>
-              </ul>
+            <AlertDescription className="text-blue-800 text-sm">
+              Prorated billing applies. Changes take effect immediately. Cancel anytime.
             </AlertDescription>
           </Alert>
 
