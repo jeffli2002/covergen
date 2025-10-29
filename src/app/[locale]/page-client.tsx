@@ -342,7 +342,7 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
         </section>
 
         {/* Generation Section */}
-        <section id="generator" className="py-20 bg-gray-50 scroll-mt-20">
+        <section id="generator" className="py-12 bg-gray-50 scroll-mt-20">
           <div className="container mx-auto px-4">
             <ImageGenerator />
           </div>

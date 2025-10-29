@@ -268,7 +268,7 @@ export default function ImageGenerator() {
   }
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto">
+    <div className="w-full max-w-[1200px] mx-auto">
       {/* Mobile Layout - Stacked */}
       <div className="lg:hidden space-y-6">
         <InputPanel
@@ -301,7 +301,7 @@ export default function ImageGenerator() {
       </div>
 
       {/* Desktop Layout - 2 Columns */}
-      <div className="hidden lg:grid lg:grid-cols-2 gap-8 min-h-[700px]">
+      <div className="hidden lg:grid lg:grid-cols-2 gap-6 min-h-[600px]">
         {/* Left Column: Input Panel */}
         <div className="flex flex-col">
           <InputPanel

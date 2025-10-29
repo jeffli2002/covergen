@@ -63,41 +63,41 @@ export default function OutputGallery({
   return (
     <>
       <Card className="h-full bg-white border-gray-200 flex flex-col shadow-sm hover:shadow-lg transition-all duration-300">
-        <div className="p-4 md:p-6 space-y-4 md:space-y-6 flex-1 flex flex-col">
+        <div className="p-4 md:p-5 space-y-3 md:space-y-4 flex-1 flex flex-col">
           {/* Header */}
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 md:p-2 bg-gradient-to-r from-green-100 to-emerald-100 rounded-2xl">
-                <ImageIcon className="w-4 h-4 md:w-5 md:h-5 text-green-600" />
+              <div className="p-1.5 bg-gradient-to-r from-green-100 to-emerald-100 rounded-2xl">
+                <ImageIcon className="w-4 h-4 text-green-600" />
               </div>
-              <h3 className="text-lg md:text-xl font-bold text-gray-900">Output Gallery</h3>
+              <h3 className="text-base md:text-lg font-bold text-gray-900">Output Gallery</h3>
             </div>
-            <p className="text-xs md:text-sm text-gray-600">Your AI creations appear here</p>
+            <p className="text-xs text-gray-600">Your AI creations appear here</p>
           </div>
 
           {/* Results Area */}
-          <div className="flex-1 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center min-h-[300px] md:min-h-[400px]">
+          <div className="flex-1 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center min-h-[280px] md:min-h-[350px]">
             {isGenerating ? (
               <div className="text-center p-4">
-                <div className="w-12 h-12 md:w-16 md:h-16 mb-3 rounded-2xl bg-gradient-to-r from-orange-100 to-red-100 flex items-center justify-center mx-auto">
-                  <Loader2 className="w-6 h-6 md:w-8 md:h-8 text-orange-600 animate-spin" />
+                <div className="w-12 h-12 md:w-14 md:h-14 mb-2.5 rounded-2xl bg-gradient-to-r from-orange-100 to-red-100 flex items-center justify-center mx-auto">
+                  <Loader2 className="w-6 h-6 md:w-7 md:h-7 text-orange-600 animate-spin" />
                 </div>
-                <h4 className="text-base md:text-lg font-bold text-gray-900 mb-2">Generating your image...</h4>
-                <p className="text-xs md:text-sm text-gray-600">This usually takes 5-10 seconds</p>
+                <h4 className="text-sm md:text-base font-bold text-gray-900 mb-1.5">Generating your image...</h4>
+                <p className="text-xs text-gray-600">This usually takes 5-10 seconds</p>
                 <div className="mt-3 w-32 md:w-48 h-1 bg-gray-200 rounded-full mx-auto overflow-hidden">
                   <div className="h-full bg-gradient-to-r from-orange-500 to-red-500 rounded-full animate-pulse w-3/4"></div>
                 </div>
               </div>
             ) : generatedImages.length === 0 ? (
               <div className="text-center p-4">
-                <div className="w-12 h-12 md:w-20 md:h-20 mb-3 md:mb-4 rounded-2xl bg-gradient-to-r from-orange-100 to-red-100 flex items-center justify-center mx-auto">
-                  <ImageIcon className="w-6 h-6 md:w-10 md:h-10 text-orange-600" />
+                <div className="w-12 h-12 md:w-16 md:h-16 mb-2.5 md:mb-3 rounded-2xl bg-gradient-to-r from-orange-100 to-red-100 flex items-center justify-center mx-auto">
+                  <ImageIcon className="w-6 h-6 md:w-8 md:h-8 text-orange-600" />
                 </div>
-                <h4 className="text-ui-lg md:text-heading-5 text-gray-900 mb-1 md:mb-2">Ready for generation</h4>
-                <p className="text-body-sm text-gray-600">Configure your prompt and hit generate</p>
+                <h4 className="text-sm md:text-base text-gray-900 mb-1 font-bold">Ready for generation</h4>
+                <p className="text-xs text-gray-600">Configure your prompt and hit generate</p>
               </div>
             ) : (
-              <div className="w-full max-w-md p-4 md:p-6">
+              <div className="w-full max-w-md p-3 md:p-4">
                 {/* Image Container */}
                 <div 
                   className="bg-white rounded-2xl p-3 md:p-4 border-2 border-orange-200 shadow-lg cursor-pointer hover:border-orange-300 hover:shadow-xl transition-all duration-300 group"
@@ -107,7 +107,7 @@ export default function OutputGallery({
                     <img
                       src={generatedImages[0]}
                       alt="Generated image"
-                      className="w-full h-auto rounded max-h-[250px] md:max-h-[300px] object-contain"
+                      className="w-full h-auto rounded max-h-[220px] md:max-h-[260px] object-contain"
                     />
                     
                     {/* Preview overlay */}

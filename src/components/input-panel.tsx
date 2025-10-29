@@ -248,27 +248,27 @@ export default function InputPanel({
   return (
     <>
       <Card className="h-full bg-white border-gray-200 flex flex-col shadow-sm hover:shadow-md transition-all duration-300">
-        <div className="p-6 space-y-6 flex-1 flex flex-col overflow-y-auto">
+        <div className="p-5 space-y-4 flex-1 flex flex-col overflow-y-auto">
           {/* Header */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-gradient-to-r from-orange-100 to-red-100 rounded-xl">
-                <Sparkles className="w-6 h-6 text-orange-600" />
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 bg-gradient-to-r from-orange-100 to-red-100 rounded-xl">
+                <Sparkles className="w-5 h-5 text-orange-600" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">Create Your Design</h2>
-                <p className="text-sm text-gray-600">Configure your generation parameters</p>
+                <h2 className="text-xl font-bold text-gray-900">Create Your Design</h2>
+                <p className="text-xs text-gray-600">Configure your generation parameters</p>
               </div>
             </div>
           </div>
 
           {/* Mode Selection */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <label className="text-sm font-semibold text-gray-900 flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-orange-500"></div>
               Generation Mode
             </label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2.5">
               <button
                 onClick={() => setMode('image')}
                 className={cn(
@@ -351,7 +351,7 @@ export default function InputPanel({
 
           {/* Reference Images (Image Mode) */}
           {mode === 'image' && (
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-orange-500"></div>
@@ -379,7 +379,7 @@ export default function InputPanel({
                     onChange={handleImageUpload}
                     className="hidden"
                   />
-                  <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 hover:bg-gray-100 hover:border-gray-400 transition-all duration-200">
+                  <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 hover:bg-gray-100 hover:border-gray-400 transition-all duration-200">
                     <div className="p-4 bg-white rounded-full mb-4 shadow-sm">
                       <ImageIcon className="w-8 h-8 text-gray-400" />
                     </div>
@@ -394,7 +394,7 @@ export default function InputPanel({
                   </div>
                 </label>
               ) : (
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-2.5">
                   {referenceImages.map((file, index) => (
                     <div key={index} className="relative aspect-square group">
                       <div 
@@ -477,7 +477,7 @@ export default function InputPanel({
           )}
 
           {/* Platform Selection */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <label className="text-sm font-semibold text-gray-900 flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-orange-500"></div>
               Target Platform
@@ -566,7 +566,7 @@ export default function InputPanel({
           )}
 
           {/* Title Input */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <label className="text-sm font-semibold text-gray-900 flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
               Title
@@ -576,12 +576,12 @@ export default function InputPanel({
               placeholder="My awesome content..."
               value={title}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
-              className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-11 rounded-xl hover:border-gray-300 focus:border-orange-500 transition-colors"
+              className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-10 rounded-xl hover:border-gray-300 focus:border-orange-500 transition-colors"
             />
           </div>
 
           {/* Prompt Input */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <label className="text-sm font-semibold text-gray-900 flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-orange-500"></div>
               Description
@@ -591,7 +591,7 @@ export default function InputPanel({
                 placeholder="Describe your desired image in detail..."
                 value={prompt}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setPrompt(e.target.value)}
-                className="min-h-[140px] bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 resize-none rounded-xl hover:border-gray-300 focus:border-orange-500 transition-colors pr-24 pb-12"
+                className="min-h-[120px] bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 resize-none rounded-xl hover:border-gray-300 focus:border-orange-500 transition-colors pr-24 pb-12"
               />
               <Button
                 onClick={handleEnhancePrompt}
@@ -717,7 +717,7 @@ export default function InputPanel({
             onClick={onGenerate}
             disabled={!canGenerate || isGenerating}
             className={cn(
-              "w-full h-14 font-bold text-lg rounded-xl shadow-lg transition-all duration-200",
+              "w-full h-12 font-bold text-base rounded-xl shadow-lg transition-all duration-200"
               "bg-gradient-to-r from-orange-500 to-red-500",
               "hover:from-orange-600 hover:to-red-600",
               "disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed disabled:shadow-none",
