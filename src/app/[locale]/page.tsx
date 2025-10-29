@@ -22,15 +22,7 @@ export async function generateMetadata({
       'sora 2',
       'ai poster maker',
       'ai cover generator',
-      'ai thumbnail generator',
-      'ai ad creator',
-      'ai design tool',
-      'ai content creator',
-      'ai social media tool',
-      'free ai generator',
-      'ai image video tool',
-      'ai art creator',
-      'ai marketing visuals'
+      'ai thumbnail generator'
     ],
     path: '/',
     locale,
@@ -41,6 +33,7 @@ export async function generateMetadata({
       height: 630,
       alt: 'CoverGen Pro - AI-Powered Cover & Thumbnail Generator',
     }],
+    useDefaultKeywords: false, // Don't merge with ALL platform keywords
   })
   
   return metadata

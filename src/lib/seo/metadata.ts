@@ -19,6 +19,7 @@ interface GenerateMetadataParams {
   noindex?: boolean
   schema?: any
   searchParams?: Record<string, string | string[] | undefined>
+  useDefaultKeywords?: boolean
 }
 
 const DEFAULT_KEYWORDS = getAllKeywords()
@@ -33,6 +34,7 @@ export function generateMetadata({
   noindex = false,
   schema,
   searchParams,
+  useDefaultKeywords = true,
 }: GenerateMetadataParams): Metadata {
   const baseUrl = 'https://covergen.pro'
   
@@ -54,7 +56,7 @@ export function generateMetadata({
   return {
     title,
     description,
-    keywords: [...DEFAULT_KEYWORDS, ...keywords],
+    keywords: useDefaultKeywords ? [...DEFAULT_KEYWORDS, ...keywords] : keywords,
     authors: [{ name: 'CoverGen Pro Team' }],
     creator: 'CoverGen Pro',
     publisher: 'CoverGen Pro',
