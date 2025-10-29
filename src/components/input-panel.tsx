@@ -717,7 +717,7 @@ export default function InputPanel({
             onClick={onGenerate}
             disabled={!canGenerate || isGenerating}
             className={cn(
-              "w-full h-12 font-bold text-base rounded-xl shadow-lg transition-all duration-200"
+              "w-full h-12 font-bold text-base rounded-xl shadow-lg transition-all duration-200",
               "bg-gradient-to-r from-orange-500 to-red-500",
               "hover:from-orange-600 hover:to-red-600",
               "disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed disabled:shadow-none",
