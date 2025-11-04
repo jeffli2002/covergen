@@ -715,7 +715,8 @@ export class BestAuthService {
         to: user.email,
         subject: 'Verify your email - CoverGen Pro',
         html,
-        text
+        text,
+        category: 'verification'
       })
       
       if (!result.success) {

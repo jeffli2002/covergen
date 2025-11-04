@@ -20,9 +20,17 @@ export function getEmailConfig(): EmailConfig {
     provider = 'smtp'
   }
   
-  // In development, always use console unless explicitly set
-  if (process.env.NODE_ENV === 'development' && !process.env.FORCE_EMAIL_PROVIDER) {
+  // In development, only use console if explicitly forced or no provider configured
+  if (process.env.NODE_ENV === 'development' && 
+      process.env.FORCE_EMAIL_PROVIDER === 'console' && 
+      provider !== 'console') {
+    console.warn('⚠️  Email provider configured but FORCE_EMAIL_PROVIDER=console is set. Using console mode.')
     provider = 'console'
+  }
+  
+  // Log the email configuration for debugging
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`📧 Email Configuration: provider=${provider}, from=${emailFrom}`)
   }
   
   return {

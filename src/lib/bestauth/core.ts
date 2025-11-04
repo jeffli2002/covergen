@@ -79,17 +79,18 @@ export async function signUp({
       const { emailService } = await import('@/lib/email/service')
       
       // Generate verification token
-      const verificationToken = generateToken()
-      const tokenHash = await hashToken(verificationToken)
+      const crypto = await import('crypto')
+      const verificationToken = crypto.randomBytes(32).toString('hex')
       
-      // Store verification token
+      // Store verification token (store original token, not hash)
       const expiresAt = new Date()
       expiresAt.setHours(expiresAt.getHours() + 24) // 24 hour expiry
       
       await db.verificationTokens.create({
         email: user.email,
-        token: tokenHash,
-        expires_at: expiresAt
+        token: verificationToken,
+        expires_at: expiresAt,
+        user_id: user.id
       })
       
       // Send email
@@ -108,7 +109,8 @@ export async function signUp({
         to: user.email,
         subject: 'Verify your email - CoverGen Pro',
         html,
-        text
+        text,
+        category: 'verification'
       })
       
       console.log('[BestAuth] Verification email sent to:', user.email)

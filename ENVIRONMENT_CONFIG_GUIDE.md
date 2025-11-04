@@ -50,3 +50,40 @@ Before deploying to production:
 - [ ] Verify Supabase production URL and keys
 - [ ] Test subscription flow works correctly
 - [ ] Verify usage limits are enforced
+
+## Email Provider (Resend/SMTP/SendGrid)
+
+Set the following variables in Vercel (or `.env.local` for development) so transactional emails are sent:
+
+### Option 1: Resend (Recommended)
+```bash
+RESEND_API_KEY=your_resend_api_key
+EMAIL_FROM=noreply@covergen.pro
+EMAIL_REPLY_TO=support@covergen.pro
+EMAIL_BCC_SUBSCRIPTION=jefflee2002@gmail.com
+EMAIL_BCC_PAYMENT_FAILURE=jefflee2002@gmail.com
+EMAIL_BCC_CREDITS_EXHAUSTED=jefflee2002@gmail.com
+EMAIL_BCC_BUGS=jefflee2002@gmail.com
+```
+
+### Option 2: SMTP (e.g., Zoho Mail)
+```bash
+EMAIL_SERVER_HOST=smtp.zoho.com
+EMAIL_SERVER_PORT=587
+EMAIL_SERVER_USER=your-email@yourdomain.com
+EMAIL_SERVER_PASSWORD=your-app-password
+EMAIL_FROM=noreply@covergen.pro
+EMAIL_REPLY_TO=support@covergen.pro
+```
+
+### Option 3: SendGrid
+```bash
+SENDGRID_API_KEY=your_sendgrid_api_key
+EMAIL_FROM=noreply@covergen.pro
+EMAIL_REPLY_TO=support@covergen.pro
+```
+
+### Important Notes:
+- **Emails are now sent in both development and production** if a provider is configured
+- Set `FORCE_EMAIL_PROVIDER=console` if you want to disable email sending and only log to console
+- Optional: Use `EMAIL_BCC_DEFAULT` or `EMAIL_MONITOR_BCC` to set a global fallback BCC list

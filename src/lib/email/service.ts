@@ -2,11 +2,21 @@ import { getEmailConfig } from './config'
 import nodemailer from 'nodemailer'
 import type { Transporter } from 'nodemailer'
 
+export type EmailCategory =
+  | 'general'
+  | 'verification'
+  | 'subscription'
+  | 'payment_failure'
+  | 'credits_exhausted'
+  | 'bug_report'
+
 export interface EmailOptions {
   to: string
   subject: string
   html?: string
   text?: string
+  bcc?: string | string[]
+  category?: EmailCategory
 }
 
 export interface EmailResult {
@@ -15,23 +25,42 @@ export interface EmailResult {
   error?: string
 }
 
+const CATEGORY_ENV_KEYS: Record<EmailCategory, string[]> = {
+  general: ['EMAIL_BCC_DEFAULT', 'EMAIL_MONITOR_BCC'],
+  verification: ['EMAIL_BCC_VERIFICATION', 'EMAIL_BCC_DEFAULT', 'EMAIL_MONITOR_BCC'],
+  subscription: ['EMAIL_BCC_SUBSCRIPTION', 'EMAIL_BCC_DEFAULT', 'EMAIL_MONITOR_BCC'],
+  payment_failure: ['EMAIL_BCC_PAYMENT_FAILURE', 'EMAIL_BCC_DEFAULT', 'EMAIL_MONITOR_BCC'],
+  credits_exhausted: ['EMAIL_BCC_CREDITS_EXHAUSTED', 'EMAIL_BCC_DEFAULT', 'EMAIL_MONITOR_BCC'],
+  bug_report: ['EMAIL_BCC_BUGS', 'EMAIL_BCC_DEFAULT', 'EMAIL_MONITOR_BCC']
+}
+
+const SUBJECT_CATEGORY_HINTS: Array<{ pattern: RegExp; category: EmailCategory }> = [
+  { pattern: /subscription/i, category: 'subscription' },
+  { pattern: /payment.*(failed|failure|issue)/i, category: 'payment_failure' },
+  { pattern: /(credit|credits).*(exhaust|deplet|low|limit)/i, category: 'credits_exhausted' },
+  { pattern: /(bug|incident|issue|error)/i, category: 'bug_report' }
+]
+
 class EmailService {
-  private config = getEmailConfig()
+  private get config() {
+    return getEmailConfig()
+  }
   
   async send(options: EmailOptions): Promise<EmailResult> {
     const { provider } = this.config
+    const normalizedOptions = this.applyMonitoredBcc(options)
     
     try {
       switch (provider) {
         case 'resend':
-          return await this.sendWithResend(options)
+          return await this.sendWithResend(normalizedOptions)
         case 'sendgrid':
-          return await this.sendWithSendGrid(options)
+          return await this.sendWithSendGrid(normalizedOptions)
         case 'smtp':
-          return await this.sendWithSMTP(options)
+          return await this.sendWithSMTP(normalizedOptions)
         case 'console':
         default:
-          return await this.sendWithConsole(options)
+          return await this.sendWithConsole(normalizedOptions)
       }
     } catch (error: any) {
       console.error('Email send error:', error)
@@ -42,7 +71,19 @@ class EmailService {
     }
   }
   
-  private async sendWithResend(options: EmailOptions): Promise<EmailResult> {
+  private applyMonitoredBcc(options: EmailOptions): EmailOptions & { bcc?: string[] } {
+    const explicitBcc = normalizeAddressInput(options.bcc)
+    const category = options.category ?? detectCategoryFromSubject(options.subject) ?? 'general'
+    const monitorBcc = getMonitorBcc(category)
+    const combined = dedupeAddresses([...explicitBcc, ...monitorBcc])
+    
+    return {
+      ...options,
+      bcc: combined.length ? combined : undefined
+    }
+  }
+  
+  private async sendWithResend(options: EmailOptions & { bcc?: string[] }): Promise<EmailResult> {
     const apiKey = process.env.RESEND_API_KEY
     if (!apiKey) {
       throw new Error('RESEND_API_KEY not configured')
@@ -61,6 +102,7 @@ class EmailService {
           subject: options.subject,
           html: options.html,
           text: options.text,
+          bcc: options.bcc,
           reply_to: this.config.replyTo
         })
       })
@@ -81,13 +123,21 @@ class EmailService {
     }
   }
   
-  private async sendWithSendGrid(options: EmailOptions): Promise<EmailResult> {
+  private async sendWithSendGrid(options: EmailOptions & { bcc?: string[] }): Promise<EmailResult> {
     const apiKey = process.env.SENDGRID_API_KEY
     if (!apiKey) {
       throw new Error('SENDGRID_API_KEY not configured')
     }
     
     try {
+      const personalizations: Array<Record<string, unknown>> = [{
+        to: [{ email: options.to }]
+      }]
+      
+      if (options.bcc?.length) {
+        personalizations[0].bcc = options.bcc.map(email => ({ email }))
+      }
+      
       const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
         method: 'POST',
         headers: {
@@ -95,9 +145,7 @@ class EmailService {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          personalizations: [{
-            to: [{ email: options.to }]
-          }],
+          personalizations,
           from: { email: this.config.from },
           reply_to: { email: this.config.replyTo || this.config.from },
           subject: options.subject,
@@ -122,7 +170,7 @@ class EmailService {
     }
   }
   
-  private async sendWithSMTP(options: EmailOptions): Promise<EmailResult> {
+  private async sendWithSMTP(options: EmailOptions & { bcc?: string[] }): Promise<EmailResult> {
     const host = process.env.EMAIL_SERVER_HOST
     const port = parseInt(process.env.EMAIL_SERVER_PORT || '587')
     const user = process.env.EMAIL_SERVER_USER
@@ -160,7 +208,8 @@ class EmailService {
         subject: options.subject,
         text: options.text,
         html: options.html,
-        replyTo: this.config.replyTo || this.config.from
+        replyTo: this.config.replyTo || this.config.from,
+        bcc: options.bcc
       })
       
       return {
@@ -172,12 +221,15 @@ class EmailService {
     }
   }
   
-  private async sendWithConsole(options: EmailOptions): Promise<EmailResult> {
+  private async sendWithConsole(options: EmailOptions & { bcc?: string[] }): Promise<EmailResult> {
     // In development, just log the email
     console.log('\n📧 Email Service (Console Mode)')
     console.log('================================')
     console.log(`From: ${this.config.from}`)
     console.log(`To: ${options.to}`)
+    if (options.bcc?.length) {
+      console.log(`BCC: ${options.bcc.join(', ')}`)
+    }
     console.log(`Subject: ${options.subject}`)
     console.log('--------------------------------')
     if (options.text) {
@@ -199,3 +251,35 @@ class EmailService {
 
 // Export singleton instance
 export const emailService = new EmailService()
+
+function normalizeAddressInput(addresses?: string | string[]): string[] {
+  if (!addresses) return []
+  const list = Array.isArray(addresses) ? addresses : addresses.split(',')
+  return list
+    .map(address => address.trim())
+    .filter(Boolean)
+}
+
+function dedupeAddresses(addresses: string[]): string[] {
+  const seen = new Set<string>()
+  const result: string[] = []
+  for (const address of addresses) {
+    const normalized = address.toLowerCase()
+    if (seen.has(normalized)) continue
+    seen.add(normalized)
+    result.push(address)
+  }
+  return result
+}
+
+function detectCategoryFromSubject(subject?: string): EmailCategory | undefined {
+  if (!subject) return undefined
+  const hint = SUBJECT_CATEGORY_HINTS.find(({ pattern }) => pattern.test(subject))
+  return hint?.category
+}
+
+function getMonitorBcc(category: EmailCategory): string[] {
+  const envKeys = CATEGORY_ENV_KEYS[category] || []
+  const addresses = envKeys.flatMap(key => normalizeAddressInput(process.env[key]))
+  return dedupeAddresses(addresses)
+}

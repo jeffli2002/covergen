@@ -48,7 +48,8 @@ export async function POST(request: NextRequest) {
       to: user.email,
       subject: 'Verify your email - CoverGen Pro',
       html,
-      text
+      text,
+      category: 'verification'
     })
     
     return NextResponse.json({

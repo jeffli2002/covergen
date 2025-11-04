@@ -437,18 +437,32 @@ export const db = {
 
   // Verification token operations
   verificationTokens: {
-    async create(data: { email: string, token: string, expires_at: Date }): Promise<boolean> {
+    async create(data: { email: string, token: string, expires_at: Date, user_id?: string }): Promise<boolean> {
       try {
+        // Find user_id if not provided
+        let userId = data.user_id
+        if (!userId) {
+          const user = await db.users.findByEmail(data.email)
+          if (!user) {
+            console.error('User not found for email:', data.email)
+            return false
+          }
+          userId = user.id
+        }
+        
         const { error } = await getDb()
           .from('bestauth_verification_tokens')
           .insert({
-            email: data.email,
+            user_id: userId,
             token: data.token,
             expires_at: data.expires_at.toISOString(),
             created_at: new Date().toISOString()
           })
         
-        if (error) throw error
+        if (error) {
+          console.error('Database error creating verification token:', error)
+          throw error
+        }
         return true
       } catch (error) {
         console.error('Error creating verification token:', error)
