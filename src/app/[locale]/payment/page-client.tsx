@@ -48,6 +48,23 @@ export default function PaymentPageClient({
   const [currentSubscription, setCurrentSubscription] = useState<Subscription | null>(null)
   const [isLoadingSubscription, setIsLoadingSubscription] = useState(true)
 
+  // Keep billing query parameter synchronized so shared links reflect the current toggle
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const params = new URLSearchParams(window.location.search)
+    params.set('billing', billingCycle)
+    const newSearch = params.toString()
+    const newUrl = `${window.location.pathname}${newSearch ? `?${newSearch}` : ''}`
+    const currentUrl = `${window.location.pathname}${window.location.search}`
+
+    if (newUrl !== currentUrl) {
+      window.history.replaceState(null, '', newUrl)
+    }
+  }, [billingCycle])
+
   useEffect(() => {
     // Check if we're in test mode
     setIsTestMode(creemService.isTestMode())

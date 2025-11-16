@@ -30,6 +30,8 @@
     "test:email:verification": "tsx scripts/test-email-verification.ts",
     "resend:verification": "tsx scripts/resend-verification-with-correct-url.ts",
     "verify:email:manual": "tsx scripts/manually-verify-email.ts",
+    "test:email:e2e": "tsx scripts/test-email-e2e.ts",
+    "check:production:env": "tsx scripts/check-production-env.ts",
     "check:dns": "tsx scripts/check-dns-propagation.ts",
     "verify:dns": "tsx scripts/verify-dns-records.ts",
     "test": "vitest",
