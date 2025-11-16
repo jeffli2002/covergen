@@ -24,6 +24,7 @@ async function handler(req: AuthenticatedRequest) {
     console.log('[BestAuth] Request body:', body)
     
     const { planId, successUrl, cancelUrl } = body
+    const billingCycle = body.billingCycle || body.billing || 'monthly'
 
     if (!planId || !successUrl || !cancelUrl) {
       return NextResponse.json(
@@ -129,6 +130,7 @@ async function handler(req: AuthenticatedRequest) {
       userId: user.id,
       userEmail: user.email!,
       planId: planId as 'pro' | 'pro_plus',
+      billingCycle,
       successUrl,
       cancelUrl,
       currentPlan: subscription?.tier || 'free'
