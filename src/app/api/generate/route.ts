@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateImage, GEMINI_MODEL } from '@/lib/openrouter'
+import { getKieApiService } from '@/lib/kie-api'
 import { createClient } from '@/lib/supabase/server'
 import { checkGenerationLimit, incrementGenerationCount, getUserSubscriptionInfo } from '@/lib/generation-limits'
 import { getSubscriptionConfig } from '@/lib/subscription-config'
@@ -429,113 +429,37 @@ async function handler(request: AuthenticatedRequest) {
       }
     }
 
-    // Generate image using OpenRouter with Gemini 2.5 Flash
-    const result = await generateImage({
+    // Generate image using KIE API with nano-banana
+    const kieApi = getKieApiService()
+    
+    // Map aspect ratio from dimensions
+    let imageSize: '1:1' | '9:16' | '16:9' | '3:4' | '4:3' | undefined
+    if (dimensions) {
+      const aspectRatio = (dimensions.width / dimensions.height).toFixed(2)
+      if (aspectRatio === '1.00') imageSize = '1:1'
+      else if (aspectRatio === '0.56') imageSize = '9:16'
+      else if (aspectRatio === '1.78') imageSize = '16:9'
+      else if (aspectRatio === '0.75') imageSize = '3:4'
+      else if (aspectRatio === '1.33') imageSize = '4:3'
+    }
+    
+    // Create image generation task
+    const taskResponse = await kieApi.generateImage({
       prompt,
-      referenceImages,
-      mode,
-      style,
-      platform,
-      dimensions,
+      imageUrls: mode === 'image' && referenceImages?.length > 0 ? referenceImages : undefined,
+      imageSize,
+      outputFormat: 'png',
     })
-
-    // Extract image data from Gemini's response
-    const message = result.choices[0]?.message as any
-    console.log('Full Gemini response:', JSON.stringify(result, null, 2))
-    console.log('Message content type:', typeof message?.content)
-    console.log('Message content:', message?.content)
     
-    // Check if this is an image generation model response
-    // The Gemini 2.5 Flash Image model might return images differently
-    if (result.choices?.[0]?.finish_reason === 'stop' && !message?.content) {
-      console.log('Empty response from model - this might be a chat model, not an image model')
-    }
+    console.log('[Generate API] KIE task created:', taskResponse.data.taskId)
     
-    // Parse the response to extract generated images
-    let generatedImages: string[] = []
+    // Poll for task completion
+    const pollResult = await kieApi.pollTaskStatus(taskResponse.data.taskId)
     
-    // Check if images are in the message.images array (Gemini's format)
-    if (message?.images && Array.isArray(message.images)) {
-      generatedImages = message.images.map((img: any) => {
-        if (img.type === 'image_url' && img.image_url?.url) {
-          return img.image_url.url
-        } else if (img.type === 'base64' && img.base64) {
-          return `data:image/png;base64,${img.base64}`
-        }
-        return null
-      }).filter(Boolean)
-      
-      console.log('Extracted images from message.images:', generatedImages)
-    }
+    console.log('[Generate API] Image generated:', pollResult.imageUrl)
     
-    // Fallback: check content field
-    if (generatedImages.length === 0 && message?.content) {
-      const responseContent = message.content
-      console.log('Response content:', responseContent)
-      
-      // Try to parse if it's JSON with image data
-      try {
-        const parsed = JSON.parse(responseContent)
-        if (parsed.images) {
-          generatedImages = parsed.images
-        } else if (parsed.image) {
-          generatedImages = [parsed.image]
-        }
-      } catch {
-        // If not JSON, check if it's a direct base64 string or URL
-        if (typeof responseContent === 'string' && (responseContent.startsWith('data:image') || responseContent.startsWith('http'))) {
-          generatedImages = [responseContent]
-        }
-      }
-    }
-    
-    
-    // If no images were extracted, the AI model is not returning images
-    if (generatedImages.length === 0) {
-      console.warn('WARNING: No images were returned from the AI model. This might indicate:')
-      console.warn('1. The Gemini 2.5 Flash Image Preview model requires different API parameters')
-      console.warn('2. The model might need specific formatting for image generation requests')
-      console.warn('3. OpenRouter might handle this model differently than expected')
-      console.warn('Current model:', GEMINI_MODEL)
-      
-      // For now, return an error instead of placeholders in production
-      if (process.env.NODE_ENV === 'production') {
-        throw new Error('Image generation is temporarily unavailable. The AI model configuration needs to be updated to use an image generation model instead of a chat model.')
-      }
-      
-      console.warn('Development mode: Generating placeholder images as fallback...')
-      
-      // Use platform dimensions or default to 1920x1080 for placeholders
-      // For "none" platform, use a reasonable default placeholder size
-      const width = dimensions?.width || 1920
-      const height = dimensions?.height || 1080
-      
-      console.log(`Generating placeholder images with dimensions: ${width}x${height} for platform: ${platform}`)
-      
-      // Generate simple colored placeholder images as data URLs with correct dimensions
-      // NO TEXT - just clean background gradients
-      const colors = [
-        '#FF6B6B', // Red
-        '#4ECDC4', // Teal
-        '#45B7D1', // Blue
-        '#2C3E50'  // Dark
-      ]
-      
-      generatedImages = colors.map((color) => {
-        const canvas = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:${color};stop-opacity:1" />
-              <stop offset="50%" style="stop-color:${color};stop-opacity:0.8" />
-              <stop offset="100%" style="stop-color:${color};stop-opacity:0.6" />
-            </linearGradient>
-          </defs>
-          <rect width="${width}" height="${height}" fill="url(#grad)"/>
-        </svg>`
-        const base64 = Buffer.from(canvas).toString('base64')
-        return `data:image/svg+xml;base64,${base64}`
-      })
-    }
+    // Use the generated image
+    const generatedImages = [pollResult.imageUrl]
 
     // Increment generation count after successful generation
     if (user) {
@@ -603,10 +527,11 @@ async function handler(request: AuthenticatedRequest) {
       success: true,
       images: generatedImages,
       metadata: {
-        model: GEMINI_MODEL,
+        model: 'nano-banana',
         prompt,
         mode,
         timestamp: new Date().toISOString(),
+        taskId: taskResponse.data.taskId,
       },
     })
     
