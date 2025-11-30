@@ -1,7 +1,5 @@
 import { requireAdmin } from '@/lib/admin/auth';
-import { db } from '@/server/db';
-import { publishSubmissions } from '@/server/db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { getBestAuthSupabaseClient } from '@/lib/bestauth/db-client';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
@@ -19,28 +17,47 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'submissionId is required' }, { status: 400 });
     }
 
+    const client = getBestAuthSupabaseClient();
+    if (!client) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 500 });
+    }
+
     const updateData: Record<string, unknown> = {
-      publishToLanding,
-      updatedAt: new Date(),
+      publish_to_landing: publishToLanding,
+      updated_at: new Date().toISOString(),
     };
 
     if (publishToLanding) {
-      const [maxRow] = await db
-        .select({ max: sql<number | null>`MAX(${publishSubmissions.landingOrder})` })
-        .from(publishSubmissions);
-      updateData.landingOrder = (maxRow?.max ?? 0) + 1;
+      // Get max landing_order
+      const { data: maxRows, error: maxError } = await client
+        .from('publish_submissions')
+        .select('landing_order')
+        .order('landing_order', { ascending: false })
+        .limit(1);
+
+      if (maxError && maxError.code !== 'PGRST116') {
+        console.error('Error getting max landing_order:', maxError);
+        return NextResponse.json({ error: 'Failed to get next order' }, { status: 500 });
+      }
+
+      updateData.landing_order = (maxRows && maxRows.length > 0 ? (maxRows[0].landing_order || 0) : 0) + 1;
     } else {
-      updateData.landingOrder = null;
+      updateData.landing_order = null;
     }
 
-    const [updated] = await db
-      .update(publishSubmissions)
-      .set(updateData)
-      .where(eq(publishSubmissions.id, submissionId))
-      .returning();
+    const { data: updated, error: updateError } = await client
+      .from('publish_submissions')
+      .update(updateData)
+      .eq('id', submissionId)
+      .select()
+      .single();
 
-    if (!updated) {
-      return NextResponse.json({ error: 'Submission not found' }, { status: 404 });
+    if (updateError) {
+      if (updateError.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Submission not found' }, { status: 404 });
+      }
+      console.error('Failed to toggle landing submission:', updateError);
+      return NextResponse.json({ error: 'Failed to update submission' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, submission: updated });

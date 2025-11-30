@@ -1,8 +1,6 @@
 import { SHOWCASE_CATEGORIES } from '@/config/showcase.config';
 import { requireAdmin } from '@/lib/admin/auth';
-import { db } from '@/server/db';
-import { landingShowcaseEntries } from '@/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { getBestAuthSupabaseClient } from '@/lib/bestauth/db-client';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
@@ -14,7 +12,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { entryI
     const body = await request.json();
     const { title, subtitle, category, ctaUrl, isVisible } = body ?? {};
     const updates: Record<string, unknown> = {
-      updatedAt: new Date(),
+      updated_at: new Date().toISOString(),
     };
 
     if (typeof title === 'string') {
@@ -24,10 +22,10 @@ export async function PATCH(request: NextRequest, { params }: { params: { entryI
       updates.subtitle = subtitle;
     }
     if (typeof ctaUrl === 'string') {
-      updates.ctaUrl = ctaUrl;
+      updates.cta_url = ctaUrl;
     }
     if (typeof isVisible === 'boolean') {
-      updates.isVisible = isVisible;
+      updates.is_visible = isVisible;
     }
     if (category) {
       if (!SHOWCASE_CATEGORIES.some((item) => item.id === category)) {
@@ -36,14 +34,24 @@ export async function PATCH(request: NextRequest, { params }: { params: { entryI
       updates.category = category;
     }
 
-    const [updated] = await db
-      .update(landingShowcaseEntries)
-      .set(updates)
-      .where(eq(landingShowcaseEntries.id, params.entryId))
-      .returning();
+    const client = getBestAuthSupabaseClient();
+    if (!client) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 500 });
+    }
 
-    if (!updated) {
-      return NextResponse.json({ error: 'Entry not found' }, { status: 404 });
+    const { data: updated, error } = await client
+      .from('landing_showcase_entries')
+      .update(updates)
+      .eq('id', params.entryId)
+      .select()
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Entry not found' }, { status: 404 });
+      }
+      console.error('Failed to update landing showcase entry:', error);
+      return NextResponse.json({ error: 'Failed to update entry' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, entry: updated });
@@ -56,7 +64,22 @@ export async function PATCH(request: NextRequest, { params }: { params: { entryI
 export async function DELETE(_request: NextRequest, { params }: { params: { entryId: string } }) {
   try {
     await requireAdmin();
-    await db.delete(landingShowcaseEntries).where(eq(landingShowcaseEntries.id, params.entryId));
+    
+    const client = getBestAuthSupabaseClient();
+    if (!client) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 500 });
+    }
+
+    const { error } = await client
+      .from('landing_showcase_entries')
+      .delete()
+      .eq('id', params.entryId);
+
+    if (error) {
+      console.error('Failed to delete landing showcase entry:', error);
+      return NextResponse.json({ error: 'Failed to delete entry' }, { status: 500 });
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Failed to delete landing showcase entry:', error);

@@ -62,6 +62,14 @@ export function UpgradePrompt({
   const recommendedPlan = currentPlan === 'free' ? 'pro' : 'pro_plus'
   const plan = PRICING_CONFIG.plans.find((p) => p.id === recommendedPlan) || PRICING_CONFIG.plans[1]
 
+  // Use actual balance from subscription info if available, otherwise use prop
+  const actualCurrentCredits = subscriptionInfo?.balance ?? currentCredits ?? 0
+  
+  // Use generation cost from config if requiredCredits is 0 or invalid
+  const actualRequiredCredits = requiredCredits > 0 
+    ? requiredCredits 
+    : PRICING_CONFIG.generationCosts[generationType] || PRICING_CONFIG.generationCosts.nanoBananaImage
+
   const getTitle = () => {
     switch (reason) {
       case 'credits':
@@ -85,7 +93,7 @@ export function UpgradePrompt({
     
     switch (reason) {
       case 'credits':
-        return `You need ${requiredCredits} credits but only have ${currentCredits} credits remaining. Upgrade to get monthly credits and continue creating!`
+        return `You need ${actualRequiredCredits} credits but only have ${actualCurrentCredits} credits remaining. Upgrade to get monthly credits and continue creating!`
       case 'daily_limit':
         return `You've reached your daily limit. Upgrade to Pro for ${proCredits.toLocaleString()} credits per month!`
       case 'monthly_limit':
@@ -99,7 +107,9 @@ export function UpgradePrompt({
     }
   }
 
-  const creditsProgress = (currentCredits / requiredCredits) * 100
+  const creditsProgress = actualRequiredCredits > 0 
+    ? (actualCurrentCredits / actualRequiredCredits) * 100 
+    : 0
 
   const handleUpgrade = () => {
     if (!user) {
@@ -149,12 +159,12 @@ export function UpgradePrompt({
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Current Credits</span>
               <span className="font-semibold text-gray-900">
-                {currentCredits} / {requiredCredits}
+                {actualCurrentCredits} / {actualRequiredCredits}
               </span>
             </div>
             <Progress value={creditsProgress} className="h-2" />
             <p className="text-xs text-gray-500">
-              You need {requiredCredits - currentCredits} more credits for this {generationType.replace(/([A-Z])/g, ' $1').toLowerCase()}
+              You need {Math.max(0, actualRequiredCredits - actualCurrentCredits)} more credits for this {generationType.replace(/([A-Z])/g, ' $1').toLowerCase()}
             </p>
           </div>
         )}

@@ -68,7 +68,14 @@ export default function ImageGenerator() {
       return
     }
     
-    // Check quota limits for both authenticated and unauthenticated users
+    // Check authentication first - unauthenticated users should see sign-in modal
+    if (!user) {
+      console.log('User not authenticated, showing auth modal')
+      setShowAuthModal(true)
+      return
+    }
+    
+    // For authenticated users, check if they can generate (credit check happens on backend)
     if (!canGenerate()) {
       setShowUpgradeModal(true)
       return

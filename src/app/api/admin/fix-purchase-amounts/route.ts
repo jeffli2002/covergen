@@ -1,19 +1,24 @@
-import { randomUUID } from 'node:crypto';
-import { env } from '@/env';
-import { db } from '@/server/db';
-import { creditPackPurchase, creditTransactions } from '@/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { requireAdmin } from '@/lib/admin/auth';
+import { getBestAuthSupabaseClient } from '@/lib/bestauth/db-client';
 import { NextResponse } from 'next/server';
 
 export async function POST() {
   try {
-    await db.delete(creditPackPurchase);
+    await requireAdmin();
 
-    const purchaseTransactions = await db
-      .select()
-      .from(creditTransactions)
-      .where(eq(creditTransactions.source, 'purchase'))
-      .orderBy(creditTransactions.createdAt);
+    const client = getBestAuthSupabaseClient();
+    if (!client) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 500 });
+    }
+
+    // Get purchase transactions from bestauth_points_transactions
+    const { data: purchaseTransactions, error } = await client
+      .from('bestauth_points_transactions')
+      .select('*')
+      .eq('transaction_type', 'purchase')
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
 
     let backfilled = 0;
     let skippedTest = 0;
@@ -22,12 +27,14 @@ export async function POST() {
       orderId: string;
       credits: number;
       amount: number;
-      date: Date;
+      date: string;
     }> = [];
     const processedOrderIds = new Set<string>();
 
-    for (const transaction of purchaseTransactions) {
-      const metadata = transaction.metadata ? JSON.parse(transaction.metadata as string) : {};
+    for (const transaction of purchaseTransactions || []) {
+      const metadata = typeof transaction.metadata === 'string'
+        ? JSON.parse(transaction.metadata)
+        : (transaction.metadata || {});
 
       const orderId = metadata.orderId || null;
       const checkoutId = metadata.checkoutId || null;
@@ -56,8 +63,7 @@ export async function POST() {
         skippedTest++;
       }
 
-      const _productName = metadata.productName || `${transaction.amount} credits`;
-      const credits = transaction.amount;
+      const credits = transaction.points || 0;
       const currency = metadata.currency || 'USD';
 
       const amountCents =
@@ -75,27 +81,24 @@ export async function POST() {
                     ? 330
                     : 0;
 
-      await db.insert(creditPackPurchase).values({
-        id: randomUUID(),
-        userId: transaction.userId,
-        creditPackId: `pack_${credits}`,
-        credits,
-        amountCents,
-        currency,
-        provider: 'creem',
-        orderId,
-        checkoutId,
-        creditTransactionId: transaction.id,
-        metadata,
-        testMode: isTestMode,
-        createdAt: transaction.createdAt,
-      });
+      // Update metadata with amount_cents if needed
+      const updatedMetadata = {
+        ...metadata,
+        amount_cents: amountCents,
+        test_mode: isTestMode,
+      };
+
+      // Update the transaction metadata
+      await client
+        .from('bestauth_points_transactions')
+        .update({ metadata: updatedMetadata })
+        .eq('id', transaction.id);
 
       details.push({
         orderId,
         credits,
         amount: amountCents / 100,
-        date: transaction.createdAt,
+        date: transaction.created_at,
       });
 
       backfilled++;
@@ -103,7 +106,7 @@ export async function POST() {
 
     return NextResponse.json({
       success: true,
-      message: `Backfilled ${backfilled} credit pack purchases (skipped ${skippedTest} test mode, ${skippedDuplicate} duplicates)`,
+      message: `Fixed ${backfilled} purchase amounts (skipped ${skippedTest} test mode, ${skippedDuplicate} duplicates)`,
       backfilled,
       skippedTest,
       skippedDuplicate,

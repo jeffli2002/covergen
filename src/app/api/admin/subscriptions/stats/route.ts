@@ -1,8 +1,5 @@
 import { requireAdmin } from '@/lib/admin/auth';
-// @ts-nocheck
-import { db } from '@/server/db';
-import { subscription, user } from '@/server/db/schema';
-import { desc, eq, sql } from 'drizzle-orm';
+import { getBestAuthSupabaseClient } from '@/lib/bestauth/db-client';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
@@ -24,18 +21,24 @@ export async function GET(request: Request) {
       startDate.setDate(startDate.getDate() - daysAgo);
     }
 
-    // Get plan counts
-    // Free users = all users - users with active paid subscriptions
-    const totalUsers = await db.execute(sql`SELECT COUNT(*) as count FROM ${user}`);
-    const paidUsers = await db.execute(sql`
-      SELECT 
-        plan_type as plan,
-        COUNT(DISTINCT user_id) as count
-      FROM ${subscription}
-      WHERE plan_type IN ('pro', 'enterprise')
-        AND status = 'active'
-      GROUP BY plan_type
-    `);
+    const client = getBestAuthSupabaseClient();
+    if (!client) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 500 });
+    }
+
+    // Get total users count
+    const { count: totalUsersCount, error: usersError } = await client
+      .from('bestauth_users')
+      .select('*', { count: 'exact', head: true });
+
+    if (usersError) throw usersError;
+
+    // Get subscriptions grouped by tier
+    const { data: subscriptions, error: subsError } = await client
+      .from('bestauth_subscriptions')
+      .select('tier, status');
+
+    if (subsError) throw subsError;
 
     // Calculate plan counts
     const planCountsMap: Record<'free' | 'pro' | 'proplus', number> = {
@@ -43,63 +46,76 @@ export async function GET(request: Request) {
       pro: 0,
       proplus: 0,
     };
-    const paidUserRows = paidUsers.rows as Array<{ plan: string; count: number | string }>;
 
-    let totalPaidUsers = 0;
-    paidUserRows.forEach((row) => {
-      const planName = row.plan === 'enterprise' ? 'proplus' : row.plan;
-      planCountsMap[planName] = Number(row.count);
-      totalPaidUsers += Number(row.count);
+    const paidUserSet = new Set<string>();
+    (subscriptions || []).forEach((sub: any) => {
+      if (sub.tier === 'pro' || sub.tier === 'pro_plus') {
+        paidUserSet.add(sub.tier);
+        const planName = sub.tier === 'pro_plus' ? 'proplus' : 'pro';
+        planCountsMap[planName] = (planCountsMap[planName] || 0) + 1;
+      }
     });
 
-    // Free users = total users - paid users
-    planCountsMap.free = Number(totalUsers.rows[0].count) - totalPaidUsers;
+    // Free users = total users - users with paid subscriptions
+    const totalPaidUsers = Object.values(planCountsMap).reduce((sum, count) => sum + count, 0);
+    planCountsMap.free = (totalUsersCount || 0) - totalPaidUsers;
 
     // Get status counts
-    const statusCounts = await db.execute(sql`
-      SELECT 
-        status,
-        COUNT(*) as count
-      FROM ${subscription}
-      GROUP BY status
-    `);
-
-    // Parse status counts
     const statusCountsMap: Record<'active' | 'canceled' | 'expired' | 'trial', number> = {
       active: 0,
       canceled: 0,
       expired: 0,
       trial: 0,
     };
-    const statusRows = statusCounts.rows as Array<{ status: string; count: number | string }>;
-    statusRows.forEach((row) => {
-      if (row.status in statusCountsMap) {
-        statusCountsMap[row.status as keyof typeof statusCountsMap] = Number(row.count);
-      }
+
+    (subscriptions || []).forEach((sub: any) => {
+      const status = sub.status;
+      if (status === 'active') statusCountsMap.active++;
+      else if (status === 'cancelled' || status === 'canceled') statusCountsMap.canceled++;
+      else if (status === 'expired') statusCountsMap.expired++;
+      else if (status === 'trialing') statusCountsMap.trial++;
     });
 
-    // Get recent subscriptions (with date filter if applicable)
-    let recentQuery = db
-      .select({
-        id: subscription.id,
-        userId: subscription.userId,
-        userEmail: user.email,
-        plan: subscription.planType,
-        status: subscription.status,
-        startDate: subscription.periodStart,
-        endDate: subscription.periodEnd,
-        amount: sql<number>`0`, // TODO: Add amount calculation based on plan
-      })
-      .from(subscription)
-      .leftJoin(user, eq(subscription.userId, user.id))
-      .orderBy(desc(subscription.createdAt))
+    // Get recent subscriptions with user info
+    let recentSubsQuery = client
+      .from('bestauth_subscriptions')
+      .select(`
+        id,
+        user_id,
+        tier,
+        status,
+        current_period_start,
+        current_period_end,
+        created_at,
+        bestauth_users!inner (
+          email,
+          name
+        )
+      `)
+      .order('created_at', { ascending: false })
       .limit(50);
 
     if (startDate) {
-      recentQuery = recentQuery.where(sql`${subscription.createdAt} >= ${startDate}`);
+      recentSubsQuery = recentSubsQuery.gte('created_at', startDate.toISOString());
     }
 
-    const recentSubscriptions = await recentQuery;
+    const { data: recentSubsData, error: recentError } = await recentSubsQuery;
+
+    if (recentError) throw recentError;
+
+    const recentSubscriptions = (recentSubsData || []).map((sub: any) => {
+      const user = Array.isArray(sub.bestauth_users) ? sub.bestauth_users[0] : sub.bestauth_users;
+      return {
+        id: sub.id,
+        userId: sub.user_id,
+        userEmail: user?.email || 'Unknown',
+        plan: sub.tier,
+        status: sub.status,
+        startDate: sub.current_period_start,
+        endDate: sub.current_period_end,
+        amount: 0, // TODO: Calculate based on plan
+      };
+    });
 
     const response = NextResponse.json({
       planCounts: planCountsMap,

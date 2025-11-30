@@ -1,9 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { SHOWCASE_CATEGORIES } from '@/config/showcase.config';
 import { requireAdmin } from '@/lib/admin/auth';
-import { db } from '@/server/db';
-import { landingShowcaseEntries } from '@/server/db/schema';
-import { desc, eq, sql } from 'drizzle-orm';
+import { getBestAuthSupabaseClient } from '@/lib/bestauth/db-client';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
@@ -12,12 +10,24 @@ export const fetchCache = 'force-no-store';
 export async function GET() {
   try {
     await requireAdmin();
-    const entries = await db
-      .select()
-      .from(landingShowcaseEntries)
-      .orderBy(landingShowcaseEntries.sortOrder, desc(landingShowcaseEntries.createdAt));
+    
+    const client = getBestAuthSupabaseClient();
+    if (!client) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 500 });
+    }
 
-    return NextResponse.json({ success: true, entries });
+    const { data: entries, error } = await client
+      .from('landing_showcase_entries')
+      .select('*')
+      .order('sort_order', { ascending: false })
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Failed to load landing showcase entries:', error);
+      return NextResponse.json({ success: false, error: 'Failed to load entries' }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, entries: entries || [] });
   } catch (error) {
     console.error('Failed to load landing showcase entries:', error);
     return NextResponse.json({ success: false, error: 'Failed to load entries' }, { status: 500 });
@@ -41,24 +51,46 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
     }
 
-    const [maxRow] = await db
-      .select({ max: sql<number | null>`MAX(${landingShowcaseEntries.sortOrder})` })
-      .from(landingShowcaseEntries);
-    const nextOrder = (maxRow?.max ?? 0) + 1;
+    const client = getBestAuthSupabaseClient();
+    if (!client) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 500 });
+    }
 
-    const [created] = await db
-      .insert(landingShowcaseEntries)
-      .values({
+    // Get max sort_order
+    const { data: maxRows, error: maxError } = await client
+      .from('landing_showcase_entries')
+      .select('sort_order')
+      .order('sort_order', { ascending: false })
+      .limit(1);
+
+    if (maxError && maxError.code !== 'PGRST116') {
+      console.error('Error getting max sort_order:', maxError);
+      return NextResponse.json({ error: 'Failed to get next order' }, { status: 500 });
+    }
+
+    const nextOrder = (maxRows && maxRows.length > 0 ? (maxRows[0].sort_order || 0) : 0) + 1;
+
+    const { data: created, error: insertError } = await client
+      .from('landing_showcase_entries')
+      .insert({
         id: randomUUID(),
-        imageUrl,
+        image_url: imageUrl,
         title,
         subtitle: subtitle || null,
         category: category || null,
-        ctaUrl: ctaUrl || null,
-        isVisible: Boolean(isVisible),
-        sortOrder: nextOrder,
+        cta_url: ctaUrl || null,
+        is_visible: Boolean(isVisible),
+        sort_order: nextOrder,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       })
-      .returning();
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error('Failed to create landing showcase entry:', insertError);
+      return NextResponse.json({ error: 'Failed to create entry' }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, entry: created });
   } catch (error) {

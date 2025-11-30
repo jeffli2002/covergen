@@ -1,7 +1,5 @@
 import { requireAdmin } from '@/lib/admin/auth';
-import { db } from '@/server/db';
-import { landingShowcaseEntries } from '@/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { getBestAuthSupabaseClient } from '@/lib/bestauth/db-client';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
@@ -17,12 +15,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'ids array is required' }, { status: 400 });
     }
 
+    const client = getBestAuthSupabaseClient();
+    if (!client) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 500 });
+    }
+
     await Promise.all(
       ids.map((id, index) =>
-        db
-          .update(landingShowcaseEntries)
-          .set({ sortOrder: index + 1 })
-          .where(eq(landingShowcaseEntries.id, id))
+        client
+          .from('landing_showcase_entries')
+          .update({ sort_order: index + 1, updated_at: new Date().toISOString() })
+          .eq('id', id)
       )
     );
 

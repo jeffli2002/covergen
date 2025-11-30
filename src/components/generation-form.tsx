@@ -12,6 +12,7 @@ import { platformSizes, styleTemplates, type Platform, type StyleTemplate } from
 import { useAppStore } from '@/lib/store'
 import { platformIcons, platformGuidelines, platformEnhancements, generatePlatformPrompt } from '@/lib/platform-configs'
 import { UpgradePrompt } from '@/components/pricing/UpgradePrompt'
+import AuthForm from '@/components/auth/AuthForm'
 import authService from '@/services/authService'
 import { getClientSubscriptionConfig } from '@/lib/subscription-config-client'
 import { usePathname } from 'next/navigation'
@@ -33,6 +34,7 @@ export default function GenerationForm() {
   const [avatar, setAvatar] = useState<File | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [showPromptDetails, setShowPromptDetails] = useState(false)
+  const [showAuthModal, setShowAuthModal] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [upgradeReason, setUpgradeReason] = useState<'credits' | 'daily_limit' | 'monthly_limit'>('credits')
   const [currentCredits, setCurrentCredits] = useState(0)
@@ -79,7 +81,14 @@ export default function GenerationForm() {
   }
 
   const handleGenerate = async () => {
-    if (!title.trim() || !prompt.trim() || !user) return
+    if (!title.trim() || !prompt.trim()) return
+    
+    // Check authentication first - unauthenticated users should see sign-in modal
+    if (!user) {
+      console.log('User not authenticated, showing auth modal')
+      setShowAuthModal(true)
+      return
+    }
     
     // Check if user has reached daily limit
     if (dailyLimitStatus && !dailyLimitStatus.can_generate) {
@@ -186,7 +195,8 @@ export default function GenerationForm() {
     }
   }
 
-  const canGenerate = user && title.trim() && prompt.trim()
+  // Allow button to be clicked even if user is not authenticated (will show auth modal)
+  const canGenerate = title.trim() && prompt.trim()
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -492,6 +502,13 @@ export default function GenerationForm() {
           )}
         </Button>
       </CardContent>
+      
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <AuthForm 
+          onClose={() => setShowAuthModal(false)}
+        />
+      )}
       
       {/* Upgrade Modal */}
       {showUpgradeModal && (

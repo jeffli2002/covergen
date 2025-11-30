@@ -6,13 +6,18 @@ export async function GET(request: Request) {
   const orderId = searchParams.get('orderId') || 'ord_qGyz2nDwkbNMoe1VNreVY';
 
   try {
-    const creemApiUrl = env.CREEM_API_KEY.startsWith('creem_test_')
+    const creemApiKey = env.CREEM_API_KEY;
+    if (!creemApiKey) {
+      return NextResponse.json({ error: 'CREEM_API_KEY is not configured' }, { status: 500 });
+    }
+
+    const creemApiUrl = creemApiKey.startsWith('creem_test_')
       ? 'https://test-api.creem.io'
       : 'https://api.creem.io';
 
     const orderResponse = await fetch(`${creemApiUrl}/v1/orders/${orderId}`, {
       headers: {
-        Authorization: `Bearer ${env.CREEM_API_KEY}`,
+        Authorization: `Bearer ${creemApiKey}`,
       },
     });
 

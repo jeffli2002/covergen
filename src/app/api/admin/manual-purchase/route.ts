@@ -1,8 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { requireAdmin } from '@/lib/admin/auth';
-import { db } from '@/server/db';
-import { creditPackPurchase, creditTransactions, userCredits } from '@/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { getBestAuthSupabaseClient } from '@/lib/bestauth/db-client';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
@@ -20,53 +18,97 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const [existingTransaction] = await db
-      .select()
-      .from(creditTransactions)
-      .where(eq(creditTransactions.referenceId, `creem_credit_pack_${orderId}`))
+    const client = getBestAuthSupabaseClient();
+    if (!client) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 500 });
+    }
+
+    // Check if transaction already exists using reference_id
+    const referenceId = `creem_credit_pack_${orderId}`;
+    const { data: existingTransactions, error: checkError } = await client
+      .from('bestauth_points_transactions')
+      .select('id')
+      .eq('reference_id', referenceId)
       .limit(1);
 
-    if (existingTransaction) {
+    if (checkError) {
+      console.error('Error checking existing transaction:', checkError);
+      return NextResponse.json({ error: 'Failed to check existing transaction' }, { status: 500 });
+    }
+
+    if (existingTransactions && existingTransactions.length > 0) {
       return NextResponse.json(
         { error: 'Purchase with this orderId already exists' },
         { status: 400 }
       );
     }
 
-    const [userCredit] = await db
-      .select()
-      .from(userCredits)
-      .where(eq(userCredits.userId, userId))
-      .limit(1);
+    // Get user's current subscription to update points_balance
+    const { data: subscription, error: subError } = await client
+      .from('bestauth_subscriptions')
+      .select('points_balance, points_lifetime_earned')
+      .eq('user_id', userId)
+      .single();
 
-    if (!userCredit) {
-      return NextResponse.json({ error: 'User credit account not found' }, { status: 404 });
+    if (subError && subError.code !== 'PGRST116') {
+      // PGRST116 = no rows returned, which is OK if user doesn't have subscription yet
+      console.error('Error fetching subscription:', subError);
+      return NextResponse.json({ error: 'Failed to fetch user subscription' }, { status: 500 });
     }
 
-    const newBalance = userCredit.balance + credits;
-    const referenceId = `creem_credit_pack_${orderId}`;
+    const currentBalance = subscription?.points_balance || 0;
+    const newBalance = currentBalance + credits;
+    const lifetimeEarned = (subscription?.points_lifetime_earned || 0) + credits;
 
-    await db
-      .update(userCredits)
-      .set({
-        balance: newBalance,
-        totalEarned: userCredit.totalEarned + credits,
-        updatedAt: new Date(),
-      })
-      .where(eq(userCredits.userId, userId));
+    // Update or insert subscription with new balance
+    if (subscription) {
+      const { error: updateError } = await client
+        .from('bestauth_subscriptions')
+        .update({
+          points_balance: newBalance,
+          points_lifetime_earned: lifetimeEarned,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', userId);
 
-    const [transactionRecord] = await db
-      .insert(creditTransactions)
-      .values({
-        id: randomUUID(),
-        userId,
-        type: 'earn',
-        amount: credits,
-        balanceAfter: newBalance,
-        source: 'purchase',
+      if (updateError) {
+        console.error('Error updating subscription:', updateError);
+        return NextResponse.json({ error: 'Failed to update user balance' }, { status: 500 });
+      }
+    } else {
+      // Create subscription record if it doesn't exist
+      const { error: insertError } = await client
+        .from('bestauth_subscriptions')
+        .insert({
+          id: randomUUID(),
+          user_id: userId,
+          tier: 'free',
+          status: 'active',
+          points_balance: newBalance,
+          points_lifetime_earned: lifetimeEarned,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+
+      if (insertError) {
+        console.error('Error creating subscription:', insertError);
+        return NextResponse.json({ error: 'Failed to create subscription record' }, { status: 500 });
+      }
+    }
+
+    // Create transaction record
+    const transactionId = randomUUID();
+    const { error: transactionError } = await client
+      .from('bestauth_points_transactions')
+      .insert({
+        id: transactionId,
+        user_id: userId,
+        points: credits,
+        balance_after: newBalance,
+        transaction_type: 'purchase',
         description: `Credit pack purchase: ${credits} credits (manual)`,
-        referenceId,
-        metadata: JSON.stringify({
+        reference_id: referenceId,
+        metadata: {
           provider: 'creem',
           checkoutId,
           orderId,
@@ -74,33 +116,14 @@ export async function POST(request: NextRequest) {
           amount: amountCents / 100,
           currency: 'USD',
           manual: true,
-        }),
-        createdAt: new Date(),
-      })
-      .returning({ id: creditTransactions.id });
+        },
+        created_at: new Date().toISOString(),
+      });
 
-    await db.insert(creditPackPurchase).values({
-      id: randomUUID(),
-      userId,
-      creditPackId: `pack_${credits}`,
-      credits,
-      amountCents,
-      currency: 'USD',
-      provider: 'creem',
-      orderId,
-      checkoutId: checkoutId || null,
-      creditTransactionId: transactionRecord?.id || null,
-      metadata: {
-        provider: 'creem',
-        orderId,
-        checkoutId,
-        credits,
-        amount: amountCents / 100,
-        manual: true,
-      },
-      testMode: false,
-      createdAt: new Date(),
-    });
+    if (transactionError) {
+      console.error('Error creating transaction:', transactionError);
+      return NextResponse.json({ error: 'Failed to create transaction record' }, { status: 500 });
+    }
 
     return NextResponse.json({
       success: true,

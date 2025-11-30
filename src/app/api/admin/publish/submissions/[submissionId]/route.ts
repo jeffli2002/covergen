@@ -1,8 +1,6 @@
 import { SHOWCASE_CATEGORIES } from '@/config/showcase.config';
 import { requireAdmin } from '@/lib/admin/auth';
-import { db } from '@/server/db';
-import { publishSubmissions } from '@/server/db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { getBestAuthSupabaseClient } from '@/lib/bestauth/db-client';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
@@ -19,12 +17,24 @@ export async function PATCH(
       return NextResponse.json({ error: 'Submission ID is required' }, { status: 400 });
     }
 
-    const submission = await db.query.publishSubmissions.findFirst({
-      where: eq(publishSubmissions.id, id),
-    });
+    const client = getBestAuthSupabaseClient();
+    if (!client) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 500 });
+    }
 
-    if (!submission) {
-      return NextResponse.json({ error: 'Submission not found' }, { status: 404 });
+    // Get existing submission
+    const { data: submission, error: fetchError } = await client
+      .from('publish_submissions')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) {
+      if (fetchError.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Submission not found' }, { status: 404 });
+      }
+      console.error('Error fetching submission:', fetchError);
+      return NextResponse.json({ error: 'Failed to fetch submission' }, { status: 500 });
     }
 
     const body = await request.json();
@@ -35,13 +45,13 @@ export async function PATCH(
       return NextResponse.json({ error: 'Invalid status update' }, { status: 400 });
     }
 
-    const now = new Date();
+    const now = new Date().toISOString();
     const updateData: Record<string, unknown> = {
       status,
-      updatedAt: now,
-      reviewedAt: now,
-      reviewedBy: admin.email,
-      adminNotes: typeof adminNotes === 'string' ? adminNotes : null,
+      updated_at: now,
+      reviewed_at: now,
+      reviewed_by: admin.email,
+      admin_notes: typeof adminNotes === 'string' ? adminNotes : null,
     };
 
     if (status === 'approved') {
@@ -49,53 +59,66 @@ export async function PATCH(
         return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
       }
       const landingFlag =
-        typeof publishToLanding === 'boolean' ? publishToLanding : submission.publishToLanding;
+        typeof publishToLanding === 'boolean' ? publishToLanding : submission.publish_to_landing;
       const showcaseFlag =
         typeof publishToShowcase === 'boolean'
           ? publishToShowcase
-          : submission.publishToShowcase || landingFlag;
+          : submission.publish_to_showcase || landingFlag;
 
-      updateData.publishToLanding = landingFlag;
-      updateData.publishToShowcase = showcaseFlag;
+      updateData.publish_to_landing = landingFlag;
+      updateData.publish_to_showcase = showcaseFlag;
       updateData.category = category || null;
-      updateData.approvedAt = now;
-      updateData.rejectedAt = null;
-      updateData.rejectionReason = null;
+      updateData.approved_at = now;
+      updateData.rejected_at = null;
+      updateData.rejection_reason = null;
 
       if (landingFlag) {
-        const existingOrder = submission.landingOrder;
+        const existingOrder = submission.landing_order;
         if (existingOrder && existingOrder > 0) {
-          updateData.landingOrder = existingOrder;
+          updateData.landing_order = existingOrder;
         } else {
-          const [maxRow] = await db
-            .select({
-              max: sql<number | null>`MAX(${publishSubmissions.landingOrder})`,
-            })
-            .from(publishSubmissions);
-          const nextOrder = (maxRow?.max ?? 0) + 1;
-          updateData.landingOrder = nextOrder;
+          // Get max landing_order
+          const { data: maxRows, error: maxError } = await client
+            .from('publish_submissions')
+            .select('landing_order')
+            .order('landing_order', { ascending: false })
+            .limit(1);
+
+          if (maxError && maxError.code !== 'PGRST116') {
+            console.error('Error getting max landing_order:', maxError);
+            return NextResponse.json({ error: 'Failed to get next order' }, { status: 500 });
+          }
+
+          const nextOrder = (maxRows && maxRows.length > 0 ? (maxRows[0].landing_order || 0) : 0) + 1;
+          updateData.landing_order = nextOrder;
         }
       } else {
-        updateData.landingOrder = null;
+        updateData.landing_order = null;
       }
     } else {
-      updateData.publishToLanding = false;
-      updateData.publishToShowcase = false;
+      updateData.publish_to_landing = false;
+      updateData.publish_to_showcase = false;
       updateData.category = null;
-      updateData.landingOrder = null;
-      updateData.rejectionReason =
+      updateData.landing_order = null;
+      updateData.rejection_reason =
         typeof rejectionReason === 'string' && rejectionReason.trim().length > 0
           ? rejectionReason
           : 'Rejected by admin review';
-      updateData.rejectedAt = now;
-      updateData.approvedAt = null;
+      updateData.rejected_at = now;
+      updateData.approved_at = null;
     }
 
-    const [updated] = await db
-      .update(publishSubmissions)
-      .set(updateData)
-      .where(eq(publishSubmissions.id, id))
-      .returning();
+    const { data: updated, error: updateError } = await client
+      .from('publish_submissions')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error('Failed to update submission:', updateError);
+      return NextResponse.json({ error: 'Failed to update submission' }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, submission: updated });
   } catch (error) {
