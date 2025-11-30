@@ -57,18 +57,11 @@ export default function RefundPolicyPage() {
               <h2 className="text-2xl font-bold text-gray-900">Subscription Refunds</h2>
             </div>
             <div className="space-y-4 text-gray-700">
-              <h3 className="font-semibold text-gray-900">14-Day Money-Back Guarantee</h3>
-              <p>
-                We offer a <strong>14-day money-back guarantee</strong> for first-time subscription purchases (Pro and Pro+ plans).
-              </p>
-              
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-2">
-                <p className="font-semibold text-green-900">Eligible for Full Refund:</p>
-                <ul className="list-disc pl-6 space-y-1 text-green-800">
-                  <li>First-time subscribers (Pro or Pro+ plan)</li>
-                  <li>Refund requested within 14 days of initial purchase</li>
-                  <li>Account has not been terminated for Terms violation</li>
-                </ul>
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <p className="font-semibold text-orange-900 mb-2">No Refund Policy</p>
+                <p className="text-orange-800">
+                  All subscription purchases are <strong>final and non-refundable</strong>. This includes first-time purchases, renewals, and upgrades. Credits consumed during any period are non-refundable.
+                </p>
               </div>
 
               <h3 className="font-semibold text-gray-900 mt-6">Renewal Refunds</h3>
@@ -78,7 +71,7 @@ export default function RefundPolicyPage() {
 
               <h3 className="font-semibold text-gray-900 mt-6">Proration for Upgrades</h3>
               <p>
-                When upgrading from Pro to Pro+ mid-cycle, you will receive prorated credits immediately. Downgrades take effect at the end of the current billing period with no refund.
+                When upgrading from Pro to Pro+ mid-cycle, you will receive prorated credits immediately. Downgrades take effect at the end of the current billing period with no refund. All generation requires authentication and sufficient credits before processing.
               </p>
             </div>
           </section>
@@ -93,7 +86,7 @@ export default function RefundPolicyPage() {
               <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
                 <p className="font-semibold text-orange-900 mb-2">Non-Refundable</p>
                 <p className="text-orange-800">
-                  All credit pack purchases (one-time purchases) are <strong>final and non-refundable</strong> after payment is processed. This is because credits never expire and provide immediate value.
+                  All credit pack purchases (one-time purchases) are <strong>final and non-refundable</strong> after payment is processed. This is because credits never expire and provide immediate value. All generation requires authentication and sufficient credits before processing starts.
                 </p>
               </div>
 
@@ -132,23 +125,23 @@ export default function RefundPolicyPage() {
             </div>
           </section>
 
-          {/* Requesting a Refund */}
+          {/* Billing Errors & Technical Issues */}
           <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">How to Request a Refund</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Billing Errors & Technical Issues</h2>
             <div className="space-y-4 text-gray-700">
-              <p>To request a refund for an eligible subscription:</p>
+              <p>While we have a no-refund policy, we will correct billing errors and address technical issues:</p>
               <ol className="list-decimal pl-6 space-y-2">
                 <li>Email us at <a href="mailto:support@covergen.pro" className="text-blue-600 hover:underline">support@covergen.pro</a></li>
-                <li>Include your account email and subscription details</li>
-                <li>Briefly explain your reason for the refund request</li>
+                <li>Include your account email and billing details</li>
+                <li>Describe the billing error or technical issue</li>
                 <li>Our team will respond within 2 business days</li>
-                <li>Approved refunds are processed within 5-7 business days</li>
+                <li>If a billing error is confirmed, corrections are processed within 5-7 business days</li>
               </ol>
 
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-                <p className="font-semibold text-blue-900 mb-2">Processing Time</p>
+                <p className="font-semibold text-blue-900 mb-2">What We Will Correct</p>
                 <p className="text-blue-800 text-sm">
-                  Refunds are issued to the original payment method. Depending on your bank or card issuer, it may take 5-10 business days for the refund to appear in your account.
+                  We will correct duplicate charges, incorrect amounts, or charges for services not received due to technical issues on our end. All corrections are issued to the original payment method.
                 </p>
               </div>
             </div>
@@ -158,14 +151,14 @@ export default function RefundPolicyPage() {
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Exceptions</h2>
             <div className="space-y-4 text-gray-700">
-              <p>Refunds will not be provided in the following cases:</p>
+              <p>All purchases are final and non-refundable in the following cases:</p>
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                 <ul className="space-y-2 text-red-800">
+                  <li>• All subscription purchases (first-time, renewals, upgrades)</li>
                   <li>• Account terminated due to Terms of Service violation</li>
-                  <li>• Subscription renewals (except for technical errors on our part)</li>
-                  <li>• Requests made after the 14-day guarantee period</li>
                   <li>• Partial refunds for unused credits or time</li>
                   <li>• Credit pack purchases (always non-refundable)</li>
+                  <li>• Credits consumed during any period</li>
                   <li>• Chargebacks or payment disputes (account may be suspended)</li>
                 </ul>
               </div>

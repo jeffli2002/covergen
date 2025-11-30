@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 
-const FREE_TIER_LIMIT = 3
+// DEPRECATED: FREE_TIER_LIMIT removed - system is now pure credit-based
+// All generation requires authentication and sufficient credits
 
 export function useFreeTier() {
   const { user, getUserUsageToday, incrementUsage, getUserSubscription } = useAuth()
@@ -48,40 +49,26 @@ export function useFreeTier() {
   }, [user]) // Remove getUserUsageToday from dependencies to prevent unnecessary calls
 
   const canGenerate = () => {
-    // Bypass limit in development mode
-    if (process.env.NEXT_PUBLIC_BYPASS_USAGE_LIMIT === 'true') {
-      return true
+    // REMOVED: Free quota checks - now pure credit-based
+    // All generation requires authentication and sufficient credits
+    // Backend will check credits before allowing generation
+    if (!user) {
+      return false // Authentication required
     }
     
-    // Pro and Pro+ users have no daily limits (they use credits instead)
-    if (subscription) {
-      const tier = subscription.tier || subscription.subscription_tier || 'free'
-      if (tier === 'pro' || tier === 'pro_plus') {
-        console.log('[useFreeTier] Pro/Pro+ user - bypassing daily limit check')
-        return true // Let the backend check credits instead
-      }
-    }
-    
-    // Free tier users have daily limit
-    return usageToday < FREE_TIER_LIMIT
+    // Always return true for authenticated users - credit check happens on backend
+    return true
   }
 
   const getRemainingGenerations = () => {
-    // Show unlimited in development mode
-    if (process.env.NEXT_PUBLIC_BYPASS_USAGE_LIMIT === 'true') {
-      return 999
+    // REMOVED: Free quota limits
+    // Generation is now limited by credits only, not daily/monthly quotas
+    // Return a high number to indicate "unlimited" (limited by credits)
+    if (!user) {
+      return 0 // Authentication required
     }
     
-    // Pro and Pro+ users have effectively unlimited daily generations
-    if (subscription) {
-      const tier = subscription.tier || subscription.subscription_tier || 'free'
-      if (tier === 'pro' || tier === 'pro_plus') {
-        return 999 // Effectively unlimited (limited by credits, not daily count)
-      }
-    }
-    
-    // Free tier users have daily limit
-    return Math.max(0, FREE_TIER_LIMIT - usageToday)
+    return 999 // Effectively unlimited (limited by credits, not daily count)
   }
 
   const incrementLocalUsage = () => {
@@ -135,7 +122,7 @@ export function useFreeTier() {
     getRemainingGenerations,
     trackUsage,
     isLoading,
-    freeTierLimit: FREE_TIER_LIMIT,
+    freeTierLimit: 0, // DEPRECATED: No free quota, credit-based only
     subscription
   }
 }

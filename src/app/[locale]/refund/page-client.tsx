@@ -72,9 +72,11 @@ export default function RefundPageClient({ locale, translations: t }: RefundPage
               </p>
               <ul className="list-disc list-inside space-y-2 ml-4">
                 <li>All purchases are final and non-refundable</li>
-                <li>Credits are consumed immediately upon generation</li>
-                <li>Generated images cannot be "returned"</li>
+                <li>All generation requires authentication and sufficient credits before processing</li>
+                <li>Credits are consumed immediately upon successful generation</li>
+                <li>Generated images and videos cannot be "returned"</li>
                 <li>Service access begins immediately upon payment</li>
+                <li>Free users receive signup bonus credits (one-time, never expire) but all generation still requires authentication</li>
               </ul>
             </div>
           </section>

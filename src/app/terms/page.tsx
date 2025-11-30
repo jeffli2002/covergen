@@ -93,11 +93,14 @@ export default function TermsPage() {
 
               <h3 className="font-semibold text-gray-900">3.2 Credits System</h3>
               <ul className="list-disc pl-6 space-y-2">
+                <li><strong>Authentication Required:</strong> All content generation requires user authentication. You must create an account and sign in to generate images or videos.</li>
+                <li><strong>Credit-Based System:</strong> All generation is credit-based. You must have sufficient credits before generation starts. Credits are deducted immediately upon successful generation.</li>
                 <li>Paid subscriptions include monthly credits that refresh at the start of each billing cycle</li>
                 <li>Subscription credits do not roll over to the next billing period</li>
                 <li>One-time credit packs never expire and can be used at any time</li>
-                <li>Free users receive {PRICING_CONFIG.plans[0].credits.onSignup} signup bonus credits that never expire</li>
+                <li>Free users receive {PRICING_CONFIG.plans[0].credits.onSignup} signup bonus credits (one-time) that never expire</li>
                 <li>Generation costs: Nano Banana Images ({PRICING_CONFIG.generationCosts.nanoBananaImage} credits), Sora 2 Videos ({PRICING_CONFIG.generationCosts.sora2Video} credits), Sora 2 Pro Videos ({PRICING_CONFIG.generationCosts.sora2ProVideo} credits)</li>
+                <li><strong>No Free Quotas:</strong> There are no daily or monthly generation quotas. Generation is limited only by your available credits.</li>
               </ul>
 
               <h3 className="font-semibold text-gray-900">3.3 Billing</h3>
@@ -146,7 +149,7 @@ export default function TermsPage() {
               <ul className="list-disc pl-6 space-y-2">
                 <li>You may cancel your subscription at any time</li>
                 <li>Cancellations take effect at the end of the current billing period</li>
-                <li>14-day money-back guarantee for first-time subscription purchases</li>
+                <li>All subscription purchases are final and non-refundable</li>
                 <li>One-time credit packs are non-refundable</li>
                 <li>Partial refunds are not provided for unused credits</li>
               </ul>

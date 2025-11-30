@@ -135,8 +135,8 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
       'AI-powered image generation',
       'Google Gemini 2.5 Flash (Nano Banana) technology',
       'Multi-platform support',
-      'No sign-in required',
-      'Free generation'
+      'Credit-based system',
+      'Authentication required'
     ]
   }
   const { currentTask, user } = useAppStore()
@@ -504,9 +504,9 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                   What's the difference between free and Pro plans?
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Free users get {PRICING_CONFIG.plans[0].credits.onSignup} credits on signup (up to {Math.floor(PRICING_CONFIG.plans[0].credits.onSignup! / PRICING_CONFIG.generationCosts.nanoBananaImage)} Nano Banana images) for personal use only, with a daily limit of {PRICING_CONFIG.plans[0].features.find(f => f.text.includes('images per day'))?.text.split(' ')[0]} images. 
+                  All generation requires authentication and sufficient credits. Free users get {PRICING_CONFIG.plans[0].credits.onSignup} signup bonus credits (one-time, never expire) - up to {Math.floor(PRICING_CONFIG.plans[0].credits.onSignup! / PRICING_CONFIG.generationCosts.nanoBananaImage)} images for personal use only. 
                   Pro (${PRICING_CONFIG.plans[1].price.monthly.toFixed(1)}/month or ${PRICING_CONFIG.plans[1].price.yearly.toFixed(2)}/year) includes {PRICING_CONFIG.plans[1].credits.monthly.toLocaleString()} credits/month ({PRICING_CONFIG.plans[1].credits.yearly.toLocaleString()}/year) for up to {Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or {Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} Sora 2 videos per month with commercial rights. 
-                  Pro+ (${PRICING_CONFIG.plans[2].price.monthly.toFixed(1)}/month or ${PRICING_CONFIG.plans[2].price.yearly.toFixed(2)}/year) includes {PRICING_CONFIG.plans[2].credits.monthly.toLocaleString()} credits/month ({PRICING_CONFIG.plans[2].credits.yearly.toLocaleString()}/year) for up to {Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or {Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} Sora 2 videos per month, plus Sora 2 Pro quality.
+                  Pro+ (${PRICING_CONFIG.plans[2].price.monthly.toFixed(1)}/month or ${PRICING_CONFIG.plans[2].price.yearly.toFixed(2)}/year) includes {PRICING_CONFIG.plans[2].credits.monthly.toLocaleString()} credits/month ({PRICING_CONFIG.plans[2].credits.yearly.toLocaleString()}/year) for up to {Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or {Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} Sora 2 videos per month, plus Sora 2 Pro quality. There are no daily or monthly quotas - generation is limited only by your available credits.
                 </p>
               </div>
 
@@ -585,9 +585,9 @@ export default function HomePageClient({ locale, translations: t }: HomePageClie
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
                   Credits are used for all generation types. Nano Banana images cost {PRICING_CONFIG.generationCosts.nanoBananaImage} credits each, Sora 2 videos cost {PRICING_CONFIG.generationCosts.sora2Video} credits, 
-                  and Sora 2 Pro videos cost {PRICING_CONFIG.generationCosts.sora2ProVideo} credits. Free users get {PRICING_CONFIG.plans[0].credits.onSignup} signup bonus credits (up to {Math.floor(PRICING_CONFIG.plans[0].credits.onSignup! / PRICING_CONFIG.generationCosts.nanoBananaImage)} images, no video access). 
+                  and Sora 2 Pro videos cost {PRICING_CONFIG.generationCosts.sora2ProVideo} credits. All generation requires authentication and sufficient credits. Free users get {PRICING_CONFIG.plans[0].credits.onSignup} signup bonus credits (one-time, never expire) - up to {Math.floor(PRICING_CONFIG.plans[0].credits.onSignup! / PRICING_CONFIG.generationCosts.nanoBananaImage)} images, no video access. 
                   Pro users get {PRICING_CONFIG.plans[1].credits.monthly.toLocaleString()} credits/month (up to {Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or {Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} videos). Pro+ users get {PRICING_CONFIG.plans[2].credits.monthly.toLocaleString()} credits/month 
-                  (up to {Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or {Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} videos) with access to Sora 2 Pro quality.
+                  (up to {Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or {Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} videos) with access to Sora 2 Pro quality. There are no daily or monthly quotas - generation is limited only by your available credits.
                 </p>
               </div>
 

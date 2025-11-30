@@ -48,335 +48,20 @@ async function handler(request: AuthenticatedRequest) {
     // Get authenticated user from request (BestAuth middleware adds it)
     const user = request.user
     
-    // Get session ID for unauthenticated users
-    const sessionInfo = user ? null : await getOrCreateSessionId()
-    const sessionId = sessionInfo?.sessionId || null
+    // REQUIRE AUTHENTICATION: All generation requires authentication
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please sign in to generate images.' },
+        { status: 401 }
+      )
+    }
     
-    // Check generation limits
-    let limitStatus = null
-    
-    if (user) {
+    // Check generation limits - REMOVED: Free quota checks, now credit-based only
+    // All users must have sufficient credits before generation
       // Check current generation limit for authenticated users
       
-      // Use BestAuth if enabled
-      if (authConfig.USE_BESTAUTH) {
-        console.log('[Generate API] Checking BestAuth limits for user:', user.id)
-        
-        // Check if user can generate (checks BOTH daily AND monthly limits)
-        const canGenerate = await bestAuthSubscriptionService.canUserGenerateImage(user.id)
-        const subscription = await bestAuthSubscriptionService.getUserSubscription(user.id)
-        const usageToday = await bestAuthSubscriptionService.getUserUsageToday(user.id)
-        const usageThisMonth = await bestAuthSubscriptionService.getUserUsageThisMonth(user.id)
-        
-        if (subscription) {
-          const config = getSubscriptionConfig()
-          const tier = subscription.tier as 'free' | 'pro' | 'pro_plus'
-          const limits = bestAuthSubscriptionService.getSubscriptionLimits(tier, subscription.is_trialing)
-          
-          limitStatus = {
-            can_generate: canGenerate,
-            daily_usage: usageToday,
-            daily_limit: limits.daily,
-            monthly_usage: usageThisMonth,
-            monthly_limit: limits.monthly,
-            is_trial: subscription.is_trialing,
-            subscription_tier: subscription.tier,
-            trial_ends_at: subscription.trial_days_remaining > 0 ? new Date(Date.now() + subscription.trial_days_remaining * 24 * 60 * 60 * 1000).toISOString() : null,
-            remaining_daily: Math.max(0, limits.daily - usageToday),
-            remaining_monthly: Math.max(0, limits.monthly - usageThisMonth),
-            trial_usage: subscription.is_trialing ? usageThisMonth : 0,
-            trial_limit: subscription.is_trialing ? limits.monthly : null,
-            remaining_trial: subscription.is_trialing ? Math.max(0, limits.monthly - usageThisMonth) : null
-          }
-          
-          console.log('[Generate API] BestAuth limit status:', limitStatus)
-        }
-      } else {
-        // Fallback to Supabase
-        limitStatus = await checkGenerationLimit(user.id)
-      }
-      
-      if (!limitStatus) {
-        console.error('[Generate API] Failed to check generation limit for user:', user.id)
-        
-        // Try to get subscription info as fallback
-        try {
-          const subInfo = await getUserSubscriptionInfo(user.id)
-          console.log('[Generate API] Subscription info fallback:', subInfo)
-          
-          // If user has a trial/paid subscription, allow generation with warning
-          if (subInfo.subscription_tier !== 'free' && (subInfo.is_trial || subInfo.subscription_tier === 'pro' || subInfo.subscription_tier === 'pro_plus')) {
-            console.warn('[Generate API] Allowing generation for trial/paid user despite limit check failure')
-            // Create a temporary limit status to allow generation
-            limitStatus = {
-              monthly_usage: 0,
-              monthly_limit: 120,
-              daily_usage: 0,
-              daily_limit: 4,
-              trial_usage: 0,
-              trial_limit: 12, // 3-day trial with 4/day
-              can_generate: true,
-              is_trial: subInfo.is_trial,
-              trial_ends_at: subInfo.trial_ends_at,
-              subscription_tier: subInfo.subscription_tier,
-              remaining_monthly: 120,
-              remaining_trial: 12,
-              remaining_daily: 4
-            }
-          } else {
-            // For free users, check their actual usage
-            console.log('[Generate API] Checking usage for free user manually')
-            
-            try {
-              // Get current date info
-              const today = new Date()
-              const dateKey = today.toISOString().split('T')[0]
-              const monthKey = today.toISOString().substring(0, 7)
-              
-              // Try to get usage data directly
-              const { data: usageData, error: usageError } = await supabase
-                .from('user_usage')
-                .select('*')
-                .eq('user_id', user.id)
-                .eq('date_key', dateKey)
-                .single()
-              
-              // Get subscription config for limits
-              const config = getSubscriptionConfig()
-              const dailyLimit = config.limits.free.daily
-              
-              if (!usageError && usageData) {
-                // Check if they've exceeded daily limit
-                if (usageData.daily_count >= dailyLimit) {
-                  return NextResponse.json(
-                    { 
-                      error: `Daily generation limit reached (${usageData.daily_count}/${dailyLimit} today). Please try it tomorrow or upgrade to Pro plan.`,
-                      limit_reached: true,
-                      daily_usage: usageData.daily_count,
-                      daily_limit: dailyLimit,
-                      subscription_tier: 'free',
-                      is_trial: false,
-                      remaining_daily: 0
-                    },
-                    { status: 429 }
-                  )
-                }
-                
-                // If they haven't exceeded but we're here, allow generation with current usage
-                return NextResponse.json(
-                  { 
-                    error: `Generation limit check failed. You have used ${usageData.daily_count}/${dailyLimit} today.`,
-                    limit_reached: false,
-                    daily_usage: usageData.daily_count,
-                    daily_limit: dailyLimit,
-                    subscription_tier: 'free',
-                    is_trial: false,
-                    remaining_daily: Math.max(0, dailyLimit - usageData.daily_count)
-                  },
-                  { status: 200 } // Allow generation to proceed
-                )
-              }
-              
-              // If we can't determine usage at all, allow generation but warn
-              console.warn('[Generate API] Could not determine usage, allowing generation as fallback for free user')
-              // Create a temporary limit status to allow generation
-              limitStatus = {
-                monthly_usage: 0,
-                monthly_limit: config.limits.free.monthly,
-                daily_usage: 0,
-                daily_limit: dailyLimit,
-                trial_usage: 0,
-                trial_limit: null,
-                can_generate: true,
-                is_trial: false,
-                trial_ends_at: null,
-                subscription_tier: 'free',
-                remaining_monthly: config.limits.free.monthly,
-                remaining_trial: null,
-                remaining_daily: dailyLimit
-              }
-            } catch (err) {
-              console.error('[Generate API] Error checking free user usage:', err)
-              // Get config for daily limit
-              const config = getSubscriptionConfig()
-              const dailyLimit = config.limits.free.daily
-              // Allow generation but log the error for debugging
-              console.warn('[Generate API] Usage check failed, allowing generation as fallback for free user')
-              limitStatus = {
-                monthly_usage: 0,
-                monthly_limit: config.limits.free.monthly,
-                daily_usage: 0,
-                daily_limit: dailyLimit,
-                trial_usage: 0,
-                trial_limit: null,
-                can_generate: true,
-                is_trial: false,
-                trial_ends_at: null,
-                subscription_tier: 'free',
-                remaining_monthly: config.limits.free.monthly,
-                remaining_trial: null,
-                remaining_daily: dailyLimit
-              }
-            }
-          }
-        } catch (fallbackError) {
-          console.error('[Generate API] Fallback subscription check failed:', fallbackError)
-          const config = getSubscriptionConfig()
-          const dailyLimit = config.limits.free.daily
-          // Allow generation as ultimate fallback
-          console.warn('[Generate API] All checks failed, allowing generation as ultimate fallback')
-          limitStatus = {
-            monthly_usage: 0,
-            monthly_limit: config.limits.free.monthly,
-            daily_usage: 0,
-            daily_limit: dailyLimit,
-            trial_usage: 0,
-            trial_limit: null,
-            can_generate: true,
-            is_trial: false,
-            trial_ends_at: null,
-            subscription_tier: 'free',
-            remaining_monthly: config.limits.free.monthly,
-            remaining_trial: null,
-            remaining_daily: dailyLimit
-          }
-        }
-      }
-      
-      // If user has reached their limit, return error
-      if (!limitStatus.can_generate) {
-        let errorMessage = ''
-        let limitType = ''
-        
-        const tier = limitStatus.subscription_tier
-        const isPaidUser = tier === 'pro' || tier === 'pro_plus'
-        
-        if (limitStatus.is_trial) {
-          // Trial users
-          const dailyLimitHit = limitStatus.daily_usage >= limitStatus.daily_limit
-          const trialLimitHit = limitStatus.trial_usage >= limitStatus.trial_limit
-          
-          if (dailyLimitHit) {
-            errorMessage = `Daily trial limit reached (${limitStatus.daily_usage}/${limitStatus.daily_limit} images today). Try again tomorrow or upgrade to Pro plan!`
-            limitType = 'daily'
-          } else if (trialLimitHit) {
-            errorMessage = `Trial limit reached (${limitStatus.trial_usage}/${limitStatus.trial_limit} images used). Upgrade to Pro plan to continue!`
-            limitType = 'trial'
-          } else {
-            errorMessage = `Trial limit reached. Upgrade to Pro plan to continue!`
-            limitType = 'trial'
-          }
-        } else if (isPaidUser) {
-          // Paid users (Pro/Pro+) - Use credit system (this shouldn't happen if credits are properly checked)
-          const upgradeMessage = tier === 'pro' 
-            ? 'Upgrade to Pro+ for more credits or purchase a credits pack.' 
-            : 'Purchase a credits pack to continue generating images.'
-          errorMessage = `You've run out of credits. ${upgradeMessage}`
-          limitType = 'credits'
-        } else {
-          // Free users - check both daily and monthly
-          const config = getSubscriptionConfig()
-          const dailyLimitHit = limitStatus.daily_usage >= limitStatus.daily_limit
-          const monthlyLimitHit = limitStatus.monthly_usage >= limitStatus.monthly_limit
-          
-          if (dailyLimitHit && monthlyLimitHit) {
-            errorMessage = `Both daily (${limitStatus.daily_usage}/${limitStatus.daily_limit}) and monthly (${limitStatus.monthly_usage}/${limitStatus.monthly_limit}) limits reached. Upgrade to Pro for ${config.limits.pro.monthly} images/month or try again tomorrow.`
-            limitType = 'both'
-          } else if (dailyLimitHit) {
-            errorMessage = `Daily limit reached (${limitStatus.daily_usage}/${limitStatus.daily_limit} images today). Upgrade to Pro for ${config.limits.pro.monthly} images/month or try again tomorrow.`
-            limitType = 'daily'
-          } else if (monthlyLimitHit) {
-            errorMessage = `Monthly limit reached (${limitStatus.monthly_usage}/${limitStatus.monthly_limit} images this month). Upgrade to Pro for ${config.limits.pro.monthly} images/month or try again next month.`
-            limitType = 'monthly'
-          } else {
-            errorMessage = `Generation limit reached. Upgrade to Pro for more images.`
-            limitType = 'unknown'
-          }
-        }
-          
-        return NextResponse.json(
-          { 
-            error: errorMessage,
-            limit_reached: true,
-            limit_type: limitType,
-            daily_usage: limitStatus.daily_usage,
-            daily_limit: limitStatus.daily_limit,
-            monthly_usage: limitStatus.monthly_usage,
-            monthly_limit: limitStatus.monthly_limit,
-            trial_usage: limitStatus.trial_usage,
-            trial_limit: limitStatus.trial_limit,
-            subscription_tier: limitStatus.subscription_tier,
-            is_trial: limitStatus.is_trial,
-            trial_ends_at: limitStatus.trial_ends_at,
-            remaining_daily: limitStatus.remaining_daily,
-            remaining_monthly: limitStatus.remaining_monthly
-          },
-          { status: 429 }
-        )
-      }
-    } else if (sessionId) {
-      // Check limits for unauthenticated users by session
-      console.log('[Generate API] Checking limits for session:', sessionId)
-      
-      if (authConfig.USE_BESTAUTH) {
-        const canGenerate = await bestAuthSubscriptionService.canSessionGenerate(sessionId)
-        const usageToday = await bestAuthSubscriptionService.getSessionUsageToday(sessionId)
-        const config = getSubscriptionConfig()
-        const dailyLimit = config.limits.free.daily
-        
-        limitStatus = {
-          can_generate: canGenerate,
-          daily_usage: usageToday,
-          daily_limit: dailyLimit,
-          monthly_usage: usageToday, // For free tier, we only track daily
-          monthly_limit: config.limits.free.monthly,
-          is_trial: false,
-          subscription_tier: 'free',
-          trial_ends_at: null,
-          remaining_daily: Math.max(0, dailyLimit - usageToday),
-          remaining_monthly: Math.max(0, config.limits.free.monthly - usageToday),
-          trial_usage: 0,
-          trial_limit: null,
-          remaining_trial: null
-        }
-        
-        console.log('[Generate API] Session limit status:', limitStatus)
-        
-        // If session has reached their limit, return error
-        if (!limitStatus.can_generate) {
-          return NextResponse.json(
-            { 
-              error: `Daily generation limit reached (${limitStatus.daily_usage}/${limitStatus.daily_limit} today). Please try again tomorrow or sign in to get more generations.`,
-              limit_reached: true,
-              daily_usage: limitStatus.daily_usage,
-              daily_limit: limitStatus.daily_limit,
-              subscription_tier: 'free',
-              is_trial: false,
-              remaining_daily: 0
-            },
-            { status: 429 }
-          )
-        }
-      } else {
-        // For non-BestAuth, allow generation (no tracking)
-        const config = getSubscriptionConfig()
-        limitStatus = {
-          can_generate: true,
-          daily_usage: 0,
-          daily_limit: config.limits.free.daily,
-          monthly_usage: 0,
-          monthly_limit: config.limits.free.monthly,
-          is_trial: false,
-          subscription_tier: 'free',
-          trial_ends_at: null,
-          remaining_daily: config.limits.free.daily,
-          remaining_monthly: config.limits.free.monthly,
-          trial_usage: 0,
-          trial_limit: null,
-          remaining_trial: null
-        }
-      }
-    }
+    // REMOVED: All free quota checks - now pure credit-based system
+    // Credit check happens below before generation starts
 
     if (mode === 'image' && (!referenceImages || referenceImages.length === 0)) {
       return NextResponse.json(
@@ -400,33 +85,42 @@ async function handler(request: AuthenticatedRequest) {
       }
     }
 
-    if (user) {
-      // CRITICAL FIX: Use service role client for checking credits in bestauth_subscriptions
-      const supabaseAdmin = getBestAuthSupabaseClient()
-      
-      if (!supabaseAdmin) {
-        return NextResponse.json(
-          { error: 'Internal server error - database connection unavailable' },
-          { status: 500 }
-        )
-      }
-      
-      // For BestAuth users, use the BestAuth user ID directly (no need to resolve to Supabase ID)
-      console.log('[Generate API] Checking credits for BestAuth user:', user.id)
-      const pointsCheck = await checkPointsForGeneration(user.id, 'nanoBananaImage', supabaseAdmin)
-      
-      if (pointsCheck.usesPoints && !pointsCheck.canProceed) {
-        return NextResponse.json(
-          {
-            error: pointsCheck.error,
-            insufficientPoints: true,
-            currentBalance: pointsCheck.details?.currentBalance,
-            requiredPoints: pointsCheck.details?.requiredPoints,
-            shortfall: pointsCheck.details?.shortfall,
-          },
-          { status: 402 }
-        )
-      }
+    // CREDIT CHECK: All users must have sufficient credits before generation starts
+    const supabaseAdmin = getBestAuthSupabaseClient()
+    
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Internal server error - database connection unavailable' },
+        { status: 500 }
+      )
+    }
+    
+    // Check credits for authenticated user (required)
+    console.log('[Generate API] Checking credits for authenticated user:', user.id)
+    const pointsCheck = await checkPointsForGeneration(user.id, 'nanoBananaImage', supabaseAdmin)
+    
+    if (pointsCheck.usesPoints && !pointsCheck.canProceed) {
+      return NextResponse.json(
+        {
+          error: pointsCheck.error || 'Insufficient credits. Please purchase credits to generate images.',
+          insufficientPoints: true,
+          currentBalance: pointsCheck.details?.currentBalance,
+          requiredPoints: pointsCheck.details?.requiredPoints,
+          shortfall: pointsCheck.details?.shortfall,
+        },
+        { status: 402 }
+      )
+    }
+    
+    // If user doesn't use points system, they must have a subscription with credits
+    if (!pointsCheck.usesPoints) {
+      return NextResponse.json(
+        {
+          error: 'No credits available. Please purchase a subscription or credits pack to generate images.',
+          insufficientPoints: true,
+        },
+        { status: 402 }
+      )
     }
 
     // Generate image using KIE API with nano-banana
@@ -461,66 +155,68 @@ async function handler(request: AuthenticatedRequest) {
     // Use the generated image
     const generatedImages = [pollResult.imageUrl]
 
-    // Increment generation count after successful generation
-    if (user) {
-      // Increment for authenticated users
-      try {
-        // CRITICAL FIX: Use service role client for deducting credits from bestauth_subscriptions
-        const supabaseAdmin = getBestAuthSupabaseClient()
-        
-        if (!supabaseAdmin) {
-          console.error('[Generate API] CRITICAL: Cannot deduct credits - no admin client available')
-        } else {
-          // For BestAuth users, use the BestAuth user ID directly (no need to resolve to Supabase ID)
-          console.log('[Generate API] Deducting credits for BestAuth user:', user.id)
-          
-          const pointsDeduction = await deductPointsForGeneration(user.id, 'nanoBananaImage', supabaseAdmin, {
-            prompt: prompt?.substring(0, 100),
-            mode,
-            platform,
-          })
-          
-          if (pointsDeduction.success && pointsDeduction.transaction) {
-            console.log('[Generate API] Deducted points for image generation:', pointsDeduction.transaction)
-          } else if (!pointsDeduction.success) {
-            console.error('[Generate API] Failed to deduct points:', pointsDeduction.error)
-          }
-        }
+    // Deduct credits after successful generation (user is authenticated)
+    try {
+      // CRITICAL: Use service role client for deducting credits from bestauth_subscriptions
+      const supabaseAdmin = getBestAuthSupabaseClient()
+      
+      if (!supabaseAdmin) {
+        console.error('[Generate API] CRITICAL: Cannot deduct credits - no admin client available')
+        // Return error - we should not allow generation without deducting credits
+        return NextResponse.json(
+          { error: 'Failed to process payment. Credits were not deducted. Please try again.' },
+          { status: 500 }
+        )
+      }
+      
+      // Deduct credits for authenticated user
+      console.log('[Generate API] Deducting credits for user:', user.id)
+      
+      const pointsDeduction = await deductPointsForGeneration(user.id, 'nanoBananaImage', supabaseAdmin, {
+        prompt: prompt?.substring(0, 100),
+        mode,
+        platform,
+      })
+      
+      if (pointsDeduction.success && pointsDeduction.transaction) {
+        console.log('[Generate API] Deducted points for image generation:', pointsDeduction.transaction)
+      } else if (!pointsDeduction.success) {
+        console.error('[Generate API] Failed to deduct points:', pointsDeduction.error)
+        // Return error - generation succeeded but payment failed
+        return NextResponse.json(
+          { 
+            error: pointsDeduction.error || 'Failed to deduct credits. Please contact support.',
+            generationSucceeded: true,
+            paymentFailed: true
+          },
+          { status: 402 }
+        )
+      }
 
-        // Use BestAuth increment if enabled, otherwise fallback to Supabase
-        if (authConfig.USE_BESTAUTH) {
-          console.log('[Generate API] Incrementing usage for BestAuth user:', user.id)
+      // Track usage for analytics (optional, doesn't block response)
+      if (authConfig.USE_BESTAUTH) {
+        try {
+          console.log('[Generate API] Tracking usage for user:', user.id)
           const result = await bestAuthSubscriptionService.incrementUsage(user.id, 1)
           if (result.success) {
-            console.log('[Generate API] Usage incremented successfully, new count:', result.newCount)
-          } else {
-            console.error('[Generate API] Failed to increment BestAuth usage')
+            console.log('[Generate API] Usage tracked successfully')
           }
-        } else {
-          // Fallback to Supabase increment
-          const subInfo = await getUserSubscriptionInfo(user.id)
-          await incrementGenerationCount(user.id, subInfo.subscription_tier)
+        } catch (usageError) {
+          console.error('[Generate API] Failed to track usage (non-critical):', usageError)
+          // Don't fail the request if usage tracking fails
         }
-      } catch (error) {
-        console.error('Failed to increment generation count:', error)
-        // Continue with successful response even if counting fails
       }
-    } else if (sessionId && authConfig.USE_BESTAUTH) {
-      // Increment for unauthenticated users with session
-      try {
-        console.log('[Generate API] Incrementing usage for session:', sessionId)
-        console.log('[Generate API] Session info:', sessionInfo)
-        const result = await bestAuthSubscriptionService.incrementSessionUsage(sessionId, 1)
-        console.log('[Generate API] Increment result:', result)
-        if (result.success) {
-          console.log('[Generate API] Session usage incremented successfully, new count:', result.newCount)
-        } else {
-          console.error('[Generate API] Failed to increment session usage - result:', result)
-        }
-      } catch (error) {
-        console.error('Failed to increment session generation count:', error)
-        // Continue with successful response even if counting fails
-      }
+    } catch (error) {
+      console.error('[Generate API] Failed to deduct credits:', error)
+      // Return error - we cannot allow generation without payment
+      return NextResponse.json(
+        { 
+          error: 'Failed to process payment. Please try again or contact support.',
+          generationSucceeded: false,
+          paymentFailed: true
+        },
+        { status: 500 }
+      )
     }
 
     const response = NextResponse.json({
@@ -534,20 +230,6 @@ async function handler(request: AuthenticatedRequest) {
         taskId: taskResponse.data.taskId,
       },
     })
-    
-    // If a new session was created, ensure the cookie is set in the response
-    if (sessionInfo?.isNew && sessionId) {
-      const { getSessionCookieOptions } = await import('@/lib/session-utils')
-      const cookieOptions = getSessionCookieOptions()
-      response.cookies.set(cookieOptions.name, sessionId, {
-        ...cookieOptions,
-        httpOnly: cookieOptions.httpOnly,
-        secure: cookieOptions.secure,
-        sameSite: cookieOptions.sameSite,
-        maxAge: cookieOptions.maxAge,
-        path: cookieOptions.path
-      })
-    }
     
     return response
   } catch (error) {
@@ -587,23 +269,26 @@ async function handler(request: AuthenticatedRequest) {
   }
 }
 
-// Export POST handler
+// Export POST handler with authentication required
 export async function POST(request: NextRequest) {
-  // Check if BestAuth is enabled
+  // REQUIRE AUTHENTICATION: All generation requires authentication
   if (authConfig.USE_BESTAUTH) {
-    // Try to get authenticated user
     const user = await getAuthenticatedUser(request)
-    if (user) {
-      // User is authenticated, add user to request and call handler
-      const authenticatedRequest = request as AuthenticatedRequest
-      authenticatedRequest.user = user
-      return handler(authenticatedRequest)
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please sign in to generate images.' },
+        { status: 401 }
+      )
     }
+    // User is authenticated, add user to request and call handler
+    const authenticatedRequest = request as AuthenticatedRequest
+    authenticatedRequest.user = user
+    return handler(authenticatedRequest)
   }
   
-  // For unauthenticated requests or when BestAuth is disabled
-  // Create a dummy request with no user
-  const unauthenticatedRequest = request as AuthenticatedRequest
-  unauthenticatedRequest.user = null
-  return handler(unauthenticatedRequest)
+  // If BestAuth is disabled, still require authentication via middleware
+  return NextResponse.json(
+    { error: 'Authentication required. Please sign in to generate images.' },
+    { status: 401 }
+  )
 }

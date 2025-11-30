@@ -173,7 +173,7 @@ export default function PricingPage({ locale = 'en' }: PricingPageProps = {}) {
       return 'Current Plan'
     }
     
-    if (isSameTierDifferentCycle) {
+    if (isSameTierDifferentCycle && plan.id !== 'free') {
       return selectedBillingCycle === 'yearly' ? 'Switch to Yearly' : 'Switch to Monthly'
     }
 
@@ -555,10 +555,6 @@ export default function PricingPage({ locale = 'en' }: PricingPageProps = {}) {
             <span className="flex items-center gap-1">
               <Check className="w-4 h-4 text-green-500" />
               Cancel anytime
-            </span>
-            <span className="flex items-center gap-1">
-              <Check className="w-4 h-4 text-green-500" />
-              14-day money back
             </span>
             <span className="flex items-center gap-1">
               <Check className="w-4 h-4 text-green-500" />

@@ -262,73 +262,37 @@ export class BestAuthSubscriptionService {
   }
 
   /**
-   * Check if user can generate image (hasn't hit image limits)
-   * For free users: Check BOTH daily and monthly limits
-   * For paid users (Pro/Pro+): Skip limit check (they use credit system only)
+   * Check if user can generate image (DEPRECATED: Now credit-based only)
+   * REMOVED: Free quota checks - all generation now requires sufficient credits
+   * This method is kept for backward compatibility but always returns true
+   * Credit checks happen in the API endpoints before generation
    */
   async canUserGenerateImage(userId: string): Promise<boolean> {
-    try {
-      const subscription = await this.getUserSubscription(userId)
-      if (!subscription) return false
-      
-      const limits = this.getSubscriptionLimits(subscription.tier, subscription.is_trialing)
-      const tier = subscription.tier
-      const isTrialing = subscription.is_trialing
-      
-      // For paid users (Pro/Pro+), skip limit check - they use credits only
-      if (tier === 'pro' || tier === 'pro_plus') {
-        return true
-      }
-      
-      // For free users or trial users, check both daily and monthly
-      const usageToday = await db.usage.getTodayByType(userId, 'image')
-      const usageThisMonth = await db.usage.getMonthlyUsageByType(userId, 'image')
-      return usageToday < limits.images.daily && usageThisMonth < limits.images.monthly
-    } catch (error) {
-      console.error('Error checking image generation limit:', error)
-      return false
-    }
+    // Always return true - credit checks happen in API endpoints
+    // This method is deprecated but kept for backward compatibility
+    return true
   }
 
   /**
-   * Check if user can generate video (hasn't hit video limits)
-   * For free users: Check BOTH daily and monthly limits
-   * For paid users (Pro/Pro+): Skip limit check (they use credit system only)
+   * Check if user can generate video (DEPRECATED: Now credit-based only)
+   * REMOVED: Free quota checks - all generation now requires sufficient credits
+   * This method is kept for backward compatibility but always returns true
+   * Credit checks happen in the API endpoints before generation
    */
   async canUserGenerateVideo(userId: string): Promise<boolean> {
-    try {
-      const subscription = await this.getUserSubscription(userId)
-      if (!subscription) return false
-      
-      const limits = this.getSubscriptionLimits(subscription.tier, subscription.is_trialing)
-      const tier = subscription.tier
-      const isTrialing = subscription.is_trialing
-      
-      // For paid users (Pro/Pro+), skip limit check - they use credits only
-      if (tier === 'pro' || tier === 'pro_plus') {
-        return true
-      }
-      
-      // For free users or trial users, check both daily and monthly
-      const usageToday = await db.usage.getTodayByType(userId, 'video')
-      const usageThisMonth = await db.usage.getMonthlyUsageByType(userId, 'video')
-      return usageToday < limits.videos.daily && usageThisMonth < limits.videos.monthly
-    } catch (error) {
-      console.error('Error checking video generation limit:', error)
-      return false
-    }
+    // Always return true - credit checks happen in API endpoints
+    // This method is deprecated but kept for backward compatibility
+    return true
   }
 
   /**
-   * Check if session can generate (hasn't hit limits)
+   * Check if session can generate (DEPRECATED: Now credit-based only)
+   * REMOVED: Session-based generation - all generation now requires authentication
    */
   async canSessionGenerate(sessionId: string): Promise<boolean> {
-    try {
-      return await db.usage.checkLimitBySession(sessionId)
-    } catch (error) {
-      console.error('Error checking session generation limit:', error)
-      return false
-    }
+    // Always return false - sessions are no longer supported
+    // All generation requires authentication
+    return false
   }
 
   /**

@@ -63,16 +63,12 @@ export const PRICING_PLANS: PricingPlan[] = [
     },
     features: [
       {
-        text: `${SUBSCRIPTION_CONFIG.signupBonus.free} credits on signup`,
+        text: `${SUBSCRIPTION_CONFIG.signupBonus.free} credits on signup (one-time bonus)`,
         included: true,
         highlight: true,
       },
       {
-        text: `${SUBSCRIPTION_CONFIG.free.dailyImageLimit} images per day`,
-        included: true,
-      },
-      {
-        text: `${SUBSCRIPTION_CONFIG.free.monthlyImageLimit} images per month max`,
+        text: `Up to ${Math.floor(SUBSCRIPTION_CONFIG.signupBonus.free / GENERATION_COSTS.nanoBananaImage)} images with signup bonus`,
         included: true,
       },
       {
@@ -84,7 +80,11 @@ export const PRICING_PLANS: PricingPlan[] = [
         included: true,
       },
       {
-        text: 'Basic platform sizes',
+        text: 'All platform sizes',
+        included: true,
+      },
+      {
+        text: 'Authentication required for all generation',
         included: true,
       },
       {
@@ -251,10 +251,16 @@ export const CREDITS_PACKS: CreditsPack[] = SUBSCRIPTION_CONFIG.pointsPacks.map(
 
 export const PRICING_FAQ = [
   {
+    id: 'authentication-required',
+    question: 'Do I need to sign up to generate content?',
+    answer:
+      'Yes, authentication is required for all content generation. You must create an account and sign in to generate images or videos. This ensures secure access and proper credit management. Free users receive 30 signup bonus credits that never expire.',
+  },
+  {
     id: 'credits-work',
     question: 'How do credits work?',
     answer:
-      'Credits are used to generate content. Each generation type costs different amounts: Nano Banana images cost 5 credits, Sora 2 videos cost 20 credits, and Sora 2 Pro videos cost 80 credits. Your credits refresh monthly with your subscription, and unused credits from one-time packs never expire.',
+      'Credits are used to generate content. Each generation type costs different amounts: Nano Banana images cost 5 credits, Sora 2 videos cost 20 credits, and Sora 2 Pro videos cost 80 credits. All generation requires sufficient credits before processing starts. Your credits refresh monthly with your subscription, and unused credits from one-time packs never expire.',
   },
   {
     id: 'yearly-savings',
@@ -278,7 +284,13 @@ export const PRICING_FAQ = [
     id: 'refund-policy',
     question: 'What is your refund policy?',
     answer:
-      'We offer a 14-day money-back guarantee on your first subscription purchase. If you\'re not satisfied, contact us within 14 days for a full refund. Credit packs are non-refundable after purchase but never expire.',
+      'All subscription purchases are final and non-refundable. This includes first-time purchases, renewals, and upgrades. Credit packs are also non-refundable after purchase but never expire. We will correct billing errors (duplicate charges, incorrect amounts) and address technical issues that prevent service use. Please contact support if you experience any billing errors.',
+  },
+  {
+    id: 'free-plan-limits',
+    question: 'What are the limits for the free plan?',
+    answer:
+      'Free plan users receive 30 signup bonus credits (one-time) that never expire. This allows up to 6 images with the signup bonus. All generation requires authentication and sufficient credits. There are no daily or monthly quotas - generation is limited only by your available credits. To generate more content, you can purchase a subscription or credit packs.',
   },
   {
     id: 'commercial-use',
