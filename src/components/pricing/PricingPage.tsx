@@ -402,14 +402,6 @@ export default function PricingPage({ locale = 'en' }: PricingPageProps = {}) {
                       </>
                     )}
 
-                    {plan.id === 'free' && (
-                      <li className="flex items-start gap-2">
-                        <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-green-500" />
-                        <span className="text-sm text-gray-700">
-                          Up to {PRICING_CONFIG.plans[0].features.find(f => f.text.includes('images per day'))?.text.split(' ')[0]} images per day
-                        </span>
-                      </li>
-                    )}
 
                     {/* Watermark-free */}
                     <li className="flex items-start gap-2">

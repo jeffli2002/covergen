@@ -98,7 +98,7 @@ export default function SupportPageClient({ locale, translations: t }: SupportPa
             <div className="border-l-4 border-blue-500 pl-4">
               <h4 className="text-heading-5 text-gray-900">How many images and videos can I generate?</h4>
               <p className="text-body-md text-gray-600 mt-1">
-                Free: {PRICING_CONFIG.plans[0].credits.onSignup} credits on signup (up to {Math.floor(PRICING_CONFIG.plans[0].credits.onSignup! / PRICING_CONFIG.generationCosts.nanoBananaImage)} images, {PRICING_CONFIG.plans[0].features.find(f => f.text.includes('images per day'))?.text.split(' ')[0]} per day). Pro (${PRICING_CONFIG.plans[1].price.monthly.toFixed(1)}/month): {PRICING_CONFIG.plans[1].credits.monthly} credits/month (up to {Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or {Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} videos). Pro+ (${PRICING_CONFIG.plans[2].price.monthly.toFixed(1)}/month): {PRICING_CONFIG.plans[2].credits.monthly} credits/month (up to {Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or {Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} videos).
+                Free: {PRICING_CONFIG.plans[0].credits.onSignup} credits on signup (one-time bonus, up to {Math.floor(PRICING_CONFIG.plans[0].credits.onSignup! / PRICING_CONFIG.generationCosts.nanoBananaImage)} images). Pro (${PRICING_CONFIG.plans[1].price.monthly.toFixed(1)}/month): {PRICING_CONFIG.plans[1].credits.monthly} credits/month (up to {Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or {Math.floor(PRICING_CONFIG.plans[1].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} videos). Pro+ (${PRICING_CONFIG.plans[2].price.monthly.toFixed(1)}/month): {PRICING_CONFIG.plans[2].credits.monthly} credits/month (up to {Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.nanoBananaImage)} images or {Math.floor(PRICING_CONFIG.plans[2].credits.monthly / PRICING_CONFIG.generationCosts.sora2Video)} videos). All generation requires authentication and sufficient credits. There are no daily or monthly quotas - generation is limited only by your available credits.
               </p>
             </div>
             <div className="border-l-4 border-blue-500 pl-4">
@@ -116,13 +116,13 @@ export default function SupportPageClient({ locale, translations: t }: SupportPa
             <div className="border-l-4 border-blue-500 pl-4">
               <h4 className="text-heading-5 text-gray-900">What happens when I run out of credits?</h4>
               <p className="text-body-md text-gray-600 mt-1">
-                When you run out of credits, you'll see an upgrade prompt. You can upgrade to Pro/Pro+ for monthly credits, or purchase one-time credit packs that never expire. Pro/Pro+ credits refresh monthly. Free users get {PRICING_CONFIG.plans[0].credits.onSignup} credits on signup with a daily limit of {PRICING_CONFIG.plans[0].features.find(f => f.text.includes('images per day'))?.text.split(' ')[0]} images.
+                When you run out of credits, you'll see an upgrade prompt. You can upgrade to Pro/Pro+ for monthly credits, or purchase one-time credit packs that never expire. Pro/Pro+ credits refresh monthly. Free users get {PRICING_CONFIG.plans[0].credits.onSignup} credits on signup (one-time bonus, never expire). All generation requires authentication and sufficient credits.
               </p>
             </div>
             <div className="border-l-4 border-blue-500 pl-4">
               <h4 className="text-heading-5 text-gray-900">How do I upgrade my subscription?</h4>
               <p className="text-body-md text-gray-600 mt-1">
-                Click "Upgrade to Pro" in the limit modal or go to the pricing page. You can upgrade directly from the generation form when you hit your daily limit.
+                Click "Upgrade to Pro" in the upgrade prompt or go to the pricing page. You can upgrade directly from the generation form when you need more credits.
               </p>
             </div>
             <div className="border-l-4 border-blue-500 pl-4">

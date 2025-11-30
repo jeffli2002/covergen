@@ -153,9 +153,9 @@ export default function TermsPageClient({ locale, translations: t }: TermsPageCl
                     <h4 className="text-ui-lg text-gray-900 mb-2">Free Plan</h4>
                     <p className="text-sm font-medium text-gray-900 mb-2">$0/forever</p>
                     <ul className="space-y-1 text-sm text-gray-600">
-                      <li>✓ {PRICING_CONFIG.plans[0].credits.onSignup} credits on signup</li>
-                      <li>✓ Up to {Math.floor(PRICING_CONFIG.plans[0].credits.onSignup! / PRICING_CONFIG.generationCosts.nanoBananaImage)} images</li>
-                      <li>✓ {PRICING_CONFIG.plans[0].features.find(f => f.text.includes('images per day'))?.text.split(' ')[0]} images per day max</li>
+                      <li>✓ {PRICING_CONFIG.plans[0].credits.onSignup} credits on signup (one-time bonus)</li>
+                      <li>✓ Up to {Math.floor(PRICING_CONFIG.plans[0].credits.onSignup! / PRICING_CONFIG.generationCosts.nanoBananaImage)} images with signup bonus</li>
+                      <li>✓ Authentication required for all generation</li>
                       <li>✓ Watermark-free images</li>
                       <li>✓ Personal use only</li>
                     </ul>

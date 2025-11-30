@@ -68,7 +68,7 @@ export default async function PricingPageRoute({
         name: 'Free Plan',
         price: '0',
         priceCurrency: 'USD',
-        description: `${config.free.signupBonusPoints} credits on signup, ${config.free.dailyImageLimit} images per day max`
+        description: `${config.free.signupBonusPoints} credits on signup (one-time bonus, never expire)`
       },
       {
         '@type': 'Offer',

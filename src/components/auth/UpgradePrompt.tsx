@@ -77,7 +77,7 @@ export default function UpgradePrompt({
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle className="text-xl">
-              {!isAuthenticated ? 'Sign In Required' : 'Daily Limit Reached'}
+              {!isAuthenticated ? 'Sign In Required' : 'Credits Required'}
             </CardTitle>
             {onClose && (
               <Button
@@ -94,14 +94,14 @@ export default function UpgradePrompt({
             {!isAuthenticated 
               ? type === 'video'
                 ? `Please sign in to generate videos. Free users don't have video access. Sign up to get one-time signup bonus for images!`
-                : `Please sign in to generate images. Free tier has daily and monthly limits. Sign up for one-time signup bonus!`
-              : `You've reached your daily limit for ${contentType}.`
+                : `Please sign in to generate images. All generation requires authentication and sufficient credits. Sign up for one-time signup bonus!`
+              : `You need more credits to generate ${contentType}.`
             }
           </p>
-          {isAuthenticated && (
+          {isAuthenticated && dailyCount !== undefined && dailyLimit !== undefined && (
             <div className="mt-2 text-center">
               <Badge variant="outline" className="text-xs">
-                Used {dailyCount} / {dailyLimit} {contentType} today
+                Generation requires sufficient credits
               </Badge>
             </div>
           )}
@@ -178,7 +178,7 @@ export default function UpgradePrompt({
           </div>
 
           <div className="text-center text-sm text-gray-500 space-y-1">
-            <p>Your daily limit resets at midnight UTC</p>
+            <p>Purchase credits or upgrade to Pro for monthly credits</p>
           </div>
         </CardContent>
       </Card>

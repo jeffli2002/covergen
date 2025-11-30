@@ -356,7 +356,7 @@ export default function AuthForm({ onAuthSuccess, onClose }: AuthFormProps) {
               <div className="mt-4 p-3 bg-purple-50 rounded-md">
                 <p className="text-xs text-purple-800">
                   By creating an account, you agree to our Terms of Service and Privacy Policy. 
-                  Free users can create up to 3 images per day.
+                  All generation requires authentication and sufficient credits.
                 </p>
               </div>
             )}

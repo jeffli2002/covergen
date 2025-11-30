@@ -309,6 +309,16 @@ export function generateToolMetadata(
   })
 }
 
+// Build canonical metadata for admin pages
+export function buildCanonicalMetadata(path: string): Metadata {
+  return generateMetadata({
+    title: 'Admin Dashboard | CoverGen',
+    description: 'CoverGen Admin Dashboard',
+    path,
+    noindex: true,
+  })
+}
+
 // Blog post metadata generator
 export function generateBlogMetadata(
   slug: string,

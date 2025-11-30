@@ -862,7 +862,7 @@ export default function AccountPageClient({ locale }: AccountPageClientProps) {
                     </span>
                   </div>
                   <p className="text-ui-sm text-gray-600">
-                    {freePlanConfig.features.find(f => f.text.includes('images per day'))?.text}, {freePlanConfig.features.find(f => f.text.includes('images per month'))?.text}
+                    {freePlanConfig.features.find(f => f.text.includes('credits on signup'))?.text || `${freePlanConfig.credits.onSignup} credits on signup (one-time bonus)`}
                   </p>
                   {freePlanConfig.credits.onSignup && (
                     <p className="text-ui-sm text-gray-600 mt-1">
