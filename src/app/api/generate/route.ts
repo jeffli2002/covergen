@@ -173,23 +173,42 @@ async function handler(request: AuthenticatedRequest) {
       console.log('[Generate API] Deducting credits for user:', user.id)
       
       const pointsDeduction = await deductPointsForGeneration(user.id, 'nanoBananaImage', supabaseAdmin, {
+        taskId: taskResponse.data.taskId, // Include taskId in metadata for tracking
         prompt: prompt?.substring(0, 100),
         mode,
         platform,
       })
       
       if (pointsDeduction.success && pointsDeduction.transaction) {
-        console.log('[Generate API] Deducted points for image generation:', pointsDeduction.transaction)
+        console.log('[Generate API] ✅ Deducted points for image generation:', {
+          transactionId: pointsDeduction.transaction.id,
+          amount: pointsDeduction.transaction.amount,
+          balanceAfter: pointsDeduction.transaction.balance_after,
+        })
       } else if (!pointsDeduction.success) {
-        console.error('[Generate API] Failed to deduct points:', pointsDeduction.error)
-        // Return error - generation succeeded but payment failed
+        console.error('[Generate API] ❌ CRITICAL: Failed to deduct points:', pointsDeduction.error)
+        // CRITICAL: Generation succeeded but payment failed - this should not happen
+        // Return error to prevent free generation
         return NextResponse.json(
           { 
             error: pointsDeduction.error || 'Failed to deduct credits. Please contact support.',
             generationSucceeded: true,
-            paymentFailed: true
+            paymentFailed: true,
+            warning: 'Image was generated but credits were not deducted. Please contact support immediately.'
           },
           { status: 402 }
+        )
+      } else {
+        // This should not happen - success is true but no transaction
+        console.error('[Generate API] ❌ CRITICAL: Deduction reported success but no transaction record:', pointsDeduction)
+        return NextResponse.json(
+          { 
+            error: 'Credit deduction completed but transaction record is missing. Please contact support.',
+            generationSucceeded: true,
+            paymentFailed: true,
+            warning: 'Image was generated but transaction record was not created.'
+          },
+          { status: 500 }
         )
       }
 

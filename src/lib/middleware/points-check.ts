@@ -159,34 +159,6 @@ export async function deductPointsForGeneration(
         }
       }
 
-      // Deduct credits from bestauth_subscriptions
-      const newBalance = currentBalance - creditCost
-      const newSpent = currentSpent + creditCost
-
-      const { error: updateError } = await supabase
-        .from('bestauth_subscriptions')
-        .update({
-          points_balance: newBalance,
-          points_lifetime_spent: newSpent,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId)
-
-      if (updateError) {
-        console.error('[PointsDeduct] Failed to deduct credits from BestAuth subscription:', updateError)
-        return {
-          success: false,
-          error: 'Failed to deduct credits',
-        }
-      }
-
-      // Get subscription ID for transaction record
-      const { data: subData } = await supabase
-        .from('bestauth_subscriptions')
-        .select('id')
-        .eq('user_id', userId)
-        .single()
-
       // Create human-readable description
       const getGenerationDescription = (type: string, meta?: Record<string, any>) => {
         const typeNames: Record<string, string> = {
@@ -205,43 +177,63 @@ export async function deductPointsForGeneration(
         return baseName
       }
 
-      // Create transaction record for audit trail
-      const { error: txError } = await supabase
-        .from('bestauth_points_transactions')
-        .insert({
-          user_id: userId,
-          amount: -creditCost,
-          balance_after: newBalance,
-          transaction_type: 'generation_deduction',
-          generation_type: generationType,
-          subscription_id: subData?.id,
-          description: getGenerationDescription(generationType, metadata),
-          metadata
-        })
+      // CRITICAL FIX: Use atomic database function to ensure transaction record is created
+      // This ensures that credit deduction and transaction recording happen atomically
+      // If transaction record creation fails, the entire operation is rolled back
+      try {
+        const { data: rpcResult, error: rpcError } = await supabase.rpc(
+          'deduct_points_for_generation',
+          {
+            p_user_id: userId,
+            p_generation_type: generationType,
+            p_credit_cost: creditCost,
+            p_metadata: metadata || {},
+            p_description: getGenerationDescription(generationType, metadata),
+          }
+        )
 
-      if (txError) {
-        console.error('[PointsDeduct] Failed to create transaction record:', txError)
-        // Don't fail the deduction if transaction record fails
-      } else {
-        console.log('[PointsDeduct] Transaction record created')
-      }
+        if (rpcError) {
+          console.error('[PointsDeduct] ❌ RPC call failed:', rpcError)
+          return {
+            success: false,
+            error: `Failed to deduct credits atomically: ${rpcError.message}`,
+          }
+        }
 
-      console.log(`[PointsDeduct] ✅ Successfully deducted ${creditCost} credits from BestAuth user`)
-      console.log(`[PointsDeduct]    Previous balance: ${currentBalance}`)
-      console.log(`[PointsDeduct]    New balance: ${newBalance}`)
-      console.log(`[PointsDeduct]    Lifetime spent: ${newSpent}`)
-
-      return {
-        success: true,
-        transaction: {
-          user_id: userId,
-          amount: -creditCost,
-          balance_before: currentBalance,
-          balance_after: newBalance,
-          transaction_type: 'generation_deduction',
-          description: `${generationType} generation`,
-          metadata
-        },
+        if (rpcResult && rpcResult.success) {
+          console.log('[PointsDeduct] ✅ Atomic deduction successful via RPC')
+          console.log('[PointsDeduct]    Transaction ID:', rpcResult.transaction_id)
+          console.log('[PointsDeduct]    Previous balance:', rpcResult.previous_balance)
+          console.log('[PointsDeduct]    New balance:', rpcResult.new_balance)
+          
+          return {
+            success: true,
+            transaction: {
+              id: rpcResult.transaction_id,
+              user_id: userId,
+              amount: -creditCost,
+              balance_before: rpcResult.previous_balance,
+              balance_after: rpcResult.new_balance,
+              transaction_type: 'generation_deduction',
+              generation_type: generationType,
+              description: getGenerationDescription(generationType, metadata),
+              metadata,
+            },
+          }
+        } else {
+          // RPC returned but success is false
+          console.error('[PointsDeduct] ❌ RPC returned failure:', rpcResult)
+          return {
+            success: false,
+            error: rpcResult?.error || 'RPC call returned failure',
+          }
+        }
+      } catch (rpcException: any) {
+        console.error('[PointsDeduct] ❌ Exception during RPC call:', rpcException)
+        return {
+          success: false,
+          error: `RPC exception: ${rpcException.message}`,
+        }
       }
     }
 

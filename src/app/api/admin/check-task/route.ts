@@ -91,6 +91,7 @@ export async function GET(request: Request) {
       result.data = taskStatus;
 
       // Check credit transactions that might reference this task
+      // Search in multiple ways: metadata.taskId, metadata.task_id, description, or by time proximity
       const { data: allTransactions } = await client
         .from('bestauth_points_transactions')
         .select('*')
@@ -101,13 +102,122 @@ export async function GET(request: Request) {
         result.transactions = allTransactions.filter((tx: any) => {
           const meta = tx.metadata || {};
           const desc = tx.description || '';
+          // Check multiple possible taskId fields in metadata
           return (
             meta.taskId === taskId ||
             meta.task_id === taskId ||
+            meta.taskID === taskId ||
             desc.includes(taskId) ||
-            (meta.taskId && String(meta.taskId) === taskId)
+            (meta.taskId && String(meta.taskId) === taskId) ||
+            (meta.task_id && String(meta.task_id) === taskId)
           );
         });
+
+        // If no direct match, try to find transactions by generation type and time proximity
+        // Image generation tasks typically deduct credits right after creation
+        if (result.transactions.length === 0 && taskStatus.data) {
+          // Try multiple time fields from KIE API response (nested structure)
+          // KIE API returns: { data: { data: { createTime: ... } } }
+          const taskDataAny = taskStatus.data as any;
+          const taskData = taskDataAny?.data || taskDataAny;
+          const taskCreatedAt = 
+            taskData?.createTime || 
+            taskData?.created_at || 
+            taskData?.createdAt ||
+            taskDataAny?.createTime ||
+            taskDataAny?.created_at ||
+            taskDataAny?.createdAt;
+          
+          if (taskCreatedAt) {
+            // Handle both timestamp (milliseconds) and ISO string formats
+            let taskTime: number;
+            if (typeof taskCreatedAt === 'number') {
+              taskTime = taskCreatedAt; // Already in milliseconds
+            } else {
+              taskTime = new Date(taskCreatedAt).getTime();
+            }
+            
+            // Look for generation_deduction transactions within 10 minutes of task creation
+            const nearbyTransactions = allTransactions.filter((tx: any) => {
+              if (tx.transaction_type !== 'generation_deduction' || tx.generation_type !== 'nanoBananaImage') {
+                return false;
+              }
+              const txTime = new Date(tx.created_at).getTime();
+              const timeDiff = Math.abs(txTime - taskTime);
+              return timeDiff < 10 * 60 * 1000; // 10 minutes window
+            });
+            
+            if (nearbyTransactions.length > 0) {
+              // Sort by time proximity (closest first)
+              nearbyTransactions.sort((a: any, b: any) => {
+                const timeA = Math.abs(new Date(a.created_at).getTime() - taskTime);
+                const timeB = Math.abs(new Date(b.created_at).getTime() - taskTime);
+                return timeA - timeB;
+              });
+              
+              result.transactions = nearbyTransactions;
+              result.note = `Found ${nearbyTransactions.length} transaction(s) by time proximity (no direct taskId match in metadata). Task created at ${new Date(taskTime).toISOString()}`;
+            } else {
+              // Still no match - check all transactions more broadly
+              // First, get user info from the transaction if we can find any clues
+              const allImageTx = allTransactions.filter((tx: any) => 
+                tx.transaction_type === 'generation_deduction' && 
+                tx.generation_type === 'nanoBananaImage'
+              );
+              
+              // Show recent transactions for debugging
+              const recentImageTx = allImageTx.slice(0, 10); // Last 10 image generation transactions
+              
+              if (recentImageTx.length > 0) {
+                // Get user info for these transactions
+                const userIds = [...new Set(recentImageTx.map((tx: any) => tx.user_id))];
+                const { data: users } = await client
+                  .from('bestauth_users')
+                  .select('id, email, name')
+                  .in('id', userIds);
+                
+                const userMap = new Map((users || []).map((u: any) => [u.id, u]));
+                
+                result.recentImageTransactions = recentImageTx.map((tx: any) => {
+                  const user = userMap.get(tx.user_id);
+                  return {
+                    id: tx.id,
+                    userId: tx.user_id,
+                    userEmail: user?.email || 'Unknown',
+                    userName: user?.name || null,
+                    amount: tx.amount,
+                    createdAt: tx.created_at,
+                    timeDiffFromTask: Math.abs(new Date(tx.created_at).getTime() - taskTime),
+                    timeDiffDays: (Math.abs(new Date(tx.created_at).getTime() - taskTime) / (1000 * 60 * 60 * 24)).toFixed(1),
+                    metadata: tx.metadata,
+                    description: tx.description,
+                  };
+                });
+                
+                result.note = `No transactions found within 10 minutes of task creation. Task created at ${new Date(taskTime).toISOString()}. Showing recent image generation transactions for reference.`;
+                result.warning = 'This task may not have deducted credits, or the transaction was created at a different time than expected.';
+              }
+              
+              // Also check if there are any transactions with empty or missing metadata that could be this task
+              const transactionsWithoutTaskId = allImageTx.filter((tx: any) => {
+                const meta = tx.metadata || {};
+                return !meta.taskId && !meta.task_id && !meta.taskID;
+              });
+              
+              if (transactionsWithoutTaskId.length > 0) {
+                result.transactionsWithoutTaskId = transactionsWithoutTaskId.slice(0, 5).map((tx: any) => ({
+                  id: tx.id,
+                  userId: tx.user_id,
+                  amount: tx.amount,
+                  createdAt: tx.created_at,
+                  description: tx.description,
+                  metadata: tx.metadata,
+                }));
+                result.note += ` Found ${transactionsWithoutTaskId.length} image generation transaction(s) without taskId in metadata.`;
+              }
+            }
+          }
+        }
 
         // Get user from first transaction if found
         if (result.transactions.length > 0) {
@@ -121,6 +231,19 @@ export async function GET(request: Request) {
           if (user) {
             result.user = user;
           }
+
+          // Check if credit cost is correct
+          const { PRICING_CONFIG } = await import('@/config/pricing.config');
+          const expectedCost = PRICING_CONFIG.generationCosts.nanoBananaImage;
+          const actualCost = Math.abs(firstTx.amount || 0);
+          
+          result.creditCheck = {
+            expectedCost,
+            actualCost,
+            isCorrect: actualCost === expectedCost,
+            transactionAmount: firstTx.amount,
+            generationType: firstTx.generation_type,
+          };
         }
       }
 

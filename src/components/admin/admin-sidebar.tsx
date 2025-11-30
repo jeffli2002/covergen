@@ -25,6 +25,11 @@ const menuItems = [
     icon: Users,
   },
   {
+    name: 'Users Credits',
+    href: '/admin/users/credits',
+    icon: Zap,
+  },
+  {
     name: 'Subscriptions',
     href: '/admin/subscriptions',
     icon: CreditCard,

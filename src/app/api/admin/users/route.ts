@@ -97,17 +97,45 @@ export async function GET(request: Request) {
       const latestTx = transactions && transactions.length > 0 ? transactions[0] : null;
       const availableBalance = latestTx?.balance_after ?? subscription?.points_balance ?? 0;
       
-      // Use subscription data if available and seems correct, otherwise use calculated values
+      // Get subscription values as fallback
       const subscriptionEarned = subscription?.points_lifetime_earned ?? 0;
       const subscriptionSpent = subscription?.points_lifetime_spent ?? 0;
+      const subscriptionBalance = subscription?.points_balance ?? 0;
       
-      // Prefer calculated values if subscription values are 0 but we have transactions
-      const finalEarned = (subscriptionEarned > 0 || transactions?.length === 0) 
-        ? subscriptionEarned 
-        : totalEarned;
-      const finalSpent = (subscriptionSpent > 0 || transactions?.length === 0) 
-        ? subscriptionSpent 
-        : totalSpent;
+      // Determine final values with improved fallback logic:
+      // 1. If we have transactions, use calculated values (most accurate)
+      // 2. If no transactions but subscription has lifetime_earned, use that
+      // 3. If subscription has balance > 0 but lifetime_earned is 0, use balance as minimum earned
+      //    (this handles cases where signup bonus was granted but lifetime_earned wasn't updated)
+      let finalEarned = 0;
+      let finalSpent = 0;
+      
+      if (transactions && transactions.length > 0) {
+        // Use calculated values from transactions (most accurate)
+        finalEarned = totalEarned;
+        finalSpent = totalSpent;
+      } else {
+        // No transactions - use subscription values
+        finalEarned = subscriptionEarned;
+        finalSpent = subscriptionSpent;
+        
+        // Special case: If subscription has balance but lifetime_earned is 0,
+        // it means credits were granted but lifetime_earned wasn't updated.
+        // Use balance as minimum earned (user has credits, so they must have earned at least that much)
+        if (subscriptionBalance > 0 && subscriptionEarned === 0) {
+          finalEarned = subscriptionBalance;
+          console.log(`[Admin Users API] User ${user.email} (${user.id}): balance=${subscriptionBalance}, lifetime_earned=0, using balance as earned`);
+        }
+        
+        // Debug log for new users with 0 credits
+        if (finalEarned === 0 && finalSpent === 0 && subscriptionBalance === 0) {
+          const userAge = Date.now() - new Date(user.created_at).getTime();
+          const hoursSinceSignup = userAge / (1000 * 60 * 60);
+          if (hoursSinceSignup < 24) {
+            console.log(`[Admin Users API] New user ${user.email} (${user.id}) registered ${hoursSinceSignup.toFixed(1)}h ago: no credits, no transactions, subscription=${subscription ? 'exists' : 'missing'}`);
+          }
+        }
+      }
       
       return {
         id: user.id,
