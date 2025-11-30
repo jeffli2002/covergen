@@ -123,8 +123,8 @@ export default function AdminDashboardPage() {
 
   if (isLoading || !stats) {
     return (
-      <div className="p-6">
-        <div className="text-center py-12">Loading...</div>
+      <div className="p-6 bg-white text-gray-900">
+        <div className="text-center py-12 text-gray-900">Loading...</div>
       </div>
     );
   }
@@ -133,7 +133,7 @@ export default function AdminDashboardPage() {
     `$${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-white text-gray-900">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Dashboard</h1>
         <div className="flex items-end gap-3 flex-wrap">

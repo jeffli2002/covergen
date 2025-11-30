@@ -60,10 +60,10 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 bg-white border-r min-h-screen p-4 sticky top-0">
+    <aside className="w-64 bg-white border-r min-h-screen p-4 sticky top-0 text-gray-900">
       <div className="mb-6">
-        <h2 className="font-bold text-xl text-slate-900 dark:text-white">CoverGen Admin</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400">Management Portal</p>
+        <h2 className="font-bold text-xl text-slate-900">CoverGen Admin</h2>
+        <p className="text-sm text-slate-500">Management Portal</p>
       </div>
 
       <nav className="flex flex-col gap-1">
@@ -75,8 +75,8 @@ export function AdminSidebar() {
               href={item.href}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                 isActive
-                  ? 'bg-teal-100 dark:bg-teal-900/30 text-slate-700 dark:text-slate-300 font-medium'
-                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:bg-slate-800'
+                  ? 'bg-teal-100 text-slate-700 font-medium'
+                  : 'text-slate-700 hover:bg-slate-100'
               }`}
             >
               <item.icon className="h-5 w-5" />

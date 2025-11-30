@@ -79,11 +79,11 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-white text-gray-900">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Users Management</h1>
+          <h1 className="text-3xl font-bold text-slate-900">Users Management</h1>
           <p className="text-gray-500 mt-1">Total: {total} users</p>
         </div>
         <div className="flex items-center gap-3">
@@ -128,35 +128,35 @@ export default function AdminUsersPage() {
             <div className="text-center py-8">Loading...</div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full bg-white">
                 <thead>
-                  <tr className="text-left text-sm text-gray-500 border-b">
-                    <th className="py-3 px-4">Email</th>
-                    <th className="py-3 px-4">Name</th>
-                    <th className="py-3 px-4">Registration Date</th>
-                    <th className="py-3 px-4">Plan</th>
-                    <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4">Available Credits</th>
-                    <th className="py-3 px-4">Total Earned</th>
-                    <th className="py-3 px-4">Total Spent</th>
+                  <tr className="text-left text-sm text-gray-500 border-b bg-gray-50">
+                    <th className="py-3 px-4 font-medium">Email</th>
+                    <th className="py-3 px-4 font-medium">Name</th>
+                    <th className="py-3 px-4 font-medium">Registration Date</th>
+                    <th className="py-3 px-4 font-medium">Plan</th>
+                    <th className="py-3 px-4 font-medium">Status</th>
+                    <th className="py-3 px-4 font-medium">Available Credits</th>
+                    <th className="py-3 px-4 font-medium">Total Earned</th>
+                    <th className="py-3 px-4 font-medium">Total Spent</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="bg-white">
                   {users.map((user) => (
-                    <tr key={user.id} className="border-b hover:bg-slate-50 dark:bg-slate-900">
-                      <td className="py-3 px-4 text-sm">{user.email}</td>
-                      <td className="py-3 px-4 text-sm">{user.name || '-'}</td>
-                      <td className="py-3 px-4 text-sm">
+                    <tr key={user.id} className="border-b hover:bg-slate-50 bg-white">
+                      <td className="py-3 px-4 text-sm text-gray-900">{user.email}</td>
+                      <td className="py-3 px-4 text-sm text-gray-900">{user.name || '-'}</td>
+                      <td className="py-3 px-4 text-sm text-gray-900">
                         {new Date(user.createdAt).toLocaleDateString()}
                       </td>
                       <td className="py-3 px-4">
                         <span
                           className={`px-2 py-1 rounded text-xs font-medium ${
                             user.plan === 'proplus'
-                              ? 'bg-teal-100 dark:bg-teal-900/30 text-slate-700 dark:text-slate-300'
+                              ? 'bg-teal-100 text-slate-700'
                               : user.plan === 'pro'
                                 ? 'bg-blue-100 text-blue-700'
-                                : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                                : 'bg-slate-100 text-slate-700'
                           }`}
                         >
                           {user.plan || 'Free'}
@@ -167,19 +167,19 @@ export default function AdminUsersPage() {
                           className={`px-2 py-1 rounded text-xs font-medium ${
                             user.subscriptionStatus === 'active'
                               ? 'bg-green-100 text-green-700'
-                              : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                              : 'bg-slate-100 text-slate-700'
                           }`}
                         >
                           {user.subscriptionStatus || 'inactive'}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-sm font-medium">
+                      <td className="py-3 px-4 text-sm font-medium text-gray-900">
                         {user.availableBalance?.toLocaleString() || 0}
                       </td>
-                      <td className="py-3 px-4 text-sm">
+                      <td className="py-3 px-4 text-sm text-gray-900">
                         {user.totalEarned?.toLocaleString() || 0}
                       </td>
-                      <td className="py-3 px-4 text-sm">
+                      <td className="py-3 px-4 text-sm text-gray-900">
                         {user.totalSpent?.toLocaleString() || 0}
                       </td>
                     </tr>

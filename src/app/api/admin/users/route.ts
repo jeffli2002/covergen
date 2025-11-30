@@ -63,10 +63,51 @@ export async function GET(request: Request) {
     }
 
     // Transform data to match expected format
-    const usersList = (usersData || []).map((user: any) => {
+    // Calculate credits from transactions if subscription data is missing or incorrect
+    const usersList = await Promise.all((usersData || []).map(async (user: any) => {
       const subscription = Array.isArray(user.bestauth_subscriptions) 
         ? user.bestauth_subscriptions[0] 
         : user.bestauth_subscriptions;
+      
+      // Get transactions to calculate accurate credit data
+      const { data: transactions } = await client
+        .from('bestauth_points_transactions')
+        .select('amount, transaction_type, balance_after, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      let totalEarned = 0;
+      let totalSpent = 0;
+      
+      // Calculate from transactions (most accurate source)
+      if (transactions && transactions.length > 0) {
+        transactions.forEach((tx: any) => {
+          const amount = tx.amount || 0;
+          if (amount > 0) {
+            // Positive amounts are earned (signup_bonus, purchase, subscription_grant)
+            totalEarned += amount;
+          } else {
+            // Negative amounts are spent (generation_cost)
+            totalSpent += Math.abs(amount);
+          }
+        });
+      }
+      
+      // Get current balance from latest transaction or subscription
+      const latestTx = transactions && transactions.length > 0 ? transactions[0] : null;
+      const availableBalance = latestTx?.balance_after ?? subscription?.points_balance ?? 0;
+      
+      // Use subscription data if available and seems correct, otherwise use calculated values
+      const subscriptionEarned = subscription?.points_lifetime_earned ?? 0;
+      const subscriptionSpent = subscription?.points_lifetime_spent ?? 0;
+      
+      // Prefer calculated values if subscription values are 0 but we have transactions
+      const finalEarned = (subscriptionEarned > 0 || transactions?.length === 0) 
+        ? subscriptionEarned 
+        : totalEarned;
+      const finalSpent = (subscriptionSpent > 0 || transactions?.length === 0) 
+        ? subscriptionSpent 
+        : totalSpent;
       
       return {
         id: user.id,
@@ -75,11 +116,11 @@ export async function GET(request: Request) {
         createdAt: user.created_at,
         plan: subscription?.tier || 'free',
         subscriptionStatus: subscription?.status || 'inactive',
-        availableBalance: subscription?.points_balance || 0,
-        totalEarned: subscription?.points_lifetime_earned || 0,
-        totalSpent: subscription?.points_lifetime_spent || 0,
+        availableBalance,
+        totalEarned: finalEarned,
+        totalSpent: finalSpent,
       };
-    });
+    }));
 
     // Get total count
     let countQuery = client.from('bestauth_users').select('id', { count: 'exact', head: true });

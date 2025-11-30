@@ -36,7 +36,7 @@ export async function GET(request: Request) {
     // Get all spend transactions (negative amounts) from bestauth_points_transactions
     const { data: spendTransactions, error: spendError } = await client
       .from('bestauth_points_transactions')
-      .select('amount, metadata, description, created_at')
+      .select('amount, generation_type, metadata, description, created_at')
       .lt('amount', 0) // Negative amounts are spends
       .gte('created_at', startDate.toISOString());
 
@@ -51,12 +51,22 @@ export async function GET(request: Request) {
       const amount = Math.abs(tx.amount);
       totalCredits += amount;
       
+      // Use generation_type field (most reliable)
+      const genType = tx.generation_type || '';
       const meta = tx.metadata || {};
       const desc = tx.description || '';
       
-      if (meta.feature === 'image-generation' || desc.includes('Image generation') || desc.includes('nanoBanana')) {
+      // Check generation_type first, then fallback to description/metadata
+      if (genType === 'nanoBananaImage' || 
+          meta.feature === 'image-generation' || 
+          desc.includes('Image generation') || 
+          desc.includes('nanoBanana')) {
         imageCredits += amount;
-      } else if (meta.feature === 'video-generation' || desc.includes('Video generation') || desc.includes('Sora')) {
+      } else if (genType === 'sora2Video' || 
+                 genType === 'sora2ProVideo' ||
+                 meta.feature === 'video-generation' || 
+                 desc.includes('Video generation') || 
+                 desc.includes('Sora')) {
         videoCredits += amount;
       }
     });
@@ -67,6 +77,7 @@ export async function GET(request: Request) {
       .select(`
         user_id,
         amount,
+        generation_type,
         metadata,
         description,
         bestauth_users!inner (
@@ -113,11 +124,22 @@ export async function GET(request: Request) {
       const stats = userSpendMap.get(userId)!;
       stats.total_consumed += amount;
 
+      // Use generation_type field (most reliable)
+      const genType = tx.generation_type || '';
       const meta = tx.metadata || {};
       const desc = tx.description || '';
-      if (meta.feature === 'image-generation' || desc.includes('Image generation') || desc.includes('nanoBanana')) {
+      
+      // Check generation_type first, then fallback to description/metadata
+      if (genType === 'nanoBananaImage' || 
+          meta.feature === 'image-generation' || 
+          desc.includes('Image generation') || 
+          desc.includes('nanoBanana')) {
         stats.image_credits += amount;
-      } else if (meta.feature === 'video-generation' || desc.includes('Video generation') || desc.includes('Sora')) {
+      } else if (genType === 'sora2Video' || 
+                 genType === 'sora2ProVideo' ||
+                 meta.feature === 'video-generation' || 
+                 desc.includes('Video generation') || 
+                 desc.includes('Sora')) {
         stats.video_credits += amount;
       }
     });
@@ -139,15 +161,24 @@ export async function GET(request: Request) {
     // For generation counts, we'll use transaction counts as proxy
     // (since we don't have a generatedAsset table)
     const imageGenerations = (spendTransactions || []).filter((tx: any) => {
+      const genType = tx.generation_type || '';
       const meta = tx.metadata || {};
       const desc = tx.description || '';
-      return meta.feature === 'image-generation' || desc.includes('Image generation') || desc.includes('nanoBanana');
+      return genType === 'nanoBananaImage' || 
+             meta.feature === 'image-generation' || 
+             desc.includes('Image generation') || 
+             desc.includes('nanoBanana');
     }).length;
 
     const videoGenerations = (spendTransactions || []).filter((tx: any) => {
+      const genType = tx.generation_type || '';
       const meta = tx.metadata || {};
       const desc = tx.description || '';
-      return meta.feature === 'video-generation' || desc.includes('Video generation') || desc.includes('Sora');
+      return genType === 'sora2Video' || 
+             genType === 'sora2ProVideo' ||
+             meta.feature === 'video-generation' || 
+             desc.includes('Video generation') || 
+             desc.includes('Sora');
     }).length;
 
     // Get daily generation trend based on transactions
@@ -157,11 +188,21 @@ export async function GET(request: Request) {
       const date = new Date(tx.created_at).toISOString().split('T')[0];
       const trend = dailyTrendMap.get(date) || { imageCount: 0, videoCount: 0 };
       
+      const genType = tx.generation_type || '';
       const meta = tx.metadata || {};
       const desc = tx.description || '';
-      if (meta.feature === 'image-generation' || desc.includes('Image generation') || desc.includes('nanoBanana')) {
+      
+      // Check generation_type first, then fallback to description/metadata
+      if (genType === 'nanoBananaImage' || 
+          meta.feature === 'image-generation' || 
+          desc.includes('Image generation') || 
+          desc.includes('nanoBanana')) {
         trend.imageCount++;
-      } else if (meta.feature === 'video-generation' || desc.includes('Video generation') || desc.includes('Sora')) {
+      } else if (genType === 'sora2Video' || 
+                 genType === 'sora2ProVideo' ||
+                 meta.feature === 'video-generation' || 
+                 desc.includes('Video generation') || 
+                 desc.includes('Sora')) {
         trend.videoCount++;
       }
       

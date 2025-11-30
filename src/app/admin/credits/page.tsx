@@ -90,10 +90,10 @@ export default function AdminCreditsPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-white text-gray-900">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Credits Management</h1>
+        <h1 className="text-3xl font-bold text-slate-900">Credits Management</h1>
         <Select value={range} onValueChange={setRange}>
           <SelectTrigger className="w-[180px]">
             <SelectValue />
@@ -112,7 +112,7 @@ export default function AdminCreditsPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-teal-100 dark:bg-teal-900/30 rounded-lg">
+              <div className="p-2 bg-teal-100 rounded-lg">
                 <ImageIcon className="h-5 w-5 text-teal-500" />
               </div>
               <div>
@@ -174,19 +174,19 @@ export default function AdminCreditsPage() {
               {data.top10Users.map((user, index) => (
                 <div
                   key={user.id}
-                  className="flex items-center justify-between border rounded-lg p-3 hover:bg-slate-50 dark:bg-slate-900 transition-colors"
+                  className="flex items-center justify-between border rounded-lg p-3 hover:bg-slate-50 bg-white transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center text-slate-700 dark:text-slate-300 font-bold text-sm">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center text-slate-700 font-bold text-sm">
                       {index + 1}
                     </div>
                     <div>
-                      <div className="font-medium text-slate-900 dark:text-white">{user.email}</div>
+                      <div className="font-medium text-slate-900">{user.email}</div>
                       <div className="text-sm text-gray-500">{user.name || 'No name'}</div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm font-semibold text-slate-900 dark:text-white">
+                    <div className="text-sm font-semibold text-slate-900">
                       Total: {Number(user.total_consumed).toLocaleString()}
                     </div>
                     <div className="text-xs text-gray-500">
